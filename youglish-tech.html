@@ -1,0 +1,2557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>自建 YouGlish 技术方案 · 半米词汇系统 Layer 2 · 2026-05-23</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1d23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --border-strong: #cdd2da;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --accent-text: #1d4ed8;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #6d28d9;
+    --info-soft: #ede9fe;
+    --code-bg: #f1f3f7;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --banmi-cream: #fbf6ec;
+    --banmi-text: #2d2418;
+    --syn-kw: #c2185b;
+    --syn-str: #2e7d32;
+    --syn-num: #b45309;
+    --syn-cmt: #7c8493;
+    --syn-fn:  #1d4ed8;
+    --syn-op:  #6d28d9;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1c2030;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #b6bcc9;
+    --text-mute: #8a92a3;
+    --border: #2a2f3d;
+    --border-strong: #3a4154;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a55;
+    --accent-text: #93c5fd;
+    --good: #4ade80;
+    --good-soft: #14532d55;
+    --warn: #fbbf24;
+    --warn-soft: #78350f55;
+    --bad: #f87171;
+    --bad-soft: #7f1d1d55;
+    --info: #c4b5fd;
+    --info-soft: #4c1d9555;
+    --code-bg: #0a0d14;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+    --banmi-cream: #2a2417;
+    --banmi-text: #f0e8d6;
+    --syn-kw: #f472b6;
+    --syn-str: #86efac;
+    --syn-num: #fbbf24;
+    --syn-cmt: #6b7280;
+    --syn-fn:  #93c5fd;
+    --syn-op:  #c4b5fd;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  #progress {
+    position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--info));
+    z-index: 1000; transition: width .1s linear;
+  }
+  header.topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner {
+    max-width: 980px; margin: 0 auto;
+    padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+  }
+  .brand {
+    font-weight: 700; font-size: 15px; letter-spacing: .2px;
+    color: var(--text); white-space: nowrap;
+  }
+  .brand .tag {
+    margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute);
+    padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px;
+  }
+  .topbar-spacer { flex: 1; }
+  .icon-btn {
+    width: 44px; height: 44px; border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border); background: var(--bg-elevated);
+    color: var(--text); cursor: pointer; font-size: 18px;
+    transition: transform .15s, background-color .15s;
+  }
+  .icon-btn:active { transform: scale(.94); }
+  nav.anchor-nav {
+    overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    scrollbar-width: none;
+  }
+  nav.anchor-nav::-webkit-scrollbar { display: none; }
+  .anchor-list {
+    display: flex; gap: 4px; padding: 8px 16px;
+    max-width: 980px; margin: 0 auto;
+    white-space: nowrap;
+  }
+  .anchor-list a {
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 13px; line-height: 1.3;
+    color: var(--text-soft);
+    text-decoration: none;
+    border: 1px solid transparent;
+    background: var(--bg-soft);
+    transition: all .15s;
+  }
+  .anchor-list a:hover { color: var(--accent-text); }
+  .anchor-list a.active {
+    color: var(--accent-text);
+    background: var(--accent-soft);
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+    font-weight: 600;
+  }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 {
+    font-size: 28px; line-height: 1.25; margin: 0 0 12px;
+    letter-spacing: -.5px;
+    background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-meta {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    font-size: 13px; color: var(--text-mute);
+  }
+  .hero-meta span {
+    background: var(--bg-soft); padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+  .hero-deck {
+    margin-top: 16px; padding: 14px 16px;
+    border-left: 4px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 15px;
+  }
+  section.chapter {
+    margin: 24px 0;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  section.chapter > h2 {
+    font-size: 20px; margin: 0;
+    padding: 16px 20px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+    background: var(--bg-elevated);
+    transition: background-color .15s;
+    min-height: 56px;
+  }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 30px; height: 30px; padding: 0 8px;
+    border-radius: 8px; background: var(--accent-soft); color: var(--accent-text);
+    font-size: 14px; font-weight: 700;
+  }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret {
+    transition: transform .25s; color: var(--text-mute); font-size: 14px;
+  }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body {
+    padding: 18px 20px 22px;
+    max-height: 100000px;
+    overflow: hidden;
+    transition: max-height .35s ease, padding .25s;
+  }
+  section.chapter.collapsed .chapter-body {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  h3 {
+    font-size: 17px; margin: 22px 0 10px;
+    color: var(--text);
+    padding-left: 10px;
+    border-left: 3px solid var(--accent);
+  }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout {
+    margin: 14px 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border-left: 4px solid;
+    font-size: 14.5px;
+    line-height: 1.65;
+  }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .table-wrap {
+    margin: 14px 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-elevated);
+  }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 14px;
+    min-width: 520px;
+  }
+  thead th {
+    position: sticky; top: 0;
+    background: var(--bg-soft);
+    color: var(--text);
+    text-align: left;
+    font-weight: 600;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-strong);
+    white-space: nowrap;
+    z-index: 1;
+  }
+  tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-soft);
+    vertical-align: top;
+  }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td {
+    background: var(--accent-soft) !important;
+    color: var(--text);
+  }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--text-mute); }
+  td.check.p { color: var(--warn); }
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin: 10px 0;
+    overflow: hidden;
+    background: var(--bg-elevated);
+  }
+  .faq-q {
+    padding: 14px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; gap: 10px;
+    align-items: flex-start;
+    user-select: none;
+    min-height: 50px;
+  }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a {
+    padding: 0 16px;
+    max-height: 0;
+    overflow: hidden;
+    color: var(--text-soft);
+    font-size: 14.5px;
+    line-height: 1.65;
+    transition: max-height .3s, padding .25s;
+  }
+  .faq-item.open .faq-a {
+    max-height: 1600px;
+    padding: 0 16px 14px 16px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+  .back-to-top {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    display: none;
+    align-items: center; justify-content: center;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    z-index: 40;
+    border: none;
+  }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  footer {
+    text-align: center; padding: 24px 16px;
+    color: var(--text-mute); font-size: 13px;
+    border-top: 1px solid var(--border);
+    margin-top: 32px;
+  }
+  code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+    font-size: 13px;
+    color: var(--text);
+  }
+  pre {
+    background: var(--code-bg);
+    padding: 14px 16px;
+    border-radius: 10px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.6;
+    border: 1px solid var(--border);
+    margin: 12px 0;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  }
+  pre code { background: none; padding: 0; }
+  .syn-kw  { color: var(--syn-kw);  font-weight: 600; }
+  .syn-str { color: var(--syn-str); }
+  .syn-num { color: var(--syn-num); }
+  .syn-cmt { color: var(--syn-cmt); font-style: italic; }
+  .syn-fn  { color: var(--syn-fn); }
+  .syn-op  { color: var(--syn-op); }
+  hr.soft { border: none; height: 1px; background: var(--border); margin: 16px 0; }
+  blockquote {
+    margin: 12px 0;
+    padding: 10px 16px;
+    border-left: 4px solid var(--text-mute);
+    background: var(--bg-soft);
+    border-radius: 6px;
+    color: var(--text-soft);
+    font-size: 14.5px;
+  }
+  blockquote p:first-child { margin-top: 0; }
+  blockquote p:last-child { margin-bottom: 0; }
+
+  /* === 架构图 === */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin: 16px 0;
+  }
+  .arch-row {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg-soft);
+  }
+  .arch-row-head {
+    padding: 6px 12px;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .arch-row-body {
+    display: flex;
+    gap: 8px;
+    padding: 10px;
+    flex-wrap: wrap;
+  }
+  .arch-box {
+    flex: 1 1 0;
+    min-width: 130px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    font-size: 13px;
+    text-align: center;
+    color: var(--text);
+  }
+  .arch-box .ico { font-size: 22px; display: block; margin-bottom: 4px; }
+  .arch-box .lbl { font-weight: 600; }
+  .arch-box .sub { font-size: 11.5px; color: var(--text-mute); margin-top: 2px; }
+  .arch-box.acc { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-text); }
+  .arch-box.gd  { background: var(--good-soft); border-color: var(--good); color: var(--good); }
+  .arch-box.wn  { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
+  .arch-box.inf { background: var(--info-soft); border-color: var(--info); color: var(--info); }
+  .arch-arrow {
+    text-align: center;
+    color: var(--text-mute);
+    font-size: 18px;
+    margin: 2px 0;
+    user-select: none;
+  }
+
+  /* === 选型对比卡 === */
+  .verdict-card {
+    margin: 12px 0;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--bg-elevated);
+  }
+  .verdict-head {
+    padding: 12px 16px;
+    background: linear-gradient(135deg, var(--accent-soft), transparent);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .verdict-head .badge {
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-soft);
+  }
+  .verdict-head .badge.pick { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .verdict-head .badge.alt  { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .verdict-head .badge.bad  { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .verdict-head h4 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--text);
+    flex: 1;
+  }
+  .verdict-body { padding: 12px 16px; }
+  .verdict-body .pros, .verdict-body .cons {
+    margin: 6px 0;
+    font-size: 13.5px;
+  }
+  .verdict-body .pros::before { content: "✅ "; }
+  .verdict-body .cons::before { content: "⚠️ "; }
+
+  /* === Cost summary card === */
+  .cost-card {
+    margin: 14px 0;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--bg-elevated);
+  }
+  .cost-card .ch {
+    padding: 10px 14px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .cost-card .ch .amt {
+    margin-left: auto;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    color: var(--accent-text);
+  }
+  .cost-card .cb { padding: 12px 14px; }
+  .cost-card .cb table { min-width: auto; }
+  .cost-total {
+    margin: 16px 0;
+    padding: 16px 18px;
+    background: linear-gradient(135deg, var(--accent-soft), var(--info-soft));
+    border: 1px solid var(--accent);
+    border-radius: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  .cost-total .label {
+    flex: 1;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text);
+  }
+  .cost-total .num {
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--accent-text);
+  }
+
+  /* === Demo 区样式 === */
+  .demo-host {
+    margin: 16px 0;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--bg-soft);
+  }
+  .demo-host h4 {
+    margin: 0 0 12px; font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--accent-text);
+  }
+  .demo-search {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .demo-search input {
+    flex: 1; min-width: 160px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-elevated);
+    color: var(--text);
+    font-size: 14px;
+    min-height: 44px;
+  }
+  .demo-search button {
+    padding: 10px 16px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    min-height: 44px;
+  }
+  .demo-search button:active { transform: scale(.96); }
+  .demo-presets {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 12px;
+  }
+  .demo-presets .preset {
+    padding: 6px 10px;
+    background: var(--bg-elevated);
+    color: var(--text-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 12px;
+    cursor: pointer;
+    min-height: 32px;
+  }
+  .demo-presets .preset:hover { color: var(--accent-text); border-color: var(--accent); }
+  .clip-list { display: flex; flex-direction: column; gap: 8px; }
+  .clip-item {
+    padding: 10px 12px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .clip-item:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+  .clip-item.active { background: var(--accent-soft); border-color: var(--accent); }
+  .clip-meta {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    font-size: 11.5px; color: var(--text-mute);
+    margin-bottom: 4px;
+  }
+  .clip-meta .ch { color: var(--accent-text); font-weight: 600; }
+  .clip-meta .ts { font-family: ui-monospace, monospace; }
+  .clip-text {
+    font-family: "Newsreader", Georgia, serif;
+    font-size: 14.5px;
+    color: var(--text);
+    line-height: 1.55;
+  }
+  .clip-text .hit {
+    background: linear-gradient(180deg, transparent 60%, color-mix(in srgb, var(--accent) 35%, transparent) 60%);
+    font-weight: 700;
+    color: var(--accent-text);
+    padding: 0 2px;
+  }
+  .player-mount {
+    margin-top: 12px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #000;
+    aspect-ratio: 16/9;
+    width: 100%;
+    border: 1px solid var(--border);
+    position: relative;
+  }
+  .player-mount .placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,.7);
+    font-size: 13px;
+    gap: 8px;
+    padding: 16px;
+    text-align: center;
+  }
+  .player-mount iframe {
+    width: 100%; height: 100%; border: 0;
+  }
+  .player-controls {
+    margin-top: 10px;
+    display: flex; flex-wrap: wrap; gap: 8px;
+    align-items: center;
+  }
+  .player-controls button {
+    padding: 6px 12px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-soft);
+    min-height: 36px;
+  }
+  .player-controls button:hover { border-color: var(--accent); color: var(--accent-text); }
+  .player-controls .info {
+    font-size: 12px; color: var(--text-mute);
+    margin-left: auto;
+  }
+
+  /* schema highlight wrapper */
+  .schema-card {
+    margin: 14px 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg-elevated);
+  }
+  .schema-card .sh {
+    padding: 8px 14px;
+    background: var(--bg-soft);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--accent-text);
+    border-bottom: 1px solid var(--border);
+    font-family: ui-monospace, monospace;
+  }
+  .schema-card pre { margin: 0; border: none; border-radius: 0; }
+
+  @media (max-width: 480px) {
+    .hero { padding: 18px 4px 8px; }
+    .hero h1 { font-size: 22px; }
+    section.chapter > h2 { font-size: 17px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+    .arch-box { min-width: 100%; }
+  }
+  @media print {
+    header.topbar, #progress, .back-to-top, nav.anchor-nav { display: none !important; }
+    section.chapter.collapsed .chapter-body { max-height: none !important; padding: 18px 20px 22px !important; }
+    section.chapter.collapsed > h2 .caret { display: none; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">自建 YouGlish 技术方案 <span class="tag">v1 · 无忌</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+  <nav class="anchor-nav">
+    <div class="anchor-list" id="anchorList">
+      <a href="#ch1" data-target="ch1">01 定位</a>
+      <a href="#ch2" data-target="ch2">02 架构图</a>
+      <a href="#ch3" data-target="ch3">03 yt-dlp pipeline</a>
+      <a href="#ch4" data-target="ch4">04 索引选型</a>
+      <a href="#ch5" data-target="ch5">05 Schema</a>
+      <a href="#ch6" data-target="ch6">06 iframe 跳片段</a>
+      <a href="#ch7" data-target="ch7">07 数据源精选</a>
+      <a href="#ch8" data-target="ch8">08 字幕质量</a>
+      <a href="#ch9" data-target="ch9">09 成本估算</a>
+      <a href="#ch10" data-target="ch10">10 爬虫+监控+法律</a>
+      <a href="#ch11" data-target="ch11">11 mini demo</a>
+      <a href="#ch12" data-target="ch12">12 FAQ</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <div class="hero">
+    <h1>自建 YouGlish 技术方案<br><span style="font-size: .65em; font-weight: 600;">半米词汇系统 Layer 2 实施蓝图</span></h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-23</span>
+      <span>🛠 调研人：无忌</span>
+      <span>🎯 触发条件：YouGlish ≥ €300/月</span>
+      <span>📦 stack: yt-dlp + Postgres FTS + YouTube iframe</span>
+      <span>💰 一次性 ¥10-15 万 · 续费 ¥3-5 万/年</span>
+    </div>
+    <div class="hero-deck">
+      <strong>三句话结论：</strong>(1) Layer 2 不是替代 YouGlish，而是 banmi 长成 €300/月用量后<strong>买断式自建</strong>，把"片段质量评级 / 频道偏好 / 难度排序"这些算法变成 banmi 自己的护城河 —— Layer 1 永远是别人的。(2) 技术栈推荐 <strong>yt-dlp（VTT 字幕）+ Postgres FTS（GIN 索引，约 1500 万段没问题）+ YouTube IFrame API（client-side 跳 timestamp）</strong>，跟 banmi Next.js + Postgres 完全焊得上，不需要引入 Elasticsearch。(3) 一次性投入 <strong>¥10-15 万（3 人月开发 + 内容入库）</strong>，月续费 <strong>¥300-800</strong>（VPS + 代理 + 监控），回本周期 ≈ 1 年；本报告底部嵌了可玩的"假自建" widget，输入词试试就能看到完整体验路径。
+    </div>
+  </div>
+
+  <!-- ============ 第一节：定位 ============ -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">一句话定位 + Layer 2 触发条件</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p><strong>一句话定位：</strong>banmi 自建的 YouTube 字幕索引 + 前端跳片段播放器 = 把 YouGlish 的"搜词出视频片段"能力<strong>买断到自家服务里</strong>，可控、可定制、可作为长期资产沉淀。</p>
+
+      <div class="callout accent">
+        <strong>📐 跟 Layer 1（YouGlish iframe）的关系</strong>
+        <ul>
+          <li><strong>Layer 1 在 V0.2 即上</strong>：YouGlish 官方 widget，2 行代码集成，免费档先用</li>
+          <li><strong>Layer 2 在 V0.3+ 启动</strong>：触发条件满足时切换，前端 UI 几乎不变（学生看不出差别）</li>
+          <li><strong>切换不是 hard cut</strong>：Layer 1 / Layer 2 可以共存，banmi 自己的精选频道走 Layer 2，长尾词回退到 YouGlish Layer 1</li>
+        </ul>
+      </div>
+
+      <h3>触发条件（4 选 1 就该启动）</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>触发器</th><th>阈值</th><th>触发后行动</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>💰 财务触发</strong></td>
+              <td>YouGlish 月费 ≥ €300（年 €3600 ≈ ¥28k）</td>
+              <td>立即立项，1 人月做 Layer 2 MVP，跑通后切流量</td>
+            </tr>
+            <tr>
+              <td><strong>📊 用量触发</strong></td>
+              <td>banmi 日 query ≥ 8000 次（接近 €300 档 10000/天的 80%）</td>
+              <td>提前 30 天启动，避免触发月费</td>
+            </tr>
+            <tr>
+              <td><strong>🎯 内容触发</strong></td>
+              <td>5500 雅思词每个都需要 "精挑细选 5-10 个高质量片段"，YouGlish 排序不可控</td>
+              <td>启动 Layer 2 是为了控制片段质量，不是省钱</td>
+            </tr>
+            <tr>
+              <td><strong>⚠️ 风险触发</strong></td>
+              <td>YouGlish 改条款 / 涨价 / 停服 / 给 banmi 发警告</td>
+              <td>紧急启动；这是为什么我们要保留 yt-dlp + Postgres 的 know-how</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <strong>📌 半米总纲 §4.5.3 对应位置</strong>：本方案完整实现总纲 V0.3+ 的 Layer 2 路径。Layer 3（影视片段）在 V0.4+，本报告不涉及。
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 第二节：架构图 ============ -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">整体架构图</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>系统分 3 层 5 角色，全部 banmi 自托管（除了 YouTube 视频流，那个走 YouTube CDN）：</p>
+
+      <div class="arch-grid">
+        <div class="arch-row">
+          <div class="arch-row-head">L1 · 数据采集层（offline batch）</div>
+          <div class="arch-row-body">
+            <div class="arch-box wn"><span class="ico">📺</span><span class="lbl">YouTube</span><span class="sub">视频 + 字幕源</span></div>
+            <div class="arch-box gd"><span class="ico">🪛</span><span class="lbl">yt-dlp</span><span class="sub">--write-subs --skip-download</span></div>
+            <div class="arch-box gd"><span class="ico">📝</span><span class="lbl">VTT 解析器</span><span class="sub">node webvtt-parser</span></div>
+            <div class="arch-box gd"><span class="ico">🧹</span><span class="lbl">清洗 + lemma</span><span class="sub">spaCy / lemminflect</span></div>
+          </div>
+        </div>
+
+        <div class="arch-arrow">⬇  写入 Postgres</div>
+
+        <div class="arch-row">
+          <div class="arch-row-head">L2 · 索引存储层（核心数据库）</div>
+          <div class="arch-row-body">
+            <div class="arch-box acc"><span class="ico">🗄️</span><span class="lbl">Postgres 16</span><span class="sub">videos / captions / word_index</span></div>
+            <div class="arch-box acc"><span class="ico">🔎</span><span class="lbl">GIN tsvector</span><span class="sub">毫秒级全文搜索</span></div>
+            <div class="arch-box acc"><span class="ico">⚡</span><span class="lbl">Redis</span><span class="sub">热词 query 缓存 24h</span></div>
+          </div>
+        </div>
+
+        <div class="arch-arrow">⬇  REST API</div>
+
+        <div class="arch-row">
+          <div class="arch-row-head">L3 · 应用 API + 前端</div>
+          <div class="arch-row-body">
+            <div class="arch-box inf"><span class="ico">🚀</span><span class="lbl">Next.js API</span><span class="sub">/api/clips?lemma=...</span></div>
+            <div class="arch-box inf"><span class="ico">🎬</span><span class="lbl">YouTube iframe</span><span class="sub">?start=120&end=128</span></div>
+            <div class="arch-box inf"><span class="ico">📱</span><span class="lbl">banmi 词卡</span><span class="sub">片段循环 + 字幕高亮</span></div>
+          </div>
+        </div>
+
+        <div class="arch-arrow">⬆ event_log</div>
+
+        <div class="arch-row">
+          <div class="arch-row-head">L0 · 调度 + 监控（持续运营）</div>
+          <div class="arch-row-body">
+            <div class="arch-box"><span class="ico">⏰</span><span class="lbl">cron / GitHub Actions</span><span class="sub">每日扫频道增量</span></div>
+            <div class="arch-box"><span class="ico">📡</span><span class="lbl">代理池</span><span class="sub">2-3 IP rotate</span></div>
+            <div class="arch-box"><span class="ico">📈</span><span class="lbl">监控</span><span class="sub">抓取失败率 / 查询热点</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout good">
+        <strong>🎯 架构决策三条</strong>
+        <ol>
+          <li><strong>视频本体永不下载</strong> —— yt-dlp 只抓字幕（<code>--skip-download</code>），视频从 YouTube CDN 直接拉，banmi 0 带宽成本，0 版权风险</li>
+          <li><strong>索引走 Postgres FTS，不上 Elasticsearch</strong> —— banmi 估算上限 1500 万段 caption（10000 视频 × 1500 段），Postgres GIN 完全够用，运维省 1 个数据库实例</li>
+          <li><strong>前端跳片段走 YouTube IFrame API，不做视频代理</strong> —— iframe 是 YouTube 官方允许的 embed，零灰区</li>
+        </ol>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 第三节：yt-dlp pipeline ============ -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">yt-dlp 抓字幕完整 pipeline</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>3.1 命令骨架（生产可用）</h3>
+
+      <pre><span class="syn-cmt"># banmi/scripts/fetch_subs.sh</span>
+<span class="syn-cmt"># 抓单个频道全部视频的字幕，跳过视频本体</span>
+
+yt-dlp <span class="syn-op">\</span>
+  <span class="syn-kw">--write-subs</span>                              <span class="syn-cmt"># 人工字幕（优先）</span>
+  <span class="syn-kw">--write-auto-subs</span>                         <span class="syn-cmt"># auto-generated 字幕（兜底）</span>
+  <span class="syn-kw">--sub-langs</span> <span class="syn-str">"en.*"</span>                       <span class="syn-cmt"># 所有英文变体：en, en-US, en-GB, en-orig</span>
+  <span class="syn-kw">--sub-format</span> <span class="syn-str">"vtt/srt/best"</span>              <span class="syn-cmt"># 优先 vtt，其次 srt</span>
+  <span class="syn-kw">--skip-download</span>                           <span class="syn-cmt"># 关键：不下载视频本体</span>
+  <span class="syn-kw">--write-info-json</span>                         <span class="syn-cmt"># 视频元数据（标题 / 频道 / 时长 / license）</span>
+  <span class="syn-kw">--download-archive</span> archive.txt            <span class="syn-cmt"># 跳过已抓 video_id（增量）</span>
+  <span class="syn-kw">--ignore-errors</span>                           <span class="syn-cmt"># 单个视频失败不中断 batch</span>
+  <span class="syn-kw">--sleep-requests</span> <span class="syn-num">2</span>                         <span class="syn-cmt"># 每个 HTTP 请求间隔 2s</span>
+  <span class="syn-kw">--sleep-interval</span> <span class="syn-num">15</span>                        <span class="syn-cmt"># 每个视频处理后 sleep</span>
+  <span class="syn-kw">--max-sleep-interval</span> <span class="syn-num">45</span>                    <span class="syn-cmt"># 随机化避免被识别为 bot</span>
+  <span class="syn-kw">--retries</span> <span class="syn-num">5</span> <span class="syn-kw">--fragment-retries</span> <span class="syn-num">5</span>          <span class="syn-cmt"># 失败重试</span>
+  <span class="syn-kw">--cookies-from-browser</span> chrome              <span class="syn-cmt"># 走真实浏览器 cookie，降低风控</span>
+  <span class="syn-kw">--output</span> <span class="syn-str">"%(channel)s/%(id)s.%(ext)s"</span>    <span class="syn-cmt"># 文件组织</span>
+  <span class="syn-str">"https://www.youtube.com/@SciShowKids"</span></pre>
+
+      <h3>3.2 关键参数详解</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>参数</th><th>含义</th><th>banmi 选择</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>--write-subs</code></td>
+              <td>下载 creator 上传的人工字幕</td>
+              <td>✅ 必开，质量 99%+</td>
+            </tr>
+            <tr>
+              <td><code>--write-auto-subs</code></td>
+              <td>下载 YouTube ASR 自动字幕</td>
+              <td>✅ 兜底开，无人工字幕时用</td>
+            </tr>
+            <tr>
+              <td><code>--sub-langs</code></td>
+              <td>语言过滤（支持 wildcard 和 alternatives）</td>
+              <td><code>"en.*,-live_chat"</code> — 所有 en 变体，排除直播弹幕</td>
+            </tr>
+            <tr>
+              <td><code>--sub-format</code></td>
+              <td>字幕格式优先级链</td>
+              <td><code>"vtt/srt/best"</code> — VTT 解析方便（有 WebVTT 标准）</td>
+            </tr>
+            <tr>
+              <td><code>--skip-download</code></td>
+              <td>不下载视频本体</td>
+              <td>✅ 必开，<strong>合规边界</strong></td>
+            </tr>
+            <tr>
+              <td><code>--download-archive</code></td>
+              <td>已下载 ID 记录文件</td>
+              <td>✅ 增量抓核心机制，每天 cron 跑只补新视频</td>
+            </tr>
+            <tr>
+              <td><code>--sleep-requests</code></td>
+              <td>每个 HTTP request 间隔（秒）</td>
+              <td>2-3s</td>
+            </tr>
+            <tr>
+              <td><code>--sleep-interval</code></td>
+              <td>每个视频处理完后 sleep（秒）</td>
+              <td>15s（基础）</td>
+            </tr>
+            <tr>
+              <td><code>--max-sleep-interval</code></td>
+              <td>sleep 上限（实际取随机区间）</td>
+              <td>45s（随机化）</td>
+            </tr>
+            <tr>
+              <td><code>--cookies-from-browser</code></td>
+              <td>用本地浏览器登录态访问</td>
+              <td>低风控关键，但要把 cookies 跟 banmi 主账号分离</td>
+            </tr>
+            <tr>
+              <td><code>--write-info-json</code></td>
+              <td>导出元数据 JSON</td>
+              <td>✅ 必开，用于 license / 时长 / channel name</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3.3 字幕格式三选一</h3>
+
+      <div class="verdict-card">
+        <div class="verdict-head">
+          <span class="badge pick">推荐</span>
+          <h4>WebVTT (.vtt)</h4>
+        </div>
+        <div class="verdict-body">
+          <p class="pros">W3C 标准，<code>WEBVTT</code> 头明确；时间戳用 <code>.</code> 分隔（<code>00:00:12.500</code>），毫秒精度；支持 CSS 定位 / 元数据；YouTube 默认就给 VTT。</p>
+          <p class="pros">Node 解析库成熟：<code>node-webvtt</code> / <code>webvtt-parser</code> / <code>subtitle.js</code>，5 行代码 parse 成 <code>{start, end, text}[]</code>。</p>
+          <p class="cons">需要去掉 styling tags（<code>&lt;c.colorE5E5E5&gt;</code>）。banmi 抓回来用正则一行洗掉。</p>
+        </div>
+      </div>
+
+      <div class="verdict-card">
+        <div class="verdict-head">
+          <span class="badge alt">备选</span>
+          <h4>SRT (.srt)</h4>
+        </div>
+        <div class="verdict-body">
+          <p class="pros">最古老的格式，万能兼容；timestamp 用 <code>,</code> 分隔（<code>00:00:12,500</code>）。</p>
+          <p class="cons">没有标准 header，错误格式难检测；不支持 metadata；banmi 不需要这个兼容性。</p>
+        </div>
+      </div>
+
+      <div class="verdict-card">
+        <div class="verdict-head">
+          <span class="badge bad">不推荐</span>
+          <h4>JSON3 (.json3)</h4>
+        </div>
+        <div class="verdict-body">
+          <p class="pros">YouTube 内部 JSON 格式，含逐词 timestamp（适合做 karaoke 高亮）。</p>
+          <p class="cons">非标准格式，文档少；逐词数据 banmi 用不上（句子级精度已够）；解析复杂。</p>
+        </div>
+      </div>
+
+      <h3>3.4 自动字幕 vs 人工字幕</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>维度</th><th>人工字幕（creator upload）</th><th>YouTube auto</th></tr></thead>
+          <tbody>
+            <tr><td>准确率</td><td>99%+（达 broadcast 级）</td><td>清晰录音 85-95%，嘈杂场景 60-70%</td></tr>
+            <tr><td>标点</td><td>✅ 完整</td><td>❌ 几乎无标点（影响 banmi 断句搜词）</td></tr>
+            <tr><td>专有名词</td><td>✅ 正确</td><td>⚠️ 经常错（"banmi" → "ban me"）</td></tr>
+            <tr><td>时间戳精度</td><td>±0.1s</td><td>±0.5s 偏差，常超前 / 滞后</td></tr>
+            <tr><td>语言识别</td><td>✅ 明确</td><td>⚠️ 多语种视频会乱标</td></tr>
+            <tr><td>banmi 策略</td><td>✅ 优先用</td><td>⚠️ 仅用于"无人工字幕"的视频，且需要轻量后处理</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <strong>📊 数据来源</strong>：YouTube 2025 公开测试 (cisdem / grabcaptions / notelm.ai) 报告 auto-caption 总体准确率 85-95%；formal WER 指标 (Word Error Rate) 在教育 / talk 类视频普遍 5-10%，但 2024 前模型 WER 高达 15-20%。banmi 抓的频道（SciShow / Crash Course / TED）都有 creator 上传字幕，问题不大。
+      </div>
+
+      <h3>3.5 批量抓策略：3 种模式</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>模式</th><th>命令</th><th>适用</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>单视频</strong></td>
+              <td><code>yt-dlp [opts] https://youtu.be/&lt;id&gt;</code></td>
+              <td>测试 / 学生 ad-hoc 报告"这个视频我想加进来"</td>
+            </tr>
+            <tr>
+              <td><strong>频道增量</strong></td>
+              <td><code>yt-dlp [opts] https://www.youtube.com/@SciShowKids</code></td>
+              <td>banmi 主用：精选 10-15 个频道 cron 每日扫</td>
+            </tr>
+            <tr>
+              <td><strong>Playlist</strong></td>
+              <td><code>yt-dlp [opts] "&lt;playlist URL&gt;"</code></td>
+              <td>抓"高中英语听力训练 100 集" 这类主题包</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3.6 增量更新机制</h3>
+
+      <pre><span class="syn-cmt"># banmi 每日 cron 任务 — 扫频道列表 + archive 跳过已抓</span>
+<span class="syn-cmt"># /etc/cron.d/banmi-subs-daily</span>
+
+<span class="syn-num">0</span> <span class="syn-num">3</span> <span class="syn-op">*</span> <span class="syn-op">*</span> <span class="syn-op">*</span> banmi <span class="syn-fn">/opt/banmi/scripts/fetch_subs_daily.sh</span> &gt;&gt; <span class="syn-fn">/var/log/banmi-subs.log</span> <span class="syn-num">2</span>&gt;&amp;<span class="syn-num">1</span>
+
+<span class="syn-cmt"># fetch_subs_daily.sh — 遍历 channels.txt 每个频道增量抓</span>
+<span class="syn-kw">while read</span> channel; <span class="syn-kw">do</span>
+  yt-dlp <span class="syn-op">\</span>
+    <span class="syn-op">$(cat /opt/banmi/yt-dlp.opts)</span> <span class="syn-op">\</span>
+    <span class="syn-kw">--download-archive</span> <span class="syn-fn">/opt/banmi/data/archive.txt</span> <span class="syn-op">\</span>
+    <span class="syn-str">"$channel"</span>
+  <span class="syn-cmt"># 抓完触发解析 + 入库</span>
+  node <span class="syn-fn">/opt/banmi/scripts/parse_and_index.mjs</span> <span class="syn-op">\</span>
+    <span class="syn-kw">--channel</span> <span class="syn-str">"$channel"</span> <span class="syn-op">\</span>
+    <span class="syn-kw">--input-dir</span> <span class="syn-fn">/opt/banmi/data/subs/</span>
+<span class="syn-kw">done</span> &lt; <span class="syn-fn">/opt/banmi/channels.txt</span></pre>
+
+      <h3>3.7 速率限制 / 反封禁三层</h3>
+
+      <ol>
+        <li><strong>请求节流</strong>：<code>--sleep-requests 2-3 --sleep-interval 15 --max-sleep-interval 45</code> 让单 IP 抓取速率接近真实用户浏览节奏</li>
+        <li><strong>Cookie 轮换</strong>：用 2-3 个独立 Google 账号，每个账号配 <code>--cookies-from-browser</code> + 独立浏览器 profile；账号跟 banmi 主账号严格隔离</li>
+        <li><strong>代理 IP</strong>：触发 429 / IP ban 时切换代理（推荐 BrightData / Smartproxy 住宅 IP，~¥50-150/月）；轻量场景下香港 / 新加坡 VPS 多 IP 就够</li>
+      </ol>
+
+      <div class="callout info">
+        <strong>📡 实战经验</strong>：根据 yt-dlp GitHub issue 区，使用 <code>-r 3M --sleep-requests 3 --sleep-interval 60 --max-sleep-interval 120</code> 配置时绝大部分情况不会被风控。banmi 只抓字幕（远低于视频体），风险更低。
+      </div>
+
+      <h3>3.8 错误重试 + 失败 video 处理</h3>
+
+      <pre><span class="syn-cmt">// banmi/scripts/parse_and_index.mjs — 入库幂等 + retry queue</span>
+<span class="syn-kw">import</span> <span class="syn-op">{</span> readFile <span class="syn-op">}</span> <span class="syn-kw">from</span> <span class="syn-str">'node:fs/promises'</span>;
+<span class="syn-kw">import</span> <span class="syn-op">{</span> WebVTTParser <span class="syn-op">}</span> <span class="syn-kw">from</span> <span class="syn-str">'webvtt-parser'</span>;
+<span class="syn-kw">import</span> <span class="syn-op">{</span> sql <span class="syn-op">}</span> <span class="syn-kw">from</span> <span class="syn-str">'./db.mjs'</span>;
+
+<span class="syn-kw">async function</span> <span class="syn-fn">ingestSubFile</span>(videoId, vttPath, meta) <span class="syn-op">{</span>
+  <span class="syn-kw">const</span> raw <span class="syn-op">=</span> <span class="syn-kw">await</span> <span class="syn-fn">readFile</span>(vttPath, <span class="syn-str">'utf-8'</span>);
+  <span class="syn-kw">const</span> parsed <span class="syn-op">=</span> <span class="syn-kw">new</span> <span class="syn-fn">WebVTTParser</span>().<span class="syn-fn">parse</span>(raw, <span class="syn-str">'metadata'</span>);
+
+  <span class="syn-cmt">// upsert video meta 幂等</span>
+  <span class="syn-kw">await</span> sql<span class="syn-op">`</span>
+    INSERT INTO videos (id, channel, title, duration_sec, license, lang, fetched_at)
+    VALUES (<span class="syn-op">${</span>videoId<span class="syn-op">}</span>, <span class="syn-op">${</span>meta.channel<span class="syn-op">}</span>, <span class="syn-op">${</span>meta.title<span class="syn-op">}</span>,
+            <span class="syn-op">${</span>meta.duration<span class="syn-op">}</span>, <span class="syn-op">${</span>meta.license<span class="syn-op">}</span>, <span class="syn-op">${</span>meta.lang<span class="syn-op">}</span>, NOW())
+    ON CONFLICT (id) DO UPDATE SET
+      title <span class="syn-op">=</span> EXCLUDED.title, last_updated <span class="syn-op">=</span> NOW()<span class="syn-op">`</span>;
+
+  <span class="syn-cmt">// 批量 insert captions（每段一行）</span>
+  <span class="syn-kw">const</span> rows <span class="syn-op">=</span> parsed.cues.<span class="syn-fn">map</span>(c <span class="syn-op">=&gt;</span> (<span class="syn-op">{</span>
+    video_id: videoId,
+    start_sec: c.startTime,
+    end_sec:   c.endTime,
+    text:      c.text.<span class="syn-fn">replace</span>(<span class="syn-op">/&lt;[^&gt;]*&gt;/g</span>, <span class="syn-str">''</span>).<span class="syn-fn">trim</span>(),
+    lang:      meta.lang,
+  <span class="syn-op">}</span>));
+  <span class="syn-kw">await</span> sql<span class="syn-op">`</span>INSERT INTO captions <span class="syn-op">${</span>sql(rows)<span class="syn-op">}</span> ON CONFLICT DO NOTHING<span class="syn-op">`</span>;
+<span class="syn-op">}</span>
+
+<span class="syn-cmt">// 失败 video 进 retry queue, 24h 后自动重试 3 次后人工 review</span></pre>
+
+    </div>
+  </section>
+
+  <!-- ============ 第四节：索引选型 ============ -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">字幕索引选型对比（5 候选 + 推荐）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>banmi 估算字幕数据量上限：10000 视频 × 平均 1500 段 caption ≈ <strong>1500 万行</strong>。对全文搜索引擎而言这属于"中等规模"。</p>
+
+      <h3>4.1 5 候选横评</h3>
+
+      <div class="table-wrap">
+        <table class="matrix-table">
+          <thead><tr>
+            <th>引擎</th>
+            <th>类型</th>
+            <th>性能（1500w 行）</th>
+            <th>运维</th>
+            <th>中文</th>
+            <th>typo</th>
+            <th>phrase</th>
+            <th>license</th>
+            <th>成本</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Postgres FTS + GIN</strong></td>
+              <td>SQL 内建</td>
+              <td>毫秒级（GIN 索引下 query 40ms）</td>
+              <td>极轻（banmi 已有 PG）</td>
+              <td>需 zhparser</td>
+              <td>❌ 默认无</td>
+              <td>✅</td>
+              <td>BSD</td>
+              <td>免费</td>
+            </tr>
+            <tr>
+              <td><strong>Meilisearch</strong></td>
+              <td>独立服务</td>
+              <td>极快（10ms instant search）</td>
+              <td>中（额外 1 个 service）</td>
+              <td>✅ 内建</td>
+              <td>✅ 内建</td>
+              <td>✅</td>
+              <td>MIT</td>
+              <td>自托管免费 / 云 $30+/月</td>
+            </tr>
+            <tr>
+              <td><strong>Typesense</strong></td>
+              <td>独立服务</td>
+              <td>极快（接近 Meili）</td>
+              <td>中（需要 cluster）</td>
+              <td>✅ 内建</td>
+              <td>✅ 内建</td>
+              <td>✅</td>
+              <td>GPL-3</td>
+              <td>自托管免费 / 云 $19+/月</td>
+            </tr>
+            <tr>
+              <td><strong>Elasticsearch</strong></td>
+              <td>独立服务</td>
+              <td>极快（生产级）</td>
+              <td>重（JVM / heap / cluster）</td>
+              <td>需 IK 插件</td>
+              <td>✅</td>
+              <td>✅✅</td>
+              <td>SSPL（受限）</td>
+              <td>自托管 ¥500+/月 server</td>
+            </tr>
+            <tr>
+              <td><strong>OpenSearch</strong></td>
+              <td>独立服务</td>
+              <td>同 ES</td>
+              <td>重</td>
+              <td>需插件</td>
+              <td>✅</td>
+              <td>✅✅</td>
+              <td>Apache 2.0</td>
+              <td>自托管 ¥500+/月 / AWS ¥2k+/月</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>4.2 推荐：Postgres FTS（再加 trigram 兜底）</h3>
+
+      <div class="verdict-card">
+        <div class="verdict-head">
+          <span class="badge pick">banmi 主推</span>
+          <h4>Postgres 16 + tsvector + GIN + pg_trgm</h4>
+        </div>
+        <div class="verdict-body">
+          <p class="pros"><strong>性能足够</strong>：oneuptime / paradedb 等公开 benchmark 显示 1000 万 行 + GIN tsvector，单次查询 40-150ms，banmi 1500 万行完全在能力范围内。</p>
+          <p class="pros"><strong>运维零增量</strong>：banmi 已经有 Postgres（Next.js + Postgres 是默认栈），不需要再起 Elasticsearch / Meilisearch 服务。Supabase 用户更受益。</p>
+          <p class="pros"><strong>跨表 JOIN</strong>：搜词时同时按 video.channel / video.cefr_level / video.license 过滤，纯 SQL，不需要数据同步。</p>
+          <p class="pros"><strong>persistent tsvector + GIN</strong>：把 tsvector 物化成 generated column + GIN 索引，query 时 0 计算开销，按 danielabaron 实测 比 query-time 计算快 100×。</p>
+          <p class="cons"><strong>typo 容忍</strong>：默认无 fuzzy；用 <code>pg_trgm</code> trigram 索引 + similarity score 弥补，对低频拼错查询能 fallback。</p>
+          <p class="cons"><strong>中文</strong>：banmi 是英文为主，中文搜索不在路径上；万一以后做中文，引 <code>zhparser</code> 或换 Meilisearch。</p>
+        </div>
+      </div>
+
+      <h3>4.3 次选：Meilisearch（若运维资源富裕）</h3>
+
+      <div class="verdict-card">
+        <div class="verdict-head">
+          <span class="badge alt">如果团队接受多 service</span>
+          <h4>Meilisearch (self-host)</h4>
+        </div>
+        <div class="verdict-body">
+          <p class="pros">Instant search 体验最好（每键入一个字母都重排）—— 适合 banmi 学生在词卡上输入词时实时推荐相关片段。</p>
+          <p class="pros">typo / synonym / facet / highlight 全部开箱即用，相比 Postgres FTS 省去手写 ts_rank。</p>
+          <p class="pros">Schema 灵活：JSON 文档化，调字段不用 ALTER TABLE。</p>
+          <p class="cons">需要把 Postgres 数据同步到 Meilisearch（用 logical replication 或定时 ETL），多一道数据流。</p>
+          <p class="cons">月运维成本多 ¥100-300（VPS 单实例 RAM ≥ 4GB）。</p>
+        </div>
+      </div>
+
+      <h3>4.4 不推荐：Elasticsearch / OpenSearch</h3>
+
+      <div class="verdict-card">
+        <div class="verdict-head">
+          <span class="badge bad">overkill</span>
+          <h4>Elasticsearch / OpenSearch</h4>
+        </div>
+        <div class="verdict-body">
+          <p class="cons">JVM heap 至少 4GB / shard 设计学习曲线陡 / cluster 运维（节点同步 / split brain）—— banmi 5500 词级别用量不需要这么重的引擎。</p>
+          <p class="cons">Elasticsearch 切了 SSPL 协议，AWS 不开源支持 → 用 OpenSearch 反而绑定云厂商。</p>
+          <p class="cons">中文需要 IK 插件 + 中文分词训练；banmi 是英文场景，多花的成本拿不到收益。</p>
+          <p class="pros">真到了 banmi 全国百万用户 / 全文搜整个 banmi 内容生态时，才考虑切 ES。</p>
+        </div>
+      </div>
+
+      <h3>4.5 实战 SQL（Postgres FTS 推荐用法）</h3>
+
+      <pre><span class="syn-cmt">-- 1. captions 表加 tsvector generated column（持久化）</span>
+ALTER TABLE captions
+  ADD COLUMN search_vec tsvector
+  GENERATED ALWAYS AS (to_tsvector(<span class="syn-str">'english'</span>, text)) STORED;
+
+<span class="syn-cmt">-- 2. GIN 索引</span>
+CREATE INDEX captions_search_vec_gin
+  ON captions USING GIN (search_vec);
+
+<span class="syn-cmt">-- 3. trigram 索引兜底（typo / 部分匹配）</span>
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX captions_text_trgm
+  ON captions USING GIN (text gin_trgm_ops);
+
+<span class="syn-cmt">-- 4. 查询：找包含 'significant' 的 caption，按相关度 + 频道质量排序</span>
+SELECT
+  c.video_id,
+  c.start_sec,
+  c.end_sec,
+  c.text,
+  v.channel,
+  v.title,
+  ts_rank(c.search_vec, q.query)                         AS rank_text,
+  ts_rank(c.search_vec, q.query) <span class="syn-op">*</span> v.quality_score      AS rank_final
+FROM captions c
+JOIN videos v ON v.id <span class="syn-op">=</span> c.video_id,
+     to_tsquery(<span class="syn-str">'english'</span>, <span class="syn-str">'significant'</span>) q
+WHERE c.search_vec <span class="syn-op">@@</span> q.query
+  AND v.kid_safe <span class="syn-op">=</span> true        <span class="syn-cmt">-- 例如 K-G6 模式</span>
+ORDER BY rank_final DESC
+LIMIT <span class="syn-num">20</span>;</pre>
+
+      <div class="callout good">
+        <strong>📊 性能基准</strong>：Postgres 17 + 1000 万行 captions + GIN 索引，single-word query <strong>~40ms</strong>，phrase query <strong>~80ms</strong>，trigram fuzzy <strong>~150ms</strong>。banmi 上 Redis 缓存层后热门词 5ms 内返回。
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 第五节：Schema ============ -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">数据模型 / Schema 设计</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>4 张主表 + 2 张辅助表，跟半米总纲 §12 的 <code>lexeme / vocab_card_template</code> 完美对接。<code>clip_refs[]</code> 字段就是引用这套表的指针。</p>
+
+      <h3>5.1 主表 · videos</h3>
+
+      <div class="schema-card">
+        <div class="sh">videos · 视频元数据（一行 = 一条 YouTube 视频）</div>
+        <pre><span class="syn-kw">CREATE TABLE</span> videos (
+  id              <span class="syn-fn">TEXT</span>        <span class="syn-kw">PRIMARY KEY</span>,    <span class="syn-cmt">-- YouTube video_id 11 字符</span>
+  channel_id      <span class="syn-fn">TEXT</span>        <span class="syn-kw">NOT NULL</span>,
+  channel_name    <span class="syn-fn">TEXT</span>        <span class="syn-kw">NOT NULL</span>,       <span class="syn-cmt">-- 'SciShow Kids'</span>
+  title           <span class="syn-fn">TEXT</span>        <span class="syn-kw">NOT NULL</span>,
+  duration_sec    <span class="syn-fn">INTEGER</span>     <span class="syn-kw">NOT NULL</span>,
+  lang            <span class="syn-fn">TEXT</span>        <span class="syn-kw">NOT NULL</span>,       <span class="syn-cmt">-- 'en', 'en-US'</span>
+  license         <span class="syn-fn">TEXT</span>        <span class="syn-kw">NOT NULL</span>,       <span class="syn-cmt">-- 'youtube_standard' | 'cc_by' | 'cc_by_nc' | 'public_domain'</span>
+  cefr_level      <span class="syn-fn">TEXT</span>,                       <span class="syn-cmt">-- A2/B1/B2/C1 — 人工或 ML 标</span>
+  quality_score   <span class="syn-fn">REAL</span>        <span class="syn-kw">DEFAULT</span> <span class="syn-num">1.0</span>,    <span class="syn-cmt">-- 频道质量加权（0.5-2.0）</span>
+  kid_safe        <span class="syn-fn">BOOLEAN</span>     <span class="syn-kw">DEFAULT</span> false,  <span class="syn-cmt">-- K-G6 Kid Mode 过滤</span>
+  has_manual_sub  <span class="syn-fn">BOOLEAN</span>     <span class="syn-kw">DEFAULT</span> false,  <span class="syn-cmt">-- 是否有 creator 人工字幕</span>
+  thumbnail_url   <span class="syn-fn">TEXT</span>,
+  fetched_at      <span class="syn-fn">TIMESTAMPTZ</span> <span class="syn-kw">NOT NULL</span> <span class="syn-kw">DEFAULT</span> NOW(),
+  last_updated    <span class="syn-fn">TIMESTAMPTZ</span> <span class="syn-kw">NOT NULL</span> <span class="syn-kw">DEFAULT</span> NOW(),
+  is_active       <span class="syn-fn">BOOLEAN</span>     <span class="syn-kw">DEFAULT</span> true    <span class="syn-cmt">-- 视频失效 / 被删除 → false</span>
+);
+
+<span class="syn-kw">CREATE INDEX</span> videos_channel_id_idx     <span class="syn-kw">ON</span> videos (channel_id);
+<span class="syn-kw">CREATE INDEX</span> videos_kid_safe_idx       <span class="syn-kw">ON</span> videos (kid_safe) <span class="syn-kw">WHERE</span> kid_safe;
+<span class="syn-kw">CREATE INDEX</span> videos_quality_score_idx  <span class="syn-kw">ON</span> videos (quality_score <span class="syn-fn">DESC</span>);</pre>
+      </div>
+
+      <h3>5.2 主表 · captions（核心，约 1500 万行）</h3>
+
+      <div class="schema-card">
+        <div class="sh">captions · 字幕段（一行 = 一段字幕，平均 5-15 秒）</div>
+        <pre><span class="syn-kw">CREATE TABLE</span> captions (
+  id              <span class="syn-fn">BIGSERIAL</span>   <span class="syn-kw">PRIMARY KEY</span>,
+  video_id        <span class="syn-fn">TEXT</span>        <span class="syn-kw">NOT NULL REFERENCES</span> videos(id) <span class="syn-kw">ON DELETE CASCADE</span>,
+  start_sec       <span class="syn-fn">REAL</span>        <span class="syn-kw">NOT NULL</span>,       <span class="syn-cmt">-- 精度到 0.1 秒</span>
+  end_sec         <span class="syn-fn">REAL</span>        <span class="syn-kw">NOT NULL</span>,
+  text            <span class="syn-fn">TEXT</span>        <span class="syn-kw">NOT NULL</span>,
+  lang            <span class="syn-fn">TEXT</span>        <span class="syn-kw">NOT NULL</span>,
+  is_auto         <span class="syn-fn">BOOLEAN</span>     <span class="syn-kw">DEFAULT</span> false,  <span class="syn-cmt">-- true = YouTube ASR auto-generated</span>
+  search_vec      <span class="syn-fn">TSVECTOR</span>    <span class="syn-kw">GENERATED ALWAYS AS</span> (to_tsvector(<span class="syn-str">'english'</span>, text)) STORED,
+  <span class="syn-kw">UNIQUE</span> (video_id, start_sec)
+);
+
+<span class="syn-kw">CREATE INDEX</span> captions_search_vec_gin   <span class="syn-kw">ON</span> captions <span class="syn-kw">USING</span> GIN (search_vec);
+<span class="syn-kw">CREATE INDEX</span> captions_text_trgm        <span class="syn-kw">ON</span> captions <span class="syn-kw">USING</span> GIN (text gin_trgm_ops);
+<span class="syn-kw">CREATE INDEX</span> captions_video_start      <span class="syn-kw">ON</span> captions (video_id, start_sec);
+
+<span class="syn-cmt">-- 数据量估算：</span>
+<span class="syn-cmt"># 10000 视频 × 1500 段/视频 = 15M 行</span>
+<span class="syn-cmt"># 每行约 200 bytes（text + tsvector） → 3 GB 表体 + 1.5 GB GIN 索引 ≈ 4.5 GB</span></pre>
+      </div>
+
+      <h3>5.3 主表 · word_index（可选，做预聚合）</h3>
+
+      <div class="schema-card">
+        <div class="sh">word_index · lemma 反向索引（缓存查 lemma 性能）</div>
+        <pre><span class="syn-kw">CREATE TABLE</span> word_index (
+  lemma           <span class="syn-fn">TEXT</span>        <span class="syn-kw">NOT NULL</span>,           <span class="syn-cmt">-- 'significant'</span>
+  video_id        <span class="syn-fn">TEXT</span>        <span class="syn-kw">NOT NULL REFERENCES</span> videos(id),
+  caption_id      <span class="syn-fn">BIGINT</span>      <span class="syn-kw">NOT NULL REFERENCES</span> captions(id),
+  surface_form    <span class="syn-fn">TEXT</span>        <span class="syn-kw">NOT NULL</span>,           <span class="syn-cmt">-- 'significantly'（原形）</span>
+  pos             <span class="syn-fn">TEXT</span>,                           <span class="syn-cmt">-- 'ADJ' / 'ADV' / 'VERB'</span>
+  position        <span class="syn-fn">SMALLINT</span>,                       <span class="syn-cmt">-- 在 caption 中第几个 token</span>
+  freq_rank       <span class="syn-fn">INTEGER</span>,                        <span class="syn-cmt">-- 该词在该视频出现次数</span>
+  <span class="syn-kw">PRIMARY KEY</span> (lemma, video_id, caption_id, position)
+);
+
+<span class="syn-kw">CREATE INDEX</span> word_index_lemma          <span class="syn-kw">ON</span> word_index (lemma);
+<span class="syn-kw">CREATE INDEX</span> word_index_lemma_video    <span class="syn-kw">ON</span> word_index (lemma, video_id);
+
+<span class="syn-cmt">-- 入库时用 spaCy / lemminflect lemmatize 后写入</span>
+<span class="syn-cmt">-- 查 'significant' 时直接命中 word_index，bypass FTS 排序</span>
+<span class="syn-cmt">-- 数据量估算：1500w caption × 平均 12 词 ≈ 1.8亿 行 → 较重，可改成 MV</span></pre>
+      </div>
+
+      <div class="callout warn">
+        <strong>⚠️ word_index 是 V0.3+ 的优化，不是 V0.3 上线必做</strong>。第一版直接走 captions FTS 即可，等真出现"高频词 query 慢" 再做这层。
+      </div>
+
+      <h3>5.4 辅助表 · search_log</h3>
+
+      <div class="schema-card">
+        <div class="sh">search_log · 学生查询埋点</div>
+        <pre><span class="syn-kw">CREATE TABLE</span> search_log (
+  id              <span class="syn-fn">BIGSERIAL</span>   <span class="syn-kw">PRIMARY KEY</span>,
+  student_id      <span class="syn-fn">UUID</span>        <span class="syn-kw">NOT NULL</span>,
+  query           <span class="syn-fn">TEXT</span>        <span class="syn-kw">NOT NULL</span>,
+  source          <span class="syn-fn">TEXT</span>,                           <span class="syn-cmt">-- 'vocab_card' / 'reading_lookup' / 'search_page'</span>
+  result_count    <span class="syn-fn">INTEGER</span>,
+  selected_clip   <span class="syn-fn">BIGINT</span>      <span class="syn-kw">REFERENCES</span> captions(id),  <span class="syn-cmt">-- 学生最终点开哪个片段</span>
+  query_ms        <span class="syn-fn">INTEGER</span>,                        <span class="syn-cmt">-- 数据库查询耗时</span>
+  created_at      <span class="syn-fn">TIMESTAMPTZ</span> <span class="syn-kw">DEFAULT</span> NOW()
+);
+
+<span class="syn-kw">CREATE INDEX</span> search_log_query_idx      <span class="syn-kw">ON</span> search_log (query, created_at);
+<span class="syn-kw">CREATE INDEX</span> search_log_student_idx    <span class="syn-kw">ON</span> search_log (student_id, created_at);</pre>
+      </div>
+
+      <h3>5.5 ER 关系</h3>
+
+      <pre>videos  <span class="syn-op">───</span>1:N<span class="syn-op">───</span>  captions  <span class="syn-op">───</span>1:N<span class="syn-op">───</span>  word_index
+                                       <span class="syn-op">└──</span>  search_log.selected_clip
+
+vocab_card_template (半米总纲 §12)
+   <span class="syn-op">└──</span> clip_refs[]  <span class="syn-op">──[</span>youtube:VIDEO_ID#start-end<span class="syn-op">]──</span>  videos + captions</pre>
+
+      <h3>5.6 数据量与存储估算</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>表</th><th>规模</th><th>每行大小</th><th>总占用</th><th>索引</th></tr></thead>
+          <tbody>
+            <tr><td>videos</td><td>10000 行</td><td>~500 B</td><td>5 MB</td><td>~2 MB</td></tr>
+            <tr><td>captions</td><td>15M 行</td><td>~200 B</td><td>3 GB</td><td>1.5 GB GIN + 200 MB trgm</td></tr>
+            <tr><td>word_index（可选）</td><td>180M 行</td><td>~80 B</td><td>14 GB</td><td>5 GB</td></tr>
+            <tr><td>search_log</td><td>10000 行/天 × 365 = 3.6M/年</td><td>~200 B</td><td>700 MB/年</td><td>200 MB</td></tr>
+            <tr><td><strong>合计（不含 word_index）</strong></td><td>—</td><td>—</td><td><strong>~5 GB</strong></td><td><strong>~2 GB</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>5 GB 数据 + 2 GB 索引 = <strong>7 GB</strong>，DigitalOcean Basic Droplet ($24/月，4C8G + 80GB SSD) 完全装得下。带索引启动 word_index 跳到 20 GB，需要升级到 $48 档（4C8G + 160GB）。</p>
+
+    </div>
+  </section>
+
+  <!-- ============ 第六节：iframe ============ -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">前端 iframe 跳 timestamp 实现</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>6.1 最简单方式：URL 参数（零 JS）</h3>
+
+      <pre><span class="syn-kw">&lt;iframe</span>
+  <span class="syn-fn">width</span><span class="syn-op">=</span><span class="syn-str">"560"</span> <span class="syn-fn">height</span><span class="syn-op">=</span><span class="syn-str">"315"</span>
+  <span class="syn-fn">src</span><span class="syn-op">=</span><span class="syn-str">"https://www.youtube.com/embed/VIDEO_ID?start=120&amp;end=128&amp;autoplay=1&amp;rel=0&amp;cc_load_policy=1"</span>
+  <span class="syn-fn">allow</span><span class="syn-op">=</span><span class="syn-str">"autoplay; encrypted-media; picture-in-picture"</span>
+  <span class="syn-fn">allowfullscreen</span><span class="syn-op">&gt;</span>
+<span class="syn-kw">&lt;/iframe&gt;</span></pre>
+
+      <p>这种方式 banmi 90% 场景够用 —— 学生点词卡上的"播放片段"按钮，iframe src 直接拼一下 <code>?start=&end=</code> 就完事。</p>
+
+      <h3>6.2 URL 参数完整清单（2025 最新）</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>参数</th><th>含义</th><th>banmi 推荐</th></tr></thead>
+          <tbody>
+            <tr><td><code>start=120</code></td><td>从第 120 秒开始播（整数秒）</td><td>✅ 必用</td></tr>
+            <tr><td><code>end=128</code></td><td>播到第 128 秒停止</td><td>✅ 必用</td></tr>
+            <tr><td><code>autoplay=1</code></td><td>iframe 加载即播放</td><td>⚠️ 桌面 OK，移动端被静音策略限制</td></tr>
+            <tr><td><code>mute=1</code></td><td>静音播放（autoplay 移动端必需）</td><td>不开（背词需要听声）</td></tr>
+            <tr><td><code>controls=0</code></td><td>隐藏播放器控件</td><td>不开（学生需要重播 / 进度条）</td></tr>
+            <tr><td><code>rel=0</code></td><td>结束后只推同频道相关视频</td><td>✅ 开（2018-09-25 后只能限制不能完全关）</td></tr>
+            <tr><td><code>cc_load_policy=1</code></td><td>默认开字幕</td><td>✅ 开（背词必须看字幕）</td></tr>
+            <tr><td><code>cc_lang_pref=en</code></td><td>字幕语言偏好</td><td>✅ <code>en</code></td></tr>
+            <tr><td><code>iv_load_policy=3</code></td><td>不显示视频内 annotation</td><td>✅ 开（干净体验）</td></tr>
+            <tr><td><code>fs=1</code></td><td>允许全屏按钮</td><td>✅</td></tr>
+            <tr><td><code>playsinline=1</code></td><td>iOS 内联播放（不强制全屏）</td><td>✅ 移动端关键</td></tr>
+            <tr><td><code>loop=1</code></td><td>视频循环</td><td>需配 <code>playlist=VIDEO_ID</code> 才生效，做片段循环不靠它</td></tr>
+            <tr><td><code>modestbranding</code></td><td>隐藏 YouTube logo</td><td>⚠️ <strong>已 deprecated</strong>，2025 已无效</td></tr>
+            <tr><td><code>showinfo</code></td><td>隐藏作者信息</td><td>⚠️ <strong>已 deprecated</strong>，2025 已无效</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <strong>⚠️ 2025 重要变化</strong>：YouTube 已经废弃 <code>modestbranding</code> / <code>showinfo</code> / <code>autohide</code> / <code>theme</code>。这些参数传上去不报错但不生效。banmi 想"完全干净"的播放器是做不到的，必须接受顶部有 logo + 视频标题。
+      </div>
+
+      <h3>6.3 进阶：IFrame Player API（可控播放）</h3>
+
+      <pre><span class="syn-cmt">&lt;!-- 1. 加载 YouTube IFrame API（一次性） --&gt;</span>
+<span class="syn-kw">&lt;script&gt;</span>
+  <span class="syn-cmt">// 异步加载</span>
+  <span class="syn-kw">const</span> tag <span class="syn-op">=</span> document.<span class="syn-fn">createElement</span>(<span class="syn-str">'script'</span>);
+  tag.src <span class="syn-op">=</span> <span class="syn-str">"https://www.youtube.com/iframe_api"</span>;
+  document.head.<span class="syn-fn">appendChild</span>(tag);
+
+  <span class="syn-cmt">// 全局 callback —— YouTube 加载完会调用</span>
+  <span class="syn-kw">let</span> player;
+  window.<span class="syn-fn">onYouTubeIframeAPIReady</span> <span class="syn-op">=</span> <span class="syn-kw">function</span>() <span class="syn-op">{</span>
+    player <span class="syn-op">=</span> <span class="syn-kw">new</span> YT.<span class="syn-fn">Player</span>(<span class="syn-str">'banmi-clip-player'</span>, <span class="syn-op">{</span>
+      height: <span class="syn-str">'315'</span>,
+      width:  <span class="syn-str">'560'</span>,
+      videoId: <span class="syn-str">'dQw4w9WgXcQ'</span>,
+      playerVars: <span class="syn-op">{</span>
+        start: <span class="syn-num">120</span>,
+        end:   <span class="syn-num">128</span>,
+        autoplay: <span class="syn-num">1</span>,
+        rel:      <span class="syn-num">0</span>,
+        cc_load_policy: <span class="syn-num">1</span>,
+        playsinline:    <span class="syn-num">1</span>,
+      <span class="syn-op">}</span>,
+      events: <span class="syn-op">{</span>
+        onReady:       <span class="syn-fn">onReady</span>,
+        onStateChange: <span class="syn-fn">onStateChange</span>,
+      <span class="syn-op">}</span>
+    <span class="syn-op">}</span>);
+  <span class="syn-op">}</span>;
+
+  <span class="syn-kw">function</span> <span class="syn-fn">onReady</span>(e) <span class="syn-op">{</span>
+    e.target.<span class="syn-fn">setPlaybackRate</span>(<span class="syn-num">0.75</span>);    <span class="syn-cmt">// 降速 0.75 倍 — 适合 K-G6 学员</span>
+  <span class="syn-op">}</span>
+
+  <span class="syn-cmt">// 监听 currentTime → 到 end 自动回到 start（实现"片段循环"）</span>
+  <span class="syn-kw">let</span> loopRange <span class="syn-op">=</span> <span class="syn-op">{</span> start: <span class="syn-num">120</span>, end: <span class="syn-num">128</span> <span class="syn-op">}</span>;
+  <span class="syn-kw">function</span> <span class="syn-fn">onStateChange</span>(e) <span class="syn-op">{</span>
+    <span class="syn-kw">if</span> (e.data <span class="syn-op">===</span> YT.PlayerState.PLAYING) <span class="syn-op">{</span>
+      <span class="syn-cmt">// 每 100ms 检查一次</span>
+      <span class="syn-kw">const</span> timer <span class="syn-op">=</span> <span class="syn-fn">setInterval</span>(() <span class="syn-op">=&gt;</span> <span class="syn-op">{</span>
+        <span class="syn-kw">if</span> (player.<span class="syn-fn">getPlayerState</span>() <span class="syn-op">!==</span> YT.PlayerState.PLAYING) <span class="syn-op">{</span>
+          <span class="syn-fn">clearInterval</span>(timer);
+          <span class="syn-kw">return</span>;
+        <span class="syn-op">}</span>
+        <span class="syn-kw">const</span> t <span class="syn-op">=</span> player.<span class="syn-fn">getCurrentTime</span>();
+        <span class="syn-kw">if</span> (t <span class="syn-op">&gt;=</span> loopRange.end) <span class="syn-op">{</span>
+          player.<span class="syn-fn">seekTo</span>(loopRange.start, true);  <span class="syn-cmt">// 跳回起点</span>
+        <span class="syn-op">}</span>
+      <span class="syn-op">}</span>, <span class="syn-num">100</span>);
+    <span class="syn-op">}</span>
+  <span class="syn-op">}</span>
+
+  <span class="syn-cmt">// 切下一个片段（学生看完一个换下一个）</span>
+  <span class="syn-kw">function</span> <span class="syn-fn">playNextClip</span>(videoId, startSec, endSec) <span class="syn-op">{</span>
+    loopRange <span class="syn-op">=</span> <span class="syn-op">{</span> start: startSec, end: endSec <span class="syn-op">}</span>;
+    player.<span class="syn-fn">loadVideoById</span>(<span class="syn-op">{</span>
+      videoId,
+      startSeconds: startSec,
+      endSeconds:   endSec,
+    <span class="syn-op">}</span>);
+  <span class="syn-op">}</span>
+<span class="syn-kw">&lt;/script&gt;</span>
+
+<span class="syn-kw">&lt;div </span><span class="syn-fn">id</span><span class="syn-op">=</span><span class="syn-str">"banmi-clip-player"</span><span class="syn-kw">&gt;&lt;/div&gt;</span></pre>
+
+      <h3>6.4 关键 API 方法表</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>方法</th><th>用途</th><th>banmi 用法</th></tr></thead>
+          <tbody>
+            <tr><td><code>seekTo(sec, allowSeekAhead)</code></td><td>跳到指定时间</td><td>实现片段循环 / 学生 replay</td></tr>
+            <tr><td><code>loadVideoById({videoId, startSeconds, endSeconds})</code></td><td>加载新视频</td><td>切下一个片段</td></tr>
+            <tr><td><code>cueVideoById(...)</code></td><td>加载但不自动播</td><td>"准备就绪"等用户点</td></tr>
+            <tr><td><code>playVideo() / pauseVideo()</code></td><td>播放控制</td><td>暂停按钮</td></tr>
+            <tr><td><code>setPlaybackRate(rate)</code></td><td>设倍速（0.25 / 0.5 / 0.75 / 1 / 1.25 / 1.5 / 2）</td><td>K-G6 默认 0.75，成人 1.0</td></tr>
+            <tr><td><code>getCurrentTime()</code></td><td>当前播放秒数</td><td>循环检测 + 字幕同步</td></tr>
+            <tr><td><code>setVolume(0-100)</code></td><td>音量</td><td>静音重播</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>6.5 时间精度</h3>
+
+      <p><code>start</code> / <code>end</code> URL 参数只接受<strong>整数秒</strong>；想要毫秒级（雅思口语跟读评估场景）必须用 IFrame API 的 <code>seekTo(120.5)</code>。banmi 字幕段 <code>start_sec REAL</code> 已经存的是 float，所以查 caption 时拿到的是 <code>120.34</code>，URL 路径下退化到 <code>120</code> 没问题。</p>
+
+      <h3>6.6 iOS Safari 自动播放限制</h3>
+
+      <div class="callout warn">
+        <strong>📱 移动端三条铁律</strong>
+        <ol>
+          <li>iOS Safari 默认<strong>禁止 autoplay 非静音视频</strong> —— banmi 词卡片段播放<strong>必须用户手势触发</strong>（学生点按钮才能开始）</li>
+          <li>必须加 <code>playsinline=1</code>，否则 iOS 会强制全屏 → 出词卡场景</li>
+          <li>循环切片段时第一次必须用户点过 player，后续 <code>loadVideoById</code> 才能不破坏 autoplay 权限</li>
+        </ol>
+      </div>
+
+      <h3>6.7 字幕高亮目标词（前端覆盖层方案）</h3>
+
+      <p>YouTube iframe 内的字幕是 native 渲染的，banmi <strong>没法直接改 iframe 内部 DOM</strong>。两条路：</p>
+
+      <ol>
+        <li><strong>(推荐) 隐藏 YouTube 字幕，自己渲染</strong>：URL 加 <code>cc_load_policy=0</code>，banmi 在 iframe 上层覆一个透明 div，配合 <code>getCurrentTime()</code> 实时显示自家字幕 + 高亮目标词。优点：完全可控 / 缺点：要做时间轴同步。</li>
+        <li><strong>(简单) 显示 YouTube 原字幕 + 词卡侧栏单独显示该片段全文</strong>：iframe 字幕不动，banmi 在 player 下方再放一个 caption 块，目标词加 <code>&lt;mark&gt;</code> 高亮。技术零成本，体验已经够。</li>
+      </ol>
+
+    </div>
+  </section>
+
+  <!-- ============ 第七节：数据源精选 ============ -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">数据源精选（12 频道清单）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>banmi 首批入库 10-15 个频道，覆盖小学 K-G6 / 中学 / 高中 / 雅思托福 4 个学段。按版权风险从低到高排：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>#</th>
+            <th>频道</th>
+            <th>授权</th>
+            <th>视频量</th>
+            <th>平均时长</th>
+            <th>字幕语种</th>
+            <th>学段</th>
+            <th>kid_safe</th>
+            <th>quality_score</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td><strong>VOA Learning English</strong></td>
+              <td>🟢 public domain</td>
+              <td>5000+</td>
+              <td>3-5 min</td>
+              <td>en（人工 + 转写）</td>
+              <td>中学/高中</td>
+              <td class="check y">✓</td>
+              <td>2.0</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td><strong>TED-Ed</strong></td>
+              <td>🟡 CC BY-NC-ND</td>
+              <td>2000+</td>
+              <td>4-6 min</td>
+              <td>en + 多语字幕</td>
+              <td>高中/成人</td>
+              <td class="check p">部分</td>
+              <td>2.0</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td><strong>TED Talks 主频道</strong></td>
+              <td>🟡 CC BY-NC-ND</td>
+              <td>3500+</td>
+              <td>10-20 min</td>
+              <td>en + 多语</td>
+              <td>雅思/托福</td>
+              <td class="check n">否</td>
+              <td>1.8</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td><strong>Khan Academy</strong></td>
+              <td>🟡 CC BY-NC-SA</td>
+              <td>8000+</td>
+              <td>5-10 min</td>
+              <td>en（人工）</td>
+              <td>小学/中学/高中</td>
+              <td class="check y">✓</td>
+              <td>1.8</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td><strong>Crash Course</strong></td>
+              <td>🟡 CC BY-SA（早期 NC-SA）</td>
+              <td>1000+</td>
+              <td>10-15 min</td>
+              <td>en（人工）</td>
+              <td>高中</td>
+              <td class="check p">部分</td>
+              <td>1.7</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td><strong>Crash Course Kids</strong></td>
+              <td>🟡 CC BY-NC-SA</td>
+              <td>140+</td>
+              <td>3-4 min</td>
+              <td>en（人工）</td>
+              <td>小学 K-G6</td>
+              <td class="check y">✓</td>
+              <td>2.0</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td><strong>SciShow</strong></td>
+              <td>🔵 standard YouTube</td>
+              <td>2500+</td>
+              <td>5-10 min</td>
+              <td>en（人工）</td>
+              <td>中学/高中</td>
+              <td class="check p">部分</td>
+              <td>1.6</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td><strong>SciShow Kids</strong></td>
+              <td>🔵 standard YouTube</td>
+              <td>700+</td>
+              <td>3-5 min</td>
+              <td>en（人工）</td>
+              <td>小学 K-G6</td>
+              <td class="check y">✓</td>
+              <td>2.0</td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td><strong>National Geographic</strong></td>
+              <td>🔵 standard YouTube</td>
+              <td>5000+</td>
+              <td>3-10 min</td>
+              <td>en（混合）</td>
+              <td>中学/高中</td>
+              <td class="check y">✓</td>
+              <td>1.5</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td><strong>BBC Learning English</strong></td>
+              <td>🟠 BBC ToS（教育免费 / 商用要审）</td>
+              <td>3000+</td>
+              <td>3-8 min</td>
+              <td>en（人工）</td>
+              <td>中学/雅思</td>
+              <td class="check y">✓</td>
+              <td>1.7</td>
+            </tr>
+            <tr>
+              <td>11</td>
+              <td><strong>MIT OCW</strong></td>
+              <td>🟡 CC BY-NC-SA</td>
+              <td>3000+ lecture</td>
+              <td>30-60 min</td>
+              <td>en（人工）</td>
+              <td>托福/学术</td>
+              <td class="check n">否</td>
+              <td>1.4</td>
+            </tr>
+            <tr>
+              <td>12</td>
+              <td><strong>Stanford Online</strong></td>
+              <td>🟡 CC BY-NC-SA</td>
+              <td>2000+</td>
+              <td>20-60 min</td>
+              <td>en（人工）</td>
+              <td>托福/学术</td>
+              <td class="check n">否</td>
+              <td>1.3</td>
+            </tr>
+            <tr>
+              <td>13</td>
+              <td><strong>Peppa Pig 官方频道</strong></td>
+              <td>🔴 standard YouTube（强 IP）</td>
+              <td>500+</td>
+              <td>5-10 min</td>
+              <td>en（人工）</td>
+              <td>小学低年级</td>
+              <td class="check y">✓</td>
+              <td>1.6</td>
+            </tr>
+            <tr>
+              <td>14</td>
+              <td><strong>BBC Earth / Planet Earth</strong></td>
+              <td>🔴 standard YouTube</td>
+              <td>千级</td>
+              <td>3-15 min</td>
+              <td>en（人工）</td>
+              <td>中学</td>
+              <td class="check y">✓</td>
+              <td>1.5</td>
+            </tr>
+            <tr>
+              <td>15</td>
+              <td><strong>Storyline Online (SAG-AFTRA)</strong></td>
+              <td>🟢 教育免费分发</td>
+              <td>100+</td>
+              <td>5-15 min</td>
+              <td>en（讲读者人工）</td>
+              <td>小学 K-G3</td>
+              <td class="check y">✓</td>
+              <td>1.7</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>7.1 授权风险等级</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>等级</th><th>说明</th><th>banmi 用法</th></tr></thead>
+          <tbody>
+            <tr><td>🟢 public domain</td><td>无版权（VOA / Storyline）</td><td>无限制使用，但抓字幕 + iframe 嵌入仍要尊重 YouTube ToS</td></tr>
+            <tr><td>🟡 CC BY-NC-* </td><td>非商业 + 署名 + 不修改</td><td>banmi 是教育用途；iframe 嵌入 + 字幕索引属于"链接 + 引用"边界，不算修改</td></tr>
+            <tr><td>🔵 standard YouTube</td><td>YouTube 默认 ToS</td><td>iframe 嵌入是 YouTube 官方允许的；字幕索引"图书馆模型"边界 OK</td></tr>
+            <tr><td>🟠 BBC ToS</td><td>需看具体条款</td><td>educational fair use 可用，发邮件确认更稳</td></tr>
+            <tr><td>🔴 强 IP</td><td>Peppa Pig / BBC Earth 等</td><td>iframe 嵌入官方频道 = YouTube 允许；不要二次剪辑 / 自托管</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>7.2 按学段优先级</h3>
+
+      <div class="callout good">
+        <strong>📚 banmi 第一批入库（V0.3 启动周完成）：4 个频道，约 1500 视频</strong>
+        <ul>
+          <li><strong>K-G6</strong>：SciShow Kids（700）+ Crash Course Kids（140）= 840 视频，覆盖小升初词库</li>
+          <li><strong>中学/高中</strong>：VOA Learning English（5000，分批入 500）</li>
+          <li><strong>雅思入门</strong>：TED-Ed（2000，分批入 200）</li>
+        </ul>
+        <p>第一批跑通后再扩到 10000 视频规模。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 第八节：字幕质量 ============ -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">字幕质量过滤策略</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>8.1 三层过滤链</h3>
+
+      <p>从抓到入库分 3 道闸门：</p>
+
+      <ol>
+        <li><strong>第 1 道：抓取时优先选人工字幕</strong> — <code>--write-subs --write-auto-subs</code> 一起开，但解析时如果同一视频两种都有，保留人工版本，把 <code>is_auto=false</code> 写进 captions</li>
+        <li><strong>第 2 道：解析时正则清洗 + 段落合并</strong> — 去 styling tags / 修复段落断裂 / 合并相邻 1 秒内段落</li>
+        <li><strong>第 3 道：入库后 quality_score 加权</strong> — 频道质量 × 字幕类型 × CEFR 难度匹配</li>
+      </ol>
+
+      <h3>8.2 auto 字幕 vs 人工字幕的真实差距</h3>
+
+      <div class="callout info">
+        <strong>📊 2025 准确率数据汇总</strong>
+        <ul>
+          <li><strong>人工字幕</strong>：99%+ 准确率，标点完整，专有名词正确，时间戳精度 ±0.1s</li>
+          <li><strong>YouTube auto（2024+）</strong>：教育 / talk 类清晰录音 85-95%（cisdem 测试）；嘈杂 / 室外 60-70%</li>
+          <li><strong>WER (Word Error Rate)</strong>：精挑频道 5-10%；混合频道 10-20%</li>
+          <li><strong>缺标点</strong>：auto 字幕几乎不带句号，影响 banmi"按句搜词"算法</li>
+        </ul>
+      </div>
+
+      <h3>8.3 时间戳精度修正</h3>
+
+      <p>auto 字幕常有 ±0.5-1 秒偏差（领先或滞后）。banmi 用三种方法补：</p>
+
+      <ul>
+        <li><strong>偏移补偿</strong>：抽样 50 个频道 caption，对比片段实际播放点 vs caption start_sec，算出系统性 offset（如该频道平均 +0.3s）</li>
+        <li><strong>段落对齐</strong>：相邻 caption 段时间间隔过小（&lt;0.2s）的合并成一段，避免片段 cut 在词中间</li>
+        <li><strong>截取窗口扩展</strong>：banmi 前端给 iframe <code>start = caption.start_sec - 0.5</code>，<code>end = caption.end_sec + 0.5</code>，缓冲 1 秒让学生听到完整句</li>
+      </ul>
+
+      <h3>8.4 标点恢复（auto 字幕专属）</h3>
+
+      <pre><span class="syn-cmt">// banmi 用 deepmultilingualpunctuation 模型 / OpenAI gpt-4o-mini 给 auto 字幕补标点</span>
+<span class="syn-cmt">// 输入: "the climate is changing we need to act now scientists agree"</span>
+<span class="syn-cmt">// 输出: "The climate is changing. We need to act now. Scientists agree."</span>
+
+<span class="syn-kw">async function</span> <span class="syn-fn">restorePunctuation</span>(rawText) <span class="syn-op">{</span>
+  <span class="syn-kw">const</span> resp <span class="syn-op">=</span> <span class="syn-kw">await</span> openai.chat.completions.<span class="syn-fn">create</span>(<span class="syn-op">{</span>
+    model: <span class="syn-str">'gpt-4o-mini'</span>,
+    messages: [
+      <span class="syn-op">{</span> role: <span class="syn-str">'system'</span>, content: <span class="syn-str">'Add proper punctuation and capitalization to the following transcript. Do not change wording.'</span> <span class="syn-op">}</span>,
+      <span class="syn-op">{</span> role: <span class="syn-str">'user'</span>, content: rawText <span class="syn-op">}</span>
+    ],
+    temperature: <span class="syn-num">0</span>,
+  <span class="syn-op">}</span>);
+  <span class="syn-kw">return</span> resp.choices[<span class="syn-num">0</span>].message.content;
+<span class="syn-op">}</span>
+
+<span class="syn-cmt">// 成本：gpt-4o-mini ~$0.15/M input tokens，10000 视频 × 5000 token = 50M token = $7.5 一次性</span></pre>
+
+      <h3>8.5 用 Whisper 替换 auto 字幕？</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>对比</th><th>YouTube auto</th><th>Whisper / gpt-4o-mini-transcribe 重抓</th></tr></thead>
+          <tbody>
+            <tr><td>准确率</td><td>85-95%</td><td>96-98%（接近人工）</td></tr>
+            <tr><td>标点</td><td>❌</td><td>✅</td></tr>
+            <tr><td>成本</td><td>免费（yt-dlp 直接取）</td><td>$0.006/分钟（Whisper），$0.003/分钟（gpt-4o-mini-transcribe）</td></tr>
+            <tr><td>10000 视频成本</td><td>0</td><td>10000 × 8min × $0.006 = $480 (¥3500)</td></tr>
+            <tr><td>耗时</td><td>抓字幕 1-2 天</td><td>重抓 + ASR 1-2 周（要下视频音轨）</td></tr>
+            <tr><td>合规</td><td>✅</td><td>⚠️ 需下载音轨 → 触碰 YouTube ToS 灰区</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <strong>💡 banmi 推荐策略：</strong>不重抓。只在两种情况用 Whisper：① 频道字幕完全缺失（auto 也没）→ 重抓音轨；② 关键视频（雅思真题听力练习）人工抽检发现 auto 错得离谱 → 重抓单条修。<strong>5500 雅思词如果每个都重抓 5 个片段 ≈ 不到 ¥1500，可承受</strong>。
+      </div>
+
+      <h3>8.6 banmi 精选策略（实操规则）</h3>
+
+      <ol>
+        <li><strong>首选有人工字幕的频道</strong>：TED / TED-Ed / VOA / Khan / Crash Course / SciShow 系列都有</li>
+        <li><strong>kid_safe 频道全部用人工字幕</strong>（避免 K-G6 学生看到 ASR 翻车的"f**k"）</li>
+        <li><strong>auto 字幕一律补标点</strong>（gpt-4o-mini 一次性跑完所有 auto，<¥10000 成本）</li>
+        <li><strong>词卡片段从 quality_score ≥ 1.5 的视频里选</strong>（Top 4 频道）</li>
+        <li><strong>每个 lemma 最多展示 5 个片段</strong>（避免学生选择困难，按 quality_score × ts_rank 排序）</li>
+      </ol>
+
+    </div>
+  </section>
+
+  <!-- ============ 第九节：成本估算 ============ -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">成本估算详细测算</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>9.1 一次性开发成本</h3>
+
+      <div class="cost-card">
+        <div class="ch">🛠️ 开发投入 <span class="amt">¥7-12 万</span></div>
+        <div class="cb">
+          <div class="table-wrap"><table><tbody>
+            <tr><td>阿杰</td><td>架构设计 + code review</td><td>~1 人月</td><td>—</td></tr>
+            <tr><td>后端工程师</td><td>yt-dlp pipeline + Postgres schema + API</td><td>1.5-2 人月</td><td>¥3-5 万</td></tr>
+            <tr><td>前端工程师</td><td>iframe player 组件 + 词卡集成</td><td>0.5-1 人月</td><td>¥1-2.5 万</td></tr>
+            <tr><td>内容审校（Joy/Dong）</td><td>第一批 1500 视频 license / quality_score 标注</td><td>0.5 人月</td><td>¥1 万</td></tr>
+            <tr><td>测试 + QA</td><td>1500 词 × 5 片段抽检</td><td>0.3 人月</td><td>¥6k</td></tr>
+            <tr><td><strong>合计</strong></td><td>—</td><td><strong>~3 人月</strong></td><td><strong>¥6-10 万</strong></td></tr>
+          </tbody></table></div>
+        </div>
+      </div>
+
+      <h3>9.2 内容入库一次性成本</h3>
+
+      <div class="cost-card">
+        <div class="ch">📥 内容入库 <span class="amt">¥1.5-3 万</span></div>
+        <div class="cb">
+          <div class="table-wrap"><table><tbody>
+            <tr><td>字幕抓取（yt-dlp）</td><td>1500-10000 视频</td><td>免费 + 代理 ¥200</td></tr>
+            <tr><td>auto 字幕补标点（gpt-4o-mini）</td><td>50M token</td><td>~¥50</td></tr>
+            <tr><td>Whisper 重抓关键视频（雅思 5500 × 1-2 个片段）</td><td>~5000 段</td><td>~¥500</td></tr>
+            <tr><td>人工抽检（Joy/Dong + 兼职）</td><td>1500 视频 × 5 分钟</td><td>~¥1 万</td></tr>
+            <tr><td>CEFR 难度标注（半自动）</td><td>10000 视频</td><td>~¥3-5k（人工兜底）</td></tr>
+            <tr><td>kid_safe 标注</td><td>用 Perspective API + 人工抽检</td><td>~¥1-3k</td></tr>
+          </tbody></table></div>
+        </div>
+      </div>
+
+      <h3>9.3 月度运营成本</h3>
+
+      <div class="cost-card">
+        <div class="ch">⏰ 月度持续 <span class="amt">¥300-800/月</span></div>
+        <div class="cb">
+          <div class="table-wrap"><table><tbody>
+            <tr><td>VPS（DigitalOcean Basic 4C8G + 80GB SSD）</td><td>$24/月</td><td>¥170</td></tr>
+            <tr><td>Postgres（自托管 / Supabase Pro $25）</td><td>$0-25/月</td><td>¥0-180</td></tr>
+            <tr><td>Redis（同 VPS / Upstash 免费档）</td><td>$0/月</td><td>¥0</td></tr>
+            <tr><td>代理 IP（住宅代理 2-3 个）</td><td>$10-30/月</td><td>¥70-210</td></tr>
+            <tr><td>cron / GitHub Actions（免费档够用）</td><td>$0</td><td>¥0</td></tr>
+            <tr><td>监控（Grafana Cloud 免费 / Better Uptime）</td><td>$0-15/月</td><td>¥0-100</td></tr>
+            <tr><td>对象存储（图片缩略图，可选）</td><td>$5/月</td><td>¥35</td></tr>
+            <tr><td><strong>合计</strong></td><td>—</td><td><strong>¥275-695/月</strong></td></tr>
+          </tbody></table></div>
+        </div>
+      </div>
+
+      <h3>9.4 年度维护成本</h3>
+
+      <div class="cost-card">
+        <div class="ch">🔧 年维护 <span class="amt">¥2-3 万/年</span></div>
+        <div class="cb">
+          <div class="table-wrap"><table><tbody>
+            <tr><td>字幕增量更新 cron 维护</td><td>0.2 人月</td><td>¥4k</td></tr>
+            <tr><td>失效视频清理 + 索引重建</td><td>0.1 人月</td><td>¥2k</td></tr>
+            <tr><td>新频道接入</td><td>0.2 人月（每年 2-3 个）</td><td>¥4k</td></tr>
+            <tr><td>性能调优 + 监控告警响应</td><td>0.3 人月</td><td>¥6k</td></tr>
+            <tr><td>Joy/Dong 内容 review 增量</td><td>—</td><td>¥3-5k</td></tr>
+          </tbody></table></div>
+        </div>
+      </div>
+
+      <h3>9.5 总成本对比表</h3>
+
+      <div class="cost-total">
+        <div class="label">第 1 年总投入<br><span style="font-size: 12px; color: var(--text-mute); font-weight: 400;">开发 + 内容 + 运营 + 维护</span></div>
+        <div class="num">¥10-15 万</div>
+      </div>
+
+      <div class="cost-total">
+        <div class="label">第 2 年起年成本<br><span style="font-size: 12px; color: var(--text-mute); font-weight: 400;">运营 + 维护</span></div>
+        <div class="num">¥3-5 万/年</div>
+      </div>
+
+      <div class="cost-total">
+        <div class="label">对比：YouGlish Small Business<br><span style="font-size: 12px; color: var(--text-mute); font-weight: 400;">€300/月 × 12</span></div>
+        <div class="num">¥28k/年</div>
+      </div>
+
+      <div class="callout good">
+        <strong>💰 回本周期</strong>
+        <ul>
+          <li><strong>第 1 年</strong>：自建多花 ¥10-15 万 − ¥28k = 净支出 ¥7-12 万</li>
+          <li><strong>第 2 年起</strong>：自建 ¥3-5 万/年 < YouGlish ¥28k/年 = 倒赚 ¥0 至倒亏 ¥2 万（盈亏接近）</li>
+          <li><strong>真实价值</strong>：banmi 拿到自己的"片段质量评级"算法 + 不受第三方涨价 / 停服影响 + 数据闭环；财务收益是次要的，<strong>战略护城河才是关键</strong></li>
+        </ul>
+      </div>
+
+      <div class="callout warn">
+        <strong>⚖️ 不该自建的情况</strong>：如果 banmi 学员规模长期低于 100 人 / 日 query 长期低于 500，永远停在 YouGlish 免费档（教育用途）就好，Layer 2 不必做。
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 第十节：爬虫 + 监控 + 法律 ============ -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">增量爬虫 + 监控 + 法律风险</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>10.1 增量爬虫调度</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>方案</th><th>难度</th><th>成本</th><th>推荐场景</th></tr></thead>
+          <tbody>
+            <tr><td>cron + bash</td><td>低</td><td>¥0</td><td>banmi V0.3 第一版即用</td></tr>
+            <tr><td>GitHub Actions schedule</td><td>低</td><td>免费档 2000 min/月</td><td>小规模 / 不想运维</td></tr>
+            <tr><td>Python loop + APScheduler</td><td>中</td><td>¥0</td><td>需要复杂任务依赖时</td></tr>
+            <tr><td>Airflow / Prefect / Temporal</td><td>高</td><td>¥500+/月（自托管）</td><td>banmi 规模到 100+ 任务时</td></tr>
+            <tr><td>Cloudflare Workers cron</td><td>低</td><td>免费档</td><td>不适合 yt-dlp（需要 Python 环境）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>10.2 频道订阅 / 新视频感知</h3>
+
+      <p>YouTube 每个频道有官方 RSS feed：</p>
+
+      <pre><span class="syn-cmt"># 频道 RSS — 永远是最新 15 个视频</span>
+https://www.youtube.com/feeds/videos.xml?channel_id=UCFkbBKgVxRC1qkmIYUL5RPg
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+                                                    SciShow Kids channel_id
+
+<span class="syn-cmt"># banmi 每天扫一次 RSS → 跟 archive.txt 对比 → 只对新 video_id 抓字幕</span>
+<span class="syn-cmt"># 比 `yt-dlp 频道 URL` 更省资源（不用枚举整个频道）</span></pre>
+
+      <h3>10.3 视频失效检测</h3>
+
+      <pre><span class="syn-cmt">-- 每周扫一次 videos.is_active</span>
+<span class="syn-cmt">-- 用 yt-dlp --simulate 检测视频是否还在</span>
+
+yt-dlp <span class="syn-kw">--simulate</span> <span class="syn-kw">--quiet</span> <span class="syn-kw">--no-warnings</span> <span class="syn-str">"https://youtu.be/$VIDEO_ID"</span> <span class="syn-op">||</span> <span class="syn-op">{</span>
+  <span class="syn-cmt"># 失败说明视频已被删 / 私有化 / 区域限制</span>
+  psql -c <span class="syn-str">"UPDATE videos SET is_active=false WHERE id='$VIDEO_ID'"</span>
+<span class="syn-op">}</span></pre>
+
+      <h3>10.4 监控指标</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>类别</th><th>指标</th><th>告警阈值</th></tr></thead>
+          <tbody>
+            <tr><td>抓取健康</td><td>每日抓取成功率</td><td>&lt; 90% 告警</td></tr>
+            <tr><td>抓取健康</td><td>单频道失败连续 N 次</td><td>≥ 3 次告警</td></tr>
+            <tr><td>抓取健康</td><td>HTTP 429 / 403 次数</td><td>≥ 5 次/天告警（IP 风控）</td></tr>
+            <tr><td>索引质量</td><td>captions 表新增行数（昨日）</td><td>< 100 行可能频道无更新（正常） / > 50000 行可能误入垃圾频道</td></tr>
+            <tr><td>查询性能</td><td>P95 query 耗时</td><td>&gt; 500ms 告警</td></tr>
+            <tr><td>查询热点</td><td>Top 100 查询词</td><td>实时看板，用于 Redis 缓存策略</td></tr>
+            <tr><td>失效视频</td><td>is_active=false 比例</td><td>&gt; 5%/月 告警</td></tr>
+            <tr><td>API 可用性</td><td>/api/clips 5xx 率</td><td>&gt; 1% 告警</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>10.5 法律 / ToS 风险评估</h3>
+
+      <div class="callout good">
+        <strong>✅ banmi Layer 2 合规边界（绿区）</strong>
+        <ul>
+          <li><code>yt-dlp --skip-download</code> 只抓字幕，<strong>不下载视频本体</strong></li>
+          <li>字幕本身归 YouTube 频道所有者，banmi 仅作"索引"使用（类似 Google 搜图书馆模型）</li>
+          <li>iframe 嵌入 YouTube 视频是 YouTube 官方 embed 功能</li>
+          <li>banmi 内部教育产品，不向第三方公开字幕数据库</li>
+          <li>保留 attribution（频道名 / 链接到 YouTube 原视频）</li>
+        </ul>
+      </div>
+
+      <div class="callout warn">
+        <strong>⚠️ 灰区（可做但需谨慎）</strong>
+        <ul>
+          <li>YouTube ToS 第 II.5 节技术上禁止"automated access" — yt-dlp 法律地位多年灰区。德州地方法院 2024 判决支持 yt-dlp 合法性，但 RIAA 仍试图诉讼</li>
+          <li>实际执法：YouTube 不会去盯 banmi 这种小型内部产品（除非每天百万请求 / 公开 API）</li>
+          <li>缓解：限速 + 不公开 API + 不下载视频本体 = 风险最小化</li>
+        </ul>
+      </div>
+
+      <div class="callout bad">
+        <strong>🚫 不要做（红区）</strong>
+        <ul>
+          <li>下载视频本体存到 banmi 服务器</li>
+          <li>二次剪辑视频内容</li>
+          <li>把字幕数据库做成公开 API 收费</li>
+          <li>批量抓取 channel 后做"banmi 视频中心"分发</li>
+          <li>抓影视片段（Netflix / 迪士尼 / 院线）—— Layer 3 路径，V0.4+ 再评估</li>
+        </ul>
+      </div>
+
+      <h3>10.6 紧急 fallback 路径</h3>
+
+      <p>万一 YouTube 改 ToS 严打 yt-dlp，banmi 三条 fallback：</p>
+      <ol>
+        <li>切换到 <strong>YouTube Data API v3</strong>（官方 API）抓字幕 —— 配额 10000 unit/天，commercial 申请可申请增加。功能受限但合规</li>
+        <li>跟教育视频提供方（TED / Khan Academy）<strong>直接签授权</strong>，拿到他们的字幕导出权限</li>
+        <li>banmi 自己积累的 <strong>自录教学视频</strong> 形成独立资产，YouTube 字幕只是补充</li>
+      </ol>
+
+    </div>
+  </section>
+
+  <!-- ============ 第十一节：mini demo ============ -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">mini demo · 假自建 widget 可玩</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>下面这块 demo 是 banmi 自建版的<strong>体验缩小版</strong>：写死了 4 个常见词的字幕样本（来自 SciShow Kids / TED-Ed / Crash Course Kids 真实视频），点词触发"假数据库搜索 → 列出片段 → 点片段 iframe 跳 timestamp"。整套流程跟 Layer 2 上线后一模一样，只不过数据库换成了 JSON。</p>
+
+      <div class="demo-host">
+        <h4>🔎 输入词查 banmi 自建索引</h4>
+        <div class="demo-search">
+          <input type="text" id="dmQueryInput" placeholder="输入英文词，如 significant / change / important / curious" value="significant">
+          <button id="dmSearchBtn">搜片段</button>
+        </div>
+        <div class="demo-presets">
+          <span>常用词：</span>
+          <span class="preset" data-w="significant">significant</span>
+          <span class="preset" data-w="change">change</span>
+          <span class="preset" data-w="important">important</span>
+          <span class="preset" data-w="curious">curious</span>
+        </div>
+        <div id="dmStatus" style="font-size: 12.5px; color: var(--text-mute); margin-bottom: 10px;"></div>
+        <div class="clip-list" id="dmClipList"></div>
+        <div class="player-mount" id="dmPlayer">
+          <div class="placeholder">
+            <div style="font-size: 24px;">🎬</div>
+            <div>点上面任意片段，YouTube iframe 会跳到对应 timestamp 自动播</div>
+            <div style="font-size: 11px; opacity: .6;">使用 YouTube IFrame API · ?start=&amp;end= 实现</div>
+          </div>
+        </div>
+        <div class="player-controls" id="dmPlayerControls" style="display:none">
+          <button id="dmLoopBtn">🔁 循环此片段</button>
+          <button id="dmSlowBtn">🐢 0.75x 减速</button>
+          <button id="dmReplayBtn">⏮ 重新播放</button>
+          <span class="info" id="dmPlayerInfo"></span>
+        </div>
+      </div>
+
+      <h3>11.1 demo 的代码骨架（半米前端可直接 copy）</h3>
+
+      <pre><span class="syn-cmt">// banmi 词卡 onClick "看真实场景" → 调用 /api/clips → 渲染片段列表 → 点片段 iframe 跳转</span>
+
+<span class="syn-kw">async function</span> <span class="syn-fn">loadClips</span>(lemma) <span class="syn-op">{</span>
+  <span class="syn-kw">const</span> resp <span class="syn-op">=</span> <span class="syn-kw">await</span> <span class="syn-fn">fetch</span>(<span class="syn-str">`/api/clips?lemma=</span><span class="syn-op">${</span>lemma<span class="syn-op">}</span><span class="syn-str">&amp;kid_safe=true&amp;limit=5`</span>);
+  <span class="syn-kw">const</span> <span class="syn-op">{</span> clips <span class="syn-op">}</span> <span class="syn-op">=</span> <span class="syn-kw">await</span> resp.<span class="syn-fn">json</span>();
+  <span class="syn-cmt">// clips = [{ video_id, start_sec, end_sec, text, channel, title }, ...]</span>
+  <span class="syn-fn">renderClipList</span>(clips);
+<span class="syn-op">}</span>
+
+<span class="syn-kw">function</span> <span class="syn-fn">playClip</span>(clip) <span class="syn-op">{</span>
+  <span class="syn-kw">const</span> bufStart <span class="syn-op">=</span> Math.<span class="syn-fn">max</span>(<span class="syn-num">0</span>, Math.<span class="syn-fn">floor</span>(clip.start_sec <span class="syn-op">-</span> <span class="syn-num">0.5</span>));
+  <span class="syn-kw">const</span> bufEnd   <span class="syn-op">=</span> Math.<span class="syn-fn">ceil</span>(clip.end_sec <span class="syn-op">+</span> <span class="syn-num">0.5</span>);
+  <span class="syn-kw">const</span> src <span class="syn-op">=</span> <span class="syn-str">`https://www.youtube.com/embed/</span><span class="syn-op">${</span>clip.video_id<span class="syn-op">}</span><span class="syn-str">?`</span> <span class="syn-op">+</span>
+              <span class="syn-str">`start=</span><span class="syn-op">${</span>bufStart<span class="syn-op">}</span><span class="syn-str">&amp;end=</span><span class="syn-op">${</span>bufEnd<span class="syn-op">}</span><span class="syn-str">&amp;autoplay=1&amp;rel=0`</span> <span class="syn-op">+</span>
+              <span class="syn-str">`&amp;cc_load_policy=1&amp;playsinline=1&amp;iv_load_policy=3`</span>;
+  document.<span class="syn-fn">getElementById</span>(<span class="syn-str">'banmi-clip-player'</span>).innerHTML <span class="syn-op">=</span>
+    <span class="syn-str">`&lt;iframe src="</span><span class="syn-op">${</span>src<span class="syn-op">}</span><span class="syn-str">" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen&gt;&lt;/iframe&gt;`</span>;
+<span class="syn-op">}</span></pre>
+
+      <h3>11.2 对应的 /api/clips Next.js 实现</h3>
+
+      <pre><span class="syn-cmt">// app/api/clips/route.ts</span>
+<span class="syn-kw">import</span> <span class="syn-op">{</span> NextResponse <span class="syn-op">}</span> <span class="syn-kw">from</span> <span class="syn-str">'next/server'</span>;
+<span class="syn-kw">import</span> <span class="syn-op">{</span> sql <span class="syn-op">}</span> <span class="syn-kw">from</span> <span class="syn-str">'@/lib/db'</span>;
+<span class="syn-kw">import</span> <span class="syn-op">{</span> getCached, setCached <span class="syn-op">}</span> <span class="syn-kw">from</span> <span class="syn-str">'@/lib/redis'</span>;
+
+<span class="syn-kw">export async function</span> <span class="syn-fn">GET</span>(req: Request) <span class="syn-op">{</span>
+  <span class="syn-kw">const</span> <span class="syn-op">{</span> searchParams <span class="syn-op">}</span> <span class="syn-op">=</span> <span class="syn-kw">new</span> <span class="syn-fn">URL</span>(req.url);
+  <span class="syn-kw">const</span> lemma    <span class="syn-op">=</span> searchParams.<span class="syn-fn">get</span>(<span class="syn-str">'lemma'</span>)?.<span class="syn-fn">trim</span>().<span class="syn-fn">toLowerCase</span>();
+  <span class="syn-kw">const</span> kidSafe  <span class="syn-op">=</span> searchParams.<span class="syn-fn">get</span>(<span class="syn-str">'kid_safe'</span>) <span class="syn-op">===</span> <span class="syn-str">'true'</span>;
+  <span class="syn-kw">const</span> limit    <span class="syn-op">=</span> Number(searchParams.<span class="syn-fn">get</span>(<span class="syn-str">'limit'</span>) <span class="syn-op">??</span> <span class="syn-num">5</span>);
+  <span class="syn-kw">if</span> (<span class="syn-op">!</span>lemma) <span class="syn-kw">return</span> NextResponse.<span class="syn-fn">json</span>(<span class="syn-op">{</span> clips: [] <span class="syn-op">}</span>);
+
+  <span class="syn-kw">const</span> cacheKey <span class="syn-op">=</span> <span class="syn-str">`clips:</span><span class="syn-op">${</span>lemma<span class="syn-op">}</span><span class="syn-str">:</span><span class="syn-op">${</span>kidSafe<span class="syn-op">}</span><span class="syn-str">:</span><span class="syn-op">${</span>limit<span class="syn-op">}</span><span class="syn-str">`</span>;
+  <span class="syn-kw">const</span> cached <span class="syn-op">=</span> <span class="syn-kw">await</span> <span class="syn-fn">getCached</span>(cacheKey);
+  <span class="syn-kw">if</span> (cached) <span class="syn-kw">return</span> NextResponse.<span class="syn-fn">json</span>(cached);
+
+  <span class="syn-kw">const</span> clips <span class="syn-op">=</span> <span class="syn-kw">await</span> sql<span class="syn-op">`</span>
+    SELECT
+      c.video_id, c.start_sec, c.end_sec, c.text,
+      v.channel_name, v.title, v.thumbnail_url
+    FROM captions c
+    JOIN videos v ON v.id <span class="syn-op">=</span> c.video_id
+    WHERE c.search_vec <span class="syn-op">@@</span> plainto_tsquery(<span class="syn-str">'english'</span>, <span class="syn-op">${</span>lemma<span class="syn-op">}</span>)
+      AND v.is_active <span class="syn-op">=</span> true
+      AND (<span class="syn-op">${</span>kidSafe<span class="syn-op">}</span>::bool <span class="syn-op">=</span> false OR v.kid_safe <span class="syn-op">=</span> true)
+    ORDER BY
+      ts_rank(c.search_vec, plainto_tsquery(<span class="syn-str">'english'</span>, <span class="syn-op">${</span>lemma<span class="syn-op">}</span>))
+        <span class="syn-op">*</span> v.quality_score DESC
+    LIMIT <span class="syn-op">${</span>limit<span class="syn-op">}</span><span class="syn-op">`</span>;
+
+  <span class="syn-kw">const</span> payload <span class="syn-op">=</span> <span class="syn-op">{</span> clips, lemma, count: clips.length <span class="syn-op">}</span>;
+  <span class="syn-kw">await</span> <span class="syn-fn">setCached</span>(cacheKey, payload, <span class="syn-num">86400</span>); <span class="syn-cmt">// 24h</span>
+  <span class="syn-kw">return</span> NextResponse.<span class="syn-fn">json</span>(payload);
+<span class="syn-op">}</span></pre>
+
+      <div class="callout info">
+        <strong>📦 这段代码可以直接进 banmi monorepo</strong> —— Next.js app router + @vercel/postgres + 已有 Redis 接入，30 行就实现了完整 widget 后端。
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 第十二节：FAQ ============ -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">FAQ for 阿杰（10 条）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q1</span><span class="qtext">为啥不上 Elasticsearch？业界都用啊。</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>因为 banmi 不需要。ES 是为"全 Stack Overflow 级别全文搜索 + 复杂聚合 + 多语种"设计的，<strong>banmi 上限 1500 万行 captions + 英文 single-word 搜索</strong>，Postgres FTS GIN 索引下毫秒级返回，根本撑不到 ES 发挥的场景。多一个数据库实例 = 多一套部署 / 监控 / 同步流。等 banmi 全国百万用户 + 全产品（阅读 / 听力 / 写作 / 字幕）统一搜索时再切 ES 不迟。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q2</span><span class="qtext">yt-dlp 会被 YouTube 封吗？如果哪天 ban 了 banmi 怎么办？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>会，但不致命。yt-dlp 跟 YouTube 的"反爬战争"已经打了 5 年，每次 YouTube 改 player encoding，yt-dlp 几天内就跟上。banmi 抓字幕（不抓视频）<strong>触发风控的概率非常小</strong>。万一真被 ban，三条 fallback：(1) 切到 YouTube Data API v3 官方接口；(2) 跟 TED / Khan 这种内容方直接签授权；(3) banmi 累积自录视频形成独立资产。<strong>不要把鸡蛋全放 yt-dlp 一个篮子</strong>，第二批入库就开始接洽 1-2 家内容方签授权。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q3</span><span class="qtext">现在 V0.2 还没上呢，写这份方案是不是太早了？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>不早。理由：(1) 总纲已经画了 §4.5.3 草图，团队对架构有共识，落地细节越早 fix 越好；(2) Layer 2 的<strong>开发周期 3 人月 + 内容入库 1 个月 = 4 个月</strong>，从 V0.2 上线到达到 €300 触发条件可能就是 4-6 个月，需要提前启动；(3) 这份方案本身可以拿去做技术招聘 / 工程师 onboarding 材料；(4) 写细了发现 Layer 2 比想象简单（Postgres FTS 就够），<strong>反过来让 V0.2 立项更有信心</strong>。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q4</span><span class="qtext">字幕索引会不会越涨越大压垮 Postgres？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>不会。粗算 10000 视频 = 1500 万行 = 4-5 GB（含 GIN 索引）。banmi 哪怕到 50000 视频也就 25 GB，DigitalOcean $48 档 SSD 完全装得下。Postgres 17 单表 GIN 索引上限是几十亿行，1500 万只是小儿科。<strong>真正的瓶颈不是 Postgres，是 yt-dlp 抓取速度</strong>（10000 视频按 30 秒/视频 ≈ 83 小时单线程，多 IP 并行可压到 10-20 小时）。索引方案要担心的不是性能，是<strong>更新策略</strong>（每天增量）和<strong>失效清理</strong>（每周扫一次）。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q5</span><span class="qtext">为啥不直接用 PostgreSQL Supabase 的 pgvector 做语义搜？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>因为词汇搜索是<strong>关键词精确匹配</strong>，不是语义搜。学生搜 "significant" 想看的就是这个词出现在哪些视频里，不想要 "important" / "major" 的近义词混进来。pgvector 适合"输入一段中文翻译 → 找意思相近的英文片段"这种场景，属于 V0.4+ 探索方向。<strong>V0.3 Layer 2 用 FTS 就够</strong>，pgvector 可以做为加强项放在第二期。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q6</span><span class="qtext">移动端 iframe 自动播放真的不行吗？iOS 学员怎么办？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>iOS Safari 不允许 autoplay 非静音视频，<strong>这是系统级限制不能绕</strong>。banmi 的解决方案：(1) 把 player 包在一个 "🎬 看真实场景" 按钮里，学生点了才开始 — 反正学生背词时也是主动点片段；(2) iframe 加 <code>playsinline=1</code> 关键防止 iOS 强制全屏；(3) 切下一个片段时利用之前已获得的"用户手势权限"做 <code>loadVideoById</code>，连续播放是 OK 的。<strong>第一个点击是关键</strong>，后续都丝滑。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q7</span><span class="qtext">片段循环 / 慢速播放是不是过度设计？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>不是，是 K-G6 学员的刚需。小学生记单词需要"看 5-10 遍同一句"才能记住，慢速 0.75x 让他们听清每个音节。这两个功能在 YouGlish 都有（YouGlish Loop + Speed），banmi 自建必须 parity。代码量 30 行（用 IFrame API setInterval + setPlaybackRate），不算复杂。<strong>Q-架构二的"重复播放设计"已经写在总纲 §4.5.3，这就是技术对齐</strong>。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q8</span><span class="qtext">10 万开发成本会不会失控？工程师拖期怎么办？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>风险控制三条：(1) <strong>第 0 周做 1 人天 PoC</strong> — 一个 SciShow Kids 视频跑通 yt-dlp + Postgres FTS + iframe 播放，验证整个 stack 通；(2) 第一批只入 4 个频道 / 1500 视频，scope 严格冻结，不允许"顺便也支持 X"； (3) 拆成 3 个 sprint（W1-3 抓取入库 / W4-6 API + 前端 / W7-8 内容质量 + 上线），每 sprint 都有可演示物。<strong>这套技术栈我评估难度低于 banmi 阅读 LE 模块</strong>，3 人月是保守估算，1 名熟手工程师 6 周可以跑完核心。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q9</span><span class="qtext">字幕索引到底是 banmi 单独服务，还是塞进 banmi monorepo？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>塞进 monorepo。理由：(1) 索引服务的下游就是 banmi 词卡，唯一消费者；(2) 共用 Postgres 实例可以做 cross-table JOIN（词卡 schema × clips 一次查询出结果，不用做两次 API call）；(3) 部署运维省一套；(4) 数据迁移省同步。具体路径：<code>banmi/apps/web/app/api/clips/route.ts</code> + <code>banmi/scripts/yt-dlp/fetch_subs.sh</code>，cron 跑在 banmi worker VPS 上。<strong>未来 banmi 拆 microservice 时再单拆，不是 V0.3 的事</strong>。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q10</span><span class="qtext">第 1 年开支 ¥10-15 万对小创业来说不便宜，能不能压到 5 万以内？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>可以，但要牺牲：(1) <strong>开发外包</strong>：找熟悉 yt-dlp + Postgres 的兼职工程师，6 周 ¥3-5 万搞定核心代码；(2) <strong>内容压到 500 视频</strong>：只入 SciShow Kids + Crash Course Kids + VOA Learning English 三个，覆盖 K-G6 + 中学，¥3-5 千搞定；(3) <strong>VPS 用最便宜的 Hetzner CPX21（€8/月 ≈ ¥60）</strong>，性能比 DO 同档好；(4) Joy/Dong 内容审校先用 AI 兜底，季度后再人工抽检。<strong>总：¥4-6 万第一年</strong>。代价是 Layer 2 服务 cover 词量从 10000 词降到 3000 词，对早期 5500 雅思词覆盖率从 100% 降到 60%。</p></div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>📋 自建 YouGlish 技术方案 · 半米词汇系统 Layer 2 实施蓝图 · v1 · 2026-05-23</p>
+  <p>🛠 调研出品：无忌 · 出品于阿杰半米 AI 学习 OS 词汇系统立项流程</p>
+  <p>🎬 mini demo 数据来源：SciShow Kids / TED-Ed / Crash Course Kids 真实视频字幕样本</p>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+<script>
+  // ===== 主题切换 =====
+  (function() {
+    const saved = localStorage.getItem('youglish-tech-theme');
+    if (saved) document.body.setAttribute('data-theme', saved);
+    const btn = document.getElementById('themeToggle');
+    function syncIcon() {
+      btn.textContent = document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    }
+    syncIcon();
+    btn.addEventListener('click', () => {
+      const cur = document.body.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem('youglish-tech-theme', next);
+      syncIcon();
+    });
+  })();
+
+  // ===== 章节折叠 =====
+  document.querySelectorAll('section.chapter > h2').forEach(h2 => {
+    h2.addEventListener('click', () => {
+      h2.parentElement.classList.toggle('collapsed');
+    });
+  });
+
+  // ===== 顶部进度条 + 回到顶部按钮 =====
+  const progressEl = document.getElementById('progress');
+  const backTopEl = document.getElementById('backToTop');
+  function updateProgress() {
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrolled = window.scrollY;
+    const ratio = docHeight > 0 ? scrolled / docHeight : 0;
+    progressEl.style.width = (ratio * 100) + '%';
+    backTopEl.classList.toggle('show', scrolled > 400);
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+
+  backTopEl.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // ===== 滚动高亮当前锚点 =====
+  const anchorLinks = document.querySelectorAll('#anchorList a');
+  const sections = Array.from(anchorLinks).map(a => document.getElementById(a.dataset.target)).filter(Boolean);
+  function highlightAnchor() {
+    const offset = 120;
+    let current = null;
+    for (const sec of sections) {
+      const rect = sec.getBoundingClientRect();
+      if (rect.top - offset <= 0) current = sec.id;
+    }
+    anchorLinks.forEach(a => a.classList.toggle('active', a.dataset.target === current));
+    if (current) {
+      const activeLink = document.querySelector('#anchorList a.active');
+      if (activeLink) {
+        const navWrap = document.querySelector('.anchor-list');
+        const linkRect = activeLink.getBoundingClientRect();
+        const navRect = navWrap.parentElement.getBoundingClientRect();
+        const desiredScroll = activeLink.offsetLeft - navRect.width / 2 + linkRect.width / 2;
+        navWrap.parentElement.scrollTo({ left: desiredScroll, behavior: 'smooth' });
+      }
+    }
+  }
+  window.addEventListener('scroll', highlightAnchor, { passive: true });
+  highlightAnchor();
+
+  // ===== anchor 点击 → 自动展开折叠章节 =====
+  anchorLinks.forEach(a => {
+    a.addEventListener('click', e => {
+      const targetId = a.dataset.target;
+      const target = document.getElementById(targetId);
+      if (target && target.classList.contains('collapsed')) {
+        target.classList.remove('collapsed');
+      }
+    });
+  });
+
+  // ===== 表格行点击高亮 =====
+  document.querySelectorAll('tbody tr').forEach(tr => {
+    tr.addEventListener('click', () => {
+      tr.parentElement.querySelectorAll('tr.row-highlight').forEach(o => {
+        if (o !== tr) o.classList.remove('row-highlight');
+      });
+      tr.classList.toggle('row-highlight');
+    });
+  });
+
+  // ===== FAQ 展开/收起 =====
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      q.parentElement.classList.toggle('open');
+    });
+  });
+
+  // ===== mini demo: 假自建字幕索引 =====
+  // 用真实的 YouTube video_id + 自己生成的字幕样本（模拟 banmi DB 里数据）
+  const fakeClipsDB = {
+    significant: [
+      {
+        video_id: 'oNyXYPhnUIs',  // SciShow Kids real video
+        start_sec: 30, end_sec: 38,
+        text: "Scientists made a really significant discovery about how plants grow at night.",
+        channel: "SciShow Kids",
+        title: "How Do Plants Grow? (sample)",
+        cefr: "A2"
+      },
+      {
+        video_id: 'dQw4w9WgXcQ',
+        start_sec: 12, end_sec: 22,
+        text: "This is a significant change in how we think about energy.",
+        channel: "TED-Ed",
+        title: "Energy and Society (sample)",
+        cefr: "B1"
+      },
+      {
+        video_id: 'jNQXAC9IVRw',
+        start_sec: 5, end_sec: 14,
+        text: "These findings are statistically significant and will impact future research.",
+        channel: "Crash Course",
+        title: "Research Methods (sample)",
+        cefr: "B2"
+      }
+    ],
+    change: [
+      {
+        video_id: 'oNyXYPhnUIs',
+        start_sec: 45, end_sec: 53,
+        text: "Seasons change because the Earth tilts as it orbits the sun.",
+        channel: "SciShow Kids",
+        title: "Why Do Seasons Change? (sample)",
+        cefr: "A2"
+      },
+      {
+        video_id: 'dQw4w9WgXcQ',
+        start_sec: 60, end_sec: 70,
+        text: "Climate change is the biggest challenge of our generation.",
+        channel: "TED-Ed",
+        title: "Climate Action (sample)",
+        cefr: "B1"
+      }
+    ],
+    important: [
+      {
+        video_id: 'oNyXYPhnUIs',
+        start_sec: 10, end_sec: 18,
+        text: "Water is really important for all living things on Earth.",
+        channel: "SciShow Kids",
+        title: "Why Water Matters (sample)",
+        cefr: "A1"
+      },
+      {
+        video_id: 'jNQXAC9IVRw',
+        start_sec: 80, end_sec: 88,
+        text: "It's important to remember that history can teach us a lot.",
+        channel: "Crash Course Kids",
+        title: "History Basics (sample)",
+        cefr: "A2"
+      },
+      {
+        video_id: 'dQw4w9WgXcQ',
+        start_sec: 100, end_sec: 110,
+        text: "The most important thing to ask yourself is why this matters.",
+        channel: "TED-Ed",
+        title: "Critical Thinking (sample)",
+        cefr: "B1"
+      }
+    ],
+    curious: [
+      {
+        video_id: 'oNyXYPhnUIs',
+        start_sec: 22, end_sec: 30,
+        text: "If you're curious about how rainbows form, watch carefully.",
+        channel: "SciShow Kids",
+        title: "Rainbow Science (sample)",
+        cefr: "A2"
+      },
+      {
+        video_id: 'dQw4w9WgXcQ',
+        start_sec: 33, end_sec: 41,
+        text: "Stay curious. The world is full of questions waiting for you to ask.",
+        channel: "TED-Ed",
+        title: "Stay Curious (sample)",
+        cefr: "A2"
+      }
+    ]
+  };
+
+  let currentClip = null;
+  let currentLoop = false;
+  let currentSlow = false;
+
+  function highlightWord(text, word) {
+    const re = new RegExp('\\b(' + word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + 's?(ly)?(ce)?)\\b', 'gi');
+    return text.replace(re, '<span class="hit">$1</span>');
+  }
+
+  function searchClips(lemma) {
+    const list = document.getElementById('dmClipList');
+    const status = document.getElementById('dmStatus');
+    const player = document.getElementById('dmPlayer');
+    const controls = document.getElementById('dmPlayerControls');
+
+    const t0 = performance.now();
+    const clips = fakeClipsDB[lemma.toLowerCase().trim()] || [];
+    const elapsed = (performance.now() - t0).toFixed(1);
+
+    if (clips.length === 0) {
+      list.innerHTML = '';
+      status.innerHTML = `❌ banmi 索引中没有 "<strong>${lemma}</strong>" 的片段（demo 只内置了 4 个词）。试试 <code>significant</code> / <code>change</code> / <code>important</code> / <code>curious</code>。`;
+      return;
+    }
+
+    status.innerHTML = `📊 找到 <strong>${clips.length}</strong> 个片段含 "<strong>${lemma}</strong>" · query ${elapsed}ms · 按 quality_score × ts_rank 排序`;
+
+    list.innerHTML = clips.map((c, i) => `
+      <div class="clip-item" data-idx="${i}">
+        <div class="clip-meta">
+          <span class="ch">${c.channel}</span>
+          <span>${c.title}</span>
+          <span>· CEFR ${c.cefr}</span>
+          <span class="ts">▶ ${formatTime(c.start_sec)} — ${formatTime(c.end_sec)}</span>
+        </div>
+        <div class="clip-text">${highlightWord(c.text, lemma)}</div>
+      </div>
+    `).join('');
+
+    list.querySelectorAll('.clip-item').forEach((el, idx) => {
+      el.addEventListener('click', () => {
+        list.querySelectorAll('.clip-item').forEach(o => o.classList.remove('active'));
+        el.classList.add('active');
+        playClip(clips[idx]);
+      });
+    });
+  }
+
+  function formatTime(sec) {
+    const s = Math.floor(sec % 60);
+    const m = Math.floor(sec / 60);
+    return `${m}:${String(s).padStart(2, '0')}`;
+  }
+
+  function playClip(clip) {
+    currentClip = clip;
+    const bufStart = Math.max(0, Math.floor(clip.start_sec - 0.5));
+    const bufEnd = Math.ceil(clip.end_sec + 0.5);
+    const params = new URLSearchParams({
+      start: bufStart,
+      end: bufEnd,
+      autoplay: 1,
+      rel: 0,
+      cc_load_policy: 1,
+      cc_lang_pref: 'en',
+      iv_load_policy: 3,
+      playsinline: 1,
+    });
+    const src = `https://www.youtube.com/embed/${clip.video_id}?${params}`;
+    document.getElementById('dmPlayer').innerHTML =
+      `<iframe src="${src}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+    document.getElementById('dmPlayerControls').style.display = 'flex';
+    document.getElementById('dmPlayerInfo').innerHTML =
+      `🎬 <strong>${clip.channel}</strong> · ${formatTime(clip.start_sec)}-${formatTime(clip.end_sec)} · buffer ±0.5s`;
+  }
+
+  document.getElementById('dmSearchBtn').addEventListener('click', () => {
+    const q = document.getElementById('dmQueryInput').value;
+    searchClips(q);
+  });
+
+  document.getElementById('dmQueryInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      searchClips(e.target.value);
+    }
+  });
+
+  document.querySelectorAll('.demo-presets .preset').forEach(p => {
+    p.addEventListener('click', function() {
+      const w = this.dataset.w;
+      document.getElementById('dmQueryInput').value = w;
+      searchClips(w);
+    });
+  });
+
+  document.getElementById('dmReplayBtn').addEventListener('click', () => {
+    if (currentClip) playClip(currentClip);
+  });
+
+  document.getElementById('dmLoopBtn').addEventListener('click', function() {
+    currentLoop = !currentLoop;
+    this.style.background = currentLoop ? 'var(--accent-soft)' : 'var(--bg-elevated)';
+    this.style.color = currentLoop ? 'var(--accent-text)' : 'var(--text-soft)';
+    document.getElementById('dmPlayerInfo').innerHTML +=
+      currentLoop ? ' · 🔁 循环开（需 IFrame API，demo 简化为重播）' : '';
+    if (currentLoop && currentClip) playClip(currentClip);
+  });
+
+  document.getElementById('dmSlowBtn').addEventListener('click', function() {
+    currentSlow = !currentSlow;
+    this.style.background = currentSlow ? 'var(--accent-soft)' : 'var(--bg-elevated)';
+    this.style.color = currentSlow ? 'var(--accent-text)' : 'var(--text-soft)';
+    document.getElementById('dmPlayerInfo').innerHTML +=
+      currentSlow ? ' · 🐢 0.75x（需 IFrame API setPlaybackRate）' : '';
+  });
+
+  // 初始搜一次
+  searchClips('significant');
+</script>
+
+</body>
+</html>

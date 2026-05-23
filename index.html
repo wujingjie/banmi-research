@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>半米 · 研究导航</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1a23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --accent-text: #1d4ed8;
+    --banmi: #fb6ec;
+    --banmi-cream: #fbf6ec;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 16px;
+    --radius-lg: 20px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1a1e2a;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #bbbcc9;
+    --text-mute: #8a92a5;
+    --border: #2a2f3a;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a55;
+    --accent-text: #93c5fd;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4), 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+  .container { max-width: 760px; margin: 0 auto; padding: 32px 20px 80px; }
+  header {
+    text-align: center;
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .logo-mark {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 18px;
+  }
+  .logo-text { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+  .subtitle { color: var(--text-mute); font-size: 15px; }
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+    z-index: 100;
+    transition: all 0.2s;
+  }
+  .theme-toggle:hover { transform: scale(1.05); }
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 28px 0 14px;
+    padding-left: 4px;
+  }
+  .section-title:first-of-type { margin-top: 0; }
+  .card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent);
+  }
+  .card:hover::before { opacity: 1; }
+  .card:active { transform: translateY(0); }
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+  .card-icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+  .card-title-row { flex: 1; min-width: 0; }
+  .card-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+  .card-meta {
+    font-size: 12px;
+    color: var(--text-mute);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--bg-soft);
+    color: var(--text-soft);
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .tag.done { background: #10b98122; color: #059669; }
+  [data-theme="dark"] .tag.done { background: #10b98133; color: #34d399; }
+  .tag.research { background: #6366f122; color: #4f46e5; }
+  [data-theme="dark"] .tag.research { background: #6366f133; color: #a5b4fc; }
+  .tag.tool { background: #f59e0b22; color: #b45309; }
+  [data-theme="dark"] .tag.tool { background: #f59e0b33; color: #fbbf24; }
+  .card-desc {
+    font-size: 14px;
+    color: var(--text-soft);
+    line-height: 1.55;
+    margin-top: 6px;
+    padding-left: 58px;
+  }
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    padding-left: 58px;
+    font-size: 12px;
+    color: var(--text-mute);
+  }
+  .card-arrow {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 13px;
+  }
+  footer {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: var(--text-mute);
+    font-size: 12px;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 20px 0 28px;
+  }
+  .stat {
+    text-align: center;
+    padding: 14px 8px;
+    background: var(--bg-soft);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .stat-num {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.2;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-mute);
+    margin-top: 4px;
+  }
+  @media (max-width: 480px) {
+    .container { padding: 20px 14px 60px; }
+    h1 { font-size: 24px; }
+    .card { padding: 16px 18px; }
+    .card-desc, .card-footer { padding-left: 0; margin-top: 10px; }
+    .card-header { gap: 12px; }
+    .card-icon { width: 38px; height: 38px; font-size: 18px; }
+    .card-title { font-size: 16px; }
+    .stat-num { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="切换主题">🌓</button>
+<div class="container">
+  <header>
+    <div class="logo">
+      <div class="logo-mark">半</div>
+      <div class="logo-text">半米 · 研究中心</div>
+    </div>
+    <h1>研究导航</h1>
+    <p class="subtitle">阿杰 + 无忌的研究归档总入口</p>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="count-total">3</div><div class="stat-label">报告总数</div></div>
+    <div class="stat"><div class="stat-num" id="count-recent">3</div><div class="stat-label">本周新增</div></div>
+    <div class="stat"><div class="stat-num">2026</div><div class="stat-label">年份</div></div>
+  </div>
+
+  <div class="section-title">📅 2026-05-23 · 半米词汇 / 模考系统</div>
+
+  <a class="card" href="./vocab-research.html" target="_blank" rel="noopener">
+    <div class="card-header">
+      <div class="card-icon">📘</div>
+      <div class="card-title-row">
+        <div class="card-title">词汇软件对标研究</div>
+        <div class="card-meta">
+          <span class="tag research">市场调研</span>
+          <span class="tag done">已完成</span>
+          <span>· 11 章节 · 137 KB</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-desc">市面词汇软件全景（多邻国 / Anki / 不背 / 墨墨 / Quizlet 等）+ 半米词汇打法建议 · 三层视频词典 mini-demo · 用户最爱功能拆解</div>
+    <div class="card-footer">
+      <span>来源：自定研究</span>
+      <span class="card-arrow">打开 →</span>
+    </div>
+  </a>
+
+  <a class="card" href="./exam-research.html" target="_blank" rel="noopener">
+    <div class="card-header">
+      <div class="card-icon">📕</div>
+      <div class="card-title-row">
+        <div class="card-title">模考软件对标研究</div>
+        <div class="card-meta">
+          <span class="tag research">市场调研</span>
+          <span class="tag tool">立项参考</span>
+          <span class="tag done">已完成</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-desc">托福 / 雅思模考系统对标 checklist · 自建 vs 二开 vs 逆向决策树 · 评分系统拆解 · 内部学员版定位（不是 toC 产品）</div>
+    <div class="card-footer">
+      <span>来源：自定研究</span>
+      <span class="card-arrow">打开 →</span>
+    </div>
+  </a>
+
+  <a class="card" href="./youglish-tech.html" target="_blank" rel="noopener">
+    <div class="card-header">
+      <div class="card-icon">📗</div>
+      <div class="card-title-row">
+        <div class="card-title">自建 YouGlish 技术方案</div>
+        <div class="card-meta">
+          <span class="tag tool">技术方案</span>
+          <span class="tag done">已完成</span>
+          <span>· 12 章节 · 130 KB</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-desc">yt-dlp 拉字幕 → 索引 → 前端 iframe 跳 timestamp · Postgres / Meilisearch / Algolia 索引选型 · Next.js API route 完整代码 · 可玩 mini demo</div>
+    <div class="card-footer">
+      <span>来源：自定研究</span>
+      <span class="card-arrow">打开 →</span>
+    </div>
+  </a>
+
+  <footer>
+    最后更新：2026-05-24<br>
+    导航源文件由无忌维护 · 新研究上线后会自动加到这个页面<br>
+    <span style="opacity: 0.6;">阿杰把这条链接收藏到 Safari，以后就是研究入口</span>
+  </footer>
+</div>
+
+<script>
+  const KEY = 'banmi-research-theme';
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem(KEY, t); } catch(e){}
+  }
+  function toggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme') || 'light';
+    applyTheme(cur === 'dark' ? 'light' : 'dark');
+  }
+  try {
+    const saved = localStorage.getItem(KEY);
+    if (saved) applyTheme(saved);
+    else if (window.matchMedia('(prefers-color-scheme: dark)').matches) applyTheme('dark');
+  } catch(e){}
+</script>
+</body>
+</html>

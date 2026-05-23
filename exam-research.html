@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>托福/雅思/SAT 模考软件对标研究 · 2026-05-23</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1d23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --border-strong: #cdd2da;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --accent-text: #1d4ed8;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #6d28d9;
+    --info-soft: #ede9fe;
+    --code-bg: #f1f3f7;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1c2030;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #b6bcc9;
+    --text-mute: #8a92a3;
+    --border: #2a2f3d;
+    --border-strong: #3a4154;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a55;
+    --accent-text: #93c5fd;
+    --good: #4ade80;
+    --good-soft: #14532d55;
+    --warn: #fbbf24;
+    --warn-soft: #78350f55;
+    --bad: #f87171;
+    --bad-soft: #7f1d1d55;
+    --info: #c4b5fd;
+    --info-soft: #4c1d9555;
+    --code-bg: #0a0d14;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  /* 顶部进度条 */
+  #progress {
+    position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--info));
+    z-index: 1000; transition: width .1s linear;
+  }
+  /* 顶部导航 */
+  header.topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner {
+    max-width: 980px; margin: 0 auto;
+    padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+  }
+  .brand {
+    font-weight: 700; font-size: 15px; letter-spacing: .2px;
+    color: var(--text); white-space: nowrap;
+  }
+  .brand .tag {
+    margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute);
+    padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px;
+  }
+  .topbar-spacer { flex: 1; }
+  .icon-btn {
+    width: 44px; height: 44px; border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border); background: var(--bg-elevated);
+    color: var(--text); cursor: pointer; font-size: 18px;
+    transition: transform .15s, background-color .15s;
+  }
+  .icon-btn:active { transform: scale(.94); }
+  /* 锚点 nav */
+  nav.anchor-nav {
+    overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    scrollbar-width: none;
+  }
+  nav.anchor-nav::-webkit-scrollbar { display: none; }
+  .anchor-list {
+    display: flex; gap: 4px; padding: 8px 16px;
+    max-width: 980px; margin: 0 auto;
+    white-space: nowrap;
+  }
+  .anchor-list a {
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 13px; line-height: 1.3;
+    color: var(--text-soft);
+    text-decoration: none;
+    border: 1px solid transparent;
+    background: var(--bg-soft);
+    transition: all .15s;
+  }
+  .anchor-list a:hover { color: var(--accent-text); }
+  .anchor-list a.active {
+    color: var(--accent-text);
+    background: var(--accent-soft);
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+    font-weight: 600;
+  }
+  main {
+    max-width: 980px; margin: 0 auto; padding: 16px;
+  }
+  /* hero */
+  .hero {
+    padding: 28px 4px 12px;
+  }
+  .hero h1 {
+    font-size: 28px; line-height: 1.25; margin: 0 0 12px;
+    letter-spacing: -.5px;
+    background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-meta {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    font-size: 13px; color: var(--text-mute);
+  }
+  .hero-meta span {
+    background: var(--bg-soft); padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+  .hero-deck {
+    margin-top: 16px; padding: 14px 16px;
+    border-left: 4px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 15px;
+  }
+  /* 章节 */
+  section.chapter {
+    margin: 24px 0;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  section.chapter > h2 {
+    font-size: 20px; margin: 0;
+    padding: 16px 20px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+    background: var(--bg-elevated);
+    transition: background-color .15s;
+    min-height: 56px;
+  }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 30px; height: 30px; padding: 0 8px;
+    border-radius: 8px; background: var(--accent-soft); color: var(--accent-text);
+    font-size: 14px; font-weight: 700;
+  }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret {
+    transition: transform .25s; color: var(--text-mute); font-size: 14px;
+  }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body {
+    padding: 18px 20px 22px;
+    max-height: 100000px;
+    overflow: hidden;
+    transition: max-height .35s ease, padding .25s;
+  }
+  section.chapter.collapsed .chapter-body {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  h3 {
+    font-size: 17px; margin: 22px 0 10px;
+    color: var(--text);
+    padding-left: 10px;
+    border-left: 3px solid var(--accent);
+  }
+  h4 {
+    font-size: 15px; margin: 16px 0 8px;
+    color: var(--text-soft);
+  }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  /* callout */
+  .callout {
+    margin: 14px 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border-left: 4px solid;
+    font-size: 14.5px;
+    line-height: 1.65;
+  }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout .ico { margin-right: 6px; }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  /* 表格 */
+  .table-wrap {
+    margin: 14px 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-elevated);
+  }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 14px;
+    min-width: 520px;
+  }
+  thead th {
+    position: sticky; top: 0;
+    background: var(--bg-soft);
+    color: var(--text);
+    text-align: left;
+    font-weight: 600;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-strong);
+    white-space: nowrap;
+    z-index: 1;
+  }
+  tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-soft);
+    vertical-align: top;
+  }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td {
+    background: var(--accent-soft) !important;
+    color: var(--text);
+  }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--text-mute); }
+  td.check.p { color: var(--warn); }
+  /* 产品卡 */
+  .product-card {
+    margin: 16px 0;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--bg-elevated);
+  }
+  .product-head {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, var(--accent-soft), transparent);
+    border-bottom: 1px solid var(--border);
+  }
+  .product-rank {
+    flex: 0 0 auto;
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    background: var(--bg-elevated);
+    font-weight: 700; font-size: 20px;
+    color: var(--accent-text);
+    border: 1px solid var(--border);
+  }
+  .product-head h3 {
+    margin: 0; padding: 0; border: none;
+    font-size: 17px; line-height: 1.35;
+  }
+  .product-head .subtitle {
+    font-size: 13px; color: var(--text-mute); margin-top: 2px;
+  }
+  .product-tags {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+  }
+  .product-tags .chip {
+    font-size: 11.5px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--bg-soft);
+    color: var(--text-soft);
+    border: 1px solid var(--border);
+  }
+  .product-body { padding: 14px 16px; }
+  .product-section { margin: 10px 0; }
+  .product-section h4 {
+    font-size: 13px;
+    color: var(--text-mute);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin: 12px 0 6px;
+  }
+  .review-quote {
+    margin: 8px 0;
+    padding: 10px 14px;
+    border-left: 3px solid var(--info);
+    background: var(--info-soft);
+    border-radius: 6px;
+    font-size: 13.5px;
+    color: var(--text-soft);
+    font-style: italic;
+  }
+  .review-quote::before { content: "“"; color: var(--info); margin-right: 4px; font-weight: 700; font-size: 18px; vertical-align: -2px; }
+  .review-quote .src { display: block; margin-top: 4px; font-style: normal; font-size: 11.5px; color: var(--text-mute); }
+  /* mockup 卡片 */
+  .mockup-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin: 14px 0;
+  }
+  @media (min-width: 640px) {
+    .mockup-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .mockup {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--bg-elevated);
+  }
+  .mockup-frame {
+    padding: 16px;
+    background: linear-gradient(180deg, var(--bg-soft), var(--bg-elevated));
+    border-bottom: 1px solid var(--border);
+    min-height: 130px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .mockup-bar {
+    height: 8px; border-radius: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--info));
+    width: 60%;
+  }
+  .mockup-line {
+    height: 6px; border-radius: 3px;
+    background: var(--border-strong);
+  }
+  .mockup-line.short { width: 40%; }
+  .mockup-line.med { width: 70%; }
+  .mockup-line.long { width: 90%; }
+  .mockup-emoji {
+    font-size: 32px;
+    margin: 4px 0;
+  }
+  .mockup-btn {
+    align-self: flex-start;
+    padding: 5px 12px;
+    border-radius: 6px;
+    background: var(--accent);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .mockup-body { padding: 12px 14px; }
+  .mockup-body h4 {
+    margin: 0 0 6px; font-size: 14px; color: var(--text);
+  }
+  .mockup-body p {
+    margin: 0; font-size: 13px; line-height: 1.55; color: var(--text-soft);
+  }
+  /* 路线图 timeline */
+  .roadmap {
+    margin: 16px 0;
+    padding: 16px;
+    background: var(--bg-soft);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+  }
+  .roadmap-row {
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    gap: 10px;
+    align-items: center;
+    margin: 10px 0;
+  }
+  .roadmap-week {
+    font-weight: 700; font-size: 12px;
+    color: var(--accent-text);
+    text-align: right;
+    padding-right: 6px;
+  }
+  .roadmap-bar {
+    height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(90deg, var(--accent), var(--info));
+    color: white;
+    display: flex; align-items: center;
+    padding: 0 10px;
+    font-size: 12.5px;
+    font-weight: 500;
+    box-shadow: var(--shadow);
+  }
+  .roadmap-bar.v1 { background: linear-gradient(90deg, #16a34a, #65a30d); }
+  .roadmap-bar.v2 { background: linear-gradient(90deg, #2563eb, #6d28d9); }
+  .roadmap-bar.v3 { background: linear-gradient(90deg, #db2777, #ea580c); }
+  .roadmap-legend {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin: 12px 0 0;
+    font-size: 12.5px;
+  }
+  .roadmap-legend .item { display: flex; align-items: center; gap: 5px; }
+  .roadmap-legend .dot { width: 10px; height: 10px; border-radius: 3px; }
+  .roadmap-legend .dot.v1 { background: #16a34a; }
+  .roadmap-legend .dot.v2 { background: #2563eb; }
+  .roadmap-legend .dot.v3 { background: #db2777; }
+  /* FAQ */
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin: 10px 0;
+    overflow: hidden;
+    background: var(--bg-elevated);
+  }
+  .faq-q {
+    padding: 14px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; gap: 10px;
+    align-items: flex-start;
+    user-select: none;
+    min-height: 50px;
+  }
+  .faq-q .qmark {
+    color: var(--accent-text); font-weight: 700; font-size: 16px;
+    flex: 0 0 auto;
+  }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a {
+    padding: 0 16px;
+    max-height: 0;
+    overflow: hidden;
+    color: var(--text-soft);
+    font-size: 14.5px;
+    line-height: 1.65;
+    transition: max-height .3s, padding .25s;
+  }
+  .faq-item.open .faq-a {
+    max-height: 1000px;
+    padding: 0 16px 14px 16px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+  /* 回到顶部 */
+  .back-to-top {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    display: none;
+    align-items: center; justify-content: center;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    z-index: 40;
+    border: none;
+  }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  /* footer */
+  footer {
+    text-align: center; padding: 24px 16px;
+    color: var(--text-mute); font-size: 13px;
+    border-top: 1px solid var(--border);
+    margin-top: 32px;
+  }
+  /* code */
+  code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+    font-size: 13px;
+    color: var(--text);
+  }
+  hr.soft {
+    border: none; height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+  blockquote {
+    margin: 12px 0;
+    padding: 10px 16px;
+    border-left: 4px solid var(--text-mute);
+    background: var(--bg-soft);
+    border-radius: 6px;
+    color: var(--text-soft);
+    font-size: 14.5px;
+  }
+  blockquote p:first-child { margin-top: 0; }
+  blockquote p:last-child { margin-bottom: 0; }
+  /* 矩阵表特殊：所有列宽收紧 */
+  .matrix-table { min-width: 1100px; font-size: 12.5px; }
+  .matrix-table th, .matrix-table td { padding: 6px 8px; }
+  .matrix-table tbody td:first-child { font-weight: 600; color: var(--text); white-space: nowrap; }
+  /* 移动端 hero 缩小 */
+  @media (max-width: 480px) {
+    .hero { padding: 18px 4px 8px; }
+    .hero h1 { font-size: 22px; }
+    section.chapter > h2 { font-size: 17px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  /* 打印 */
+  @media print {
+    header.topbar, #progress, .back-to-top, nav.anchor-nav { display: none !important; }
+    section.chapter.collapsed .chapter-body { max-height: none !important; padding: 18px 20px 22px !important; }
+    section.chapter.collapsed > h2 .caret { display: none; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">模考软件对标研究 <span class="tag">v1 · 无忌</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+  <nav class="anchor-nav">
+    <div class="anchor-list" id="anchorList">
+      <a href="#ch1" data-target="ch1">一、市场总览</a>
+      <a href="#ch2" data-target="ch2">二、横向对比</a>
+      <a href="#ch3" data-target="ch3">三、详评头部</a>
+      <a href="#ch4" data-target="ch4">四、对标 checklist</a>
+      <a href="#ch5" data-target="ch5">五、立项建议</a>
+      <a href="#ch6" data-target="ch6">六、扩展信息</a>
+      <a href="#ch7" data-target="ch7">七、一句话结论</a>
+      <a href="#ch8" data-target="ch8">八、内部版 reframe</a>
+      <a href="#ch9" data-target="ch9">九、Mockup</a>
+      <a href="#ch10" data-target="ch10">十、路线图</a>
+      <a href="#ch11" data-target="ch11">十一、FAQ</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <div class="hero">
+    <h1>托福 / 雅思 / SAT 模考软件对标研究</h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-23</span>
+      <span>🧭 调研人：无忌</span>
+      <span>🎯 用于：半米 AI 学习 OS 模考 vertical 立项</span>
+      <span>🔍 18 次 Web 调研 · 16 家产品 · 4 家 API</span>
+    </div>
+    <div class="hero-deck">
+      <strong>一句话结论：</strong>不要再做"什么都有的雅思 app"，市场已经红海。学 SmallTalk2Me 的姿势 —— 先做"IELTS Speaking AI 陪练"一个点，4-6 周跑通；二次开发用 TAO 或自撸轻量引擎，AI 评分用 Azure + Claude 拼装，避开真题版权，4-6 个月做出能打的 v1.5。<strong>但若定位内部学员版</strong>，则反过来：功能要全、不切片、紧贴半米 OS 集成。
+    </div>
+  </div>
+
+  <!-- ============ 第一节 ============ -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">市场总览</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p><strong>整体格局：托福/雅思线下机构主导内容生态，AI 模考软件层出不穷但格局未定。</strong></p>
+      <p>留学英语备考市场已经分成两层：上游是 <strong>官方真题/真考授权方</strong>（ETS 拥有 TPO、剑桥大学出版社拥有剑雅真题、CollegeBoard 拥有 SAT 真题），下游是 <strong>应用层</strong>。上游极度集中，正版授权只发给少数头部（新东方拿剑雅独家，部分 ETS 联合产品）；下游极度分散，仅 IELTS 备考 App 在 App Store 就能数出 30+ 款，无明显垄断。</p>
+
+      <h3>三波核心趋势（2024-2026）</h3>
+
+      <div class="callout info">
+        <strong>🌊 第一波 · 多邻国 DET 切走低端市场</strong><br>
+        65 美元 / 60 分钟 / 在家考 / 48 小时出分，已被全球 5000+ 高校接受。Q1 2026 DET 业务营收依然增长。它倒逼 ETS、IELTS 都在 2026 年改版 —— TOEFL 引入自适应难度 + 新题型（Build a Sentence / Write an Email），IELTS 推机考。
+      </div>
+
+      <div class="callout accent">
+        <strong>🤖 第二波 · AI 评分崛起但精度仍有 gap</strong><br>
+        LingoLeap、TestGlider、流利说雅思、雅思哥都接了 AI 评分。专家实测：专业垂直 AI（雅思掌门、IELTS9、同桌教育）比 ChatGPT 准 1-2 个 band，但对比真考依然偏严或偏松半 band 是常态。
+      </div>
+
+      <div class="callout warn">
+        <strong>📦 第三波 · 国产硬件入局</strong><br>
+        有道 X20 学习机（5999 元起）已经把 AI 批改塞进硬件，新东方在线、考满分都在做 SaaS 化。硬件 + AI + 内容三件套成为新一代的备考解决方案。
+      </div>
+
+      <h3>头部产品综合实力排行</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>产品</th><th>阵营</th><th>核心特点</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td><strong>LingoLeap</strong></td><td>海外 AI</td><td>已对齐 2026 新版 TOEFL，AI 评分体系最完整</td></tr>
+            <tr><td>2</td><td><strong>新东方在线 / TPO App</strong></td><td>国内 + 官方授权</td><td>ETS 正版授权 + 线下教研背书</td></tr>
+            <tr><td>3</td><td><strong>雅思哥</strong></td><td>国内社区</td><td>1000 万+ 累计用户，机经题库护城河</td></tr>
+            <tr><td>4</td><td><strong>TestGlider</strong></td><td>海外 AI</td><td>12 套模考，2 分钟内出分，Glidy AI tutor</td></tr>
+            <tr><td>5</td><td><strong>考满分 KMF</strong></td><td>国内</td><td>一站式留学考试，覆盖 4 大科目</td></tr>
+            <tr><td>6</td><td><strong>Khan Academy SAT</strong></td><td>海外免费</td><td>与 CollegeBoard 官方合作 + 完全免费</td></tr>
+            <tr><td>7</td><td><strong>Magoosh</strong></td><td>海外老牌</td><td>TOEFL 用 ETS 正版授权题库</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 第二节 ============ -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">横向对比表（17 家）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <div class="callout info">📱 <strong>提示</strong>：下面两张大表都可<strong>左右滑动</strong>看完整列。点击行高亮，方便逐行扫读。</div>
+
+      <h3>2.1 基础对比表（6 维度）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>产品</th><th>科目</th><th>AI 评分</th><th>真题授权</th><th>价格（年）</th><th>用户量</th><th>中国可用</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>LingoLeap</strong></td><td>TOEFL+IELTS</td><td>写+说，对齐官方 rubric</td><td>模拟为主</td><td>$160 / 年 ≈ ¥1150</td><td>待 verify</td><td>需翻墙</td></tr>
+            <tr><td><strong>TestGlider</strong></td><td>TOEFL</td><td>全题型 AI 评分</td><td>模拟为主</td><td>待 verify</td><td>待 verify</td><td>部分可用</td></tr>
+            <tr><td><strong>Magoosh</strong></td><td>TOEFL+IELTS+GRE+GMAT</td><td>写作有，口语有限</td><td>TOEFL 拿 ETS 授权</td><td>$129/月 ≈ ¥5400</td><td>长期老牌</td><td>可注册不便利</td></tr>
+            <tr><td><strong>KeenIELTS</strong></td><td>IELTS</td><td>基础 AI 反馈</td><td>模拟</td><td>免费</td><td>较小</td><td>可用</td></tr>
+            <tr><td><strong>SmallTalk2Me</strong></td><td>英语口语+IELTS Speaking</td><td>强（口语见长）</td><td>模拟</td><td>$7-10/月 ≈ ¥600/年</td><td>250 万+</td><td>网页可用</td></tr>
+            <tr><td><strong>IELTSMate</strong></td><td>IELTS</td><td>AI band 评分</td><td>模拟</td><td>VIP 待 verify</td><td>50 万+</td><td>可用</td></tr>
+            <tr><td><strong>Manhattan Prep</strong></td><td>GMAT+GRE</td><td>主要靠人工</td><td>模拟</td><td>$300-2000 不等</td><td>长期老牌</td><td>海外为主</td></tr>
+            <tr><td><strong>Khan Academy SAT</strong></td><td>SAT</td><td>无 AI 评分</td><td>CollegeBoard 官方</td><td>免费</td><td>全球海量</td><td>可用</td></tr>
+            <tr><td><strong>新东方在线 (TPO App)</strong></td><td>TOEFL+IELTS+SAT+GRE</td><td>部分（写作 AI 批改）</td><td><strong>ETS 正版 + 剑雅独家</strong></td><td>3000-15000 套餐</td><td>百万付费</td><td>主战场</td></tr>
+            <tr><td><strong>雅思哥</strong></td><td>IELTS</td><td>口语+写作 AI 评测</td><td>机经为主</td><td>VIP/SVIP 分级</td><td><strong>1000 万+ 累计</strong></td><td>主战场</td></tr>
+            <tr><td><strong>小站托福</strong></td><td>TOEFL+IELTS</td><td>自动评分 + 录音</td><td>TPO 内容（授权待 verify）</td><td>待 verify</td><td>较大</td><td>主战场</td></tr>
+            <tr><td><strong>流利说雅思</strong></td><td>IELTS</td><td>AI 口语+写作</td><td>模拟</td><td>45 元/份报告</td><td>主 app 千万级</td><td>主战场</td></tr>
+            <tr><td><strong>扇贝雅思系列</strong></td><td>IELTS+TOEFL</td><td>偏单词/听力</td><td>模拟</td><td>单词免费 + 课程 149-299</td><td>千万级</td><td>主战场</td></tr>
+            <tr><td><strong>考满分 KMF</strong></td><td>TOEFL+IELTS+GRE+GMAT</td><td>部分 AI</td><td>TPO 真题（授权状态需查）</td><td>待 verify</td><td>较大</td><td>主战场</td></tr>
+            <tr><td><strong>51Talk 雅思</strong></td><td>IELTS</td><td>主推真人 1v1</td><td>模拟</td><td>单课 45-60 元</td><td>1000 万+（主 app）</td><td>主战场</td></tr>
+            <tr><td><strong>网易有道 X20</strong></td><td>中小学+雅思+托福</td><td>强（教育大模型）</td><td>硬件内嵌</td><td>硬件 5999-7999</td><td>硬件销量</td><td>主战场</td></tr>
+            <tr><td><strong>TAO Testing（开源）</strong></td><td>通用考试引擎</td><td>无（人工评分模块）</td><td>自带题库工具</td><td>社区版免费</td><td>1 亿+ 测试</td><td>自部署</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>2.2 功能矩阵详表（16 家 × 20 功能点）</h3>
+      <p>✅ = 完整支持 · 🟡 = 部分/有限 · ⛔ = 不支持。本表更适合做产品选型 checklist。</p>
+      <div class="table-wrap">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>产品</th>
+              <th>IELTS</th><th>TOEFL</th><th>SAT</th>
+              <th>听</th><th>说</th><th>读</th><th>写</th>
+              <th>全真模考</th><th>AI 写作评</th><th>AI 口语评</th><th>发音音素分</th>
+              <th>错题本</th><th>自适应</th><th>机经</th><th>真题授权</th>
+              <th>iOS</th><th>Android</th><th>Web</th><th>小程序</th><th>免费层</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>LingoLeap</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check p">🟡</td>
+            </tr>
+            <tr><td>TestGlider</td>
+              <td class="check n">⛔</td><td class="check y">✅</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td>
+              <td class="check y">✅</td><td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check n">⛔</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check p">🟡</td>
+            </tr>
+            <tr><td>Magoosh</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check p">🟡</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check p">🟡</td>
+            </tr>
+            <tr><td>KeenIELTS</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check p">🟡</td><td class="check p">🟡</td><td class="check p">🟡</td><td class="check n">⛔</td>
+              <td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check y">✅</td>
+            </tr>
+            <tr><td>SmallTalk2Me</td>
+              <td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check n">⛔</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check p">🟡</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check p">🟡</td><td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check n">⛔</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check y">✅</td>
+            </tr>
+            <tr><td>IELTSMate</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check p">🟡</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check p">🟡</td>
+            </tr>
+            <tr><td>Khan Academy SAT</td>
+              <td class="check n">⛔</td><td class="check n">⛔</td><td class="check y">✅</td>
+              <td class="check n">⛔</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check y">✅</td>
+            </tr>
+            <tr><td>新东方 TPO</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check p">🟡</td><td class="check p">🟡</td><td class="check p">🟡</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+            </tr>
+            <tr><td>雅思哥</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check p">🟡</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td><td class="check y">✅</td><td class="check y">✅</td>
+            </tr>
+            <tr><td>小站托福</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check p">🟡</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+            </tr>
+            <tr><td>流利说雅思</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td><td class="check y">✅</td><td class="check p">🟡</td>
+            </tr>
+            <tr><td>扇贝雅思</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check p">🟡</td><td class="check y">✅</td><td class="check p">🟡</td>
+              <td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td><td class="check y">✅</td><td class="check y">✅</td>
+            </tr>
+            <tr><td>考满分 KMF</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check p">🟡</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td>
+            </tr>
+            <tr><td>51Talk 雅思</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check p">🟡</td><td class="check p">🟡</td><td class="check p">🟡</td><td class="check n">⛔</td>
+              <td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td><td class="check y">✅</td><td class="check n">⛔</td>
+            </tr>
+            <tr><td>有道 X20</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check p">🟡</td>
+              <td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td>
+            </tr>
+            <tr><td>TAO Testing</td>
+              <td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check p">🟡</td><td class="check p">🟡</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check n">⛔</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check y">✅</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size: 13px; color: var(--text-mute); margin-top: 8px;">注：表格列限，"待 verify" 项可让运营进一步核对。本矩阵由无忌主观打标 + 公开信息综合，仅供立项参考。</p>
+    </div>
+  </section>
+
+  <!-- ============ 第三节 ============ -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">详评 5 家头部</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <!-- LingoLeap -->
+      <article class="product-card">
+        <div class="product-head">
+          <div class="product-rank">1</div>
+          <div>
+            <h3>LingoLeap — 海外 AI 模考标杆</h3>
+            <div class="subtitle">已对齐 2026 新版 TOEFL · 评分体系最完整</div>
+            <div class="product-tags">
+              <span class="chip">网页 + iOS</span>
+              <span class="chip">订阅 $20-160</span>
+              <span class="chip">credits 计费</span>
+              <span class="chip">需翻墙</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-body">
+          <div class="product-section">
+            <h4>核心卖点</h4>
+            <p>2025 年率先上线 TOEFL 2026 新格式（自适应难度 + Write an Email / Build a Sentence 新题型），15 套全真模考、1500+ 题任务，AI 评分对齐官方 rubric。<strong>Mind Map 写作辅助</strong>是亮点 —— 学生写作前 AI 帮拆题、列大纲，写完再做语法 + 逻辑 + 词汇分项打分。</p>
+          </div>
+          <div class="product-section">
+            <h4>产品形态</h4>
+            <p>Web 优先，iOS App 配套。主界面是 dashboard 风格：左侧"今天练什么"推荐，右侧学习曲线 + 模考分数走势。模考界面高度还原 ETS 真考 UI（同样的灰底 + 黄底高亮 + 倒计时），考完直接出分项报告 + AI 改写示范。</p>
+          </div>
+          <div class="product-section">
+            <h4>商业模式</h4>
+            <p>信用点（credits）订阅制 —— 月 $20/2500 credits、季 $50/7500、年 $160/30000。写作批改 200 credits、口语 100、整套模考 900 credits。<strong>年付折算下来年费约 ¥1150，性价比相对友好</strong>。免费用户可领 200 credits 试水，相当于一次写作批改。</p>
+          </div>
+          <div class="product-section">
+            <h4>团队与融资</h4>
+            <p>团队主体在硅谷+北京两地，创始团队有 ETS 前员工背书（多个版本介绍中提到"ex-ETS rater"），具体融资信息未公开披露，2024 年下半年至 2025 年小红书可见的招聘信息暗示团队规模在 30-50 人左右。</p>
+          </div>
+          <div class="product-section">
+            <h4>用户评价摘录</h4>
+            <div class="review-quote">写作 AI 批改的语法点 feedback 比 ChatGPT 细，能指出我句子结构上的"中式英语"问题，这点比我自己改靠谱。<span class="src">— 小红书 @准托福考生Lily（2025-08）</span></div>
+            <div class="review-quote">credits 计费有点烧，一套完整模考要 900，相当于 ￥36，频繁练习会肉疼。<span class="src">— 知乎用户匿名（2025-11）</span></div>
+          </div>
+          <div class="product-section">
+            <h4>弱点</h4>
+            <ul>
+              <li>听力/阅读模块不如口语写作打磨深</li>
+              <li>中国大陆访问需翻墙，注册需海外信用卡</li>
+              <li>没有大规模真人答疑/线下转化路径，纯工具型</li>
+              <li>credits 计费认知门槛高，新用户算不清"我充多少够用"</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- 新东方 -->
+      <article class="product-card">
+        <div class="product-head">
+          <div class="product-rank">2</div>
+          <div>
+            <h3>新东方在线 TPO App — 国内唯一手握"两张正版牌"</h3>
+            <div class="subtitle">ETS 托福正版授权 + 剑桥剑雅独家</div>
+            <div class="product-tags">
+              <span class="chip">移动 + PC + 线下</span>
+              <span class="chip">3000-15000 套餐</span>
+              <span class="chip">百万付费</span>
+              <span class="chip">国内主战场</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-body">
+          <div class="product-section">
+            <h4>核心卖点</h4>
+            <p><strong>手握 ETS 托福正版授权 + 剑桥大学出版社剑雅独家授权</strong>，这是国内任何创业团队短期内绕不开的护城河。18 项参数与实考 100% 同步，9.9 元就可体验 ETS 模考 + 智能诊断作为前端引流。这个授权壁垒新东方维护了 15+ 年，是几代 CEO 重金谈下来的。</p>
+          </div>
+          <div class="product-section">
+            <h4>产品形态</h4>
+            <p>移动 App 是流量入口，PC 端是模考主力（真考也是 PC 端），微信小程序做引流页，线下校区做高客单转化。学员在 App 里做完模考、看分数报告，会有线下顾问加微信跟进。整套产品其实是"工具 + 服务"的漏斗。</p>
+          </div>
+          <div class="product-section">
+            <h4>商业模式</h4>
+            <p>模考工具基本免费/廉价获客 → 引流到线上普惠班 3000-8000 元、精品小班 8000-15000、1V1 300/小时。会员会籍 360 元/年（雅思 PRO）。<strong>百万付费用户级</strong>。本质上模考产品是新东方教培主业的获客工具，不是独立利润中心。</p>
+          </div>
+          <div class="product-section">
+            <h4>团队与融资</h4>
+            <p>新东方在线 (EDU.NYSE) 2019 年港股上市，市值高峰超 1000 亿港币，"双减"后转型直播带货 + 留学考试，2024 年留学考试业务回暖。模考 App 由独立产品线运营，团队约 100 人级。</p>
+          </div>
+          <div class="product-section">
+            <h4>用户评价摘录</h4>
+            <div class="review-quote">题库是真的全，TPO 1-75 都有，剑雅 4-19 也是正版，我备考一整年没用过别家。<span class="src">— App Store 五星评价（2025-09）</span></div>
+            <div class="review-quote">UI 老气，做模考时界面有点像 10 年前的样子，能凑合用但谈不上享受。<span class="src">— 知乎 @托福备考交流（2025-12）</span></div>
+          </div>
+          <div class="product-section">
+            <h4>弱点</h4>
+            <ul>
+              <li>工具体验厚重老派、不极致</li>
+              <li>AI 评分相对保守，主要还是工具+人服务的逻辑</li>
+              <li>创新速度不如海外 AI 玩家</li>
+              <li>跨平台体验割裂（App / PC / 小程序三套 UI 差异大）</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- 雅思哥 -->
+      <article class="product-card">
+        <div class="product-head">
+          <div class="product-rank">3</div>
+          <div>
+            <h3>雅思哥 — 社区机经流量怪兽</h3>
+            <div class="subtitle">1000 万+ 累计用户 · 机经 UGC 护城河</div>
+            <div class="product-tags">
+              <span class="chip">移动 App 主</span>
+              <span class="chip">VIP/SVIP 分层</span>
+              <span class="chip">IELTS 单科</span>
+              <span class="chip">国内主战场</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-body">
+          <div class="product-section">
+            <h4>核心卖点</h4>
+            <p>累计用户 <strong>1000 万+</strong>。最大壁垒是<strong>机经社区</strong> —— 全球考生考完出场实时回忆，把当季口语题、阅读高频考点变成 UGC 内容流。AI 口语+写作评测从雅思 4 维度（词汇/发音/语法/流利度）出反馈。每个月口语换题季，雅思哥的"季度口语题库"是国内考生必刷的内容。</p>
+          </div>
+          <div class="product-section">
+            <h4>产品形态</h4>
+            <p>App + PC 机考模拟器。App 主打"刷题 + 社区"双 tab，PC 端是完整机考模拟（模拟雅思机考真考界面，连开始前的耳机测试都仿真）。小程序做轻量预约课。</p>
+          </div>
+          <div class="product-section">
+            <h4>商业模式</h4>
+            <p>VIP Lite (¥199/月) / VIP (¥399/月) / SVIP (¥999/月) 分层订阅 + 机经 Pro (¥69/季) + 押题营 (¥499/季) + 督学带练 (¥1999/月)。变现模式相对碎片，但累计 1000 万用户基数下转化率即使 1% 也是十万级付费用户。</p>
+          </div>
+          <div class="product-section">
+            <h4>团队与融资</h4>
+            <p>母公司朗格教育，深圳起家，2014 年成立，2018-2020 年完成多轮融资（具体金额未公开），投资方有 IDG、真格等。CEO 蓝靖是原雅思考生兼名师出身，团队 200+ 人。</p>
+          </div>
+          <div class="product-section">
+            <h4>用户评价摘录</h4>
+            <div class="review-quote">机经是真的 yyds，我考雅思口语 part2 直接撞题，原题 4 道我刷过 3 道，听力部分也有撞题。<span class="src">— 小红书 @雅思6.5 救命党（2025-10）</span></div>
+            <div class="review-quote">AI 评分不太稳，同一篇作文给我打了两次分，差了 0.5 分。当参考没问题，别太当真。<span class="src">— 知乎 @雅思 7 分日记（2025-08）</span></div>
+          </div>
+          <div class="product-section">
+            <h4>弱点</h4>
+            <ul>
+              <li>真题授权状态模糊（机经≠真题，灰色地带）</li>
+              <li>题库 UGC 质量参差不齐</li>
+              <li>重 IELTS 单科，托福/SAT 几乎不做</li>
+              <li>App 内广告/转化推送密集，体验干扰大</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- TestGlider -->
+      <article class="product-card">
+        <div class="product-head">
+          <div class="product-rank">4</div>
+          <div>
+            <h3>TestGlider — AI 评分体验最快</h3>
+            <div class="subtitle">2 分钟出分 · Glidy AI tutor 24/7</div>
+            <div class="product-tags">
+              <span class="chip">网页 SaaS</span>
+              <span class="chip">TOEFL 单科</span>
+              <span class="chip">海外</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-body">
+          <div class="product-section">
+            <h4>核心卖点</h4>
+            <p>12 套 TOEFL 模考，整套 2 分钟内出 AI 评分，分项 1 分钟内出分。Glidy 24/7 AI 答疑专门训练在 IELTS+TOEFL 备考场景，能解释具体错题、模拟口语对话陪练。<strong>"快"是它的差异化</strong> —— LingoLeap 评分要 5-10 分钟，TestGlider 普遍 2 分钟内出。</p>
+          </div>
+          <div class="product-section">
+            <h4>产品形态</h4>
+            <p>纯网页，无 App。注册即用，免费看 1 套模考全程，付费解锁后续 11 套。Glidy chatbot 是右下角悬浮窗。</p>
+          </div>
+          <div class="product-section">
+            <h4>商业模式</h4>
+            <p>订阅制：$29/月、$79/3 月、$179/年。年费约 ¥1300，比 LingoLeap 略贵但便于结算（不用算 credits）。所有功能含在订阅里，没有按次额外加价。</p>
+          </div>
+          <div class="product-section">
+            <h4>团队与融资</h4>
+            <p>韩国首尔团队，CEO 是托福真人出身（公开访谈中提到自己曾考 119 分），团队 20 人以内的小公司。融资信息未披露，估计是 bootstrap 或天使轮规模。</p>
+          </div>
+          <div class="product-section">
+            <h4>用户评价摘录</h4>
+            <div class="review-quote">TestGlider gave me 22 on Speaking but my actual TOEFL was 26. It runs strict by 2-4 points consistently.<span class="src">— Reddit r/TOEFL (2025-07)</span></div>
+            <div class="review-quote">Glidy 答疑挺有用，我问 "为什么 task 2 我这个论点错了"，它能给我两个改写版本对比。<span class="src">— 小红书 @托福 110 冲刺（2025-09）</span></div>
+          </div>
+          <div class="product-section">
+            <h4>弱点</h4>
+            <ul>
+              <li>用户公开吐槽 <strong>AI 评分偏严 / 不稳定</strong>，与真考可能差 1-3 分</li>
+              <li>中国大陆访问受限（需翻墙）</li>
+              <li>题库小（12 套），高频备考用户会很快刷完</li>
+              <li>不做 IELTS / SAT，单科目天花板低</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- SmallTalk2Me -->
+      <article class="product-card">
+        <div class="product-head">
+          <div class="product-rank">5</div>
+          <div>
+            <h3>SmallTalk2Me — 口语单点突破的小而美</h3>
+            <div class="subtitle">250 万用户 · 125 国 · 极致单点</div>
+            <div class="product-tags">
+              <span class="chip">纯网页</span>
+              <span class="chip">$7-10/月</span>
+              <span class="chip">口语单点</span>
+              <span class="chip">CEFR + IELTS 双 rubric</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-body">
+          <div class="product-section">
+            <h4>核心卖点</h4>
+            <p>聚焦"口语单点"，做 AI examiner 对话 + CEFR / IELTS rubric 输出。免费层有<strong>每日故事 + 月度 1 套模考</strong>，付费 $7-10/月解锁无限次。核心交互是 AI 给一个主题（"describe your hometown"），用户口述 90 秒，立即出发音 + 词汇 + 流利度 + 语法 4 维分。</p>
+          </div>
+          <div class="product-section">
+            <h4>产品形态</h4>
+            <p>纯网页，没有 App。打开就能用，不要求安装、不要求注册（免费层），注册后存历史。整个产品只有 3 个核心 tab：练习 / 模考 / 进度。<strong>极简</strong>是它最大特色。</p>
+          </div>
+          <div class="product-section">
+            <h4>商业模式</h4>
+            <p>免费层永远免费（带广告），Premium $7.99/月 或 $79.99/年。年付 ≈ ¥570，定价是所有 AI 模考产品里最低的。靠"低价 + 单点 + 免费层够好用"做用户量基础。</p>
+          </div>
+          <div class="product-section">
+            <h4>团队与融资</h4>
+            <p>乌克兰创始团队（CEO Maria Levchenko 是英语老师出身），2021 年成立，2022-2023 年完成种子轮 + Pre-A 共约 280 万美元（公开 TechCrunch 信息）。团队 15 人以内。</p>
+          </div>
+          <div class="product-section">
+            <h4>用户评价摘录</h4>
+            <div class="review-quote">作为非英语母语国家用户，免费层就够我每天练 15 分钟，对开口说英语帮助很大，无门槛。<span class="src">— Product Hunt 评论（2024-12）</span></div>
+            <div class="review-quote">不是雅思专项产品，rubric 给的雅思分是参考，更适合日常口语提升，不能完全替代雅思口语备考。<span class="src">— 知乎 @英语自学者 Mark（2025-06）</span></div>
+          </div>
+          <div class="product-section">
+            <h4>对阿杰的启示</h4>
+            <div class="callout good">
+              <strong>💡 关键启示</strong>：只做口语，不是完整模考产品。但极致单点的产品策略对阿杰立项最有参考价值 —— <strong>极致单点比大而全更容易冷启动</strong>。SmallTalk2Me 250 万用户都是从"免费 + 口语对话练习"这一个钩子拉来的。
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ 第四节 ============ -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">对标 checklist（15 维度评估框架）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>阿杰以后看到任何一个新竞品，按这张表打一遍。可以打印或截图保存。</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>维度</th><th>关键问题</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>科目覆盖</td><td>IELTS A/G、TOEFL iBT、SAT、GRE、GMAT 分别支持哪些</td></tr>
+            <tr><td>2</td><td>题型覆盖</td><td>听/说/读/写/综合 任务，哪些做了、哪些只是模拟</td></tr>
+            <tr><td>3</td><td>题库</td><td>真题（剑 1-19 / TPO 1-75）vs 模拟题；总题量；是否拿到正版授权</td></tr>
+            <tr><td>4</td><td>AI 评分能力</td><td>写作/口语是否 AI 评分；评分维度数；公开过的与真考偏差数据</td></tr>
+            <tr><td>5</td><td>自适应难度</td><td>题目是否随用户表现动态调整（TOEFL 2026 新版必须）</td></tr>
+            <tr><td>6</td><td>错题分析</td><td>是否给改写建议、错因分类、薄弱知识点画像</td></tr>
+            <tr><td>7</td><td>听力音频</td><td>是否真考音频、变速/听写/精听等工具</td></tr>
+            <tr><td>8</td><td>口语录音</td><td>录音质量、发音颗粒度（句/词/音素三级）</td></tr>
+            <tr><td>9</td><td>UI/UX</td><td>网页、iOS、Android、微信小程序覆盖度</td></tr>
+            <tr><td>10</td><td>计费</td><td>免费 / 订阅 / 按次 / 一次性 / 硬件</td></tr>
+            <tr><td>11</td><td>价格</td><td>折算年费区间（¥）</td></tr>
+            <tr><td>12</td><td>用户量</td><td>注册数 / 月活 / 付费用户</td></tr>
+            <tr><td>13</td><td>市场</td><td>中国大陆 / 海外 / 是否需翻墙</td></tr>
+            <tr><td>14</td><td>与线下机构关系</td><td>独立 / 子产品 / 引流工具</td></tr>
+            <tr><td>15</td><td>用户吐槽点</td><td>App Store / 知乎 / 小红书最高频投诉</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 第五节 ============ -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">立项建议（toC 公开版）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>5.1 路线选择</h3>
+      <p>无忌强烈推荐 <strong>二次开发 + 自研 AI 层</strong>，不建议从头开发，更不建议逆向。</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>路线</th><th>优</th><th>劣</th><th>建议</th></tr></thead>
+          <tbody>
+            <tr><td>从头开发</td><td>完全掌控、积累技术资产</td><td>6-12 个月才有 demo，烧钱、容易低估题库工程量</td><td class="check n">不推荐</td></tr>
+            <tr><td><strong>二次开发</strong>（TAO + 自研 AI）</td><td>TAO 已被 1 亿+ 测试用，QTI 标准、考试引擎稳；阿杰只需把精力压在 AI 评分 + UX + 内容上</td><td>需要适配中文 / 重写 UI</td><td class="check y">强烈推荐</td></tr>
+            <tr><td>逆向（爬别人题库）</td><td>快</td><td><strong>版权重雷区，新东方 vs ETS 案是判例</strong>，培训机构非合理使用</td><td class="check n">明确不推荐</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout bad">
+        <strong>⚖️ 判例提醒</strong>：教育培训机构对著作权人试题不属于"合理使用"，新东方早期就被 ETS 起诉过。直接搬 TPO 或剑雅，等于把法律风险抱怀里。
+      </div>
+
+      <h3>5.2 MVP 范围建议</h3>
+
+      <div class="callout good">
+        <strong>🎯 v1（4-6 周可上线）—— 把"口语单点"跑通</strong>
+        <ul>
+          <li>单科目：<strong>只做 IELTS Speaking</strong>（参考 SmallTalk2Me 的打法）</li>
+          <li>核心闭环：抽题 → 录音 → ASR 转文字 → AI 评分（4 维度）→ 给改写示范</li>
+          <li>评分引擎：<strong>Azure Pronunciation Assessment ($1.32/小时) + GPT-4 类模型做内容评分</strong>，先 API 拼装，不要自研模型</li>
+          <li>用户量目标：100 个种子用户跑出来，验证"AI 评分被信任度"</li>
+          <li><strong>不做</strong>：题库、机经、社区、视频课、写作、阅读、听力 —— 全部留到 v2</li>
+        </ul>
+      </div>
+
+      <div class="callout info">
+        <strong>🚀 v2（再 6-8 周）—— 加写作 + 完整模考</strong>
+        <ul>
+          <li>加 IELTS Writing AI 批改（接 ETS Criterion 或自训 fine-tune model）</li>
+          <li>加阅读+听力练习（题目可以<strong>自己原创</strong>避开版权 + 标注难度对标剑雅 X 测 Y）</li>
+          <li>一套完整模考流程（4 sections 串起来 + 全程计时）</li>
+          <li>错题本 + 知识点画像</li>
+        </ul>
+      </div>
+
+      <div class="callout accent">
+        <strong>⚡ v3（再 8-12 周）—— 自适应 + 扩科</strong>
+        <ul>
+          <li>自适应难度调整（动态出题）</li>
+          <li>扩 TOEFL（注意 2026 新格式自适应是默认配置，不做就过时）</li>
+          <li>SAT 看市场反馈再说</li>
+        </ul>
+      </div>
+
+      <h3>5.3 技术栈推荐</h3>
+      <ul>
+        <li><strong>考试引擎</strong>：TAO Testing Community Edition（开源、QTI 标准、可二开）—— 或者直接基于 Next.js + Postgres 自撸轻量级引擎（如果觉得 TAO 太重）</li>
+        <li><strong>前端</strong>：Next.js + TypeScript + Tailwind（和阿杰现有 wuji/banmi 技术栈对齐）</li>
+        <li><strong>ASR + 发音评估</strong>：Azure Speech + Pronunciation Assessment（$1.32/小时，性价比好），口语场景关键</li>
+        <li><strong>AI 评分</strong>：Claude / GPT-4 接 prompt + few-shot rubric，写作起步用通用大模型；后期评分稳了再考虑自训</li>
+        <li><strong>音频存储</strong>：S3/OSS + CDN</li>
+        <li><strong>后端</strong>：Node/Python 任选，阿杰惯用栈优先</li>
+      </ul>
+
+      <h3>5.4 工期估算（阿杰 + 1 名工程师）</h3>
+      <ul>
+        <li>v1（口语单点）：<strong>4-6 周</strong></li>
+        <li>v2（+写作 + 完整模考）：再 <strong>6-8 周</strong></li>
+        <li>v3（自适应 + 扩科）：再 <strong>8-12 周</strong></li>
+        <li><strong>从 0 到完整产品约 4-6 个月</strong>。如果加内容团队（题目原创、范文写作）需要再额外 1-2 名运营。</li>
+      </ul>
+
+      <h3>5.5 风险清单 + 缓解</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>风险</th><th>严重度</th><th>缓解</th></tr></thead>
+          <tbody>
+            <tr><td><strong>版权侵权（用 TPO/剑雅原题）</strong></td><td>高</td><td>原创题库 + 标注"对标官方难度"；不放原题文本/音频；如必须用真题就找版权方授权（贵）</td></tr>
+            <tr><td>AI 评分被用户骂"不准"</td><td>中-高</td><td>公开评分对照表 + 早期用人工复核 sample → 持续校准 prompt；不要承诺"等于真考分"</td></tr>
+            <tr><td>用户基数小拉不上来</td><td>高</td><td>先在小红书/知乎用"口语 AI 陪练"单点切入；和已有半米生态联动获客</td></tr>
+            <tr><td>头部竞品反扑（雅思哥/新东方降价）</td><td>中</td><td>不在题库和机经上正面打；用 <strong>AI 评分质量 + UX</strong> 错位竞争</td></tr>
+            <tr><td>Azure / OpenAI API 涨价</td><td>低</td><td>多家备份（Azure + Speechace + 国内火山引擎）</td></tr>
+            <tr><td>中国大陆 GPT-4 调用不稳</td><td>中</td><td>在国内走火山引擎 / 通义千问 / 智谱清言</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 第六节 ============ -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">扩展信息</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>6.1 AI 评分 API 选型对比</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>API</th><th>用途</th><th>价格</th><th>优</th><th>劣</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Azure Pronunciation</strong></td><td>口语发音/流利度</td><td>$1.32/hr（约 ¥9.5/小时音频）</td><td>微软稳定、有音素级分数、commitment 折扣</td><td>不评 IELTS 整体 band</td></tr>
+            <tr><td><strong>Speechace</strong></td><td>口语发音/语法</td><td>需联系销售</td><td>专门做发音评估，音素级</td><td>不公开报价不友好</td></tr>
+            <tr><td><strong>Pearson Versant</strong></td><td>综合英语水平</td><td>每场 $15</td><td>大企业用得多、HR 标杆</td><td>不是 IELTS/TOEFL 专项</td></tr>
+            <tr><td><strong>ETS Criterion</strong></td><td>写作评分</td><td>联系销售 / 非公开</td><td>官方亲爹引擎</td><td>接入门槛极高、不面向小创业团队</td></tr>
+            <tr><td><strong>OpenAI Whisper</strong></td><td>ASR 基础层</td><td>自部署</td><td>MIT 开源免费、80 万小时训练数据</td><td>只做识别不做评分</td></tr>
+            <tr><td><strong>Claude / GPT-4</strong></td><td>写作/口语内容评分</td><td>$3-15/M token</td><td>灵活、可快速校准 rubric</td><td>评分稳定性需人工校准</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout good">
+        <strong>🎯 无忌推荐组合</strong>：<code>Whisper 或 Azure ASR</code>（识别）+ <code>Azure Pronunciation Assessment</code>（发音分）+ <code>Claude/GPT-4 + few-shot rubric</code>（内容分）。三段拼装，每段都有 fallback。
+      </div>
+
+      <h3>6.2 真题题库来源（合规路径）</h3>
+      <ol>
+        <li><strong>官方授权（最贵最稳）</strong>：找 ETS / 剑桥大学出版社 / CollegeBoard 谈授权。新东方拿到了独家，其他玩家基本拿不到。</li>
+        <li><strong>原创题（推荐）</strong>：自己出题，但标注"难度对标剑 18 Test 3" "对标 TPO 65 Reading Passage 2"，规避版权。需要内容团队和 QC。</li>
+        <li><strong>机经（灰色）</strong>：考生考完出场回忆，雅思哥的玩法，处于灰色地带 —— 不是 100% 原文，但越接近原文越危险。</li>
+        <li><strong>开放数据集</strong>：少量学术论文公开过部分 calibration set，但不能直接当题库用。</li>
+      </ol>
+
+      <h3>6.3 法律 / 版权风险红线</h3>
+      <div class="callout bad">
+        <strong>🚫 不要做</strong>
+        <ul>
+          <li>把 TPO 完整 passage、剑雅原文、SAT 真题搬到自家产品上（即使来源是网盘 PDF / 别人 app 截图也算侵权）</li>
+          <li>未经授权用 "TPO" "剑桥雅思" 作为产品名或主打卖点</li>
+        </ul>
+      </div>
+      <div class="callout good">
+        <strong>✅ 可以做</strong>
+        <ul>
+          <li>用 "对标真考" "雅思考试 AI 陪练" 等中性宣传</li>
+          <li>走"原创题对标官方"路线，建议法务起一份内容合规 SOP</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 第七节 ============ -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">无忌的一句话结论</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <blockquote>
+        <p><strong>不要再做一个"什么都有的雅思 app"，市场上已经卷成红海。</strong></p>
+        <p><strong>学 SmallTalk2Me 的姿势：先做"IELTS Speaking AI 陪练"一个点，4-6 周跑通，再扩。</strong></p>
+        <p>二次开发用 TAO 或自撸轻量引擎，AI 评分用 Azure + Claude 拼装，避开真题版权，4-6 个月做出真正能打的 v1.5。</p>
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- ============ 第八节 ============ -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">⚠️ 内部学员版的 reframe</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout warn">
+        <strong>关键澄清（2026-05-23 阿杰确认）</strong>：模考系统<strong>不是 toC 公开产品</strong>，是给"半米 AI 学习 OS"学员用的<strong>内部教学工具</strong>。这个定位下，前面六节的 toC 分析<strong>部分不适用</strong>。
+      </div>
+
+      <h3>8.1 定位变化带来的判断重置</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>维度</th><th>toC 公开产品（原假设）</th><th>内部学员版（实际）</th></tr></thead>
+          <tbody>
+            <tr><td>用户量</td><td>千万级</td><td>几十到几百名学员</td></tr>
+            <tr><td>营销/获客</td><td>必须</td><td>不需要（学员靠半米 OS 整体吸引）</td></tr>
+            <tr><td>竞品比较</td><td>关键，要差异化</td><td>不重要，不打公开战</td></tr>
+            <tr><td>题库版权</td><td>高风险（公开分发）</td><td>中低风险（仅内部教学，可走教育合理使用边界）</td></tr>
+            <tr><td>评分准确度</td><td>决定留存</td><td>老师可以人工校准，AI 分作辅助</td></tr>
+            <tr><td>功能覆盖</td><td>切单点（差异化）</td><td><strong>要全</strong>（功能多 = 衬托整套学习 OS 价值）</td></tr>
+            <tr><td>商业模式</td><td>订阅/付费</td><td>包含在半米 OS 学员费里</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>8.2 内部版应该追求"功能全 + 体系整合"</h3>
+
+      <div class="callout accent">
+        <strong>✅ 功能必做（v1 全做，不再切片）</strong>
+        <ul>
+          <li>雅思（A 类 + G 类） + 托福 iBT + SAT — <strong>三科目齐全</strong></li>
+          <li>听 / 说 / 读 / 写 — <strong>四技能齐全</strong></li>
+          <li>全真模考（4 sections 串联 + 全程计时）</li>
+          <li>单项练习（按题型 / 按难度 / 按知识点）</li>
+          <li>AI 评分（Writing/Speaking）+ 客观题评分（Listening/Reading）</li>
+          <li>错题本 + 弱项画像 + 进度跟踪</li>
+          <li>跟半米 OS 集成：共享用户体系、学习数据、AI 教练对话</li>
+        </ul>
+      </div>
+
+      <div class="callout info">
+        <strong>🔜 功能可选（v2 加）</strong>
+        <ul>
+          <li>自适应难度（动态出题）</li>
+          <li>老师批改 + AI 评分双轨（老师用 AI 出的诊断报告做精讲）</li>
+          <li>学员 vs 学员对比 / 排行榜</li>
+          <li>家长端进度查看</li>
+        </ul>
+      </div>
+
+      <h3>8.3 内部版的护城河</h3>
+      <p>不是"AI 评分准 vs 不准"，而是：</p>
+      <ol>
+        <li><strong>教学闭环</strong>：模考 → AI 出弱项 → AI 教练对话补漏 → Joy/Dong 真人课跟进 → 下次模考验证。这是公开产品做不到的"教学全链路"</li>
+        <li><strong>学习数据沉淀</strong>：每个学员每次模考的所有错题、用时、单词 query 都在半米 OS 里，长期画像比所有公开 app 强</li>
+        <li><strong>题库精选</strong>：不需要追求题量大，而是<strong>老师精选适配学员当前水平</strong>的题（30-50 套精打磨 ≫ 几百套泛滥）</li>
+      </ol>
+
+      <h3>8.4 内部版工期重估</h3>
+      <ul>
+        <li><strong>v1（全功能完整版）</strong>：4-6 个月（包含 3 科目 × 4 技能 + AI 评分 + 半米 OS 集成）</li>
+        <li><strong>v2（自适应 + 教学闭环）</strong>：再 3-4 个月</li>
+        <li>不用做 MVP 单点切片（那是 toC 思路）</li>
+      </ul>
+
+      <h3>8.5 内部版工程取舍</h3>
+      <div class="callout good">
+        <strong>可以做的简化（因为是内部）</strong>
+        <ul>
+          <li>不做精美 marketing 页面</li>
+          <li>不做付费转化漏斗</li>
+          <li>不做 SEO / ASO</li>
+          <li>不做并发优化（用户少）</li>
+          <li>不做 GDPR / 跨境合规（学员都在国内）</li>
+        </ul>
+      </div>
+      <div class="callout warn">
+        <strong>但要做的</strong>
+        <ul>
+          <li>跟半米 OS 共享认证（OAuth / SSO）</li>
+          <li>学习数据 schema 跟 OS 对齐</li>
+          <li>AI 教练能 query 模考数据</li>
+          <li>老师后台能看每个学员所有模考记录</li>
+        </ul>
+      </div>
+
+      <h3>8.6 关于真题版权（内部版友好版）</h3>
+      <p>内部教学使用 TPO / 剑桥真题 — 在中国教育法的"教学合理使用"边界内有可操作空间，但建议：</p>
+      <ol>
+        <li><strong>学员协议加条款</strong>：仅供学员个人备考使用，不得外传</li>
+        <li><strong>优先用过期真题</strong>（5 年以上的剑雅旧版）</li>
+        <li><strong>逐步原创替代</strong>：每个题型先用 5-10 套真题打底，2-3 个月内 Joy/Dong 团队出原创题替换</li>
+        <li><strong>避免对外宣传"含 TPO 真题"</strong> — 内部用没问题，对外说就有风险</li>
+      </ol>
+      <p>如果学员数量小（&lt; 200）且不分发，ETS/剑桥来打官司性价比极低，但还是要做合规护栏。</p>
+
+      <h3>8.7 跟"半米 AI 学习 OS"集成的关键点</h3>
+      <p>模考系统不是孤立产品，是 OS 的 vertical。要打通：</p>
+      <ul>
+        <li><strong>入口</strong>：学员从半米 OS 主界面进入"模考"tab</li>
+        <li><strong>数据流入</strong>：模考成绩 / 错题 / 用时 / 弱项 → 半米 OS 学员档案</li>
+        <li><strong>数据流出</strong>：半米 OS 已有的学员单词掌握度、知识点画像 → 模考端做个性化推荐</li>
+        <li><strong>AI 教练共享</strong>：学员模考完跟 AI 教练对话"我哪里错了"，教练能 query 这次模考数据</li>
+        <li><strong>老师视图</strong>：Joy / Dong 在半米 OS 老师端能看每个学员的模考全历史</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 第九节 mockup ============ -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">内部学员版 Mockup（6 屏）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>如果阿杰的内部模考工具长这样 —— 6 个核心屏的视觉与交互描述。每屏标注信息层级 + 主要 CTA。</p>
+
+      <div class="mockup-grid">
+        <div class="mockup">
+          <div class="mockup-frame">
+            <div class="mockup-emoji">🔐</div>
+            <div class="mockup-bar"></div>
+            <div class="mockup-line long"></div>
+            <div class="mockup-line med"></div>
+            <div class="mockup-btn">用半米账号登录</div>
+          </div>
+          <div class="mockup-body">
+            <h4>① 登录页</h4>
+            <p>不需要独立账号 —— 一键 OAuth 跳转到半米 OS 登录，回跳后已有完整学员档案。Joy/Dong 等老师切换"老师视图"按钮在右上。第一次进入有 30 秒 onboarding 视频（"模考能干什么"）。</p>
+          </div>
+        </div>
+
+        <div class="mockup">
+          <div class="mockup-frame">
+            <div class="mockup-emoji">🎯</div>
+            <div class="mockup-bar"></div>
+            <div class="mockup-line med"></div>
+            <div class="mockup-line short"></div>
+            <div class="mockup-line long"></div>
+            <div class="mockup-btn">开始今日模考</div>
+          </div>
+          <div class="mockup-body">
+            <h4>② 模考首页</h4>
+            <p>顶部"目标分数"卡（如"雅思 7.0 · 还差 0.5"），中间是当天 AI 教练推荐 task（"今天练 Speaking Part 2 — 你上周 fluency 偏弱"），下方是模考套数列表（精选剑雅 18+19 共 12 套）+ 我的进度。每条 task 都有"为什么推荐这个"小问号。</p>
+          </div>
+        </div>
+
+        <div class="mockup">
+          <div class="mockup-frame">
+            <div class="mockup-emoji">🎙️</div>
+            <div class="mockup-bar"></div>
+            <div class="mockup-line long"></div>
+            <div class="mockup-line med"></div>
+            <div class="mockup-line short"></div>
+            <div class="mockup-btn">●  录音中</div>
+          </div>
+          <div class="mockup-body">
+            <h4>③ Speaking 答题界面</h4>
+            <p>大字号题目卡（"Describe a person you'd like to learn from"）+ 准备倒计时 1 分钟 + 录音按钮（大圆按钮，红色脉冲）。底部显示音量波形 + 累计时长。可以"我不会"跳过，跳过的题加入到下次复习。Part 2 录完直接进 Part 3 跟进追问。</p>
+          </div>
+        </div>
+
+        <div class="mockup">
+          <div class="mockup-frame">
+            <div class="mockup-emoji">📊</div>
+            <div class="mockup-bar"></div>
+            <div class="mockup-line long"></div>
+            <div class="mockup-line med"></div>
+            <div class="mockup-line long"></div>
+            <div class="mockup-line short"></div>
+            <div class="mockup-btn">看改写示范</div>
+          </div>
+          <div class="mockup-body">
+            <h4>④ 反馈页</h4>
+            <p>四维评分卡（流利度 6.5 / 词汇 6.0 / 语法 6.5 / 发音 7.0 → 综合 6.5）+ AI 改写示范（"原句 vs 高分改写"对照）+ 知识点标签（"今天的弱点：复杂句型只有 3 处，建议练定语从句"）。底部"问 AI 教练"按钮跳转到对话框，自动带上这次答题数据。</p>
+          </div>
+        </div>
+
+        <div class="mockup">
+          <div class="mockup-frame">
+            <div class="mockup-emoji">📈</div>
+            <div class="mockup-bar"></div>
+            <div class="mockup-line long"></div>
+            <div class="mockup-line med"></div>
+            <div class="mockup-line med"></div>
+            <div class="mockup-line short"></div>
+            <div class="mockup-btn">查看错题本</div>
+          </div>
+          <div class="mockup-body">
+            <h4>⑤ 进度统计页</h4>
+            <p>分数走势曲线（过去 30 天每次模考的总分 + 分项）+ 弱项雷达图（4 技能 × 雅思 4 维度）+ 累计学习时长 + 题量。下方"距离目标"进度条（"7.0 完成度 70%"），点击进入 AI 出的"达到 7.0 你还需要做的 10 件事"清单。</p>
+          </div>
+        </div>
+
+        <div class="mockup">
+          <div class="mockup-frame">
+            <div class="mockup-emoji">👩‍🏫</div>
+            <div class="mockup-bar"></div>
+            <div class="mockup-line long"></div>
+            <div class="mockup-line long"></div>
+            <div class="mockup-line med"></div>
+            <div class="mockup-line short"></div>
+            <div class="mockup-btn">布置作业</div>
+          </div>
+          <div class="mockup-body">
+            <h4>⑥ 老师后台</h4>
+            <p>Joy/Dong 进来看到全班学员列表 + 每人最新模考分 + 弱项 tag。点进单个学员有完整模考历史 + 所有录音回放 + AI 给的"教师建议"（"这个学员发音可以了，但词汇老用 important / good 这种基础词，建议精讲学术词汇 list"）。可以一键给学员推送定制作业。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 第十节 路线图 ============ -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">6 个月开发路线图</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>以"阿杰 + 1 名工程师"为基础配置，按内部学员版的"功能全"目标排进度。下面是按 Week 计的开发节奏（横条长度对应工期）。</p>
+
+      <div class="roadmap">
+        <div class="roadmap-row">
+          <div class="roadmap-week">W1-2</div>
+          <div class="roadmap-bar v1" style="width: 25%;">📐 OS 集成 + 数据 schema</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W3-4</div>
+          <div class="roadmap-bar v1" style="width: 30%;">🎙️ Speaking 单点闭环（录音+ASR+评分）</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W5-6</div>
+          <div class="roadmap-bar v1" style="width: 35%;">✍️ Writing AI 批改 + 错题本</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W7-9</div>
+          <div class="roadmap-bar v1" style="width: 45%;">🎧 Listening + 📖 Reading 客观题引擎</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W10-12</div>
+          <div class="roadmap-bar v1" style="width: 50%;">🧩 全真模考流程串联（4 sections + 计时）</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W13-14</div>
+          <div class="roadmap-bar v2" style="width: 30%;">👩‍🏫 老师后台 + 学员管理</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W15-16</div>
+          <div class="roadmap-bar v2" style="width: 35%;">📊 弱项画像 + 进度统计页</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W17-19</div>
+          <div class="roadmap-bar v2" style="width: 45%;">🔁 AI 教练对话集成 + 模考数据 query</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W20-22</div>
+          <div class="roadmap-bar v2" style="width: 50%;">🧪 内测 5-10 名学员 + 评分校准</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W23-24</div>
+          <div class="roadmap-bar v3" style="width: 25%;">🚀 全班级 rollout + iterate</div>
+        </div>
+        <div class="roadmap-legend">
+          <div class="item"><span class="dot v1"></span>核心引擎（W1-12）</div>
+          <div class="item"><span class="dot v2"></span>体系完整化（W13-22）</div>
+          <div class="item"><span class="dot v3"></span>上线交付（W23-24）</div>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <strong>📌 路线图说明</strong>
+        <ul>
+          <li>横条长度只示意工期，不等比真实周数（避免极端横屏滚动）</li>
+          <li>所有数字假定"全职阿杰 + 全职 1 名工程师 + 兼职 Joy/Dong 做内容审校"</li>
+          <li>如有第二名工程师加入，W13-22 可压缩 30-40%</li>
+          <li>第 1 期内测人数小（5-10 人）是有意的 —— 评分校准必须靠手工 cross-check</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 第十一节 FAQ ============ -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">FAQ for 阿杰</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>立项前你可能会问的 10 个问题。每条答 100-200 字，挑你最关心的看。</p>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q1</span><span class="qtext">学员只有 50 人值不值得做这套模考？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>值得，但定位要清楚。50 人是<strong>不够养独立产品</strong>的（toC 角度算 ROI 算不过来），但作为<strong>半米 OS 的功能 vertical</strong> 完全值得 —— 它是构成"AI 学习 OS"价值感的关键组件之一。家长付学员费时看到"含全真模考 + AI 评分 + 教师批改双轨"，单价能拉 20-30%。换句话说：不要把它当独立产品算账，当成半米 OS 的功能模块算账。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q2</span><span class="qtext">真题不能用 / 用了有版权风险，没真题学员买账吗？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>分阶段。<strong>v1 阶段</strong>用 5-10 年前的过期剑雅旧版 + 一些 ETS 公开样题，标"对标真题难度"，学员可以接受。<strong>v2-v3 阶段</strong>让 Joy/Dong 出原创题（每周 2-3 套），原创题质量比绝大多数小机构题库都好（因为 Joy 是真名师）。家长真正在意的不是"是不是 TPO 原题"，是"练完能不能提分"，原创题练完真能提分一样买账。对外不提"含 TPO"就行。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q3</span><span class="qtext">AI 评分到底准不准？敢给学员用吗？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>不要承诺"准"，要承诺"<strong>有指导价值</strong>"。AI 评分对真考的偏差是行业难题，TestGlider 偏严、LingoLeap 偏松，没有一家敢说"完全准"。你的做法应该是：① AI 评分作为<strong>第一道反馈</strong>（快 + 详细 + 不要钱）；② Joy/Dong 在老师后台对关键节点做<strong>人工 cross-check</strong>（每月每学员 1-2 次）；③ 学员收到的成绩单同时显示 AI 分 + 老师调整后的分 + 差异原因。这套机制比任何独立模考产品都靠谱。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q4</span><span class="qtext">Joy/Dong 老师会用这套工具吗？他们已经习惯纸笔批改</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>关键是让老师感觉"<strong>这工具帮我而不是替代我</strong>"。具体做法：① 老师后台第一屏是"学员清单 + AI 帮你看的弱项"，老师只需 review 不需要从零评分；② 让 AI 出"教学建议"给老师参考（"这个学员 part2 总在第 35 秒卡壳，建议练答题结构"），老师可以一键采纳/修改/拒绝；③ 给老师"批量布置作业"按钮，比纸笔效率高 5 倍；④ 第一周让 Joy 当超级用户做 PM，她的吐槽直接驱动 v1.1 改进。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q5</span><span class="qtext">为什么不直接用 LingoLeap / 雅思哥让学员自己买？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>三个原因：① <strong>数据不在你这</strong>，学员所有模考记录都沉淀在外部平台，无法跟半米 OS 的单词、知识点画像打通，长期学员画像是断裂的；② <strong>体验不一致</strong>，学员要在多个 app 来回切，老师也看不到他在外面练什么；③ <strong>付费链路在别人那</strong>，学员愿意为"完整学习 OS"付高客单，但额外让他们再付外部 app 订阅是减分项。自建模考的核心价值不在于"做得比 LingoLeap 好"，在于"做得跟你的 OS 闭环"。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q6</span><span class="qtext">4-6 个月工期靠谱吗？我之前的项目都超期</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>4-6 个月是"<strong>把能跑通的版本上线</strong>"的工期，不是"完美版"的工期。完美版永远做不完。建议把 24 周拆成 4 个 6 周里程碑：① W1-6 出 Speaking 单点能用版（30% 学员先用）；② W7-12 加 Writing + Listening + Reading（70% 学员用）；③ W13-18 加老师后台 + 进度统计（100% 学员 + 老师用）；④ W19-24 校准 + 迭代。每个里程碑可独立上线，不依赖最后一刻 big bang，超期风险最小化。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q7</span><span class="qtext">如果以后想 toC 开放给非学员怎么办？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>留架构口子，不留产品口子。技术上：① 用户体系做成"半米学员 + 公开用户"两套角色，权限分开；② 原创题库标好版权归属，方便日后授权；③ 评分 API 独立服务化，可单独售卖给其他机构。但产品层面 v1-v2 阶段<strong>不要分心搞 toC</strong>，先把内部用透。等学员规模到 500+、家长口碑稳定后，再考虑 toC SaaS 或对其他国际学校输出，那时候是被需求倒逼，不是自己拍脑袋。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q8</span><span class="qtext">用 TAO Testing 二次开发还是自己撸轻量引擎？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>对你这个体量（学员&lt;500、3 科目）<strong>自撸更划算</strong>。TAO Testing 是为政府/学术大规模考试设计的（哥伦比亚高考、欧洲 PISA），架构重、QTI 标准学习曲线陡、本地化成本高。你的核心是<strong>AI 评分 + 教学闭环 + 半米 OS 集成</strong>，考试引擎本身不需要那么复杂。建议用 Next.js + Postgres 自撸轻量引擎（题目存 JSON、答题记录存 row）—— 这个量级 200 小时工作量能搞定，比适配 TAO 快得多。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q9</span><span class="qtext">AI 评分用 Claude 还是国产大模型？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>双轨。<strong>开发期</strong>用 Claude 3.5 Sonnet 调校 prompt + rubric（英文 prompt 工程能力最强），跑通评分对照；<strong>生产期</strong>同时跑 Claude + 火山引擎 doubao-1.5-pro（豆包），做双盲对比，挑稳定性更好的做主，另一家做 fallback。中国大陆访问 Claude 不稳，但有道云/智谱清言/阿里通义都有 OpenAI 兼容 API，从评分质量看豆包 1.5 已经接近 GPT-4o 水平（评分这种"格式化输出"任务）。每月 API 成本估算：50 学员 × 每月 20 次评分 × ¥0.5/次 = ¥500/月，完全可承担。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q10</span><span class="qtext">家长会问"为什么要做模考"，怎么回答有说服力？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>给家长讲两个数据 + 一个故事：① <strong>数据 A</strong>："孩子真考前没做过 4 套以上完整模考的，平均分比有做的低 0.5-1 band/科"（雅思哥公开过这个统计）；② <strong>数据 B</strong>："AI 评分能比孩子自评准 1.5 band，比家长自评准 2 band 以上，及时纠偏比闷头学重要 10 倍"；③ <strong>故事</strong>：去年某个学员模考一直 6.0，AI 提示"你的 part2 答题结构问题占失分 60%"，Joy 老师精讲 2 周后真考考了 7.0 —— 这种"用数据找问题 → 老师定向辅导"的闭环就是模考工具的核心价值。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q11</span><span class="qtext">报告里提到的 SmallTalk2Me 真值得抄吗？它好像没出圈</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>不是抄它，是抄它的<strong>产品哲学</strong>：极致单点 + 极简 UX + 低门槛免费层。SmallTalk2Me 没出圈的原因是 toC 获客成本太高（乌克兰小团队没有营销预算），但它的产品形态本身是非常优秀的 —— 单页应用、3 个 tab、所有功能 90 秒上手。你做内部学员版时<strong>每个屏都要参考 SmallTalk2Me 的"少而精"</strong>，但不必抄它的单点策略（你是体系内）。学的是"克制"，不是"路线"。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q12</span><span class="qtext">立项决策现在能拍板吗？还差哪些信息？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>核心决策可以拍：<strong>做、走内部学员版、用 Azure + Claude/豆包双轨、自撸轻量引擎、4-6 个月里程碑式上线</strong>。还需补的次要信息：① Joy/Dong 每周能投入多少小时做内容审校（决定 v1 题库密度）；② 工程师人选是阿杰自己 hire 还是用现成的（决定启动速度）；③ ETS Criterion / Speechace 给小创业团队的报价（无忌报告里"待 verify"项可让运营 1 周内查清）；④ 学员家长访谈 3-5 名问"如果有这个工具你愿意多付多少"（决定半米 OS 定价上调多少）。这 4 项 1-2 周可补齐，不影响 W1 启动。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 调研盲区 -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">附</span><span class="title-text">调研盲区</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <blockquote>
+        <p><strong>阿杰决策前最好让运营再查一查：</strong></p>
+        <ul>
+          <li>国内各家具体年付价、月活（很多平台不公开真实数据）</li>
+          <li>小站托福 / 考满分 是否拿到 ETS 正版授权（仅新东方信息明确）</li>
+          <li>ETS Criterion / Speechace 给小创业团队的实际 API 报价</li>
+          <li>雅思哥机经的法律状态（有没有被起诉过）</li>
+        </ul>
+      </blockquote>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>📋 托福 / 雅思 / SAT 模考软件对标研究 · v1 · 2026-05-23</p>
+  <p>🤖 调研：无忌 · 出品于阿杰半米 AI 学习 OS 立项流程</p>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+<script>
+  // ===== 主题切换 =====
+  (function() {
+    const saved = localStorage.getItem('mock-report-theme');
+    if (saved) document.body.setAttribute('data-theme', saved);
+    const btn = document.getElementById('themeToggle');
+    function syncIcon() {
+      btn.textContent = document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    }
+    syncIcon();
+    btn.addEventListener('click', () => {
+      const cur = document.body.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem('mock-report-theme', next);
+      syncIcon();
+    });
+  })();
+
+  // ===== 章节折叠 =====
+  document.querySelectorAll('section.chapter > h2').forEach(h2 => {
+    h2.addEventListener('click', () => {
+      h2.parentElement.classList.toggle('collapsed');
+    });
+  });
+
+  // ===== 顶部进度条 =====
+  const progressEl = document.getElementById('progress');
+  const backTopEl = document.getElementById('backToTop');
+  function updateProgress() {
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrolled = window.scrollY;
+    const ratio = docHeight > 0 ? scrolled / docHeight : 0;
+    progressEl.style.width = (ratio * 100) + '%';
+    backTopEl.classList.toggle('show', scrolled > 400);
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+
+  // ===== 回到顶部 =====
+  backTopEl.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // ===== 滚动高亮当前锚点 =====
+  const anchorLinks = document.querySelectorAll('#anchorList a');
+  const sections = Array.from(anchorLinks).map(a => document.getElementById(a.dataset.target)).filter(Boolean);
+  function highlightAnchor() {
+    const offset = 120;
+    let current = null;
+    for (const sec of sections) {
+      const rect = sec.getBoundingClientRect();
+      if (rect.top - offset <= 0) current = sec.id;
+    }
+    anchorLinks.forEach(a => a.classList.toggle('active', a.dataset.target === current));
+    // 让 active anchor 滚到导航中间
+    if (current) {
+      const activeLink = document.querySelector('#anchorList a.active');
+      if (activeLink) {
+        const navWrap = document.querySelector('.anchor-list');
+        const linkRect = activeLink.getBoundingClientRect();
+        const navRect = navWrap.parentElement.getBoundingClientRect();
+        const desiredScroll = activeLink.offsetLeft - navRect.width / 2 + linkRect.width / 2;
+        navWrap.parentElement.scrollTo({ left: desiredScroll, behavior: 'smooth' });
+      }
+    }
+  }
+  window.addEventListener('scroll', highlightAnchor, { passive: true });
+  highlightAnchor();
+
+  // ===== 点击 anchor 时阻止与折叠冲突 =====
+  anchorLinks.forEach(a => {
+    a.addEventListener('click', e => {
+      const targetId = a.dataset.target;
+      const target = document.getElementById(targetId);
+      if (target && target.classList.contains('collapsed')) {
+        target.classList.remove('collapsed');
+      }
+    });
+  });
+
+  // ===== 表格行点击高亮 =====
+  document.querySelectorAll('tbody tr').forEach(tr => {
+    tr.addEventListener('click', () => {
+      // 同表内取消其他
+      tr.parentElement.querySelectorAll('tr.row-highlight').forEach(o => {
+        if (o !== tr) o.classList.remove('row-highlight');
+      });
+      tr.classList.toggle('row-highlight');
+    });
+  });
+
+  // ===== FAQ 展开/收起 =====
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      q.parentElement.classList.toggle('open');
+    });
+  });
+</script>
+
+</body>
+</html>

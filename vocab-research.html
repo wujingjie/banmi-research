@@ -1,0 +1,2466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>词汇学习软件对标研究 · 半米词汇系统借鉴指南 · 2026-05-23</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1d23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --border-strong: #cdd2da;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --accent-text: #1d4ed8;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #6d28d9;
+    --info-soft: #ede9fe;
+    --code-bg: #f1f3f7;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --banmi-cream: #fbf6ec;
+    --banmi-text: #2d2418;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1c2030;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #b6bcc9;
+    --text-mute: #8a92a3;
+    --border: #2a2f3d;
+    --border-strong: #3a4154;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a55;
+    --accent-text: #93c5fd;
+    --good: #4ade80;
+    --good-soft: #14532d55;
+    --warn: #fbbf24;
+    --warn-soft: #78350f55;
+    --bad: #f87171;
+    --bad-soft: #7f1d1d55;
+    --info: #c4b5fd;
+    --info-soft: #4c1d9555;
+    --code-bg: #0a0d14;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+    --banmi-cream: #2a2417;
+    --banmi-text: #f0e8d6;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  #progress {
+    position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--info));
+    z-index: 1000; transition: width .1s linear;
+  }
+  header.topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner {
+    max-width: 980px; margin: 0 auto;
+    padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+  }
+  .brand {
+    font-weight: 700; font-size: 15px; letter-spacing: .2px;
+    color: var(--text); white-space: nowrap;
+  }
+  .brand .tag {
+    margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute);
+    padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px;
+  }
+  .topbar-spacer { flex: 1; }
+  .icon-btn {
+    width: 44px; height: 44px; border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border); background: var(--bg-elevated);
+    color: var(--text); cursor: pointer; font-size: 18px;
+    transition: transform .15s, background-color .15s;
+  }
+  .icon-btn:active { transform: scale(.94); }
+  nav.anchor-nav {
+    overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    scrollbar-width: none;
+  }
+  nav.anchor-nav::-webkit-scrollbar { display: none; }
+  .anchor-list {
+    display: flex; gap: 4px; padding: 8px 16px;
+    max-width: 980px; margin: 0 auto;
+    white-space: nowrap;
+  }
+  .anchor-list a {
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 13px; line-height: 1.3;
+    color: var(--text-soft);
+    text-decoration: none;
+    border: 1px solid transparent;
+    background: var(--bg-soft);
+    transition: all .15s;
+  }
+  .anchor-list a:hover { color: var(--accent-text); }
+  .anchor-list a.active {
+    color: var(--accent-text);
+    background: var(--accent-soft);
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+    font-weight: 600;
+  }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 {
+    font-size: 28px; line-height: 1.25; margin: 0 0 12px;
+    letter-spacing: -.5px;
+    background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-meta {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    font-size: 13px; color: var(--text-mute);
+  }
+  .hero-meta span {
+    background: var(--bg-soft); padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+  .hero-deck {
+    margin-top: 16px; padding: 14px 16px;
+    border-left: 4px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 15px;
+  }
+  section.chapter {
+    margin: 24px 0;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  section.chapter > h2 {
+    font-size: 20px; margin: 0;
+    padding: 16px 20px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+    background: var(--bg-elevated);
+    transition: background-color .15s;
+    min-height: 56px;
+  }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 30px; height: 30px; padding: 0 8px;
+    border-radius: 8px; background: var(--accent-soft); color: var(--accent-text);
+    font-size: 14px; font-weight: 700;
+  }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret {
+    transition: transform .25s; color: var(--text-mute); font-size: 14px;
+  }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body {
+    padding: 18px 20px 22px;
+    max-height: 100000px;
+    overflow: hidden;
+    transition: max-height .35s ease, padding .25s;
+  }
+  section.chapter.collapsed .chapter-body {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  h3 {
+    font-size: 17px; margin: 22px 0 10px;
+    color: var(--text);
+    padding-left: 10px;
+    border-left: 3px solid var(--accent);
+  }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout {
+    margin: 14px 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border-left: 4px solid;
+    font-size: 14.5px;
+    line-height: 1.65;
+  }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .table-wrap {
+    margin: 14px 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-elevated);
+  }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 14px;
+    min-width: 520px;
+  }
+  thead th {
+    position: sticky; top: 0;
+    background: var(--bg-soft);
+    color: var(--text);
+    text-align: left;
+    font-weight: 600;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-strong);
+    white-space: nowrap;
+    z-index: 1;
+  }
+  tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-soft);
+    vertical-align: top;
+  }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td {
+    background: var(--accent-soft) !important;
+    color: var(--text);
+  }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--text-mute); }
+  td.check.p { color: var(--warn); }
+  .product-card {
+    margin: 16px 0;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--bg-elevated);
+  }
+  .product-head {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, var(--accent-soft), transparent);
+    border-bottom: 1px solid var(--border);
+  }
+  .product-rank {
+    flex: 0 0 auto;
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    background: var(--bg-elevated);
+    font-weight: 700; font-size: 20px;
+    color: var(--accent-text);
+    border: 1px solid var(--border);
+  }
+  .product-head h3 { margin: 0; padding: 0; border: none; font-size: 17px; line-height: 1.35; }
+  .product-head .subtitle { font-size: 13px; color: var(--text-mute); margin-top: 2px; }
+  .product-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .product-tags .chip {
+    font-size: 11.5px; padding: 2px 8px; border-radius: 999px;
+    background: var(--bg-soft); color: var(--text-soft); border: 1px solid var(--border);
+  }
+  .product-body { padding: 14px 16px; }
+  .product-section { margin: 10px 0; }
+  .product-section h4 {
+    font-size: 13px; color: var(--text-mute);
+    text-transform: uppercase; letter-spacing: .5px;
+    margin: 12px 0 6px;
+  }
+  .review-quote {
+    margin: 8px 0;
+    padding: 10px 14px;
+    border-left: 3px solid var(--info);
+    background: var(--info-soft);
+    border-radius: 6px;
+    font-size: 13.5px;
+    color: var(--text-soft);
+    font-style: italic;
+  }
+  .review-quote::before { content: "\201C"; color: var(--info); margin-right: 4px; font-weight: 700; font-size: 18px; vertical-align: -2px; }
+  .review-quote .src { display: block; margin-top: 4px; font-style: normal; font-size: 11.5px; color: var(--text-mute); }
+  /* roadmap */
+  .roadmap {
+    margin: 16px 0; padding: 16px;
+    background: var(--bg-soft);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+  }
+  .roadmap-row {
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    gap: 10px;
+    align-items: center;
+    margin: 10px 0;
+  }
+  .roadmap-week {
+    font-weight: 700; font-size: 12px;
+    color: var(--accent-text);
+    text-align: right;
+    padding-right: 6px;
+  }
+  .roadmap-bar {
+    height: 28px; border-radius: 8px;
+    background: linear-gradient(90deg, var(--accent), var(--info));
+    color: white;
+    display: flex; align-items: center;
+    padding: 0 10px;
+    font-size: 12.5px;
+    font-weight: 500;
+    box-shadow: var(--shadow);
+    min-width: 30%;
+  }
+  .roadmap-bar.v1 { background: linear-gradient(90deg, #16a34a, #65a30d); }
+  .roadmap-bar.v2 { background: linear-gradient(90deg, #2563eb, #6d28d9); }
+  .roadmap-bar.v3 { background: linear-gradient(90deg, #db2777, #ea580c); }
+  .roadmap-bar.v4 { background: linear-gradient(90deg, #475569, #1e293b); }
+  .roadmap-legend {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin: 12px 0 0;
+    font-size: 12.5px;
+  }
+  .roadmap-legend .item { display: flex; align-items: center; gap: 5px; }
+  .roadmap-legend .dot { width: 10px; height: 10px; border-radius: 3px; }
+  .roadmap-legend .dot.v1 { background: #16a34a; }
+  .roadmap-legend .dot.v2 { background: #2563eb; }
+  .roadmap-legend .dot.v3 { background: #db2777; }
+  .roadmap-legend .dot.v4 { background: #475569; }
+  /* FAQ */
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin: 10px 0;
+    overflow: hidden;
+    background: var(--bg-elevated);
+  }
+  .faq-q {
+    padding: 14px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; gap: 10px;
+    align-items: flex-start;
+    user-select: none;
+    min-height: 50px;
+  }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a {
+    padding: 0 16px;
+    max-height: 0;
+    overflow: hidden;
+    color: var(--text-soft);
+    font-size: 14.5px;
+    line-height: 1.65;
+    transition: max-height .3s, padding .25s;
+  }
+  .faq-item.open .faq-a {
+    max-height: 1400px;
+    padding: 0 16px 14px 16px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+  .back-to-top {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    display: none;
+    align-items: center; justify-content: center;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    z-index: 40;
+    border: none;
+  }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  footer {
+    text-align: center; padding: 24px 16px;
+    color: var(--text-mute); font-size: 13px;
+    border-top: 1px solid var(--border);
+    margin-top: 32px;
+  }
+  code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+    font-size: 13px;
+    color: var(--text);
+  }
+  pre {
+    background: var(--code-bg);
+    padding: 14px 16px;
+    border-radius: 10px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.55;
+    border: 1px solid var(--border);
+    margin: 12px 0;
+  }
+  pre code { background: none; padding: 0; }
+  hr.soft { border: none; height: 1px; background: var(--border); margin: 16px 0; }
+  blockquote {
+    margin: 12px 0;
+    padding: 10px 16px;
+    border-left: 4px solid var(--text-mute);
+    background: var(--bg-soft);
+    border-radius: 6px;
+    color: var(--text-soft);
+    font-size: 14.5px;
+  }
+  blockquote p:first-child { margin-top: 0; }
+  blockquote p:last-child { margin-bottom: 0; }
+  .matrix-table { min-width: 1200px; font-size: 12.5px; }
+  .matrix-table th, .matrix-table td { padding: 6px 8px; }
+  .matrix-table tbody td:first-child { font-weight: 600; color: var(--text); white-space: nowrap; }
+
+  /* === Demo 区样式 === */
+  .demo-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+  @media (min-width: 720px) {
+    .demo-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .demo-card {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    background: var(--bg-elevated);
+  }
+  .demo-card h4 {
+    margin: 0 0 10px; font-size: 14px;
+    color: var(--text); text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--accent-text);
+  }
+  /* 词卡翻转 */
+  .flip-card {
+    perspective: 1000px;
+    height: 240px;
+    cursor: pointer;
+    margin: 8px 0;
+  }
+  .flip-inner {
+    position: relative;
+    width: 100%; height: 100%;
+    text-align: center;
+    transition: transform .6s;
+    transform-style: preserve-3d;
+  }
+  .flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+  .flip-front, .flip-back {
+    position: absolute;
+    width: 100%; height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    background: var(--banmi-cream);
+    color: var(--banmi-text);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .flip-front .word {
+    font-family: "Newsreader", "Times New Roman", Georgia, serif;
+    font-size: 42px;
+    font-weight: 500;
+    margin: 0 0 8px;
+    letter-spacing: -.5px;
+  }
+  .flip-front .ipa { font-size: 16px; color: var(--text-mute); margin-bottom: 4px; }
+  .flip-front .pos { font-size: 12px; color: var(--text-mute); font-style: italic; }
+  .flip-front .img-placeholder {
+    font-size: 56px; margin: 12px 0 4px;
+  }
+  .flip-back { transform: rotateY(180deg); padding: 16px; align-items: flex-start; text-align: left; }
+  .flip-back .meaning { font-weight: 700; font-size: 16px; margin: 0 0 8px; color: var(--banmi-text); }
+  .flip-back .sentence-en { font-size: 13.5px; margin: 4px 0; }
+  .flip-back .sentence-zh { font-size: 12.5px; color: var(--text-mute); margin: 0 0 8px; }
+  .flip-back .collocs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .flip-back .colloc-chip {
+    font-size: 11px; padding: 2px 7px; border-radius: 999px;
+    background: var(--accent-soft); color: var(--accent-text);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+  .flip-hint {
+    font-size: 11.5px; color: var(--text-mute);
+    text-align: center; margin-top: 4px;
+  }
+  /* cloze */
+  .cloze-box {
+    padding: 14px 16px;
+    background: var(--banmi-cream);
+    color: var(--banmi-text);
+    border-radius: 12px;
+    margin: 8px 0;
+    font-family: "Newsreader", Georgia, serif;
+    font-size: 16px;
+    line-height: 1.7;
+    border: 1px solid var(--border);
+  }
+  .cloze-blank {
+    display: inline-block;
+    min-width: 80px;
+    padding: 2px 6px;
+    border-bottom: 2px solid var(--accent);
+    color: var(--accent-text);
+    font-weight: 700;
+    background: transparent;
+    text-align: center;
+    cursor: pointer;
+  }
+  .cloze-blank.revealed {
+    border-bottom-color: var(--good);
+    color: var(--good);
+  }
+  .cloze-choices {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px;
+  }
+  .cloze-choice {
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-soft);
+    transition: all .15s;
+    min-height: 36px;
+    display: inline-flex; align-items: center;
+  }
+  .cloze-choice:hover { border-color: var(--accent); color: var(--accent-text); }
+  .cloze-choice.correct { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .cloze-choice.wrong { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  /* SRS button row */
+  .srs-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin: 12px 0;
+  }
+  .srs-btn {
+    padding: 10px 8px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    min-height: 48px;
+    transition: all .15s;
+    color: var(--text-soft);
+  }
+  .srs-btn .label { display: block; font-size: 14px; }
+  .srs-btn .interval { display: block; font-size: 11px; color: var(--text-mute); margin-top: 2px; font-weight: 400; }
+  .srs-btn[data-srs="again"]:hover, .srs-btn[data-srs="again"].active { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .srs-btn[data-srs="hard"]:hover, .srs-btn[data-srs="hard"].active { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .srs-btn[data-srs="good"]:hover, .srs-btn[data-srs="good"].active { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .srs-result {
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--bg-soft);
+    font-size: 13px;
+    color: var(--text-soft);
+    min-height: 36px;
+    border: 1px dashed var(--border);
+  }
+  /* YouGlish widget container */
+  .youglish-host {
+    margin: 16px 0;
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    padding: 12px;
+  }
+  .youglish-search {
+    display: flex; gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .youglish-search input {
+    flex: 1; min-width: 160px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-elevated);
+    color: var(--text);
+    font-size: 14px;
+    min-height: 44px;
+  }
+  .youglish-search button {
+    padding: 10px 16px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    min-height: 44px;
+  }
+  .youglish-search button:active { transform: scale(.96); }
+  .youglish-search .preset {
+    padding: 6px 10px;
+    background: var(--bg-elevated);
+    color: var(--text-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 12px;
+    cursor: pointer;
+    min-height: 32px;
+  }
+  .youglish-search .preset:hover { color: var(--accent-text); border-color: var(--accent); }
+  #ygWidgetMount { min-height: 380px; border-radius: 10px; overflow: hidden; }
+  .yg-status { font-size: 12.5px; color: var(--text-mute); margin-top: 6px; }
+  /* Q-A blocks */
+  .qa-block {
+    margin: 16px 0;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-elevated);
+  }
+  .qa-block .q {
+    font-weight: 700; color: var(--accent-text);
+    font-size: 15px; margin-bottom: 8px;
+  }
+  /* feature list cards */
+  .feat-card {
+    margin: 12px 0;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-elevated);
+  }
+  .feat-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 8px;
+  }
+  .feat-num {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px;
+    flex: 0 0 auto;
+  }
+  .feat-title { font-weight: 700; font-size: 15px; color: var(--text); flex: 1; }
+  .feat-meta { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; font-size: 11.5px; }
+  .feat-meta span {
+    padding: 2px 8px; border-radius: 999px;
+    background: var(--bg-soft); border: 1px solid var(--border);
+    color: var(--text-soft);
+  }
+  .feat-meta .diff-h { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .feat-meta .diff-m { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .feat-meta .diff-l { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .feat-meta .cov-y { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .feat-meta .cov-p { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .feat-meta .cov-n { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+
+  @media (max-width: 480px) {
+    .hero { padding: 18px 4px 8px; }
+    .hero h1 { font-size: 22px; }
+    section.chapter > h2 { font-size: 17px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+    .flip-front .word { font-size: 32px; }
+  }
+  @media print {
+    header.topbar, #progress, .back-to-top, nav.anchor-nav { display: none !important; }
+    section.chapter.collapsed .chapter-body { max-height: none !important; padding: 18px 20px 22px !important; }
+    section.chapter.collapsed > h2 .caret { display: none; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">词汇软件对标研究 <span class="tag">v1 · 无忌</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+  <nav class="anchor-nav">
+    <div class="anchor-list" id="anchorList">
+      <a href="#ch1" data-target="ch1">一、市场总览</a>
+      <a href="#ch2" data-target="ch2">二、横向对比</a>
+      <a href="#ch3" data-target="ch3">三、头部详评</a>
+      <a href="#ch4" data-target="ch4">四、核心功能 List</a>
+      <a href="#ch5" data-target="ch5">五、用户最爱 Top10</a>
+      <a href="#ch6" data-target="ch6">六、视频词典深挖</a>
+      <a href="#ch7" data-target="ch7">七、半米 vs 市场</a>
+      <a href="#ch8" data-target="ch8">八、可玩 Demo</a>
+      <a href="#ch9" data-target="ch9">九、24 周路线图</a>
+      <a href="#ch10" data-target="ch10">十、FAQ</a>
+      <a href="#ch11" data-target="ch11">附 · 字幕源</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <div class="hero">
+    <h1>词汇学习软件对标研究<br><span style="font-size: .65em; font-weight: 600;">半米词汇系统借鉴指南</span></h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-23</span>
+      <span>🧭 调研人：无忌</span>
+      <span>🎯 用于：半米词汇系统 V0.1.5 / V0.2 立项</span>
+      <span>🔍 20+ 次 Web 调研 · 18 家产品 · 含可玩 YouGlish demo</span>
+    </div>
+    <div class="hero-deck">
+      <strong>三句话结论：</strong>(1) 词汇市场已经被 Anki+Quizlet+百词斩+多邻国 分走 80% 的注意力，但<strong>课程化形态 + AI 个性化</strong>仍是空地，半米的"阅读沉淀 + 双形态 + 统一池"路径走通就有差异化。(2) <strong>用户最爱 Top3 永远是 SRS / 真实例句 / 即时反馈</strong>，半米总纲已全部覆盖；缺的是<strong>游戏化 streak</strong>、<strong>社群对决</strong>、<strong>词卡视觉惊喜</strong>这几项 retention 杠杆。(3) 视频词典三层方案<strong>可以直接落地</strong>：Layer 1 YouGlish iframe 今天就能上（教育用途免费），Layer 2 自建用 yt-dlp + Postgres FTS / Elasticsearch（V0.3 启动，约 3 人月）；本报告底部嵌了一个可玩的 YouGlish widget，输入词试试。
+    </div>
+  </div>
+
+  <!-- ============ 第一节：市场总览 ============ -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">市场总览</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p><strong>整体格局：</strong>全球词汇学习市场两条主干线 —— "<strong>主动背词</strong>"（Anki / Quizlet / 百词斩 / 墨墨）和"<strong>内容沉淀</strong>"（LingQ / Readlang / FluentU / WordUp / Memrise）。两条线技术栈不同、用户画像不同、commercial model 不同，但都在向中间靠拢 —— 主动背词侧加内容（百词斩做 Word TV、WordUp 做电影例句），内容沉淀侧补 SRS（FluentU 做闪卡 + 间隔重复）。</p>
+
+      <h3>三波核心趋势（2024-2026）</h3>
+
+      <div class="callout info">
+        <strong>🌊 第一波 · FSRS 成为新一代 SRS 默认引擎</strong><br>
+        2024 起 Anki / MintDeck / Mochi / StudyGlen 都把默认调度器换成 FSRS（Free Spaced Repetition Scheduler）。相比经典 SM-2，FSRS 减少 20-30% 复习量到达同样 retention，且按用户个人遗忘曲线动态拟合。半米总纲 §8 用的是 phase 9 混合 SRS（当天真实时间 + 跨天学习日），属于经验法则路径 —— 后期可考虑升级到 FSRS 风格的个体拟合。
+      </div>
+
+      <div class="callout accent">
+        <strong>🤖 第二波 · AI 个性化 + 自动生卡崛起</strong><br>
+        Quizlet 推 Magic Notes：上传笔记一键转 flashcards + 测试 + AI 导师；Lingvist 用 AI 持续校准每个学习者的遗忘曲线只教最常用 6000 词；Memrise 2025 推 MemBot AI 陪练。<strong>2026 的"AI 个性化"已经不是噱头，是中位线</strong>。
+      </div>
+
+      <div class="callout warn">
+        <strong>🎬 第三波 · 视频 / 真实片段成标配</strong><br>
+        Memrise 的"native speaker videos"是其核心护城河；WordUp 把 25,000 词全部挂电影 / 新闻片段；百词斩有 Word TV；不背单词 150 万+ 原声例句；FluentU 直接在 Netflix / YouTube 字幕上点词。<strong>谁能把"真实场景片段"做好，谁就拿到下一代词汇产品的入场券</strong> —— 这正是半米 V0.2 课程化 + 三层视频词典方案要解决的问题。
+      </div>
+
+      <h3>头部产品用户量 / 估值（Top 7）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>产品</th><th>阵营</th><th>规模</th><th>核心定位</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td><strong>多邻国 Duolingo</strong></td><td>美国上市</td><td>1.1 亿 MAU · 市值 $130 亿</td><td>游戏化语言全栈，词汇是其中一环</td></tr>
+            <tr><td>2</td><td><strong>Quizlet</strong></td><td>美国学生市场</td><td>6000 万+ MAU · 估值 $18 亿</td><td>学生 flashcards 之王 + AI 转换</td></tr>
+            <tr><td>3</td><td><strong>Memrise</strong></td><td>英国</td><td>7000 万+ 累计</td><td>原生视频 + AI Buddies 对话</td></tr>
+            <tr><td>4</td><td><strong>百词斩</strong></td><td>中国成都超有爱</td><td>1.7-2 亿累计 · 1700 万 MAU（2020）</td><td>图背单词 + Word TV 视频例句</td></tr>
+            <tr><td>5</td><td><strong>扇贝（系列）</strong></td><td>中国</td><td>千万级 MAU（主 app）</td><td>词 / 听 / 读 / 写四联动生态</td></tr>
+            <tr><td>6</td><td><strong>Anki / AnkiHub</strong></td><td>开源 + 商业插件</td><td>千万下载（PC + Android 免费 / iOS $25）</td><td>SRS 之王，护城河在算法 + 社区 deck</td></tr>
+            <tr><td>7</td><td><strong>墨墨背单词</strong></td><td>中国</td><td>千万级（考研 / 雅思主战场）</td><td>艾宾浩斯曲线 + 词书最全</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>下半场 / 内容驱动派（不在 Top 7 但对半米更相关）</h3>
+      <ul>
+        <li><strong>WordUp</strong> — 25,000 词全挂电影例句 + 新闻例句，<strong>跟 banmi V0.2 方向最像</strong>。用户评价"罕见的真心好评 ed-tech 产品"。</li>
+        <li><strong>LingQ</strong> — Steve Kaufmann 创办，import 任何文章 / 字幕变成学习材料，B1-B2 中级最佳。免费档严格限词。</li>
+        <li><strong>Readlang</strong> — Chrome 扩展查词即翻译即生卡，免费档最慷慨。</li>
+        <li><strong>FluentU</strong> — Netflix / YouTube 字幕点词，$30/月，"视频 + 互动字幕 + 闪卡"路径标杆。</li>
+        <li><strong>YouGlish</strong> — 单点工具：搜词出 YouTube 真实片段。已被 Anki 插件 Aglish 集成。<strong>banmi V0.2 Layer 1 主选</strong>。</li>
+        <li><strong>PlayPhrase.me / Yarn</strong> — 影视片段搜词，技术上用 AI 语音识别 + 字幕索引（不是单纯字幕匹配）。</li>
+      </ul>
+
+      <h3>一句话竞争格局</h3>
+      <div class="callout good">
+        <strong>给半米的位置：</strong>不要打 Anki / Quizlet / 多邻国 的 toC 仗 —— 你的护城河在<strong>学校内 K12 学员 + 阅读自然沉淀 + 双形态共用复习池 + 老师 Dashboard</strong>。市面 18 家产品没有任何一家同时做到这 4 点。
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 第二节：横向对比 ============ -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">横向对比表（18 家 × 12 维度）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <div class="callout info">📱 <strong>提示</strong>：表格<strong>左右滑动</strong>看完整列；点击行高亮，方便逐行扫读。</div>
+
+      <h3>2.1 基础对比表</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>产品</th><th>定位</th><th>SRS 算法</th><th>视频/片段</th><th>价格</th><th>用户规模</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Anki</strong></td><td>开源 SRS 之王</td><td>FSRS（2024+）默认</td><td>插件支持（Aglish）</td><td>免费 / iOS $25 一次</td><td>千万下载</td></tr>
+            <tr><td><strong>Quizlet</strong></td><td>学生 flashcards</td><td>Learn Mode 自适应</td><td>无视频</td><td>$36/年 Plus</td><td>6000 万 MAU</td></tr>
+            <tr><td><strong>Memrise</strong></td><td>视频原生场景</td><td>有 SRS（弱化版）</td><td>✅ Native speaker 视频 + AI Buddies</td><td>$89/年 / $250 终身</td><td>7000 万累计</td></tr>
+            <tr><td><strong>WordUp</strong></td><td>电影例句</td><td>SRS 内建</td><td>✅ 25,000 词全挂电影/新闻</td><td>$60/年（年付）</td><td>5 万+ 评价</td></tr>
+            <tr><td><strong>Drops</strong></td><td>5 分钟游戏化</td><td>有 SRS</td><td>少量插画动效</td><td>$70/年</td><td>4500 万累计（2024）</td></tr>
+            <tr><td><strong>Lingvist</strong></td><td>AI 个性化 6000 高频词</td><td>AI 拟合个人遗忘曲线</td><td>有少量例句视频</td><td>$80/年</td><td>百万级</td></tr>
+            <tr><td><strong>Vocabulary.com</strong></td><td>20 级自适应测试</td><td>类 SRS（20 级 mastery）</td><td>无视频</td><td>$3/月 Plus</td><td>百万级（北美学校多）</td></tr>
+            <tr><td><strong>Brainscape</strong></td><td>5 档信心评分 SRS</td><td>Confidence-Based Repetition</td><td>无视频</td><td>$8/月 Pro</td><td>百万级</td></tr>
+            <tr><td><strong>Mondly</strong></td><td>多邻国仿品 + AR</td><td>弱 SRS</td><td>AR / VR 实验</td><td>$48/年</td><td>1 亿+ 下载</td></tr>
+            <tr><td><strong>多邻国 Duolingo</strong></td><td>游戏化语言全栈</td><td>有 SRS（不是核心）</td><td>无核心视频</td><td>免费 + Super $84/年</td><td><strong>1.1 亿 MAU</strong></td></tr>
+            <tr><td><strong>FluentU</strong></td><td>视频 + 互动字幕</td><td>有 SRS</td><td>✅ Netflix/YouTube 互动字幕</td><td>$30/月 / $240/年</td><td>百万级</td></tr>
+            <tr><td><strong>LingQ</strong></td><td>import 任何文本</td><td>5 级 known 状态</td><td>有音视频联读</td><td>$13-40/月</td><td>百万级</td></tr>
+            <tr><td><strong>Readlang</strong></td><td>浏览器扩展查词</td><td>简单 SRS</td><td>无视频</td><td>免费 / Pro $5/月</td><td>百万级</td></tr>
+            <tr><td><strong>YouGlish</strong></td><td>YouTube 片段查词</td><td>无（工具）</td><td>✅ 数百万 YouTube 字幕索引</td><td>免费教育 / €25-300+/月 商业</td><td>百万级访问</td></tr>
+            <tr><td><strong>百词斩</strong></td><td>图背单词 + Word TV</td><td>有 SRS（被诟病弱）</td><td>✅ 图+短视频+真人例句</td><td>免费 + 内购</td><td><strong>1.7-2 亿累计</strong></td></tr>
+            <tr><td><strong>扇贝单词</strong></td><td>词+听+读+写生态</td><td>艾宾浩斯</td><td>少量真题例句</td><td>免费 + 99-199 词书</td><td>千万级 MAU</td></tr>
+            <tr><td><strong>墨墨背单词</strong></td><td>艾宾浩斯 + 词书最全</td><td>艾宾浩斯曲线</td><td>无</td><td>免费 + 单词上限内购</td><td>千万级</td></tr>
+            <tr><td><strong>不背单词</strong></td><td>原声例句海</td><td>有 SRS</td><td>✅ 150 万+ 原声例句</td><td>免费 + 内购</td><td>百万级</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>2.2 功能矩阵（18 家 × 18 功能点）</h3>
+      <p>✅ = 完整支持 · 🟡 = 部分/有限 · ⛔ = 不支持。这是产品选型 checklist，半米可以拿来比对自己的覆盖度。</p>
+      <div class="table-wrap">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>产品</th>
+              <th>SRS</th><th>FSRS/AI 拟合</th><th>cloze 题</th><th>听音拼写</th><th>真实例句</th><th>视频片段</th>
+              <th>AI 生卡</th><th>精美图卡</th><th>个性化推荐</th><th>阅读联动</th><th>错题词</th>
+              <th>游戏化 streak</th><th>社群 PK</th><th>老师 Dashboard</th>
+              <th>iOS</th><th>Android</th><th>Web</th><th>开源/可自建</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Anki</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td><td class="check n">⛔</td><td class="check p">🟡</td><td class="check p">🟡</td>
+              <td class="check p">🟡</td><td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+            </tr>
+            <tr><td>Quizlet</td>
+              <td class="check y">✅</td><td class="check p">🟡</td><td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check p">🟡</td><td class="check p">🟡</td><td class="check n">⛔</td><td class="check p">🟡</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td>
+            </tr>
+            <tr><td>Memrise</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td>
+            </tr>
+            <tr><td>WordUp</td>
+              <td class="check y">✅</td><td class="check p">🟡</td><td class="check p">🟡</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check p">🟡</td><td class="check p">🟡</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td><td class="check n">⛔</td>
+            </tr>
+            <tr><td>Drops</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check p">🟡</td>
+              <td class="check n">⛔</td><td class="check y">✅</td><td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check p">🟡</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td><td class="check n">⛔</td>
+            </tr>
+            <tr><td>Lingvist</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td><td class="check y">✅</td><td class="check p">🟡</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td>
+            </tr>
+            <tr><td>Vocabulary.com</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td><td class="check y">✅</td><td class="check n">⛔</td>
+              <td class="check p">🟡</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td>
+            </tr>
+            <tr><td>Brainscape</td>
+              <td class="check y">✅</td><td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check p">🟡</td><td class="check n">⛔</td><td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check p">🟡</td><td class="check n">⛔</td><td class="check p">🟡</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td>
+            </tr>
+            <tr><td>Duolingo</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check p">🟡</td><td class="check p">🟡</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td>
+            </tr>
+            <tr><td>FluentU</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check n">⛔</td><td class="check n">⛔</td><td class="check p">🟡</td><td class="check y">✅</td><td class="check n">⛔</td>
+              <td class="check p">🟡</td><td class="check n">⛔</td><td class="check p">🟡</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td>
+            </tr>
+            <tr><td>LingQ</td>
+              <td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check p">🟡</td>
+              <td class="check n">⛔</td><td class="check n">⛔</td><td class="check p">🟡</td><td class="check y">✅</td><td class="check n">⛔</td>
+              <td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td>
+            </tr>
+            <tr><td>Readlang</td>
+              <td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check p">🟡</td><td class="check n">⛔</td>
+              <td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check n">⛔</td>
+              <td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check n">⛔</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check n">⛔</td>
+            </tr>
+            <tr><td>YouGlish</td>
+              <td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check n">⛔</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check n">⛔</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check n">⛔</td>
+            </tr>
+            <tr><td>百词斩</td>
+              <td class="check p">🟡</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check n">⛔</td><td class="check y">✅</td><td class="check p">🟡</td><td class="check n">⛔</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td><td class="check n">⛔</td>
+            </tr>
+            <tr><td>扇贝单词</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td>
+              <td class="check n">⛔</td><td class="check p">🟡</td><td class="check p">🟡</td><td class="check y">✅</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check p">🟡</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td>
+            </tr>
+            <tr><td>墨墨背单词</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check p">🟡</td><td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td>
+              <td class="check n">⛔</td><td class="check n">⛔</td><td class="check p">🟡</td><td class="check n">⛔</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td>
+            </tr>
+            <tr><td>不背单词</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td>
+              <td class="check n">⛔</td><td class="check p">🟡</td><td class="check p">🟡</td><td class="check n">⛔</td><td class="check y">✅</td>
+              <td class="check y">✅</td><td class="check n">⛔</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check p">🟡</td><td class="check n">⛔</td>
+            </tr>
+            <tr><td>沪江开心词场</td>
+              <td class="check p">🟡</td><td class="check n">⛔</td><td class="check y">✅</td><td class="check p">🟡</td><td class="check p">🟡</td><td class="check n">⛔</td>
+              <td class="check n">⛔</td><td class="check p">🟡</td><td class="check n">⛔</td><td class="check n">⛔</td><td class="check p">🟡</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td>
+              <td class="check y">✅</td><td class="check y">✅</td><td class="check y">✅</td><td class="check n">⛔</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout accent">
+        <strong>📊 表里看不到的 3 个洞察：</strong>
+        <ul>
+          <li><strong>"阅读联动"几乎是空地</strong> —— 18 家里只有 LingQ / Readlang / FluentU 真做了，其他全是孤立背词。半米的 V0.1 阅读沉淀路径走通就是天然差异化。</li>
+          <li><strong>"老师 Dashboard"也是空地</strong> —— 只有 Quizlet / Vocabulary.com 做了 Class 功能（且都是欧美班级老师场景）。中文国际学校学员 + 老师双端这块没人深耕。</li>
+          <li><strong>"AI 自动生卡"已被 Quizlet / Lingvist / Duolingo 用透</strong> —— 半米可以直接用 Claude / 豆包 + Q-4 多源混合策略追赶到中位线。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 第三节：头部详评 ============ -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">5 家头部详评（含真实用户评论）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <!-- Anki -->
+      <div class="product-card">
+        <div class="product-head">
+          <div class="product-rank">1</div>
+          <div>
+            <h3>Anki — 开源 SRS 之王 / 算法护城河</h3>
+            <div class="subtitle">2007 创立 · 桌面 / Web / 安卓免费 / iOS $25 一次性 · 千万下载</div>
+            <div class="product-tags">
+              <span class="chip">SRS 算法</span><span class="chip">FSRS 默认</span><span class="chip">社区 deck</span><span class="chip">插件生态</span><span class="chip">学习曲线陡</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-body">
+          <div class="product-section">
+            <h4>核心定位</h4>
+            <p>极简词卡 + 极强 SRS + 极开放架构。2024 起把默认调度器从 SM-2 换成 FSRS，按用户个人遗忘曲线动态拟合，<strong>同等 retention 下减少 20-30% 复习量</strong>。</p>
+          </div>
+          <div class="product-section">
+            <h4>最被夸的功能</h4>
+            <ul>
+              <li>FSRS 算法 ——"它真的在按我个人遗忘曲线调度"</li>
+              <li>开放的卡片模板 / HTML / LaTeX 支持，医学生可放分子式</li>
+              <li>10 万+ 社区共享 deck（AnkiWeb shared decks）</li>
+              <li>插件生态：Image Occlusion、Pop-up Dictionary、Aglish（YouGlish 集成）</li>
+            </ul>
+            <div class="review-quote">FSRS personalized to my memory patterns. After 3000 reviews it knows when I'll forget better than I do.<span class="src">— Reddit / r/Anki, 2025</span></div>
+            <div class="review-quote">The MCAT trap is real — building 30,000 cards and spending 6 hours a day reviewing instead of learning. The tool is too powerful, you need discipline to limit it.<span class="src">— Med School Insiders</span></div>
+          </div>
+          <div class="product-section">
+            <h4>最被骂的功能</h4>
+            <ul>
+              <li>UI 1990 风格，新用户上手前要先学怎么用 Anki</li>
+              <li>iOS 25 美金一次性买断（开发者唯一收入来源，社区争议）</li>
+              <li>社区 deck 质量参差，没有质量背书</li>
+            </ul>
+          </div>
+          <div class="product-section">
+            <h4>半米可以借鉴</h4>
+            <ul>
+              <li><strong>FSRS 风格的个人遗忘曲线拟合</strong> —— V0.2 之后可以引入，半米 phase 9 当前是经验阈值，升级路径清晰</li>
+              <li><strong>三档答题按钮</strong>（不会 / 模糊 / 会） —— 半米 §8 已采纳</li>
+              <li><strong>不要抄它的 UI</strong> —— 半米 Q-2 已明确选 D banmi 风格，对的</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quizlet -->
+      <div class="product-card">
+        <div class="product-head">
+          <div class="product-rank">2</div>
+          <div>
+            <h3>Quizlet — 学生 flashcards 之王 + AI 转换</h3>
+            <div class="subtitle">2005 创立 · 6000 万 MAU · 估值 $18 亿 · $3/月 Plus</div>
+            <div class="product-tags">
+              <span class="chip">学生市场</span><span class="chip">Magic Notes</span><span class="chip">Q-Chat AI</span><span class="chip">社群 PK</span><span class="chip">付费墙争议</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-body">
+          <div class="product-section">
+            <h4>核心定位</h4>
+            <p>北美中学 / 大学 flashcards 准默认基建。2023-2024 推 Magic Notes（笔记 → flashcards / 测试 / 大纲一键转换，准确率 85%）+ Q-Chat AI 导师 + Quick Summary。Learn Mode 是其早期自适应原型。</p>
+          </div>
+          <div class="product-section">
+            <h4>最被夸的功能</h4>
+            <ul>
+              <li>Magic Notes：上传图片 / Google Docs 笔记一键转 flashcards</li>
+              <li>Learn Mode：根据正确率自适应出题</li>
+              <li>Match / Gravity 等小游戏（虽然付费墙了）</li>
+              <li>班级功能 + 老师布置作业</li>
+            </ul>
+            <div class="review-quote">Magic Notes turned my 12 pages of bio notes into 80 flashcards in 30 seconds. About 85% were good without editing.<span class="src">— Fortune Education, 2024</span></div>
+          </div>
+          <div class="product-section">
+            <h4>最被骂的功能</h4>
+            <ul>
+              <li><strong>Trustpilot 1.4 / 5</strong>（500+ 评价，2026） —— 用户怒火集中在"以前免费的功能现在付费了"</li>
+              <li>Match / Gravity 小游戏锁付费墙</li>
+              <li>AI 转换有时跨学科错配</li>
+            </ul>
+            <div class="review-quote">Free features I used for 5 years are now behind a paywall. I'm done with Quizlet.<span class="src">— Trustpilot, 2026</span></div>
+          </div>
+          <div class="product-section">
+            <h4>半米可以借鉴</h4>
+            <ul>
+              <li><strong>Magic Notes 的"非结构化笔记 → 词卡" 流水线</strong> —— 半米 V0.1.5 manual_import 入口可加"粘贴英文段落 → AI 提取生词 → 自动建卡"</li>
+              <li><strong>班级 / 老师布置作业功能</strong> —— 半米 §11 phase 4 老师 Dashboard 已规划，可以更直接抄 Quizlet 这一套</li>
+              <li><strong>避坑：</strong>不要把已经放出的免费功能后置付费墙，对内部学员产品不会出现这个问题（无 toC 商业模式），但要记得这是用户最大怒点</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- WordUp -->
+      <div class="product-card">
+        <div class="product-head">
+          <div class="product-rank">3</div>
+          <div>
+            <h3>WordUp — 电影例句嵌入 / 跟半米 V0.2 方向最像</h3>
+            <div class="subtitle">英国 Geeks Ltd · $60/年 · 25,000 词全挂电影 / 新闻 / 名人引语</div>
+            <div class="product-tags">
+              <span class="chip">电影例句</span><span class="chip">25000 词排序</span><span class="chip">罕见好评</span><span class="chip">个性化推荐</span><span class="chip">B2B 学校版</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-body">
+          <div class="product-section">
+            <h4>核心定位</h4>
+            <p>所有 25,000 单词<strong>按真实使用频率排序</strong>（数据来自数千部电影 / 电视剧 spoken English），用户先建知识图谱（标已知 / 未知词），系统推下一个最值得学的词。每个词带电影片段 + 新闻例句 + 名人引语。</p>
+          </div>
+          <div class="product-section">
+            <h4>最被夸的功能</h4>
+            <ul>
+              <li><strong>电影 / 新闻例句海</strong> —— 每个词配 20-50 个真实片段</li>
+              <li>"<strong>已知 vs 未知</strong>" 词图谱可视化，决定下一个学什么</li>
+              <li>音频朗读 + 单词卡设计干净</li>
+              <li>Spaced Repetition 自动调度</li>
+            </ul>
+            <div class="review-quote">用户评论罕见地一致好评 ——"best vocabulary app I've ever tried"，在 ed-tech 荒漠中是异类。<span class="src">— Speed Reading Lounge, 2026</span></div>
+            <div class="review-quote">Rather than just boring text definitions, WordUp adds short video clips from top movies and TV, showing you how the word is used in real world.<span class="src">— WordUp 官网</span></div>
+          </div>
+          <div class="product-section">
+            <h4>最被骂的功能</h4>
+            <ul>
+              <li>免费版词卡严格限量</li>
+              <li>词典 + 例句解释偶尔不够深</li>
+              <li>缺 cloze / 听音拼写等多种题型</li>
+            </ul>
+          </div>
+          <div class="product-section">
+            <h4>半米可以借鉴（重点）</h4>
+            <ul>
+              <li><strong>"按真实使用频率排序"的词序</strong> —— 半米 5 个官方词库可参考这种数据驱动排序（不只是按教材或字母）</li>
+              <li><strong>"已知 vs 未知"图谱</strong> —— 半米 §4.5.5 已规划"碰过 vs 没碰过"<strong>本质上是 WordUp 的同一个机制</strong>，且半米叠加了阅读自然沉淀更强</li>
+              <li><strong>电影例句</strong> —— 半米 Layer 3（V0.4+）的对标，但 banmi 的差异在于"短视频讲解（半米自制）+ YouGlish 片段（Layer 1）+ 影视片段（Layer 3）"三层堆叠，比 WordUp 单纯电影一层更全</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 百词斩 -->
+      <div class="product-card">
+        <div class="product-head">
+          <div class="product-rank">4</div>
+          <div>
+            <h3>百词斩 — 中国市场 1.7-2 亿用户 / 图背单词原创</h3>
+            <div class="subtitle">成都超有爱科技 · 1700 万 MAU（2020） · 免费 + 内购</div>
+            <div class="product-tags">
+              <span class="chip">图背单词</span><span class="chip">Word TV</span><span class="chip">单词 PK</span><span class="chip">紧扣教材</span><span class="chip">SRS 弱</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-body">
+          <div class="product-section">
+            <h4>核心定位</h4>
+            <p>"图背单词" 的发明者 —— 每个单词配一张原创插画 + 例句 + Word TV 短视频（情景剧 / 网络梗）。紧扣中国教材（小学 / 初高中 / 四六级 / 考研 / 雅思托福），所有词书都对齐应试场景。</p>
+          </div>
+          <div class="product-section">
+            <h4>最被夸的功能</h4>
+            <ul>
+              <li><strong>原创插画 + 趣味例句</strong>（蹭热梗 / 明星 / 网络新词）</li>
+              <li>Word TV 短视频例句 + 单词电台 + 单词 PK 对战</li>
+              <li>紧扣教材，初高中生最爱</li>
+              <li>免费可用，性价比之王</li>
+            </ul>
+            <div class="review-quote">百词斩的优点是紧扣教材、巩固复习、稳定增长、快速上手。这种边玩边学的模式能保持用户的学习耐心。<span class="src">— 知乎产品体验报告</span></div>
+          </div>
+          <div class="product-section">
+            <h4>最被骂的功能</h4>
+            <ul>
+              <li><strong>SRS 弱 / 记忆效果不强</strong> —— 多次错的词不会智能加大复习频次</li>
+              <li>缺少"单词运用"功能（背了不会用）</li>
+              <li>例句多次重复，娱乐性大于学习性</li>
+            </ul>
+            <div class="review-quote">用户对一个单词的记忆不牢靠导致多次复习经常性选错后，仍然不会将其作为易错词在其余复习中穿插。缺少单词的运用功能，背单词的目的不就是为了会用它吗？<span class="src">— 知乎对比评测</span></div>
+          </div>
+          <div class="product-section">
+            <h4>半米可以借鉴</h4>
+            <ul>
+              <li><strong>原创插画风格</strong> —— 半米 §4.5.1 已锁"AI 生图 + banmi 视觉 token 批量预生成"路径正确，但要注意人工抽检关键词避免 AI 翻车</li>
+              <li><strong>Word TV 短视频</strong> —— 半米的"短视频讲解"对标这个，且半米更结构化（发音 + 词性 + 词源 + 例句 + 易错点 30-60s 模板）</li>
+              <li><strong>避坑：</strong>百词斩的 SRS 弱是其被骂最多的，半米 §8 走 phase 9 统一池 + Anki FSRS 路径，避开这个坑</li>
+              <li><strong>避坑：</strong>"缺少运用" —— 半米要在 V0.2 题型 T2/T4（中文选英 + collocation 选择）+ T6（片段听辨）补足</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Memrise -->
+      <div class="product-card">
+        <div class="product-head">
+          <div class="product-rank">5</div>
+          <div>
+            <h3>Memrise — 原生视频 + AI Buddies / 词汇 + 听力 + 对话</h3>
+            <div class="subtitle">英国伦敦 · 7000 万+ 累计 · $89/年 / $250 终身</div>
+            <div class="product-tags">
+              <span class="chip">Native videos</span><span class="chip">MemBot</span><span class="chip">AI Buddies</span><span class="chip">间隔重复</span><span class="chip">语法弱</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-body">
+          <div class="product-section">
+            <h4>核心定位</h4>
+            <p>"<strong>Real-world videos of native speakers</strong>" 是其核心护城河 —— 每个词 / 短语配一段街拍 / 真人采访视频，让学习者听到真实口音 / 语速 / 面部表情。2025 推 AI Buddies（Grammar / Role Play / Translator / Culture）+ MemBot 对话陪练。</p>
+          </div>
+          <div class="product-section">
+            <h4>最被夸的功能</h4>
+            <ul>
+              <li><strong>原生说话人视频</strong> —— "比听同一个录音棚配音员一个星期好得多"</li>
+              <li>AI Buddies 角色扮演 / 文化场景对话（2025 新增）</li>
+              <li>Conversations Tab（2025 改版后）</li>
+              <li>SRS 间隔重复（虽然弱化）</li>
+            </ul>
+            <div class="review-quote">Native videos make words stick. Hearing real accents, facial expressions, and casual delivery is better than hearing the same polished studio voice all week.<span class="src">— Koto English review, 2026</span></div>
+          </div>
+          <div class="product-section">
+            <h4>最被骂的功能</h4>
+            <ul>
+              <li>语法薄弱，靠 AI Buddy 也补不全</li>
+              <li>高阶学习者觉得内容浅</li>
+              <li>价格相对贵（$250 终身但年付 $89 偏高）</li>
+            </ul>
+          </div>
+          <div class="product-section">
+            <h4>半米可以借鉴</h4>
+            <ul>
+              <li><strong>原生短视频 + 真人口音</strong> —— 半米 §4.5.1 的"短视频讲解"可以学这个：不要纯 TTS + 字幕，要混入<strong>真人朗读 + 不同口音</strong>（K-G6 用 banmi 自录童声，IELTS 用 UK / AUS 口音）</li>
+              <li><strong>AI 角色扮演</strong> —— V0.3+ 可以考虑"用学过的词跟 AI 对话练运用"，对标 Memrise AI Buddies</li>
+              <li><strong>避坑：</strong>不要走 Memrise 的"语法薄弱"老路，半米词汇 +0E 写作课程绑定，语法在 0E 补</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 第四节：核心功能 List ============ -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">问题 1：核心功能 List（最小可用词汇系统）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>从 18 家产品反向归纳，<strong>一个最小可用的词汇系统必须有这 8 项核心功能</strong>。每项标"为什么核心 / 谁做得好 / 半米总纲覆盖状态"。</p>
+
+      <!-- F1 -->
+      <div class="feat-card">
+        <div class="feat-head">
+          <div class="feat-num">1</div>
+          <div class="feat-title">SRS 间隔重复调度</div>
+        </div>
+        <div class="feat-meta">
+          <span class="diff-h">实现难度：高</span>
+          <span class="cov-y">半米覆盖：✅ §8 phase 9 统一池</span>
+        </div>
+        <p><strong>为什么核心：</strong>背单词如果没有 SRS，学过就忘是必然。所有 18 家里只有 LingQ / Readlang / YouGlish 没有完整 SRS，其余 15 家都有。这是<strong>入场门槛</strong>。</p>
+        <p><strong>谁做得好：</strong>Anki（FSRS 个人拟合）／Lingvist（AI 拟合每个学习者）／墨墨背单词（艾宾浩斯曲线 + 词书全）／Brainscape（5 档信心评分）。</p>
+        <p><strong>半米状态：</strong>已锁混合 SRS —— 当天真实时间 + 跨天学习日（day 1 / 2 / 4 / 7 / 15 / 30）。三档答题按钮（不会 / 模糊 / 会）。<strong>升级路径：</strong>V0.3+ 可考虑 FSRS 风格的个体遗忘曲线拟合。</p>
+      </div>
+
+      <!-- F2 -->
+      <div class="feat-card">
+        <div class="feat-head">
+          <div class="feat-num">2</div>
+          <div class="feat-title">Context-rich 词卡（不是孤立单词 + 中文）</div>
+        </div>
+        <div class="feat-meta">
+          <span class="diff-m">实现难度：中</span>
+          <span class="cov-y">半米覆盖：✅ §6 schema 强制 context</span>
+        </div>
+        <p><strong>为什么核心：</strong>研究证实"context-rich"是 vocabulary retention 的核心。Nation &amp; Webb 实验对 12 种背词练习排序，cloze（context 补全）排第二，效果远超孤立背中文释义。</p>
+        <p><strong>谁做得好：</strong>不背单词（150 万+ 原声例句）／LingQ（import 任何文本）／WordUp（25,000 词全挂电影例句）／Reverso Context（双语 movie subtitle 例句库）。</p>
+        <p><strong>半米状态：</strong>schema 强制带 sentence_en + sentence_zh + collocation。<strong>建议加强：</strong>V0.2 阅读联动让"原句即学习材料"，比孤立例句更高价值（半米 §9 已写）。</p>
+      </div>
+
+      <!-- F3 -->
+      <div class="feat-card">
+        <div class="feat-head">
+          <div class="feat-num">3</div>
+          <div class="feat-title">多题型测试（不只是看英选中）</div>
+        </div>
+        <div class="feat-meta">
+          <span class="diff-m">实现难度：中</span>
+          <span class="cov-y">半米覆盖：✅ §7 5 类题型</span>
+        </div>
+        <p><strong>为什么核心：</strong>单一题型（看英选中）只测识别不测运用，<strong>4-5 种题型轮换</strong>是中位线产品的最低配置。</p>
+        <p><strong>谁做得好：</strong>Quizlet（Match / Test / Learn / Write 多模式）／Vocabulary.com（10 种题型 + 20 级 mastery）／扇贝单词（拼写 + 例句 + 短语搭配多题型）。</p>
+        <p><strong>半米状态：</strong>§7 已 deepen 5 类（T1 看英选中 / T2 看中选英 / T3 原句 cloze / T4 collocation / T5 听音拼写）+ V0.2 T6 片段听辨。V0.1.5 取 T1+T3。</p>
+      </div>
+
+      <!-- F4 -->
+      <div class="feat-card">
+        <div class="feat-head">
+          <div class="feat-num">4</div>
+          <div class="feat-title">发音 + 跟读 / 听音</div>
+        </div>
+        <div class="feat-meta">
+          <span class="diff-m">实现难度：中</span>
+          <span class="cov-p">半米覆盖：🟡 IPA 有，跟读 V0.2+</span>
+        </div>
+        <p><strong>为什么核心：</strong>词汇不是 silent vocab —— 听不懂的词等于没学。每个词卡至少要有 IPA + 朗读，进阶要有跟读评分。</p>
+        <p><strong>谁做得好：</strong>百词斩（真人朗读 + 多口音）／Memrise（native videos）／Drops（每词都有 TTS + 重复跟读）／不背单词（150 万原声例句）。</p>
+        <p><strong>半米状态：</strong>§6 schema 有 IPA 字段。<strong>建议补：</strong>V0.1.5 加 audio_url 字段 + Web Audio TTS（Azure / Forvo），V0.2+ 加跟读评分（接 phase 0E 写作 / 0C 听力同一套语音 API）。</p>
+      </div>
+
+      <!-- F5 -->
+      <div class="feat-card">
+        <div class="feat-head">
+          <div class="feat-num">5</div>
+          <div class="feat-title">收藏 / 生词本 / 错题词联动</div>
+        </div>
+        <div class="feat-meta">
+          <span class="diff-l">实现难度：低</span>
+          <span class="cov-y">半米覆盖：✅ §3 三大来源 + §9 阅读联动</span>
+        </div>
+        <p><strong>为什么核心：</strong>学习者必须能"<strong>把刚遇到的词当场抓住</strong>"。这是 Anki / Quizlet / 扇贝 / 墨墨 都默认有的功能，缺它产品没法用。</p>
+        <p><strong>谁做得好：</strong>Readlang（点词即建卡）／LingQ（5 级 known 状态打标）／不背单词（阅读 + 听力词都进生词本）。</p>
+        <p><strong>半米状态：</strong>三大来源（reading_lookup / reading_unknown / wrong_answer / manual / teacher / official / video / writing）已锁。<strong>这是半米最大的护城河之一</strong> —— 8 种来源汇入同一个 SRS 池。</p>
+      </div>
+
+      <!-- F6 -->
+      <div class="feat-card">
+        <div class="feat-head">
+          <div class="feat-num">6</div>
+          <div class="feat-title">官方词库 / 应试词表选择</div>
+        </div>
+        <div class="feat-meta">
+          <span class="diff-l">实现难度：低（内容工程）</span>
+          <span class="cov-y">半米覆盖：✅ §5 5 个官方词库</span>
+        </div>
+        <p><strong>为什么核心：</strong>K12 学员要应试 —— 必须有"中考 / 高考 / 雅思 / 托福" 词表。这是中国市场区别于全球市场的<strong>必须项</strong>。</p>
+        <p><strong>谁做得好：</strong>墨墨背单词（词书最全 几乎所有教材 + 真题）／百词斩（紧扣教材）／扇贝单词（真题例句）。</p>
+        <p><strong>半米状态：</strong>5 个官方词库 V0.2 上线（小学+小升初 1500 / 中考 1600 / 高考 3500 / 雅思 5500 / 托福 8000）。版本化要求 §5 已锁。</p>
+      </div>
+
+      <!-- F7 -->
+      <div class="feat-card">
+        <div class="feat-head">
+          <div class="feat-num">7</div>
+          <div class="feat-title">每日上限 + 复习负债管理</div>
+        </div>
+        <div class="feat-meta">
+          <span class="diff-l">实现难度：低</span>
+          <span class="cov-y">半米覆盖：✅ §8 已规划</span>
+        </div>
+        <p><strong>为什么核心：</strong>Anki 的最大教训 —— 不限新词上限导致<strong>复习负债压垮学习者</strong>（最终弃用率 70%+）。墨墨用"两天不打卡复习量翻倍"被骂同样问题。</p>
+        <p><strong>谁做得好：</strong>FSRS Helper 插件 / Lingvist（AI 强制每日上限） / Brainscape（confidence-based 自然节奏控制）。</p>
+        <p><strong>半米状态：</strong>§8 已写每日新词 / 复习上限 + overdue 自动滚动 + backlog 高时停新词 + 老师端显示"复习负荷"。<strong>这是半米 vs 百词斩的关键差异之一</strong>。</p>
+      </div>
+
+      <!-- F8 -->
+      <div class="feat-card">
+        <div class="feat-head">
+          <div class="feat-num">8</div>
+          <div class="feat-title">视频 / 真实场景片段</div>
+        </div>
+        <div class="feat-meta">
+          <span class="diff-h">实现难度：高（自建）/ 低（嵌入）</span>
+          <span class="cov-y">半米覆盖：✅ §4.5.3 三层方案</span>
+        </div>
+        <p><strong>为什么核心：</strong>2024-2026 已经从"加分项"变成"中位线" —— Memrise / WordUp / 百词斩 / FluentU / 不背单词都有，半米必须跟上。</p>
+        <p><strong>谁做得好：</strong>WordUp（25,000 词全挂电影例句）／FluentU（Netflix/YouTube 互动字幕）／YouGlish（数百万 YouTube 字幕索引）／PlayPhrase.me（AI 语音识别影视片段）。</p>
+        <p><strong>半米状态：</strong>Layer 1 YouGlish iframe（V0.2 即上）／ Layer 2 自建 yt-dlp + Postgres FTS（V0.3+）／ Layer 3 影视片段（V0.4+ 谨慎）。<strong>详见第六章深挖。</strong></p>
+      </div>
+
+      <hr class="soft">
+
+      <div class="callout good">
+        <strong>✅ 评估结论：</strong>半米总纲已经覆盖 8 个核心功能中的 <strong>7.5 项</strong>（发音 / 跟读半覆盖）。<strong>剩下要补的是 F4 跟读评分 + 建议加 F9（游戏化 streak）+ F10（社群对战，可选）</strong>。
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 第五节：用户最爱 Top 10 ============ -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">问题 2：用户最爱功能 Top 10（含真实评论）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>从 App Store / Google Play / 知乎 / Reddit / 少数派 / Trustpilot 抓的真实用户原话，归纳出 10 个被夸最多的功能。每项标<strong>实现难度</strong> + <strong>半米可借鉴度</strong>。</p>
+
+      <!-- L1 -->
+      <div class="feat-card">
+        <div class="feat-head">
+          <div class="feat-num">1</div>
+          <div class="feat-title">"它知道我什么时候要忘" —— 个人化遗忘曲线</div>
+        </div>
+        <div class="feat-meta">
+          <span class="diff-h">实现难度：高</span>
+          <span class="cov-y">半米借鉴度：高（V0.3+ 升级）</span>
+        </div>
+        <div class="review-quote">FSRS personalized to my memory patterns. After 3000 reviews it knows when I'll forget better than I do.<span class="src">— Anki 用户 / Reddit</span></div>
+        <div class="review-quote">墨墨提供了背单词者自己的遗忘曲线估计图，背得越多估计就越准确。<span class="src">— 知乎产品分析</span></div>
+        <p><strong>给半米：</strong>V0.2 跑通经验法则 SRS 后，V0.3+ 引入 FSRS 风格的个人遗忘曲线拟合，且在 UI 上明示"系统已学习你的遗忘规律"。</p>
+      </div>
+
+      <!-- L2 -->
+      <div class="feat-card">
+        <div class="feat-head">
+          <div class="feat-num">2</div>
+          <div class="feat-title">"真实场景片段 / 听真人说" —— 不再是 silent vocab</div>
+        </div>
+        <div class="feat-meta">
+          <span class="diff-m">实现难度：中</span>
+          <span class="cov-y">半米借鉴度：高（V0.2 Layer 1 即上）</span>
+        </div>
+        <div class="review-quote">Native videos make words stick. Hearing real accents, facial expressions, and casual delivery is better than hearing the same polished studio voice all week.<span class="src">— Memrise / Koto English</span></div>
+        <div class="review-quote">不背单词 150 万+ 原声例句，在英美剧纪录片中学单词，例句和发音比较不错。<span class="src">— 知乎对比评测</span></div>
+        <p><strong>给半米：</strong>Layer 1 YouGlish iframe 当天就能上；Layer 2 自建字幕索引控制内容质量。详见第六章。</p>
+      </div>
+
+      <!-- L3 -->
+      <div class="feat-card">
+        <div class="feat-head">
+          <div class="feat-num">3</div>
+          <div class="feat-title">"上传笔记一键转 flashcards" —— Magic Notes</div>
+        </div>
+        <div class="feat-meta">
+          <span class="diff-m">实现难度：中</span>
+          <span class="cov-p">半米借鉴度：中（V0.1.5 加 manual_import 增强）</span>
+        </div>
+        <div class="review-quote">Magic Notes turned my 12 pages of bio notes into 80 flashcards in 30 seconds. About 85% were good without editing.<span class="src">— Fortune Education</span></div>
+        <p><strong>给半米：</strong>manual_import 入口可以加"粘贴英文段落 → AI 提取重点词 → 自动建卡"，K12 学员可以扫考卷错题段落 + OCR 进词汇本。</p>
+      </div>
+
+      <!-- L4 -->
+      <div class="feat-card">
+        <div class="feat-head">
+          <div class="feat-num">4</div>
+          <div class="feat-title">"图背单词" —— 视觉记忆 + 趣味例句</div>
+        </div>
+        <div class="feat-meta">
+          <span class="diff-m">实现难度：中（AI 生图批量）</span>
+          <span class="cov-y">半米借鉴度：高（§4.5.1 已锁）</span>
+        </div>
+        <div class="review-quote">百词斩的优点是紧扣教材、巩固复习、稳定增长、快速上手。蹭热梗 / 明星 / 网络梗的例句让小孩愿意背。<span class="src">— 知乎</span></div>
+        <p><strong>给半米：</strong>已锁 AI 生图 + banmi 视觉 token，关键词人工抽检。建议给小学 / 初中词库走"卡通拟人风"，雅思 / 托福走"学术抽象风"。</p>
+      </div>
+
+      <!-- L5 -->
+      <div class="feat-card">
+        <div class="feat-head">
+          <div class="feat-num">5</div>
+          <div class="feat-title">"streak / 排行榜 / 单词 PK" —— 游戏化驱动</div>
+        </div>
+        <div class="feat-meta">
+          <span class="diff-l">实现难度：低</span>
+          <span class="cov-n">半米借鉴度：高（总纲未明确）</span>
+        </div>
+        <div class="review-quote">沪江开心词场的最大特色就是游戏性，小单元闯关，连对提示音「叮」让人一直想对下去。排行榜机制和竞技场模式增强了求胜欲。<span class="src">— 人人都是产品经理</span></div>
+        <div class="review-quote">Duolingo's streak is the single most powerful retention mechanic in language apps. Users learn for 500-day streaks they don't even use the language for.<span class="src">— BGR 2026</span></div>
+        <p><strong>给半米（重点补）：</strong>总纲未明确游戏化设计。建议 V0.1.5 加 <strong>每日学习 streak + 周排行（同班 / 同年级）</strong>，V0.2+ 加单词 PK（同学间）。<strong>对 K12 学员尤其有效</strong>。</p>
+      </div>
+
+      <!-- L6 -->
+      <div class="feat-card">
+        <div class="feat-head">
+          <div class="feat-num">6</div>
+          <div class="feat-title">"看英文剧学单词" —— 阅读 / 观影联动</div>
+        </div>
+        <div class="feat-meta">
+          <span class="diff-m">实现难度：中</span>
+          <span class="cov-y">半米借鉴度：高（§9 已锁）</span>
+        </div>
+        <div class="review-quote">FluentU's strength is turning passive video watching into active vocabulary acquisition. You're not just watching, you're clicking, saving, reviewing, and quizzing.<span class="src">— FluentU review</span></div>
+        <div class="review-quote">LingQ 让 import any content 变成你的学习材料。读你真心想读的东西，词汇自动沉淀。<span class="src">— LingQ 用户</span></div>
+        <p><strong>给半米：</strong>这就是半米的核心护城河 §9 阅读联动。V0.2+ 扩展到听力字幕点词。</p>
+      </div>
+
+      <!-- L7 -->
+      <div class="feat-card">
+        <div class="feat-head">
+          <div class="feat-num">7</div>
+          <div class="feat-title">"原句 cloze" —— 不是孤立填空，是文章原句</div>
+        </div>
+        <div class="feat-meta">
+          <span class="diff-l">实现难度：低</span>
+          <span class="cov-y">半米借鉴度：高（§7 T3 已锁）</span>
+        </div>
+        <div class="review-quote">Cloze exercises ranked #2 in vocabulary retention out of 12 vocabulary learning exercises tested by Nation & Webb.<span class="src">— 学术研究</span></div>
+        <p><strong>给半米：</strong>§7 T3 已用收藏时的原句做 cloze。<strong>这是 banmi 跟孤立背词 App 的核心差异点</strong>。</p>
+      </div>
+
+      <!-- L8 -->
+      <div class="feat-card">
+        <div class="feat-head">
+          <div class="feat-num">8</div>
+          <div class="feat-title">"信心评分" —— 5 档自评激发元认知</div>
+        </div>
+        <div class="feat-meta">
+          <span class="diff-l">实现难度：低</span>
+          <span class="cov-p">半米借鉴度：中（已有 3 档，可考虑扩 5 档）</span>
+        </div>
+        <div class="review-quote">Confidence-based repetition makes you rate how sure you felt. This metacognitive step alone deepens memory.<span class="src">— Brainscape Academy</span></div>
+        <p><strong>给半米：</strong>V0.1.5 用 3 档（不会 / 模糊 / 会）够了，V0.2+ 可加第 4 档"太简单"（Easy） —— Anki 也是这样的 4 档。</p>
+      </div>
+
+      <!-- L9 -->
+      <div class="feat-card">
+        <div class="feat-head">
+          <div class="feat-num">9</div>
+          <div class="feat-title">"已知 vs 未知 图谱" —— 学习进度可视化</div>
+        </div>
+        <div class="feat-meta">
+          <span class="diff-l">实现难度：低</span>
+          <span class="cov-y">半米借鉴度：高（§4.5.5 已锁）</span>
+        </div>
+        <div class="review-quote">WordUp helps you build a map of your knowledge by identifying the words you know and the words you don't know. Seeing the gap is motivating.<span class="src">— WordUp 官网</span></div>
+        <p><strong>给半米（重点扩展）：</strong>§4.5.5 已锁"碰过 vs 没碰过"。<strong>建议 UI 加上"你已经在阅读里碰到 X% 雅思词"的进度条</strong>，给学生强激励感。</p>
+      </div>
+
+      <!-- L10 -->
+      <div class="feat-card">
+        <div class="feat-head">
+          <div class="feat-num">10</div>
+          <div class="feat-title">"AI Buddy 角色扮演" —— 学过的词跟 AI 对话练运用</div>
+        </div>
+        <div class="feat-meta">
+          <span class="diff-m">实现难度：中</span>
+          <span class="cov-n">半米借鉴度：中（V0.3+ 考虑）</span>
+        </div>
+        <div class="review-quote">Memrise AI Buddies offer specialized practice for grammar, role-play, translation, and culture. It's like having a patient tutor.<span class="src">— Memrise review 2026</span></div>
+        <p><strong>给半米：</strong>V0.3+ 可加"用你这周学的 20 个词跟 AI 角色扮演一段对话"，绑 phase 0E 写作课程 + 0C 听力。<strong>不是 V0.2 优先级</strong>。</p>
+      </div>
+
+      <hr class="soft">
+
+      <div class="callout accent">
+        <strong>🎯 给阿杰的 retention 杠杆（按 ROI 排）：</strong>
+        <ol>
+          <li><strong>L5 游戏化 streak + 排行榜</strong>（低难度 / 总纲未明确 / 对 K12 学员效果最强）→ V0.1.5 加</li>
+          <li><strong>L9 已知/未知 图谱进度条</strong>（低难度 / 已锁但 UI 加强）→ V0.2 重点</li>
+          <li><strong>L2 真实场景片段</strong>（中难度 / 已锁 Layer 1）→ V0.2 上线</li>
+          <li><strong>L3 Magic Notes 风 manual_import 增强</strong>（中难度 / 总纲已有但可深化）→ V0.1.5 加</li>
+          <li><strong>L4 精美图卡 banmi 风格</strong>（中难度 / 已锁）→ V0.2 上线</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 第六节：视频词典深挖（重点） ============ -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">问题 3：视频词典如何实施（三层方案完整深挖）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout accent">
+        <strong>本章是阿杰最关心的问题。</strong>半米总纲 §4.5.3 已锁三层方案，本章把每一层<strong>完整拆透</strong> —— 代码可读，pipeline 可跑，成本可算，并在底部<strong>嵌入一个真实可玩的 YouGlish widget</strong>，阿杰可以直接搜词看片段。
+      </div>
+
+      <h3>6.1 三层方案总览</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>层</th><th>阶段</th><th>技术</th><th>开发成本</th><th>运营成本</th><th>对应产品</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Layer 1</td><td>V0.2 即上</td><td>YouGlish iframe widget</td><td>0.5 人周</td><td>免费（教育）/ €25-300/月（商业）</td><td>YouGlish</td></tr>
+            <tr><td>Layer 2</td><td>V0.3+</td><td>yt-dlp + Postgres FTS / ES + YouTube iframe</td><td>3 人月</td><td>服务器 + Redis ≈ ¥500/月</td><td>对标 FluentU 后端</td></tr>
+            <tr><td>Layer 3</td><td>V0.4+ 谨慎</td><td>OpenSubtitles + Whisper + 影视片段</td><td>6+ 人月</td><td>版权风险高</td><td>PlayPhrase / Yarn / FluentU</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>6.2 Layer 1：YouGlish Widget 完整拆解（V0.2 立即上）</h3>
+
+      <h4>(1) 授权阶梯（2026-05-23 官方文档查实）</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>用途</th><th>价格</th><th>限制</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>非商业教育 / 个人</td><td><strong>免费</strong></td><td>"Powered by YouGlish.com" 必显 + YouTube ToS 链接 + 最小 200×200px</td></tr>
+            <tr><td>商业 Hobby</td><td>€25/月</td><td>500 reqs/天 + attribution</td></tr>
+            <tr><td>商业 Small Business</td><td>€300/月</td><td>1 万 reqs/天 + attribution</td></tr>
+            <tr><td>Corporate</td><td>定制</td><td>移除 attribution + SLA + 无限请求</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout warn">
+        <strong>临界点：</strong>€300/月 × 12 = €3,600/年 ≈ Layer 2 自建开发成本（3 人月）。这是 V0.3+ 升级到 Layer 2 的<strong>财务触发条件</strong>。
+      </div>
+
+      <h4>(2) 真实嵌入代码（可直接 copy）</h4>
+      <p>外部 script：</p>
+<pre><code>&lt;script src="https://youglish.com/public/emb/widget.js" async&gt;&lt;/script&gt;</code></pre>
+      <p>HTML 容器：</p>
+<pre><code>&lt;div id="widget-banmi"&gt;&lt;/div&gt;</code></pre>
+      <p>JS 初始化（API ready callback）：</p>
+<pre><code>function onYouglishAPIReady() {
+  window.ygWidget = new YG.Widget("widget-banmi", {
+    width: 640,
+    components: 9,           // bitwise: 1 search + 8 caption
+    autoStart: 1,
+    captionSize: 14,
+    restrictionMode: 0,      // K-G6 改成 1（Kid Mode）
+    videoQuality: "default",
+    events: {
+      onFetchDone: (data) =&gt; console.log("found", data.totalResult),
+      onVideoChange: (data) =&gt; console.log("track", data.trackNumber),
+      onCaptionConsumed: (data) =&gt; console.log("caption done", data.id)
+    }
+  });
+  window.ygWidget.fetch("significant", "english", "us");
+}</code></pre>
+
+      <h4>(3) JS API 完整方法（控制播放）</h4>
+      <p>查实 <code>youglish.com/api/doc/js-api</code> 拿到的完整接口：</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>方法</th><th>用途</th></tr></thead>
+          <tbody>
+            <tr><td><code>fetch(query, lang, accent)</code></td><td>搜索新词，载入第一段</td></tr>
+            <tr><td><code>play() / pause() / replay()</code></td><td>播放控制</td></tr>
+            <tr><td><code>next() / previous()</code></td><td>切换视频片段</td></tr>
+            <tr><td><code>move(seconds)</code></td><td>前进 / 后退秒数</td></tr>
+            <tr><td><code>setSpeed(rate)</code></td><td>0-2 倍速（0.75x 减速最适合学习）</td></tr>
+            <tr><td><code>close()</code></td><td>关闭 widget</td></tr>
+            <tr><td><code>addEventListener / removeEventListener</code></td><td>注册事件</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>(4) 关键 accent 选项（半米官方词库直接对应）</h4>
+      <ul>
+        <li><code>us</code> US English — 托福 / SAT 词库默认</li>
+        <li><code>uk</code> UK English — 雅思 / KET / PET 词库默认</li>
+        <li><code>aus</code> Australian — 雅思高级</li>
+        <li><code>can / irl / sco / nz</code> 其他 7 种英语口音</li>
+      </ul>
+
+      <h4>(5) Kid Mode（K-G6 词库必用）</h4>
+      <p>设置 <code>restrictionMode: 1</code>，YouGlish 会自动过滤成人内容、脏话、暴力片段，对小学+小升初词库（1500 词）必须开启。</p>
+
+      <div class="callout good">
+        <strong>✅ 落地 checklist（V0.2 上线前）：</strong>
+        <ul>
+          <li>词卡页面底部嵌 widget（高度 380-440px）</li>
+          <li>"Powered by YouGlish.com" 显示在 widget 下方（不能藏）</li>
+          <li>页脚加 YouTube ToS + Google Privacy 链接</li>
+          <li>同一页面只创建一个 widget instance（多次 fetch 复用）</li>
+          <li>K-G6 词库 <code>restrictionMode: 1</code></li>
+          <li>埋点：<code>vocab_clip_play</code> event（半米 §10 已规划）</li>
+          <li>记录学生点了哪些片段，给老师 Dashboard 看</li>
+        </ul>
+      </div>
+
+      <h3>6.3 Layer 2：banmi 自建 YouTube 字幕索引（V0.3+）</h3>
+
+      <h4>(1) Pipeline 总览</h4>
+      <pre><code>1. yt-dlp 批量抓字幕（不下视频本体）
+   ↓
+2. 字幕 .vtt / .srt 解析成结构化 segment
+   ↓
+3. 写入 Postgres FTS / Elasticsearch
+   (video_id + start_ts + end_ts + sentence + word_index + channel + license)
+   ↓
+4. 学生查词 → query 索引 → 返回片段列表（按相关度 / 频道质量 / 难度排序）
+   ↓
+5. 前端用 YouTube iframe ?start=120&end=128 自动播放对应片段
+   (视频从 YouTube 直接拉流，banmi 不存视频本体)
+   ↓
+6. Redis 缓存热门查询结果</code></pre>
+
+      <h4>(2) yt-dlp 命令实战</h4>
+      <p>抓单视频字幕（不下视频）：</p>
+<pre><code>yt-dlp --write-subs --sub-lang en --skip-download \
+  --convert-subs srt \
+  "https://www.youtube.com/watch?v=VIDEO_ID"</code></pre>
+      <p>批量抓整个 TED 频道：</p>
+<pre><code>yt-dlp --write-subs --sub-lang en --skip-download \
+  --convert-subs srt \
+  --download-archive ted_archive.txt \
+  -P "subtitles:./subs/ted/" \
+  "https://www.youtube.com/@TED"</code></pre>
+      <p>抓多语种（含 auto-generated）：</p>
+<pre><code>yt-dlp --write-subs --write-auto-subs --sub-langs "en.*" \
+  --skip-download --convert-subs srt \
+  "URL_OR_CHANNEL"</code></pre>
+
+      <h4>(3) Postgres FTS schema</h4>
+<pre><code>CREATE TABLE subtitle_segment (
+  id BIGSERIAL PRIMARY KEY,
+  video_id TEXT NOT NULL,           -- YouTube video ID
+  channel_id TEXT NOT NULL,
+  channel_name TEXT NOT NULL,
+  license TEXT NOT NULL,            -- 'CC-BY' / 'standard_youtube' / 'banmi_owned'
+  start_ts REAL NOT NULL,           -- 秒
+  end_ts REAL NOT NULL,
+  sentence TEXT NOT NULL,
+  lang TEXT NOT NULL DEFAULT 'en',
+  cefr_estimated TEXT,              -- 后期可加 CEFR 估算
+  search_vector TSVECTOR,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- GIN 索引（百万级行依然亚秒级查询）
+CREATE INDEX idx_subseg_fts ON subtitle_segment USING GIN(search_vector);
+
+-- 触发器：sentence 更新自动重建 tsvector
+CREATE TRIGGER tsv_update BEFORE INSERT OR UPDATE
+ON subtitle_segment FOR EACH ROW EXECUTE FUNCTION
+tsvector_update_trigger(search_vector, 'pg_catalog.english', sentence);
+
+-- 查词的 SQL
+SELECT video_id, start_ts, end_ts, sentence, channel_name
+FROM subtitle_segment
+WHERE search_vector @@ plainto_tsquery('english', $1)
+  AND license IN ('CC-BY', 'banmi_owned')
+ORDER BY ts_rank(search_vector, plainto_tsquery('english', $1)) DESC
+LIMIT 20;</code></pre>
+
+      <h4>(4) 前端 YouTube iframe 时间戳跳转</h4>
+<pre><code>// 给定 video_id + start + end
+const url = `https://www.youtube.com/embed/${videoId}` +
+  `?start=${Math.floor(startTs)}` +
+  `&end=${Math.ceil(endTs)}` +
+  `&autoplay=1&modestbranding=1&rel=0`;
+
+// React 组件
+&lt;iframe
+  width="560" height="315"
+  src={url}
+  frameBorder="0"
+  allow="autoplay; encrypted-media"
+  allowFullScreen
+/&gt;</code></pre>
+
+      <h4>(5) 工期 + 成本估算</h4>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>阶段</th><th>工作</th><th>工期</th></tr></thead>
+          <tbody>
+            <tr><td>W1-2</td><td>yt-dlp pipeline + 字幕解析器 + 第一批 CC 频道（TED / SciShow / Khan）</td><td>2 周</td></tr>
+            <tr><td>W3-4</td><td>Postgres schema + GIN 索引 + 查词 API</td><td>2 周</td></tr>
+            <tr><td>W5-6</td><td>前端 iframe 播放 + 词卡集成 + 片段缩略图</td><td>2 周</td></tr>
+            <tr><td>W7-8</td><td>Redis 缓存 + 排序优化（相关度 / 频道质量 / 难度）+ 埋点</td><td>2 周</td></tr>
+            <tr><td>W9-12</td><td>扩展到 30 个频道 + 内容审校（Joy / Dong 抽检）</td><td>4 周</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>总计：</strong>3 人月（1 名工程师 + 0.5 名内容审校） · 服务器成本 ¥300-500/月（Postgres 中等实例 + Redis）。</p>
+
+      <h3>6.4 Layer 3：影视片段（V0.4+ 谨慎评估）</h3>
+
+      <h4>(1) PlayPhrase.me / Yarn 技术解构</h4>
+      <ul>
+        <li><strong>数据库规模：</strong>PlayPhrase 1000 万+ phrases，每天新增 2000-5000 条</li>
+        <li><strong>索引方式：</strong>不是单纯字幕匹配，是<strong>AI 语音识别 + 字幕</strong>双重索引（应对字幕和音频不同步、多人同时说话等情况）</li>
+        <li><strong>数据源：</strong>OpenSubtitles（5000 万+ 字幕条目，REST API 免费用户 20 下载/天）+ 自家爬取 IMDb 高分剧集 + 用户上传</li>
+        <li><strong>影视视频本体：</strong>这是核心版权风险 —— PlayPhrase 用的是<strong>用户上传 +"短片段属于 fair use"</strong>灰区</li>
+      </ul>
+
+      <h4>(2) banmi 路径建议（保守）</h4>
+      <div class="callout warn">
+        <strong>不建议 V0.2 / V0.3 做 Layer 3 自建。</strong>影视视频本体托管对国际学校内部使用产品风险太高，被告或被下架成本远超收益。
+      </div>
+      <p>替代方案（按风险从低到高）：</p>
+      <ol>
+        <li><strong>直接嵌 PlayPhrase iframe</strong>（如果他们开放 embed） —— 让 PlayPhrase 扛版权</li>
+        <li><strong>跟 OpenSubtitles 合作</strong> —— 用他们的字幕 + 跳转到正版流媒体（Netflix 链接）</li>
+        <li><strong>banmi 自购 / 自录教学视频</strong> —— V0.4+ 长期路径，但成本高（每条 3-5 分钟视频，预估 ¥200-500/条）</li>
+      </ol>
+
+      <h3>6.5 数据源版权清单（实操级）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>频道 / 来源</th><th>许可</th><th>适用半米词库</th><th>风险</th></tr></thead>
+          <tbody>
+            <tr><td>TED Talks（官方）</td><td>CC BY-NC-ND</td><td>雅思 / 托福</td><td>低</td></tr>
+            <tr><td>TED-Ed</td><td>CC BY-NC-ND</td><td>K-G6 / 中考</td><td>低</td></tr>
+            <tr><td>Khan Academy</td><td>CC BY-NC-SA</td><td>全词库（学科例句）</td><td>低</td></tr>
+            <tr><td>Crash Course</td><td>CC BY-SA</td><td>高考 / 雅思学科</td><td>低</td></tr>
+            <tr><td>SciShow / SciShow Kids</td><td>standard YouTube（限制嵌入 OK）</td><td>K-G6 / 中考</td><td>低（仅嵌入）</td></tr>
+            <tr><td>National Geographic</td><td>standard YouTube</td><td>高考 / 雅思</td><td>低（仅嵌入）</td></tr>
+            <tr><td>CC 标记的任意 YouTube</td><td>CC BY</td><td>全词库</td><td>低</td></tr>
+            <tr><td>banmi 自录 / 自购视频</td><td>banmi 拥有</td><td>全词库</td><td>无</td></tr>
+            <tr><td>影视字幕 OpenSubtitles</td><td>字幕本身可用，视频本体不可托管</td><td>仅 V0.4+ Layer 3</td><td>高（视频本体）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>6.6 重复播放设计（响应阿杰原话）</h3>
+      <blockquote>阿杰原话："希望通过几个片段的重复播放帮助用户记牢单词。"</blockquote>
+      <ul>
+        <li>词卡复习页底部放 3-5 个片段缩略图</li>
+        <li>0.75x 减速播放（YouGlish API 支持 <code>setSpeed(0.75)</code>）</li>
+        <li>字幕高亮目标词（YouGlish caption 自带高亮，自建 Layer 2 用 <code>&lt;mark&gt;</code> 包词）</li>
+        <li>复习时随机抽 1-2 个片段播，下次复习换另外的（防止单一片段记忆固化）</li>
+        <li>event <code>vocab_clip_play</code> 记录哪些片段播过几次，反向反馈片段质量</li>
+        <li>"循环播放当前片段 3 次"按钮（默认 3 次比较合理）</li>
+      </ul>
+
+      <h3>6.7 可玩 demo —— 在报告里搜词看视频</h3>
+      <p>下面是<strong>真实嵌入的 YouGlish widget</strong>。输入你想查的词（默认搜 <code>significant</code>），点"搜片段"看真实 YouTube 视频片段。这是 V0.2 半米词卡页底部的实际形态。</p>
+
+      <div class="youglish-host">
+        <div class="youglish-search">
+          <input type="text" id="ygQueryInput" placeholder="输入英文词，比如 significant / approach / develop" value="significant">
+          <button id="ygSearchBtn">▶ 搜片段</button>
+        </div>
+        <div class="youglish-search">
+          <button class="preset" data-w="significant">significant</button>
+          <button class="preset" data-w="develop">develop</button>
+          <button class="preset" data-w="approach">approach</button>
+          <button class="preset" data-w="environment">environment</button>
+          <button class="preset" data-w="vocabulary">vocabulary</button>
+          <button class="preset" data-w="curriculum">curriculum</button>
+        </div>
+        <div id="ygWidgetMount"></div>
+        <div class="yg-status" id="ygStatus">点击"搜片段"加载 YouGlish widget · Powered by <a href="https://youglish.com" target="_blank" rel="noopener">YouGlish.com</a></div>
+        <div class="yg-status">
+          <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener">YouTube ToS</a> ·
+          <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 第七节：半米 vs 市场 ============ -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">半米词汇系统 vs 市场（差异 + 借鉴优先级）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>7.1 半米总纲已覆盖的 vs 还可借鉴的</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>能力</th><th>半米已覆盖</th><th>市场参考</th><th>优先级</th></tr></thead>
+          <tbody>
+            <tr><td>SRS 间隔重复</td><td class="check y">✅ §8 phase 9 混合</td><td>Anki FSRS / 墨墨 / Lingvist</td><td>V0.1.5 必须</td></tr>
+            <tr><td>统一 schema（来源分离 / 复习合并）</td><td class="check y">✅ §2 三铁律</td><td><strong>市面无对标</strong></td><td>V0.1 已锁，半米独门</td></tr>
+            <tr><td>阅读自然沉淀</td><td class="check y">✅ §9</td><td>LingQ / FluentU / Readlang</td><td>V0.1 主战场</td></tr>
+            <tr><td>多题型测试</td><td class="check y">✅ §7 5 类</td><td>Quizlet / Vocabulary.com</td><td>V0.1.5 + V0.2 渐进</td></tr>
+            <tr><td>官方词库（5 个 K12 / 应试）</td><td class="check y">✅ §5</td><td>墨墨 / 百词斩 / 扇贝</td><td>V0.2 主战场</td></tr>
+            <tr><td>课程化精美图 + 短视频</td><td class="check y">✅ §4.5.1</td><td>百词斩 / Memrise / Drops</td><td>V0.2</td></tr>
+            <tr><td>真实场景片段（三层）</td><td class="check y">✅ §4.5.3</td><td>YouGlish / WordUp / FluentU</td><td>L1 V0.2 / L2 V0.3+</td></tr>
+            <tr><td>"碰过 vs 没碰过"图谱</td><td class="check y">✅ §4.5.5</td><td>WordUp（最像）</td><td>V0.2</td></tr>
+            <tr><td>未遇到词主动推送</td><td class="check y">✅ §4.5.6</td><td>Anki review queue</td><td>V0.2</td></tr>
+            <tr><td>一键标 unknown</td><td class="check y">✅ §4.5.4</td><td>LingQ 5 级状态</td><td>V0.1</td></tr>
+            <tr><td>个人 Agent 推送</td><td class="check y">✅ phase 11</td><td>Duolingo notification</td><td>V0.2+</td></tr>
+            <tr><td>老师 Dashboard</td><td class="check y">✅ phase 4</td><td>Quizlet Class / Vocab.com</td><td>V0.2 重点</td></tr>
+            <tr><td><strong>游戏化 streak + 周排行</strong></td><td class="check p">🟡 未明确</td><td>Duolingo / 沪江开心词场</td><td><strong>建议 V0.1.5 补</strong></td></tr>
+            <tr><td><strong>单词 PK / 班级对战</strong></td><td class="check n">⛔ 未规划</td><td>沪江 / 百词斩 / Quizlet Live</td><td><strong>V0.2+ 考虑</strong></td></tr>
+            <tr><td><strong>Magic Notes 风一键转卡</strong></td><td class="check p">🟡 manual_import 浅</td><td>Quizlet Magic Notes</td><td><strong>V0.1.5 增强</strong></td></tr>
+            <tr><td><strong>跟读评分</strong></td><td class="check p">🟡 IPA 有，跟读无</td><td>百词斩 / 流利说 / Speechace API</td><td><strong>V0.2+ 加</strong></td></tr>
+            <tr><td><strong>FSRS 个人遗忘曲线</strong></td><td class="check p">🟡 V0.2 经验法则</td><td>Anki / Lingvist</td><td><strong>V0.3+ 升级</strong></td></tr>
+            <tr><td><strong>AI 角色扮演练运用</strong></td><td class="check n">⛔ 未规划</td><td>Memrise AI Buddies</td><td><strong>V0.3+ 考虑</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>7.2 半米独门 / 市场无对标的 3 项</h3>
+      <div class="callout good">
+        <ol>
+          <li><strong>来源分离 + 复习合并的统一 schema</strong> —— 没有任何一家 toC 词汇 App 同时做了"阅读 + 听力 + 写作 + 错题 + 官方词库" 8 种来源汇入同一个 SRS 池，且让学生只看到"今日词汇复习 N 个"。这是半米最大的护城河。</li>
+          <li><strong>双形态（阅读附属 + 独立完整课程）共用 schema</strong> —— LingQ / Readlang 只做内容沉淀，百词斩 / 墨墨只做主动背词。半米同时做两条且共用底层数据，是市场唯一。</li>
+          <li><strong>K12 国际学校学员 + Joy/Dong 老师 Dashboard 双端</strong> —— 欧美 Quizlet Class 是给老师布置作业的工具，没有"老师精讲弱词 / AI 出教学建议给老师"路径。半米 §11 phase 4 + phase 11 个人 Agent 已规划，对内部学员 vertical 极有效。</li>
+        </ol>
+      </div>
+
+      <h3>7.3 借鉴优先级（按 ROI 排）</h3>
+      <ol>
+        <li><strong>P0 / V0.1.5 必加：</strong> 游戏化 streak + 周排行（成本极低，retention 杠杆极强）</li>
+        <li><strong>P0 / V0.1.5 必加：</strong> Magic Notes 风 manual_import 增强（粘贴英文段 → AI 提取生词）</li>
+        <li><strong>P1 / V0.2 重点：</strong> YouGlish Layer 1 嵌入（半米总纲已锁，按本报告 6.2 节落地）</li>
+        <li><strong>P1 / V0.2 重点：</strong> "碰过 vs 没碰过" 词图谱可视化 + 进度激励文案</li>
+        <li><strong>P1 / V0.2 重点：</strong> 精美图卡批量生成（已锁，注意人工抽检）</li>
+        <li><strong>P2 / V0.2+：</strong> 跟读评分（接 Azure / Speechace API）</li>
+        <li><strong>P2 / V0.2+：</strong> 单词 PK / 班级对战（K12 学员有效）</li>
+        <li><strong>P3 / V0.3+：</strong> FSRS 升级 + Layer 2 自建字幕索引 + AI 角色扮演</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ 第八节：mini demo 区 ============ -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">可玩 mini Demo（在报告里直接玩）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>下面是 4 个 mini demo，对应半米 V0.2 词卡的核心交互。点击 / 选项卡都可以真实操作。</p>
+
+      <div class="demo-grid">
+        <!-- Demo 1: 词卡翻转 -->
+        <div class="demo-card">
+          <h4>① 词卡翻转（点击翻面）</h4>
+          <div class="flip-card" id="flipCard1">
+            <div class="flip-inner">
+              <div class="flip-front">
+                <div class="img-placeholder">🔬</div>
+                <h3 class="word">significant</h3>
+                <div class="ipa">/sɪɡˈnɪfɪkənt/</div>
+                <div class="pos">adj.</div>
+              </div>
+              <div class="flip-back">
+                <p class="meaning">重要的；显著的</p>
+                <p class="sentence-en">This finding is <strong>significant</strong> because it changes how we understand climate.</p>
+                <p class="sentence-zh">这个发现很重要，因为它改变了我们对气候的理解。</p>
+                <div class="collocs">
+                  <span class="colloc-chip">significant finding</span>
+                  <span class="colloc-chip">significant change</span>
+                  <span class="colloc-chip">statistically significant</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flip-hint">📱 点击卡片翻面 · banmi 米黄底 + Newsreader 字体</div>
+        </div>
+
+        <!-- Demo 2: SRS 难度按钮 -->
+        <div class="demo-card">
+          <h4>② SRS 难度按钮（三档自评）</h4>
+          <div class="cloze-box" style="font-family: system-ui; font-size: 14px;">
+            <strong>significant</strong> /sɪɡˈnɪfɪkənt/ — <em>adj.</em> 重要的；显著的
+            <br>
+            <span style="font-size: 12px; color: var(--text-mute);">复习时间：day 4</span>
+          </div>
+          <div class="srs-row">
+            <button class="srs-btn" data-srs="again">
+              <span class="label">不会</span>
+              <span class="interval">→ day 1 重新学</span>
+            </button>
+            <button class="srs-btn" data-srs="hard">
+              <span class="label">模糊</span>
+              <span class="interval">→ 推 day 6</span>
+            </button>
+            <button class="srs-btn" data-srs="good">
+              <span class="label">会</span>
+              <span class="interval">→ 推 day 7</span>
+            </button>
+          </div>
+          <div class="srs-result" id="srsResult1">选一档看看会发生什么 →</div>
+        </div>
+
+        <!-- Demo 3: cloze -->
+        <div class="demo-card">
+          <h4>③ 原句 cloze（半米 T3 题型）</h4>
+          <div class="cloze-box">
+            The research findings are <span class="cloze-blank" id="clozeBlank1">____</span> because they reshape our understanding of climate models worldwide.
+          </div>
+          <div style="font-size: 12px; color: var(--text-mute); margin: 8px 0;">从下方选最合适的词填入：</div>
+          <div class="cloze-choices" id="clozeChoices1">
+            <button class="cloze-choice" data-correct="false" data-word="surprised">surprised</button>
+            <button class="cloze-choice" data-correct="true" data-word="significant">significant</button>
+            <button class="cloze-choice" data-correct="false" data-word="practical">practical</button>
+            <button class="cloze-choice" data-correct="false" data-word="dangerous">dangerous</button>
+          </div>
+          <div class="srs-result" id="clozeResult1">选一个词 →</div>
+        </div>
+
+        <!-- Demo 4: 已知 vs 未知图谱 -->
+        <div class="demo-card">
+          <h4>④ 已知 vs 未知图谱（雅思 5500 词进度）</h4>
+          <div style="margin: 10px 0;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+              <span>🟢 已掌握</span><strong>820</strong>
+            </div>
+            <div style="height: 12px; background: var(--bg-soft); border-radius: 6px; overflow: hidden;">
+              <div style="width: 15%; height: 100%; background: linear-gradient(90deg, #16a34a, #65a30d);"></div>
+            </div>
+          </div>
+          <div style="margin: 10px 0;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+              <span>🔵 学习中</span><strong>460</strong>
+            </div>
+            <div style="height: 12px; background: var(--bg-soft); border-radius: 6px; overflow: hidden;">
+              <div style="width: 8%; height: 100%; background: linear-gradient(90deg, #2563eb, #6d28d9);"></div>
+            </div>
+          </div>
+          <div style="margin: 10px 0;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+              <span>🟡 阅读里碰到过</span><strong>1280</strong>
+            </div>
+            <div style="height: 12px; background: var(--bg-soft); border-radius: 6px; overflow: hidden;">
+              <div style="width: 23%; height: 100%; background: linear-gradient(90deg, #f59e0b, #ea580c);"></div>
+            </div>
+          </div>
+          <div style="margin: 10px 0;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+              <span>⚪ 还没碰过</span><strong>2940</strong>
+            </div>
+            <div style="height: 12px; background: var(--bg-soft); border-radius: 6px; overflow: hidden;">
+              <div style="width: 54%; height: 100%; background: var(--border-strong);"></div>
+            </div>
+          </div>
+          <div class="srs-result" style="margin-top: 16px;">
+            🎯 <strong>你已经走了 46% 的路</strong>（已掌握 + 学习中 + 阅读已遇到 = 2560/5500）<br>
+            <span style="font-size: 12px;">系统建议今天背 20 个核心未遇到词 → 进 SRS 队列</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <strong>📝 demo 注释：</strong>这 4 个 demo 都是<strong>纯 HTML/CSS/JS</strong> 实现，没有任何外部依赖（除了第 6 章的 YouGlish widget）。半米前端工程师可以直接拿这些代码做 V0.2 词卡组件的起点。
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 第九节：路线图 ============ -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">24 周开发路线图</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>对应半米总纲 §0.1 MVP 分阶段。颜色对应 V0.1 / V0.1.5 / V0.2 / V0.3+。</p>
+
+      <div class="roadmap">
+        <div class="roadmap-row">
+          <div class="roadmap-week">W1-3</div>
+          <div class="roadmap-bar v1" style="width: 55%;">📖 V0.1 阅读 LE 查词 + 收藏 + 一键标 unknown + event_log</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W4-5</div>
+          <div class="roadmap-bar v1" style="width: 40%;">📊 阅读 Vocabulary Digest（3-8 高价值词）</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W6-7</div>
+          <div class="roadmap-bar v1" style="width: 35%;">🎯 老师 Dashboard 看查词密度 + 生词本</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W8-10</div>
+          <div class="roadmap-bar v2" style="width: 60%;">📔 V0.1.5 我的词汇本页面 + Today 词汇复习入口</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W11-12</div>
+          <div class="roadmap-bar v2" style="width: 50%;">🎮 T1 看英选中 + T3 原句 cloze + SRS 上线</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W13</div>
+          <div class="roadmap-bar v2" style="width: 30%;">🔥 streak + 周排行（P0 借鉴）</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W14-15</div>
+          <div class="roadmap-bar v2" style="width: 45%;">✨ Magic Notes 风 manual_import 增强</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W16-18</div>
+          <div class="roadmap-bar v3" style="width: 70%;">📚 V0.2 5 个官方词库内容工程（雅思 5500 优先）</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W19-20</div>
+          <div class="roadmap-bar v3" style="width: 60%;">🖼️ 词卡课程化：精美图 + 短视频讲解模板 + 批量生产</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W21</div>
+          <div class="roadmap-bar v3" style="width: 35%;">🎬 Layer 1 YouGlish iframe 集成 + Kid Mode</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W22</div>
+          <div class="roadmap-bar v3" style="width: 30%;">🗺️ "碰过 vs 没碰过" 图谱 + 进度激励文案</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W23-24</div>
+          <div class="roadmap-bar v3" style="width: 40%;">🚀 V0.2 全班级 rollout + 校准 + 老师培训</div>
+        </div>
+        <div class="roadmap-row">
+          <div class="roadmap-week">W25+</div>
+          <div class="roadmap-bar v4" style="width: 55%;">🔮 V0.3+ Layer 2 自建字幕索引 + FSRS 升级 + AI 角色扮演</div>
+        </div>
+        <div class="roadmap-legend">
+          <div class="item"><span class="dot v1"></span>V0.1 阅读沉淀（W1-7）</div>
+          <div class="item"><span class="dot v2"></span>V0.1.5 词汇本（W8-15）</div>
+          <div class="item"><span class="dot v3"></span>V0.2 课程化（W16-24）</div>
+          <div class="item"><span class="dot v4"></span>V0.3+ 自建深化（W25+）</div>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <strong>📌 路线图说明</strong>
+        <ul>
+          <li>横条长度只示意工期 / 任务重量，不是等比真实周数</li>
+          <li>数字假定"全职 1 工程师 + 全职阿杰 + 兼职 Joy/Dong 内容审校"</li>
+          <li>V0.1 已部分跑通（阅读 LE 已有），按总纲算 50% 完成 → 实际工期可压缩</li>
+          <li>V0.2 内容工程（5500 雅思词的精美图 + 短视频）是最大瓶颈，可以模板化批量生产</li>
+          <li>第 8 周 Today 屏词汇复习入口上线是关键里程碑 —— 这是学生第一次看到"统一复习"</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 第十节：FAQ ============ -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">FAQ for 阿杰（14 条）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q1</span><span class="qtext">半米学员才 50 人，做这么完整的词汇系统值得吗？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>值得，但定位要清晰。50 人不够养独立词汇 toC 产品，但作为<strong>半米 OS 的核心 vertical</strong>必须做完整 —— 词汇是"学语言"最高频的子任务，词汇系统决定了家长对"我把孩子放在半米学到底学什么"的认知。如果只做阅读不做词汇，家长会问"那我为什么不直接用墨墨 + 你们家阅读"。<strong>词汇 + 阅读 + 听力 + 写作 + 考试 5 件套绑定才是半米 OS 的价值密度</strong>。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q2</span><span class="qtext">市面已经有百词斩 / 墨墨 / Anki，半米为什么不直接接入第三方？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>同模考报告 Q5 同样的逻辑：<strong>数据闭环 + 体验一致 + 付费链路</strong> 三个都断了。但词汇系统更特别 —— 半米的核心是<strong>"阅读自然沉淀 → 复习池"</strong>，这条链路必须在自家闭环。如果学生在百词斩背的词跟在 banmi 阅读里碰到的词不互通，整个"reading-generated + official + unified pool" 架构就崩塌了。<strong>词汇必须自建，是半米架构的承重墙</strong>。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q3</span><span class="qtext">最该补的 1 个功能是什么？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p><strong>游戏化 streak + 周排行</strong>。总纲没明确这块，但所有头部产品（Duolingo / 沪江开心词场 / 百词斩 / Quizlet）都重金投入这个机制。对 K12 学员特别有效（小孩子争胜欲强 + 家长看到打卡数据高兴）。实现成本低（1-2 周）、retention 拉升明显（行业平均 +30%）、对老师 Dashboard 也有数据增量（"本周班级 streak 排行"）。Q-架构二 已锁双形态后，<strong>游戏化是下一个低悬果实</strong>。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q4</span><span class="qtext">YouGlish 真的能直接嵌吗？版权 / 商业用途怎么算？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>可以直接嵌，但要看商业属性。<strong>非商业教育用途免费</strong>（半米内测 / 学校内部用 OK），需保留"Powered by YouGlish.com" + YouTube ToS + Google Privacy 链接。一旦半米开始向家长收费，就进入"商业"档：500 reqs/天以下 €25/月，1 万 reqs/天 €300/月。<strong>临界点 €3600/年 ≈ Layer 2 自建 3 人月开发成本</strong>，到这个点就该启动 Layer 2 自建。本报告 6.2 节有完整 checklist。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q5</span><span class="qtext">5500 雅思词每个都要配精美图 + 短视频，成本扛得住吗？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>扛得住，但<strong>必须模板化批量生产</strong>。AI 生图（Flux / Midjourney）单张约 $0.04-0.1，5500 词 ≈ ¥1500-3500；短视频用 TTS（Azure $4/M chars） + 动态字幕 + 简单动效（Remotion / FFmpeg），单条 30-60s 成本 ¥2-5，5500 条 ≈ ¥1.1-2.7 万。<strong>总内容生产成本 5 万以内</strong>，对内部学员产品完全可承担。关键是<strong>人工抽检关键词</strong>（每 100 词 Joy/Dong 抽 10 个），避免 AI 翻车。详见总纲 §4.5.1。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q6</span><span class="qtext">FSRS 算法值得现在就上吗？还是 V0.2 用经验法则？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>V0.1.5 / V0.2 用<strong>经验法则混合 SRS</strong>（半米 §8 已锁），<strong>V0.3+ 再上 FSRS</strong>。原因：① FSRS 需要每个学习者 ~1000 条复习记录才能拟合个性化曲线，V0.2 学员积累不到这个量；② 经验法则（day 1/2/4/7/15/30）已经能解决 80% 问题；③ FSRS 自研工程量大，可以等开源库 fsrs4anki 成熟后接入。<strong>路径：经验法则 → 收数据 → V0.3 升 FSRS</strong>，每步可独立验证。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q7</span><span class="qtext">百词斩 SRS 弱被骂，半米怎么避坑？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>百词斩被骂主要 2 点：① 反复错的词不会智能加大频次；② "背了不会用"。半米已经在架构层避坑：① §8 走 phase 9 统一池，复习按 SRS 调度而非顺序遍历，反复错的词必然抬升频次；② V0.2 题型 T2-T6 全套（中文选英 + collocation + 听音拼写 + 片段听辨）+ §9 阅读联动让"背的词在文章里真的遇到"，是真实运用。<strong>这两条焊死后，"百词斩坑"基本绕开</strong>。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q8</span><span class="qtext">Layer 2 自建字幕索引真要做吗？还是永远停在 Layer 1？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p><strong>要做，但触发条件明确。</strong>财务触发：YouGlish €300/月商业月费 × 12 ≈ €3600/年，等于 3 人月自建成本，到这个点必须切。内容触发：当半米 5500 雅思词词卡都希望"精挑细选 5-10 个高质量片段"而 YouGlish 排序不可控时，必须切。<strong>战略意义</strong>：Layer 2 让 banmi 拥有自己的"片段质量评级 + 频道偏好"算法，是真正的护城河。Layer 1 永远是别人的。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q9</span><span class="qtext">影视片段 Layer 3 到底做不做？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>V0.4+ 之前<strong>都不要做</strong>。版权风险大于收益。Joy/Dong 在国际学校体系内做生意，被影视版权方告一次就完蛋。替代路径：① 嵌 PlayPhrase iframe（让他们扛版权）；② OpenSubtitles 字幕 + 跳转 Netflix；③ banmi 自购 / 自录教学视频。<strong>"影视片段"对词汇学习的边际增益没有想象中大</strong> —— Layer 1 + Layer 2 已经能给学生 80% 真实场景体验。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q10</span><span class="qtext">老师 Dashboard 该展示什么？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>抄 Quizlet Class + 加 banmi 独门内容。Quizlet 给的：班级学员清单 / 学员完成度 / 错题集中区。banmi 加的：① 每个学员"阅读查词密度 vs 班级平均"；② 每个学员"已掌握 / 学习中 / 阅读已遇到 / 未遇到"分布（§4.5.5）；③ "本周 streak 排行"；④ "本周班级共同薄弱词" Top 10（系统聚合）；⑤ AI 出"教学建议"给老师参考（"3 个学员在 academic 动词反复错，建议精讲"）。<strong>第 5 条是 Quizlet 没有的，半米独门</strong>。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q11</span><span class="qtext">阅读联动是半米最大护城河，那怎么防止学员只用阅读不背词？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>正面回应：<strong>学员只用阅读不背词 = 半米成功</strong>，不是失败。这恰恰是 banmi 架构的设计意图 —— context-rich 自然沉淀比孤立背词效率高。学员每天读 1 篇文章自动沉淀 5-10 个词，半年累积 1500-3000 词，已经覆盖中考 / 高考词库 80%。<strong>"主动背词库（V0.2 形态 B）"是给那些有明确应试目标的学员加速通道</strong>，不是必经路径。半米通过 Today 屏统一复习入口让两条路殊途同归。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q12</span><span class="qtext">Joy / Dong 老师能接受这套词汇系统吗？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>关键是让老师感觉"<strong>我给学生加分而不是被替代</strong>"。具体做法：① 老师 Dashboard 第一屏是"班级薄弱词 Top 10 + AI 出的教学建议" → 老师只需 review + 采纳 / 修改；② 老师可以一键标"这周班级重点词" → 自动进所有学员词汇本（teacher_assigned source）；③ 复习负荷可视化 —— 老师能看到"如果我布置 100 个词，下周复习会爆"；④ 第一周让 Joy 当超级用户做 PM，她吐槽什么就改什么。<strong>跟模考报告一样的思路</strong>。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q13</span><span class="qtext">AI 生例句质量不稳怎么办？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>Q-4 已锁多源混合（B + C + D）：词典数据库 + 真题语料 + AI 生成。优先级：① 阅读自然沉淀的原句（最高质量，来自 banmi 阅读材料库）；② 词典 collocation 数据库（Oxford / Collins / Cambridge 接 API 或买静态数据）；③ 真题语料（雅思剑桥真题电子版抓取 + 标注）；④ AI 生成（最后兜底）。<strong>每个词卡最少 2 个例句</strong>，至少 1 个来自前 3 类。AI 生的例句必须人工抽检 5-10% 才放出。</p></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q14</span><span class="qtext">本报告 7 项 P0/P1 都做完要多久？</span><span class="toggle">＋</span></div>
+        <div class="faq-a"><p>按第九章路线图，<strong>24 周内完成 V0.1 + V0.1.5 + V0.2</strong>（包括 P0 streak / P0 manual_import 增强 / P1 YouGlish / P1 已知未知图谱 / P1 精美图卡）。假定全职 1 工程师 + 全职阿杰 + 兼职 Joy/Dong 内容审校。若有第二名工程师介入可压缩到 18 周。<strong>P2/P3（FSRS / Layer 2 / AI 角色扮演）在 V0.3+ 阶段</strong>，第 25 周后启动。<strong>关键里程碑</strong>：W8 词汇本上线（第一次有"统一复习"体验）/ W21 YouGlish 集成（真实场景片段上）/ W22 已知/未知图谱（最强激励 UI）。</p></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 第十一节：附录 ============ -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">附</span><span class="title-text">视频词典字幕源 + 工具链清单</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>11.1 字幕 / 视频源（按风险从低到高）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>源</th><th>许可</th><th>数据量</th><th>接入方式</th></tr></thead>
+          <tbody>
+            <tr><td>TED Talks 官方</td><td>CC BY-NC-ND</td><td>3000+ talks 全字幕</td><td>API + 网页抓取（TCSE 可用）</td></tr>
+            <tr><td>Khan Academy</td><td>CC BY-NC-SA</td><td>8000+ videos</td><td>YouTube + 官网</td></tr>
+            <tr><td>Crash Course</td><td>CC BY-SA</td><td>1000+ episodes</td><td>YouTube CC 字幕</td></tr>
+            <tr><td>SciShow / Kids</td><td>standard YouTube</td><td>2000+ episodes</td><td>YouTube iframe 嵌入 OK</td></tr>
+            <tr><td>National Geographic</td><td>standard YouTube</td><td>千级 videos</td><td>YouTube iframe</td></tr>
+            <tr><td>CC 标记的 YouTube</td><td>CC BY</td><td>百万级（YouTube 搜索过滤）</td><td>yt-dlp + 过滤 license 字段</td></tr>
+            <tr><td>banmi 自录教学视频</td><td>banmi 拥有</td><td>从 0 累积</td><td>内部录制 + ASR 转字幕</td></tr>
+            <tr><td>OpenSubtitles</td><td>字幕本身可用，视频本体不行</td><td>5000 万+ 字幕条目</td><td>REST API（免费 20/天）</td></tr>
+            <tr><td>剑桥雅思真题音频</td><td>剑桥出版社版权</td><td>有限</td><td>不建议商用</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>11.2 技术栈 / 工具链</h3>
+      <ul>
+        <li><strong>字幕抓取：</strong>yt-dlp（持续维护） / youtube-transcript-api（Python 库轻量）</li>
+        <li><strong>字幕解析：</strong>pysrt / webvtt-py</li>
+        <li><strong>全文索引：</strong>Postgres FTS + GIN（小到中规模，&lt; 1000 万 segment）/ Elasticsearch（大规模 + 高并发）</li>
+        <li><strong>排序加权：</strong>Postgres ts_rank 或 BM25（pg_textsearch 扩展）</li>
+        <li><strong>缓存：</strong>Redis（热门查词缓存 24 小时）</li>
+        <li><strong>语音识别（Layer 3 / 自录）：</strong>Whisper（OpenAI 开源，本地跑或 API）/ AssemblyAI / Azure Speech</li>
+        <li><strong>TTS（词卡发音 / 短视频）：</strong>Azure Speech（最便宜 $4/M chars）/ ElevenLabs（最自然但贵）/ Forvo（真人发音音库）</li>
+        <li><strong>AI 生图：</strong>Flux / Midjourney / Stable Diffusion + ComfyUI</li>
+        <li><strong>短视频生成：</strong>Remotion（React-based 编程式视频）+ FFmpeg</li>
+        <li><strong>跟读评分 API：</strong>Speechace（专业） / Azure Pronunciation Assessment（便宜）/ 火山引擎语音评测</li>
+      </ul>
+
+      <h3>11.3 重要参考文档</h3>
+      <ul>
+        <li>YouGlish JS API: <code>https://youglish.com/api/doc/js-api</code></li>
+        <li>YouGlish Widget: <code>https://youglish.com/api/doc/widget</code></li>
+        <li>YouTube iframe API: <code>https://developers.google.com/youtube/iframe_api_reference</code></li>
+        <li>yt-dlp GitHub: <code>https://github.com/yt-dlp/yt-dlp</code></li>
+        <li>OpenSubtitles REST API: <code>https://opensubtitles.stoplight.io/docs/opensubtitles-api</code></li>
+        <li>FSRS 论文 / fsrs4anki: <code>https://github.com/open-spaced-repetition/fsrs4anki</code></li>
+        <li>Postgres FTS 官方: <code>https://www.postgresql.org/docs/current/textsearch.html</code></li>
+      </ul>
+
+      <h3>11.4 调研盲区（待 verify）</h3>
+      <blockquote>
+        <p><strong>立项前需要再补的信息：</strong></p>
+        <ul>
+          <li>YouGlish "教育用途免费" 边界精确范围 —— 是否覆盖"向家长收费的国际学校词汇课"？建议运营发邮件确认</li>
+          <li>5500 雅思词的精美图 + 短视频实际生产成本（先做 100 词 pilot 测算）</li>
+          <li>Joy / Dong 每周能投入多少小时审校 AI 生成内容</li>
+          <li>剑桥雅思真题语料是否可以小规模授权（不是抓盗版）</li>
+          <li>Forvo / Speechace 给小创业团队的实际 API 报价</li>
+          <li>K-G6 学员家长对"游戏化排行"是否敏感（攀比 vs 激励边界）</li>
+        </ul>
+      </blockquote>
+
+      <h3>11.5 报告版本记录</h3>
+      <ul>
+        <li><strong>v1 · 2026-05-23</strong> · 无忌出品 · 20+ 次 Web 调研 · 18 家产品 · 含可玩 YouGlish demo</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>📋 词汇学习软件对标研究 · 半米词汇系统借鉴指南 · v1 · 2026-05-23</p>
+  <p>🤖 调研：无忌 · 出品于阿杰半米 AI 学习 OS 词汇系统立项流程</p>
+  <p>🎬 YouGlish widget powered by <a href="https://youglish.com" target="_blank" rel="noopener" style="color: var(--accent-text);">YouGlish.com</a></p>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+<!-- 唯一外部依赖：YouGlish widget JS API（用户点击搜片段时才加载） -->
+
+<script>
+  // ===== 主题切换 =====
+  (function() {
+    const saved = localStorage.getItem('vocab-report-theme');
+    if (saved) document.body.setAttribute('data-theme', saved);
+    const btn = document.getElementById('themeToggle');
+    function syncIcon() {
+      btn.textContent = document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    }
+    syncIcon();
+    btn.addEventListener('click', () => {
+      const cur = document.body.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem('vocab-report-theme', next);
+      syncIcon();
+    });
+  })();
+
+  // ===== 章节折叠 =====
+  document.querySelectorAll('section.chapter > h2').forEach(h2 => {
+    h2.addEventListener('click', () => {
+      h2.parentElement.classList.toggle('collapsed');
+    });
+  });
+
+  // ===== 顶部进度条 + 回到顶部按钮 =====
+  const progressEl = document.getElementById('progress');
+  const backTopEl = document.getElementById('backToTop');
+  function updateProgress() {
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrolled = window.scrollY;
+    const ratio = docHeight > 0 ? scrolled / docHeight : 0;
+    progressEl.style.width = (ratio * 100) + '%';
+    backTopEl.classList.toggle('show', scrolled > 400);
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+
+  backTopEl.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // ===== 滚动高亮当前锚点 =====
+  const anchorLinks = document.querySelectorAll('#anchorList a');
+  const sections = Array.from(anchorLinks).map(a => document.getElementById(a.dataset.target)).filter(Boolean);
+  function highlightAnchor() {
+    const offset = 120;
+    let current = null;
+    for (const sec of sections) {
+      const rect = sec.getBoundingClientRect();
+      if (rect.top - offset <= 0) current = sec.id;
+    }
+    anchorLinks.forEach(a => a.classList.toggle('active', a.dataset.target === current));
+    if (current) {
+      const activeLink = document.querySelector('#anchorList a.active');
+      if (activeLink) {
+        const navWrap = document.querySelector('.anchor-list');
+        const linkRect = activeLink.getBoundingClientRect();
+        const navRect = navWrap.parentElement.getBoundingClientRect();
+        const desiredScroll = activeLink.offsetLeft - navRect.width / 2 + linkRect.width / 2;
+        navWrap.parentElement.scrollTo({ left: desiredScroll, behavior: 'smooth' });
+      }
+    }
+  }
+  window.addEventListener('scroll', highlightAnchor, { passive: true });
+  highlightAnchor();
+
+  // ===== anchor 点击 → 自动展开折叠章节 =====
+  anchorLinks.forEach(a => {
+    a.addEventListener('click', e => {
+      const targetId = a.dataset.target;
+      const target = document.getElementById(targetId);
+      if (target && target.classList.contains('collapsed')) {
+        target.classList.remove('collapsed');
+      }
+    });
+  });
+
+  // ===== 表格行点击高亮 =====
+  document.querySelectorAll('tbody tr').forEach(tr => {
+    tr.addEventListener('click', () => {
+      tr.parentElement.querySelectorAll('tr.row-highlight').forEach(o => {
+        if (o !== tr) o.classList.remove('row-highlight');
+      });
+      tr.classList.toggle('row-highlight');
+    });
+  });
+
+  // ===== FAQ 展开/收起 =====
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      q.parentElement.classList.toggle('open');
+    });
+  });
+
+  // ===== Demo 1: 词卡翻转 =====
+  document.getElementById('flipCard1').addEventListener('click', function() {
+    this.classList.toggle('flipped');
+  });
+
+  // ===== Demo 2: SRS 难度按钮 =====
+  const srsMessages = {
+    again: '⏰ 已重置到 day 1。今天会再次出现这个词。',
+    hard: '🟡 推到 day 6（下一节点的一半）。下次再确认。',
+    good: '✅ 推到 day 7（下一节点）。掌握加深。'
+  };
+  document.querySelectorAll('.srs-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.srs-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      const result = document.getElementById('srsResult1');
+      result.textContent = srsMessages[this.dataset.srs];
+    });
+  });
+
+  // ===== Demo 3: cloze =====
+  const clozeChoices = document.querySelectorAll('#clozeChoices1 .cloze-choice');
+  const clozeBlank = document.getElementById('clozeBlank1');
+  const clozeResult = document.getElementById('clozeResult1');
+  clozeChoices.forEach(choice => {
+    choice.addEventListener('click', function() {
+      clozeChoices.forEach(c => c.classList.remove('correct', 'wrong'));
+      const isCorrect = this.dataset.correct === 'true';
+      this.classList.add(isCorrect ? 'correct' : 'wrong');
+      clozeBlank.textContent = this.dataset.word;
+      if (isCorrect) {
+        clozeBlank.classList.add('revealed');
+        clozeResult.innerHTML = '✅ 正确！这个词在原句里强调"研究的重要性"。+1 mastery 进入 SRS day 7 队列。';
+      } else {
+        clozeBlank.classList.remove('revealed');
+        clozeResult.innerHTML = '❌ 不对。再想想 —— "research findings are ___" 这个搭配最常见的是哪个？';
+      }
+    });
+  });
+
+  // ===== YouGlish widget 集成（懒加载） =====
+  let ygScriptLoaded = false;
+  let ygReady = false;
+  let ygWidget = null;
+
+  // 全局 callback，YouGlish JS API 加载完后会调用
+  window.onYouglishAPIReady = function() {
+    ygReady = true;
+    initYgWidget();
+  };
+
+  function initYgWidget() {
+    if (!ygReady || ygWidget) return;
+    const input = document.getElementById('ygQueryInput');
+    const query = input.value.trim() || 'significant';
+    try {
+      ygWidget = new YG.Widget('ygWidgetMount', {
+        width: 640,
+        components: 9,  // 1 (search) + 8 (caption) bitwise
+        autoStart: 1,
+        captionSize: 14,
+        restrictionMode: 0,
+        events: {
+          onFetchDone: function(data) {
+            document.getElementById('ygStatus').innerHTML =
+              `📊 找到 <strong>${data.totalResult}</strong> 个真实 YouTube 片段含 "<strong>${query}</strong>" · Powered by <a href="https://youglish.com" target="_blank" rel="noopener">YouGlish.com</a>`;
+          },
+          onVideoChange: function(data) {
+            console.log('YG: video changed', data);
+          },
+          onError: function(data) {
+            document.getElementById('ygStatus').textContent = '⚠️ YouGlish 加载出错（可能网络问题或被防火墙拦截）：' + JSON.stringify(data);
+          }
+        }
+      });
+      ygWidget.fetch(query, 'english', 'us');
+      document.getElementById('ygStatus').textContent = '⏳ 加载中... 等几秒查询 YouTube 字幕索引';
+    } catch (e) {
+      document.getElementById('ygStatus').textContent = '⚠️ YouGlish widget 初始化失败：' + e.message;
+    }
+  }
+
+  function loadYouGlishScript() {
+    return new Promise((resolve, reject) => {
+      if (ygScriptLoaded) return resolve();
+      const s = document.createElement('script');
+      s.src = 'https://youglish.com/public/emb/widget.js';
+      s.async = true;
+      s.onload = () => { ygScriptLoaded = true; resolve(); };
+      s.onerror = () => reject(new Error('script load failed'));
+      document.head.appendChild(s);
+    });
+  }
+
+  document.getElementById('ygSearchBtn').addEventListener('click', async function() {
+    const input = document.getElementById('ygQueryInput');
+    const query = input.value.trim();
+    if (!query) {
+      document.getElementById('ygStatus').textContent = '⚠️ 请输入一个英文词';
+      return;
+    }
+    try {
+      await loadYouGlishScript();
+      if (ygReady && ygWidget) {
+        ygWidget.fetch(query, 'english', 'us');
+        document.getElementById('ygStatus').textContent = '⏳ 查询 "' + query + '"...';
+      } else if (ygReady && !ygWidget) {
+        initYgWidget();
+      }
+      // 否则 onYouglishAPIReady 会自动调用 initYgWidget
+    } catch (e) {
+      document.getElementById('ygStatus').textContent = '⚠️ YouGlish 脚本加载失败：' + e.message + '（可能网络问题或防火墙拦截 youglish.com）';
+    }
+  });
+
+  // preset 词点击
+  document.querySelectorAll('.preset').forEach(p => {
+    p.addEventListener('click', function() {
+      document.getElementById('ygQueryInput').value = this.dataset.w;
+      document.getElementById('ygSearchBtn').click();
+    });
+  });
+</script>
+
+</body>
+</html>

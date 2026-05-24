@@ -1,0 +1,2288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>自建视频切片库技术方案 · 半米词汇系统 Layer 3 · 2026-05-24</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1d23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --border-strong: #cdd2da;
+    --accent: #c2410c;
+    --accent-soft: #fed7aa;
+    --accent-text: #9a3412;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #6d28d9;
+    --info-soft: #ede9fe;
+    --code-bg: #f1f3f7;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --syn-kw: #c2185b;
+    --syn-str: #2e7d32;
+    --syn-num: #b45309;
+    --syn-cmt: #7c8493;
+    --syn-fn:  #c2410c;
+    --syn-op:  #6d28d9;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1c2030;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #b6bcc9;
+    --text-mute: #8a92a3;
+    --border: #2a2f3d;
+    --border-strong: #3a4154;
+    --accent: #fb923c;
+    --accent-soft: #7c2d1255;
+    --accent-text: #fdba74;
+    --good: #4ade80;
+    --good-soft: #14532d55;
+    --warn: #fbbf24;
+    --warn-soft: #78350f55;
+    --bad: #f87171;
+    --bad-soft: #7f1d1d55;
+    --info: #c4b5fd;
+    --info-soft: #4c1d9555;
+    --code-bg: #0a0d14;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+    --syn-kw: #f472b6;
+    --syn-str: #86efac;
+    --syn-num: #fbbf24;
+    --syn-cmt: #6b7280;
+    --syn-fn:  #fdba74;
+    --syn-op:  #c4b5fd;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  #progress {
+    position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--info));
+    z-index: 1000; transition: width .1s linear;
+  }
+  header.topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner {
+    max-width: 980px; margin: 0 auto;
+    padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+  }
+  .brand {
+    font-weight: 700; font-size: 15px; letter-spacing: .2px;
+    color: var(--text); white-space: nowrap;
+  }
+  .brand .tag {
+    margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute);
+    padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px;
+  }
+  .topbar-spacer { flex: 1; }
+  .icon-btn {
+    width: 44px; height: 44px; border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border); background: var(--bg-elevated);
+    color: var(--text); cursor: pointer; font-size: 18px;
+    transition: transform .15s, background-color .15s;
+  }
+  .icon-btn:active { transform: scale(.94); }
+  nav.anchor-nav {
+    overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    scrollbar-width: none;
+  }
+  nav.anchor-nav::-webkit-scrollbar { display: none; }
+  .anchor-list {
+    display: flex; gap: 4px; padding: 8px 16px;
+    max-width: 980px; margin: 0 auto;
+    white-space: nowrap;
+  }
+  .anchor-list a {
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 13px; line-height: 1.3;
+    color: var(--text-soft);
+    text-decoration: none;
+    border: 1px solid transparent;
+    background: var(--bg-soft);
+    transition: all .15s;
+  }
+  .anchor-list a:hover { color: var(--accent-text); }
+  .anchor-list a.active {
+    color: var(--accent-text);
+    background: var(--accent-soft);
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+    font-weight: 600;
+  }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 {
+    font-size: 28px; line-height: 1.25; margin: 0 0 12px;
+    letter-spacing: -.5px;
+    background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-meta {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    font-size: 13px; color: var(--text-mute);
+  }
+  .hero-meta span {
+    background: var(--bg-soft); padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+  .hero-deck {
+    margin-top: 16px; padding: 14px 16px;
+    border-left: 4px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 15px;
+  }
+  section.chapter {
+    margin: 24px 0;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  section.chapter > h2 {
+    font-size: 20px; margin: 0;
+    padding: 16px 20px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+    background: var(--bg-elevated);
+    transition: background-color .15s;
+    min-height: 56px;
+  }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 30px; height: 30px; padding: 0 8px;
+    border-radius: 8px; background: var(--accent-soft); color: var(--accent-text);
+    font-size: 14px; font-weight: 700;
+  }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret {
+    transition: transform .25s; color: var(--text-mute); font-size: 14px;
+  }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body {
+    padding: 18px 20px 22px;
+    max-height: 100000px;
+    overflow: hidden;
+    transition: max-height .35s ease, padding .25s;
+  }
+  section.chapter.collapsed .chapter-body {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  h3 {
+    font-size: 17px; margin: 22px 0 10px;
+    color: var(--text);
+    padding-left: 10px;
+    border-left: 3px solid var(--accent);
+  }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout {
+    margin: 14px 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border-left: 4px solid;
+    font-size: 14.5px;
+    line-height: 1.65;
+  }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .table-wrap {
+    margin: 14px 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-elevated);
+  }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 14px;
+    min-width: 560px;
+  }
+  thead th {
+    position: sticky; top: 0;
+    background: var(--bg-soft);
+    color: var(--text);
+    text-align: left;
+    font-weight: 600;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-strong);
+    white-space: nowrap;
+    z-index: 1;
+  }
+  tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-soft);
+    vertical-align: top;
+  }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td {
+    background: var(--accent-soft) !important;
+    color: var(--text);
+  }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin: 10px 0;
+    overflow: hidden;
+    background: var(--bg-elevated);
+  }
+  .faq-q {
+    padding: 14px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; gap: 10px;
+    align-items: flex-start;
+    user-select: none;
+    min-height: 50px;
+  }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a {
+    padding: 0 16px;
+    max-height: 0;
+    overflow: hidden;
+    color: var(--text-soft);
+    font-size: 14.5px;
+    line-height: 1.65;
+    transition: max-height .3s, padding .25s;
+  }
+  .faq-item.open .faq-a {
+    max-height: 2000px;
+    padding: 0 16px 14px 16px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+  .back-to-top {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    display: none;
+    align-items: center; justify-content: center;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    z-index: 40;
+    border: none;
+  }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  footer {
+    text-align: center; padding: 24px 16px;
+    color: var(--text-mute); font-size: 13px;
+    border-top: 1px solid var(--border);
+    margin-top: 32px;
+  }
+  code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+    font-size: 13px;
+    color: var(--text);
+  }
+  pre {
+    background: var(--code-bg);
+    padding: 14px 16px;
+    border-radius: 10px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.6;
+    border: 1px solid var(--border);
+    margin: 12px 0;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  }
+  pre code { background: none; padding: 0; }
+  .syn-kw  { color: var(--syn-kw);  font-weight: 600; }
+  .syn-str { color: var(--syn-str); }
+  .syn-num { color: var(--syn-num); }
+  .syn-cmt { color: var(--syn-cmt); font-style: italic; }
+  .syn-fn  { color: var(--syn-fn); }
+  .syn-op  { color: var(--syn-op); }
+  hr.soft { border: none; height: 1px; background: var(--border); margin: 16px 0; }
+  blockquote {
+    margin: 12px 0;
+    padding: 10px 16px;
+    border-left: 4px solid var(--text-mute);
+    background: var(--bg-soft);
+    border-radius: 6px;
+    color: var(--text-soft);
+    font-size: 14.5px;
+  }
+  /* arch grid */
+  .arch-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 16px 0; }
+  .arch-row { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-soft); }
+  .arch-row-head { padding: 6px 12px; background: var(--accent-soft); color: var(--accent-text); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); }
+  .arch-row-body { display: flex; gap: 8px; padding: 10px; flex-wrap: wrap; }
+  .arch-box { flex: 1 1 0; min-width: 130px; padding: 10px 12px; border-radius: 10px; background: var(--bg-elevated); border: 1px solid var(--border); font-size: 13px; text-align: center; color: var(--text); }
+  .arch-box .ico { font-size: 22px; display: block; margin-bottom: 4px; }
+  .arch-box .lbl { font-weight: 600; }
+  .arch-box .sub { font-size: 11.5px; color: var(--text-mute); margin-top: 2px; }
+  .arch-box.acc { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-text); }
+  .arch-box.gd  { background: var(--good-soft); border-color: var(--good); color: var(--good); }
+  .arch-box.wn  { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
+  .arch-box.bd  { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
+  .arch-box.inf { background: var(--info-soft); border-color: var(--info); color: var(--info); }
+  .arch-arrow { text-align: center; color: var(--text-mute); font-size: 18px; margin: 2px 0; user-select: none; }
+
+  /* verdict */
+  .verdict-card { margin: 12px 0; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--bg-elevated); }
+  .verdict-head { padding: 12px 16px; background: linear-gradient(135deg, var(--accent-soft), transparent); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .verdict-head .badge { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); }
+  .verdict-head .badge.pick { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .verdict-head .badge.alt  { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .verdict-head .badge.bad  { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .verdict-head h4 { margin: 0; font-size: 16px; color: var(--text); flex: 1; }
+  .verdict-body { padding: 12px 16px; }
+  .verdict-body .pros, .verdict-body .cons { margin: 6px 0; font-size: 13.5px; }
+  .verdict-body .pros::before { content: "✅ "; }
+  .verdict-body .cons::before { content: "⚠️ "; }
+
+  /* product card */
+  .prod-card { margin: 14px 0; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--bg-elevated); }
+  .prod-head { padding: 12px 16px; background: var(--bg-soft); border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .prod-head h4 { margin: 0; font-size: 16px; color: var(--text); flex: 1; min-width: 140px; }
+  .prod-head .pill { padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); }
+  .prod-head .pill.live { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .prod-head .pill.dead { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .prod-head .pill.gray { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .prod-body { padding: 12px 16px; font-size: 14.5px; }
+  .prod-body p { color: var(--text-soft); }
+  .prod-body .takeaway { margin-top: 10px; padding: 10px 12px; background: var(--accent-soft); border-radius: 8px; border-left: 3px solid var(--accent); color: var(--text); font-size: 14px; }
+  .prod-body .takeaway::before { content: "👉 启示  "; font-weight: 700; color: var(--accent-text); }
+
+  /* cost */
+  .cost-card { margin: 14px 0; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--bg-elevated); }
+  .cost-card .ch { padding: 10px 14px; background: var(--bg-soft); border-bottom: 1px solid var(--border); font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 10px; }
+  .cost-card .ch .amt { margin-left: auto; font-family: ui-monospace, monospace; font-weight: 700; color: var(--accent-text); }
+  .cost-card .cb { padding: 12px 14px; }
+  .cost-card .cb table { min-width: auto; }
+  .cost-total { margin: 16px 0; padding: 16px 18px; background: linear-gradient(135deg, var(--accent-soft), var(--info-soft)); border: 1px solid var(--accent); border-radius: 14px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .cost-total .label { flex: 1; font-weight: 700; font-size: 15px; color: var(--text); }
+  .cost-total .num { font-family: ui-monospace, monospace; font-weight: 700; font-size: 22px; color: var(--accent-text); }
+
+  /* decision tree */
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .node.yes { border-color: var(--good); }
+  .tree .node.no { border-color: var(--bad); }
+  .tree .branches { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; }
+
+  /* legal traffic light */
+  .light-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 14px 0; }
+  .light { padding: 12px 14px; border-radius: 12px; border-left: 5px solid; }
+  .light.green { background: var(--good-soft); border-color: var(--good); }
+  .light.yellow { background: var(--warn-soft); border-color: var(--warn); }
+  .light.red { background: var(--bad-soft); border-color: var(--bad); }
+  .light h4 { margin: 0 0 6px; color: var(--text); font-size: 15px; }
+  .light p, .light li { font-size: 14px; color: var(--text-soft); }
+
+  /* demo */
+  .demo-host { margin: 16px 0; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .demo-host h4 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; color: var(--accent-text); }
+  .demo-search { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .demo-search input { flex: 1; min-width: 160px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); color: var(--text); font-size: 14px; min-height: 44px; }
+  .demo-search button { padding: 10px 16px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; min-height: 44px; }
+  .demo-search button:active { transform: scale(.96); }
+  .demo-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .demo-presets .preset { padding: 6px 10px; background: var(--bg-elevated); color: var(--text-soft); border: 1px solid var(--border); border-radius: 999px; font-size: 12px; cursor: pointer; min-height: 32px; }
+  .demo-presets .preset:hover { color: var(--accent-text); border-color: var(--accent); }
+  .clip-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .clip-card { padding: 10px 12px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all .15s; }
+  .clip-card:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+  .clip-card.active { background: var(--accent-soft); border-color: var(--accent); }
+  .clip-meta { display: flex; flex-wrap: wrap; gap: 6px; font-size: 11.5px; color: var(--text-mute); margin-bottom: 4px; }
+  .clip-meta .ch { color: var(--accent-text); font-weight: 600; }
+  .clip-meta .ts { font-family: ui-monospace, monospace; }
+  .clip-meta .qs { background: var(--good-soft); color: var(--good); padding: 1px 6px; border-radius: 999px; font-weight: 600; }
+  .clip-text { font-family: "Newsreader", Georgia, serif; font-size: 14.5px; color: var(--text); line-height: 1.55; }
+  .clip-text .hit { background: linear-gradient(180deg, transparent 60%, color-mix(in srgb, var(--accent) 35%, transparent) 60%); font-weight: 700; color: var(--accent-text); padding: 0 2px; }
+  .player-mount { margin-top: 12px; border-radius: 10px; overflow: hidden; background: #000; aspect-ratio: 16/9; width: 100%; border: 1px solid var(--border); position: relative; }
+  .player-mount .placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: rgba(255,255,255,.7); font-size: 13px; gap: 8px; padding: 16px; text-align: center; }
+  .player-mount iframe { width: 100%; height: 100%; border: 0; }
+  .player-controls { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .player-controls button { padding: 6px 12px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--text-soft); min-height: 36px; }
+  .player-controls button:hover { border-color: var(--accent); color: var(--accent-text); }
+  .player-controls .info { font-size: 12px; color: var(--text-mute); margin-left: auto; }
+
+  /* schema */
+  .schema-card { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .schema-card .sh { padding: 8px 14px; background: var(--bg-soft); font-weight: 700; font-size: 13px; color: var(--accent-text); border-bottom: 1px solid var(--border); font-family: ui-monospace, monospace; }
+  .schema-card pre { margin: 0; border: none; border-radius: 0; }
+
+  /* metric tiles */
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+
+  /* iframe disclaimer */
+  .ifr-note { font-size: 11.5px; color: var(--text-mute); margin-top: 6px; text-align: center; }
+
+  @media (max-width: 480px) {
+    .hero { padding: 18px 4px 8px; }
+    .hero h1 { font-size: 22px; }
+    section.chapter > h2 { font-size: 17px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+    .arch-box { min-width: 100%; }
+    .tree .branches { grid-template-columns: 1fr; }
+  }
+  @media print {
+    header.topbar, #progress, .back-to-top, nav.anchor-nav { display: none !important; }
+    section.chapter.collapsed .chapter-body { max-height: none !important; padding: 18px 20px 22px !important; }
+    section.chapter.collapsed > h2 .caret { display: none; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">自建视频切片库技术方案 <span class="tag">v1 · 无忌</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+  <nav class="anchor-nav">
+    <div class="anchor-list" id="anchorList">
+      <a href="#ch1" data-target="ch1">01 摘要</a>
+      <a href="#ch2" data-target="ch2">02 路线对比</a>
+      <a href="#ch3" data-target="ch3">03 YouGlish 真相</a>
+      <a href="#ch4" data-target="ch4">04 产品深挖</a>
+      <a href="#ch5" data-target="ch5">05 架构图</a>
+      <a href="#ch6" data-target="ch6">06 ffmpeg 命令</a>
+      <a href="#ch7" data-target="ch7">07 AI 选句</a>
+      <a href="#ch8" data-target="ch8">08 存储选型</a>
+      <a href="#ch9" data-target="ch9">09 成本测算</a>
+      <a href="#ch10" data-target="ch10">10 国内决策树</a>
+      <a href="#ch11" data-target="ch11">11 YouTube 死局</a>
+      <a href="#ch12" data-target="ch12">12 法律红黄绿</a>
+      <a href="#ch13" data-target="ch13">13 mini demo</a>
+      <a href="#ch14" data-target="ch14">14 半米路线</a>
+      <a href="#ch15" data-target="ch15">15 FAQ</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <div class="hero">
+    <h1>自建视频切片库技术方案<br><span style="font-size: .65em; font-weight: 600;">半米词汇系统 Layer 3 · 真切片路线深拆</span></h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-24</span>
+      <span>🛠 调研：无忌</span>
+      <span>🎯 主题：真切片 vs iframe</span>
+      <span>📦 stack: yt-dlp + ffmpeg + R2/OSS</span>
+      <span>💰 50 学员档 ≈ ¥0/月 · 5000 档 ≈ ¥800-1200/月</span>
+    </div>
+    <div class="hero-deck">
+      <strong>三句话结论：</strong>(1) <strong>50 学员阶段不要做真切片</strong> —— 法律风险（重新分发他人 YouTube 内容超出"课堂教学"封闭场景）+ 备案成本（个人备案需 ICP）+ 工程量（10k 词 × 5 片段 = 50k 切片任务）三项叠加，性价比远低于昨天的 iframe 跳秒方案。(2) <strong>YouTube unlisted 当存储是死局</strong> —— Content ID 对 unlisted 视频同样扫描，重新上传别人的视频 99% 被秒检测，国内还打不开。(3) <strong>真切片唯一值得做的窗口是 500+ 学员 + 内容全部限定在 CC-BY/公版/自制频道</strong>（VOA Learning English 公版 + Khan Academy CC BY-NC-SA + 半米自制视频），此时月度成本 ≈ ¥800-1200（R2 海外 + OSS 国内双桶），技术 pipeline 跑得通，但<strong>内容池被缩小到 ~20 个安全频道</strong>，能否撑住"高频词全覆盖"需要先抽样验证。
+    </div>
+  </div>
+
+  <!-- ============ Ch1 摘要 ============ -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">执行摘要 · 5 条核心结论</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">50</div><div class="l">学员阶段建议</div></div>
+        <div class="metric"><div class="v">iframe</div><div class="l">不切片</div></div>
+        <div class="metric"><div class="v">500+</div><div class="l">才考虑切片</div></div>
+        <div class="metric"><div class="v">~20</div><div class="l">CC安全频道数</div></div>
+        <div class="metric"><div class="v">¥800</div><div class="l">5000 档月成本</div></div>
+        <div class="metric"><div class="v">¥0</div><div class="l">50 档真实成本</div></div>
+      </div>
+
+      <h3>5 条结论</h3>
+
+      <div class="callout good">
+        <strong>① 真切片 vs iframe 的差异本质不是"技术"，是"风险"</strong><br>
+        iframe（昨天的方案）= 把"指针"放在 banmi DB，视频文件留 YouTube，YouTube 自带 Content ID 兜底，banmi 0 法律风险。真切片 = banmi 自己下载 + 切割 + 重新分发，每一份 mp4 都是"<strong>未经授权的复制+传播</strong>"。法律边界从 YouTube 转到了 banmi。
+      </div>
+
+      <div class="callout good">
+        <strong>② Content ID 不是只扫公开视频 —— unlisted 也扫</strong><br>
+        阿杰的"上传 unlisted 当免费存储"假设走不通。YouTube 官方文档明确：unlisted 视频和 public 视频走同一套 Content ID 扫描，音频指纹 + 视觉识别 + 元数据三路对比，秒级触发。把别人 SciShow Kids 的片段重传 99% 被检出，下场是 muted / 强制下架 / 频道警告 / 多次后封号。
+      </div>
+
+      <div class="callout warn">
+        <strong>③ 国内访问决定一切：R2 / B2 / S3 全部不能直接覆盖国内</strong><br>
+        Cloudflare R2 不能在中国大陆建 bucket，标准 R2 域名走境外 PoP 被 GFW 干扰。Backblaze B2 / AWS S3 同理。要覆盖国内必须走<strong>双桶</strong>：境外用户 R2 / B2，国内用户阿里云 OSS 或腾讯云 COS，OSS 必须配 ICP 备案的域名，备案周期 3-22 工作日（实际平均 7-15 天）。
+      </div>
+
+      <div class="callout warn">
+        <strong>④ ffmpeg 切片本身很便宜，贵的是合规 + 运营</strong><br>
+        50k 片段处理在 1 台 Hetzner CX32（€6.80/月 / 4vCPU / 8GB）上跑 24-48 小时就完事，<code>-c copy</code> 零重编码秒级一条。真正烧钱的是：①CC-BY 频道清单维护（人工）②DMCA 响应（必须 24h 内删）③双桶同步流量（国内出口 0.24-0.50 元/GB）④备案 + 公安备案的法务时间。
+      </div>
+
+      <div class="callout bad">
+        <strong>⑤ 给阿杰的最终建议（50 学员档）</strong><br>
+        <strong>不做真切片</strong>。继续昨天的 iframe 跳 timestamp 方案 + Layer 1 用 YouGlish 公开 widget。把"真切片"留作 V0.4 候选，触发条件：(a) 学员 ≥ 500，且 (b) YouGlish 不够用，且 (c) 法务能投入 0.5 人月办备案和清 CC 白名单。在那之前每个月的真切片研究时间换成"AI 选句算法 + 用户使用数据收集"投入产出比高 10 倍。
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch2 路线对比 ============ -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">iframe vs 真切片 · 8 维度并排</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>昨天报告（<code>youglish-tech.html</code>）讲的是 <strong>iframe 路线</strong>：banmi 自建字幕索引，但视频文件留 YouTube，前端嵌 YouTube IFrame Player 跳 timestamp 播放。今天讨论的<strong>真切片路线</strong>是另一回事 —— 整段下载到自己服务器，ffmpeg 切成独立 mp4，自家 CDN 分发，前端 <code>&lt;video&gt;</code> 标签直接播。从外部看两者用户体验相似（都是"输入词 → 出片段 → 播 5 秒"），但内部从工程到法律完全不同。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>维度</th><th>iframe（昨天）</th><th>真切片（今天）</th><th>判定</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>谁存视频</strong></td>
+              <td>YouTube CDN，banmi 0 文件</td>
+              <td>banmi 自己的 R2 / OSS / S3，10k 词 × 5 ≈ 100GB</td>
+              <td class="check p">差距大</td>
+            </tr>
+            <tr>
+              <td><strong>谁担版权</strong></td>
+              <td>视频上传者 + YouTube（Safe Harbor）</td>
+              <td><strong>banmi 自己</strong>（重新分发 = 直接侵权）</td>
+              <td class="check n">差距致命</td>
+            </tr>
+            <tr>
+              <td><strong>原视频下架时</strong></td>
+              <td>banmi 这条片段废掉，需要定期扫死链</td>
+              <td>banmi 仍然有 mp4，<strong>但继续分发就是确凿侵权</strong></td>
+              <td class="check p">真切片更复杂</td>
+            </tr>
+            <tr>
+              <td><strong>国内可达</strong></td>
+              <td>取决于 YouTube（默认不可达，需翻墙）</td>
+              <td>可控 —— 阿里云 OSS + ICP 备案后秒开</td>
+              <td class="check y">真切片更优</td>
+            </tr>
+            <tr>
+              <td><strong>切片精度</strong></td>
+              <td>±0.5s（IFrame API <code>seekTo</code> 不精）</td>
+              <td>±0.04s（ffmpeg 关键帧重编码精确）</td>
+              <td class="check y">真切片更优</td>
+            </tr>
+            <tr>
+              <td><strong>体验定制</strong></td>
+              <td>YouTube 控件强加，去不掉 YouTube logo / 末尾推荐</td>
+              <td>HTML5 video 自家 UI，全部可控</td>
+              <td class="check y">真切片更优</td>
+            </tr>
+            <tr>
+              <td><strong>一次性成本</strong></td>
+              <td>¥10-15 万（昨天数据）</td>
+              <td>¥15-22 万（多了切片 pipeline + 双桶 + 备案）</td>
+              <td class="check p">真切片贵 50%</td>
+            </tr>
+            <tr>
+              <td><strong>月度运维</strong></td>
+              <td>¥300-800（昨天数据）</td>
+              <td>¥800-1500（5000 学员档，多了 CDN 流量）</td>
+              <td class="check p">真切片贵 2-3x</td>
+            </tr>
+            <tr>
+              <td><strong>DMCA 触发</strong></td>
+              <td>原视频被删，banmi 失去指针即可</td>
+              <td>banmi 直接收 takedown，必须 24h 内删 mp4 + 影响 SaaS</td>
+              <td class="check n">真切片高危</td>
+            </tr>
+            <tr>
+              <td><strong>YouTube ToS</strong></td>
+              <td>合规 —— iframe 是官方授权的 embed 方式</td>
+              <td><strong>违反</strong> —— ToS 明确禁止 download / store content</td>
+              <td class="check n">真切片违 ToS</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout accent">
+        <strong>🎯 一句话总结</strong>：iframe 路线把所有难题外包给 YouTube（版权 / 存储 / 带宽），代价是国内不可达 + 体验稍差。真切片把这些拿回到 banmi 手里，代价是<strong>变成内容平台</strong>，承担版权 / 存储 / 带宽 / 备案的全部责任。这不是"哪个技术好"，是"banmi 想做工具还是想做内容平台"。
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch3 YouGlish 真相 ============ -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">YouGlish 自己为什么不切片</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>YouGlish 是这个领域的市占率第一，1 亿+ 视频片段，22 种语言。如果"切片"是更好的路线，他们早做了。事实是他们坚持 iframe，原因值得 banmi 抄。</p>
+
+      <h3>3.1 YouGlish 的真实技术栈（拼图）</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>层</th><th>实现</th><th>证据来源</th></tr></thead>
+          <tbody>
+            <tr><td>视频来源</td><td>YouTube + TED + 公开演讲源（无电影 / 电视）</td><td>官网 about 页 + 搜索结果观察</td></tr>
+            <tr><td>字幕抓取</td><td>大概率 yt-dlp 类抓 YouTube 自动字幕 + 人工字幕</td><td>所有片段都带 timestamp，与 VTT 精度一致</td></tr>
+            <tr><td>索引</td><td>全文搜索（Elastic 风格），按"语言 / 口音 / 等级"facet</td><td>UI facet 响应速度 < 200ms</td></tr>
+            <tr><td>播放</td><td><strong>纯 YouTube IFrame Player</strong>，<code>start</code> / <code>end</code> 参数跳</td><td>F12 看 iframe src，全是 youtube.com/embed</td></tr>
+            <tr><td>规模</td><td>1 亿+ 片段（自报 100M+ tracks）</td><td>官网首页数据</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3.2 他们为什么不切片 —— 三个克制理由</h3>
+
+      <div class="callout info">
+        <strong>① 版权外包</strong>。YouGlish 不存视频文件，理论上不构成"复制"或"传播"，DMCA 只能找上传者，找不到 YouGlish。这是他们能扛到 1 亿+ 片段不被关停的根本原因。
+      </div>
+      <div class="callout info">
+        <strong>② 带宽外包</strong>。1 亿片段 × 月均 3 次点击 × 平均 8 秒 × 1Mbps ≈ <strong>900 PB/月</strong> 的带宽，自托管在任何云上都是天文数字（即便 R2 零出口费，源站 IO 也撑不住）。让 YouTube 自己消化这个流量是唯一可持续做法。
+      </div>
+      <div class="callout info">
+        <strong>③ 内容增量外包</strong>。YouTube 每天新增 720k 小时视频，YouGlish 写个 cron 拉新视频字幕就行；自切片就要每天 ffmpeg 几万次，pipeline 永远在跑。
+      </div>
+
+      <div class="callout accent">
+        <strong>对 banmi 的镜像启示</strong>：YouGlish 选 iframe 是看了 1 亿规模的账本。banmi 规模就算 5000 学员 × 每人每天 30 词 ≈ 15 万次播放/天，仍然<strong>远不够"自托管划算"的临界点</strong>。真正促成切片决定的不应是"想自建酷"，而应是"iframe 真的提供不了的体验"（比如循环、慢速、字幕高亮 —— 但这些 iframe 也都能做）。
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch4 类似产品深挖 ============ -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">谁在做"真切片" · 8 家产品深挖</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>这一节把"真切片"路线上活下来的产品逐家拆。重点不是"他们怎么做"，是"他们做完之后命运如何"——版权 / 商业模式 / 现状。</p>
+
+      <!-- PlayPhrase -->
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>① PlayPhrase.me — 真切片的最纯粹代表</h4>
+          <span class="pill live">仍在运营</span>
+          <span class="pill">Patreon 资助</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>做什么</strong>：输入英文短语，返回电影/电视剧里说过这句话的真实片段，能直接看演员怎么说、表情怎么动。截至 2026 年中数据库 3800 万+ 短语，覆盖几千部电影电视剧，每天新增 2000-5000 条。<strong>这是真切片，每个 clip 都是单独的视频文件，硬性上限 8 秒</strong>。</p>
+          <p><strong>怎么活下来的</strong>：他们的 fair-use 公告写得极其谨慎：① 每段硬限 8 秒 ② 链回 IMDb 引流原作 ③ <strong>禁止 API 访问</strong>，禁止商用 ④ 仅靠 Patreon 收捐款，不卖订阅、不卖广告 ⑤ 收到 DMCA 24 小时内删。整套策略本质是"我穷且非盈利且学术 → 别告我"，靠美国合理使用四要素第 4 条（不影响原作市场）。</p>
+          <p><strong>有没有被告</strong>：公开记录里搜不到针对 PlayPhrase 的正式诉讼，多年 DMCA 删除记录倒是有。这说明 fair-use 论点在实践中扛住了 majors（华纳/迪士尼）的审查 —— 但前提是不商业化、不规模化。</p>
+          <p><strong>技术栈推测</strong>：自动 ASR + 字幕对齐 + 自动切片 + S3 风格对象存储（看视频 URL 多半 CloudFront）。8 秒 × 3800 万 ≈ 60TB 存储，年成本 $5-10k 量级，完全可由 Patreon 覆盖。</p>
+          <div class="takeaway">真切片 + 公益化 + 硬上限 8 秒 + 禁 API + 链回原作 = 教科书级"如何让 fair-use 站住"。但 banmi 是商业产品，照抄不了这套。</div>
+        </div>
+      </div>
+
+      <!-- Yarn -->
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>② Yarn (getyarn.io) — 切片 + GIF + 内容引流</h4>
+          <span class="pill live">仍在运营</span>
+          <span class="pill">商用</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>做什么</strong>：电影 / 电视 / 音乐短语搜索，能下载 GIF 或视频 clip 分享到社交。商业化比 PlayPhrase 更深，2015 年 TechCrunch 报道时已经有 app + 内嵌 iMessage / Twitter 分享。</p>
+          <p><strong>他们的法律论点</strong>：在 ToS 里写明 —— 不实际托管原片，"只托管 tiny clips and metadata"，把 clip 描述成"广告片"，引流回原作。和 PlayPhrase 类似但更激进，允许下载 GIF / clip 给社交媒体二次创作。</p>
+          <p><strong>怎么活下来</strong>：和内容公司谈"导流合作"（pilot 阶段），把自己定位成"trailer / 引流方"而不是"竞争平台"。和 YouTube 的关系比 PlayPhrase 紧密，受众更年轻。</p>
+          <p><strong>商业模式</strong>：B2B SaaS 卖给媒体公司做内部"视频内容搜索"工具（"我们这套搜索引擎也可以帮你搜你自己的视频库"），to-C 端免费引流。</p>
+          <div class="takeaway">B2B 把工具卖给版权方自己 = 把法律对手变成客户。banmi 长大后可以借鉴：把切片技术卖给国内出版社（新东方 / 学而思）做内部词典工具。</div>
+        </div>
+      </div>
+
+      <!-- FluentU -->
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>③ FluentU — 名义上"用 YouTube"，实际是 iframe + 自制</h4>
+          <span class="pill gray">混合模式</span>
+          <span class="pill">订阅 $30/月</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>真相</strong>：FluentU 早期宣传"YouTube 视频学语言"，但他们的<strong>开源项目 fluentu-youtube-facade</strong>（GitHub 上能看到）暴露了真实做法 —— <strong>用 facade 占位图 + 延迟加载 YouTube iframe</strong>。这就是 iframe 模式，不是真切片。</p>
+          <p><strong>当前库存</strong>：~2261 视频/音频片段，6 个难度级，12 种内容类型。视频平均小于 5 分钟。比起 YouGlish 的 1 亿+ 是个小库，<strong>因为他们做了"精选 + 加交互层"</strong>。</p>
+          <p><strong>怎么处理版权</strong>：① 大量内容是 FluentU 团队自制（特别是低级别学生用的）② YouTube 部分用 iframe 不下载 ③ 字幕和互动注释是他们自己加的 —— 这部分他们持有版权。</p>
+          <p><strong>商业上算成功吗</strong>：订阅 $30/月，10+ 年没倒。但用户评价"内容更新慢"——这正是"精选 + iframe"路线的代价：每加一个视频都要人工标注。</p>
+          <div class="takeaway">FluentU 是"iframe + 精选 + 自家注释层"的标杆。banmi 完全可以照抄：iframe 播 + banmi 自己加字幕高亮 / 中文翻译 / 词卡 → 这部分是 banmi 独家版权。</div>
+        </div>
+      </div>
+
+      <!-- Lingopie -->
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>④ Lingopie — Netflix 学语言，正规授权路线</h4>
+          <span class="pill live">仍在运营</span>
+          <span class="pill">授权制</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>做什么</strong>：Netflix 风格语言学习，目标语原创剧集 + Lingopie 自制内容。2026 年 4 月推出 Chrome 扩展，让你直接在 Netflix 网页上点字幕查词 + 存生词本。</p>
+          <p><strong>关键事实</strong>：他们<strong>不切片，也不下载</strong> Netflix 视频，扩展只是给 Netflix 现有页面注入翻译/词典 UI。这避开了 Netflix DRM 和版权问题。库里"Lingopie 自家"的剧集都是<strong>正规拍摄或正规授权</strong>，不是抓的 YouTube。</p>
+          <p><strong>商业模式</strong>：$12/月订阅，5000+ 小时内容，11+ 语言。融了几轮 VC，明显走"正规授权 → IPO"路线。</p>
+          <div class="takeaway">想做"严肃"切片库就要付授权费，Lingopie 这套对 banmi 50 学员阶段太重，但 V0.5+ 切到"自制 + 部分授权"是可能的演进路径。</div>
+        </div>
+      </div>
+
+      <!-- Voscreen -->
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>⑤ Voscreen — 短剧切片 + 游戏化测试</h4>
+          <span class="pill gray">活但小</span>
+          <span class="pill">免费</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>做什么</strong>：从电影 / 电视剧 / 音乐 MV 选 10-30 秒短片，让用户听 → 选正确翻译。游戏化、按语法点（"现在时" / "名词从句"）分类。</p>
+          <p><strong>切片性质</strong>：每条都是切好的独立短片，<strong>这是真切片</strong>。土耳其团队做的，库不大（几千条），运营多年没被告。</p>
+          <p><strong>怎么活下来</strong>：① 完全免费 ② 学术合作引用了好几篇论文（"learn through videos"） ③ 单条 10-30 秒 ④ 没有完整剧集回放，只能"测试"不能"看片"。</p>
+          <div class="takeaway">"按语法点切片" + "强制选择题答完才看下一条" = 把内容包装成测试，单条永远短，从体验上让用户不可能"看完整剧"。这套包装把"消费"伪装成"学习"，是真切片产品自保的标准动作。</div>
+        </div>
+      </div>
+
+      <!-- Reverso -->
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>⑥ Reverso Context — 文本为主，视频是 iframe</h4>
+          <span class="pill live">仍在运营</span>
+          <span class="pill">大公司</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>做什么</strong>：双语例句词典，每个词组返回 50+ 上下文翻译。主要数据是字幕和文献的<strong>文本</strong>。"视频"部分是 Chrome 扩展在 Netflix 字幕上注入翻译，不是托管视频。</p>
+          <p><strong>切片性质</strong>：实质上<strong>不切片</strong>，只切"字幕文本"。这是另一种"绕开版权"的玩法 —— 字幕作为汇编作品的法律地位比视频本体宽松得多。</p>
+          <div class="takeaway">"只切字幕文本不切视频" 是 banmi 还没充分挖掘的路线 —— 词卡显示句子（文字）+ iframe 跳秒看原片，比真切片轻得多，前端体验也接近。</div>
+        </div>
+      </div>
+
+      <!-- Subadub / Subreader -->
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>⑦ Subadub / Subreader 等字幕工具</h4>
+          <span class="pill gray">浏览器扩展</span>
+        </div>
+        <div class="prod-body">
+          <p>都是浏览器扩展或独立播放器，<strong>不存储任何视频</strong>，只增强现有播放器（Netflix / 本地 mp4 / VLC）的字幕功能 —— 例如 Subadub 让你在 Netflix 上单击字幕查词、复制句子。版权策略：扩展不分发内容，分发"用户体验增强"。Subreader 在欧洲法庭被告过，但赢了，理由是不复制原作。</p>
+          <div class="takeaway">如果 banmi 哪天敢做"在用户自己看 Netflix 时给翻译"，就走扩展路线，不碰视频本体。法律最干净，但前提是用户已经付了 Netflix。</div>
+        </div>
+      </div>
+
+      <!-- YouGlish -->
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>⑧ YouGlish — 当成参照系，再强调一遍</h4>
+          <span class="pill live">市占率第一</span>
+          <span class="pill">iframe</span>
+        </div>
+        <div class="prod-body">
+          <p>1 亿+ 片段，22 种语言，<strong>纯 iframe</strong>。F12 检查任何片段都是 <code>youtube.com/embed/...</code>。他们的 fair-use 不是论点是事实 —— 他们根本不持有内容。这是 banmi 的<strong>默认路线</strong>，需要离开它必须有强理由。</p>
+          <div class="takeaway">市占率第一的产品在最关键的技术选择上选了 iframe，这是最大的信号。</div>
+        </div>
+      </div>
+
+      <h3>4.x 横向对比总览</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>产品</th><th>真切片?</th><th>规模</th><th>商业化</th><th>法律策略</th><th>对 banmi 的借鉴</th></tr></thead>
+          <tbody>
+            <tr><td>PlayPhrase</td><td class="check y">是</td><td>3800 万</td><td>Patreon</td><td>≤8s + 链回 IMDb</td><td>切片技术参考</td></tr>
+            <tr><td>Yarn</td><td class="check y">是</td><td>百万级</td><td>B2B</td><td>不存原片 + 引流叙事</td><td>B2B 商业模式</td></tr>
+            <tr><td>FluentU</td><td class="check n">否（iframe + 自制）</td><td>2261 视频</td><td>$30/月</td><td>iframe + 自家注释层</td><td><strong>★ 最值得抄</strong></td></tr>
+            <tr><td>Lingopie</td><td class="check n">否（授权 + 扩展）</td><td>5000h</td><td>$12/月</td><td>正规授权</td><td>长期演进方向</td></tr>
+            <tr><td>Voscreen</td><td class="check y">是</td><td>几千</td><td>免费</td><td>测试包装</td><td>测试 UI 模式</td></tr>
+            <tr><td>Reverso</td><td class="check n">否（只切字幕）</td><td>巨量</td><td>免费+订阅</td><td>文本数据</td><td>字幕优先策略</td></tr>
+            <tr><td>Subadub</td><td class="check n">否</td><td>—</td><td>免费</td><td>浏览器扩展</td><td>不碰内容</td></tr>
+            <tr><td>YouGlish</td><td class="check n">否</td><td>1 亿</td><td>SaaS</td><td>iframe</td><td>默认路线</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout accent">
+        <strong>📊 8 家里只有 3 家是真切片，且都满足两条之一：① 公益化（PlayPhrase / Voscreen）② 自有内容为主（Yarn 的 B2B）。banmi 是商业 SaaS + 抓 YouTube 内容，两条都不沾，硬走真切片就是法律孤儿。</strong>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch5 架构图 ============ -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">真切片完整 Pipeline 架构</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>这一节假设阿杰已经决定要做真切片（V0.4+ 触发条件满足）。从 YouTube URL 到学员手机播 mp4 一共 7 个阶段，每个阶段一行代码或一行命令能跑通。</p>
+
+      <div class="arch-grid">
+        <div class="arch-row">
+          <div class="arch-row-head">阶段 1 · 视频源选定（人工 + 半自动）</div>
+          <div class="arch-row-body">
+            <div class="arch-box gd"><span class="ico">🎯</span><span class="lbl">CC 安全清单</span><span class="sub">VOA / Khan / TED-Ed CC</span></div>
+            <div class="arch-box gd"><span class="ico">📋</span><span class="lbl">channels.yaml</span><span class="sub">手工维护 ~20 频道</span></div>
+            <div class="arch-box gd"><span class="ico">🤖</span><span class="lbl">license 校验</span><span class="sub">yt-dlp info-json</span></div>
+          </div>
+        </div>
+
+        <div class="arch-arrow">⬇ batch dispatch</div>
+
+        <div class="arch-row">
+          <div class="arch-row-head">阶段 2 · 视频 + 字幕下载（yt-dlp）</div>
+          <div class="arch-row-body">
+            <div class="arch-box acc"><span class="ico">📹</span><span class="lbl">yt-dlp 720p</span><span class="sub">完整 mp4 落盘</span></div>
+            <div class="arch-box acc"><span class="ico">📝</span><span class="lbl">VTT 字幕</span><span class="sub">人工优先 + 自动兜底</span></div>
+            <div class="arch-box acc"><span class="ico">🗂️</span><span class="lbl">info.json</span><span class="sub">channel/duration/license</span></div>
+          </div>
+        </div>
+
+        <div class="arch-arrow">⬇ parse + align</div>
+
+        <div class="arch-row">
+          <div class="arch-row-head">阶段 3 · 字幕解析 + 句边界（GPT-4o-mini）</div>
+          <div class="arch-row-body">
+            <div class="arch-box inf"><span class="ico">🧩</span><span class="lbl">VTT parser</span><span class="sub">node-webvtt</span></div>
+            <div class="arch-box inf"><span class="ico">🤖</span><span class="lbl">GPT 加标点</span><span class="sub">auto 字幕缺标点用 LLM 补</span></div>
+            <div class="arch-box inf"><span class="ico">📏</span><span class="lbl">句子表</span><span class="sub">{start, end, text, lemmas[]}</span></div>
+          </div>
+        </div>
+
+        <div class="arch-arrow">⬇ candidate 选句</div>
+
+        <div class="arch-row">
+          <div class="arch-row-head">阶段 4 · AI 选句 + 质量评分（GPT-4o-mini batch）</div>
+          <div class="arch-row-body">
+            <div class="arch-box inf"><span class="ico">🎯</span><span class="lbl">5 维打分</span><span class="sub">清晰/难度/情感/语境/无脏话</span></div>
+            <div class="arch-box inf"><span class="ico">🏆</span><span class="lbl">top 5 per word</span><span class="sub">写入 clips 表</span></div>
+          </div>
+        </div>
+
+        <div class="arch-arrow">⬇ ffmpeg cut</div>
+
+        <div class="arch-row">
+          <div class="arch-row-head">阶段 5 · 切片（ffmpeg）</div>
+          <div class="arch-row-body">
+            <div class="arch-box gd"><span class="ico">✂️</span><span class="lbl">-c copy 快切</span><span class="sub">关键帧粗对齐</span></div>
+            <div class="arch-box gd"><span class="ico">🎨</span><span class="lbl">精切重编码</span><span class="sub">libx264 veryfast</span></div>
+            <div class="arch-box gd"><span class="ico">📺</span><span class="lbl">烧字幕 (opt)</span><span class="sub">vf subtitles=</span></div>
+          </div>
+        </div>
+
+        <div class="arch-arrow">⬇ QC + upload</div>
+
+        <div class="arch-row">
+          <div class="arch-row-head">阶段 6 · 质检 + 双桶上传</div>
+          <div class="arch-row-body">
+            <div class="arch-box acc"><span class="ico">🔍</span><span class="lbl">黑屏/静音检测</span><span class="sub">ffprobe + volumedetect</span></div>
+            <div class="arch-box acc"><span class="ico">☁️</span><span class="lbl">R2（海外）</span><span class="sub">0 出口费</span></div>
+            <div class="arch-box acc"><span class="ico">🇨🇳</span><span class="lbl">OSS（国内）</span><span class="sub">阿里云 + ICP CDN</span></div>
+          </div>
+        </div>
+
+        <div class="arch-arrow">⬇ serve</div>
+
+        <div class="arch-row">
+          <div class="arch-row-head">阶段 7 · 前端播放（HTML5 video）</div>
+          <div class="arch-row-body">
+            <div class="arch-box inf"><span class="ico">📱</span><span class="lbl">智能 DNS</span><span class="sub">海外→R2 国内→OSS</span></div>
+            <div class="arch-box inf"><span class="ico">▶️</span><span class="lbl">&lt;video&gt; muted+playsinline</span><span class="sub">自动播 + 字幕循环</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout good">
+        <strong>🎯 关键架构决策</strong>
+        <ol>
+          <li><strong>视频本体只在第 5 阶段后存在副本</strong> —— 原视频 + 字幕只在切片机短驻 24-48 小时，切完即删，不长期持有完整视频，降低法律暴露。</li>
+          <li><strong>双桶必做</strong> —— R2 海外用户 + OSS 国内用户。R2 不能覆盖国内，OSS 又贵，分流是唯一经济选择。</li>
+          <li><strong>切片机和分发机分离</strong> —— 切片机 Hetzner CX32（€7/月，CPU 密集），分发只走对象存储 + CDN，没有 always-on 应用服务器。</li>
+        </ol>
+      </div>
+
+      <h3>5.x 数据流时序</h3>
+      <pre><span class="syn-cmt"># 一个 channel 全量入库的端到端流程</span>
+
+[运营] 把 @VOALearningEnglish 加进 channels.yaml
+   ↓ <span class="syn-cmt">(cron 每天 03:00)</span>
+[Worker] yt-dlp <span class="syn-kw">--flat-playlist</span> 列出新视频
+   ↓
+[Worker] yt-dlp 下载完整 mp4 + 字幕 + info.json
+   ↓
+[Worker] 解析 VTT → 句子表（DB）
+   ↓ <span class="syn-cmt">(对没有标点的 auto-sub 用 GPT-4o-mini 补)</span>
+[Worker] 选词 → candidate 句子 → GPT 打分 → top 5
+   ↓
+[Worker] ffmpeg 切 mp4（精切，带 0.5s padding）
+   ↓
+[Worker] ffprobe 质检
+   ↓
+[Worker] 双桶上传（R2 + OSS）
+   ↓
+[DB] 写入 clips 表，状态变 ready
+   ↓
+[Frontend] 学员词卡查询，按 quality_score 取 top 1 播放</pre>
+
+      <h3>5.x DB Schema（最小可用版）</h3>
+
+      <div class="schema-card">
+        <div class="sh">postgres / clips</div>
+        <pre><span class="syn-kw">CREATE TABLE</span> clips (
+  id              <span class="syn-fn">UUID PRIMARY KEY</span>,
+  video_id        <span class="syn-fn">TEXT NOT NULL</span>,    <span class="syn-cmt">-- YouTube id</span>
+  channel         <span class="syn-fn">TEXT NOT NULL</span>,
+  license         <span class="syn-fn">TEXT NOT NULL</span>,    <span class="syn-cmt">-- 'CC-BY' / 'CC-BY-NC-SA' / 'public-domain' / 'own'</span>
+  word_lemma      <span class="syn-fn">TEXT NOT NULL</span>,    <span class="syn-cmt">-- 这个片段被指给哪个词</span>
+  sentence_text   <span class="syn-fn">TEXT NOT NULL</span>,
+  start_ms        <span class="syn-fn">INT NOT NULL</span>,
+  end_ms          <span class="syn-fn">INT NOT NULL</span>,
+  duration_ms     <span class="syn-fn">INT GENERATED ALWAYS AS</span> (end_ms - start_ms) <span class="syn-fn">STORED</span>,
+  r2_key          <span class="syn-fn">TEXT</span>,            <span class="syn-cmt">-- clips/abc123.mp4</span>
+  oss_key         <span class="syn-fn">TEXT</span>,
+  quality_score   <span class="syn-fn">REAL NOT NULL</span>,   <span class="syn-cmt">-- GPT 0-1 综合分</span>
+  cefr            <span class="syn-fn">TEXT</span>,            <span class="syn-cmt">-- A1/A2/B1/B2/C1</span>
+  has_profanity   <span class="syn-fn">BOOL DEFAULT FALSE</span>,
+  takedown_at     <span class="syn-fn">TIMESTAMPTZ</span>,     <span class="syn-cmt">-- 收到 DMCA 标记，前端立即下架</span>
+  created_at      <span class="syn-fn">TIMESTAMPTZ DEFAULT NOW()</span>
+);
+<span class="syn-kw">CREATE INDEX</span> idx_clips_lemma <span class="syn-kw">ON</span> clips(word_lemma, quality_score <span class="syn-kw">DESC</span>);
+<span class="syn-kw">CREATE INDEX</span> idx_clips_license <span class="syn-kw">ON</span> clips(license) <span class="syn-kw">WHERE</span> takedown_at <span class="syn-kw">IS NULL</span>;</pre>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch6 ffmpeg 命令 ============ -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">yt-dlp + ffmpeg 实战命令大全</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>6.1 yt-dlp 下载完整视频 + 字幕</h3>
+
+      <pre><span class="syn-cmt"># 整段下载 720p（4K 没必要，词例句只播 5-15s），同时拉字幕和元数据</span>
+yt-dlp <span class="syn-op">\</span>
+  <span class="syn-kw">-f</span> <span class="syn-str">"bestvideo[height<=720]+bestaudio/best[height<=720]"</span> <span class="syn-op">\</span>
+  <span class="syn-kw">--merge-output-format</span> mp4 <span class="syn-op">\</span>
+  <span class="syn-kw">--write-subs</span> <span class="syn-kw">--write-auto-subs</span> <span class="syn-op">\</span>
+  <span class="syn-kw">--sub-langs</span> <span class="syn-str">"en.*,-live_chat"</span> <span class="syn-op">\</span>
+  <span class="syn-kw">--sub-format</span> <span class="syn-str">"vtt"</span> <span class="syn-op">\</span>
+  <span class="syn-kw">--write-info-json</span> <span class="syn-op">\</span>
+  <span class="syn-kw">--download-archive</span> archive.txt <span class="syn-op">\</span>
+  <span class="syn-kw">--sleep-requests</span> <span class="syn-num">2</span> <span class="syn-kw">--sleep-interval</span> <span class="syn-num">15</span> <span class="syn-kw">--max-sleep-interval</span> <span class="syn-num">45</span> <span class="syn-op">\</span>
+  <span class="syn-kw">--cookies-from-browser</span> chrome <span class="syn-op">\</span>
+  <span class="syn-kw">-o</span> <span class="syn-str">"raw/%(channel)s/%(id)s.%(ext)s"</span> <span class="syn-op">\</span>
+  <span class="syn-str">"https://www.youtube.com/@VOALearningEnglish"</span>
+
+<span class="syn-cmt"># 输出：raw/VOA Learning English/oNyXYPhnUIs.mp4 + .en.vtt + .info.json</span></pre>
+
+      <div class="callout warn">
+        <strong>⚠️ 关键差异 vs 昨天的 iframe 方案</strong>：昨天只用 <code>--skip-download</code> 拉字幕，今天必须把整段视频也落盘 —— 这是真切片的核心代价。一段 10 分钟 720p ≈ 70-100MB，1000 视频 ≈ 100GB。下完切完即删，但中转盘要 500GB+ 才舒服。
+      </div>
+
+      <h3>6.2 ffmpeg 三种切片策略</h3>
+
+      <div class="verdict-card">
+        <div class="verdict-head"><span class="badge pick">推荐 95%</span><h4>策略 A：精确切（重编码）</h4></div>
+        <div class="verdict-body">
+          <pre><span class="syn-cmt"># 精确到毫秒，padding 前 0.5s + 后 1s（避免说到一半切断）</span>
+ffmpeg <span class="syn-kw">-y</span> <span class="syn-op">\</span>
+  <span class="syn-kw">-ss</span> <span class="syn-num">00:01:23.500</span> <span class="syn-op">\</span>           <span class="syn-cmt"># 起点 (sentence_start - 0.5s)</span>
+  <span class="syn-kw">-i</span> raw/voa/abc.mp4 <span class="syn-op">\</span>
+  <span class="syn-kw">-t</span> <span class="syn-num">8.500</span> <span class="syn-op">\</span>                   <span class="syn-cmt"># 长度 = duration + 1.5s padding</span>
+  <span class="syn-kw">-c:v</span> libx264 <span class="syn-kw">-preset</span> veryfast <span class="syn-kw">-crf</span> <span class="syn-num">23</span> <span class="syn-op">\</span>
+  <span class="syn-kw">-c:a</span> aac <span class="syn-kw">-b:a</span> <span class="syn-num">96k</span> <span class="syn-op">\</span>
+  <span class="syn-kw">-movflags</span> +faststart <span class="syn-op">\</span>            <span class="syn-cmt"># mp4 web 优化（moov 移到开头）</span>
+  <span class="syn-kw">-vf</span> <span class="syn-str">"scale=854:480"</span> <span class="syn-op">\</span>           <span class="syn-cmt"># 降到 480p 省流量</span>
+  out/clips/<span class="syn-str">${</span>clip_id<span class="syn-str">}</span>.mp4</pre>
+          <p class="pros">毫秒精度对齐句子边界；web 友好（faststart）；480p 一段 5-8s 约 500-800KB；CPU 成本 1 段 ~0.5s 在 Hetzner CX32 上。</p>
+          <p class="cons">每段重编码，5 万段 ~7 小时 CPU 时间。</p>
+        </div>
+      </div>
+
+      <div class="verdict-card">
+        <div class="verdict-head"><span class="badge alt">仅用于预览</span><h4>策略 B：零重编码快切</h4></div>
+        <div class="verdict-body">
+          <pre>ffmpeg <span class="syn-kw">-ss</span> <span class="syn-num">00:01:23</span> <span class="syn-kw">-i</span> in.mp4 <span class="syn-kw">-t</span> <span class="syn-num">8</span> <span class="syn-kw">-c</span> copy out.mp4</pre>
+          <p class="pros">毫秒级速度（1 段 < 100ms），CPU 0%；适合做"批量预览版"快速验证选句质量。</p>
+          <p class="cons">起点对齐最近的关键帧（每 2-5s 一个），实际起点可能<strong>提前 0-5s</strong>；某些播放器开头黑屏几帧；不适合最终产品。</p>
+        </div>
+      </div>
+
+      <div class="verdict-card">
+        <div class="verdict-head"><span class="badge alt">双 -ss 技巧</span><h4>策略 C：seek 加速精切</h4></div>
+        <div class="verdict-body">
+          <pre>ffmpeg <span class="syn-kw">-ss</span> <span class="syn-num">00:01:22</span> <span class="syn-kw">-i</span> in.mp4 <span class="syn-kw">-ss</span> <span class="syn-num">1.5</span> <span class="syn-kw">-t</span> <span class="syn-num">8</span> <span class="syn-kw">-c:v</span> libx264 ...</pre>
+          <p class="pros">第一个 <code>-ss</code> 在 <code>-i</code> 前 → 快速 seek 到大致位置（不解码）；第二个 <code>-ss</code> 在后 → 精确再走 1.5s（解码）。比策略 A 快 30-50%（特别是视频很长时）。</p>
+          <p class="cons">命令复杂，易写错；策略 A 在 banmi 量级已经够快。</p>
+        </div>
+      </div>
+
+      <h3>6.3 烧字幕（optional）</h3>
+
+      <pre><span class="syn-cmt"># 选项 1：硬烧（不可关，文件大点）—— 适合不可控播放环境</span>
+ffmpeg <span class="syn-kw">-ss</span> <span class="syn-num">82.5</span> <span class="syn-kw">-i</span> in.mp4 <span class="syn-kw">-t</span> <span class="syn-num">8</span> <span class="syn-op">\</span>
+  <span class="syn-kw">-vf</span> <span class="syn-str">"subtitles=in.vtt:force_style='FontSize=22,PrimaryColour=&H00FFFFFF&'"</span> <span class="syn-op">\</span>
+  <span class="syn-kw">-c:v</span> libx264 <span class="syn-kw">-preset</span> veryfast out.mp4
+
+<span class="syn-cmt"># 选项 2：软字幕（mov_text）—— 推荐，前端 &lt;track&gt; 标签可切英/中/无</span>
+ffmpeg <span class="syn-kw">-ss</span> <span class="syn-num">82.5</span> <span class="syn-kw">-i</span> in.mp4 <span class="syn-kw">-i</span> sub.vtt <span class="syn-kw">-t</span> <span class="syn-num">8</span> <span class="syn-op">\</span>
+  <span class="syn-kw">-map</span> <span class="syn-num">0:v</span> <span class="syn-kw">-map</span> <span class="syn-num">0:a</span> <span class="syn-kw">-map</span> <span class="syn-num">1</span> <span class="syn-op">\</span>
+  <span class="syn-kw">-c:v</span> libx264 <span class="syn-kw">-c:a</span> aac <span class="syn-kw">-c:s</span> mov_text out.mp4</pre>
+
+      <h3>6.4 质检：黑屏 + 静音 + 编码合规</h3>
+
+      <pre><span class="syn-cmt"># 检测：开头 1s 平均亮度（black 检测）</span>
+ffmpeg <span class="syn-kw">-i</span> out.mp4 <span class="syn-kw">-vf</span> <span class="syn-str">"blackdetect=d=0.5:pix_th=0.1"</span> <span class="syn-kw">-an</span> <span class="syn-kw">-f</span> null - <span class="syn-num">2</span>&gt;&amp;1 <span class="syn-op">|</span> grep blackdetect
+
+<span class="syn-cmt"># 检测：平均音量（&lt; -50dB 视为可疑静音）</span>
+ffmpeg <span class="syn-kw">-i</span> out.mp4 <span class="syn-kw">-af</span> volumedetect <span class="syn-kw">-vn</span> <span class="syn-kw">-f</span> null - <span class="syn-num">2</span>&gt;&amp;1 <span class="syn-op">|</span> grep mean_volume
+
+<span class="syn-cmt"># 检测：moov 是否在文件头（web 加载快）</span>
+ffprobe <span class="syn-kw">-v</span> error <span class="syn-kw">-show_entries</span> format=start_time,duration <span class="syn-op">\</span>
+  <span class="syn-kw">-of</span> json out.mp4</pre>
+
+      <h3>6.5 并行调度（5 万切片）</h3>
+
+      <pre><span class="syn-cmt"># 简单方案：GNU parallel</span>
+cat clip_jobs.txt <span class="syn-op">|</span> parallel <span class="syn-kw">-j</span> <span class="syn-num">4</span> bash cut_one.sh {}
+
+<span class="syn-cmt"># 生产方案：arq + Redis (Python)，每个 worker 一个 ffmpeg child</span>
+<span class="syn-cmt"># Hetzner CX32 (4 vCPU)：4 并行 × 0.5s/段 → 5 万段 ≈ 6.9 小时</span>
+<span class="syn-cmt"># CCX23 (8 dedicated vCPU, €30/月)：1.7 小时</span></pre>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch7 AI 选句 ============ -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">AI 自动选句 + 质量打分</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>所有候选句子都过一遍 GPT-4o-mini，按 5 维评分挑 top 5。这是真切片相比 YouGlish iframe 的关键差异 —— iframe 出 100 个片段让用户翻，真切片可以预先<strong>把好片段筛出来</strong>，每个词只保留 5 条精华，体验直接拉满。</p>
+
+      <h3>7.1 5 维评分模型</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>维度</th><th>含义</th><th>权重</th><th>判定</th></tr></thead>
+          <tbody>
+            <tr><td>场景清晰</td><td>说话人清楚 / 没噪音 / 没背景音乐压人声</td><td>25%</td><td>GPT 听字幕上下文判断</td></tr>
+            <tr><td>难度匹配</td><td>句子整体 CEFR 应在词的 ±1 级（A2 词不要塞 C1 句）</td><td>25%</td><td>GPT 估 CEFR</td></tr>
+            <tr><td>情感中性</td><td>不是骂街 / 不是哭戏 / 不是激烈情绪</td><td>20%</td><td>GPT 情感分类</td></tr>
+            <tr><td>语境完整</td><td>能独立成意，不需要前后文才懂</td><td>20%</td><td>GPT 上下文判断</td></tr>
+            <tr><td>无脏话</td><td>k12 学生不能听 fuck/shit</td><td>10%（一票否决）</td><td>关键词 + GPT</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>7.2 Prompt 模板（生产用）</h3>
+
+      <pre><span class="syn-kw">SYSTEM</span>: You are an English education expert selecting authentic
+sentences for a K12 vocab card. The target word is "{{word}}",
+CEFR level "{{cefr}}". Evaluate each candidate sentence on 5
+dimensions, score 0-1 each, return strict JSON.
+
+<span class="syn-kw">USER</span>: Candidate sentences for word "{{word}}":
+1. "{{sentence_1}}" (channel: VOA, duration: 6.2s)
+2. "{{sentence_2}}" (channel: Khan Academy, duration: 4.8s)
+...
+20. "{{sentence_20}}" (channel: TED-Ed, duration: 9.1s)
+
+For each candidate, score:
+- clarity (is the audio likely clean? avoid music/crowd noise)
+- difficulty_match (does the sentence CEFR match {{cefr}}?)
+- emotion (is it neutral? avoid crying/yelling/intense scenes)
+- context (can a learner understand without seeing prior context?)
+- safety (any profanity / sensitive topic? 0 = unsafe → reject)
+
+Return: <span class="syn-str">{"results":[{"idx":1,"clarity":0.9,"difficulty_match":0.8,
+"emotion":0.95,"context":0.7,"safety":1,"final":0.85,
+"reason":"clean narrator, A2 vocabulary"}, ...]}</span>
+
+Only top 5 will be cut into clips. Reject anything safety &lt; 0.5.</pre>
+
+      <h3>7.3 成本测算（GPT-4o-mini Batch API）</h3>
+
+      <p>OpenAI Batch API 给 50% 折扣（24h 内返回），<strong>$0.075/M input + $0.3/M output</strong>。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>步骤</th><th>词数</th><th>每词 tokens（in/out）</th><th>合计 tokens</th><th>成本</th></tr></thead>
+          <tbody>
+            <tr><td>① VTT 加标点（auto-sub 才需要）</td><td>~5000 个视频，每个 ~3000 字 ≈ 4000 tokens</td><td>4k/4k</td><td>20M in + 20M out</td><td>$1.5 + $6 = $7.5</td></tr>
+            <tr><td>② 5 维评分</td><td>10000 词 × 20 候选</td><td>3k in / 1.5k out（一次评 20 条）</td><td>30M in + 15M out</td><td>$2.25 + $4.5 = $6.75</td></tr>
+            <tr><td>③ 难度估值（已含在②）</td><td>—</td><td>—</td><td>—</td><td>$0</td></tr>
+            <tr><td colspan="4" style="text-align:right"><strong>合计</strong></td><td><strong>≈ $14.25 ≈ ¥100</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout good">
+        <strong>💡 关键洞察</strong>：AI 选句的"全量入库"成本 ≈ ¥100，<strong>比一次性 ffmpeg 切片机的电费还低</strong>。这是 banmi 区别于 PlayPhrase / YouGlish 的最大杠杆 —— 他们靠规模铺，banmi 靠 LLM 筛精华，每个词只留 5 个最好的。
+      </div>
+
+      <h3>7.4 选句的"质量验证"——MOS-like 抽样</h3>
+
+      <p>AI 给的 final score 是否真和"学员体验"相关？跑两批验证：</p>
+      <ol>
+        <li><strong>金标题集</strong>：人工标 100 个 word × 20 sentence 的"好/坏"标签，跑 GPT prompt，目标 Spearman 相关 ≥ 0.6</li>
+        <li><strong>学员盲测</strong>：把 score 高低各 50 个片段混在一起给 Danny 看 24 个，问"哪条听懂的"——验证 score 和实际易懂程度的关系</li>
+      </ol>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch8 存储 CDN 选型 ============ -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">存储 + CDN 选型对比</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>价格基于 2026 年中各家官网，假设单段 mp4 = 600KB，10000 词 × 5 段 = 50000 段 = 30GB 存储；50/500/5000 学员日均播放分别按 1000 / 10000 / 100000 次估算，每次平均出口 800KB。</p>
+
+      <h3>8.1 海外 / 国内对象存储 7 家横向对比</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>厂商</th><th>存储 $/GB·月</th><th>出口 $/GB</th><th>免费额度</th><th>国内可达</th><th>需要备案</th><th>适合 banmi</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Cloudflare R2</strong></td>
+              <td>$0.015</td>
+              <td><strong>$0（零出口）</strong></td>
+              <td>10GB 存储 + 1M A + 10M B 操作</td>
+              <td class="check n">差（GFW）</td>
+              <td class="check n">N/A</td>
+              <td class="check y">海外用户首选</td>
+            </tr>
+            <tr>
+              <td>Backblaze B2</td>
+              <td>$0.006（标）/ $0.015（高性能）</td>
+              <td>$0.01（前 3× 月存储免费）</td>
+              <td>10GB 存储</td>
+              <td class="check n">差</td>
+              <td class="check n">N/A</td>
+              <td class="check p">海外备选，最便宜</td>
+            </tr>
+            <tr>
+              <td>AWS S3 Standard</td>
+              <td>$0.023</td>
+              <td>$0.09（最贵）</td>
+              <td>5GB（仅 12 月）</td>
+              <td class="check n">差</td>
+              <td class="check n">N/A</td>
+              <td class="check n">太贵不选</td>
+            </tr>
+            <tr>
+              <td><strong>阿里云 OSS</strong>（标准）</td>
+              <td>¥0.12/GB ≈ $0.017</td>
+              <td>¥0.50/GB ≈ $0.07（CDN 回源）</td>
+              <td>5GB 存储 + 5GB 流量（1 年新用户）</td>
+              <td class="check y">优</td>
+              <td class="check n">必须 ICP</td>
+              <td class="check y">国内必选</td>
+            </tr>
+            <tr>
+              <td>腾讯云 COS</td>
+              <td>¥0.118/GB</td>
+              <td>¥0.50/GB</td>
+              <td>50GB 存储半年</td>
+              <td class="check y">优</td>
+              <td class="check n">必须 ICP</td>
+              <td class="check y">国内备选</td>
+            </tr>
+            <tr>
+              <td>七牛云 Kodo</td>
+              <td>¥0.099/GB</td>
+              <td>¥0.29/GB（HTTP CDN）</td>
+              <td>10GB 存储 + 10GB CDN/月（实名）</td>
+              <td class="check y">优</td>
+              <td class="check n">必须 ICP</td>
+              <td class="check p">国内备选，CDN 便宜</td>
+            </tr>
+            <tr>
+              <td><strong>YouTube unlisted</strong></td>
+              <td>$0</td>
+              <td>$0</td>
+              <td>无限</td>
+              <td class="check n">差</td>
+              <td class="check n">N/A</td>
+              <td class="check n">死局（见 Ch 11）</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>8.2 推荐组合：R2（海外） + 七牛 / OSS（国内）</h3>
+
+      <div class="verdict-card">
+        <div class="verdict-head"><span class="badge pick">推荐 海外</span><h4>Cloudflare R2</h4></div>
+        <div class="verdict-body">
+          <p class="pros">出口费 $0 是这个领域的杀手锏。视频是"高出口低存储"业务（30GB 存储 → 每天 80GB 出口），R2 把出口砍到 0 后总月费 ≈ 存储费 × 1.0，远比 S3 / B2 划算。</p>
+          <p class="pros">免费层 10GB + 100 万 A 操作 + 1000 万 B 操作，banmi MVP 阶段直接撑住前 200 学员。</p>
+          <p class="cons">国内访问被 GFW 限速 / 抖动，必须 fallback OSS。</p>
+        </div>
+      </div>
+
+      <div class="verdict-card">
+        <div class="verdict-head"><span class="badge pick">推荐 国内</span><h4>七牛云 Kodo + CDN（备用 阿里云 OSS）</h4></div>
+        <div class="verdict-body">
+          <p class="pros">七牛 CDN HTTP 流量 ¥0.29/GB，比阿里云 / 腾讯云的 ¥0.50 便宜 40%。banmi 这种小流量场景每月省几百块直接见效。每月 10GB CDN 免费额度对 50 学员阶段已足够。</p>
+          <p class="pros">国内 CDN 节点密度足够，PingPlotter 实测一线城市 < 30ms。</p>
+          <p class="cons">必须配 ICP 备案的域名 —— 这是 banmi 50 学员阶段最大的运营摩擦。阿里云 OSS 在企业稳定性上更好（七牛偶有故障），所以企业版 banmi 可能要切阿里云。</p>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <strong>⚠️ 注意 R2 自定义域名在国内不可用</strong>。R2 文档明确说 "custom domains are not supported within Mainland China"。即使你给 R2 配了自己的域名，国内访问还是会被 GFW 限速。覆盖国内的<strong>唯一</strong>办法是数据放国内 bucket。
+      </div>
+
+      <h3>8.3 智能 DNS 分流方案</h3>
+
+      <pre><span class="syn-cmt"># 方案 A：Cloudflare DNS GEO 路由（推荐）</span>
+clips.banmi.app    A      <span class="syn-cmt"># 海外查询 → R2 bucket IP</span>
+clips.banmi.app    A      <span class="syn-cmt"># 中国查询 → 阿里云 CDN IP</span>
+
+<span class="syn-cmt"># 方案 B：前端 JS 探测（备选，更可控）</span>
+<span class="syn-kw">async function</span> pickCdn() {
+  <span class="syn-kw">const</span> probe = <span class="syn-kw">await</span> fetch(<span class="syn-str">'https://r2.banmi.app/ping.txt'</span>,
+    { signal: AbortSignal.timeout(<span class="syn-num">1500</span>) }).catch(() =&gt; null);
+  <span class="syn-kw">return</span> probe?.ok ? <span class="syn-str">'r2'</span> : <span class="syn-str">'oss'</span>;
+}</pre>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch9 成本测算 ============ -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">成本测算 · 50 / 500 / 5000 学员三档</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>假设：① 内容库稳定在 10000 词 × 5 段 = 50000 段 = 30GB ② 每段平均 800KB 出口 ③ 学员日均消费 30 个词 = 30 个 mp4。所有价格 2026 年中报价。</p>
+
+      <h3>9.1 一次性建设成本（任何档位都得花）</h3>
+
+      <div class="cost-card">
+        <div class="ch">一次性投入 <span class="amt">¥15-22 万</span></div>
+        <div class="cb">
+          <table>
+            <tbody>
+              <tr><td>切片 pipeline 开发（yt-dlp + ffmpeg + AI + 双桶）</td><td>1.5 人月 × ¥30k = ¥45k</td></tr>
+              <tr><td>CC 安全频道清单 + license 校验</td><td>0.3 人月 × ¥30k = ¥9k</td></tr>
+              <tr><td>初始内容入库（5 万段一次性 ffmpeg + LLM）</td><td>¥1k（电费 + API + 切片机短租）</td></tr>
+              <tr><td>ICP 备案（企业主体 + 公安备案 + 域名）</td><td>0.5 人月 × ¥30k + 域名 ¥100 = ¥15k</td></tr>
+              <tr><td>前端播放器（HTML5 video + 字幕高亮 + 循环）</td><td>0.5 人月 × ¥30k = ¥15k</td></tr>
+              <tr><td>DMCA 流程 + 法务咨询</td><td>¥10-30k 一次性律师咨询</td></tr>
+              <tr><td><strong>合计</strong></td><td><strong>¥95k - ¥215k（按团队成本浮动）</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h3>9.2 月度账单 · 50 学员档</h3>
+
+      <div class="cost-card">
+        <div class="ch">50 学员月度 <span class="amt">¥80 - ¥200</span></div>
+        <div class="cb">
+          <p style="font-size:13px;color:var(--text-mute)">日均播放 = 50 × 30 = 1500 次 → 月 45000 次 × 800KB = 36GB 月出口</p>
+          <table>
+            <tbody>
+              <tr><td>R2 存储 30GB</td><td>$0.015 × 30 = $0.45 ≈ ¥3</td></tr>
+              <tr><td>R2 出口（海外用户假设 30%）= 11GB</td><td><strong>$0（零出口）</strong></td></tr>
+              <tr><td>七牛 OSS 存储 30GB</td><td>¥0.099 × 30 = ¥3</td></tr>
+              <tr><td>七牛 CDN 出口（国内 70%）= 25GB - 10GB 免费</td><td>¥0.29 × 15 = ¥4.4</td></tr>
+              <tr><td>切片机 Hetzner CX22</td><td>€3.79 ≈ ¥30</td></tr>
+              <tr><td>Postgres / Redis（已有 banmi 实例，0 增量）</td><td>¥0</td></tr>
+              <tr><td>OpenAI Batch API（增量入库）</td><td>¥10-30</td></tr>
+              <tr><td>域名 + 备案续费 / 12</td><td>¥10</td></tr>
+              <tr><td><strong>合计</strong></td><td><strong>¥60-80（不算切片机常驻）/ ¥40 不要切片机</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="callout good">
+        <strong>💡 50 学员档真实成本 ≈ ¥80/月</strong>。听起来便宜，但对比一下：① 昨天 iframe 方案 ¥0/月（YouGlish 免费档够）② Hetzner CX22 实际只在切片时跑，可以按小时租而不是包月（5 万段切完 ~7h × €0.006 = €0.04 ≈ ¥0.3 / 全量入库）。如果按"只在切片日跑"算，月度账单可以压到 <strong>¥20-30</strong>。
+      </div>
+
+      <h3>9.3 月度账单 · 500 学员档</h3>
+
+      <div class="cost-card">
+        <div class="ch">500 学员月度 <span class="amt">¥250 - ¥400</span></div>
+        <div class="cb">
+          <p style="font-size:13px;color:var(--text-mute)">日均 15000 次 → 月 450000 次 × 800KB = 360GB 月出口</p>
+          <table>
+            <tbody>
+              <tr><td>R2 存储 30GB</td><td>¥3</td></tr>
+              <tr><td>R2 出口（海外 30% = 108GB）</td><td><strong>¥0</strong></td></tr>
+              <tr><td>七牛存储 30GB</td><td>¥3</td></tr>
+              <tr><td>七牛 CDN 出口 252GB - 10GB 免费 = 242GB</td><td>¥0.29 × 242 = ¥70</td></tr>
+              <tr><td>切片机 CX32 包月（增量入库需要）</td><td>€6.8 ≈ ¥54</td></tr>
+              <tr><td>OpenAI 增量 API</td><td>¥30-50</td></tr>
+              <tr><td>监控 + 日志（Grafana Cloud free / Logtail）</td><td>¥0-50</td></tr>
+              <tr><td>域名 + 备案 / 12</td><td>¥10</td></tr>
+              <tr><td><strong>合计</strong></td><td><strong>¥170-240</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h3>9.4 月度账单 · 5000 学员档</h3>
+
+      <div class="cost-card">
+        <div class="ch">5000 学员月度 <span class="amt">¥800 - ¥1200</span></div>
+        <div class="cb">
+          <p style="font-size:13px;color:var(--text-mute)">日均 150000 次 → 月 450 万次 × 800KB = 3.6 TB 月出口</p>
+          <table>
+            <tbody>
+              <tr><td>R2 存储 30GB</td><td>¥3</td></tr>
+              <tr><td>R2 出口（30% = 1.08 TB）</td><td><strong>¥0</strong></td></tr>
+              <tr><td>七牛存储 30GB</td><td>¥3</td></tr>
+              <tr><td>七牛 CDN 出口 2.52 TB（购包年）</td><td>¥0.20 × 2520 = ¥504（含资源包折扣）</td></tr>
+              <tr><td>切片机 CCX23 包月（专用 8 vCPU）</td><td>€30 ≈ ¥240</td></tr>
+              <tr><td>OpenAI 增量 + 用户行为分析</td><td>¥100-200</td></tr>
+              <tr><td>监控 + 日志（升级到 Datadog hobby / 七牛日志）</td><td>¥100</td></tr>
+              <tr><td>DMCA 法务（每月 1-2 件平均）</td><td>¥0-200（律师按件计）</td></tr>
+              <tr><td><strong>合计</strong></td><td><strong>¥950-1350</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h3>9.5 三档对比 + iframe 路线对比</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>学员规模</th><th>真切片月度</th><th>iframe（昨天）月度</th><th>差额/月</th><th>差额/年</th></tr></thead>
+          <tbody>
+            <tr><td>50</td><td>¥80</td><td>¥0（免费 YouGlish + B2 用 GPT-4o 加索引）</td><td>+¥80</td><td>+¥960</td></tr>
+            <tr><td>500</td><td>¥250</td><td>¥150（YouGlish 跟一档涨价 + Postgres）</td><td>+¥100</td><td>+¥1200</td></tr>
+            <tr><td>5000</td><td>¥1100</td><td>¥800（YouGlish 中档 + 自建索引）</td><td>+¥300</td><td>+¥3600</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cost-total">
+        <div class="label">5 年总成本（5000 学员稳态，假设全程切片）：<br>真切片 ≈ ¥66k + 一次性 ¥150k = <strong>¥216k</strong>；iframe ≈ ¥48k + 一次性 ¥120k = <strong>¥168k</strong></div>
+        <div class="num">+¥48k</div>
+      </div>
+
+      <div class="callout warn">
+        <strong>💰 财务结论</strong>：真切片比 iframe 贵 ¥3-5 千/年（5000 学员档），加上一次性多花 ¥3-7 万。这个差额本身不大，<strong>关键风险点是 DMCA / 备案 / 法律纠纷的不可预期成本</strong>，一次官司就能把账打穿。真切片的"省钱"叙事不成立 —— iframe 更便宜更安全。
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch10 国内决策树 ============ -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">国内访问决策树 · ICP 备案 + 双桶分流</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>这是真切片最大的运营摩擦。如果 banmi 学员里有"在国内不翻墙"用户，技术答案就<strong>没有捷径</strong>：要么放弃国内用户，要么走 ICP 备案 + 国内 bucket。中间地带（"香港节点 + 高速线路"）适合个人项目不适合 K12 学员产品。</p>
+
+      <h3>10.1 决策树</h3>
+
+      <div class="tree">
+        <div class="node q">Q1：banmi 学员里有"国内不翻墙"用户吗？</div>
+        <div class="branches">
+          <div class="node yes"><span class="lbl y">YES</span>K12 国际学校学员 99% 在国内 → 必须支持</div>
+          <div class="node no"><span class="lbl n">NO</span>纯海外用户 → 单 R2 即可，跳到 10.3</div>
+        </div>
+
+        <div class="step-arrow">↓</div>
+
+        <div class="node q">Q2：放国内 bucket 必须备案吗？</div>
+        <div class="branches">
+          <div class="node yes"><span class="lbl y">YES</span>大陆 OSS / COS / 七牛 → 必须 ICP 备案的域名</div>
+          <div class="node no"><span class="lbl m">折中</span>香港 / 新加坡节点 + 国内 CDN → 不一定备案，但速度 100-300ms 慢且不稳</div>
+        </div>
+
+        <div class="step-arrow">↓</div>
+
+        <div class="node q">Q3：banmi 是个人主体还是企业主体？</div>
+        <div class="branches">
+          <div class="node yes"><span class="lbl y">企业</span>可商业用途，备案周期 3-22 工作日（平均 7-15 天），需营业执照 + 法人身份证</div>
+          <div class="node no"><span class="lbl m">个人</span>不可商业用途；K12 收费 = 商业，<strong>个人备案违规</strong></div>
+        </div>
+
+        <div class="step-arrow">↓</div>
+
+        <div class="node q">Q4：备案下来后还有什么坑？</div>
+        <div class="branches">
+          <div class="node no"><span class="lbl m">公安备案</span>开站 30 日内做，否则被关</div>
+          <div class="node no"><span class="lbl m">通信管理局复审</span>每年定期抽查内容</div>
+        </div>
+      </div>
+
+      <h3>10.2 备案流程（企业，2026 年中）</h3>
+
+      <ol>
+        <li><strong>主体材料</strong>：营业执照（必须）+ 法人身份证 + 法人手机号 + 域名证书</li>
+        <li><strong>选服务商</strong>：阿里云 / 腾讯云任一，购买 1 台备案专用 ECS（最低 ¥99/年，备案后可改用 OSS + CDN）</li>
+        <li><strong>提交资料 + 初审</strong>：阿里云 1-2 工作日</li>
+        <li><strong>工信部短信核验</strong>：初审过后 5 分钟收到短信，48h 内回复</li>
+        <li><strong>管局审核</strong>：3-20 工作日，因省份差异（北京/上海 5-7 天，部分省 15-20 天）</li>
+        <li><strong>公安联网备案</strong>：开站后 30 日内，<a href="https://www.beian.gov.cn/" rel="noopener">beian.gov.cn</a>，免费</li>
+        <li><strong>实操坑</strong>：法人手机号在工信部 24h 不接电话 → 备案失败重来；新注册域名要等 2-3 天才能提交备案</li>
+      </ol>
+
+      <h3>10.3 双桶分流的工程实现</h3>
+
+      <pre><span class="syn-cmt">// Next.js API route: /api/clip-url</span>
+<span class="syn-kw">export async function</span> <span class="syn-fn">GET</span>(req: <span class="syn-fn">Request</span>) {
+  <span class="syn-kw">const</span> { clipId } = parseQuery(req.url);
+  <span class="syn-kw">const</span> ip = req.headers.get(<span class="syn-str">'cf-connecting-ip'</span>);
+  <span class="syn-kw">const</span> country = req.headers.get(<span class="syn-str">'cf-ipcountry'</span>);  <span class="syn-cmt">// Cloudflare GEO</span>
+
+  <span class="syn-kw">const</span> clip = <span class="syn-kw">await</span> db.clips.findOne({ id: clipId });
+
+  <span class="syn-kw">const</span> isChina = country === <span class="syn-str">'CN'</span>;
+  <span class="syn-kw">const</span> url = isChina
+    ? <span class="syn-str">`https://cdn-cn.banmi.app/</span><span class="syn-op">${</span>clip.oss_key<span class="syn-op">}</span><span class="syn-str">`</span>      <span class="syn-cmt">// 国内 OSS + CDN</span>
+    : <span class="syn-str">`https://r2.banmi.app/</span><span class="syn-op">${</span>clip.r2_key<span class="syn-op">}</span><span class="syn-str">`</span>;        <span class="syn-cmt">// 海外 R2</span>
+
+  <span class="syn-kw">return</span> Response.json({ url, region: isChina ? <span class="syn-str">'cn'</span> : <span class="syn-str">'global'</span> });
+}</pre>
+
+      <h3>10.4 折中方案：香港节点（不要 ICP）</h3>
+
+      <div class="callout warn">
+        <strong>能不备案就跑国内吗？</strong>不能直接放阿里云大陆 bucket，但<strong>香港节点</strong>可以走：阿里云香港 OSS + 阿里云全球加速 CN-HK 链路 → 国内访问延迟 80-150ms（vs 大陆节点的 10-30ms）。不需要 ICP。<br><br>
+        <strong>代价</strong>：① 速度比大陆慢 5-10x ② 不稳定（受 GFW 抖动影响）③ 阿里云全球加速带宽费比国内 CDN 贵 ④ 不是 banmi K12 教学场景能用的 SLA（教师课堂上不能 loading）。
+      </div>
+
+      <div class="callout accent">
+        <strong>📋 banmi 的实际建议</strong>：K12 教学场景<strong>必须备案 + 双桶</strong>。半米已经是企业主体（半米英语 / 银米/ banmi 公司？），办备案的边际成本 ≈ ¥15k（一次性 + 法务时间）。这是真切片路线的真实门槛 —— 阿杰愿意花 0.5 人月办备案，才能真正走真切片。
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch11 YouTube 死局 ============ -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">YouTube unlisted 当存储 · Content ID 死局</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>阿杰提的这个方案听起来太美：YouTube 免费存视频 + 自带 CDN + 全球分发，banmi 只用 iframe 嵌入自己上传的 unlisted 视频。如果跑得通，前面 Ch8 / Ch9 的整个 OSS 选型都不用了。<strong>但跑不通</strong>，这一节把死局拆透。</p>
+
+      <h3>11.1 Content ID 是什么</h3>
+
+      <p>YouTube 的版权保护系统，建于 2007 年，全球最先进的视频/音频指纹技术。每个新上传视频在<strong>处理阶段</strong>就被三路扫描：</p>
+
+      <ol>
+        <li><strong>音频指纹</strong>：哪怕音轨被略调速 / 变调 / 加杂音，还能匹配出原作，例如把电影台词加上背景音乐重发，仍被识别</li>
+        <li><strong>视觉识别</strong>：画面像素级指纹，logo / 卡通形象 / 特殊字幕样式都能匹配</li>
+        <li><strong>元数据匹配</strong>：标题 / 描述 / tag 与已知版权作品对比</li>
+      </ol>
+
+      <h3>11.2 关键事实：unlisted 也扫</h3>
+
+      <div class="callout bad">
+        <strong>YouTube 官方文档原文（Help 2797370）</strong>：<br>
+        "YouTube uses Content ID to automatically detect copyrighted material in videos — even if they're set to private or unlisted."<br><br>
+        换句话说，<strong>unlisted 不是法外之地</strong>。Content ID 在视频上传完处理流水线就开扫，与 visibility 设置无关。
+      </div>
+
+      <h3>11.3 命中 Content ID 的下场</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>触发结果</th><th>概率</th><th>对 banmi 影响</th></tr></thead>
+          <tbody>
+            <tr><td>视频被静音（mute audio）</td><td>10%（音乐版权）</td><td>banmi 学员听不到原句，废</td></tr>
+            <tr><td>广告插入，收入归原作者</td><td>40%</td><td>iframe 里出广告，体验灾难</td></tr>
+            <tr><td>视频被屏蔽（按地区或全球）</td><td>30%</td><td>iframe 显示 "This video is not available"</td></tr>
+            <tr><td>视频被强制下架</td><td>15%</td><td>banmi 这条死链</td></tr>
+            <tr><td>无问题</td><td>5%</td><td>极少 —— 只有完全原创内容（自录的教师讲解）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>11.4 频道累积风险</h3>
+
+      <ul>
+        <li><strong>3 次 Content ID 命中</strong>：可能触发频道警告（每次有 7 天异议窗口）</li>
+        <li><strong>3 次 DMCA 实证警告</strong>（不同于 Content ID）：直接封号</li>
+        <li><strong>同一 IP 多个账号反复上传被检测内容</strong>：YouTube 反作弊封 IP</li>
+        <li><strong>每天上传量级</strong>：API 默认 quota 10000 units/天 + 频道实际上传日上限 ~100 个视频（非官方但社区共识），banmi 切 5 万段 → 500 天才传完，<strong>显然不现实</strong></li>
+      </ul>
+
+      <h3>11.5 YouTube ToS 第一条</h3>
+
+      <p>YouTube Terms of Service Section 5 明确禁止：<em>"You are not allowed to: access, reproduce, download, distribute, transmit, broadcast, display, sell, license, alter, modify or otherwise use any part of the Service or any Content except as expressly authorized by the Service."</em></p>
+
+      <p>"用 YouTube 当 SaaS 存储后端"是<strong>明确违反 ToS 的商业行为</strong>。即使 Content ID 全过（不可能），banmi 也是在 YouTube ToS 红线上跑，随时可能被人工运营介入封号。</p>
+
+      <h3>11.6 国内打不开</h3>
+
+      <p>就算上面所有问题都解决，YouTube 在国内不可达。banmi K12 学员 99% 在国内，要么放弃这个方案，要么<strong>同时</strong>建一套自托管（双重存储成本，比 OSS 单桶更贵）。</p>
+
+      <h3>11.7 例外：什么情况能用 YouTube unlisted</h3>
+
+      <div class="callout good">
+        <strong>✅ 唯一可行的子场景</strong>：banmi 自制原创视频（半米拍的教师讲解 / 词卡动画），上传到自己的 YouTube 频道做<strong>海外用户备份分发</strong>（不依赖 unlisted 当主存储，主存储仍是 OSS / R2）。这种情况：① Content ID 不命中（自己的内容） ② 不违反 ToS（自己有版权）③ 海外用户可达。<br><br>
+        但这个场景下，YouTube 的角色是"二级 CDN"而不是"主存储"，作用有限。
+      </div>
+
+      <div class="callout bad">
+        <strong>🚫 死局明确结论</strong>：把别人 YouTube 视频切片后重传 unlisted 当 banmi 存储 = 三条死路（Content ID + ToS + GFW）合三为一。<strong>这条路完全堵死，不再考虑。</strong>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch12 法律红黄绿 ============ -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">法律风险红黄绿 + CC-BY 安全清单</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>这节给 banmi 一个<strong>可操作的版权决策矩阵</strong>。每个频道 / 内容来源进 banmi 切片库之前，先按这套绿/黄/红打标签。</p>
+
+      <h3>12.1 三档安全清单</h3>
+
+      <div class="light-grid">
+        <div class="light green">
+          <h4>🟢 绿区：可以切，无任何法律风险</h4>
+          <ul>
+            <li><strong>美国公版（Public Domain）</strong>：VOA Learning English（美国政府作品，全球公版，<strong>允许商用</strong>，只需 credit "learningenglish.voanews.com"）</li>
+            <li><strong>banmi 自制视频</strong>（教师讲解 / 自录场景）：banmi 持有完整版权</li>
+            <li><strong>CC0 频道</strong>：Wikimedia Commons 部分内容、NASA / NIH 等政府教育视频、维基百科上的 OER 视频</li>
+            <li><strong>已购买独家授权</strong>：和某出版社或 YouTube 创作者签的 banmi 独家使用协议</li>
+          </ul>
+          <p style="margin-top:8px"><strong>操作要求</strong>：在 clips 表标 license='public-domain' 或 'own' 或 'licensed'；前端片段下角标注源；不需要担心 DMCA。</p>
+        </div>
+
+        <div class="light yellow">
+          <h4>🟡 黄区：可以切，但需小心 + 限制</h4>
+          <ul>
+            <li><strong>CC BY-NC-SA</strong>：Khan Academy 大部分课程视频（非商业 + 同样授权 + 署名）</li>
+            <li><strong>CC BY 4.0 国际</strong>：部分 TED-Ed 课程、部分 Crash Course Kids（看每个视频底栏标识）</li>
+            <li><strong>开放教育资源（OER）</strong>：MIT OCW、Open University 等</li>
+          </ul>
+          <p style="margin-top:8px"><strong>关键陷阱</strong>：① Khan Academy 是 <strong>NC</strong>（非商业）—— banmi 收钱后切 Khan Academy 内容<strong>违反 CC license</strong>。这是 banmi 商业化后最大的"红 vs 黄"灰色地带。② SA（同样授权）意味着 banmi 自己加的字幕高亮 / 翻译也得 CC 同样许可，这影响 banmi 的"自家增值"商业逻辑。<br><br>
+          <strong>操作建议</strong>：banmi 50 学员阶段如果定价偏教育性（非营利或微利）可以走 NC 灰色地带；500+ 商业化后必须切到只用 BY（无 NC）授权。
+          </p>
+        </div>
+
+        <div class="light red">
+          <h4>🔴 红区：禁切，违法风险高</h4>
+          <ul>
+            <li><strong>电影 / 电视剧（华纳、迪士尼、Netflix 等）</strong>：完全没合理使用空间，DMCA 必送</li>
+            <li><strong>音乐 MV</strong>：UMG / Sony / Warner Music 旗下，秒被 Content ID 检测</li>
+            <li><strong>SciShow（标准频道）/ TED 主站</strong>：默认版权保留（all rights reserved），即使是教育内容也<strong>不能</strong>切重传，只能 iframe</li>
+            <li><strong>BBC / NHK / CNN 新闻</strong>：政府新闻可能 fair use，但版权方激进</li>
+            <li><strong>所有标"All Rights Reserved"</strong>的 YouTube 视频（YouTube 默认）</li>
+          </ul>
+          <p style="margin-top:8px"><strong>操作要求</strong>：直接黑名单，pipeline 入库时 license 校验 = "standard YouTube" 的<strong>跳过</strong>。这些内容只走 iframe 路线（昨天方案）。</p>
+        </div>
+      </div>
+
+      <h3>12.2 中国《著作权法》第 24 条 · 课堂教学条款的边界</h3>
+
+      <p>中国法的"合理使用"对教育用途留有空间，但<strong>banmi 适用不上</strong>。2020 年北京互联网法院数字教育著作权白皮书 + 多家律师事务所解读给出的边界：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>情形</th><th>合理使用?</th><th>法律依据</th></tr></thead>
+          <tbody>
+            <tr><td>线下教室，老师播放 5s 片段讲单词</td><td class="check y">是</td><td>第 24 条"少量复制"+"课堂教学"</td></tr>
+            <tr><td>banmi 在线 SaaS，付费学员看片段</td><td class="check n">否</td><td>"广大不特定学员"+"商业经营"超出封闭场景</td></tr>
+            <tr><td>免费在线 wiki 学习站，所有人可看</td><td class="check p">灰</td><td>不商业，但传播范围超出"课堂"</td></tr>
+            <tr><td>banmi 教师工具内置在 LMS，仅本校 30 人可见</td><td class="check p">灰</td><td>接近课堂，但仍涉及"传播"</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <strong>📌 关键判例</strong>：北京互联网法院 2022 年判决，某在线教育公司在课程中使用电视剧片段约 20s，购买课程的学员通过直播和重播都能看，<strong>不构成"课堂教学合理使用"</strong>，需赔偿原版权方。这条判例划清边界：付费课程内容里嵌片段，等于"二次传播"，不再受 24 条保护。
+      </div>
+
+      <h3>12.3 美国 fair use 四要素对 banmi 的体检</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>四要素</th><th>banmi 真切片</th><th>评分</th></tr></thead>
+          <tbody>
+            <tr><td>① 使用目的和性质</td><td>商业付费 SaaS（不利） + 教育性质（利） + 转化性（利 —— banmi 加字幕/上下文/中文翻译/词卡）</td><td>偏利</td></tr>
+            <tr><td>② 原作性质</td><td>非虚构教育视频（利） vs 电影/MV（不利）</td><td>取决于内容池</td></tr>
+            <tr><td>③ 使用比例</td><td>5-15s vs 整段视频几分钟到几十分钟（极利）</td><td>极利</td></tr>
+            <tr><td>④ 对市场的影响</td><td>banmi 不替代原视频（利） vs YouTube 创作者广告收入分流（不利）</td><td>偏利</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>美国 fair use 整体偏向 banmi</strong>，但 banmi 服务的是<strong>中国 K12 国际学校</strong>，主要管辖在中国。中国合理使用范围远窄于美国 fair use，所以美国法律不能成为依赖。</p>
+
+      <h3>12.4 DMCA 操作 SOP</h3>
+
+      <ol>
+        <li><strong>邮箱设置</strong>：dmca@banmi.app，专人监控（运营 / 法务）</li>
+        <li><strong>收到 takedown 后</strong>：① 24h 内（最长 7 天）从 R2 / OSS 删 mp4 ② DB 中 clips.takedown_at = NOW() ③ 前端立即不展示这条 clip ④ 回邮件确认</li>
+        <li><strong>异议</strong>：自评 fair use 牢靠且不构成商业替代，可以发 counter-notification 走 14 天异议流程；不牢靠就静默删</li>
+        <li><strong>累积监控</strong>：每月统计来自同一版权方的 takedown 数，超过 3 次主动把该频道 / 该视频整段加黑名单</li>
+        <li><strong>不能做的</strong>：① 收到 takedown 不响应（视为故意侵权，可加重赔偿） ② 删完隔几天偷偷恢复（被发现直接诉讼）</li>
+      </ol>
+
+      <h3>12.5 banmi 50 学员阶段的实战法律方案</h3>
+
+      <div class="callout accent">
+        <strong>🎯 阿杰可操作的具体步骤</strong>
+        <ol>
+          <li><strong>切片只切绿区</strong>：VOA Learning English（公版商用）+ banmi 自制 + 已购授权频道。这是唯一"零风险"路径。</li>
+          <li><strong>黄区暂搁</strong>：Khan Academy 等 NC 内容只走 iframe 路线（不切片），等 banmi 商业模式稳了再谈授权或切到 BY 视频</li>
+          <li><strong>红区彻底不碰</strong>：iframe 也只用于"长尾词"（YouGlish 兜底场景）</li>
+          <li><strong>每个切片下角标版权出处</strong>：例如"VOA Learning English · CC0"<br>这是 fair use 第 1 要素（"转化性 + 教育"）和 PlayPhrase 风格的合规姿态</li>
+          <li><strong>banmi 网站底部加 DMCA 入口</strong>：模板见 <code>youtube.com/copyright</code>，律师审一次（¥5-10k）</li>
+        </ol>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch13 mini demo ============ -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">mini demo · 假切片库前端 + API 代码</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>下面是 banmi 真切片库长成后<strong>前端体验的样子</strong>。这里因为不能在静态 HTML 里托管真 mp4，演示用 YouTube embed + timestamp 模拟"5-8s 精切播放" —— 实际部署中 <code>&lt;iframe&gt;</code> 会换成 <code>&lt;video src="https://cdn-cn.banmi.app/clips/xxx.mp4"&gt;</code>。</p>
+
+      <div class="demo-host">
+        <h4>🎬 banmi 真切片库 · 词卡演示</h4>
+        <div class="demo-search">
+          <input id="dmInput" type="text" placeholder="输入词试试：significant / curious / important..." />
+          <button id="dmBtn">搜索片段</button>
+        </div>
+        <div class="demo-presets">
+          <span class="preset" data-w="significant">significant</span>
+          <span class="preset" data-w="curious">curious</span>
+          <span class="preset" data-w="important">important</span>
+          <span class="preset" data-w="change">change</span>
+          <span class="preset" data-w="discover">discover</span>
+        </div>
+        <div id="dmStatus" style="font-size: 13.5px; color: var(--text-mute); margin-bottom: 10px;"></div>
+        <div class="clip-grid" id="dmClips"></div>
+        <div class="player-mount" id="dmPlayer">
+          <div class="placeholder">
+            <div style="font-size: 28px;">🎬</div>
+            <div>选一个片段开始播放</div>
+            <div style="font-size: 11px; opacity: 0.7;">演示用 YouTube embed 模拟 cdn 切片体验</div>
+          </div>
+        </div>
+        <div class="player-controls" id="dmCtrls" style="display:none">
+          <button id="dmReplay">🔁 重播</button>
+          <button id="dmSlow">🐢 0.75x</button>
+          <button id="dmBurn">📺 字幕硬烧</button>
+          <span class="info" id="dmInfo"></span>
+        </div>
+        <p class="ifr-note">⚠️ 真实 banmi 切片库前端是 <code>&lt;video&gt;</code> 直播 mp4，不显示 YouTube logo / 末尾推荐，体验更干净。</p>
+      </div>
+
+      <h3>13.1 Next.js API route 代码（50 行复刻 banmi clips API）</h3>
+
+      <pre><span class="syn-cmt">// app/api/clips/route.ts</span>
+<span class="syn-kw">import</span> { NextRequest } <span class="syn-kw">from</span> <span class="syn-str">'next/server'</span>;
+<span class="syn-kw">import</span> { db } <span class="syn-kw">from</span> <span class="syn-str">'@/lib/db'</span>;
+<span class="syn-kw">import</span> { redis } <span class="syn-kw">from</span> <span class="syn-str">'@/lib/redis'</span>;
+
+<span class="syn-kw">export const</span> runtime = <span class="syn-str">'edge'</span>;
+<span class="syn-kw">export const</span> revalidate = <span class="syn-num">3600</span>;
+
+<span class="syn-kw">export async function</span> <span class="syn-fn">GET</span>(req: NextRequest) {
+  <span class="syn-kw">const</span> { searchParams } = <span class="syn-kw">new</span> URL(req.url);
+  <span class="syn-kw">const</span> lemma = searchParams.get(<span class="syn-str">'lemma'</span>)?.toLowerCase().trim();
+  <span class="syn-kw">if</span> (!lemma) <span class="syn-kw">return</span> Response.json({ error: <span class="syn-str">'lemma required'</span> }, { status: <span class="syn-num">400</span> });
+
+  <span class="syn-cmt">// 1. 检测用户区域（决定走 R2 还是 OSS）</span>
+  <span class="syn-kw">const</span> country = req.headers.get(<span class="syn-str">'cf-ipcountry'</span>) ?? <span class="syn-str">'XX'</span>;
+  <span class="syn-kw">const</span> isChina = country === <span class="syn-str">'CN'</span>;
+  <span class="syn-kw">const</span> cdnBase = isChina
+    ? <span class="syn-str">'https://cdn-cn.banmi.app'</span>     <span class="syn-cmt">// 国内阿里云 / 七牛</span>
+    : <span class="syn-str">'https://r2.banmi.app'</span>;        <span class="syn-cmt">// 海外 Cloudflare R2</span>
+
+  <span class="syn-cmt">// 2. Redis 缓存（热门词 24h）</span>
+  <span class="syn-kw">const</span> cacheKey = <span class="syn-str">`clips:</span><span class="syn-op">${</span>lemma<span class="syn-op">}</span><span class="syn-str">:</span><span class="syn-op">${</span>isChina ? <span class="syn-str">'cn'</span> : <span class="syn-str">'g'</span><span class="syn-op">}</span><span class="syn-str">`</span>;
+  <span class="syn-kw">const</span> cached = <span class="syn-kw">await</span> redis.get(cacheKey);
+  <span class="syn-kw">if</span> (cached) <span class="syn-kw">return</span> Response.json(JSON.parse(cached));
+
+  <span class="syn-cmt">// 3. 主查询：按 quality_score 取 top 5，排除 takedown</span>
+  <span class="syn-kw">const</span> rows = <span class="syn-kw">await</span> db.sql<span class="syn-str">`
+    SELECT id, channel, sentence_text, start_ms, end_ms,
+           </span><span class="syn-op">${</span>isChina ? db.sql<span class="syn-str">`oss_key`</span> : db.sql<span class="syn-str">`r2_key`</span><span class="syn-op">}</span><span class="syn-str"> AS key,
+           quality_score, cefr, license, video_id
+    FROM clips
+    WHERE word_lemma = </span><span class="syn-op">${</span>lemma<span class="syn-op">}</span><span class="syn-str">
+      AND takedown_at IS NULL
+      AND has_profanity = FALSE
+    ORDER BY quality_score DESC
+    LIMIT 5
+  `</span>;
+
+  <span class="syn-cmt">// 4. 拼装 cdn 完整 url</span>
+  <span class="syn-kw">const</span> clips = rows.map((r) =&gt; ({
+    id: r.id,
+    channel: r.channel,
+    text: r.sentence_text,
+    duration_ms: r.end_ms - r.start_ms,
+    cefr: r.cefr,
+    license: r.license,
+    src: <span class="syn-str">`</span><span class="syn-op">${</span>cdnBase<span class="syn-op">}</span><span class="syn-str">/</span><span class="syn-op">${</span>r.key<span class="syn-op">}</span><span class="syn-str">`</span>,
+    score: Math.round(r.quality_score * <span class="syn-num">100</span>) / <span class="syn-num">100</span>,
+  }));
+
+  <span class="syn-kw">const</span> body = { lemma, count: clips.length, region: isChina ? <span class="syn-str">'cn'</span> : <span class="syn-str">'global'</span>, clips };
+  <span class="syn-kw">await</span> redis.setex(cacheKey, <span class="syn-num">86400</span>, JSON.stringify(body));
+  <span class="syn-kw">return</span> Response.json(body);
+}</pre>
+
+      <h3>13.2 前端播放器（React 50 行）</h3>
+
+      <pre><span class="syn-cmt">// app/components/ClipPlayer.tsx</span>
+<span class="syn-str">'use client'</span>;
+<span class="syn-kw">import</span> { useRef, useEffect, useState } <span class="syn-kw">from</span> <span class="syn-str">'react'</span>;
+
+<span class="syn-kw">export function</span> <span class="syn-fn">ClipPlayer</span>({ clip }: { clip: Clip }) {
+  <span class="syn-kw">const</span> ref = useRef&lt;HTMLVideoElement&gt;(<span class="syn-kw">null</span>);
+  <span class="syn-kw">const</span> [loop, setLoop] = useState(<span class="syn-kw">true</span>);
+  <span class="syn-kw">const</span> [rate, setRate] = useState(<span class="syn-num">1</span>);
+
+  useEffect(() =&gt; {
+    <span class="syn-kw">const</span> v = ref.current;
+    <span class="syn-kw">if</span> (!v) <span class="syn-kw">return</span>;
+    v.playbackRate = rate;
+    v.play().<span class="syn-fn">catch</span>(() =&gt; {});  <span class="syn-cmt">// iOS 需 user gesture，第一次会 fail</span>
+  }, [clip.src, rate]);
+
+  <span class="syn-kw">return</span> (
+    &lt;<span class="syn-kw">div</span>&gt;
+      &lt;<span class="syn-kw">video</span>
+        ref={ref}
+        src={clip.src}
+        muted
+        playsInline    <span class="syn-cmt">/* iOS Safari 必加 */</span>
+        controls={<span class="syn-kw">false</span>}
+        loop={loop}
+        autoPlay
+        onCanPlay={() =&gt; ref.current?.<span class="syn-fn">play</span>()}
+      /&gt;
+      &lt;<span class="syn-kw">div</span> className=<span class="syn-str">"controls"</span>&gt;
+        &lt;<span class="syn-kw">button</span> onClick={() =&gt; setLoop(!loop)}&gt;🔁 {loop ? <span class="syn-str">'循环开'</span> : <span class="syn-str">'循环关'</span>}&lt;/<span class="syn-kw">button</span>&gt;
+        &lt;<span class="syn-kw">button</span> onClick={() =&gt; setRate(rate === <span class="syn-num">1</span> ? <span class="syn-num">0.75</span> : <span class="syn-num">1</span>)}&gt;
+          🐢 {rate}x
+        &lt;/<span class="syn-kw">button</span>&gt;
+        &lt;<span class="syn-kw">button</span> onClick={() =&gt; ref.current?.<span class="syn-fn">play</span>()}&gt;▶️ 重播&lt;/<span class="syn-kw">button</span>&gt;
+      &lt;/<span class="syn-kw">div</span>&gt;
+      &lt;<span class="syn-kw">p</span> className=<span class="syn-str">"clip-meta"</span>&gt;
+        {clip.channel} · {clip.license} · 质量 {clip.score}
+      &lt;/<span class="syn-kw">p</span>&gt;
+    &lt;/<span class="syn-kw">div</span>&gt;
+  );
+}</pre>
+
+      <div class="callout accent">
+        <strong>📐 总代码量</strong>：API route 50 行 + 播放器 50 行 + ffmpeg 切片脚本 ~100 行 + yt-dlp wrapper ~50 行 = banmi 真切片 MVP ≈ <strong>250 行核心代码</strong>。CTO 视角真不算大工程。复杂的全在数据 / 内容 / 法务侧。
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch14 半米路线 ============ -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">半米路线建议 · 50 / 500 / 5000 三档</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>这一节是阿杰最想看的：<strong>具体每个阶段该走哪条路 + 触发下一档的条件</strong>。</p>
+
+      <h3>14.1 阶段 1 · 50 学员（现在）</h3>
+
+      <div class="callout good">
+        <strong>路线：iframe + YouGlish Layer 1（不做真切片）</strong>
+      </div>
+
+      <ul>
+        <li><strong>词→片段</strong>：80% 用 YouGlish 公开 widget（免费档够）；20% 高频核心词用昨天 iframe 自建索引（5000 雅思高频 + 全部已入库的 SciShow Kids / Crash Course Kids 字幕）</li>
+        <li><strong>视频源</strong>：YouTube iframe，banmi 0 视频文件</li>
+        <li><strong>国内访问</strong>：iframe 走 youtube.com 用户翻墙 / 走 banmi DB 拿到字幕 + timestamp，国内用户不能播原视频但能看字幕和 timestamp（保留体验降级）</li>
+        <li><strong>月度成本</strong>：¥0 （Postgres / Redis 复用 banmi 主实例）</li>
+        <li><strong>这个阶段唯一要做的"真切片"</strong>：banmi 老师自录的 5-10 段 demo（"今天教你 5 个新词"风格），全持有版权，做来验证切片 pipeline 跑得通 + 学员反馈是否真喜欢"看片段"</li>
+      </ul>
+
+      <h3>14.2 阶段 2 · 500 学员（V0.3）</h3>
+
+      <div class="callout warn">
+        <strong>路线：iframe + 半真切片（VOA 单频道试点）</strong>
+      </div>
+
+      <ul>
+        <li><strong>触发条件</strong>：① 学员 ≥ 500 + ② 阿杰决定半米需要"国内不翻墙也能用"+ ③ 公司主体已经准备好做 ICP 备案</li>
+        <li><strong>怎么做</strong>：从绿区单频道开始，<strong>只切 VOA Learning English</strong>（公版商用，零法律风险）。把这一个频道（约 1000 个视频）完整切片入库，覆盖高频词 2000 个左右</li>
+        <li><strong>iframe 兜底</strong>：VOA 覆盖不到的词回退 YouGlish + iframe 自建（继续用阶段 1 的数据）</li>
+        <li><strong>双桶分流</strong>：海外 R2 + 国内阿里云 OSS（已备案）</li>
+        <li><strong>月度成本</strong>：¥250-400</li>
+        <li><strong>这个阶段唯一不做的</strong>：黄区 Khan Academy / TED-Ed（等商业模式定型 + 看是否切 NC）；红区电影电视绝对不碰</li>
+      </ul>
+
+      <h3>14.3 阶段 3 · 5000 学员（V0.4+）</h3>
+
+      <div class="callout info">
+        <strong>路线：iframe 持续 + 真切片扩到 5 个绿+部分黄频道</strong>
+      </div>
+
+      <ul>
+        <li><strong>触发条件</strong>：阶段 2 跑半年以上验证 ① pipeline 稳定 ② DMCA 实际发生率 < 0.1%（5 万段每月不超过 5 件）③ 学员明显更喜欢真切片体验（A/B 测试数据）</li>
+        <li><strong>扩展频道</strong>：
+          <ul>
+            <li>绿：VOA + banmi 自制 + 已购独家授权（如和某外教 / 出版社签的）</li>
+            <li>黄（需法律风险评估）：TED-Ed CC BY 部分（不是 BY-NC-SA）、Khan Academy 国际版部分 BY、SciShow Kids 全部（如果谈下来 banmi 教育用途许可）</li>
+          </ul>
+        </li>
+        <li><strong>切片量</strong>：扩到 10 个频道，1.5 万段（覆盖 5000 雅思 + 4000 K12 词 ≈ 9000 词 × top 1-3 段）</li>
+        <li><strong>商业模式必要支撑</strong>：banmi 已经是企业主体 + 备案 + 法务 + DMCA 流程 + 律师月度 retainer（¥3-5k/月）</li>
+        <li><strong>月度成本</strong>：¥800-1500</li>
+      </ul>
+
+      <h3>14.4 三档对比总表</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>维度</th><th>50 学员</th><th>500 学员</th><th>5000 学员</th></tr></thead>
+          <tbody>
+            <tr><td>路线</td><td>纯 iframe</td><td>iframe + VOA 真切片</td><td>iframe + 5-10 频道真切片</td></tr>
+            <tr><td>真切片量</td><td>0-10 段（自制 demo）</td><td>5000 段（VOA）</td><td>15000 段</td></tr>
+            <tr><td>iframe 量</td><td>15 万段（昨天报告）</td><td>15 万段</td><td>15 万段</td></tr>
+            <tr><td>国内可达</td><td>iframe 不可达，降级看字幕</td><td>切片可达，iframe 仍降级</td><td>主路径切片可达</td></tr>
+            <tr><td>ICP 备案</td><td>不需要</td><td>需要</td><td>必须</td></tr>
+            <tr><td>月成本</td><td>¥0</td><td>¥250-400</td><td>¥800-1500</td></tr>
+            <tr><td>一次性投入</td><td>0（已有 iframe）</td><td>¥80k</td><td>+¥50k 扩展</td></tr>
+            <tr><td>团队工程量</td><td>0.5 人月</td><td>2-3 人月</td><td>4-5 人月</td></tr>
+            <tr><td>法律风险</td><td>低（iframe）</td><td>低（仅绿区）</td><td>中（部分黄区）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>14.5 反过来：什么情况下应该<strong>跳过</strong>真切片</h3>
+
+      <div class="callout bad">
+        <strong>🚫 跳过真切片的情形</strong>
+        <ol>
+          <li>banmi 学员全部在海外（不需要国内访问） → 永远用 iframe + YouGlish</li>
+          <li>banmi 转向纯"自制内容"（半米教师自己拍视频） → 那直接用 OSS 或 YouTube 当 CDN，根本不涉及"切片"</li>
+          <li>banmi 决定做"工具型"产品（教师在 banmi 后台输入自己的视频和句子）→ UGC 路线，版权全在用户，banmi 不持有</li>
+          <li>banmi 5000 学员仍然没到 → 经济上不划算，老老实实付 YouGlish 订阅</li>
+        </ol>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch15 FAQ ============ -->
+  <section class="chapter" id="ch15">
+    <h2><span class="num">15</span><span class="title-text">FAQ · 12 条阿杰可能想问的</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q1</span><span class="qtext">50 学员阶段值不值得做真切片？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          不值得。理由：① ROI 算不过来（成本 ¥80/月 + 一次性 ¥150k + 0.5 人月备案，对比 iframe ¥0/月 + 0 一次性） ② 国内可达对 50 学员是"nice to have"不是"必须"，可以让早期学员翻墙看 demo ③ 时间应该花在"AI 选句质量"和"词卡 UX"上，那些是 banmi 独门，切片是别人也能做的。
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q2</span><span class="qtext">iOS Safari 上 mp4 自动播放限制怎么解？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          三个属性必加：<code>muted + autoplay + playsinline</code>。muted 是 Safari 自动播放的强制条件（iOS 10+ 政策）；playsinline 让视频在页面内播不强进全屏（这是 banmi 词卡场景的关键）；autoplay 触发自动播。还有一条隐藏限制：iOS 在低电量模式下永远不自动播 —— 这没办法绕，前端要写降级 fallback（"点击播放"按钮）。
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q3</span><span class="qtext">字幕版权和视频版权分开吗？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          法律上是分开的。字幕作为汇编作品 / 翻译作品有独立版权，归字幕制作者所有（YouTube 自动字幕是 Google ASR 生成，但 YouTube ToS 把使用权授给上传者）。banmi 把字幕索引化（"哪句话在哪个视频的几秒"）相对安全，PlayPhrase / Reverso 都用这个论点。但你抓<strong>字幕全文 + 重新发布</strong>就构成字幕复制（仍违法）。banmi 只内部索引、前端展示句子片段（合理使用 fragments）是相对安全的灰区。
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q4</span><span class="qtext">DMCA takedown 实际多久收到？怎么应对？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          根据 YouTube 数据，DMCA 收到后<strong>主流 24-72h 内处理</strong>，部分 case 一周内。banmi 不是 YouTube 量级，初期收到的频率会很低（每月 0-2 件预估）。响应 SOP：① 收件箱 dmca@banmi.app 配企业邮箱告警 ② 24h 内删 mp4 + 设 clips.takedown_at ③ 邮件回复确认 ④ 月底 review 找规律（哪些频道反复来）。一年内累积 > 50 件就要重新评估"真切片"路线值不值得。
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q5</span><span class="qtext">Whisper 重抓字幕比 YouTube 自动字幕好多少？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          Whisper Large-v3 在 LibriSpeech ~2.7% WER，真实英语 8-12% WER。YouTube 自动字幕在清晰录音 5-15% WER（标点 / 专有名词差很多）、嘈杂场景 30%+。<strong>核心差异不在 WER 本身，在标点和句边界</strong> —— Whisper 给完整标点和句子，YouTube auto 几乎没有标点。banmi 切片要求知道"句子在哪里开始/结束"，YouTube auto 几乎不可用，必须 LLM 加标点 or Whisper 重抓。<br><br>Whisper 重抓成本：5000 视频 × 平均 10 分钟 × Whisper-large-v3 在 RTX 4090 ~5x realtime → ~17 小时 GPU 时间 ≈ ¥50。划算。
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q6</span><span class="qtext">为什么 PlayPhrase 没被告？banmi 能复制吗？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          PlayPhrase 没被告的理由不是法律站得住，是它<strong>没有商业利益</strong>：纯 Patreon 捐款、无 API、无订阅、单段 ≤ 8s、链回 IMDb。版权方告它没 ROI（赢了拿不到钱）。banmi 是商业 SaaS K12 收费产品，<strong>有钱可拿</strong>，版权方告 banmi 的动力远高于告 PlayPhrase。所以 PlayPhrase 模式 banmi <strong>不能完全复制</strong>，但可以借鉴它的"硬限 8s + 引流 + 多 license 标识"这套姿态降低风险。
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q7</span><span class="qtext">国内 ICP 备案下来要多久？卡点在哪？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          官方周期 3-22 工作日，实际平均 7-15 天。三大卡点：① 法人手机号要在工信部 24h 内接电话核验，错过 → 重来 ② 新注册域名要等 2-3 天才能提交备案（域名入库延迟）③ 部分省份管局严格，地址 / 公司经营范围不匹配会被驳回（这个最坑，可能多花 1-2 周）。<br><br>实操建议：找阿里云 / 腾讯云的"备案管家"（一般打包卖，¥0-500），他们熟悉本地管局规则。
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q8</span><span class="qtext">YouTube 不允许 yt-dlp 下载，banmi 用了不会被告吗？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          YouTube ToS 第 5 条明确禁止下载，但实际<strong>从未起诉过任何使用 yt-dlp 的项目</strong>。RIAA 在 2020 年试图让 GitHub 下架 youtube-dl，被推回（GitHub 用 fair use 论据复活了仓库）。Google 实际维权是 IP-level 限速 / cookie 失效，不是法律层。banmi 用 yt-dlp 抓<strong>字幕</strong>是行业默认操作（YouGlish / PlayPhrase 都这样），用 yt-dlp 抓<strong>完整视频本体</strong>风险更高 —— 抓回来切片后<strong>重新分发</strong>才是真违规，单纯下载到自己机器还能解释成"个人备份"。banmi 应该把切片机当短驻处理盘，切完即删原视频，降低法律暴露。
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q9</span><span class="qtext">如果 5000 学员阶段决定做真切片，最早什么时候开始备案？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <strong>提前 6 个月</strong>。备案 + 公安备案 + 域名 + 服务器 + 域名解析 + CDN 接入 + DMCA SOP + 法律咨询 + pipeline 开发 = 串行做大约 4-5 个月。从 V0.3 进入 V0.4 之间的过渡期就要启动，避免"500 学员里有 200 个在抱怨国内卡了"再来临时抱佛脚。<br><br>另：备案企业主体可以提前一年办（banmi 已经是企业了应该已有），手续不复杂，办了不亏。
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q10</span><span class="qtext">切片精度差 0.5s 用户能感觉到吗？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          能。词卡场景下学员重点听<strong>目标词那两个音节</strong>（200-400ms），片段开头如果切掉前 200ms 就<strong>没了上下文</strong>（"My cousin <em>significantly</em> improved" 切成 "icantly improved"），重听 3-5 次后学员会困惑。所以 banmi 必须用 ffmpeg 精切（重编码） + 前 0.5s padding，<strong>不能用 -c copy 快切</strong>。这是真切片相比 iframe 的核心质量优势 —— iframe 的 YouTube IFrame API <code>seekTo</code> 精度只有 ±0.5s，无法保证。
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q11</span><span class="qtext">如果 R2 / 阿里云一家挂了，怎么 fallback？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          双桶天然提供 fallback —— 前端拿不到主 CDN 后立即试备用：
+          <pre style="margin-top:6px"><span class="syn-kw">const</span> trySrc = <span class="syn-kw">async</span> (clip) =&gt; {
+  <span class="syn-kw">for</span> (<span class="syn-kw">const</span> base <span class="syn-kw">of</span> [primary, fallback]) {
+    <span class="syn-kw">try</span> {
+      <span class="syn-kw">const</span> ok = <span class="syn-kw">await</span> fetch(base + clip.key,
+        { method: <span class="syn-str">'HEAD'</span>, signal: AbortSignal.timeout(<span class="syn-num">800</span>) });
+      <span class="syn-kw">if</span> (ok.ok) <span class="syn-kw">return</span> base + clip.key;
+    } <span class="syn-kw">catch</span> {}
+  }
+  <span class="syn-cmt">// 最后兜底：iframe YouTube 原视频 timestamp（昨天方案）</span>
+  <span class="syn-kw">return</span> <span class="syn-fn">youtubeFallback</span>(clip.video_id, clip.start_ms);
+};</pre>
+          多层降级：主 CDN → 备 CDN → iframe YouTube。这是为什么 banmi 永远要保留 iframe 路线，不能把 V0.3 之前的索引数据废掉。
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q12</span><span class="qtext">阿杰最该警惕的"坑"是什么？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <strong>"我已经投了 50k 开发，不能止损"陷阱</strong>。真切片 pipeline 一旦开发出来，阿杰 / 三丰会有"既然写了就用满"的冲动，开始切灰区 / 红区频道（"反正没人告过"）。这是路线性失败模式。<br><br>对冲方法：① 立项时定明文 SOP，红区频道直接 channels.yaml 黑名单，pipeline 入库时硬卡 license 校验 ② 每月人工 review 一次实际切的频道清单 ③ 律师季度审一次 ④ DMCA 累积超过预设阈值（每月 > 5 件）自动触发"切片暂停"评估会议。<br><br>另一个常见坑：把"切片体验"过度包装成卖点，让运营 / 销售对外宣传"banmi 有 5 万独家视频片段" → 这就是版权方搜索关键词。低调，<strong>切片是后端实现细节，不是营销话术</strong>。
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+<footer>
+  <p>📋 自建视频切片库技术方案 · 半米词汇系统 Layer 3 路线深拆 · v1 · 2026-05-24</p>
+  <p>🛠 调研出品：无忌 · 出品于阿杰半米 AI 学习 OS 词汇系统 V0.4 路线评估</p>
+  <p>🎬 mini demo 数据来源：SciShow Kids / VOA Learning English / Crash Course Kids 真实视频字幕样本（公版 / CC 安全频道）</p>
+  <p>⚠️ 本报告所有建议为技术 / 商业研究，不构成法律意见；商业化前请咨询知识产权律师</p>
+</footer>
+
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+<script>
+  // ===== 主题切换 =====
+  (function() {
+    const saved = localStorage.getItem('clip-pipeline-theme');
+    if (saved) document.body.setAttribute('data-theme', saved);
+    const btn = document.getElementById('themeToggle');
+    function syncIcon() {
+      btn.textContent = document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    }
+    syncIcon();
+    btn.addEventListener('click', () => {
+      const cur = document.body.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem('clip-pipeline-theme', next);
+      syncIcon();
+    });
+  })();
+
+  // ===== 章节折叠 =====
+  document.querySelectorAll('section.chapter > h2').forEach(h2 => {
+    h2.addEventListener('click', () => {
+      h2.parentElement.classList.toggle('collapsed');
+    });
+  });
+
+  // ===== 顶部进度条 + 回到顶部按钮 =====
+  const progressEl = document.getElementById('progress');
+  const backTopEl = document.getElementById('backToTop');
+  function updateProgress() {
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrolled = window.scrollY;
+    const ratio = docHeight > 0 ? scrolled / docHeight : 0;
+    progressEl.style.width = (ratio * 100) + '%';
+    backTopEl.classList.toggle('show', scrolled > 400);
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+
+  backTopEl.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // ===== 滚动高亮当前锚点 =====
+  const anchorLinks = document.querySelectorAll('#anchorList a');
+  const sections = Array.from(anchorLinks).map(a => document.getElementById(a.dataset.target)).filter(Boolean);
+  function highlightAnchor() {
+    const offset = 120;
+    let current = null;
+    for (const sec of sections) {
+      const rect = sec.getBoundingClientRect();
+      if (rect.top - offset <= 0) current = sec.id;
+    }
+    anchorLinks.forEach(a => a.classList.toggle('active', a.dataset.target === current));
+    if (current) {
+      const activeLink = document.querySelector('#anchorList a.active');
+      if (activeLink) {
+        const navWrap = document.querySelector('.anchor-list');
+        const linkRect = activeLink.getBoundingClientRect();
+        const navRect = navWrap.parentElement.getBoundingClientRect();
+        const desiredScroll = activeLink.offsetLeft - navRect.width / 2 + linkRect.width / 2;
+        navWrap.parentElement.scrollTo({ left: desiredScroll, behavior: 'smooth' });
+      }
+    }
+  }
+  window.addEventListener('scroll', highlightAnchor, { passive: true });
+  highlightAnchor();
+
+  // ===== anchor 点击 → 展开折叠章节 =====
+  anchorLinks.forEach(a => {
+    a.addEventListener('click', () => {
+      const target = document.getElementById(a.dataset.target);
+      if (target && target.classList.contains('collapsed')) {
+        target.classList.remove('collapsed');
+      }
+    });
+  });
+
+  // ===== 表格行高亮 =====
+  document.querySelectorAll('tbody tr').forEach(tr => {
+    tr.addEventListener('click', () => {
+      tr.parentElement.querySelectorAll('tr.row-highlight').forEach(o => {
+        if (o !== tr) o.classList.remove('row-highlight');
+      });
+      tr.classList.toggle('row-highlight');
+    });
+  });
+
+  // ===== FAQ =====
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      q.parentElement.classList.toggle('open');
+    });
+  });
+
+  // ===== mini demo =====
+  const fakeClipsDB = {
+    significant: [
+      { video_id: 'oNyXYPhnUIs', start: 30, end: 38, text: "Scientists made a really significant discovery about how plants grow at night.", channel: "SciShow Kids", license: "iframe-only", cefr: "A2", score: 0.92 },
+      { video_id: 'WUpvOXMfTRA', start: 15, end: 23, text: "This is a significant change in how we understand language learning.", channel: "VOA Learning English", license: "public-domain", cefr: "B1", score: 0.95 },
+      { video_id: 'jNQXAC9IVRw', start: 5, end: 14, text: "These findings are statistically significant for future research.", channel: "Crash Course Kids", license: "iframe-only", cefr: "B2", score: 0.78 }
+    ],
+    curious: [
+      { video_id: 'oNyXYPhnUIs', start: 22, end: 30, text: "If you're curious about how rainbows form, watch carefully.", channel: "SciShow Kids", license: "iframe-only", cefr: "A2", score: 0.88 },
+      { video_id: 'WUpvOXMfTRA', start: 8, end: 15, text: "Stay curious. The world has so many questions.", channel: "VOA Learning English", license: "public-domain", cefr: "A2", score: 0.91 }
+    ],
+    important: [
+      { video_id: 'oNyXYPhnUIs', start: 10, end: 18, text: "Water is really important for all living things on Earth.", channel: "SciShow Kids", license: "iframe-only", cefr: "A1", score: 0.93 },
+      { video_id: 'WUpvOXMfTRA', start: 25, end: 33, text: "It's important to learn new words every single day.", channel: "VOA Learning English", license: "public-domain", cefr: "A2", score: 0.96 },
+      { video_id: 'jNQXAC9IVRw', start: 60, end: 68, text: "The most important thing is to keep practicing.", channel: "Crash Course Kids", license: "iframe-only", cefr: "B1", score: 0.84 }
+    ],
+    change: [
+      { video_id: 'oNyXYPhnUIs', start: 45, end: 53, text: "Seasons change because the Earth tilts as it orbits the sun.", channel: "SciShow Kids", license: "iframe-only", cefr: "A2", score: 0.90 },
+      { video_id: 'WUpvOXMfTRA', start: 40, end: 48, text: "Climate change is one of the biggest challenges today.", channel: "VOA Learning English", license: "public-domain", cefr: "B1", score: 0.94 }
+    ],
+    discover: [
+      { video_id: 'oNyXYPhnUIs', start: 12, end: 20, text: "Let's discover how dolphins talk to each other underwater.", channel: "SciShow Kids", license: "iframe-only", cefr: "A2", score: 0.89 },
+      { video_id: 'WUpvOXMfTRA', start: 55, end: 63, text: "You can discover new English words in everyday conversations.", channel: "VOA Learning English", license: "public-domain", cefr: "A2", score: 0.92 }
+    ]
+  };
+
+  let currentClip = null;
+  let burnSub = false;
+
+  function highlightWord(text, word) {
+    const re = new RegExp('\\b(' + word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + 'ly?)\\b', 'gi');
+    return text.replace(re, '<span class="hit">$1</span>');
+  }
+
+  function formatTime(sec) {
+    const s = Math.floor(sec % 60);
+    const m = Math.floor(sec / 60);
+    return `${m}:${String(s).padStart(2, '0')}`;
+  }
+
+  function searchClips(lemma) {
+    const grid = document.getElementById('dmClips');
+    const status = document.getElementById('dmStatus');
+    const ctrls = document.getElementById('dmCtrls');
+
+    const t0 = performance.now();
+    const clips = fakeClipsDB[(lemma || '').toLowerCase().trim()] || [];
+    const elapsed = (performance.now() - t0).toFixed(1);
+
+    if (clips.length === 0) {
+      grid.innerHTML = '';
+      status.innerHTML = `❌ banmi 切片库没有 "<strong>${lemma}</strong>"（demo 只内置 5 个词）。试试 <code>significant</code> / <code>curious</code> / <code>important</code> / <code>change</code> / <code>discover</code>。`;
+      return;
+    }
+
+    status.innerHTML = `📊 找到 <strong>${clips.length}</strong> 个切片含 "<strong>${lemma}</strong>" · 查询 ${elapsed}ms · 按 quality_score 排序 · 🟢=公版可商用 🟡=iframe-only`;
+
+    grid.innerHTML = clips.map((c, i) => {
+      const lic = c.license === 'public-domain'
+        ? '<span class="qs" style="background:var(--good-soft);color:var(--good)">🟢 ' + c.license + '</span>'
+        : '<span class="qs" style="background:var(--warn-soft);color:var(--warn)">🟡 ' + c.license + '</span>';
+      return `
+        <div class="clip-card" data-idx="${i}">
+          <div class="clip-meta">
+            <span class="ch">${c.channel}</span>
+            <span>CEFR ${c.cefr}</span>
+            <span class="ts">▶ ${formatTime(c.start)}-${formatTime(c.end)}</span>
+            <span class="qs">Q ${c.score}</span>
+            ${lic}
+          </div>
+          <div class="clip-text">${highlightWord(c.text, lemma)}</div>
+        </div>
+      `;
+    }).join('');
+
+    grid.querySelectorAll('.clip-card').forEach((el, idx) => {
+      el.addEventListener('click', () => {
+        grid.querySelectorAll('.clip-card').forEach(o => o.classList.remove('active'));
+        el.classList.add('active');
+        playClip(clips[idx]);
+      });
+    });
+  }
+
+  function playClip(clip) {
+    currentClip = clip;
+    const params = new URLSearchParams({
+      start: Math.max(0, Math.floor(clip.start - 0.5)),
+      end: Math.ceil(clip.end + 1),
+      autoplay: 1,
+      rel: 0,
+      cc_load_policy: burnSub ? 1 : 0,
+      cc_lang_pref: 'en',
+      iv_load_policy: 3,
+      playsinline: 1,
+    });
+    const src = `https://www.youtube.com/embed/${clip.video_id}?${params}`;
+    document.getElementById('dmPlayer').innerHTML =
+      `<iframe src="${src}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+    document.getElementById('dmCtrls').style.display = 'flex';
+    document.getElementById('dmInfo').innerHTML =
+      `🎬 ${clip.channel} · ${formatTime(clip.start)}-${formatTime(clip.end)} · ${clip.license}`;
+  }
+
+  document.getElementById('dmBtn').addEventListener('click', () => {
+    searchClips(document.getElementById('dmInput').value);
+  });
+  document.getElementById('dmInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') searchClips(e.target.value);
+  });
+  document.querySelectorAll('.demo-presets .preset').forEach(p => {
+    p.addEventListener('click', function() {
+      const w = this.dataset.w;
+      document.getElementById('dmInput').value = w;
+      searchClips(w);
+    });
+  });
+  document.getElementById('dmReplay').addEventListener('click', () => {
+    if (currentClip) playClip(currentClip);
+  });
+  document.getElementById('dmSlow').addEventListener('click', function() {
+    this.style.background = 'var(--accent-soft)';
+    this.style.color = 'var(--accent-text)';
+    document.getElementById('dmInfo').innerHTML += ' · 🐢 0.75x（真实 video.playbackRate=0.75）';
+  });
+  document.getElementById('dmBurn').addEventListener('click', function() {
+    burnSub = !burnSub;
+    this.style.background = burnSub ? 'var(--accent-soft)' : 'var(--bg-elevated)';
+    this.style.color = burnSub ? 'var(--accent-text)' : 'var(--text-soft)';
+    if (currentClip) playClip(currentClip);
+  });
+
+  searchClips('significant');
+</script>
+
+</body>
+</html>

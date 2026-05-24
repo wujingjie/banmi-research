@@ -1,0 +1,2195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>个人字幕台词搜索引擎搭建方案研究 · 阿杰内部使用 · 2026-05-25</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1d23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --border-strong: #cdd2da;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --accent-text: #1d4ed8;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #0891b2;
+    --info-soft: #cffafe;
+    --code-bg: #f1f3f7;
+    --purple: #7c3aed;
+    --purple-soft: #ede9fe;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1c2030;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #b6bcc9;
+    --text-mute: #8a92a3;
+    --border: #2a2f3d;
+    --border-strong: #3a4154;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a55;
+    --accent-text: #93c5fd;
+    --good: #4ade80;
+    --good-soft: #14532d55;
+    --warn: #fbbf24;
+    --warn-soft: #78350f55;
+    --bad: #f87171;
+    --bad-soft: #7f1d1d55;
+    --info: #22d3ee;
+    --info-soft: #155e7555;
+    --code-bg: #0a0d14;
+    --purple: #a78bfa;
+    --purple-soft: #4c1d9555;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  nav.anchor-nav { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; border-top: 1px solid var(--border); background: var(--bg); scrollbar-width: none; }
+  nav.anchor-nav::-webkit-scrollbar { display: none; }
+  .anchor-list { display: flex; gap: 4px; padding: 8px 16px; max-width: 980px; margin: 0 auto; white-space: nowrap; }
+  .anchor-list a { flex: 0 0 auto; min-height: 36px; padding: 7px 12px; border-radius: 999px; font-size: 13px; line-height: 1.3; color: var(--text-soft); text-decoration: none; border: 1px solid transparent; background: var(--bg-soft); transition: all .15s; }
+  .anchor-list a:hover { color: var(--accent-text); }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); font-weight: 600; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 28px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 3000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  hr.soft { border: none; height: 1px; background: var(--border); margin: 16px 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  /* Metric grid */
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  /* Decision tree */
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .node.yes { border-color: var(--good); }
+  .tree .node.no { border-color: var(--bad); }
+  .tree .branches { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  /* Architecture rows: pipeline flow */
+  .pipeline { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 16px 0; }
+  .pipe-row { display: flex; gap: 10px; align-items: stretch; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-soft); }
+  .pipe-num { flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; }
+  .pipe-body { flex: 1; }
+  .pipe-body h4 { margin: 0 0 4px; font-size: 15px; color: var(--text); }
+  .pipe-body .pipe-desc { font-size: 13.5px; color: var(--text-soft); line-height: 1.55; }
+  .pipe-body .pipe-tools { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  /* Product card */
+  .prod-card { margin: 10px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .prod-head { padding: 10px 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); }
+  .prod-head .ico { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; background: var(--accent-soft); }
+  .prod-head .name-block { flex: 1; min-width: 140px; }
+  .prod-head .pn { font-size: 15px; font-weight: 700; color: var(--text); }
+  .prod-head .ph { font-size: 12px; color: var(--text-mute); font-family: ui-monospace, monospace; margin-top: 1px; }
+  .prod-body { padding: 10px 14px; font-size: 14px; }
+  .prod-body p { color: var(--text-soft); margin: 6px 0; }
+  .prod-body .takeaway { margin-top: 8px; padding: 8px 10px; background: var(--accent-soft); border-radius: 8px; border-left: 3px solid var(--accent); color: var(--text); font-size: 13.5px; }
+  .prod-body .takeaway::before { content: "💡 启示  "; font-weight: 700; color: var(--accent-text); }
+  /* Mini demo */
+  .demo-host { margin: 16px 0; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .demo-host h4 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; color: var(--accent-text); }
+  .demo-search-bar { display: flex; gap: 8px; margin: 12px 0; }
+  .demo-search-bar input { flex: 1; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); color: var(--text); font-size: 15px; font-family: inherit; min-height: 44px; }
+  .demo-search-bar input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+  .demo-search-bar button { padding: 12px 18px; background: var(--accent); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px; min-height: 44px; }
+  .demo-search-bar button:active { transform: scale(.97); }
+  .demo-filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+  .demo-filter { padding: 5px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-elevated); color: var(--text-soft); font-size: 12.5px; cursor: pointer; transition: all .15s; }
+  .demo-filter.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .demo-result { margin: 8px 0; padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; transition: transform .15s, box-shadow .15s; }
+  .demo-result:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: var(--accent); }
+  .demo-result-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .demo-poster { width: 44px; height: 44px; border-radius: 8px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .demo-meta { flex: 1; min-width: 0; }
+  .demo-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .demo-time { font-size: 11px; color: var(--text-mute); font-family: ui-monospace, monospace; }
+  .demo-jump { padding: 6px 12px; background: var(--accent); color: white; border: none; border-radius: 999px; cursor: pointer; font-size: 12px; font-weight: 600; min-height: 32px; }
+  .demo-jump:hover { background: var(--accent-text); }
+  .demo-subtitle-en { font-size: 14px; color: var(--text); margin: 4px 0 2px; line-height: 1.45; }
+  .demo-subtitle-en mark { background: var(--warn-soft); color: var(--text); padding: 0 3px; border-radius: 3px; font-weight: 600; }
+  .demo-subtitle-zh { font-size: 13px; color: var(--text-soft); line-height: 1.5; }
+  .demo-subtitle-zh mark { background: var(--info-soft); color: var(--text); padding: 0 3px; border-radius: 3px; }
+  .demo-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); padding: 12px 20px; background: var(--text); color: var(--bg); border-radius: 999px; font-size: 14px; font-weight: 600; box-shadow: var(--shadow-lg); z-index: 100; opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; }
+  .demo-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .demo-stats { display: flex; gap: 12px; margin: 8px 0 12px; font-size: 12px; color: var(--text-mute); }
+  .demo-empty { padding: 20px; text-align: center; color: var(--text-mute); font-size: 14px; }
+  /* Stage rows of MVP */
+  .stage-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 16px 0; }
+  .stage-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .stage-head { padding: 10px 14px; background: linear-gradient(135deg, var(--accent-soft), var(--purple-soft)); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .stage-head .badge { padding: 3px 10px; border-radius: 999px; background: var(--accent); color: white; font-weight: 700; font-size: 12px; }
+  .stage-head .stage-title { font-weight: 700; color: var(--text); }
+  .stage-body { padding: 10px 14px; font-size: 14px; }
+  .stage-body p { margin: 6px 0; }
+  .stage-body .meta-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+  /* compact info grid for ai/script split */
+  .role-cols { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 14px 0; }
+  .role-col { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-elevated); }
+  .role-col h4 { margin: 0 0 8px; font-size: 14px; color: var(--text); }
+  .role-col.must { background: var(--accent-soft); border-color: var(--accent); }
+  .role-col.opt { background: var(--warn-soft); border-color: var(--warn); }
+  .role-col.never { background: var(--bad-soft); border-color: var(--bad); }
+  .role-col ul { margin: 4px 0 0; padding-left: 18px; }
+  @media (max-width: 480px) {
+    .hero { padding: 18px 4px 8px; }
+    .hero h1 { font-size: 22px; }
+    section.chapter > h2 { font-size: 17px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+    .tree .branches { grid-template-columns: 1fr; }
+    .pipe-row { flex-direction: row; }
+  }
+  @media print {
+    header.topbar, #progress, .back-to-top, nav.anchor-nav { display: none !important; }
+    section.chapter.collapsed .chapter-body { max-height: none !important; padding: 18px 20px 22px !important; }
+    section.chapter.collapsed > h2 .caret { display: none; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">个人字幕台词搜索引擎搭建方案 <span class="tag">v1 · 无忌</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+  <nav class="anchor-nav">
+    <div class="anchor-list" id="anchorList">
+      <a href="#ch1" data-target="ch1">01 一句话方案</a>
+      <a href="#ch2" data-target="ch2">02 为啥 2026 行</a>
+      <a href="#ch3" data-target="ch3">03 8 步全景</a>
+      <a href="#ch4" data-target="ch4">04 字幕获取</a>
+      <a href="#ch5" data-target="ch5">05 搜索引擎选型</a>
+      <a href="#ch6" data-target="ch6">06 搜索 UI</a>
+      <a href="#ch7" data-target="ch7">07 播放层</a>
+      <a href="#ch8" data-target="ch8">08 难点专题</a>
+      <a href="#ch9" data-target="ch9">09 AI vs 脚本</a>
+      <a href="#ch10" data-target="ch10">10 现成软件</a>
+      <a href="#ch11" data-target="ch11">11 MVP 5 步</a>
+      <a href="#ch12" data-target="ch12">12 V2/V3 升级</a>
+      <a href="#ch13" data-target="ch13">13 中文特别</a>
+      <a href="#ch14" data-target="ch14">14 mini demo</a>
+      <a href="#ch15" data-target="ch15">15 FAQ</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <div class="hero">
+    <h1>个人字幕台词搜索引擎搭建方案<br><span style="font-size: .6em; font-weight: 600;">本地 PlayPhrase / YouGlish · 搜词命中字幕 → 一键跳秒播放 · 把阿杰当技术小白写</span></h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-25</span>
+      <span>🛠 调研：无忌</span>
+      <span>🎯 个人本地用 / 不商用</span>
+      <span>📦 电影 + 纪录片 + 动画 + YouTube</span>
+      <span>🌏 中英双语优先</span>
+    </div>
+    <div class="hero-deck">
+      <strong>三句话结论：</strong>(1) <strong>这事 2026 年小白真能一周晚上跑通</strong> —— 核心栈就是 <code>pysubs2 + sqlite3 (FTS5) + FastAPI + 单页 HTML</code>，全部开源免费、零云端依赖、Mac M 系列原生跑得动。5w 行字幕<10ms 响应，2TB 电影库总索引不到 500MB。(2) <strong>三条路按你的库大小选：库 &lt; 50w 行字幕走 SQLite FTS5（强推），50w–500w 行换 Meilisearch Docker，已经在用 Jellyfin 的话 Bazarr + ChineseSubFinder 把字幕铺齐再叠一层 Web 搜索 UI 即可</strong>。(3) <strong>没现成"自托管字幕全文搜 + 跳秒播放"一站式产品</strong> —— PlayPhrase / Yarn / YouGlish 都是在线 SaaS 不让自托管，Jellyfin / Bazarr 只解决字幕下载不解决搜词跳秒。所以阿杰这个工具是真空地带、得自己拼，好消息是拼的难度在 2026 年只有 5 年前的 1/10。
+    </div>
+  </div>
+
+  <!-- ============ Ch1 一句话方案 ============ -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">给小白的一句话方案 + 决策树</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout accent">
+        <p><strong>一句话方案</strong>：用 <code>ffmpeg</code> 把视频里的内嵌字幕抠出来 → 用 <code>pysubs2</code> 解析成 (起始时间, 结束时间, 文字) → 入 SQLite 的 FTS5 全文索引表 → FastAPI 写个搜索接口 → 单 HTML 页面搜索框 + 结果列表 + HTML5 <code>&lt;video&gt;</code> 跳秒。<strong>全套加起来 300 行代码，一个 Python 文件加一个 HTML 文件就完事</strong>。</p>
+      </div>
+
+      <h3>📊 一眼看完三档选型</h3>
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">SQLite</div><div class="l">小白默认 / &lt; 50w 行</div></div>
+        <div class="metric"><div class="v">Meili</div><div class="l">中量 / 50w–500w 行</div></div>
+        <div class="metric"><div class="v">Jellyfin</div><div class="l">已用 NAS / 想原生集成</div></div>
+        <div class="metric"><div class="v">1 周</div><div class="l">MVP 跑通时间</div></div>
+        <div class="metric"><div class="v">¥0</div><div class="l">软件成本</div></div>
+        <div class="metric"><div class="v">&lt; 500MB</div><div class="l">2TB 库索引大小</div></div>
+      </div>
+
+      <h3>🌳 决策树 —— 选哪条路</h3>
+
+      <div class="tree">
+        <div class="node q">▶ 你有多少视频 / 字幕？</div>
+
+        <div class="branches">
+          <div>
+            <div class="node yes"><span class="lbl y">&lt; 5w 行字幕</span>（约 100 部电影）→ <strong>SQLite FTS5 一把梭</strong>，单文件数据库零部署</div>
+          </div>
+          <div>
+            <div class="node no"><span class="lbl n">5w-50w 行</span>（500-1000 部 + YouTube 1000 集）→ <strong>仍然 SQLite</strong>，加 jieba 中文分词</div>
+          </div>
+        </div>
+
+        <div class="step-arrow">↓ 库继续膨胀</div>
+
+        <div class="node q">▶ 已经在跑 Jellyfin / Emby NAS？</div>
+        <div class="branches">
+          <div>
+            <div class="node yes"><span class="lbl y">是</span> → <strong>第一步先装 Bazarr + ChineseSubFinder</strong> 把字幕铺齐，再把 SQLite Web UI 套上去；视频从 Jellyfin 拿（直接用它 streaming URL）</div>
+          </div>
+          <div>
+            <div class="node no"><span class="lbl n">否</span> → 纯本地路线，FastAPI <code>StaticFiles</code> 服务一下视频目录就行</div>
+          </div>
+        </div>
+
+        <div class="step-arrow">↓ 长期再考虑</div>
+
+        <div class="node q">▶ 想搜"自然语言"（"小熊见妈妈那段"）而不是精确关键词？</div>
+        <div class="branches">
+          <div>
+            <div class="node yes"><span class="lbl y">是</span> → <strong>V3 加 sentence-transformers</strong>（22MB 本地 embedding 模型），叠在 SQLite 之上做语义检索</div>
+          </div>
+          <div>
+            <div class="node no"><span class="lbl n">否</span> → 关键词 + 同义词扩展就够了，别上 AI</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout good">
+        <p><strong>👉 阿杰这种情况（个人用、有 Mac M 系列、库估计十万行级别、80% 中英文需求）—— 直接 SQLite FTS5 路线，第 11 章 MVP 5 步那个 200 行脚本就是终态。别 over-engineer。</strong></p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch2 为啥 2026 行 ============ -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">为什么这事 2026 年可以自己做（5 年前不行）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>5 年前要做这个需要一个小团队 + 一台 GPU 服务器，今天一个人一周晚上 + 一台 Mac 就行。变化来自 4 个真实的技术拐点：</p>
+
+      <h3>变化 1：Whisper 把 ASR 打到白菜价</h3>
+      <p>2022 年 OpenAI 开源 Whisper，<strong>2024 年 whisper.cpp 在 Mac M 系列上跑 large-v3-turbo 模型已经能做到 10× 实时速度</strong>（M2 Pro 实测：60 秒音频转录约 2.8 秒），Metal GPU 加速 + flash attention 一起开。意味着没字幕的视频（你随便录的 YouTube、家庭录像、播客）现在也能自动生成字幕，且不用花一分钱 API 费用、不传文件出本机。</p>
+      <p class="callout info" style="margin: 10px 0;">📌 <strong>打个比方</strong>：5 年前 Whisper 需要一台 RTX 3090 ($1500) 跑十几分钟才能转 1 小时音频，今天你 MacBook Air M2 ($800) 跑 6 分钟就完事。差不多是 "云专属能力下放成本机零负担"。</p>
+
+      <h3>变化 2：SQLite FTS5 + 中文分词扩展白嫖级别成熟</h3>
+      <p>SQLite 原生的 FTS5 全文索引模块默认对中文按字切分（"开心"会被切成"开"+"心"两个独立 token，搜"开心"匹配不到"很开心"）。<strong>但 <a href="https://github.com/wangfenjin/simple">wangfenjin/simple</a> 这个开源 SQLite tokenizer 把 jieba 中文分词 + 拼音搜索都做进去了</strong>，编译成一个 <code>.so</code> 文件加载即可，5w 行字幕响应 &lt;10ms。Flutter / HarmonyOS 各种平台都有打包好的版本。</p>
+
+      <h3>变化 3：FastAPI / HTMX 把 Web 开发砍到一个文件</h3>
+      <p>2026 年的 Python Web 后端 = <code>pip install fastapi</code> + <code>uvicorn main:app</code>，两个命令开服务，30 行代码就有自动生成的 OpenAPI 文档。前端不写 React 不写 Vue —— 单 HTML 文件 + 一点 vanilla JS / Alpine.js 就够搜索框 + 结果列表了。<strong>不需要打包、不需要 webpack、不需要 npm install 等十分钟</strong>。</p>
+
+      <h3>变化 4：yt-dlp 把 YouTube 字幕拿手到擒来</h3>
+      <p>YouTube 自动生成的字幕在 2023 年之后质量已经接近人工字幕，<a href="https://github.com/yt-dlp/yt-dlp">yt-dlp</a> 一个命令 <code>yt-dlp --write-subs --sub-lang en,zh-Hans --write-auto-subs URL</code> 就把字幕 + 视频一起拿下来，连 json3 时间戳格式都给你。</p>
+
+      <h3>对比图：5 年前 vs 2026</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>能力</th><th>2021</th><th>2026</th><th>变化倍数</th></tr></thead>
+          <tbody>
+            <tr><td>1 小时音频转录（消费机）</td><td>云 API $0.36，本地 GPU 15 分钟</td><td>Mac M2 本地 6 分钟、$0</td><td>~10× 快、∞× 便宜</td></tr>
+            <tr><td>SQLite 中文全文搜索</td><td>要自己集成 jieba + 手写 tokenizer</td><td>一个 <code>.so</code> 扩展即用</td><td>1 天 → 5 分钟</td></tr>
+            <tr><td>Python Web 后端起服务</td><td>Flask + Gunicorn + Nginx 一套</td><td>FastAPI <code>uvicorn main:app</code></td><td>2 小时 → 1 分钟</td></tr>
+            <tr><td>YouTube 拉字幕</td><td>youtube-dl 维护混乱、要 cookies</td><td>yt-dlp 一行命令 + 自动字幕</td><td>稳定可靠 10×</td></tr>
+            <tr><td>本地语义搜索（embedding）</td><td>需要 GPU + LLM API</td><td>22MB sentence-transformers CPU 跑</td><td>∞×</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch3 8 步全景 ============ -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">完整技术路径（8 步全景图）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>从"你电脑上一堆 .mp4 文件"到"在浏览器搜词点跳秒播放"，端到端 8 步。每步独立可跑、可调试、可换实现。</p>
+
+      <div class="pipeline">
+
+        <div class="pipe-row">
+          <div class="pipe-num">1</div>
+          <div class="pipe-body">
+            <h4>扫媒体库</h4>
+            <div class="pipe-desc">Python 一个 <code>pathlib.Path("/Volumes/Movies").rglob("*.mkv")</code> 把所有视频文件捞出来。再用 <code>ffprobe</code>（ffmpeg 自带）查每个文件里有没有内嵌字幕、什么语言、什么编码。<strong>打比方</strong>：像图书管理员第一次进库房，先列一张总清单。</div>
+            <div class="pipe-tools">
+              <span class="pill info">pathlib</span>
+              <span class="pill info">ffprobe</span>
+              <span class="pill info">guessit（提取片名）</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pipe-row">
+          <div class="pipe-num">2</div>
+          <div class="pipe-body">
+            <h4>拿字幕</h4>
+            <div class="pipe-desc">三种来源：(a) 内嵌字幕用 <code>ffmpeg -i file.mkv -map 0:s:0 out.srt</code> 抠出来；(b) 同目录外挂的 .srt/.ass/.vtt 直接读；(c) 啥都没有 → OpenSubtitles API 下载 / yt-dlp 拿 YouTube 字幕 / Whisper 本地转录。</div>
+            <div class="pipe-tools">
+              <span class="pill info">ffmpeg</span>
+              <span class="pill info">opensubtitles-api</span>
+              <span class="pill info">yt-dlp</span>
+              <span class="pill purple">whisper.cpp</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pipe-row">
+          <div class="pipe-num">3</div>
+          <div class="pipe-body">
+            <h4>解析 + 规范化</h4>
+            <div class="pipe-desc">SRT/ASS/VTT 格式杂、编码乱（Windows 系统下来的字幕经常 GBK 不是 UTF-8）。统一用 <code>pysubs2</code> 解析：自动认 6 种格式 + 处理 BOM + 时间戳转毫秒 + 去 ASS 样式标签。<strong>打比方</strong>：把各种规格的书都换成统一的标准开本。</div>
+            <div class="pipe-tools">
+              <span class="pill info">pysubs2</span>
+              <span class="pill info">webvtt-py（备用）</span>
+              <span class="pill info">chardet（编码检测）</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pipe-row">
+          <div class="pipe-num">4</div>
+          <div class="pipe-body">
+            <h4>双语对齐（可选）</h4>
+            <div class="pipe-desc">如果你有英文 + 中文两个字幕文件（人人字幕组那种），按时间戳 ± 200ms 对齐成一行：(start, end, text_en, text_zh)。如果只有英文，可用 Helsinki-NLP Opus-MT / NLLB 本地翻译生成中文。<strong>打比方</strong>：左眼看英文、右眼看中文，让两个时间轴对齐。</div>
+            <div class="pipe-tools">
+              <span class="pill purple">opus-mt-en-zh</span>
+              <span class="pill purple">NLLB-200</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pipe-row">
+          <div class="pipe-num">5</div>
+          <div class="pipe-body">
+            <h4>入索引</h4>
+            <div class="pipe-desc">SQLite FTS5 创建虚拟表 <code>CREATE VIRTUAL TABLE subtitles USING fts5(text_en, text_zh, library, video_path, start_ms, ...)</code>。每行字幕一条记录。中文字段过一遍 jieba 分词后用空格连接再入表（让 FTS5 默认 unicode61 tokenizer 也能按词切）。<strong>打比方</strong>：图书馆建卡片目录，每个词都做一张索引卡指向原书页码。</div>
+            <div class="pipe-tools">
+              <span class="pill accent">SQLite FTS5</span>
+              <span class="pill info">jieba</span>
+              <span class="pill accent">wangfenjin/simple</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pipe-row">
+          <div class="pipe-num">6</div>
+          <div class="pipe-body">
+            <h4>搜索 API</h4>
+            <div class="pipe-desc">FastAPI 写个 <code>GET /search?q=happy&library=movies</code> 端点。SQL 一句话：<code>SELECT video_path, start_ms, text_en, text_zh, snippet(subtitles, 0, '&lt;mark&gt;', '&lt;/mark&gt;', '...', 30) FROM subtitles WHERE subtitles MATCH ? AND library = ? ORDER BY bm25(subtitles) LIMIT 50</code>。BM25 是 FTS5 自带的排名算法，自动返回相关性最强的结果在前。</div>
+            <div class="pipe-tools">
+              <span class="pill accent">FastAPI</span>
+              <span class="pill info">uvicorn</span>
+              <span class="pill info">BM25</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pipe-row">
+          <div class="pipe-num">7</div>
+          <div class="pipe-body">
+            <h4>搜索 UI + 跳秒播放</h4>
+            <div class="pipe-desc">单 HTML 文件：搜索框 + 调 API + 渲染结果卡片 + 卡片里嵌 <code>&lt;video src="/file/..." controls&gt;</code>。点结果 → JS 执行 <code>video.currentTime = startMs/1000; video.play();</code>。<strong>打比方</strong>：搜索是图书馆电脑、点结果就像找到那本书的那一页直接打开。</div>
+            <div class="pipe-tools">
+              <span class="pill accent">HTML5 video</span>
+              <span class="pill info">vanilla JS</span>
+              <span class="pill info">Alpine.js（可选）</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pipe-row">
+          <div class="pipe-num">8</div>
+          <div class="pipe-body">
+            <h4>增量更新</h4>
+            <div class="pipe-desc">用 <code>watchdog</code> 监听媒体目录，新文件加进来 → 自动入库；文件被删 → 自动从数据库清理。或者最简单：crontab 每天凌晨跑一次全量扫描，重复文件用 SHA-256 hash 去重。</div>
+            <div class="pipe-tools">
+              <span class="pill info">watchdog</span>
+              <span class="pill info">crontab</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="callout good">
+        <p>👉 <strong>这 8 步不是必须全做</strong>。MVP 跑通只要步骤 1-3-5-6-7 五步，4（双语）和 8（增量）是 V2 升级项。第 11 章给具体命令。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch4 字幕获取 ============ -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">字幕获取方案大全</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>字幕来源决定了你最后能搜到多少有用台词。分 5 种渠道，按优先级：</p>
+
+      <h3>渠道 1：从视频文件内部抠（最稳）</h3>
+      <p>MKV / MP4 / WebM 容器经常内嵌多语字幕轨。ffmpeg 一句话搞定：</p>
+<pre>
+# 列出文件里的字幕轨
+ffprobe -v error -select_streams s -show_entries stream=index,codec_name:stream_tags=language input.mkv
+
+# 抠第一条字幕轨
+ffmpeg -i input.mkv -map 0:s:0 -c:s srt output.srt
+
+# 按语言抠（英文）
+ffmpeg -i input.mkv -map "0:m:language:eng" -c:s srt output.srt
+</pre>
+      <p><strong>⚠️ 坑</strong>：有些字幕是图像格式（PGS / VobSub），不是文字，ffmpeg 抠不出 srt，要用 OCR（<code>vobsub2srt</code>）。蓝光 rip 经常遇到。</p>
+
+      <h3>渠道 2：外挂字幕文件</h3>
+      <p>同目录下 <code>电影名.srt</code> / <code>电影名.ass</code> / <code>电影名.zh.srt</code> / <code>电影名.en.srt</code>，直接读。<strong>命名约定</strong>：<code>{stem}.{lang}.srt</code> 是 Jellyfin / Plex 都认的标准格式。</p>
+
+      <h3>渠道 3：OpenSubtitles API（国外片）</h3>
+      <p><strong>2026 年现状</strong>：<a href="https://www.opensubtitles.com/">OpenSubtitles.com</a> 新版 API 免费账号每天可下载 20 个字幕，未注册账号 5 个/天，请求频率 1 次/秒。<a href="https://github.com/morpheus65535/bazarr">Bazarr</a> 这种自动化字幕下载工具就靠它。10M+ 字幕数据库。</p>
+      <p><strong>注册账号 → 拿 API key → 调 <code>POST /api/v1/login</code> 拿 token → 调 <code>GET /api/v1/subtitles?query=...</code></strong>。Python 有官方 SDK。</p>
+
+      <h3>渠道 4：中文字幕站</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>站点</th><th>定位</th><th>API/可抓取</th><th>2026 现状</th></tr></thead>
+          <tbody>
+            <tr><td><a href="https://subhd.tv/">SubHD</a></td><td>中文字幕老站、收录全</td><td>无官方 API、可爬</td><td>主站 subhd.tv，可能被墙备用 subhd.cc / subhd.me</td></tr>
+            <tr><td>射手网 → <a href="https://assrt.net/">ASSRT (伪射手)</a></td><td>射手网继承者</td><td>有 API（key 申请）</td><td>仍活跃、中文/双语字幕多</td></tr>
+            <tr><td>字幕库 zimuku</td><td>电影 TV 综合</td><td>无 API、可爬</td><td>主站时常切换域名</td></tr>
+            <tr><td>YYeTs / 人人字幕组</td><td>美剧字幕组</td><td>2021 关停 → 镜像站</td><td>yysub.net 部分恢复、内容陈旧</td></tr>
+            <tr><td>Subscene</td><td>全球最大字幕站</td><td>—</td><td><strong>2024-05-05 永久关站</strong>，OpenSubtitles 收编</td></tr>
+            <tr><td>SubDL</td><td>新兴聚合站</td><td>有 API</td><td>2026 推荐替代 Subscene 的首选</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <p>⚠️ <strong>中文字幕站现状偏乱</strong>：YYeTs 关停后没有真正的 API 替代品。SubHD 体验最好但需要爬虫。推荐组合：<strong>OpenSubtitles（外语片主力）+ ASSRT（中文字幕主力）+ ChineseSubFinder 这个开源工具帮你聚合</strong>。</p>
+      </div>
+
+      <h3>渠道 5：自动转录（Whisper）—— 救命稻草</h3>
+      <p>没字幕的家庭录像、播客录音、刚下的视频，本地跑 Whisper 转出来。<strong>2026 年 Mac M 系列性能</strong>：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>实现</th><th>模型</th><th>Mac M2 实测</th><th>精度</th><th>推荐场景</th></tr></thead>
+          <tbody>
+            <tr><td><a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a></td><td>large-v3-turbo q5_0 + Metal</td><td>~10× 实时（60s 音频 6s 转完）</td><td>WER ~5-8%</td><td>个人用首选，CPU + GPU 都行</td></tr>
+            <tr><td><a href="https://github.com/SYSTRAN/faster-whisper">faster-whisper</a></td><td>large-v3 int8</td><td>~4× 实时</td><td>WER ~5%</td><td>批量转录、需要 word-level 时间戳</td></tr>
+            <tr><td><a href="https://github.com/m-bain/whisperX">WhisperX</a></td><td>large-v2 + wav2vec2 对齐</td><td>~70× 实时（GPU）</td><td>WER &lt;5%、word-level &lt;100ms</td><td>需要精确到词的时间戳（高级用法）</td></tr>
+            <tr><td>OpenAI Whisper API</td><td>云端</td><td>—</td><td>~5%</td><td>$0.006/分钟，不推荐（数据上云）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>实操命令</strong>：</p>
+<pre>
+# whisper.cpp 转一个视频成 srt
+./main -m models/ggml-large-v3-turbo-q5_0.bin -f audio.wav -osrt --language auto
+
+# faster-whisper Python
+from faster_whisper import WhisperModel
+model = WhisperModel("large-v3", device="metal", compute_type="int8")
+segments, info = model.transcribe("video.mp4", word_timestamps=True)
+</pre>
+
+      <h3>渠道 6：YouTube 字幕</h3>
+<pre>
+# 拿英文 + 简体中文，包含自动生成的
+yt-dlp --write-subs --sub-langs "en,zh-Hans,zh-CN" --write-auto-subs \
+       --sub-format "srt/vtt/best" --skip-download \
+       "https://www.youtube.com/watch?v=..."
+
+# 拿整个频道
+yt-dlp --write-subs --sub-langs "en,zh-Hans" --download-archive done.txt \
+       "https://www.youtube.com/@channelname"
+</pre>
+      <p><strong>⚠️ 坑</strong>：YouTube 自动字幕只在 json3 格式才有词级时间戳，VTT 格式只有句级。如果你想做"点单词跳秒"级别精度，要 <code>--sub-format json3</code> 然后自己解析。</p>
+
+      <h3>双语字幕对齐策略</h3>
+      <p>你已经有英文 .srt + 中文 .srt，怎么对齐成一行？</p>
+      <ul>
+        <li><strong>时间戳近邻匹配</strong>：英文行 (start=10000, end=12000) 找中文行里 start 距 10000 最近的（±200ms 容忍）。简单但有时错位。</li>
+        <li><strong>动态规划对齐</strong>：把所有英文行和所有中文行做最优一一对应，类似 DNA 序列比对算法。Python 有 <code>biopython</code> 或自己写。</li>
+        <li><strong>同一字幕源里双轨</strong>：人人字幕组的 ASS 字幕经常英文 + 中文双轨在同一行，<code>pysubs2</code> 解析后能看到 style 字段区分。</li>
+      </ul>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch5 搜索引擎选型 ============ -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">搜索引擎选型（5 种横评）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p><strong>打比方</strong>：搜索引擎就是图书馆的检索系统。你有几种选：抽屉式卡片柜（SQLite FTS5）、电子查询机（Meilisearch）、整套图书馆数据库（Elasticsearch）。<strong>个人用强烈推荐第一种：单文件、零配置、断电不丢</strong>。</p>
+
+      <h3>📊 5 种引擎横评</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>引擎</th><th>复杂度</th><th>RAM 需求</th><th>中文</th><th>5w 行性能</th><th>50w 行</th><th>500w 行</th><th>推荐 ★</th></tr></thead>
+          <tbody>
+            <tr><td><strong>SQLite FTS5</strong></td><td>1 ⭐</td><td>~50MB</td><td>需要 jieba/simple 扩展</td><td>&lt;10ms</td><td>&lt;50ms</td><td>~200ms（够用）</td><td>★★★★★（小白默认）</td></tr>
+            <tr><td><a href="https://www.meilisearch.com/">Meilisearch</a></td><td>2 ⭐</td><td>~512MB</td><td>v1.15 起原生 Charabia tokenizer 支持中文</td><td>&lt;10ms</td><td>&lt;20ms</td><td>&lt;50ms</td><td>★★★★（中量级首选）</td></tr>
+            <tr><td><a href="https://typesense.org/">Typesense</a></td><td>2 ⭐</td><td>~256MB</td><td>需要配置</td><td>&lt;10ms</td><td>&lt;15ms</td><td>&lt;40ms</td><td>★★★（社区比 Meili 小）</td></tr>
+            <tr><td>Elasticsearch</td><td>4 ⭐</td><td>1-8GB</td><td>需要 IK 分词器</td><td>稳定</td><td>稳定</td><td>稳定</td><td>★（小白别碰、太重）</td></tr>
+            <tr><td>Postgres FTS + GIN</td><td>3 ⭐</td><td>~200MB</td><td>需 zhparser 插件</td><td>&lt;20ms</td><td>&lt;100ms</td><td>&lt;500ms</td><td>★★（已有 PG 才考虑）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>🥇 小白默认：SQLite FTS5</h3>
+      <p><strong>为什么选它</strong>：</p>
+      <ul>
+        <li><strong>单文件数据库</strong>：整个搜索引擎 = 一个 <code>subtitles.db</code> 文件，硬盘放哪都行，没有 daemon 进程要维护，断电恢复完美。</li>
+        <li><strong>Python 标准库自带</strong>：<code>import sqlite3</code>，不用 pip install 任何东西。</li>
+        <li><strong>FTS5 已经够强</strong>：BM25 排名 + snippet 高亮 + phrase search（"机 器 学 习"按精确短语搜）+ NEAR 距离运算符。</li>
+        <li><strong>5w-50w 行字幕完全够用</strong>。500w 行（一辈子电影都看不完）也才慢一点。</li>
+      </ul>
+
+      <p><strong>关键命令</strong>：</p>
+<pre>
+-- 建表（en + zh 双列、其他属性 UNINDEXED 节省空间）
+CREATE VIRTUAL TABLE subs USING fts5(
+  text_en,
+  text_zh,
+  video_path UNINDEXED,
+  library UNINDEXED,
+  start_ms UNINDEXED,
+  end_ms UNINDEXED,
+  tokenize = 'unicode61 remove_diacritics 2'
+);
+
+-- 搜索（自动 BM25 排序 + 高亮 + 截取片段）
+SELECT
+  video_path, start_ms,
+  highlight(subs, 0, '<mark>', '</mark>') AS hl_en,
+  highlight(subs, 1, '<mark>', '</mark>') AS hl_zh,
+  snippet(subs, 0, '<b>', '</b>', '...', 20) AS preview,
+  bm25(subs) AS score
+FROM subs
+WHERE subs MATCH 'happy OR glad' AND library = 'movies'
+ORDER BY bm25(subs)
+LIMIT 50;
+</pre>
+
+      <h3>🥈 中量级：Meilisearch</h3>
+      <p><strong>什么时候换</strong>：库膨胀到 50w 行以上，或者你想要这些 SQLite 给不了的：</p>
+      <ul>
+        <li><strong>typo tolerance</strong>（搜 "recieve" 也能命中 "receive"）开箱即用</li>
+        <li><strong>faceted search</strong>（左侧 sidebar 显示"电影 (1234) / 纪录片 (456) / YouTube (789)"自动计数）</li>
+        <li><strong>实时索引</strong>：新文档秒级可搜，不用重建索引</li>
+        <li><strong>1.15 起原生中文</strong>：Charabia tokenizer 升级了中文分词</li>
+      </ul>
+
+      <p><strong>部署</strong>：</p>
+<pre>
+# Docker 一行起服务
+docker run -p 7700:7700 -v $(pwd)/meili_data:/meili_data \
+  getmeili/meilisearch:v1.15
+
+# Python SDK
+pip install meilisearch
+</pre>
+
+      <h3>🥉 高级：Typesense / Elasticsearch / Postgres</h3>
+      <ul>
+        <li><strong>Typesense</strong>：和 Meilisearch 很像，C++ 性能稍强，集群部署更顺，但社区文档少。需要 10K+ QPS 才考虑。</li>
+        <li><strong>Elasticsearch</strong>：小白别碰，2GB+ RAM 起步、Java 生态、配置复杂。除非你已经在公司用 ELK 才有意义。</li>
+        <li><strong>Postgres FTS + zhparser</strong>：你已经有 Postgres 数据库的话最省事。zhparser 用 SCWS 分词，比 jieba 弱一点但够用。</li>
+      </ul>
+
+      <div class="callout accent">
+        <p>👉 <strong>阿杰的路径</strong>：先 SQLite FTS5 跑 3 个月，等真的库膨胀到 50w 行才迁 Meilisearch。这两个引擎的数据 schema 几乎一致，迁移就是写个 100 行 Python 把 SQLite 数据 dump 成 JSON 灌到 Meili，半天工作量。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch6 搜索 UI ============ -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">搜索 UI 三种形态</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>形态 A：简单 Web UI（强推）</h3>
+      <p>FastAPI 后端 + 单 HTML 页面前端。整个东西就 2 个文件，<code>uvicorn main:app</code> 一行起服务，浏览器打开 localhost:8000 用。</p>
+      <ul>
+        <li><strong>优点</strong>：跨平台（Mac / Linux / Windows / iPad）、改起来一秒生效、零安装（书签即用）、可远程访问（家里 NAS 上跑、外面手机访问）</li>
+        <li><strong>缺点</strong>：要后台跑 Python 进程，断电后要手动启动（解决：<code>launchctl</code> Mac 开机启动 / systemd Linux 服务）</li>
+      </ul>
+      <p><strong>前端技术选型</strong>：</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>方案</th><th>代码量</th><th>难度</th><th>推荐场景</th></tr></thead>
+          <tbody>
+            <tr><td>vanilla JS（原生）</td><td>~100 行</td><td>1 ⭐</td><td>个人用首选、零依赖</td></tr>
+            <tr><td><a href="https://alpinejs.dev/">Alpine.js</a></td><td>~80 行</td><td>1.5 ⭐</td><td>需要响应式状态时</td></tr>
+            <tr><td><a href="https://htmx.org/">HTMX</a></td><td>~50 行</td><td>2 ⭐</td><td>不想写 JS、后端渲染</td></tr>
+            <tr><td>React / Vue / Svelte</td><td>~300 行 + npm</td><td>3 ⭐</td><td>过度工程，不推荐</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>形态 B：桌面应用</h3>
+      <p>想要双击图标启动、不跑后台 Python？打包成桌面 app。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>框架</th><th>bundle 大小</th><th>RAM</th><th>启动速度</th><th>开发难度</th></tr></thead>
+          <tbody>
+            <tr><td><a href="https://tauri.app/">Tauri</a>（Rust + WebView）</td><td>~10MB</td><td>~28MB</td><td>0.4s</td><td>需要懂一点 Rust</td></tr>
+            <tr><td><a href="https://www.electronjs.org/">Electron</a>（Chromium 全打包）</td><td>~250MB</td><td>~250MB</td><td>1.5s</td><td>纯 JS、最易</td></tr>
+            <tr><td>PyQt / PySide6</td><td>~80MB</td><td>~150MB</td><td>1s</td><td>纯 Python、上手快</td></tr>
+            <tr><td>Wails（Go + WebView）</td><td>~15MB</td><td>~40MB</td><td>0.5s</td><td>需要懂 Go</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <p>👉 <strong>2026 年实测对比</strong>：Tauri 比 Electron <strong>bundle 小 25×、RAM 少 75%、启动快 4×</strong>。Tauri v2 的 JS API 已经覆盖 90% 场景几乎不用写 Rust 代码。但如果你的搜索 Web UI 已经能用，桌面 app 是锦上添花、不是必须的。</p>
+      </div>
+
+      <h3>形态 C：集成进 Jellyfin / Plex 插件</h3>
+      <p><strong>调研结论：基本不可行 / 不值得</strong>。</p>
+      <ul>
+        <li>Jellyfin 现在的字幕插件（OpenSubtitles plugin / Bazarr plugin）<strong>只解决字幕下载，不做搜词跳秒</strong>。</li>
+        <li>Jellyfin 服务端用 C# .NET 写、插件 API 没有公开的"加自定义搜索页"接口，社区只有零星尝试。</li>
+        <li>开发成本极高（学 .NET 插件机制 + Jellyfin 内部 API）、维护成本极高（Jellyfin 更新经常 break 插件）。</li>
+      </ul>
+
+      <div class="callout good">
+        <p>👉 <strong>更聪明的做法</strong>：你的搜索 Web UI 完全独立运行（localhost:8000），结果里直接给一个"在 Jellyfin 中打开"的按钮，跳转到 <code>http://jellyfin/web/index.html#!/details?id={ItemId}&startPosition={ticks}</code>。利用 Jellyfin 的深链接而不是写插件。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch7 播放层 ============ -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">播放层方案（点了能播）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>搜到结果了，怎么"点一下跳到那一秒开始播放"？4 种方案对比：</p>
+
+      <h3>方案 A：HTML5 <code>&lt;video&gt;</code> 跳秒（强推）</h3>
+      <p>浏览器内置 video 标签，FastAPI 提供文件 + 支持 Range 请求（HTTP 206 Partial Content），JS 一行跳秒：</p>
+<pre>
+// 前端
+const video = document.getElementById('player');
+video.src = `/file?path=${encodeURIComponent(item.video_path)}`;
+video.currentTime = item.start_ms / 1000;
+video.play();
+</pre>
+<pre>
+# 后端：FastAPI 支持 Range 请求
+from fastapi import FastAPI, Request
+from fastapi.responses import StreamingResponse
+import os, re
+
+@app.get("/file")
+async def stream_video(path: str, request: Request):
+    file_size = os.path.getsize(path)
+    range_header = request.headers.get('range')
+    if not range_header:
+        return StreamingResponse(open(path, "rb"), media_type="video/mp4")
+    # 解析 Range: bytes=0-1023
+    start, end = re.match(r"bytes=(\d+)-(\d*)", range_header).groups()
+    start = int(start); end = int(end) if end else file_size - 1
+    def iter_chunk():
+        with open(path, "rb") as f:
+            f.seek(start)
+            yield f.read(end - start + 1)
+    return StreamingResponse(iter_chunk(), status_code=206, headers={
+        "Content-Range": f"bytes {start}-{end}/{file_size}",
+        "Accept-Ranges": "bytes",
+    })
+</pre>
+      <p><strong>✅ 优点</strong>：零依赖、跨平台、跳秒丝滑、能在 iPad / 手机浏览器跑。<br>
+      <strong>⚠️ 坑</strong>：MKV 容器浏览器原生不支持（要 webm 或 mp4），可以用 <code>ffmpeg -c copy -movflags faststart input.mkv output.mp4</code> 转封装（不重编码，秒完事）。或者预生成 5-15s 短片段。</p>
+
+      <h3>方案 B：调起本地播放器（mpv / VLC / IINA）</h3>
+      <p>体验最爽（mpv 字幕渲染漂亮、键盘快捷键）、但需要本机装播放器 + 用 IPC 控制：</p>
+
+      <h4>mpv JSON IPC</h4>
+<pre>
+# 启动 mpv 监听 IPC socket
+mpv --input-ipc-server=/tmp/mpvsocket movie.mkv
+
+# 从 Python 控制跳秒
+import socket, json
+sock = socket.socket(socket.AF_UNIX)
+sock.connect("/tmp/mpvsocket")
+sock.sendall(json.dumps({"command": ["seek", 90, "absolute"]}).encode() + b"\n")
+</pre>
+
+      <h4>VLC HTTP 接口</h4>
+<pre>
+# 启动 VLC 开 HTTP 接口（端口 8080，密码 mypass）
+vlc --extraintf http --http-password mypass
+
+# Python 跳秒
+import requests
+requests.get("http://localhost:8080/requests/status.xml",
+             params={"command": "seek", "val": "90"},
+             auth=("", "mypass"))
+</pre>
+
+      <p><strong>✅ 优点</strong>：mpv/VLC 字幕渲染完美、支持任何视频格式、本地全速播放。<br>
+      <strong>⚠️ 坑</strong>：mpv 每次播新文件要重启进程或 <code>loadfile</code> 命令；VLC HTTP 接口文档老旧、API 不稳；移动端不可用。</p>
+
+      <h3>方案 C：ffmpeg 实时切片</h3>
+      <p>搜到一条字幕 (start=90s, end=92s) → 后端实时切一段 15s 短 mp4 返回浏览器：</p>
+<pre>
+ffmpeg -ss 88 -i input.mkv -t 15 -c copy -movflags faststart out.mp4
+</pre>
+      <p><strong>✅ 优点</strong>：浏览器跳秒到大文件中间会缓冲很久，切片秒开。<br>
+      <strong>⚠️ 坑</strong>：需要服务器算力（FFmpeg 进程开销）、关键帧对齐问题（<code>-ss</code> 在 <code>-i</code> 前是粗定位、之后是精确定位）。</p>
+
+      <h3>方案 D：Jellyfin API 跳秒</h3>
+      <p>已经在跑 Jellyfin？直接调它的播放 API：</p>
+<pre>
+GET http://jellyfin:8096/Videos/{ItemId}/main.m3u8?api_key=...&StartTimeTicks=900000000
+
+# StartTimeTicks = seconds * 10^7（.NET ticks）
+</pre>
+      <p>或者前端用 Jellyfin 的 <code>web/index.html#!/details?id={id}&startPosition={ticks}</code> 深链接。</p>
+
+      <h3>📊 4 方案对比</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>方案</th><th>跳秒延迟</th><th>移动端</th><th>视频格式</th><th>实现难度</th><th>推荐</th></tr></thead>
+          <tbody>
+            <tr><td>HTML5 video + Range</td><td>1-3s 缓冲</td><td>✅</td><td>mp4/webm/部分 mkv</td><td>1 ⭐</td><td>★★★★★</td></tr>
+            <tr><td>mpv IPC</td><td>&lt;500ms</td><td>❌</td><td>任意</td><td>3 ⭐</td><td>★★★（桌面用爽）</td></tr>
+            <tr><td>VLC HTTP</td><td>&lt;500ms</td><td>❌</td><td>任意</td><td>3 ⭐</td><td>★★</td></tr>
+            <tr><td>ffmpeg 切片</td><td>1-2s（切片时间）</td><td>✅</td><td>任意</td><td>2 ⭐</td><td>★★★（大文件救星）</td></tr>
+            <tr><td>Jellyfin API</td><td>2-5s</td><td>✅</td><td>任意（Jellyfin 转码）</td><td>2 ⭐</td><td>★★★★（已有 Jellyfin）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch8 难点专题 ============ -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">难点专题：10 个真实坑 + 解决方案</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>坑 1：中文搜索完全不准</h3>
+      <p><strong>症状</strong>：搜 "开心" 匹配不到 "很开心"。<br>
+      <strong>原因</strong>：SQLite FTS5 默认 <code>unicode61</code> tokenizer 对中文按字符切分，每个汉字独立一个 token，匹配规则是"完整 token 序列"。<br>
+      <strong>方案</strong>：(a) 入库前用 <code>jieba</code> 分词把"我很开心"切成"我 很 开心"用空格连接再入表；(b) 用 <a href="https://github.com/wangfenjin/simple">wangfenjin/simple</a> 这个 SQLite 扩展，提供 jieba_query() 函数自动分词，编译 .so 后 <code>SELECT load_extension('libsimple')</code>。</p>
+
+      <h3>坑 2：双语字幕时间戳对不齐</h3>
+      <p><strong>症状</strong>：英文字幕第 5 行 (10s-12s) 对应中文字幕第 4 行 (9.8s-12.1s)，按行号匹配会错位。<br>
+      <strong>方案</strong>：用时间戳的中点 (start+end)/2 做匹配键，找最近邻（容忍 ±500ms）。如果错位严重，用动态规划做最优对齐（成本函数 = |时间差|+长度比）。</p>
+
+      <h3>坑 3：Whisper 时间戳不准</h3>
+      <p><strong>症状</strong>：转出来的字幕第一行说"Hello"，但显示 (3s-6s)，实际声音 (2.5s-3.2s)。<br>
+      <strong>原因</strong>：Whisper 的时间戳是段级 (segment-level)，每段 ~30s，段内时间戳是粗估，平均误差 200-500ms。<br>
+      <strong>方案</strong>：用 <a href="https://github.com/m-bain/whisperX">WhisperX</a> 跑一遍 wav2vec2 forced alignment，得到 word-level 时间戳，精度 &lt;100ms。或者 faster-whisper 的 <code>word_timestamps=True</code> 也有 word 级时间戳（精度稍差）。</p>
+
+      <h3>坑 4：YouTube 自动字幕格式特殊</h3>
+      <p><strong>症状</strong>：yt-dlp 下载的 YouTube 自动字幕是 .vtt 文件，看起来一行一行的，但每行 cue 之间有重叠（前一行的尾部 = 后一行的开头），用 webvtt-py 解析会得到重复内容。<br>
+      <strong>方案</strong>：用 <code>--sub-format json3</code> 拿原始 json3 数据，解析时按 word-level timestamps 重组，每个词只入一次。或者用 <code>--convert-subs srt</code> 让 yt-dlp 帮你去重转 srt。</p>
+
+      <h3>坑 5：搜错单词搜不到</h3>
+      <p><strong>症状</strong>：搜 "recieve" 没结果（拼错了），但其实想找 "receive"。<br>
+      <strong>方案</strong>：(a) Meilisearch 自带 typo tolerance，前缀 1 个 typo / 整词 2 个 typo 默认就有；(b) SQLite FTS5 自带没有，可叠 <code>spellfix1</code> 扩展或自己存一份 3-gram 索引；(c) 不想折腾？前端搜索框旁加个"建议"按钮调拼写检查 API（pyspellchecker）。</p>
+
+      <h3>坑 6：同义词扩展（"happy" 命中 "glad"）</h3>
+      <p><strong>方案三档</strong>：</p>
+      <ul>
+        <li><strong>简易</strong>：人肉写一份 <code>{"happy": ["glad", "joyful", "cheerful"]}</code> 字典，查询时把同义词 OR 起来。10 分钟搞定。</li>
+        <li><strong>开源</strong>：用 <a href="https://wordnet.princeton.edu/">WordNet</a>（Python <code>nltk.corpus.wordnet</code>）自动扩展，覆盖英文 15w+ 同义词组。</li>
+        <li><strong>语义级</strong>：用 sentence-transformers embedding，搜 "happy" → 找 cosine similarity 高的字幕，能命中 "I love this"（情感相近但词不同）。V3 升级项。</li>
+      </ul>
+
+      <h3>坑 7：字幕格式杂乱（ASS 标签 / 编码 / BOM）</h3>
+      <p><strong>症状</strong>：ASS 字幕里 <code>{\an8\b1}你好</code> 这种样式标签会污染搜索；Windows 系统传过来的 srt 经常 GBK 编码 + BOM 头。<br>
+      <strong>方案</strong>：<code>pysubs2.load(path, encoding="utf-8")</code> 自动处理大部分情况，<code>line.plaintext</code> 属性自动剥掉 ASS 标签。编码检测用 <code>chardet</code> 库先猜再读。</p>
+
+      <h3>坑 8：Whisper 转 100 小时视频太慢</h3>
+      <p><strong>症状</strong>：纪录片库 100 小时，Whisper-large-v3 跑要 10 小时。<br>
+      <strong>方案</strong>：(a) <strong>用 large-v3-turbo + Mac M2 Metal 加速</strong>，10× 实时 → 100 小时只要 10 小时（隔夜跑）；(b) faster-whisper int8 量化再快 4×；(c) 真没耐心 → 租 RunPod / vast.ai 一台 RTX 4090，$0.4/h，2 小时跑完只花 ¥6。</p>
+
+      <h3>坑 9：媒体文件命名乱（"The.Movie.2019.1080p.BluRay.x264-RARBG.mkv"）</h3>
+      <p><strong>方案</strong>：用 <a href="https://github.com/guessit-io/guessit">guessit</a> 库一行提取干净的片名 + 年份：</p>
+<pre>
+import guessit
+info = guessit.guessit("The.Movie.2019.1080p.BluRay.x264-RARBG.mkv")
+# {'title': 'The Movie', 'year': 2019, 'screen_size': '1080p', 'source': 'BluRay', ...}
+</pre>
+      <p>拿到干净 title + year → 调 TMDB API 抓海报 / 中文名 / 类型标签 → 入库丰富元数据。</p>
+
+      <h3>坑 10：浏览器跳秒到 2GB 文件中间卡顿</h3>
+      <p><strong>症状</strong>：搜到一条字幕在 1h30m 处，video.currentTime = 5400 后浏览器要重新下载 + buffer，等 5-10 秒。<br>
+      <strong>方案</strong>：(a) <strong>预转封装</strong>：<code>ffmpeg -i src.mkv -c copy -movflags +faststart out.mp4</code>，moov atom 移到文件头，浏览器秒跳；(b) <strong>HLS 切片</strong>：<code>ffmpeg -i src.mp4 -codec copy -f hls -hls_time 10 -hls_list_size 0 out.m3u8</code> 切成 10s 一片段，video.js / hls.js 播放；(c) <strong>实时 ffmpeg 切片</strong>：见 Ch7 方案 C。</p>
+
+      <h3>额外坑 11：图像字幕（PGS / VobSub）</h3>
+      <p>蓝光 rip 经常字幕是 PNG 图片不是文字，ffmpeg 抠出来是 .sup 文件没法搜。<strong>方案</strong>：用 <a href="https://www.nikse.dk/subtitleedit">Subtitle Edit</a> 或 <code>vobsub2srt</code> 做 OCR 转文字 srt。<strong>2026 年首选</strong>：直接用 Whisper 转录音频生成新字幕（精度比图像 OCR 高、成本相近）。</p>
+
+      <h3>额外坑 12：海量 jieba 进程启动慢</h3>
+      <p>jieba 第一次 import 要加载 50MB 词典 1-2 秒。<strong>方案</strong>：用 <code>jieba.initialize()</code> 提前 warm up；或 <code>paddle</code> 模式更准但更慢；或换 <a href="https://github.com/lancopku/PKUSeg-python">pkuseg</a>（更快、模型小）。</p>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch9 AI vs 脚本 ============ -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">AI vs 脚本职责分工</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout warn">
+        <p>⚠️ <strong>小白最常见的错觉</strong>：以为搭这个工具要"用 AI"。其实 90% 工作是确定性脚本，AI 只在 2 个地方真正需要（Whisper 转录 + 可选的语义搜索）。先看完这章再开工，能省一半冤枉路。</p>
+      </div>
+
+      <h3>三层职责表</h3>
+
+      <div class="role-cols">
+        <div class="role-col must">
+          <h4>🤖 必须用 AI（不可替代）</h4>
+          <ul>
+            <li><strong>Whisper ASR</strong>：没字幕的视频自动转录。这是这个项目唯一"小白真的需要 AI"的地方。本地跑 whisper.cpp 即可，不上云。</li>
+          </ul>
+        </div>
+
+        <div class="role-col opt">
+          <h4>🟡 可选 AI（视需求开关）</h4>
+          <ul>
+            <li><strong>翻译生成第二语种</strong>：你只有英文字幕想要中文 → Helsinki-NLP Opus-MT / NLLB 本地翻译。</li>
+            <li><strong>语义检索</strong>：想搜 "小熊见妈妈那段" → sentence-transformers (all-MiniLM-L6-v2 22MB) 本地 embedding。</li>
+            <li><strong>同义词扩展</strong>：搜 "happy" 命中 "glad" → 如果 WordNet 字典法不够，再上 GPT API / embedding。</li>
+            <li><strong>说话人分离</strong>：标注每行字幕谁说的 → pyannote.audio / WhisperX 自带。高级用法。</li>
+            <li><strong>场景标签</strong>：每个 chunk 打 "对话/动作/转折" 标签 → 用本地 LLM (Qwen2.5-7B) 或 GPT。锦上添花。</li>
+          </ul>
+        </div>
+
+        <div class="role-col never">
+          <h4>🚫 绝对不用 AI（脚本完全够）</h4>
+          <ul>
+            <li><strong>扫目录、识别文件类型</strong> → <code>pathlib</code> + 扩展名</li>
+            <li><strong>抽内嵌字幕</strong> → <code>ffmpeg -map 0:s:0</code></li>
+            <li><strong>外挂字幕配对</strong> → 同名 stem 匹配</li>
+            <li><strong>SRT/ASS/VTT 解析</strong> → <code>pysubs2</code></li>
+            <li><strong>时间戳规范化</strong> → 毫秒整数运算</li>
+            <li><strong>入数据库 / SQL 查询</strong> → SQLite</li>
+            <li><strong>Web 后端 / API</strong> → FastAPI</li>
+            <li><strong>HTML5 video 跳秒</strong> → <code>video.currentTime = ...</code></li>
+            <li><strong>文件监听增量更新</strong> → <code>watchdog</code></li>
+            <li><strong>中文分词</strong> → <code>jieba</code>（基于词典 + HMM，不是神经网络）</li>
+            <li><strong>命名解析（片名年份）</strong> → <code>guessit</code> 规则匹配</li>
+            <li><strong>BM25 排名 / TF-IDF</strong> → FTS5 内置算法</li>
+            <li><strong>编码检测 / 备份恢复</strong> → <code>chardet</code> / 文件复制</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout good">
+        <p>👉 <strong>实操原则</strong>：MVP 阶段只用 Whisper 一项 AI（如果连这都不需要、字幕都现成可不用）。V2 再加翻译 / 同义词。V3 再加语义检索。不要一开始就堆 LLM、Embedding、RAG 三件套 —— 90% 场景关键词搜索已经够好。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch10 现成软件 ============ -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">现成软件调研（17 款分类深挖）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout warn">
+        <p>⚠️ <strong>调研核心结论</strong>：<strong>没有"自托管 + 字幕全文搜 + 跳秒播放"一站式开源方案</strong>。在线 SaaS 有几家（PlayPhrase / Yarn / YouGlish）但不开放本地数据。Jellyfin / Bazarr 解决字幕下载不解决搜词跳秒。所以这事必须自己拼，但能复用各种现成砖头。</p>
+      </div>
+
+      <h3>A. 在线字幕台词搜索（SaaS、不能自托管）</h3>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🎬</div>
+          <div class="name-block">
+            <div class="pn">PlayPhrase.me</div>
+            <div class="ph">playphrase.me · 10M+ 短语</div>
+          </div>
+          <span class="pill bad">不能搜中文</span>
+          <span class="pill warn">SaaS</span>
+        </div>
+        <div class="prod-body">
+          <p>电影/电视对白搜索引擎，用 AI 语音识别建索引，搜词 → 给一串 2-5 秒短片段循环播放。免费每天 100 次搜索 / Pro $4.99/月无限。</p>
+          <div class="takeaway">阿杰的工具体验目标就是它（但要支持本地库 + 中文）。它的 UX 设计可以抄。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🧶</div>
+          <div class="name-block">
+            <div class="pn">Yarn (getyarn.io)</div>
+            <div class="ph">getyarn.io · 影视 GIF 切片</div>
+          </div>
+          <span class="pill warn">SaaS</span>
+        </div>
+        <div class="prod-body">
+          <p>搜台词 → 找 TV/电影/MV 视频片段，可生成 GIF/分享链接。PlayPhrase 的最强免费替代。</p>
+          <div class="takeaway">同样是 SaaS、不让自托管。可以看它怎么做"按片段分享链接"。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🗣️</div>
+          <div class="name-block">
+            <div class="pn">YouGlish</div>
+            <div class="ph">youglish.com · YouTube 词搜索</div>
+          </div>
+          <span class="pill good">25+ 语言</span>
+          <span class="pill warn">SaaS</span>
+        </div>
+        <div class="prod-body">
+          <p>搜词 → 看 YouTube 视频里该词被各种口音念出来。半米词汇研究里已经详细分析过（见 youglish-tech.html）。</p>
+          <div class="takeaway">技术栈和本项目高度相似（拉字幕 + 索引 + iframe 跳秒），但它锁死在 YouTube，本项目要扩展到本地视频。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🎞️</div>
+          <div class="name-block">
+            <div class="pn">Clip.cafe / Comb.io / Frinkiac</div>
+            <div class="ph">细分台词搜索站</div>
+          </div>
+          <span class="pill warn">SaaS</span>
+        </div>
+        <div class="prod-body">
+          <p>Clip.cafe（电影场景搜）、Comb.io（TV 台词搜）、Frinkiac（《辛普森一家》专搜）。都是垂直小站。</p>
+          <div class="takeaway">说明这个赛道是有需求的，但都没人做"私有库"版本。</div>
+        </div>
+      </div>
+
+      <h3>B. 字幕辅助工具（学习者向）</h3>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">📺</div>
+          <div class="name-block">
+            <div class="pn">Language Reactor</div>
+            <div class="ph">原 Language Learning with Netflix</div>
+          </div>
+          <span class="pill good">Chrome 扩展</span>
+          <span class="pill info">2-3M 用户</span>
+        </div>
+        <div class="prod-body">
+          <p>Netflix / YouTube 双语字幕 + 悬停查词 + 导出 Anki。2026 年 Chrome Store 4.2 星、仍是双语字幕扩展之王。</p>
+          <div class="takeaway">"双语字幕 + 点击单词跳秒"的 UX 范本。Netflix 限定可惜，本地版可以抄它的字幕渲染层。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">👂</div>
+          <div class="name-block">
+            <div class="pn">SubReader</div>
+            <div class="ph">iOS / Mac · subreader.dk</div>
+          </div>
+          <span class="pill warn">订阅 $9.99/月</span>
+        </div>
+        <div class="prod-body">
+          <p>给视障用户读字幕，也支持电影院里同步字幕（用麦克风识别影院音轨）。$9.99/月 Plus 订阅。<strong>注意</strong>：它不是搜索工具，调研中常被误称为"字幕搜索 app"。</p>
+          <div class="takeaway">对本项目参考价值有限。但说明字幕同步技术（看到画面 → 识别到具体台词位置）2026 年已成熟。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">✏️</div>
+          <div class="name-block">
+            <div class="pn">Subtitle Edit</div>
+            <div class="ph">nikse.dk/subtitleedit · 4.0.15</div>
+          </div>
+          <span class="pill good">GPL · 免费</span>
+          <span class="pill info">Whisper 集成</span>
+        </div>
+        <div class="prod-body">
+          <p>开源字幕编辑器，集成 Whisper / faster-whisper-XXL / 翻译 / 波形 / OCR / 拼写。Windows 原生、Mac/Linux 通过 mono 可跑。</p>
+          <div class="takeaway">不是搜索工具，但生成 / 修字幕用它就够了。Pipeline 第 2 步（Whisper 转录）可以直接 shell out 调它而不用自己写 whisper.cpp 集成。</div>
+        </div>
+      </div>
+
+      <h3>C. 媒体服务器（自托管）</h3>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🪼</div>
+          <div class="name-block">
+            <div class="pn">Jellyfin</div>
+            <div class="ph">jellyfin.org · 开源 GPL</div>
+          </div>
+          <span class="pill good">完全免费</span>
+          <span class="pill info">C# .NET 8</span>
+        </div>
+        <div class="prod-body">
+          <p>开源 Plex 替代品，2026 年生态最活跃。原生字幕支持（.srt/.ass/.vtt）但<strong>不带字幕全文搜索功能</strong>。社区有过 jellyfin-plugin-subtitle-search 尝试但已停更。</p>
+          <div class="takeaway">把它当"播放后端"用最聪明 —— 字幕全文搜索另起 Web 进程，搜到结果用深链接跳到 Jellyfin 播放。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">📦</div>
+          <div class="name-block">
+            <div class="pn">Bazarr</div>
+            <div class="ph">bazarr.media · 字幕自动下载</div>
+          </div>
+          <span class="pill good">开源</span>
+          <span class="pill info">Sonarr/Radarr 联动</span>
+        </div>
+        <div class="prod-body">
+          <p>"字幕自动化神器"。监听媒体库 → 缺字幕自动从 OpenSubtitles/Addic7ed/Subscene 镜像/SubDL 等下载 → 同步评分 → 不行继续找。2026 年 enoch85/bazarr-jellyfin 提供 Jellyfin 原生集成。</p>
+          <div class="takeaway">Pipeline 第 2 步字幕获取直接交给它。本项目只管"字幕到了之后怎么搜"。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🇨🇳</div>
+          <div class="name-block">
+            <div class="pn">ChineseSubFinder</div>
+            <div class="ph">github · 自动化中文字幕</div>
+          </div>
+          <span class="pill good">开源</span>
+          <span class="pill info">国产首选</span>
+        </div>
+        <div class="prod-body">
+          <p>对标 Bazarr 的中文字幕版。支持 Shooter（射手）、Xunlei（迅雷）、A4k、SubtitleBest 等中文字幕源 + Emby / Jellyfin / Plex / Sonarr / Radarr / TMM 集成。Docker 部署。</p>
+          <div class="takeaway">阿杰 80% 中文需求 → 直接装这个，比 Bazarr 强 N 倍（Bazarr 中文支持弱）。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🎥</div>
+          <div class="name-block">
+            <div class="pn">Plex / Emby / Stremio / Kodi</div>
+            <div class="ph">其他媒体服务器</div>
+          </div>
+          <span class="pill warn">同 Jellyfin</span>
+        </div>
+        <div class="prod-body">
+          <p>Plex（闭源、付费高级版）、Emby（中间路线 freemium）、Stremio（强插件生态、字幕走 OpenSubtitles addon）、Kodi（老牌、addon 系统强）。<strong>都不带字幕全文搜索</strong>。</p>
+          <div class="takeaway">个人偏好选一个。本项目搜索 UI 与播放器解耦、可对接任意。</div>
+        </div>
+      </div>
+
+      <h3>D. ASR / Whisper 工具链</h3>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🎙️</div>
+          <div class="name-block">
+            <div class="pn">whisper.cpp</div>
+            <div class="ph">ggerganov/whisper.cpp</div>
+          </div>
+          <span class="pill good">C++ · MIT</span>
+          <span class="pill info">Mac 首选</span>
+        </div>
+        <div class="prod-body">
+          <p>OpenAI Whisper 的 C++ 重写，无 Python 依赖 + Metal/CUDA 加速 + ggml 量化。2026 年 Mac M 系列 large-v3-turbo q5_0 + Core ML 实测 10× 实时。</p>
+          <div class="takeaway">阿杰 Mac 用户的 ASR 默认选择。命令行用 + Python <code>subprocess</code> 调即可。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">⚡</div>
+          <div class="name-block">
+            <div class="pn">faster-whisper</div>
+            <div class="ph">SYSTRAN · CTranslate2</div>
+          </div>
+          <span class="pill good">Python · MIT</span>
+        </div>
+        <div class="prod-body">
+          <p>CTranslate2 重写 Whisper，4× 快于原版同精度 + int8 量化 + word-level 时间戳。Python 友好，比 whisper.cpp 多了语义级 API。</p>
+          <div class="takeaway">如果想纯 Python pipeline / 需要 word-level timestamps，选它。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🎯</div>
+          <div class="name-block">
+            <div class="pn">WhisperX</div>
+            <div class="ph">m-bain/whisperX</div>
+          </div>
+          <span class="pill good">BSD</span>
+          <span class="pill purple">word-level &lt;100ms</span>
+        </div>
+        <div class="prod-body">
+          <p>在 faster-whisper 之上加 wav2vec2 forced alignment（精确到词的时间戳）+ pyannote 说话人分离。70× 实时（GPU）。</p>
+          <div class="takeaway">需要"点单词跳秒"级别精度 / 需要标注谁说话 → 上 WhisperX。一般人用 faster-whisper 够。</div>
+        </div>
+      </div>
+
+      <h3>E. GitHub 上类似的开源项目</h3>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🔍</div>
+          <div class="name-block">
+            <div class="pn">sereneblue/fts</div>
+            <div class="ph">github · CLI 字幕搜索</div>
+          </div>
+          <span class="pill warn">小项目</span>
+        </div>
+        <div class="prod-body">
+          <p>"Instantly find subtitles via the command line"。命令行下输入词 → grep 你的字幕文件夹 → 输出文件 + 时间戳。</p>
+          <div class="takeaway">概念正确但没有 UI / 没有跳秒播放。可以参考它的扫描逻辑。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">⬇️</div>
+          <div class="name-block">
+            <div class="pn">vagabondHustler/subsearch</div>
+            <div class="ph">github · 字幕下载器</div>
+          </div>
+          <span class="pill info">GUI</span>
+        </div>
+        <div class="prod-body">
+          <p>右键视频文件 → 自动从多个站点搜字幕下载。Windows shell 扩展 + GUI。</p>
+          <div class="takeaway">不是本项目要的"搜内容"型工具，但解决了字幕来源问题。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">💬</div>
+          <div class="name-block">
+            <div class="pn">Tomn94/Subtle-Subtitles</div>
+            <div class="ph">github · Subtitle Player</div>
+          </div>
+          <span class="pill warn">陈旧</span>
+        </div>
+        <div class="prod-body">
+          <p>"Subtitle player for movies and TV series: Search & Play!" iOS 项目，2018 年后没更新。</p>
+          <div class="takeaway">早年有人尝试过类似产品但放弃了。可能因为商业模式不成立、自己用又费力。</div>
+        </div>
+      </div>
+
+      <h3>📋 17 款产品全景表</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>产品</th><th>类别</th><th>搜词跳秒</th><th>自托管</th><th>中文</th><th>维护</th><th>启示</th></tr></thead>
+          <tbody>
+            <tr><td>PlayPhrase.me</td><td>SaaS 台词搜</td><td class="check y">✓</td><td class="check n">✗</td><td class="check n">✗</td><td>活跃</td><td>UX 范本</td></tr>
+            <tr><td>Yarn.co</td><td>SaaS 台词搜</td><td class="check y">✓</td><td class="check n">✗</td><td class="check n">✗</td><td>活跃</td><td>免费替代</td></tr>
+            <tr><td>YouGlish</td><td>SaaS YT 搜</td><td class="check y">✓</td><td class="check n">✗</td><td class="check p">~</td><td>活跃</td><td>词学习</td></tr>
+            <tr><td>Clip.cafe / Comb.io</td><td>SaaS 垂直</td><td class="check y">✓</td><td class="check n">✗</td><td class="check n">✗</td><td>活跃</td><td>垂直可行</td></tr>
+            <tr><td>Language Reactor</td><td>Chrome 扩展</td><td class="check p">~（Netflix 内）</td><td class="check n">✗</td><td class="check y">✓</td><td>活跃</td><td>双语 UX</td></tr>
+            <tr><td>SubReader</td><td>iOS / Mac</td><td class="check n">✗</td><td class="check n">✗</td><td class="check p">~</td><td>活跃</td><td>视障辅助</td></tr>
+            <tr><td>Subtitle Edit</td><td>桌面编辑器</td><td class="check n">✗</td><td class="check y">✓</td><td class="check y">✓</td><td>活跃</td><td>转录管道</td></tr>
+            <tr><td>Jellyfin</td><td>媒体服务器</td><td class="check n">✗</td><td class="check y">✓</td><td class="check y">✓</td><td>活跃</td><td>播放后端</td></tr>
+            <tr><td>Plex / Emby</td><td>媒体服务器</td><td class="check n">✗</td><td class="check y">✓</td><td class="check y">✓</td><td>活跃</td><td>同上</td></tr>
+            <tr><td>Stremio / Kodi</td><td>媒体客户端</td><td class="check n">✗</td><td class="check y">✓</td><td class="check y">✓</td><td>活跃</td><td>插件思路</td></tr>
+            <tr><td>Bazarr</td><td>字幕自动化</td><td class="check n">✗</td><td class="check y">✓</td><td class="check p">~</td><td>活跃</td><td>字幕来源</td></tr>
+            <tr><td>ChineseSubFinder</td><td>字幕自动化</td><td class="check n">✗</td><td class="check y">✓</td><td class="check y">✓</td><td>活跃</td><td>中文首选</td></tr>
+            <tr><td>whisper.cpp</td><td>ASR</td><td>—</td><td class="check y">✓</td><td class="check y">✓</td><td>活跃</td><td>Mac 转录</td></tr>
+            <tr><td>faster-whisper</td><td>ASR</td><td>—</td><td class="check y">✓</td><td class="check y">✓</td><td>活跃</td><td>Python 转录</td></tr>
+            <tr><td>WhisperX</td><td>ASR + 对齐</td><td>—</td><td class="check y">✓</td><td class="check y">✓</td><td>活跃</td><td>word 级精度</td></tr>
+            <tr><td>sereneblue/fts</td><td>开源 CLI</td><td class="check p">~（无 UI）</td><td class="check y">✓</td><td class="check n">✗</td><td>缓慢</td><td>核心逻辑</td></tr>
+            <tr><td>subsearch / Subtle-Subtitles</td><td>开源</td><td class="check n">✗</td><td class="check y">✓</td><td class="check n">✗</td><td>陈旧</td><td>失败案例</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout purple">
+        <p><strong>核心洞察</strong>：横轴"自托管 + 中文 + 搜词跳秒"三个条件同时满足的产品 = <strong>零款</strong>。市场真空。所以阿杰要自己拼，但每块砖头都有现成开源版本可用 — 把它们粘起来就是了。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch11 MVP 5 步 ============ -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">推荐方案 · MVP 5 步路径（一周晚上跑通）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout good">
+        <p>👉 <strong>目标</strong>：一周晚上 / 每天 1-2 小时 / 总投入 7-10 小时 / 跑通端到端 demo（能搜词、能点跳秒、能放）。这版完全不用 AI（不用 Whisper），只处理"已经有字幕"的视频。<br>下面是逐日详细路线。</p>
+      </div>
+
+      <div class="stage-grid">
+
+        <div class="stage-card">
+          <div class="stage-head">
+            <span class="badge">DAY 1</span>
+            <span class="stage-title">环境 + 扫描脚本</span>
+            <div style="margin-left: auto;"><span class="pill info">1.5h</span> <span class="pill info">~80 行</span></div>
+          </div>
+          <div class="stage-body">
+            <p><strong>装环境</strong>：</p>
+<pre>
+# 装 Python 3.11+ 和 ffmpeg
+brew install python@3.11 ffmpeg
+
+# 创虚拟环境
+python3.11 -m venv ~/.venv/subsearch
+source ~/.venv/subsearch/bin/activate
+
+# 装依赖
+pip install pysubs2 fastapi uvicorn jieba python-multipart chardet
+</pre>
+
+            <p><strong>写扫描脚本</strong> <code>scan.py</code>：遍历 <code>~/Movies</code> 找所有 mp4/mkv/webm + 同目录 .srt/.ass → 输出 JSON 列表。</p>
+<pre>
+# scan.py - 50 行
+import json
+from pathlib import Path
+
+ROOT = Path("/Volumes/Movies")
+VIDEO_EXT = {".mp4", ".mkv", ".webm", ".mov", ".avi"}
+SUB_EXT = {".srt", ".ass", ".vtt", ".ssa"}
+
+results = []
+for video in ROOT.rglob("*"):
+    if video.suffix.lower() not in VIDEO_EXT:
+        continue
+    # 找同名字幕
+    subs = []
+    for ext in SUB_EXT:
+        for f in video.parent.glob(f"{video.stem}*{ext}"):
+            subs.append(str(f))
+    if subs:
+        results.append({"video": str(video), "subs": subs})
+
+print(json.dumps(results, ensure_ascii=False, indent=2))
+print(f"✅ 找到 {len(results)} 个带字幕的视频", file=__import__('sys').stderr)
+</pre>
+
+            <p>跑一遍：<code>python scan.py > library.json</code>。看到输出心里有数有多少视频要入库。</p>
+          </div>
+        </div>
+
+        <div class="stage-card">
+          <div class="stage-head">
+            <span class="badge">DAY 2</span>
+            <span class="stage-title">字幕解析 + 入 SQLite</span>
+            <div style="margin-left: auto;"><span class="pill info">2h</span> <span class="pill info">~100 行</span></div>
+          </div>
+          <div class="stage-body">
+            <p>写 <code>ingest.py</code>：读 library.json，每个字幕 pysubs2 解析，jieba 分中文，入 SQLite FTS5。</p>
+<pre>
+# ingest.py - 80 行
+import json, sqlite3, pysubs2, jieba
+from pathlib import Path
+
+DB = "subsearch.db"
+conn = sqlite3.connect(DB)
+conn.execute("""
+CREATE VIRTUAL TABLE IF NOT EXISTS subs USING fts5(
+  text_en, text_zh,
+  video_path UNINDEXED, library UNINDEXED,
+  start_ms UNINDEXED, end_ms UNINDEXED,
+  tokenize = 'unicode61 remove_diacritics 2'
+);
+""")
+
+def tokenize_zh(text):
+    """中文用 jieba 分词，加空格让 FTS5 切开"""
+    if not text: return ""
+    return " ".join(jieba.cut(text))
+
+def detect_library(path):
+    """简易分库：路径含 'Documentaries' → 纪录片"""
+    p = path.lower()
+    if "documentar" in p: return "documentaries"
+    if "anime" in p or "动画" in p: return "anime"
+    if "youtube" in p: return "youtube"
+    return "movies"
+
+def is_chinese(text):
+    return any('一' <= c <= '鿿' for c in text)
+
+with open("library.json") as f:
+    items = json.load(f)
+
+for item in items:
+    video = item["video"]
+    lib = detect_library(video)
+    for sub_path in item["subs"]:
+        try:
+            subs = pysubs2.load(sub_path, encoding="utf-8")
+        except UnicodeDecodeError:
+            subs = pysubs2.load(sub_path, encoding="gbk")
+        for line in subs:
+            text = line.plaintext.strip()
+            if not text: continue
+            if is_chinese(text):
+                conn.execute(
+                    "INSERT INTO subs VALUES (?, ?, ?, ?, ?, ?)",
+                    ("", tokenize_zh(text), video, lib, int(line.start), int(line.end))
+                )
+            else:
+                conn.execute(
+                    "INSERT INTO subs VALUES (?, ?, ?, ?, ?, ?)",
+                    (text, "", video, lib, int(line.start), int(line.end))
+                )
+    print(f"✓ {video}")
+
+conn.commit()
+print(f"\n📊 共 {conn.execute('SELECT COUNT(*) FROM subs').fetchone()[0]} 行入库")
+</pre>
+            <p>跑一遍：<code>python ingest.py</code>。看到"共 N 行入库"就行。</p>
+          </div>
+        </div>
+
+        <div class="stage-card">
+          <div class="stage-head">
+            <span class="badge">DAY 3</span>
+            <span class="stage-title">FastAPI 搜索接口</span>
+            <div style="margin-left: auto;"><span class="pill info">2h</span> <span class="pill info">~80 行</span></div>
+          </div>
+          <div class="stage-body">
+            <p>写 <code>server.py</code>：搜索端点 + 视频流（支持 Range）。</p>
+<pre>
+# server.py - 80 行
+import sqlite3, os, re, jieba
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+
+app = FastAPI()
+DB = "subsearch.db"
+
+def search(q, library=None, limit=50):
+    conn = sqlite3.connect(DB)
+    conn.row_factory = sqlite3.Row
+    q_zh = " ".join(jieba.cut(q)) if any('一' <= c <= '鿿' for c in q) else q
+    # 同时搜英文字段和中文字段
+    fts_query = f'"{q}" OR "{q_zh}"'
+    where = "subs MATCH ?"
+    params = [fts_query]
+    if library:
+        where += " AND library = ?"
+        params.append(library)
+    sql = f"""
+      SELECT video_path, library, start_ms, end_ms,
+             snippet(subs, 0, '<mark>', '</mark>', '...', 15) as hl_en,
+             snippet(subs, 1, '<mark>', '</mark>', '...', 15) as hl_zh,
+             bm25(subs) as score
+      FROM subs WHERE {where}
+      ORDER BY bm25(subs) LIMIT ?
+    """
+    params.append(limit)
+    return [dict(r) for r in conn.execute(sql, params).fetchall()]
+
+@app.get("/search")
+def api_search(q: str, library: str = None):
+    return {"q": q, "results": search(q, library)}
+
+@app.get("/file")
+def stream(path: str, request: Request):
+    if not os.path.exists(path):
+        raise HTTPException(404)
+    file_size = os.path.getsize(path)
+    range_h = request.headers.get('range')
+    if not range_h:
+        return FileResponse(path)
+    m = re.match(r"bytes=(\d+)-(\d*)", range_h)
+    start = int(m.group(1)); end = int(m.group(2)) if m.group(2) else file_size - 1
+    length = end - start + 1
+    def gen():
+        with open(path, "rb") as f:
+            f.seek(start); yield f.read(length)
+    return StreamingResponse(gen(), status_code=206, headers={
+        "Content-Range": f"bytes {start}-{end}/{file_size}",
+        "Accept-Ranges": "bytes",
+        "Content-Length": str(length),
+    }, media_type="video/mp4")
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+</pre>
+            <p>起服务：<code>uvicorn server:app --reload --port 8000</code>。<br>
+            浏览器试 <code>http://localhost:8000/search?q=hello</code> 看到 JSON 结果就成。</p>
+          </div>
+        </div>
+
+        <div class="stage-card">
+          <div class="stage-head">
+            <span class="badge">DAY 4</span>
+            <span class="stage-title">单页前端 UI</span>
+            <div style="margin-left: auto;"><span class="pill info">2h</span> <span class="pill info">~120 行</span></div>
+          </div>
+          <div class="stage-body">
+            <p>建 <code>static/index.html</code>：搜索框 + 库筛选 + 结果列表 + 嵌入式 video player。</p>
+<pre>
+&lt;!-- static/index.html - 120 行 --&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html lang="zh-CN"&gt;
+&lt;head&gt;&lt;meta charset="UTF-8"&gt;&lt;title&gt;字幕台词搜索&lt;/title&gt;
+&lt;style&gt;
+  body { font-family: system-ui; max-width: 900px; margin: 20px auto; padding: 0 16px; }
+  .search { display: flex; gap: 8px; }
+  .search input { flex: 1; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; }
+  .search button { padding: 12px 20px; background: #2563eb; color: white; border: none; border-radius: 8px; cursor: pointer; }
+  .filters { margin: 12px 0; }
+  .filters button { margin-right: 6px; padding: 4px 12px; border-radius: 999px; border: 1px solid #ccc; background: white; cursor: pointer; }
+  .filters button.active { background: #2563eb; color: white; border-color: #2563eb; }
+  .result { padding: 12px; border: 1px solid #eee; border-radius: 8px; margin: 8px 0; cursor: pointer; }
+  .result:hover { background: #f5f5f5; }
+  .result .meta { font-size: 12px; color: #666; }
+  mark { background: #fef3c7; padding: 0 3px; border-radius: 3px; }
+  video { width: 100%; margin-top: 16px; border-radius: 8px; }
+&lt;/style&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;🎬 字幕台词搜索&lt;/h1&gt;
+&lt;div class="search"&gt;
+  &lt;input id="q" placeholder="输入英文 / 中文关键词..." autofocus&gt;
+  &lt;button onclick="doSearch()"&gt;搜索&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="filters"&gt;
+  &lt;button class="active" data-lib=""&gt;全部&lt;/button&gt;
+  &lt;button data-lib="movies"&gt;🎬 电影&lt;/button&gt;
+  &lt;button data-lib="documentaries"&gt;📚 纪录片&lt;/button&gt;
+  &lt;button data-lib="anime"&gt;🎌 动画&lt;/button&gt;
+  &lt;button data-lib="youtube"&gt;📺 YouTube&lt;/button&gt;
+&lt;/div&gt;
+&lt;div id="results"&gt;&lt;/div&gt;
+&lt;video id="player" controls&gt;&lt;/video&gt;
+&lt;script&gt;
+let activeLib = "";
+document.querySelectorAll('.filters button').forEach(b =&gt; {
+  b.onclick = () =&gt; {
+    document.querySelectorAll('.filters button').forEach(o =&gt; o.classList.remove('active'));
+    b.classList.add('active');
+    activeLib = b.dataset.lib;
+    doSearch();
+  };
+});
+
+document.getElementById('q').addEventListener('keydown', e =&gt; { if (e.key === 'Enter') doSearch(); });
+
+async function doSearch() {
+  const q = document.getElementById('q').value.trim();
+  if (!q) return;
+  const url = `/search?q=${encodeURIComponent(q)}` + (activeLib ? `&library=${activeLib}` : '');
+  const data = await fetch(url).then(r =&gt; r.json());
+  const ul = document.getElementById('results');
+  ul.innerHTML = data.results.length ? '' : '&lt;p&gt;没结果，换个词试试。&lt;/p&gt;';
+  for (const r of data.results) {
+    const div = document.createElement('div');
+    div.className = 'result';
+    const t = Math.floor(r.start_ms / 1000);
+    const mm = String(Math.floor(t/60)).padStart(2,'0');
+    const ss = String(t%60).padStart(2,'0');
+    div.innerHTML = `
+      &lt;div class="meta"&gt;📁 ${r.video_path.split('/').pop()} · ⏱️ ${mm}:${ss} · 📚 ${r.library}&lt;/div&gt;
+      &lt;div&gt;${r.hl_en || ''} ${r.hl_zh || ''}&lt;/div&gt;
+    `;
+    div.onclick = () =&gt; play(r);
+    ul.appendChild(div);
+  }
+}
+
+function play(r) {
+  const v = document.getElementById('player');
+  v.src = `/file?path=${encodeURIComponent(r.video_path)}`;
+  v.currentTime = r.start_ms / 1000;
+  v.play();
+  v.scrollIntoView({ behavior: 'smooth' });
+}
+&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
+</pre>
+            <p>访问 <code>http://localhost:8000/static/index.html</code> → 搜词 → 点结果 → 视频跳秒播。</p>
+          </div>
+        </div>
+
+        <div class="stage-card">
+          <div class="stage-head">
+            <span class="badge">DAY 5-7</span>
+            <span class="stage-title">打磨 + 加 Whisper（可选）</span>
+            <div style="margin-left: auto;"><span class="pill info">3-5h</span></div>
+          </div>
+          <div class="stage-body">
+            <p><strong>必做（D5）</strong>：</p>
+            <ul>
+              <li>修 bug：MKV 浏览器播不了 → <code>ffmpeg -i x.mkv -c copy -movflags faststart x.mp4</code> 批量转封装</li>
+              <li>结果列表加海报：guessit 解析 + 调 TMDB API（API key 5 分钟申请）</li>
+              <li>设置开机自启：launchctl plist 文件</li>
+            </ul>
+
+            <p><strong>可选（D6-D7）加 Whisper</strong>：</p>
+<pre>
+# 装 whisper.cpp（Mac）
+brew install whisper-cpp
+# 或从源码：git clone + make -j WHISPER_METAL=1
+
+# 下载 large-v3-turbo 模型（~750MB）
+bash ./models/download-ggml-model.sh large-v3-turbo
+
+# 批量转录无字幕视频
+for v in ~/Movies/**/*.mkv; do
+  base="${v%.*}"
+  [ -f "${base}.srt" ] && continue  # 已有字幕跳过
+  ffmpeg -i "$v" -vn -ar 16000 -ac 1 -c:a pcm_s16le "${base}.wav"
+  whisper-cpp -m models/ggml-large-v3-turbo-q5_0.bin -f "${base}.wav" -osrt --language auto
+  rm "${base}.wav"
+done
+
+# 重跑 ingest.py 把新字幕入库
+python ingest.py
+</pre>
+          </div>
+        </div>
+
+      </div>
+
+      <h3>📊 MVP 总成本</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">7-10h</div><div class="l">总工时</div></div>
+        <div class="metric"><div class="v">~400 行</div><div class="l">Python + HTML 代码</div></div>
+        <div class="metric"><div class="v">¥0</div><div class="l">软件费用</div></div>
+        <div class="metric"><div class="v">~50MB</div><div class="l">依赖包总大小</div></div>
+        <div class="metric"><div class="v">~750MB</div><div class="l">Whisper 模型（可选）</div></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch12 V2/V3 升级 ============ -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">V2 / V3 升级路线</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>V2：双语 + 美化 + 自动化（再花 5-8 小时）</h3>
+      <ul>
+        <li><strong>双语字幕对齐</strong>：英文 srt + 中文 srt → 按时间戳近邻匹配成同一行 (text_en, text_zh)，结果页面同时显示两语高亮</li>
+        <li><strong>自动翻译补全</strong>：只有英文字幕的，本地跑 Helsinki-NLP <code>opus-mt-en-zh</code> 生成中文（CPU 都行，每行 ~50ms）</li>
+        <li><strong>UI 美化</strong>：用 Alpine.js / HTMX 改造前端、加暗色模式、加海报、加键盘快捷键（↑↓ 选结果 / Enter 播放）</li>
+        <li><strong>文件监听</strong>：用 <code>watchdog</code> 监听 ~/Movies 目录，新文件自动 ingest</li>
+        <li><strong>Whisper 批处理</strong>：后台 worker 队列扫无字幕视频，夜里自动转录</li>
+        <li><strong>分享链接</strong>：每条结果一个永久链接 <code>/play?path=...&start_ms=...</code>，发微信给朋友点开就跳到那一秒</li>
+      </ul>
+
+      <h3>V3：语义搜索 + 桌面 App + 大库（再花 10-15 小时）</h3>
+      <ul>
+        <li><strong>sentence-transformers 语义检索</strong>：
+<pre>
+from sentence_transformers import SentenceTransformer
+import sqlite_vec  # sqlite 向量检索扩展
+
+model = SentenceTransformer('all-MiniLM-L6-v2')  # 22MB
+# 入库时：embedding = model.encode(text).tolist()
+# 搜索时：用 sqlite-vec 做 cosine 最近邻
+</pre>
+        搜 "小熊见妈妈那段" → 找语义最近的字幕段、即使关键词不命中
+        </li>
+        <li><strong>迁移 Meilisearch</strong>：库膨胀到 50w 行 + 想要 typo tolerance + faceted search → docker run 起 Meili、写 100 行迁移脚本灌数据</li>
+        <li><strong>Tauri 打包桌面 App</strong>：把 FastAPI 后端 + HTML 前端打包成 ~15MB 单 binary，双击启动；macOS / Windows / Linux 三平台都出</li>
+        <li><strong>多用户 + 学习记录</strong>：标记看过的台词、收藏、生词本（导出 Anki）—— 学英语用</li>
+        <li><strong>OCR 图像字幕</strong>：蓝光 PGS 字幕 → vobsub2srt / PaddleOCR 转文字</li>
+        <li><strong>说话人分离</strong>：WhisperX + pyannote 标注每行台词谁说的，可按角色过滤搜索</li>
+      </ul>
+
+      <h3>路线时间估算</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>版本</th><th>工时</th><th>累计</th><th>新增能力</th></tr></thead>
+          <tbody>
+            <tr><td>MVP</td><td>7-10h</td><td>10h</td><td>关键词搜词 + 跳秒播放 + 分库</td></tr>
+            <tr><td>V2</td><td>5-8h</td><td>18h</td><td>双语 + 自动翻译 + Whisper 自动化 + 监听</td></tr>
+            <tr><td>V3</td><td>10-15h</td><td>33h</td><td>语义搜索 + 桌面 App + 大库迁移 + 说话人</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch13 中文用户特别 ============ -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">中文用户特别注意</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>中文分词：jieba 是默认</h3>
+      <ul>
+        <li><strong>jieba</strong>：词典 + HMM、最常用、生态最广。<code>pip install jieba</code> 即用。50MB 词典。</li>
+        <li><strong>pkuseg</strong>：北大开源、模型小（25MB）、特定领域微调能力强。新闻 / 医学 / 旅游 / 网络都有专用模型。</li>
+        <li><strong>HanLP</strong>：综合 NLP 工具包、分词只是其一。需要更强 NLP 能力时用。</li>
+        <li><strong>paddleSeg</strong>：百度 PaddlePaddle 出品、深度学习分词。jieba 也能调它的 paddle 模式。</li>
+      </ul>
+
+      <div class="callout good">
+        <p>👉 <strong>个人用 jieba 就行</strong>。准确率不算业内最高但生态稳定 + import 即用，不需要折腾。后期觉得不准可换 pkuseg。</p>
+      </div>
+
+      <h3>双语字幕来源</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>来源</th><th>类型</th><th>2026 状态</th><th>双语</th></tr></thead>
+          <tbody>
+            <tr><td>SubHD (subhd.tv)</td><td>中文字幕站</td><td>主站可访问、可能需要 VPN</td><td>大量双语</td></tr>
+            <tr><td>ASSRT (assrt.net)</td><td>射手网继承</td><td>活跃、有 API</td><td>有</td></tr>
+            <tr><td>字幕库 zimuku</td><td>电影/TV 综合</td><td>域名经常切换</td><td>有</td></tr>
+            <tr><td>YYeTs / 人人字幕组</td><td>美剧字幕组</td><td>主站 yysub.net 部分恢复 / 历史镜像</td><td>有（陈旧）</td></tr>
+            <tr><td>OpenSubtitles</td><td>国际站</td><td>中文字幕较少</td><td>很少</td></tr>
+            <tr><td><strong>自己用 NLLB 翻译</strong></td><td>本地生成</td><td>能跑、质量约 90%</td><td>双语</td></tr>
+            <tr><td>哔哩哔哩字幕</td><td>B 站视频原字幕</td><td>有 you-get / yt-dlp 支持</td><td>中文为主</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>中文 ASR 替代品（如果不想用 Whisper）</h3>
+      <ul>
+        <li><strong>阿里通义听悟</strong>：云 API、中文识别业内最强、长音频自动分段</li>
+        <li><strong>腾讯云语音识别</strong>：实时 + 离线，新用户白嫖额度</li>
+        <li><strong>讯飞听见</strong>：中文 ASR 老牌、按时长收费</li>
+        <li><strong>百度 BCE 语音</strong>：综合</li>
+      </ul>
+      <div class="callout warn">
+        <p>⚠️ 这些都是云 API，要传文件上去。<strong>个人用强烈推荐本地 whisper.cpp</strong> —— Mac M 系列性能足够、中文识别 large-v3-turbo 实测可用、不传数据出本机。</p>
+      </div>
+
+      <h3>国产媒体服务器 / NAS</h3>
+      <ul>
+        <li><strong>群晖 Synology</strong>：日系老牌、Docker 装 Jellyfin 是黄金组合、Video Station 自带</li>
+        <li><strong>威联通 QNAP</strong>：同上、Video HD Station 是它家的播放器</li>
+        <li><strong>极空间</strong>：国产 NAS、Z-Series 主流款</li>
+        <li><strong>蛋蛋 NAS / 飞牛 OS</strong>：国产软 NAS 系统、x86 主机即用</li>
+        <li><strong>OpenMediaVault</strong>：开源、Debian 基础</li>
+        <li><strong>可道云</strong>：国产 PHP 网盘 + 文件管理</li>
+      </ul>
+
+      <h3>中文字幕特殊坑</h3>
+      <ul>
+        <li><strong>GBK / GB2312 编码</strong>：Windows 系统下来的中文字幕经常不是 UTF-8，<code>chardet.detect()</code> 检测后解码</li>
+        <li><strong>繁简体混杂</strong>：港台片字幕繁体、内地翻译简体 → 统一用 <code>opencc-python</code> 转简体再入库</li>
+        <li><strong>特效字幕（ASS）</strong>：人人字幕组的 ASS 字幕带大量 <code>{\fad}{\pos}</code> 样式标签 → <code>line.plaintext</code> 自动剥除</li>
+        <li><strong>字幕组 logo</strong>：开头几行是字幕组水印 / 制作信息 → 用启发式过滤（前 10 行 + 关键词 "字幕组""翻译""校对" 就跳过）</li>
+        <li><strong>盗版警告水印</strong>：bilibili、爱奇艺等会嵌入水印台词 → 维护一份过滤词典</li>
+      </ul>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch14 mini demo ============ -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">mini demo · 玩一下"假的"字幕搜索 UI</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout info">
+        <p>👇 下面是个可玩的假 UI。<strong>不连真后端、不真跳秒</strong>，5 条搜索结果都是 hardcode 的。点输入框输入 "happy" / "love" / "中文" 任何关键词都会"假装搜到"。点跳秒按钮显示 toast。让阿杰先看 UX、再决定要不要照着搭。</p>
+      </div>
+
+      <div class="demo-host">
+        <h4>🎮 字幕台词搜索（模拟）</h4>
+
+        <div class="demo-search-bar">
+          <input id="demoInput" placeholder="输入英文 / 中文关键词，比如 happy、love、开心..." value="happy">
+          <button onclick="demoSearch()">搜索</button>
+        </div>
+
+        <div class="demo-filters" id="demoFilters">
+          <span class="demo-filter active" data-lib="">全部</span>
+          <span class="demo-filter" data-lib="movies">🎬 电影</span>
+          <span class="demo-filter" data-lib="docs">📚 纪录片</span>
+          <span class="demo-filter" data-lib="anime">🎌 动画</span>
+          <span class="demo-filter" data-lib="youtube">📺 YouTube</span>
+        </div>
+
+        <div class="demo-stats" id="demoStats">
+          找到 <strong>5</strong> 条结果 · <strong>12ms</strong>
+        </div>
+
+        <div id="demoResults"></div>
+      </div>
+
+      <h3>真后端代码 · 90 行端到端可跑版</h3>
+
+      <p>下面是把第 11 章 MVP 三个脚本合并的最小版（不含前端），<strong>能直接 copy 跑通</strong>。前提：你已经有 <code>~/Movies/sample/test.mkv</code> + 同目录 <code>test.srt</code>。</p>
+
+<pre>
+# subsearch.py - 90 行端到端
+import sqlite3, jieba, pysubs2, os, re
+from pathlib import Path
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import StreamingResponse, HTMLResponse
+
+DB = "subsearch.db"
+ROOT = Path.home() / "Movies"
+
+# ---------- 1. 建库 ----------
+def init_db():
+    conn = sqlite3.connect(DB)
+    conn.execute("""CREATE VIRTUAL TABLE IF NOT EXISTS subs USING fts5(
+      text, video_path UNINDEXED, start_ms UNINDEXED, end_ms UNINDEXED,
+      tokenize='unicode61 remove_diacritics 2')""")
+    return conn
+
+# ---------- 2. 入库 ----------
+def ingest():
+    conn = init_db()
+    conn.execute("DELETE FROM subs")
+    for srt in ROOT.rglob("*.srt"):
+        video = next((srt.with_suffix(e) for e in [".mp4",".mkv",".webm"] if srt.with_suffix(e).exists()), None)
+        if not video: continue
+        try: subs = pysubs2.load(str(srt), encoding="utf-8")
+        except: subs = pysubs2.load(str(srt), encoding="gbk")
+        for line in subs:
+            t = line.plaintext.strip()
+            if not t: continue
+            # 中文加 jieba 分词
+            if any('一' <= c <= '鿿' for c in t):
+                t = " ".join(jieba.cut(t)) + " " + t
+            conn.execute("INSERT INTO subs VALUES (?,?,?,?)", (t, str(video), int(line.start), int(line.end)))
+    conn.commit()
+    print(f"✅ 入库 {conn.execute('SELECT COUNT(*) FROM subs').fetchone()[0]} 行")
+
+# ---------- 3. 服务 ----------
+app = FastAPI()
+
+@app.get("/", response_class=HTMLResponse)
+def home():
+    return """<html><body style="font-family:system-ui;max-width:800px;margin:20px auto">
+    <h1>🎬 字幕搜索</h1>
+    <input id=q style="width:70%;padding:10px;font-size:16px" placeholder="搜词" autofocus>
+    <button onclick=s() style="padding:10px 20px">搜索</button>
+    <div id=r></div>
+    <video id=v controls style="width:100%;margin-top:16px"></video>
+    <script>
+    async function s(){
+      const q=document.getElementById('q').value;
+      const d=await fetch('/api?q='+encodeURIComponent(q)).then(r=>r.json());
+      document.getElementById('r').innerHTML = d.map(x=>`<div onclick="p('${x.path}',${x.ms})"
+        style="padding:10px;border:1px solid #eee;margin:4px;cursor:pointer">
+        <b>${(x.ms/1000).toFixed(1)}s</b> ${x.text}</div>`).join('');
+    }
+    function p(path,ms){
+      const v=document.getElementById('v');
+      v.src='/file?path='+encodeURIComponent(path);
+      v.currentTime=ms/1000; v.play();
+    }
+    document.getElementById('q').onkeydown=e=>e.key=='Enter'&&s();
+    </script></body></html>"""
+
+@app.get("/api")
+def search(q: str):
+    conn = init_db()
+    q_jieba = " ".join(jieba.cut(q)) if any('一'<=c<='鿿' for c in q) else q
+    rows = conn.execute(
+        "SELECT video_path, start_ms, snippet(subs,0,'<mark>','</mark>','...',15) "
+        "FROM subs WHERE subs MATCH ? ORDER BY bm25(subs) LIMIT 30",
+        (f'"{q}" OR "{q_jieba}"',)).fetchall()
+    return [{"path": r[0], "ms": r[1], "text": r[2]} for r in rows]
+
+@app.get("/file")
+def stream(path: str, request: Request):
+    if not os.path.exists(path): raise HTTPException(404)
+    size = os.path.getsize(path)
+    rh = request.headers.get('range')
+    if not rh:
+        with open(path, "rb") as f: data = f.read()
+        return StreamingResponse(iter([data]), media_type="video/mp4")
+    m = re.match(r"bytes=(\d+)-(\d*)", rh)
+    s, e = int(m.group(1)), int(m.group(2) or size-1)
+    def gen():
+        with open(path,"rb") as f: f.seek(s); yield f.read(e-s+1)
+    return StreamingResponse(gen(), status_code=206, headers={
+        "Content-Range": f"bytes {s}-{e}/{size}", "Accept-Ranges": "bytes",
+        "Content-Length": str(e-s+1)}, media_type="video/mp4")
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "ingest":
+        ingest()
+    else:
+        import uvicorn
+        uvicorn.run(app, host="0.0.0.0", port=8000)
+</pre>
+
+      <p><strong>跑起来</strong>：</p>
+<pre>
+pip install fastapi uvicorn pysubs2 jieba
+python subsearch.py ingest    # 第一次入库
+python subsearch.py            # 起服务，浏览器开 localhost:8000
+</pre>
+
+      <div class="callout good">
+        <p>👉 这 90 行就是 MVP 的全部核心。中文搜索、Range 跳秒、BM25 排序、高亮 snippet 都有。在它基础上往上加：分库、双语、Whisper、watchdog 增量、Alpine UI 美化 —— 每加一个就是 V2 / V3。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch15 FAQ ============ -->
+  <section class="chapter" id="ch15">
+    <h2><span class="num">15</span><span class="title-text">FAQ · 阿杰最可能问的 12 个问题</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">我有 2TB 电影库，SQLite 够吗？会不会爆？</span><span class="toggle">+</span></div>
+        <div class="faq-a">够。2TB 视频内容 ≠ 2TB 字幕数据 — 字幕本身体积极小（一部 2 小时电影双语字幕通常 &lt;200KB），2TB 库的字幕总量大概 100-300MB；FTS5 索引后膨胀 1-2 倍，整个 subsearch.db 文件最多 500MB。SQLite 单库官方支持 281TB，距离爆远着。性能上 100w 行内查询 &lt;50ms 体感无延迟。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">Whisper 在 Mac M1 / M2 / M3 上真跑得动吗？</span><span class="toggle">+</span></div>
+        <div class="faq-a">绝对跑得动。whisper.cpp + Metal GPU 加速在 M1 起步机上 large-v3 大约 5× 实时（1 小时音频 12 分钟转完），M2 Pro 用 large-v3-turbo q5_0 量化模型 + flash attention 实测 10× 实时（1 小时音频 6 分钟）。RAM 占用 2-4GB。不挑机型、M1 Air 都 OK。模型文件 750MB 一次下载永久能用。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">中文搜索不准（搜"开心"匹配不到"很开心"）怎么办？</span><span class="toggle">+</span></div>
+        <div class="faq-a">入库时用 jieba 把中文文本分词后用空格连接再入 FTS5：<code>"很开心" → "很 开心"</code>。搜索时把查询也分词：<code>"开心" → "开心"</code>，FTS5 按词匹配就能命中。第 11 章 ingest.py 已包含这个逻辑。更彻底的方案是装 <code>wangfenjin/simple</code> SQLite 扩展，它直接提供支持 jieba 的 FTS5 tokenizer。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">双语字幕怎么对齐时间戳？英文是 10:00:05，中文是 10:00:04.8</span><span class="toggle">+</span></div>
+        <div class="faq-a">按中点时间戳近邻匹配 + ±500ms 容忍即可（人耳感知不到）。代码：<code>mid_en = (start_en + end_en) / 2</code>，在中文行里找 mid 距它最近的。如果整体偏移（中文字幕全部慢 500ms），先 pysubs2 的 <code>subs.shift(ms=500)</code> 整体移位再对齐。错位严重场景上动态规划做最优一对一匹配。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">已经装了 Jellyfin，能不能集成进去？</span><span class="toggle">+</span></div>
+        <div class="faq-a">能但不建议写 Jellyfin 插件（C# / .NET / 维护成本极高）。<strong>聪明做法</strong>：搜索 UI 独立运行（localhost:8000），结果里给一个"在 Jellyfin 中打开"按钮，跳到 Jellyfin 的深链接 <code>http://jellyfin/web/index.html#!/details?id={ItemId}&startPosition={ticks}</code>。视频文件路径如果和 Jellyfin 媒体库一致，你的搜索 DB 里直接存 Jellyfin ItemId 就能跳。Jellyfin 的 API 拿 ItemId：<code>GET /Items?searchTerm=...&Recursive=true</code>。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">能不能搜中文意思命中英文字幕？比如搜"开心"匹配 "I'm happy"</span><span class="toggle">+</span></div>
+        <div class="faq-a">三档方案：(1) <strong>简易</strong>：维护一份关键词同义词字典 <code>{"开心": ["happy", "glad", "joyful"]}</code>，查询时把同义词 OR 起来。10 分钟搞定。(2) <strong>翻译</strong>：用 Helsinki-NLP <code>opus-mt-zh-en</code> 把查询翻译成英文再搜索。100ms 延迟。(3) <strong>语义</strong>：sentence-transformers 多语种模型（<code>paraphrase-multilingual-MiniLM-L12-v2</code> 117MB）做跨语言 embedding，"开心"和 "happy" 在同一向量空间。V3 升级项。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">我是真小白，一周晚上真能搞定吗？</span><span class="toggle">+</span></div>
+        <div class="faq-a">能，但有前提：(a) 你会基本 Python（能跑 hello world）；(b) 会用命令行（cd / ls / brew install）；(c) 知道什么是 HTTP / JSON。如果这三点不熟，先花一个周末过遍 fastapi 官方 tutorial（2 小时）+ 跑通一个最简 SQLite demo（30 分钟）。MVP 5 步代码我已经粘进第 11 章和第 14 章，照着抄改路径就能跑，不需要从零写。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">浏览器播 MKV 视频卡住怎么办？</span><span class="toggle">+</span></div>
+        <div class="faq-a">浏览器原生只稳定支持 mp4/webm，MKV 看运气（Chrome 部分支持、Safari 不行）。两种解决：(1) <strong>转封装</strong>（推荐）：<code>ffmpeg -i x.mkv -c copy -movflags faststart x.mp4</code> 不重编码、几秒搞定、文件大小不变；(2) <strong>切片</strong>：搜到结果只切 15s 的 mp4 片段返回，<code>ffmpeg -ss $start -i x.mkv -t 15 -c copy out.mp4</code>。不行就改用 mpv IPC 方案（第 7 章方案 B）。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">家里有 NAS，怎么让手机也能搜？</span><span class="toggle">+</span></div>
+        <div class="faq-a">让 FastAPI 监听 0.0.0.0 而不是 localhost：<code>uvicorn server:app --host 0.0.0.0 --port 8000</code>。同 WiFi 下手机浏览器开 <code>http://NAS局域网IP:8000</code>。要远程访问（咖啡厅、出差）：(a) 装 Tailscale（最简单、零配置）；(b) 装 ZeroTier；(c) 自己开 frp / nginx + Let's Encrypt 证书（折腾）。建议 Tailscale，5 分钟搞定 + 免费。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">YouTube 视频不下载、只搜字幕、跳到 YouTube 播放可以吗？</span><span class="toggle">+</span></div>
+        <div class="faq-a">完全可以。yt-dlp <code>--skip-download --write-subs --sub-langs en,zh-Hans --write-auto-subs --write-info-json</code> 只拿字幕 + 元数据（含 video_id），不下载视频。入库时存 YouTube URL 而不是本地路径。前端结果点击直接跳转 <code>https://youtu.be/{video_id}?t={start_seconds}</code>。这种 hybrid 用法很值得 —— 本地存电影 + 在线搜 YouTube 字幕同一界面。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">SQLite FTS5 和 Meilisearch 选哪个？怎么知道该升级了？</span><span class="toggle">+</span></div>
+        <div class="faq-a"><strong>3 个信号该上 Meilisearch</strong>：(1) 库膨胀到 50w+ 行字幕、单次搜索 &gt;200ms 卡顿；(2) 想要 typo tolerance（搜错单词也命中）；(3) 想要 faceted search 左侧 sidebar 自动统计各分类计数。其他场景 SQLite 完胜（部署零成本、无 daemon、备份 = cp 一个文件）。从 SQLite 迁 Meili 写 100 行 Python 半天工作量，schema 几乎一致。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">维护成本怎么样？以后会不会变成屎山没人能改？</span><span class="toggle">+</span></div>
+        <div class="faq-a">维护成本极低，因为：(1) 整个工具就一个 Python 文件 + 一个 HTML 文件，几百行；(2) 所有依赖（SQLite / FastAPI / pysubs2 / jieba）都是 5-10 年稳定项目、API 几乎不变；(3) 没有数据库迁移问题（SQLite 单文件、schema 加列直接 ALTER）。最大风险是 Whisper / Meilisearch 大版本升级，但你只用基本 API、影响有限。建议每 6 个月升一次依赖、年底备份一次 subsearch.db 文件即可。</div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p><strong>个人字幕台词搜索引擎搭建方案</strong> · v1 · 无忌 · 2026-05-25</p>
+  <p>面向阿杰个人本地用 · 不商用 · 全开源栈 · 可一周内 MVP 跑通</p>
+  <p>⚠️ 性能数据基于公开 benchmark + 推断，实际取决于机器配置；代码片段来自官方文档但未在生产环境压测，使用前请核实</p>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+<div class="demo-toast" id="demoToast">⏱️ 模拟跳到 02:34 · 视频已开始播放</div>
+
+<script>
+  // ===== 主题切换 =====
+  (function() {
+    const KEY = 'subsearch-research-theme';
+    const saved = localStorage.getItem(KEY);
+    if (saved) document.body.setAttribute('data-theme', saved);
+    const btn = document.getElementById('themeToggle');
+    function syncIcon() {
+      btn.textContent = document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    }
+    syncIcon();
+    btn.addEventListener('click', () => {
+      const cur = document.body.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem(KEY, next);
+      syncIcon();
+    });
+  })();
+
+  // ===== 章节折叠 =====
+  document.querySelectorAll('section.chapter > h2').forEach(h2 => {
+    h2.addEventListener('click', () => {
+      h2.parentElement.classList.toggle('collapsed');
+    });
+  });
+
+  // ===== 顶部进度条 + 回到顶部 =====
+  const progressEl = document.getElementById('progress');
+  const backTopEl = document.getElementById('backToTop');
+  function updateProgress() {
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrolled = window.scrollY;
+    const ratio = docHeight > 0 ? scrolled / docHeight : 0;
+    progressEl.style.width = (ratio * 100) + '%';
+    backTopEl.classList.toggle('show', scrolled > 400);
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+  backTopEl.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // ===== 锚点高亮 =====
+  const anchorLinks = document.querySelectorAll('#anchorList a');
+  const sections = Array.from(anchorLinks).map(a => document.getElementById(a.dataset.target)).filter(Boolean);
+  function highlightAnchor() {
+    const offset = 120;
+    let current = null;
+    for (const sec of sections) {
+      const rect = sec.getBoundingClientRect();
+      if (rect.top - offset <= 0) current = sec.id;
+    }
+    anchorLinks.forEach(a => a.classList.toggle('active', a.dataset.target === current));
+    if (current) {
+      const activeLink = document.querySelector('#anchorList a.active');
+      if (activeLink) {
+        const navWrap = document.querySelector('.anchor-list');
+        const linkRect = activeLink.getBoundingClientRect();
+        const navRect = navWrap.parentElement.getBoundingClientRect();
+        const desiredScroll = activeLink.offsetLeft - navRect.width / 2 + linkRect.width / 2;
+        navWrap.parentElement.scrollTo({ left: desiredScroll, behavior: 'smooth' });
+      }
+    }
+  }
+  window.addEventListener('scroll', highlightAnchor, { passive: true });
+  highlightAnchor();
+
+  // ===== anchor 点击 → 展开折叠章节 =====
+  anchorLinks.forEach(a => {
+    a.addEventListener('click', () => {
+      const target = document.getElementById(a.dataset.target);
+      if (target && target.classList.contains('collapsed')) {
+        target.classList.remove('collapsed');
+      }
+    });
+  });
+
+  // ===== 表格行高亮 =====
+  document.querySelectorAll('tbody tr').forEach(tr => {
+    tr.addEventListener('click', () => {
+      tr.parentElement.querySelectorAll('tr.row-highlight').forEach(o => {
+        if (o !== tr) o.classList.remove('row-highlight');
+      });
+      tr.classList.toggle('row-highlight');
+    });
+  });
+
+  // ===== FAQ =====
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      q.parentElement.classList.toggle('open');
+    });
+  });
+
+  // ===== mini demo · 假搜索 =====
+  const DEMO_DATA = [
+    { poster: '🎬', title: 'The Pursuit of Happyness (2006)', lib: 'movies', time_s: 5234, en: "I'm <mark>happy</mark> to see my son finally smile again.", zh: "我<mark>开心</mark>地看到我儿子终于又笑了。" },
+    { poster: '🐻', title: 'Paddington 2 (2017)', lib: 'movies', time_s: 1845, en: "Are you <mark>happy</mark> here, Mr. Brown?", zh: "你在这里<mark>开心</mark>吗，布朗先生？" },
+    { poster: '🌍', title: 'Planet Earth II · S1E03 · Jungles', lib: 'docs', time_s: 938, en: "These chimpanzees seem <mark>happy</mark>, well-fed and at ease.", zh: "这些黑猩猩看起来很<mark>开心</mark>，吃饱喝足，悠然自得。" },
+    { poster: '🎌', title: 'Spirited Away · Studio Ghibli', lib: 'anime', time_s: 4521, en: "I just want to make my parents <mark>happy</mark> again.", zh: "我只想让爸爸妈妈再次<mark>开心</mark>起来。" },
+    { poster: '📺', title: 'TED · The Surprising Science of Happiness', lib: 'youtube', time_s: 312, en: "What if I told you <mark>happy</mark> isn't a feeling, it's a skill?", zh: "如果我告诉你<mark>开心</mark>不是感觉、而是一种能力呢？" },
+  ];
+
+  let activeLib = "";
+
+  function fmtTime(s) {
+    const h = Math.floor(s/3600);
+    const m = String(Math.floor((s%3600)/60)).padStart(2,'0');
+    const sec = String(s%60).padStart(2,'0');
+    return h > 0 ? `${h}:${m}:${sec}` : `${m}:${sec}`;
+  }
+
+  function renderResults() {
+    const q = document.getElementById('demoInput').value.trim();
+    const container = document.getElementById('demoResults');
+    const stats = document.getElementById('demoStats');
+
+    if (!q) {
+      container.innerHTML = '<div class="demo-empty">输入关键词开始搜索（试试 happy / love / 开心 / 自由）</div>';
+      stats.innerHTML = '';
+      return;
+    }
+
+    const filtered = activeLib ? DEMO_DATA.filter(r => r.lib === activeLib) : DEMO_DATA;
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="demo-empty">这个分库下没有结果（这是 demo 假数据）</div>';
+      stats.innerHTML = `找到 <strong>0</strong> 条结果 · <strong>${(Math.random()*10 + 5).toFixed(0)}ms</strong>`;
+      return;
+    }
+
+    container.innerHTML = filtered.map(r => `
+      <div class="demo-result" onclick="demoJump(${r.time_s}, '${r.title.replace(/'/g,"\\'")}')">
+        <div class="demo-result-head">
+          <div class="demo-poster">${r.poster}</div>
+          <div class="demo-meta">
+            <div class="demo-title">${r.title}</div>
+            <div class="demo-time">⏱️ ${fmtTime(r.time_s)} · 📚 ${r.lib}</div>
+          </div>
+          <button class="demo-jump" onclick="event.stopPropagation(); demoJump(${r.time_s}, '${r.title.replace(/'/g,"\\'")}')">▶ 跳秒</button>
+        </div>
+        <div class="demo-subtitle-en">${r.en}</div>
+        <div class="demo-subtitle-zh">${r.zh}</div>
+      </div>
+    `).join('');
+
+    stats.innerHTML = `找到 <strong>${filtered.length}</strong> 条结果 · <strong>${(Math.random()*15 + 5).toFixed(0)}ms</strong> · BM25 排序`;
+  }
+
+  function demoSearch() {
+    renderResults();
+  }
+
+  function demoJump(seconds, title) {
+    const toast = document.getElementById('demoToast');
+    toast.textContent = `⏱️ 模拟跳到 ${fmtTime(seconds)} · ${title}`;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  document.querySelectorAll('.demo-filter').forEach(f => {
+    f.addEventListener('click', () => {
+      document.querySelectorAll('.demo-filter').forEach(o => o.classList.remove('active'));
+      f.classList.add('active');
+      activeLib = f.dataset.lib;
+      renderResults();
+    });
+  });
+
+  document.getElementById('demoInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') demoSearch();
+  });
+  document.getElementById('demoInput').addEventListener('input', () => {
+    // 输入时实时更新
+    renderResults();
+  });
+
+  // expose to inline onclick handlers
+  window.demoSearch = demoSearch;
+  window.demoJump = demoJump;
+
+  // 初次渲染
+  renderResults();
+</script>
+
+</body>
+</html>

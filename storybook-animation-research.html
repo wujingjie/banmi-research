@@ -1,0 +1,2247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>绘本动画化技术与市场研究 · 半米内部使用 · 2026-05-24</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1d23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --border-strong: #cdd2da;
+    --accent: #7c3aed;
+    --accent-soft: #ede9fe;
+    --accent-text: #5b21b6;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #2563eb;
+    --info-soft: #dbeafe;
+    --code-bg: #f1f3f7;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --syn-kw: #c2185b;
+    --syn-str: #2e7d32;
+    --syn-num: #b45309;
+    --syn-cmt: #7c8493;
+    --syn-fn:  #7c3aed;
+    --syn-op:  #c2410c;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1c2030;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #b6bcc9;
+    --text-mute: #8a92a3;
+    --border: #2a2f3d;
+    --border-strong: #3a4154;
+    --accent: #a78bfa;
+    --accent-soft: #4c1d9555;
+    --accent-text: #c4b5fd;
+    --good: #4ade80;
+    --good-soft: #14532d55;
+    --warn: #fbbf24;
+    --warn-soft: #78350f55;
+    --bad: #f87171;
+    --bad-soft: #7f1d1d55;
+    --info: #93c5fd;
+    --info-soft: #1e3a8a55;
+    --code-bg: #0a0d14;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+    --syn-kw: #f472b6;
+    --syn-str: #86efac;
+    --syn-num: #fbbf24;
+    --syn-cmt: #6b7280;
+    --syn-fn:  #c4b5fd;
+    --syn-op:  #fdba74;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--info)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  nav.anchor-nav { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; border-top: 1px solid var(--border); background: var(--bg); scrollbar-width: none; }
+  nav.anchor-nav::-webkit-scrollbar { display: none; }
+  .anchor-list { display: flex; gap: 4px; padding: 8px 16px; max-width: 980px; margin: 0 auto; white-space: nowrap; }
+  .anchor-list a { flex: 0 0 auto; min-height: 36px; padding: 7px 12px; border-radius: 999px; font-size: 13px; line-height: 1.3; color: var(--text-soft); text-decoration: none; border: 1px solid transparent; background: var(--bg-soft); transition: all .15s; }
+  .anchor-list a:hover { color: var(--accent-text); }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); font-weight: 600; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 28px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 3000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  .syn-kw  { color: var(--syn-kw);  font-weight: 600; }
+  .syn-str { color: var(--syn-str); }
+  .syn-num { color: var(--syn-num); }
+  .syn-cmt { color: var(--syn-cmt); font-style: italic; }
+  .syn-fn  { color: var(--syn-fn); }
+  .syn-op  { color: var(--syn-op); }
+  hr.soft { border: none; height: 1px; background: var(--border); margin: 16px 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .arch-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 16px 0; }
+  .arch-row { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-soft); }
+  .arch-row-head { padding: 6px 12px; background: var(--accent-soft); color: var(--accent-text); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); }
+  .arch-row-body { display: flex; gap: 8px; padding: 10px; flex-wrap: wrap; }
+  .arch-box { flex: 1 1 0; min-width: 130px; padding: 10px 12px; border-radius: 10px; background: var(--bg-elevated); border: 1px solid var(--border); font-size: 13px; text-align: center; color: var(--text); }
+  .arch-box .ico { font-size: 22px; display: block; margin-bottom: 4px; }
+  .arch-box .lbl { font-weight: 600; }
+  .arch-box .sub { font-size: 11.5px; color: var(--text-mute); margin-top: 2px; }
+  .arch-box.acc { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-text); }
+  .arch-box.gd  { background: var(--good-soft); border-color: var(--good); color: var(--good); }
+  .arch-box.wn  { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
+  .arch-box.bd  { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
+  .arch-box.inf { background: var(--info-soft); border-color: var(--info); color: var(--info); }
+  .arch-arrow { text-align: center; color: var(--text-mute); font-size: 18px; margin: 2px 0; user-select: none; }
+  .verdict-card { margin: 12px 0; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--bg-elevated); }
+  .verdict-head { padding: 12px 16px; background: linear-gradient(135deg, var(--accent-soft), transparent); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .verdict-head .badge { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); }
+  .verdict-head .badge.pick { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .verdict-head .badge.alt  { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .verdict-head .badge.bad  { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .verdict-head h4 { margin: 0; font-size: 16px; color: var(--text); flex: 1; min-width: 120px; }
+  .verdict-body { padding: 12px 16px; }
+  .verdict-body .pros, .verdict-body .cons { margin: 6px 0; font-size: 13.5px; }
+  .verdict-body .pros::before { content: "✅ "; }
+  .verdict-body .cons::before { content: "⚠️ "; }
+  .prod-card { margin: 14px 0; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--bg-elevated); }
+  .prod-head { padding: 12px 16px; background: var(--bg-soft); border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .prod-head h4 { margin: 0; font-size: 16px; color: var(--text); flex: 1; min-width: 140px; }
+  .prod-head .pill { padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); }
+  .prod-head .pill.live { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .prod-head .pill.dead { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .prod-head .pill.gray { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .prod-head .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .prod-body { padding: 12px 16px; font-size: 14.5px; }
+  .prod-body p { color: var(--text-soft); }
+  .prod-body .takeaway { margin-top: 10px; padding: 10px 12px; background: var(--accent-soft); border-radius: 8px; border-left: 3px solid var(--accent); color: var(--text); font-size: 14px; }
+  .prod-body .takeaway::before { content: "👉 启示  "; font-weight: 700; color: var(--accent-text); }
+  .cost-card { margin: 14px 0; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--bg-elevated); }
+  .cost-card .ch { padding: 10px 14px; background: var(--bg-soft); border-bottom: 1px solid var(--border); font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .cost-card .ch .amt { margin-left: auto; font-family: ui-monospace, monospace; font-weight: 700; color: var(--accent-text); }
+  .cost-card .cb { padding: 12px 14px; }
+  .cost-card .cb table { min-width: auto; }
+  .cost-total { margin: 16px 0; padding: 16px 18px; background: linear-gradient(135deg, var(--accent-soft), var(--info-soft)); border: 1px solid var(--accent); border-radius: 14px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .cost-total .label { flex: 1; font-weight: 700; font-size: 15px; color: var(--text); }
+  .cost-total .num { font-family: ui-monospace, monospace; font-weight: 700; font-size: 22px; color: var(--accent-text); }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .node.yes { border-color: var(--good); }
+  .tree .node.no { border-color: var(--bad); }
+  .tree .branches { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 8px 0; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  /* mini demo */
+  .demo-host { margin: 16px 0; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .demo-host h4 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; color: var(--accent-text); }
+  .book-stage { width: 100%; aspect-ratio: 16/10; background: linear-gradient(180deg, #fef3c7 0%, #fde68a 60%, #fbbf24 100%); border-radius: 12px; position: relative; overflow: hidden; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
+  [data-theme="dark"] .book-stage { background: linear-gradient(180deg, #422006 0%, #78350f 60%, #92400e 100%); }
+  .book-scene { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .8s ease, transform .8s ease; transform: scale(1.05); }
+  .book-scene.active { opacity: 1; transform: scale(1); }
+  .book-emoji { font-size: 96px; line-height: 1; animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  .book-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 14px 18px; background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,.65) 60%, rgba(0,0,0,.85) 100%); color: white; font-size: 16px; line-height: 1.4; font-family: "Newsreader", Georgia, serif; }
+  .book-caption .word-hl { background: var(--accent); color: white; padding: 1px 6px; border-radius: 4px; font-weight: 700; transition: all .25s; }
+  .book-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+  .book-controls button { padding: 8px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 14px; color: var(--text); min-height: 40px; }
+  .book-controls button:hover { border-color: var(--accent); color: var(--accent-text); }
+  .book-controls button.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .book-progress { flex: 1; min-width: 100px; padding: 4px 10px; font-size: 12px; color: var(--text-mute); text-align: right; }
+  .book-pages { display: flex; gap: 4px; margin-top: 10px; }
+  .book-page-dot { flex: 1; height: 4px; background: var(--border); border-radius: 999px; cursor: pointer; transition: background .2s; }
+  .book-page-dot.active { background: var(--accent); }
+  .book-page-dot.done { background: color-mix(in srgb, var(--accent) 60%, transparent); }
+  @media (max-width: 480px) {
+    .hero { padding: 18px 4px 8px; }
+    .hero h1 { font-size: 22px; }
+    section.chapter > h2 { font-size: 17px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+    .arch-box { min-width: 100%; }
+    .tree .branches { grid-template-columns: 1fr; }
+    .book-emoji { font-size: 64px; }
+    .book-caption { font-size: 14px; padding: 10px 12px; }
+  }
+  @media print {
+    header.topbar, #progress, .back-to-top, nav.anchor-nav { display: none !important; }
+    section.chapter.collapsed .chapter-body { max-height: none !important; padding: 18px 20px 22px !important; }
+    section.chapter.collapsed > h2 .caret { display: none; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">绘本动画化技术与市场研究 <span class="tag">v1 · 无忌</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+  <nav class="anchor-nav">
+    <div class="anchor-list" id="anchorList">
+      <a href="#ch1" data-target="ch1">01 摘要</a>
+      <a href="#ch2" data-target="ch2">02 三路线对比</a>
+      <a href="#ch3" data-target="ch3">03 商业 API</a>
+      <a href="#ch4" data-target="ch4">04 开源模型</a>
+      <a href="#ch5" data-target="ch5">05 伪动画</a>
+      <a href="#ch6" data-target="ch6">06 端到端 pipeline</a>
+      <a href="#ch7" data-target="ch7">07 角色一致性</a>
+      <a href="#ch8" data-target="ch8">08 TTS 配音</a>
+      <a href="#ch9" data-target="ch9">09 云端显卡</a>
+      <a href="#ch10" data-target="ch10">10 自动化方案</a>
+      <a href="#ch11" data-target="ch11">11 成本矩阵</a>
+      <a href="#ch12" data-target="ch12">12 竞品深挖</a>
+      <a href="#ch13" data-target="ch13">13 对比表</a>
+      <a href="#ch14" data-target="ch14">14 半米路线</a>
+      <a href="#ch15" data-target="ch15">15 mini demo</a>
+      <a href="#ch16" data-target="ch16">16 FAQ</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <div class="hero">
+    <h1>绘本动画化技术与市场研究<br><span style="font-size: .6em; font-weight: 600;">视频生成 + TTS + 自动化 pipeline + 12+ 竞品 · 半米内部使用</span></h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-24</span>
+      <span>🛠 调研：无忌</span>
+      <span>🎯 主题：PDF → mp4 动画化</span>
+      <span>📦 stack: 可灵 / Wan 2.2 / CosyVoice / Remotion</span>
+      <span>💰 50 学员 ≈ ¥500/月 · 100 本启动 ≈ ¥3-9k</span>
+    </div>
+    <div class="hero-deck">
+      <strong>三句话结论：</strong>(1) <strong>路线 A 商业 API（可灵 2.1 + ElevenLabs/MiniMax + Remotion）</strong>是 50 学员阶段唯一靠谱的选项 —— 单本 ¥80-120，一个 Python 脚本能跑通，30 页绘本 15-30 分钟出片，质量稳定到能直接给学生用。(2) <strong>路线 B 开源自托管（Wan 2.2 / LTX-2 + CosyVoice + AutoDL）</strong>到 1000+ 本量产时单本成本能砍到 ¥10-20，但前置成本高（一个工程师 1-2 人月调通 pipeline + 国内 GPU 月租 ¥3-5k 起），不适合 50 学员阶段。(3) <strong>最大的真坑是「角色一致性」</strong> —— 30 页绘本里 Caterpillar 不能每页换一张脸，2026 年商业 API 路线只有<strong>可灵 Multi-Element Reference</strong>和<strong>Vidu 2.0 多主体一致性</strong>给出了能用的方案；开源路线必须 IP-Adapter + LoRA 训练，5-10 张参考图调一晚上。建议<strong>先从可灵 2.1 + ElevenLabs 跑通 3 本 demo</strong>验证学生反应，再考虑规模化。
+    </div>
+  </div>
+
+</content>
+</invoke>
+  <!-- ============ Ch1 摘要 ============ -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">执行摘要 · 3 条核心结论</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">¥80-120</div><div class="l">单本 API 路线</div></div>
+        <div class="metric"><div class="v">¥10-20</div><div class="l">单本开源量产</div></div>
+        <div class="metric"><div class="v">15-30</div><div class="l">分钟出片（30 页）</div></div>
+        <div class="metric"><div class="v">3</div><div class="l">demo 验证起步</div></div>
+        <div class="metric"><div class="v">可灵 2.1</div><div class="l">国产首推</div></div>
+        <div class="metric"><div class="v">Wan 2.2</div><div class="l">开源首推</div></div>
+      </div>
+
+      <h3>3 条结论</h3>
+
+      <div class="callout good">
+        <strong>① 50 学员阶段 → 商业 API（可灵 2.1 Master / Hailuo / 即梦 + ElevenLabs / MiniMax + Remotion）</strong><br>
+        单本绘本（30 页 = 30 段 × 5s）= 视频 ¥60-90 + TTS ¥3-5 + 拼接 ¥0（自建服务器跑 Remotion）+ 工时 30 分钟无人值守 ≈ <strong>¥80-120 / 本</strong>。可灵 2.1 Master 的 Multi-Element Reference 解决了角色一致性这个最大坑，质量肉眼可见超过 Sora（已停服）。<strong>不要碰开源</strong>：50 学员阶段一个工程师 1 人月调通 ComfyUI + Wan 2.2 不划算，单 GPU 月租 ¥3-5k 摊不下来。
+      </div>
+
+      <div class="callout good">
+        <strong>② 500-1000 本量产 → 商业 API 拼接 + 开源做量大部分</strong><br>
+        高频通用场景（夜景 / 森林 / 厨房）用开源 Wan 2.2 14B 在 AutoDL 跑（A100 80GB ¥6/h，一段 5-8 分钟，单段成本 ¥0.6-0.8）；难场景（多主体 + 角色一致）保留可灵。混合路线单本 <strong>¥20-40</strong>，但需要一个能调 ComfyUI workflow 的工程师常驻 0.5 人月起。
+      </div>
+
+      <div class="callout warn">
+        <strong>③ 角色一致性是最大技术坑，不解决就别上线</strong><br>
+        绘本最忌讳 Caterpillar 第 1 页是绿色卡通，第 5 页变成毛茸茸写实 —— 学生秒出戏。2026 年 5 月能用方案只有四条：<strong>(a) 可灵 Multi-Element Reference</strong>（最稳，国内首选）<strong>(b) Vidu 2.0 Multi-Subject</strong>（3-7 张参考图，便宜，但运动质量略弱）<strong>(c) Runway Gen-4 Turbo + Act-One</strong>（贵 + 国内访问难）<strong>(d) 开源 IP-Adapter + Flux Redux + LoRA 5-10 张训 30 分钟</strong>（最灵活但门槛高）。<strong>Sora 已于 2026-04-26 关停</strong>，不要再列入选型。
+      </div>
+
+      <h3>关键数据点</h3>
+      <ul>
+        <li><strong>视频生成单价</strong>：可灵 2.1 Master ¥5.6/5s · 即梦 Seedance 2.0 ¥0.7/s · Hailuo 02 $0.045/s（768p）· Vidu 2.0 $0.05/s（720p）· Veo 3.1 Lite $0.05/视频 · Runway Gen-4 Turbo $0.05/s</li>
+        <li><strong>TTS 单价</strong>：ElevenLabs v3 $206/1M 字符（约 ¥1.5/千字）· MiniMax Speech-02 HD $0.10/千字 · CosyVoice 2 开源（自建零成本，3 秒克隆）</li>
+        <li><strong>开源 VRAM 需求</strong>：Wan 2.2 5B = 8GB · Wan 2.2 14B FP8 = 16-24GB · HunyuanVideo 13B = 60GB · CogVideoX 1.5 5B 量化 = 12-16GB · LTX-Video 2B = 实时（4090 上 30fps）</li>
+        <li><strong>云端 GPU 价格</strong>：AutoDL 国内 4090 ¥1.5-2/h · RunPod 4090 $0.69/h · Vast.ai 4090 $0.29/h · A100 80GB ¥6-15/h（国内）· $1.07-3/h（海外）</li>
+        <li><strong>市场对标</strong>：Vooks（真动画化）$4.99/月 · Epic! $11.99/月 40k+ 本 · Reading Eggs $9.99/月 · 凯叔讲故事 3000 万用户 · 斑马 AI 课 200 万付费 ¥50 亿/年</li>
+      </ul>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch2 三路线对比 ============ -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">三条路线总览：商业 API / 开源自托管 / 伪动画</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>绘本动画化在 2026 年 5 月有三条可走的路。下面是端到端「做一本 30 页绘本」的工作流对比。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>维度</th>
+            <th>🟣 路线 A · 商业 API</th>
+            <th>🟢 路线 B · 开源自托管</th>
+            <th>🟡 路线 C · 伪动画</th>
+          </tr></thead>
+          <tbody>
+            <tr><td><strong>核心模型</strong></td><td>可灵 2.1 / 即梦 / Hailuo / Runway / Vidu / Veo 3 Lite</td><td>Wan 2.2 / HunyuanVideo / LTX-2 / CogVideoX</td><td>Ken Burns + LivePortrait + AnimateDiff</td></tr>
+            <tr><td><strong>工作流</strong></td><td>HTTP 调 API → 等 30-60s → 拿 mp4 段 → 拼接</td><td>ComfyUI workflow → GPU 跑 5-15min → 拼接</td><td>PIL/MoviePy 脚本 + 局部动效</td></tr>
+            <tr><td><strong>单段质量</strong></td><td>★★★★★ 影院级</td><td>★★★★ 略次于 SOTA 商业</td><td>★★ 一眼能看出是 PPT</td></tr>
+            <tr><td><strong>角色一致性</strong></td><td>可灵 / Vidu 原生支持 ★★★★</td><td>IP-Adapter + LoRA ★★★ 可调</td><td>同一张图 = 100% 一致 ★★★★★</td></tr>
+            <tr><td><strong>单本成本（30 页）</strong></td><td>¥80-120</td><td>¥10-20（不算 GPU 月租）</td><td>¥0-5</td></tr>
+            <tr><td><strong>一次性开发</strong></td><td>0.5 人月（一个 Python 脚本）</td><td>1-2 人月（ComfyUI workflow + 调参）</td><td>0.5 人月（MoviePy + Ken Burns）</td></tr>
+            <tr><td><strong>固定成本</strong></td><td>¥0（按用量付）</td><td>¥3-5k/月（GPU）</td><td>¥0</td></tr>
+            <tr><td><strong>国内可用性</strong></td><td>🟢 可灵 / 即梦 / Hailuo / Vidu 都是国产</td><td>🟢 AutoDL / 腾讯 TI 跑得动</td><td>🟢 纯本地</td></tr>
+            <tr><td><strong>自动化难度</strong></td><td>🟢 低 · 标准 REST API</td><td>🟡 中 · ComfyUI API 调用</td><td>🟢 低 · 纯 Python</td></tr>
+            <tr><td><strong>适用场景</strong></td><td>50-500 学员试点，质量优先</td><td>500+ 量产，成本敏感</td><td>低预算 demo / 静态绘本 + 简单动效</td></tr>
+            <tr><td><strong>推荐指数</strong></td><td><strong>★★★★★ 首选</strong></td><td><strong>★★★★ 量产再上</strong></td><td><strong>★★ 兜底方案</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>各路线 pipeline 流程图</h3>
+
+      <div class="arch-grid">
+        <div class="arch-row">
+          <div class="arch-row-head">🟣 路线 A · 商业 API（推荐 50 学员阶段）</div>
+          <div class="arch-row-body">
+            <div class="arch-box"><span class="ico">📄</span><span class="lbl">PDF</span><span class="sub">PyMuPDF 抽页</span></div>
+            <div class="arch-box"><span class="ico">🤖</span><span class="lbl">Claude</span><span class="sub">分句 + 镜头描述</span></div>
+            <div class="arch-box acc"><span class="ico">🎬</span><span class="lbl">可灵 2.1</span><span class="sub">Multi-Element I2V</span></div>
+            <div class="arch-box acc"><span class="ico">🔊</span><span class="lbl">ElevenLabs</span><span class="sub">v3 多语种</span></div>
+            <div class="arch-box"><span class="ico">🎵</span><span class="lbl">Suno v4</span><span class="sub">BGM</span></div>
+            <div class="arch-box"><span class="ico">📺</span><span class="lbl">Remotion</span><span class="sub">字幕 + 拼接</span></div>
+            <div class="arch-box gd"><span class="ico">✅</span><span class="lbl">mp4</span><span class="sub">15-30 min</span></div>
+          </div>
+        </div>
+
+        <div class="arch-row">
+          <div class="arch-row-head">🟢 路线 B · 开源自托管（量产阶段）</div>
+          <div class="arch-row-body">
+            <div class="arch-box"><span class="ico">📄</span><span class="lbl">PDF</span><span class="sub">pdf-craft / Marker</span></div>
+            <div class="arch-box"><span class="ico">🤖</span><span class="lbl">Qwen2.5</span><span class="sub">本地分句</span></div>
+            <div class="arch-box gd"><span class="ico">🎬</span><span class="lbl">Wan 2.2 14B</span><span class="sub">+ IP-Adapter</span></div>
+            <div class="arch-box gd"><span class="ico">🔊</span><span class="lbl">CosyVoice 2</span><span class="sub">零样本克隆</span></div>
+            <div class="arch-box"><span class="ico">🎵</span><span class="lbl">MusicGen</span><span class="sub">本地 BGM</span></div>
+            <div class="arch-box"><span class="ico">📺</span><span class="lbl">FFmpeg</span><span class="sub">字幕 + 拼接</span></div>
+            <div class="arch-box gd"><span class="ico">✅</span><span class="lbl">mp4</span><span class="sub">5-15 min（A100）</span></div>
+          </div>
+        </div>
+
+        <div class="arch-row">
+          <div class="arch-row-head">🟡 路线 C · 伪动画（兜底 / 低预算）</div>
+          <div class="arch-row-body">
+            <div class="arch-box"><span class="ico">📄</span><span class="lbl">PDF</span><span class="sub">提取页 + 文本</span></div>
+            <div class="arch-box wn"><span class="ico">🖼️</span><span class="lbl">Ken Burns</span><span class="sub">推拉 / 平移</span></div>
+            <div class="arch-box wn"><span class="ico">👄</span><span class="lbl">LivePortrait</span><span class="sub">角色面部动</span></div>
+            <div class="arch-box wn"><span class="ico">✨</span><span class="lbl">AnimateDiff</span><span class="sub">局部纹理动</span></div>
+            <div class="arch-box"><span class="ico">🔊</span><span class="lbl">OpenAI TTS</span><span class="sub">$15/M chars</span></div>
+            <div class="arch-box"><span class="ico">📺</span><span class="lbl">MoviePy</span><span class="sub">拼接</span></div>
+            <div class="arch-box wn"><span class="ico">⚠️</span><span class="lbl">mp4</span><span class="sub">2-5 min · 质量低</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <strong>关键判断</strong>：路线 A 在 2026 年已经「能直接用了」—— 不需要等技术成熟。可灵 2.1 Master + ElevenLabs 在国内国外双区可用，质量稳定到学生肉眼分辨不出是 AI 生成。50 学员阶段把工程力气花在「选哪本绘本 / 怎么和教学融合 / 怎么收集学生反馈」远比花在「自己跑 Wan 2.2」回报高 10 倍。
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch3 商业 API 详评 ============ -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">商业 API 详评 · 9 家逐个拆</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>下面按「绘本动画化适用度」从高到低排，重点说<strong>角色一致性 + 国内可用性 + 价格</strong>三件事，这三件直接决定阿杰能不能上线。</p>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>🥇 可灵 AI 2.1 Master（快手）</h4>
+          <span class="pill live">国内 + 海外双区</span>
+          <span class="pill info">绘本首推</span>
+          <span class="pill">¥5.6/5s</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>定位</strong>：快手 2024 年推出，2026 年 5 月已迭代到 2.1 Master 版本，是 2026 年图生视频质量最稳的国产 SOTA。<strong>5-10s 单段</strong>，720p / 1080p 双档，I2V 时人物动作物理规律理解极强（打斗、转身、长发飘动）。</p>
+          <p><strong>价格</strong>：2.1 Master $0.80 / 5s（约 ¥5.6），或 $1.40 / 5s + $0.28/s（不同平台差异）。Master 是最贵档，普通 2.1 约 1/3 价格。fal.ai / WaveSpeed / kie.ai 都能调，国内通过快手开放平台 API 可直接对接。</p>
+          <p><strong>绘本杀手锏：Multi-Element Reference</strong>。可以同时上传多张参考图（@Element1, @Element2…），prompt 里直接引用，30 页绘本同一只 Caterpillar 几乎能保持一致。这是 2026 年 5 月所有国产视频模型里独一份的能力。</p>
+          <div class="takeaway">绘本动画化首选。50 学员阶段 100 段 ¥560，单本 30 页 ¥168（10s 段）或 ¥84（5s 段）。强烈建议先用 Master 跑 3 本 demo 验证学生反应。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>🥈 即梦 Seedance 2.0 / Dreamina（字节跳动）</h4>
+          <span class="pill live">国内 + 海外双区</span>
+          <span class="pill info">最便宜</span>
+          <span class="pill">¥0.14/s</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>定位</strong>：字节跳动 2026 年 2 月把国内即梦的 Seedance 2.0 模型搬到海外叫 Dreamina。图生视频的<strong>无缝衔接</strong>是它强项 —— 运镜笔刷可精准控制画面，良品率极高（创作者圈普遍反馈）。</p>
+          <p><strong>价格</strong>：火山方舟 API ¥1/s（约 $0.14）的 Doubao-Seedance-2.0；即梦订阅 69 元/月（~$9.6）含一定时长；Dreamina 海外版基础 $15/月 1575 credits。第三方代理低至 $0.022/s 但稳定性看运气。</p>
+          <p><strong>绘本动画化适用度</strong>：单段质量比可灵略弱，但<strong>价格不到可灵 1/4</strong>。角色一致性目前主要靠 prompt 引导 + 起始帧 + 描述精确，没有可灵那样的显式 Multi-Element 接口。</p>
+          <div class="takeaway">量产时单本 ¥30-45（30 段 × 5s × ¥1/s）。和可灵搭配用 —— 简单场景跑即梦，复杂多主体跑可灵，混合方案性价比最优。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>🥉 Hailuo MiniMax 02</h4>
+          <span class="pill live">国内 + 海外</span>
+          <span class="pill">$0.045/s（768p）</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>定位</strong>：MiniMax 2026 年的视频模型。Hailuo 02 在 768p 上 $0.045/s（约 ¥0.32/s），是当前主流商业模型里<strong>每秒成本最低</strong>之一（仅次于即梦的代理价）。6 秒 768p 单段 $0.27（≈¥2）。</p>
+          <p><strong>订阅</strong>：Standard $9.99/月 1000 credits，Unlimited $94.99/月。fal/Replicate 都有官方接入。</p>
+          <p><strong>缺点</strong>：单段质量在国产 top 3 里排第 3，物理一致性不如可灵；没有独立的 Multi-Element 接口。但<strong>速度快 + 便宜</strong>，适合做大批量「简单场景」（自然风光、空镜、过场）。</p>
+          <div class="takeaway">作为可灵的备份和大批量场景生成的主力，单本「混合方案」里 70% 简单镜头交给它。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>Vidu 2.0（生数科技）</h4>
+          <span class="pill live">国内</span>
+          <span class="pill info">多主体一致性</span>
+          <span class="pill">$0.05/s（720p）</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>定位</strong>：清华 + 生数科技联合出品。<strong>Multi-Subject Reference</strong>是它真正的卖点：可同时上传 3-7 张参考图（角色 + 物体 + 场景），AI 在生成视频时维持视觉一致性。绘本里「Caterpillar + 苹果 + 树」同时出现的场景，可以用 Vidu 把三个元素一起作为 reference。</p>
+          <p><strong>价格</strong>：720p $0.05/s · 1080p $0.125/s · 360p $0.025/s。Standard $9.99/月（年付 $7.99/月），8 秒 1080p 段约 10 credits。比 Vidu 1.5 便宜 50%，比西方对手便宜 3-7 倍同质量。</p>
+          <p><strong>缺点</strong>：动作物理质量略弱于可灵 Master；国际化访问限制相对多。</p>
+          <div class="takeaway">绘本「多主体一致性场景」（Caterpillar + 食物 + 蝴蝶同时出现）的最佳选择，可以和可灵分工：可灵跑「主角动作」，Vidu 跑「多元素同框」。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>Runway Gen-4 Turbo</h4>
+          <span class="pill gray">海外为主</span>
+          <span class="pill">$0.05/s</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>定位</strong>：欧美创作圈传统大佬，2025-2026 年迭代到 Gen-4 / Gen-4 Turbo。Turbo 版 5 credits/秒，credit 价 $0.01，约 <strong>$0.05/s</strong>。订阅 Standard $15/月 625 credits（≈125 秒 Turbo）/ Pro $35/月 2250 credits。</p>
+          <p><strong>角色一致性</strong>：Gen-4 自带 reference 能力，加上 Act-One（角色面部表演）。但相比可灵 Multi-Element 略弱，且需要更多 prompt 工程。</p>
+          <p><strong>国内可用性</strong>：🔴 国内 IP 直接访问受限，需海外信用卡支付，对中小团队不友好。</p>
+          <div class="takeaway">质量稳定但<strong>不推荐</strong>给阿杰国内场景。海外有合作伙伴或要做 toC 海外发行才考虑。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>Veo 3 / Veo 3.1 Lite（Google）</h4>
+          <span class="pill gray">海外为主</span>
+          <span class="pill info">2026 年 3 月发布 Lite</span>
+          <span class="pill">$0.05/视频</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>定位</strong>：Google 2025 年发布 Veo 3，2026 年 3 月推 Veo 3.1 Lite，主打高频低成本场景，单视频 $0.05（与 Fast 同速度但便宜 50%+）。Veo 3.1 标准 $0.40 / Fast $0.15 / Lite $0.05。Vertex AI / Gemini API / Google AI Studio 都能调。</p>
+          <p><strong>消费级</strong>：Google AI Ultra $249.99/月（贵）。</p>
+          <p><strong>国内可用性</strong>：🔴 完全不可用，Google API 需海外网络 + 国际信用卡。</p>
+          <div class="takeaway">技术上可以但<strong>国内场景下属于备选</strong>。如果阿杰未来开海外团队或合作伙伴提供 API，可重新评估。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>Luma Dream Machine Ray 2</h4>
+          <span class="pill gray">海外</span>
+          <span class="pill">$0.50/5s（API）</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>定位</strong>：Luma Labs，Ray 2 标准 32 credits/秒，Ray 2 Flash 11 credits/秒。API $0.32 / 百万像素，第三方平台（fal.ai）$0.50/5s。订阅 $24/月起。</p>
+          <p><strong>绘本动画化适用度</strong>：动作流畅但角色一致性是弱项；国内访问困难。</p>
+          <div class="takeaway">不推荐给国内场景，作为知识储备列入。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>Pika 2.5（含 Scene Ingredients）</h4>
+          <span class="pill gray">海外</span>
+          <span class="pill info">Scene Ingredients</span>
+          <span class="pill">$8-95/月</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>定位</strong>：Pika 2.0 起加入 Scene Ingredients（上传角色 + 物体 + 场景作为 ingredients），2.1 加 Pikaswaps / Pikadditions / Pikatwists。免费 80 credits/月 · Standard $8（年付）· Pro $28 · Fancy $76。Pika 没有官方 public API，要通过 fal/Pollo/Wavespeed 第三方接入。</p>
+          <p><strong>绘本动画化适用度</strong>：Scene Ingredients 概念上接近可灵 Multi-Element，但生态比较封闭、API 不友好。</p>
+          <div class="takeaway">概念领先，但<strong>工程化对接不友好</strong>。不推荐给生产场景。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>通义万相 Wan 2.6 / Tongyi（阿里）</h4>
+          <span class="pill live">国内首推</span>
+          <span class="pill info">可免费 + 开源版本</span>
+          <span class="pill">¥0.7/clip（API）</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>定位</strong>：阿里通义万相，2026 年发布 Wan 2.6 系列，第一个国内支持<strong>角色扮演</strong>功能的视频模型。Wan 2.1 是开源（见路线 B），万相平台官方网页基本免费给个人开发者，App 端日不限量。API 约 $0.10/clip 起（火山引擎对标的阿里百炼版）。</p>
+          <p><strong>路线图</strong>：阿里官方公告 Wan 3.0 60B 参数 2026 年中支持 4K + 30 秒连续生成，2-5 分钟多镜头自动生成。</p>
+          <div class="takeaway">国内全套国产工具链友好。可以和可灵双轨：可灵跑「质量优先」高端场景，万相跑「免费 + 海量」批量场景。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4 style="color: var(--bad);">⛔ Sora（OpenAI）— 已停服</h4>
+          <span class="pill dead">2026-04-26 关停</span>
+          <span class="pill dead">API 2026-09-24 下线</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>重要更新</strong>：根据 OpenAI 2026 年公告，Sora App 已于 <strong>2026-04-26 正式关停</strong>，API 计划于 2026-09-24 全部下线。原因官方解释为算力短缺 + 成本压力 + 战略聚焦企业产品。<strong>不要再把 Sora 列入选型</strong>，所有用过 Sora 的产品都得迁移到可灵 / Veo 3 / Runway。</p>
+          <p>历史能力：ChatGPT Plus 用户原本每月可生成 50 个 480p 视频，Pro 用户 10 倍配额，含 Storyboard 和 Remix 工具。</p>
+          <div class="takeaway">2026 年视频生成市场格局已确定：国产可灵 / 即梦 / 万相主导国内，Veo 3 / Runway 主导海外，Sora 出局。</div>
+        </div>
+      </div>
+
+      <h3>商业 API 横向价格表</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>模型</th>
+            <th>厂商</th>
+            <th>单段价</th>
+            <th>每秒</th>
+            <th>角色一致</th>
+            <th>国内</th>
+            <th>I2V 质量</th>
+            <th>绘本推荐</th>
+          </tr></thead>
+          <tbody>
+            <tr><td><strong>可灵 2.1 Master</strong></td><td>快手</td><td>$0.80/5s</td><td>≈$0.16</td><td class="check y">★★★★ Multi-Element</td><td class="check y">✅</td><td class="check y">★★★★★</td><td class="check y">🥇 首选</td></tr>
+            <tr><td>即梦 Seedance 2.0</td><td>字节</td><td>$0.14/s</td><td>$0.14</td><td class="check p">★★★ prompt 引导</td><td class="check y">✅</td><td class="check y">★★★★</td><td class="check y">🥈 量产</td></tr>
+            <tr><td>Hailuo 02 (768p)</td><td>MiniMax</td><td>$0.27/6s</td><td>$0.045</td><td class="check p">★★★</td><td class="check y">✅</td><td class="check y">★★★★</td><td class="check y">🥉 便宜</td></tr>
+            <tr><td>Vidu 2.0 (720p)</td><td>生数科技</td><td>$0.40/8s</td><td>$0.05</td><td class="check y">★★★★★ Multi-Subject</td><td class="check y">✅</td><td class="check p">★★★</td><td class="check y">多主体</td></tr>
+            <tr><td>Runway Gen-4 Turbo</td><td>Runway</td><td>$0.25/5s</td><td>$0.05</td><td class="check p">★★★★</td><td class="check n">❌</td><td class="check y">★★★★</td><td class="check n">海外</td></tr>
+            <tr><td>Veo 3.1 Lite</td><td>Google</td><td>$0.05/视频</td><td>≈$0.01</td><td class="check p">★★★</td><td class="check n">❌</td><td class="check y">★★★★</td><td class="check n">海外</td></tr>
+            <tr><td>Veo 3.1 标准</td><td>Google</td><td>$0.40/视频</td><td>≈$0.05</td><td class="check p">★★★★</td><td class="check n">❌</td><td class="check y">★★★★★</td><td class="check n">海外</td></tr>
+            <tr><td>Luma Ray 2</td><td>Luma</td><td>$0.50/5s</td><td>$0.10</td><td class="check p">★★★</td><td class="check n">❌</td><td class="check y">★★★★</td><td class="check n">海外</td></tr>
+            <tr><td>Pika 2.5</td><td>Pika</td><td>credit-based</td><td>~$0.08</td><td class="check p">★★★★ Scene Ingr</td><td class="check n">❌</td><td class="check p">★★★</td><td class="check n">无 API</td></tr>
+            <tr><td>通义万相 Wan 2.6</td><td>阿里</td><td>免费 / $0.10</td><td>varies</td><td class="check p">★★★★ 角色扮演</td><td class="check y">✅</td><td class="check p">★★★</td><td class="check y">免费档</td></tr>
+            <tr><td class="check n">⛔ Sora</td><td>OpenAI</td><td colspan="6" class="check n">2026-04-26 关停，9 月 API 下线，不要选型</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch4 开源模型 ============ -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">开源模型详评 · Wan 2.2 / HunyuanVideo / LTX-2 / 其他</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>开源路线 = 自己买 / 租 GPU，跑 ComfyUI workflow。回报是单本成本降到 ¥10-20，代价是工程门槛 + GPU 月租。</p>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>🥇 Wan 2.2（阿里通义开源）</h4>
+          <span class="pill live">Apache 2.0 商用</span>
+          <span class="pill info">绘本开源首选</span>
+          <span class="pill">5B / 14B 双档</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>定位</strong>：阿里通义 2025-2026 年迭代到 Wan 2.2，开源 Apache 2.0 协议，<strong>商用免费</strong>。三个变种：1.3B（4-6GB VRAM，480p 短片）/ 5B TI2V（FP8 8-10GB，480p 强 I2V）/ 14B（FP8 16-24GB 480p，40-80GB 720p）。</p>
+          <p><strong>消费级可跑</strong>：5B 版在 8GB VRAM 上跑得动（RTX 3060 / 4060 都行）。14B GGUF Q4 + T5 CPU offload 在 6-8GB VRAM 也能跑（480p）。社区项目 Wan2GP 专门为消费级 GPU 优化。</p>
+          <p><strong>绘本动画化适用度</strong>：5B 单段质量已经接近商业 API 中端档；14B 在 RTX 4090 / A100 上跑 480p 单段 5-15 分钟，质量与可灵普通版相当。配合 IP-Adapter / LoRA 可解决角色一致性（见 Ch7）。</p>
+          <div class="takeaway">阿杰量产阶段开源首选。一台 AutoDL A100 80GB（¥6/h）日跑 12 小时可出 50-100 段，单段算力成本 ¥0.6-1.5。建议先在 4090 上调通 workflow，再上 A100 量产。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>🥈 LTX-2 / LTX-Video（Lightricks 开源）</h4>
+          <span class="pill live">Apache 2.0</span>
+          <span class="pill info">2026-01 发布</span>
+          <span class="pill">实时生成</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>定位</strong>：Lightricks 2024-11 首发 LTX-Video 2B，<strong>2026-01-06 开源 LTX-2</strong>（首个 4K 真开源音视频生成模型，原生支持同步音频）。2026-03-05 LTX-2.3 升级到 22B 参数，支持 4K @ 50fps + 同步音频。</p>
+          <p><strong>速度优势</strong>：LTX-Video 2B 在 4090 上能<strong>实时 30fps 生成 1216×704</strong>，比片子本身播放还快。LTX-2.3 22B 在消费级 GPU 上也跑得动。</p>
+          <p><strong>独家卖点</strong>：原生支持 audio-video 同步生成 —— 一个模型同时出 mp4 + 音轨，省一个 TTS 环节（不过儿童绘本的英语朗读还是建议用专业 TTS）。</p>
+          <div class="takeaway">速度极快，适合「快速迭代」场景 —— 比如同一本绘本反复调 prompt 改风格时，LTX 比 Wan 快 5-10 倍。LTX-2 + Wan 2.2 双开源模型混搭是 2026 年量产方案的甜点。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>🥉 HunyuanVideo / HunyuanVideo-I2V（腾讯开源）</h4>
+          <span class="pill live">开源</span>
+          <span class="pill gray">VRAM 高</span>
+          <span class="pill">13B 参数</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>定位</strong>：腾讯 2024-12 开源 HunyuanVideo 13B 模型，2025-03 推 I2V 版本，2026 年初到 1.5 版（声称比初版「高效且强大」）。质量在 13B 这个等级里数一数二。</p>
+          <p><strong>缺点（致命）</strong>：原版 720p 至少 60GB VRAM，推荐 80GB。<strong>消费级跑不动</strong>，必须 A100/H100。即使量化后也需要 24-40GB。</p>
+          <p><strong>绘本动画化适用度</strong>：质量高但 GPU 成本不划算。Wan 2.2 14B 在同样硬件上跑得动 + Apache 2.0 更宽松，没必要选 Hunyuan。</p>
+          <div class="takeaway">只在 8×H100 集群有现成可用时才考虑。对阿杰场景 = 不推荐。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>CogVideoX 1.5-5B-I2V（智谱开源）</h4>
+          <span class="pill live">开源</span>
+          <span class="pill">5B 参数</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>定位</strong>：智谱 AI（清华系）开源，<strong>任意分辨率</strong>视频生成是它的卖点。5B 量化版 ~12-16GB VRAM（PytorchAO / Optimum-quanto 量化），4090 上能跑。</p>
+          <p><strong>对比 Wan 2.2 5B</strong>：CogVideoX 任意分辨率灵活，但运动质量略弱于 Wan 2.2；Wan 2.2 5B 在 480p 上 I2V 强项更适合绘本「单帧起点 → 5s 动起来」的场景。</p>
+          <div class="takeaway">作为 Wan 2.2 的备份方案。如果某些特殊分辨率（垂直 9:16）Wan 不好出，可以切到 CogVideoX。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>Mochi 1（Genmo 开源）</h4>
+          <span class="pill live">Apache 2.0</span>
+          <span class="pill">10B 参数</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>定位</strong>：2024 年底 Genmo 开源，AsymmDiT 架构，480p / 30fps / 5.4 秒，prompt 还原率 80%（开源里 SOTA）。</p>
+          <p><strong>致命缺点</strong>：<strong>只有 T2V，没 I2V</strong>。绘本场景是「图 + 文 → 视频」，没 I2V 等于不能用。</p>
+          <div class="takeaway">绘本场景不适用。仅供研究参考。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>Open-Sora 2.0（潞晨 / HPC-AI 开源）</h4>
+          <span class="pill live">开源</span>
+          <span class="pill info">$200k 训出来</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>定位</strong>：完整开源 DiT 实现 + 训练数据 pipeline + 评估协议。论文声称训练成本只要 $200k（同档模型 5-10 倍便宜）。</p>
+          <p><strong>实际质量</strong>：开源生态评测里和 Wan 2.1 持平，落后 Wan 2.2 半个身位。优势是<strong>完整训练代码</strong>，如果阿杰未来要 fine-tune 自己的绘本风格模型，Open-Sora 是起点。</p>
+          <div class="takeaway">短期不用，长期值得留意。半米如果 1000+ 本量产稳定后想 fine-tune「半米绘本风」专属模型，Open-Sora 训练代码是最佳起点。</div>
+        </div>
+      </div>
+
+      <h3>开源模型 VRAM × 质量矩阵</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>模型</th>
+            <th>参数</th>
+            <th>VRAM (FP16)</th>
+            <th>VRAM (量化)</th>
+            <th>I2V</th>
+            <th>速度（4090）</th>
+            <th>质量</th>
+            <th>商用</th>
+            <th>绘本推荐</th>
+          </tr></thead>
+          <tbody>
+            <tr><td><strong>Wan 2.2 5B</strong></td><td>5B</td><td>20GB</td><td>8-10GB</td><td class="check y">✅ TI2V</td><td>3-5 分/段</td><td>★★★★</td><td class="check y">Apache 2.0</td><td class="check y">🥇 首选</td></tr>
+            <tr><td><strong>Wan 2.2 14B</strong></td><td>14B</td><td>40-60GB</td><td>16-24GB（FP8）</td><td class="check y">✅</td><td>5-15 分/段</td><td>★★★★★</td><td class="check y">Apache 2.0</td><td class="check y">🥇 量产</td></tr>
+            <tr><td>Wan 2.1 1.3B</td><td>1.3B</td><td>6GB</td><td>4-6GB（Q4）</td><td class="check y">✅</td><td>1-2 分/段</td><td>★★</td><td class="check y">Apache 2.0</td><td class="check p">demo 用</td></tr>
+            <tr><td><strong>LTX-Video 2B</strong></td><td>2B</td><td>12GB</td><td>8GB</td><td class="check y">✅</td><td>实时（30fps）</td><td>★★★</td><td class="check y">Apache 2.0</td><td class="check y">迭代</td></tr>
+            <tr><td>LTX-2.3</td><td>22B</td><td>40GB</td><td>24GB</td><td class="check y">✅ + audio</td><td>2-5 分/段</td><td>★★★★★</td><td class="check y">开源</td><td class="check y">4K 场景</td></tr>
+            <tr><td>HunyuanVideo 13B</td><td>13B</td><td>60-80GB</td><td>24-40GB</td><td class="check y">✅</td><td>15-30 分/段</td><td>★★★★★</td><td class="check p">非商用版</td><td class="check n">VRAM 太高</td></tr>
+            <tr><td>CogVideoX 1.5-5B</td><td>5B</td><td>20GB</td><td>12-16GB</td><td class="check y">✅</td><td>3-8 分/段</td><td>★★★</td><td class="check y">Apache 2.0</td><td class="check p">备份</td></tr>
+            <tr><td>Mochi 1</td><td>10B</td><td>40GB</td><td>16GB</td><td class="check n">❌ 仅 T2V</td><td>5-10 分/段</td><td>★★★★</td><td class="check y">Apache 2.0</td><td class="check n">无 I2V</td></tr>
+            <tr><td>Open-Sora 2.0</td><td>11B</td><td>40GB</td><td>16GB</td><td class="check y">✅</td><td>5-12 分/段</td><td>★★★</td><td class="check y">Apache 2.0</td><td class="check p">fine-tune</td></tr>
+            <tr><td>SVD (Stability)</td><td>1.5B</td><td>10GB</td><td>6GB</td><td class="check y">✅</td><td>30s-2 分</td><td>★★</td><td class="check y">非商用</td><td class="check n">质量太弱</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout good">
+        <strong>开源路线落地建议</strong>：阿杰量产阶段就选「Wan 2.2 14B（FP8 量化）」+「LTX-2 速跑迭代」+「AutoDL A100 80GB ¥6/h」三件套。一台 A100 24h × 30 天 = ¥4320/月，能跑 1500-3000 段，覆盖 50-100 本 30 页绘本。<strong>不要碰 HunyuanVideo</strong>，VRAM 性价比最差。
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch5 伪动画 ============ -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">伪动画路线 · Ken Burns / LivePortrait / AnimateDiff</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>「伪动画」= 不真生成视频，而是把<strong>静态绘本图</strong>用各种手段「动起来」。最大优势：<strong>角色一致性 = 100%</strong>（因为根本不重生成图），缺点是质量天花板低、教学冲击力弱。</p>
+
+      <h3>伪动画 5 种手段</h3>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>① Ken Burns 推拉效果</h4>
+          <span class="pill live">PIL / MoviePy 几十行代码</span>
+          <span class="pill info">免费 + 0 GPU</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>原理</strong>：把一张图通过缓慢的缩放 + 平移做成「动起来」的感觉。Ken Burns（纪录片导演）发明，纪录片 / Apple iMovie 默认动效。</p>
+          <p><strong>实现</strong>：MoviePy <code>ImageClip + resize lambda t: 1 + 0.1*t</code> 一行搞定，每页 5-8 秒，纯 CPU 实时渲染。</p>
+          <p><strong>绘本效果</strong>：单页绘本「相机推进 Caterpillar 脸 → 拉远到全景树林」这种推拉感，比纯静态强 10 倍，是<strong>最低门槛 + 最低成本</strong>的入门路径。</p>
+          <div class="takeaway">即使主线走商业 API，所有「不需要动作」的页面都可以走 Ken Burns 兜底 —— 节省 70% API 成本。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>② LivePortrait（角色面部动）</h4>
+          <span class="pill live">开源</span>
+          <span class="pill">2024-07 港中文 + 快手</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>原理</strong>：给一张人脸图 + 一段音频（或 driving video），自动生成「面部表情 + 眨眼 + 嘴动」的视频。CVPR 2024 论文 + 开源代码 + 港中文 / 快手出品。</p>
+          <p><strong>绘本场景适用</strong>：如果绘本主角是「有脸」的角色（小动物拟人 / 人物），LivePortrait 可以让面部动起来配合朗读，体验类似 talking head。但<strong>对纯卡通脸效果一般</strong>，对真实人脸效果最好。</p>
+          <div class="takeaway">小学高年级 / 初中绘本里「人物对话」场景可用。低龄绘本（动物拟人为主）效果会不自然。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>③ SadTalker / MuseTalk（口型同步）</h4>
+          <span class="pill live">开源</span>
+          <span class="pill info">CVPR 2023 + 实时</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>SadTalker</strong>：3DMM 建模 + 音频驱动 → 头部姿态 + 表情 + 口型，单图 + 音频出 5-10 秒说话头。</p>
+          <p><strong>MuseTalk</strong>（腾讯 TMElyralab）：2026 年口型同步 SOTA 开源之一，<strong>实时</strong>能跑，适合直播场景。质量近写实。</p>
+          <p><strong>绘本场景</strong>：和 LivePortrait 类似，但 MuseTalk 口型精度更高。「让 Caterpillar 朗读这句话」是不是要让它真张嘴 —— 看绘本风格。</p>
+          <div class="takeaway">配合 TTS 用：先生成 TTS 音频，再用 MuseTalk 让角色嘴动同步。绘本里偶尔的「角色说话」场景可用。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>④ AnimateDiff（让局部纹理动）</h4>
+          <span class="pill live">开源</span>
+          <span class="pill">SD 插件</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>原理</strong>：基于 Stable Diffusion 的运动模块，给一张 SD 图加上「轻微动效」 —— 火焰摇曳 / 水波荡漾 / 头发飘动。motion module 只比 base 模型多 5-15% 参数，非常轻量。</p>
+          <p><strong>对比 SVD</strong>：AnimateDiff 走「文本 → 视频」更顺；SVD 走「图 → 视频」更顺。绘本场景如果是「保持原图 + 局部加细微动」，AnimateDiff 更合适。</p>
+          <p><strong>速度</strong>：AnimateLCM-SVD-Comfy 应用 latent consistency 蒸馏，加速 3-5 倍。</p>
+          <div class="takeaway">和 Ken Burns 互补 —— Ken Burns 处理「相机移动」，AnimateDiff 处理「画面局部动」，组合起来「图层化伪动画」效果出乎意料。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>⑤ Parallax 视差 / 深度图运镜</h4>
+          <span class="pill live">开源</span>
+          <span class="pill">depth + 摄像机</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>原理</strong>：用 Marigold / DepthAnything 估计图的深度图，把图层分成前景 / 中景 / 远景，摄像机移动时前景动得快、远景动得慢，造出 3D 视差效果（类似 iOS 锁屏深度照片）。</p>
+          <p><strong>绘本场景</strong>：绘本插画通常前景人物 / 背景树林分层清晰，视差效果尤其惊艳。MoviePy + PyTorch 几百行代码可实现。</p>
+          <div class="takeaway">和 Ken Burns 组合用 —— 加上深度感的「Ken Burns 3D 版」，是伪动画路线的天花板。</div>
+        </div>
+      </div>
+
+      <h3>伪动画做一本 30 页绘本流程</h3>
+
+      <div class="arch-grid">
+        <div class="arch-row">
+          <div class="arch-row-head">🟡 伪动画完整 pipeline</div>
+          <div class="arch-row-body">
+            <div class="arch-box"><span class="ico">📄</span><span class="lbl">PDF</span><span class="sub">PyMuPDF 抽页</span></div>
+            <div class="arch-box"><span class="ico">🗺️</span><span class="lbl">DepthAnything</span><span class="sub">深度图</span></div>
+            <div class="arch-box wn"><span class="ico">📷</span><span class="lbl">Ken Burns</span><span class="sub">推拉 + 视差</span></div>
+            <div class="arch-box wn"><span class="ico">✨</span><span class="lbl">AnimateDiff</span><span class="sub">局部动效</span></div>
+            <div class="arch-box wn"><span class="ico">😊</span><span class="lbl">MuseTalk</span><span class="sub">说话头</span></div>
+            <div class="arch-box"><span class="ico">🔊</span><span class="lbl">CosyVoice</span><span class="sub">免费 TTS</span></div>
+            <div class="arch-box"><span class="ico">📺</span><span class="lbl">MoviePy</span><span class="sub">拼接</span></div>
+            <div class="arch-box wn"><span class="ico">⚠️</span><span class="lbl">mp4</span><span class="sub">总价 ¥3-5/本</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <strong>伪动画的真实地位</strong>：<strong>不是「质量低的 AI 视频」，而是「成本极低 + 角色绝对一致」的兜底方案</strong>。当商业 API 路线某些场景 Caterpillar 跑歪了换张脸，或者预算紧到只能做 100 本试点时，伪动画就是 plan B。50 学员阶段建议<strong>主线走可灵 + 伪动画做 70% 不需要 motion 的场景</strong>，混合方案最划算。
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch6 端到端 pipeline ============ -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">端到端 pipeline · PDF → mp4 全流程拆解</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>从一本 30 页 PDF 绘本到最终 mp4 的完整流水线，分 9 个步骤。下面用「路线 A 商业 API」为基准给出详细方案，其他路线只替换对应环节。</p>
+
+      <div class="arch-grid">
+        <div class="arch-row">
+          <div class="arch-row-head">完整 9 步 pipeline（路线 A · 商业 API）</div>
+          <div class="arch-row-body">
+            <div class="arch-box"><span class="ico">①</span><span class="lbl">PDF 抽取</span><span class="sub">文本 + 图</span></div>
+            <div class="arch-box"><span class="ico">②</span><span class="lbl">分句 + 镜头</span><span class="sub">Claude/GPT</span></div>
+            <div class="arch-box acc"><span class="ico">③</span><span class="lbl">角色一致</span><span class="sub">Multi-Element</span></div>
+            <div class="arch-box acc"><span class="ico">④</span><span class="lbl">图→视频</span><span class="sub">可灵 2.1</span></div>
+            <div class="arch-box acc"><span class="ico">⑤</span><span class="lbl">TTS 配音</span><span class="sub">ElevenLabs</span></div>
+            <div class="arch-box"><span class="ico">⑥</span><span class="lbl">BGM</span><span class="sub">Suno / 库</span></div>
+            <div class="arch-box"><span class="ico">⑦</span><span class="lbl">字幕同步</span><span class="sub">WhisperX</span></div>
+            <div class="arch-box"><span class="ico">⑧</span><span class="lbl">拼接</span><span class="sub">Remotion</span></div>
+            <div class="arch-box gd"><span class="ico">⑨</span><span class="lbl">输出</span><span class="sub">mp4 / HLS</span></div>
+          </div>
+        </div>
+      </div>
+
+      <h3>① PDF / 图片输入：PyMuPDF 抽页 + 文本</h3>
+      <p>2026 年 PDF 抽取主流方案对比（参考 PyMuPDF / Marker / pdf-craft / MinerU / Docling 五家评测）：</p>
+      <ul>
+        <li><strong>PyMuPDF4LLM</strong> —— 原生 PDF（带嵌入文本）最快，几百毫秒一本。检测 header / paragraph / table / image，输出 Markdown。<strong>绘本带文本层 → 首选</strong>。</li>
+        <li><strong>Marker</strong> —— 多格式（PDF / DOCX / PPTX / EPUB / HTML），Surya OCR + GPU/CPU/MPS。质量稳定，扫描版绘本推荐。</li>
+        <li><strong>pdf-craft</strong> —— 专门为「扫描书 → Markdown / EPUB」设计，绘本场景适配最好。</li>
+      </ul>
+
+      <h3>② 文本分句 + 场景拆分（Claude / GPT）</h3>
+      <p>这是把「一段绘本文字」转成「逐句镜头描述」的关键步骤。Prompt 模板：</p>
+
+      <pre><code><span class="syn-cmt"># Prompt: 绘本分镜师</span>
+<span class="syn-kw">你是儿童绘本动画导演。</span>
+输入：绘本第 <span class="syn-num">{N}</span> 页文字 + 主角参考图 + 上一页结尾镜头。
+输出 JSON 数组，每元素：
+{
+  <span class="syn-str">"sentence"</span>: 这一句英文原文（不修改），
+  <span class="syn-str">"character"</span>: 出场角色（@Caterpillar / @Apple…），
+  <span class="syn-str">"action"</span>: 一句话动作描述（he crawls slowly），
+  <span class="syn-str">"emotion"</span>: 情绪（curious / hungry / sleepy），
+  <span class="syn-str">"camera"</span>: 镜头（close-up / medium / wide / push-in），
+  <span class="syn-str">"duration_s"</span>: 建议时长（5 或 10），
+  <span class="syn-str">"prompt"</span>: 给可灵 2.1 的完整 prompt（包含 @Element 引用）
+}</code></pre>
+
+      <h3>③ 角色一致性（最大技术坑，详见 Ch7）</h3>
+      <p>简单结论：可灵 Multi-Element Reference 把所有角色 / 关键物体先注册成 @Element1 / @Element2，然后每个 prompt 里引用。详细对比见第 7 章。</p>
+
+      <h3>④ 图 → 视频生成（5-10s 单段）</h3>
+      <p>调可灵 2.1 Master API 的最小 Python 示例：</p>
+
+      <pre><code><span class="syn-kw">import</span> requests, time
+KLING_API = <span class="syn-str">"https://api.klingai.com/v1/videos/image2video"</span>
+HEADERS = {<span class="syn-str">"Authorization"</span>: <span class="syn-str">f"Bearer {API_KEY}"</span>}
+
+<span class="syn-kw">def</span> <span class="syn-fn">gen_scene</span>(image_url, prompt, duration=<span class="syn-num">5</span>):
+    r = requests.<span class="syn-fn">post</span>(KLING_API, headers=HEADERS, json={
+        <span class="syn-str">"model"</span>: <span class="syn-str">"kling-v2.1-master"</span>,
+        <span class="syn-str">"image"</span>: image_url,
+        <span class="syn-str">"prompt"</span>: prompt,
+        <span class="syn-str">"duration"</span>: duration,
+        <span class="syn-str">"aspect_ratio"</span>: <span class="syn-str">"16:9"</span>,
+    })
+    task_id = r.<span class="syn-fn">json</span>()[<span class="syn-str">"data"</span>][<span class="syn-str">"task_id"</span>]
+    <span class="syn-kw">while</span> <span class="syn-num">True</span>:
+        s = requests.<span class="syn-fn">get</span>(<span class="syn-str">f"{KLING_API}/{task_id}"</span>, headers=HEADERS).<span class="syn-fn">json</span>()
+        <span class="syn-kw">if</span> s[<span class="syn-str">"status"</span>] == <span class="syn-str">"succeed"</span>: <span class="syn-kw">return</span> s[<span class="syn-str">"video_url"</span>]
+        time.<span class="syn-fn">sleep</span>(<span class="syn-num">5</span>)</code></pre>
+
+      <h3>⑤ TTS 配音（详见 Ch8）</h3>
+
+      <h3>⑥ 背景音乐 + 音效</h3>
+      <ul>
+        <li><strong>Suno v4</strong>：从文字描述生成 1-4 分钟完整 BGM。「Soft acoustic guitar children's lullaby, warm and gentle」→ 直接得到一段完整曲子。8 credits/首。</li>
+        <li><strong>Stable Audio 2.0 / MusicGen</strong>：开源 BGM，本地跑 4090 即可，30s-3 分钟段。</li>
+        <li><strong>ElevenLabs Sound Effects</strong>：短音效（鸟叫 / 翻书 / 苹果落地），$1 起。</li>
+        <li>预制库：Pixabay / Free Music Archive 公版儿童 BGM 直接用，零成本。</li>
+      </ul>
+
+      <h3>⑦ 字幕同步（Whisper word-level）</h3>
+      <p>WhisperX 是 2026 年单词级时间戳 SOTA：通过 wav2vec2 phoneme alignment 把每个词映射到音频精确位置，<strong>&lt;100ms 精度</strong>，足够 karaoke 风格逐词高亮。</p>
+
+      <pre><code><span class="syn-kw">import</span> whisperx
+model = whisperx.<span class="syn-fn">load_model</span>(<span class="syn-str">"large-v3"</span>, <span class="syn-str">"cuda"</span>)
+result = model.<span class="syn-fn">transcribe</span>(<span class="syn-str">"narration.mp3"</span>)
+align_model, meta = whisperx.<span class="syn-fn">load_align_model</span>(language_code=<span class="syn-str">"en"</span>)
+aligned = whisperx.<span class="syn-fn">align</span>(result[<span class="syn-str">"segments"</span>], align_model, meta, audio, <span class="syn-str">"cuda"</span>)
+<span class="syn-cmt"># aligned["word_segments"] = [{"word": "Caterpillar", "start": 1.23, "end": 1.78}, ...]</span></code></pre>
+
+      <p>输出格式：<strong>WebVTT</strong>（开始 + 结束都有时间戳，karaoke 友好）或 <strong>Enhanced LRC</strong>（单字时间戳，QQ 音乐 / 网易云风格）。前端用 React 组件逐词加 highlight CSS class 即可。</p>
+
+      <h3>⑧ 视频拼接 + 转场（Remotion 推荐）</h3>
+      <p>Remotion = React 写视频，headless Chrome 渲染每帧 → FFmpeg 拼成 mp4。优势：</p>
+      <ul>
+        <li><strong>组件化</strong>：每页绘本 = 一个 React 组件，传 props 控制文字 / 图片 / 字幕。</li>
+        <li><strong>多输出</strong>：mp4 / HEVC / WebM / GIF。</li>
+        <li><strong>Remotion Lambda</strong>：拆分任务到 AWS Lambda 并行渲染，1 本绘本能在 30s 内出片（30 页并发）。</li>
+        <li>对比 MoviePy：MoviePy 简单脚本快但效果土；Remotion 投入大但效果接近影视级。</li>
+      </ul>
+
+      <h3>⑨ 输出格式</h3>
+      <ul>
+        <li><strong>mp4 (H.264)</strong>：最兼容，1080p 30fps 30 页绘本 ≈ 150-300MB。</li>
+        <li><strong>HLS</strong>：流媒体切片，前端按需加载，省流量。半米 web 端推荐。</li>
+        <li><strong>同步元数据 JSON</strong>：每页起止时间 + 字幕 word timestamps + 当前主角，前端做交互需要。</li>
+      </ul>
+
+      <h3>端到端时长估算（30 页绘本）</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>步骤</th><th>路线 A 商业 API</th><th>路线 B 开源</th><th>路线 C 伪动画</th></tr></thead>
+          <tbody>
+            <tr><td>① PDF 抽取</td><td>30s</td><td>30s</td><td>30s</td></tr>
+            <tr><td>② 分句 + prompt</td><td>1-2 min（Claude）</td><td>1 min（Qwen 本地）</td><td>30s</td></tr>
+            <tr><td>③ 角色一致性准备</td><td>2 min（注册 Element）</td><td>30 min（LoRA 训练，一次性）</td><td>0（用原图）</td></tr>
+            <tr><td>④ 视频生成（30 段）</td><td>10-20 min（API 并发）</td><td>2-4 h（Wan 14B A100）</td><td>1 min（Ken Burns）</td></tr>
+            <tr><td>⑤ TTS（2500 字符）</td><td>30s</td><td>1 min</td><td>1 min</td></tr>
+            <tr><td>⑥ BGM</td><td>1 min（Suno）</td><td>2 min（MusicGen）</td><td>10s（库）</td></tr>
+            <tr><td>⑦ 字幕对齐</td><td>30s（WhisperX）</td><td>30s</td><td>30s</td></tr>
+            <tr><td>⑧ 拼接渲染</td><td>2-3 min（Remotion）</td><td>2-3 min</td><td>30s（MoviePy）</td></tr>
+            <tr><td><strong>总耗时</strong></td><td><strong>15-30 min</strong></td><td><strong>2-4 h</strong></td><td><strong>3-5 min</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch7 角色一致性 ============ -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">角色一致性专题 · 绘本动画化的最大坑</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>这是<strong>所有想做绘本动画化的人都会撞到的第一堵墙</strong>。讲个直观例子：The Very Hungry Caterpillar 30 页里 Caterpillar 出现 30 次，每次都得是同一只绿色 + 红色头 + 7 段身体的家伙。视频 AI 默认生成时<strong>每次脸都不一样</strong>，学生秒出戏。2026 年 5 月给出能用的解决方案有 4 条：</p>
+
+      <h3>方案对比表</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>方案</th>
+            <th>原理</th>
+            <th>准备时间</th>
+            <th>每段额外成本</th>
+            <th>一致性效果</th>
+            <th>国内可用</th>
+            <th>难度</th>
+          </tr></thead>
+          <tbody>
+            <tr><td><strong>可灵 Multi-Element Reference</strong></td><td>注册 N 个 @Element 图片，prompt 引用</td><td>2-5 min</td><td>$0（含在主价里）</td><td>★★★★★ 强</td><td class="check y">✅</td><td>低</td></tr>
+            <tr><td><strong>Vidu 2.0 Multi-Subject</strong></td><td>3-7 张参考图同时输入</td><td>2-5 min</td><td>$0</td><td>★★★★★ 强</td><td class="check y">✅</td><td>低</td></tr>
+            <tr><td>Runway Gen-4 Reference</td><td>Reference Image + Act-One</td><td>5-10 min</td><td>$0</td><td>★★★★</td><td class="check n">❌</td><td>中</td></tr>
+            <tr><td>IP-Adapter (开源 Flux)</td><td>参考图 → embedding，prompt 注入</td><td>0（推理时加）</td><td>+10-20% 算力</td><td>★★★</td><td class="check y">✅（自建）</td><td>中</td></tr>
+            <tr><td><strong>Flux Redux Adapter</strong></td><td>类 IP-Adapter，2026 主流</td><td>0</td><td>+15% 算力</td><td>★★★★</td><td class="check y">✅</td><td>中</td></tr>
+            <tr><td>LoRA fine-tune（自训）</td><td>5-10 张角色图，训 30 分钟</td><td>30-60 min（一次性）</td><td>+5% 算力</td><td>★★★★★ 最强</td><td class="check y">✅</td><td>高</td></tr>
+            <tr><td>PuLID Adapter（人脸专用）</td><td>面部特征锁定</td><td>0</td><td>+10%</td><td>★★★★ 人脸场景</td><td class="check y">✅</td><td>中</td></tr>
+            <tr><td><strong>2026 三件套组合</strong></td><td>低强度 LoRA + PuLID + ControlNet OpenPose</td><td>30 min</td><td>+25%</td><td>★★★★★ AI 电影级</td><td class="check y">✅</td><td>高</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>实操建议（按规模）</h3>
+
+      <div class="callout good">
+        <strong>50 学员阶段 → 可灵 Multi-Element Reference</strong><br>
+        把每本绘本的主角（Caterpillar / Apple / Butterfly…）和关键物体提前注册为 @Element1 ~ @Element6，每个 prompt 里显式 reference。<strong>5 分钟搞定一本</strong>，单本不增加额外成本，效果业内最强。
+      </div>
+
+      <div class="callout good">
+        <strong>500-1000 本量产 → 可灵 + Vidu 2.0 双轨</strong><br>
+        简单单角色场景走可灵单 Element；多角色同框（Caterpillar + 苹果 + 树）走 Vidu Multi-Subject（最多 7 张参考）。两家国产组合覆盖 95% 场景。
+      </div>
+
+      <div class="callout warn">
+        <strong>1000+ 本开源量产 → LoRA + Flux Redux + ControlNet 三件套</strong><br>
+        每个核心 IP 角色训一个 LoRA（5-10 张参考图，4090 上 20-30 分钟）。推理时 LoRA 强度 0.6 + Flux Redux 注入参考 + ControlNet 控制动作骨架。<strong>这是 2026 年 AI 电影圈的「角色锁定」工业标准</strong>，能做到几十帧里角色长得一模一样。
+      </div>
+
+      <h3>反面教材：什么不行</h3>
+      <ul>
+        <li><strong>纯 prompt 控制</strong>（描述「同一只绿色 Caterpillar 红头」）—— 第 5 页起开始漂移，第 15 页变成完全另一只虫。</li>
+        <li><strong>第一帧固定</strong>（每页用同一张图当起点）—— 动态生成后 1s 起就漂走。</li>
+        <li><strong>开源 SVD 默认</strong>（Stable Video Diffusion）—— 角色一致性几乎为零，仅适合「自然风光」类场景。</li>
+      </ul>
+
+      <div class="callout info">
+        <strong>给阿杰的最终建议</strong>：50 学员阶段<strong>不要碰 LoRA</strong>，直接用可灵 Multi-Element + Vidu Multi-Subject 双国产 SaaS 服务方案。等到 500 本量产 + 开始自托管时，再把 LoRA + Flux Redux 加进 ComfyUI workflow。「过早工程化」是这个领域的最大陷阱。
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch8 TTS 配音 ============ -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">TTS 配音选型 · 儿童绘本朗读全对比</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>绘本朗读对 TTS 的要求和「客服机器人」/「新闻播报」完全不同：要<strong>有情绪起伏 + 多角色变声 + 儿童友好</strong>。2026 年这几家是真能用的：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>TTS 模型</th>
+            <th>厂商</th>
+            <th>价格</th>
+            <th>语言</th>
+            <th>儿童友好</th>
+            <th>克隆门槛</th>
+            <th>情绪</th>
+            <th>国内</th>
+            <th>绘本推荐</th>
+          </tr></thead>
+          <tbody>
+            <tr><td><strong>ElevenLabs v3 Multilingual</strong></td><td>ElevenLabs</td><td>$206/M 字符</td><td>70+</td><td>★★★★★</td><td>低（1 min 音）</td><td>★★★★★ audio tags</td><td class="check p">需翻墙</td><td class="check y">🥇 海外</td></tr>
+            <tr><td><strong>MiniMax Speech-02 HD</strong></td><td>MiniMax</td><td>$0.10/千字</td><td>30+</td><td>★★★★</td><td>5 秒克隆</td><td>★★★★ emotion presets</td><td class="check y">✅</td><td class="check y">🥇 国内</td></tr>
+            <tr><td><strong>CosyVoice 2 (开源)</strong></td><td>阿里 FunAudio</td><td>免费（自建）</td><td>50+</td><td>★★★★</td><td>3-10 秒零样本</td><td>★★★★</td><td class="check y">✅</td><td class="check y">🥈 量产</td></tr>
+            <tr><td>F5-TTS (开源)</td><td>SWivid 学术</td><td>免费</td><td>多语</td><td>★★★</td><td>零样本短音</td><td>★★★</td><td class="check y">✅</td><td class="check p">备份</td></tr>
+            <tr><td>GPT-SoVITS (开源)</td><td>RVC-Boss</td><td>免费</td><td>中英日</td><td>★★★</td><td>1 分钟 few-shot</td><td>★★★</td><td class="check y">✅</td><td class="check p">中文强</td></tr>
+            <tr><td>OpenAI tts-1 / gpt-4o-mini-audio</td><td>OpenAI</td><td>$15/M 字符</td><td>多语</td><td>★★★</td><td>不支持克隆</td><td>★★★</td><td class="check n">需翻墙</td><td class="check p">备份</td></tr>
+            <tr><td>Azure Neural TTS</td><td>Microsoft</td><td>$16/M 字符</td><td>140+</td><td>★★★★ SSML</td><td>需 Custom Voice</td><td>★★★★ SSML 控</td><td class="check p">部分区域</td><td class="check p">SSML 强</td></tr>
+            <tr><td>Cartesia Sonic</td><td>Cartesia</td><td>$0.065/千字</td><td>多语</td><td>★★★</td><td>低</td><td>★★★★</td><td class="check n">国外</td><td class="check p">实时</td></tr>
+            <tr><td>讯飞 / 火山 / 腾讯云 TTS</td><td>国内三大</td><td>¥0.5-2/万字</td><td>主中英</td><td>★★★</td><td>需企业</td><td>★★★</td><td class="check y">✅</td><td class="check p">企业用</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>详细推荐</h3>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>🥇 ElevenLabs v3（海外首推 + 国际学校友好）</h4>
+          <span class="pill live">$206/M 字符</span>
+          <span class="pill info">audio tags + dialogue mode</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>独门绝活</strong>：v3 支持 audio tags（情绪标记），prompt 里写 [whispering] / [excited] / [sad] 直接控制朗读情绪。Dialogue mode 多角色对话天然适配绘本。一本 30 页绘本 ≈ 2500 字符 = $0.515（≈¥3.7），<strong>成本可忽略不计</strong>。</p>
+          <p><strong>儿童声音</strong>：可以从 ElevenLabs 声音库挑现成的儿童音色，也可以上传 1 分钟阿杰女儿 / 男友女友的声音克隆出「专属朗读人」，半米可以做差异化。</p>
+          <div class="takeaway">国际学校场景（双语 + 多种口音）首选。配合可灵 2.1 是 2026 年绘本动画化最强组合。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>🥇 MiniMax Speech-02 HD（国内首推）</h4>
+          <span class="pill live">$0.10/千字</span>
+          <span class="pill info">5 秒克隆</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>优势</strong>：国内访问无障碍，5 秒参考音就能克隆，30 多种语言含 30+ 种中文方言。普通话发音准确性是它的强项（直接对标 ElevenLabs 在西方语种的优势）。300+ 现成声音 + emotion preset + interjection tag（嗯 / 啊 / 哎呀这种）。</p>
+          <p><strong>价格</strong>：fal.ai 上 $0.10/千字，WaveSpeed 上 $0.05/千字。30 页绘本 2500 字符 = ¥1.8-3.5。<strong>语音克隆一次 $1.50</strong>，永久保存。</p>
+          <div class="takeaway">国内场景 + 中英双语绘本首选。如果阿杰要做半米专属朗读人（比如「无忌老师朗读」），克隆一次永久用。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>🥈 CosyVoice 2（开源 + 自建）</h4>
+          <span class="pill live">Apache 2.0</span>
+          <span class="pill info">3-10 秒零样本</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>定位</strong>：阿里 FunAudioLLM 团队开源，2026 年迭代到 2.0。<strong>44.1kHz 高保真</strong>，流式 latency 亚秒级，50+ 语种零样本，跨语言克隆（英语声音可以说中文）。比 1.0 错误率降 30-50%。</p>
+          <p><strong>VRAM</strong>：0.5B 模型，~6-8GB VRAM，4090 / 3090 / 甚至 4060 都能跑。</p>
+          <p><strong>对比 MiniMax 商业版</strong>：质量逼近但略弱（人声自然度差距在 5-10%），<strong>零成本 + 完全离线 + 数据不出企业</strong>是它独家优势。</p>
+          <div class="takeaway">阿杰 500+ 本量产时切到 CosyVoice 2 自建，TTS 月成本从 ¥500-2000 砍到 ¥0。一台 4090 服务器够覆盖几百本。</div>
+        </div>
+      </div>
+
+      <h3>给绘本朗读的 SSML / 风格调参建议</h3>
+      <ul>
+        <li><strong>速度</strong>：6 岁以下 0.85x（慢）· 7-10 岁 1.0x · 10+ 岁 1.1-1.2x。低龄绘本一定要降速，否则学生跟不上。</li>
+        <li><strong>停顿</strong>：每句结尾 500ms 停顿，给学生「脑内消化」时间。Azure SSML 用 <code>&lt;break time="500ms"/&gt;</code>。</li>
+        <li><strong>情绪</strong>：开心场景 ElevenLabs [excited] + 高 pitch；悲伤 [sad] + 低 pitch + 慢速；惊讶 [surprised] + 上扬。</li>
+        <li><strong>多角色</strong>：旁白用一个声音，对话每个角色一个声音。30 页绘本通常 3-5 个角色 + 1 个旁白。</li>
+      </ul>
+
+      <div class="callout good">
+        <strong>给阿杰的最终建议</strong>：50 学员阶段选 <strong>MiniMax Speech-02 HD</strong>（国内访问 + 价格低 + 质量足够）。1 本绘本 TTS 成本 ¥2-4，可忽略。如果未来面向国际学校英文为主，再加一个 ElevenLabs v3 账号给纯英语绘本用。开源 CosyVoice 2 留作量产阶段切换。
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch9 云端显卡 ============ -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">云端显卡选型 · 决策树</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>开源路线和「调商业 API 也要本地处理 ComfyUI」都绕不开 GPU。下面是 2026 年 5 月真实在用的几家。</p>
+
+      <h3>各家价格 + 特点</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>平台</th>
+            <th>定位</th>
+            <th>4090 价</th>
+            <th>A100 80G 价</th>
+            <th>H100 价</th>
+            <th>计费</th>
+            <th>冷启动</th>
+            <th>国内</th>
+            <th>推荐场景</th>
+          </tr></thead>
+          <tbody>
+            <tr><td><strong>AutoDL</strong></td><td>国内最便宜</td><td>¥1.5-2/h</td><td>¥6-15/h</td><td>¥18-30/h</td><td>按秒</td><td>30s</td><td class="check y">✅</td><td>国内量产首选</td></tr>
+            <tr><td>智星云</td><td>国内 GPU</td><td>¥1.8/h</td><td>¥8/h</td><td>¥25/h</td><td>按秒</td><td>30s</td><td class="check y">✅</td><td>AutoDL 备份</td></tr>
+            <tr><td>阿里灵骏 / 腾讯 TI</td><td>国内大厂</td><td>¥3-5/h</td><td>¥12-25/h</td><td>¥35-50/h</td><td>按时</td><td>1-2 min</td><td class="check y">✅</td><td>企业合规</td></tr>
+            <tr><td>火山引擎 GPU</td><td>字节</td><td>¥2.5-4/h</td><td>¥10-20/h</td><td>¥30-45/h</td><td>按时 / 包月</td><td>1 min</td><td class="check y">✅</td><td>国内大厂</td></tr>
+            <tr><td><strong>RunPod</strong></td><td>海外 serverless</td><td>$0.69/h</td><td>$2.69/h</td><td>$2.69-6.98/h</td><td>按秒</td><td>5-15s</td><td class="check n">国外</td><td>海外量产</td></tr>
+            <tr><td><strong>Vast.ai</strong></td><td>海外散户市场</td><td>$0.29/h</td><td>$1.07/h（spot）</td><td>$1.49/h</td><td>按秒</td><td>10-30s</td><td class="check n">国外</td><td>最便宜不稳定</td></tr>
+            <tr><td><strong>Replicate</strong></td><td>包装好模型 API</td><td>$0.001-0.05/run</td><td>$5.49/h 等价</td><td>$5.49/h 等价</td><td>按 run</td><td>0s（已部署）</td><td class="check p">国外</td><td>不想管 GPU</td></tr>
+            <tr><td><strong>Fal.ai</strong></td><td>极快冷启动</td><td>按视频秒</td><td>按视频秒</td><td>按视频秒</td><td>按输出</td><td>1-3s</td><td class="check p">国外</td><td>低延迟生产</td></tr>
+            <tr><td>Modal</td><td>serverless GPU</td><td>$0.78/h</td><td>$3.84/h</td><td>varies</td><td>按秒</td><td>5-15s</td><td class="check n">国外</td><td>Python 友好</td></tr>
+            <tr><td>Spheron</td><td>欧美最便宜 A100</td><td>varies</td><td>$1.07/h（按需）/ $0.60（spot）</td><td>$1.49+</td><td>按时</td><td>1-3 min</td><td class="check n">国外</td><td>欧美 spot</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>决策树</h3>
+
+      <div class="tree">
+        <div class="node q">你单本日产能要多少？</div>
+        <div class="branches">
+          <div class="node yes"><span class="lbl y">&lt; 10 本/日</span>不要租 GPU<br>→ 直接调商业 API（可灵 / 即梦 / Replicate 跑开源）</div>
+          <div class="node"><span class="lbl m">10-100 本/日</span>云端按用量<br>→ Replicate / Fal.ai 调开源模型 API（不管 GPU）</div>
+          <div class="node no"><span class="lbl n">100+ 本/日</span>自托管划算<br>→ AutoDL / RunPod 长期租 A100 / H100</div>
+        </div>
+
+        <div class="step-arrow">▼ 自托管路线继续</div>
+
+        <div class="node q">数据 / 隐私是否敏感？</div>
+        <div class="branches">
+          <div class="node yes"><span class="lbl y">是</span>国内自建<br>→ AutoDL（最便宜）/ 阿里灵骏 / 腾讯 TI（合规）</div>
+          <div class="node no"><span class="lbl n">否</span>海外最便宜<br>→ Vast.ai spot（不稳）/ RunPod 长期</div>
+        </div>
+
+        <div class="step-arrow">▼ 国内路线继续</div>
+
+        <div class="node q">是否要 7×24 不间断？</div>
+        <div class="branches">
+          <div class="node yes"><span class="lbl y">是</span>包月 A100<br>→ AutoDL 包月 ~¥4300/月（24h × 30d × ¥6）</div>
+          <div class="node no"><span class="lbl n">否</span>按需启停<br>→ AutoDL 按秒，闲时关，月成本可降到 ¥1000-2000</div>
+        </div>
+      </div>
+
+      <div class="callout good">
+        <strong>给阿杰的具体建议</strong>：
+        <ul>
+          <li><strong>50 学员阶段</strong>（日产 0.3-1 本）：<strong>不要碰 GPU</strong>，全走商业 API（可灵 + ElevenLabs + Suno），月固定支出 ¥0，按用量付。</li>
+          <li><strong>100 本试点</strong>（日产 3-5 本，1 个月做完）：偶尔需要 GPU 跑 ComfyUI 调风格 → <strong>AutoDL 按需 4090 ¥2/h × 20h = ¥40 一次</strong>，整月不超过 ¥500。</li>
+          <li><strong>500-1000 本量产</strong>（日产 10-30 本）：<strong>AutoDL 包月 A100 80GB ¥6/h × 720h = ¥4320/月</strong>，跑 Wan 2.2 14B 量产，单本算力 ¥10-20。</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch10 自动化 ============ -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">自动化方案 · ComfyUI / n8n / FastAPI 三选一</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>从 PDF 到 mp4 无人值守 pipeline。三种主流编排方案：</p>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>🥇 方案 A · 单 Python 脚本（最简，50 学员推荐）</h4>
+          <span class="pill live">500-800 行代码</span>
+          <span class="pill info">2 天搭出 demo</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>原理</strong>：一个 Python 脚本，串行调商业 API（PyMuPDF → Claude → 可灵 → MiniMax → WhisperX → Remotion）。失败重试 + 中间产物缓存 + tqdm 进度条 + Slack 通知完成。</p>
+          <p><strong>优势</strong>：易维护、易调试、不引入额外架构。一个工程师 2 天能搭出来跑 3 本绘本验证。</p>
+          <p><strong>缺点</strong>：并行能力靠 asyncio，跑 100 本时偶尔抖动需要人工补跑。</p>
+          <div class="takeaway">50 学员 + 100 本试点的唯一推荐方案。阿杰找一个会 Python 的工程师 2 天搭出来。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>🥈 方案 B · ComfyUI workflow + API</h4>
+          <span class="pill live">workflow JSON 可视化</span>
+          <span class="pill info">开源模型路线</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>原理</strong>：ComfyUI 是「节点式」AI 工作流编排器。每个节点 = 一个模型（PDF 抽 / Wan 2.2 / CosyVoice / FFmpeg），节点连成图。导出 workflow JSON，用 ComfyUI API 远程调用。</p>
+          <p><strong>优势</strong>：
+            <ul>
+              <li>可视化调试，非工程师也能改参数。</li>
+              <li>开源生态成熟，2026 年 Wan 2.2 / LTX-2 / IP-Adapter 都有现成节点。</li>
+              <li>n8n 有官方 ComfyUI 集成 + 社区 image-to-video 节点。</li>
+            </ul>
+          </p>
+          <p><strong>缺点</strong>：单实例 ComfyUI 跑大模型容易 OOM，需要监控 + 自动重启。商业 API（可灵 / 即梦）需要自己包 HTTP node。</p>
+          <div class="takeaway">500+ 本量产 + 开源路线推荐。配合 n8n / Google Sheets 任务表，无人值守批量出片。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>🥉 方案 C · FastAPI + Celery + Redis 自建 worker 集群</h4>
+          <span class="pill info">企业级 / 长期</span>
+          <span class="pill">1-2 人月</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>原理</strong>：FastAPI 提供 REST API（用户提交绘本 PDF）→ Celery worker 队列 → Redis 状态 → 各 worker 调对应模型。前端实时进度条。</p>
+          <p><strong>优势</strong>：完全自主可控、水平扩展容易、可与半米现有系统深度集成。</p>
+          <p><strong>缺点</strong>：1-2 人月一次性开发投入、需要 DevOps 维护。</p>
+          <div class="takeaway">1000+ 本规模化、半米要做 SaaS 给学校 B2B 输出时再考虑。50-500 学员阶段过度工程。</div>
+        </div>
+      </div>
+
+      <h3>n8n / Dify / Flowise 三个低代码 orchestrator 对比</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>工具</th><th>类型</th><th>适用</th><th>ComfyUI 集成</th><th>LLM 集成</th><th>学习成本</th></tr></thead>
+          <tbody>
+            <tr><td>n8n</td><td>通用 workflow</td><td>整体编排首选</td><td class="check y">✅ 官方 + 社区节点</td><td class="check y">✅ OpenAI / Claude / 本地</td><td>中</td></tr>
+            <tr><td>Dify</td><td>LLM app 平台</td><td>对话型应用</td><td class="check n">❌</td><td class="check y">✅ 主打</td><td>低</td></tr>
+            <tr><td>Flowise</td><td>LangChain 可视化</td><td>RAG / 链式 LLM</td><td class="check n">❌</td><td class="check y">✅</td><td>中</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <strong>给阿杰的最终建议</strong>：50 学员 + 100 本试点用<strong>方案 A 单 Python 脚本</strong>。500+ 本量产时加 <strong>n8n + ComfyUI</strong>，无人值守批量出片，每天定时 cron 跑积压任务。1000+ 才考虑自建 FastAPI 系统。
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch11 成本矩阵 ============ -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">成本矩阵 · 5 本 / 100 本 / 1000 本 × 3 路线</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>下面是 9 个真实成本场景。<strong>单本绘本 = 30 页 = 30 段 5s 视频 + ~2500 字符 TTS + 一首 BGM</strong>。</p>
+
+      <h3>① 5 本试点（验证学生反应）</h3>
+
+      <div class="cost-card">
+        <div class="ch">路线 A 商业 API（可灵 2.1 5s + MiniMax + Suno + 自建 Remotion）<span class="amt">¥500-600 / 5 本</span></div>
+        <div class="cb">
+          <div class="table-wrap"><table>
+            <thead><tr><th>项</th><th>单价</th><th>用量</th><th>小计</th></tr></thead>
+            <tbody>
+              <tr><td>可灵 2.1 5s 段</td><td>¥5.6/段</td><td>150 段</td><td>¥840 → 用 5s 版可降 50% ≈ ¥420</td></tr>
+              <tr><td>MiniMax TTS</td><td>¥0.7/千字</td><td>12.5 千字</td><td>¥9</td></tr>
+              <tr><td>Suno v4 BGM</td><td>¥3-5/首</td><td>5 首</td><td>¥20</td></tr>
+              <tr><td>Claude 分句</td><td>¥0.05/页</td><td>150 页</td><td>¥8</td></tr>
+              <tr><td>Remotion 拼接</td><td>自建 0</td><td>—</td><td>¥0</td></tr>
+              <tr><td>开发工时（一次性）</td><td>0.5 人月</td><td>—</td><td>¥15,000（不摊到本里）</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <div class="cost-card">
+        <div class="ch">路线 B Replicate 调开源（Wan 2.2 5B + CosyVoice）<span class="amt">¥200-300 / 5 本</span></div>
+        <div class="cb">
+          <p>Replicate Wan 2.2 5B ≈ $0.05/段 × 150 = $7.5 (¥54)，CosyVoice 自建 ¥0，BGM 用免费库 ¥0。<strong>开发投入 1 人月 ≈ ¥30k 一次性</strong>，不摊到本里。</p>
+        </div>
+      </div>
+
+      <div class="cost-card">
+        <div class="ch">路线 C 伪动画（Ken Burns + AnimateDiff + OpenAI TTS）<span class="amt">¥30-50 / 5 本</span></div>
+        <div class="cb">
+          <p>OpenAI tts-1 $15/M chars × 12.5k = $0.19 (¥1.4)，伪动画自建 ¥0。</p>
+        </div>
+      </div>
+
+      <h3>② 100 本启动（正式上线）</h3>
+
+      <div class="cost-card">
+        <div class="ch">路线 A 商业 API · 100 本 30 页<span class="amt">¥8,000-12,000</span></div>
+        <div class="cb">
+          <p>可灵 2.1 普通版 ¥1.6/段 × 3000 段 = ¥4,800，+ Hailuo 02 兜底简单镜头 30% × ¥0.32/s × 5s × 900 段 = ¥1,440，+ MiniMax TTS 250k 字符 ¥175，+ Suno 100 首 BGM ¥400。<strong>单本 ¥80-120</strong>。</p>
+        </div>
+      </div>
+
+      <div class="cost-card">
+        <div class="ch">路线 B Replicate / Fal 调开源 · 100 本<span class="amt">¥2,000-4,000</span></div>
+        <div class="cb">
+          <p>Replicate Wan 2.2 14B $0.10/段 × 3000 = $300 (¥2160)，CosyVoice 自建 ¥0，BGM 库 ¥0。<strong>单本 ¥20-40</strong>，但需 1 人月开发投入。</p>
+        </div>
+      </div>
+
+      <div class="cost-card">
+        <div class="ch">路线 C 伪动画 · 100 本<span class="amt">¥500-1,000</span></div>
+        <div class="cb">
+          <p>OpenAI TTS ≈ ¥30，伪动画完全自建，4090 一台够用。<strong>单本 ¥5-10</strong>。</p>
+        </div>
+      </div>
+
+      <h3>③ 1000 本量产</h3>
+
+      <div class="cost-card">
+        <div class="ch">路线 A 商业 API · 1000 本<span class="amt">¥80,000-120,000</span></div>
+        <div class="cb">
+          <p>同 ②  量级 × 10。<strong>单本恒定 ¥80-120</strong>，主成本是可灵段费。可以通过批量采购拿 9 折。</p>
+        </div>
+      </div>
+
+      <div class="cost-card">
+        <div class="ch">路线 B 自托管开源 · 1000 本<span class="amt">¥10,000-20,000</span></div>
+        <div class="cb">
+          <p>AutoDL A100 80GB 包月 ¥4,320 × 3 个月 ≈ ¥13,000 + CosyVoice 自托管 ¥0 + BGM 库 ¥0。<strong>单本 ¥10-20</strong>。</p>
+        </div>
+      </div>
+
+      <div class="cost-card">
+        <div class="ch">路线 C 伪动画 · 1000 本<span class="amt">¥3,000-5,000</span></div>
+        <div class="cb">
+          <p>纯电费 + CosyVoice 自建 + 一台 4090 服务器。<strong>单本 ¥3-5</strong>。</p>
+        </div>
+      </div>
+
+      <h3>总览 9 格矩阵</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>规模</th>
+            <th>路线 A · 商业 API</th>
+            <th>路线 B · 开源自托管</th>
+            <th>路线 C · 伪动画</th>
+          </tr></thead>
+          <tbody>
+            <tr><td><strong>5 本试点</strong></td><td>¥500 / 单本 ¥100</td><td>¥250 / 单本 ¥50<br>+1 人月开发</td><td>¥40 / 单本 ¥8</td></tr>
+            <tr><td><strong>100 本启动</strong></td><td><strong>¥9,000</strong> / 单本 ¥90</td><td>¥3,000 / 单本 ¥30<br>+1 人月</td><td>¥800 / 单本 ¥8</td></tr>
+            <tr><td><strong>1000 本量产</strong></td><td>¥90,000 / 单本 ¥90</td><td><strong>¥15,000</strong> / 单本 ¥15<br>+0.5 人月维护</td><td>¥4,000 / 单本 ¥4</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cost-total">
+        <div class="label">阿杰当前阶段（50 学员 / 5-100 本）最经济组合</div>
+        <div class="num">¥500 → ¥9,000</div>
+      </div>
+
+      <div class="callout good">
+        <strong>关键判断</strong>：50 学员 / 5 本试点 ≤ ¥500，正式 100 本 ≤ ¥9,000，这就是要花的所有真金白银。开发投入按 1 人月 ¥3 万算，第一年总投入 < ¥50,000 能跑完整试点。<strong>这个金额完全负担得起，不需要等什么</strong>。
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch12 竞品深挖 ============ -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">竞品深挖 · 14 家逐个拆</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>市面上能找到的「绘本动画化 / 动画化儿童阅读 / AI 生成绘本」按业务类型分四组深挖。</p>
+
+      <h3>🎬 真动画化绘本订阅平台</h3>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>① Vooks（vooks.com）</h4>
+          <span class="pill live">真动画绘本 SOTA</span>
+          <span class="pill">$4.99/月 / $49.99/年</span>
+          <span class="pill info">6 个月-8 岁</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>核心</strong>：1000+ 本动画化儿童绘本，每本配「动画 + 配音 + 字幕」。"patented combination of movement, narration, and sound that brings the engagement of video to the literacy-building power of books"。家庭订阅，离线下载。</p>
+          <p><strong>商业模式</strong>：纯订阅制，无广告，无内购。Common Sense Media 评 4 星。</p>
+          <p><strong>对半米的启示</strong>：<strong>这是直接对标</strong>。Vooks 是手工动画化（不是 AI），1000 本花了 5 年时间。半米用 AI 路线，理论上 1-2 个月能做出 100 本同等体验的内容。<strong>定价 $4.99/月是儿童阅读细分的"心理锚点"</strong>。</p>
+          <div class="takeaway">最重要对标。半米可以参考 Vooks 体验做交互（边动边读 + 字幕高亮），但用 AI 把成本砍到 1/10。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>② Storyline Online（SAG-AFTRA Foundation）</h4>
+          <span class="pill live">免费</span>
+          <span class="pill info">Emmy 提名</span>
+        </div>
+        <div class="prod-body">
+          <p>SAG-AFTRA 工会基金会做的免费项目，知名演员朗读绘本 + 创意插画动画。两次 Emmy 提名。24h 开放，全世界使用。无商业模式，公益。</p>
+          <div class="takeaway">证明「绘本动画化 + 名人朗读」是教育圈认可的内容形态。给学生用「金句卡片 + 朗读」交互模式，可借鉴 Storyline 的镜头语言。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>③ Speakaboos（已被 Lingokids 收购）</h4>
+          <span class="pill dead">已并购</span>
+          <span class="pill">2-9 岁</span>
+        </div>
+        <div class="prod-body">
+          <p>原为 2-9 岁动画化绘本平台，每本带 narration + interactive text。被 Lingokids 收购后内容并入 Lingokids 库。</p>
+          <div class="takeaway">这种垂类「动画化绘本」品类做不大，最终被「英语启蒙大平台」吃掉。半米要么做内容差异化（K12 国际学校专属），要么做 ToB（给学校 license）。</div>
+        </div>
+      </div>
+
+      <h3>📚 英语学习 / 阅读 app</h3>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>④ Epic!（getepic.com）</h4>
+          <span class="pill live">$11.99/月</span>
+          <span class="pill info">40,000+ 本</span>
+          <span class="pill">教师免费</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>核心</strong>：北美最大儿童数字图书馆，40,000+ 书 + audiobook + 教育视频，12 岁以下。家庭 $11.99/月（4 个子账号），教师免费。</p>
+          <p><strong>动画化程度</strong>：部分书有 read-to-me 配音 + 简单动画，<strong>不是全部</strong>。主体还是「带配音的电子书」+ 阅读理解题。</p>
+          <div class="takeaway">规模大但动画化不深。半米如果聚焦「真动画化 + 互动学习」，差异化空间大。Epic 的「教师免费」是B端获客经典玩法。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>⑤ Reading Eggs / Reading Eggspress（Blake eLearning）</h4>
+          <span class="pill live">$9.99/月</span>
+          <span class="pill info">4,000+ 书</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>核心</strong>：2-7 岁 Reading Eggs / 7-13 岁 Reading Eggspress / 2-4 Junior，<strong>全程动画化课程 + 游戏化</strong>。30 天免费，$9.99/月起，家庭 4 子账号 $99.99/年。</p>
+          <p><strong>动画化深度</strong>：每节课都是动画化（不只是配音），有故事剧情 + 游戏点击 + 即时反馈。是「动画化儿童阅读」做得最深的之一。</p>
+          <div class="takeaway">半米的<strong>课程化形态</strong>可以参考 Reading Eggs ——「动画化绘本 + 闯关游戏 + 积分」。纯订阅 $9.99 是另一个国际标杆价。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>⑥ Lingokids</h4>
+          <span class="pill live">2-8 岁</span>
+          <span class="pill info">Oxford 合作</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>核心</strong>：2016 年起，Playlearning 概念，游戏 + 歌曲 + 视频 + 互动。Oxford University Press 合作内容（含金量高）。免费版受限，付费 £14.99/月起。已收购 Speakaboos 整合动画绘本内容。已上线 Tubi 免费 TV。</p>
+          <div class="takeaway">全球英语学习 app for kids 的头部之一，全球 K12 app 市场预计 2026-2035 年 CAGR 12.44%（1.3B → 4.2B USD）。半米国内 K12 国际学校切入点很对。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>⑦ Khan Academy Kids</h4>
+          <span class="pill live">完全免费</span>
+          <span class="pill info">300+ 书</span>
+        </div>
+        <div class="prod-body">
+          <p>2-8 岁，无广告，公益模式。Read-to-Me / Read-by-Myself 模式 + 阅读理解题。300+ 本 fiction & non-fiction。</p>
+          <div class="takeaway">「完全免费」是 Khan 的核心竞争力，半米打不过这一项。半米要靠<strong>个性化 + 高质量真动画 + 国际学校教学融合</strong>差异化。</div>
+        </div>
+      </div>
+
+      <h3>🤖 生成式 AI 工具（用户自造绘本）</h3>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>⑧ Childbook.ai / MyStoryBot / LoveToRead.ai / Storique / genStorybook</h4>
+          <span class="pill live">2024-2026 爆发</span>
+          <span class="pill info">家长 toC</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>核心</strong>：家长上传孩子照片 → AI 生成 26-40 页定制绘本（孩子是主角），可印实体书寄到家。Storique 用 custom-trained 模型保持角色一致性，100+ 张插画质量稳定。</p>
+          <p><strong>商业模式</strong>：单本 $20-60 + 实体印刷加价。Storique 还含人工审核。</p>
+          <div class="takeaway">和半米路径不同 —— 这些做「定制绘本」（让孩子当主角），半米做「现有绘本动画化」。两者技术栈高度重合但市场定位完全不同。半米可以学他们的「角色一致性」技术经验。</div>
+        </div>
+      </div>
+
+      <h3>🇨🇳 国内市场（重点）</h3>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>⑨ 凯叔讲故事</h4>
+          <span class="pill live">3,000 万用户</span>
+          <span class="pill info">虚拟+实物生态</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>核心</strong>：国内儿童音频内容头部，<strong>3,000 万用户</strong>，4,000+ 故事（一半原创）。商业模式：付费音频 + 儿童教育 + 凯叔童书 + 衍生硬件 + 凯叔造物 + 凯叔优选。</p>
+          <p><strong>动画化程度</strong>：以<strong>纯音频朗读 + 广播剧</strong>为主，视频动画化内容少，AI 动画化更少。</p>
+          <div class="takeaway">凯叔证明了「儿童内容付费」在国内能做大。但<strong>动画化是个空白</strong>——凯叔走音频起家，转视频成本高。半米的机会窗口。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>⑩ 喜马拉雅儿童 / 樊登小读者</h4>
+          <span class="pill live">音频主</span>
+        </div>
+        <div class="prod-body">
+          <p>喜马拉雅儿童板块依托母站内容生态，UGC + PGC 混合。樊登小读者偏「家长解读 + 亲子共读」。两家都<strong>动画化深度浅</strong>。</p>
+          <div class="takeaway">同凯叔判断 —— 国内儿童内容付费是大盘，但动画化是技术劣势，半米切入正当时。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>⑪ 斑马 AI 课 / 腾讯开心鼠（ABCmouse 中国版）</h4>
+          <span class="pill live">200 万付费 · ¥50 亿/年</span>
+          <span class="pill info">猿辅导 $15.5B 估值</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>斑马 AI 课</strong>：猿辅导旗下，K12 启蒙英语，<strong>200 万付费用户</strong>，2020 年营收 50 亿，月营收过亿，续课率 55-60%。猿辅导 22 亿美元融资后估值 155 亿美元，全球教育科技独角兽榜首。</p>
+          <p><strong>腾讯开心鼠</strong>：3-8 岁英语启蒙，腾讯教育旗下，2020 年起独立运营（ABCmouse 中国版）。92% 课程完成率（半年），97% 续费率（实验数据）。</p>
+          <p><strong>动画化程度</strong>：核心课件都是<strong>专业动画化制作</strong>（团队几百人，每个动画几万到几十万人民币），不是 AI 生成。</p>
+          <div class="takeaway">这俩证明<strong>动画化英语启蒙在中国能做出百亿生意</strong>。但他们的成本结构（每集 ¥10-50k 制作费）注定了内容池不可能像绘本那么广（千本规模）。半米用 AI 把成本砍到 1/100 - 1/1000，能覆盖的内容池广 100-1000 倍。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>⑫ 抖音 / 快手 AI 漫剧个人号</h4>
+          <span class="pill live">2026 爆发元年</span>
+          <span class="pill info">单号月入 10 万+</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>现象</strong>：2026 年抖音 / 快手大量个人号用<strong>可灵 / 即梦</strong>生产「AI 漫剧」「儿童绘本动画化」，平均涨粉速度是传统短视频 3-5 倍，头部账号单月变现可达 10 万+。优先做「2D 漫剧」（成本低、效率高、风格灵活）。</p>
+          <p><strong>对绘本动画化的指向意义</strong>：<strong>技术已经成熟到散户都能做</strong>。可灵 + 即梦在普通用户手里都能批量出片，工程门槛极低。</p>
+          <div class="takeaway">半米要做的不是「重复散户在做的事」，而是要做<strong>结构化学习 + 学校场景 + 教师协作</strong>这些散户做不到的事。技术不是壁垒，<strong>「内容 + 教学融合」才是</strong>。</div>
+        </div>
+      </div>
+
+      <h3>📖 RAZ / 牛津树官方平台（教学场景对标）</h3>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>⑬ Raz-Plus / Raz-Kids（Learning A-Z）</h4>
+          <span class="pill live">学校 B2B 主</span>
+          <span class="pill info">分级阅读 SOTA</span>
+        </div>
+        <div class="prod-body">
+          <p>Reading A-Z + Raz-Kids + Foundations A-Z 整合包，国际学校 / 北美 K12 标配。自带音频朗读（专业播音），<strong>无视频动画</strong>。学校年付制 B2B。</p>
+          <div class="takeaway">绘本动画化的<strong>原始内容池</strong>—— 半米可以把 RAZ 的 5000+ 分级读物动画化，给国际学校学生作为家庭作业。但有 IP 边界问题（见章末 callout）。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <h4>⑭ Oxford Reading Buddy / Oxford Owl</h4>
+          <span class="pill live">学校 B2B</span>
+          <span class="pill info">牛津树</span>
+        </div>
+        <div class="prod-body">
+          <p>牛津树官方数字平台。Reading Buddy 含测验 + 朗读 + AI 辅助理解。Oxford Owl 免费给家长。<strong>无动画化</strong>，主要是带音频的 e-book。</p>
+          <div class="takeaway">同 RAZ。两家是国际学校标配阅读内容，动画化空白是半米机会，但内容版权需在「内部使用 / 不分发」前提下处理。</div>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <strong>版权说明（按阿杰要求，不展开）</strong>：本研究面向半米内部 K12 国际学校 50 学员场景，<strong>不公开分发、不商业出售、不外传</strong>，技术上完全可行。一旦未来要做 toC / SaaS 公开服务，需法务介入梳理 RAZ / 牛津树 / Eric Carle 等内容的授权或公版替代方案，建议优先做<strong>自有原创绘本 + Project Gutenberg 公版儿童文学</strong>双轨内容池。
+      </div>
+
+      <h3>🛠️ 商业模式快览</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>模式</th><th>典型</th><th>50 用户</th><th>500 用户</th><th>5000 用户</th></tr></thead>
+          <tbody>
+            <tr><td>家庭订阅 $4.99-9.99/月</td><td>Vooks / Reading Eggs / Lingokids</td><td>¥1.5-3k/月</td><td>¥15-30k/月</td><td>¥150-300k/月</td></tr>
+            <tr><td>年付家庭 $50-100</td><td>Vooks / Epic!</td><td>¥1.7k/月</td><td>¥17k/月</td><td>¥170k/月</td></tr>
+            <tr><td>学校 B2B（年 ¥200-500/生）</td><td>RAZ / Lexile</td><td>¥1-2k/月</td><td>¥10-20k/月</td><td>¥100-200k/月</td></tr>
+            <tr><td>免费 + 内购</td><td>Khan Kids / Storyline 免费</td><td>0</td><td>0</td><td>少量内购</td></tr>
+            <tr><td>API SaaS（给同行）</td><td>暂无独立头部</td><td>¥0</td><td>¥5-10k</td><td>¥50-100k</td></tr>
+            <tr><td>实体书 + 数字配套</td><td>凯叔 / Storique</td><td>¥3-5k/月</td><td>¥30-50k</td><td>¥300-500k</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch13 对比表 ============ -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">竞品对比表 · 8 家 × 6 维度</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>产品</th>
+            <th>技术方案</th>
+            <th>目标用户</th>
+            <th>背景 / 资本</th>
+            <th>定价</th>
+            <th>用户量级</th>
+            <th>商业价值评估</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Vooks</strong></td>
+              <td>真动画化（手工制作）</td>
+              <td>6 月-8 岁 / 北美家庭</td>
+              <td>独立 startup（小团队）</td>
+              <td>$4.99/月 / $49.99/年</td>
+              <td>百万级订阅（未公开具体）</td>
+              <td>动画化绘本最直接对标 · 1000 本花 5 年 · 半米 AI 路线能砍 90% 时间 · 启示：定价锚点</td>
+            </tr>
+            <tr>
+              <td><strong>Epic!</strong></td>
+              <td>电子书 + 部分动画 + 教育视频</td>
+              <td>12 岁以下 / 北美家庭 + 学校</td>
+              <td>独立上市公司 / 千万级用户</td>
+              <td>$11.99/月（4 子账号）/ 教师免费</td>
+              <td>5,000 万+ 学生 + 2 百万+ 教师</td>
+              <td>规模最大但动画化浅 · 「教师免费」B2B 获客经典 · 启示：教师免费 → 学生付费</td>
+            </tr>
+            <tr>
+              <td><strong>Reading Eggs</strong></td>
+              <td>全程动画化课程 + 游戏化</td>
+              <td>2-13 岁 / 全球家庭</td>
+              <td>Blake eLearning（澳洲）</td>
+              <td>$9.99/月起 / $99.99/年（4 子账号）</td>
+              <td>2,000 万+ 学生（全球）</td>
+              <td>动画化深度最强 · 课程化路径 · 启示：动画 + 闯关游戏 + 积分</td>
+            </tr>
+            <tr>
+              <td><strong>Lingokids</strong></td>
+              <td>Playlearning · 游戏 + 视频 + 互动</td>
+              <td>2-8 岁 / 全球</td>
+              <td>2016 Madrid · Oxford Press 内容合作</td>
+              <td>£14.99/月 / 免费版受限</td>
+              <td>1 亿+ 下载 / 4,500 万家庭</td>
+              <td>全球 K12 app 头部 · 已并购 Speakaboos 加深内容 · 启示：Oxford 合作内容增信</td>
+            </tr>
+            <tr>
+              <td><strong>Khan Kids</strong></td>
+              <td>动画绘本 + 题目 + 公益</td>
+              <td>2-8 岁 / 全球</td>
+              <td>Khan Academy 非盈利</td>
+              <td>完全免费</td>
+              <td>千万级活跃</td>
+              <td>免费是壁垒 · 半米打不过免费 · 启示：必须靠个性化 + 高质量 + 教学融合差异化</td>
+            </tr>
+            <tr>
+              <td><strong>凯叔讲故事</strong></td>
+              <td>纯音频朗读 + 广播剧</td>
+              <td>3-12 岁 / 国内家庭</td>
+              <td>独立 / 多轮融资 / 估值数十亿</td>
+              <td>会员 ¥298-498/年 + 衍生品</td>
+              <td>3,000 万+ 注册用户</td>
+              <td>国内儿童付费第一 · 动画化空白 · 启示：内容 + 衍生品 + 硬件生态</td>
+            </tr>
+            <tr>
+              <td><strong>斑马 AI 课</strong></td>
+              <td>手工动画化课程</td>
+              <td>2-8 岁 / 国内家庭</td>
+              <td>猿辅导旗下 / $15.5B 估值</td>
+              <td>¥1,800-2,800/年</td>
+              <td>200 万+ 付费 / 营收 ¥50 亿/年</td>
+              <td>动画化能撑起百亿生意 · 手工成本极高（万元 / 课）· 启示：AI 把成本砍 1/100，内容池广 100 倍</td>
+            </tr>
+            <tr>
+              <td><strong>抖音 AI 漫剧个人号</strong></td>
+              <td>可灵 / 即梦 + 个人剪辑</td>
+              <td>家长 / 创作者 / 儿童 / 国内</td>
+              <td>个人创作者 / 平台分成</td>
+              <td>免费看 + 平台广告</td>
+              <td>头部账号百万粉</td>
+              <td>技术散户化 · 半米差异：结构化学习 + 学校 / 教师场景 · 启示：技术不是壁垒，「教学融合」才是</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <strong>关键洞察</strong>：
+        <ol>
+          <li><strong>动画化儿童阅读市场规模大</strong>：Reading Eggs / Lingokids 全球破亿用户、斑马 AI 课国内 200 万付费、Vooks 北美百万订阅都证明了。</li>
+          <li><strong>真动画化（不只是音频）有溢价能力</strong>：Vooks / Reading Eggs 价格比纯音频凯叔（年费 ¥298）更高，反映用户为「视觉冲击」愿意多付。</li>
+          <li><strong>2026 年技术拐点已到</strong>：AI 让单本动画化成本从 ¥10k+（斑马手工）降到 ¥80（可灵 API），<strong>意味着内容池可以扩大 100 倍</strong> —— Vooks 5 年做 1000 本，半米理论上 1 个月做完。</li>
+          <li><strong>差异化必须靠教学融合</strong>：技术散户化后，「单纯做漂亮动画」会被淘汰。半米的护城河是<strong>「绘本动画 + 词汇追踪 + 学习路径 + 家长 / 教师后台」</strong>整套学习闭环。</li>
+        </ol>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch14 半米路线 ============ -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">半米路线建议 · 决策树（50 / 500 / 1000+ 三档）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="tree">
+        <div class="node q">阶段 1：50 学员 / 3-5 本 demo（本月可启动）</div>
+
+        <div class="node yes">
+          <strong>技术栈：</strong> 可灵 2.1（5s 段）+ MiniMax Speech-02 HD + Suno v4 + Remotion（自建）<br>
+          <strong>开发：</strong> 1 个 Python 工程师 2 天搭通端到端脚本<br>
+          <strong>成本：</strong> 3-5 本试点总投入 ¥500 + 工时 ¥3k<br>
+          <strong>目标：</strong> 把 3 本绘本（推荐《The Very Hungry Caterpillar》《Where The Wild Things Are》《Goodnight Moon》）做出来给学生看，<strong>收 5-10 条真实反馈</strong>
+        </div>
+
+        <div class="step-arrow">▼ 学生反馈正向 → 进入阶段 2</div>
+
+        <div class="node q">阶段 2：100 本启动（3-6 个月）</div>
+
+        <div class="node">
+          <strong>技术栈：</strong> 可灵 2.1 主线 + Hailuo 02 / 即梦兜底简单镜头 + MiniMax TTS + 自建 Remotion<br>
+          <strong>开发：</strong> 上 n8n + Google Sheets 任务表，无人值守批量出片；加进度看板<br>
+          <strong>成本：</strong> 100 本 ¥9,000 视频 + 工时 ¥5k<br>
+          <strong>关键决策点：</strong> 内容池选择 ——<br>
+          • 路径 A：自有 / 公版绘本（《Aesop's Fables》《Grimm》《Project Gutenberg 童话》）—— 安全 + 内容稀缺<br>
+          • 路径 B：RAZ / 牛津树 「内部使用」做配套教学 —— 教学价值高但有版权风险<br>
+          • <strong>推荐</strong>：A + B 并行，A 占 60%（公开宣传），B 占 40%（仅班级内部使用 + 后台水印）
+        </div>
+
+        <div class="step-arrow">▼ 学校 / 家长付费意愿验证后 → 进入阶段 3</div>
+
+        <div class="node q">阶段 3：500-1000+ 本量产（12-18 个月）</div>
+
+        <div class="node no">
+          <strong>技术栈：</strong> 切换到「AutoDL A100 80GB 包月 + Wan 2.2 14B + LTX-2 + CosyVoice 2 + IP-Adapter / Flux Redux」开源混合方案<br>
+          <strong>开发：</strong> 自建 FastAPI + Celery worker 集群；ComfyUI workflow 持久化；接入半米现有系统<br>
+          <strong>成本：</strong> 月固定 ¥4,300（A100 包月）+ 单本算力 ¥10-15<br>
+          <strong>商业化：</strong>
+          <ul style="margin-top: 8px;">
+            <li>家庭订阅 ¥48/月（对标 Vooks $4.99 + 中国 prem）</li>
+            <li>学校 B2B ¥3,000/班/年（对标 RAZ ¥500/生）</li>
+            <li>API SaaS（B2B 给同业）：¥100-300/本，给其他英语启蒙品牌</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>关键执行清单（阿杰可以从这个开始）</h3>
+
+      <div class="callout good">
+        <strong>本月（5 月底前）3 件事</strong>
+        <ol>
+          <li>注册<strong>快手开放平台 + 可灵 API</strong>，充值 ¥500，跑 10 段 demo 验证可用性</li>
+          <li>注册 <strong>MiniMax 开发者账号</strong>，免费 quota 跑 1 本绘本 TTS 验证</li>
+          <li>找 1 个 Python 工程师，<strong>2 天写出端到端脚本</strong>，跑出《Very Hungry Caterpillar》第 1 本</li>
+        </ol>
+      </div>
+
+      <div class="callout good">
+        <strong>下月（6 月）目标</strong>
+        <ol>
+          <li>做完 <strong>3 本 demo</strong>（覆盖低中高难度 + 不同风格）</li>
+          <li>给 <strong>5-10 个学员 + 家长 + 老师试用</strong>，收 SUS 量表评分</li>
+          <li>根据反馈决定：要不要进入阶段 2（100 本）</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <strong>避坑提醒</strong>
+        <ul>
+          <li><strong>不要从开源 Wan 2.2 开始</strong>：50 学员阶段单 GPU 月租 ¥4k 摊不下来，先用可灵 API 跑通业务再说</li>
+          <li><strong>不要碰 Sora</strong>：已停服，2026 年 9 月 API 也下线</li>
+          <li><strong>不要追求「100% AI 自动化」</strong>：50 学员阶段允许 30% 人工干预（手动选 prompt / 改字幕 / 调风格），AI + 人工混合最快出效果</li>
+          <li><strong>不要做大而全</strong>：先窄到「30 页绘本动画化 + 字幕高亮 + 朗读」这一个完整闭环，再加单词 highlight / 测验 / 排行榜</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch15 mini demo ============ -->
+  <section class="chapter" id="ch15">
+    <h2><span class="num">15</span><span class="title-text">mini demo · 可玩的「Caterpillar 5 页绘本动画化」预览</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>下面是一个<strong>纯前端模拟</strong>的绘本动画化体验。绘本：《The Very Hungry Caterpillar》（5 页精选）。每页 = 一个 emoji "插画" + 1 句话 + Ken Burns 渐变 + 假 TTS 按钮。<strong>这只是 mockup，不调真实 API。真实生产会用可灵 + ElevenLabs。</strong></p>
+
+      <div class="demo-host">
+        <h4>🐛 绘本动画化预览 · DEMO（前端模拟）</h4>
+
+        <div class="book-stage" id="bookStage">
+          <div class="book-scene active" data-idx="0">
+            <div class="book-emoji">🥚🍃</div>
+          </div>
+          <div class="book-scene" data-idx="1">
+            <div class="book-emoji">🐛🌞</div>
+          </div>
+          <div class="book-scene" data-idx="2">
+            <div class="book-emoji">🐛🍎🍐🍊</div>
+          </div>
+          <div class="book-scene" data-idx="3">
+            <div class="book-emoji">🐛🎂🍦🍭</div>
+          </div>
+          <div class="book-scene" data-idx="4">
+            <div class="book-emoji">🦋🌸🌈</div>
+          </div>
+          <div class="book-caption" id="bookCaption">
+            In the light of the moon, a little egg lay on a leaf.
+          </div>
+        </div>
+
+        <div class="book-pages" id="bookPages">
+          <div class="book-page-dot active" data-page="0"></div>
+          <div class="book-page-dot" data-page="1"></div>
+          <div class="book-page-dot" data-page="2"></div>
+          <div class="book-page-dot" data-page="3"></div>
+          <div class="book-page-dot" data-page="4"></div>
+        </div>
+
+        <div class="book-controls">
+          <button class="primary" id="bookPlay">▶ 播放</button>
+          <button id="bookPrev">◀ 上一页</button>
+          <button id="bookNext">下一页 ▶</button>
+          <button id="bookTTS">🔊 模拟 TTS</button>
+          <div class="book-progress" id="bookProgress">第 1 / 5 页 · A1 词汇</div>
+        </div>
+
+        <p style="font-size: 12px; color: var(--text-mute); margin-top: 12px;">⚠️ 真实生产路径：① 可灵 2.1 把每页静图生成 5s I2V 视频 ② ElevenLabs / MiniMax 给整本配音 ③ WhisperX 切单词级时间戳 ④ Remotion 拼装。本 demo 用纯 CSS 模拟视觉效果。</p>
+      </div>
+
+      <h3>真实生产 60 行 Python 代码</h3>
+
+      <p>下面是用 Replicate 跑可灵 API + MiniMax TTS 的<strong>真实端到端 demo 脚本</strong>。绘本 PDF in → mp4 out，60 行能跑通：</p>
+
+      <pre><code><span class="syn-cmt"># storybook_animate.py · 60 行端到端 demo</span>
+<span class="syn-cmt"># 依赖: replicate, fitz (pymupdf), requests, moviepy, anthropic</span>
+
+<span class="syn-kw">import</span> fitz, replicate, requests, anthropic, json, os
+<span class="syn-kw">from</span> moviepy.editor <span class="syn-kw">import</span> VideoFileClip, AudioFileClip, concatenate_videoclips
+
+os.environ[<span class="syn-str">"REPLICATE_API_TOKEN"</span>] = <span class="syn-str">"r8_xxx"</span>
+claude = anthropic.<span class="syn-fn">Anthropic</span>()
+MINIMAX_KEY = <span class="syn-str">"mm_xxx"</span>
+
+<span class="syn-cmt"># 1) 抽页</span>
+<span class="syn-kw">def</span> <span class="syn-fn">extract_pages</span>(pdf):
+    doc = fitz.<span class="syn-fn">open</span>(pdf)
+    <span class="syn-kw">return</span> [{<span class="syn-str">"img"</span>: p.<span class="syn-fn">get_pixmap</span>().<span class="syn-fn">tobytes</span>(<span class="syn-str">"png"</span>),
+             <span class="syn-str">"text"</span>: p.<span class="syn-fn">get_text</span>()} <span class="syn-kw">for</span> p <span class="syn-kw">in</span> doc]
+
+<span class="syn-cmt"># 2) 分句 + 镜头描述（Claude）</span>
+<span class="syn-kw">def</span> <span class="syn-fn">plan_scene</span>(text, page_idx):
+    msg = claude.messages.<span class="syn-fn">create</span>(model=<span class="syn-str">"claude-opus-4-7"</span>, max_tokens=<span class="syn-num">500</span>,
+        messages=[{<span class="syn-str">"role"</span>: <span class="syn-str">"user"</span>, <span class="syn-str">"content"</span>: <span class="syn-str">f"绘本第{page_idx}页：'{text}'。输出 JSON: prompt(给可灵的视频 prompt), camera, duration_s(5或10)"</span>}])
+    <span class="syn-kw">return</span> json.<span class="syn-fn">loads</span>(msg.content[<span class="syn-num">0</span>].text)
+
+<span class="syn-cmt"># 3) 图 → 视频（Replicate 调可灵）</span>
+<span class="syn-kw">def</span> <span class="syn-fn">i2v</span>(image_path, prompt, dur):
+    <span class="syn-kw">return</span> replicate.<span class="syn-fn">run</span>(<span class="syn-str">"kwaivgi/kling-v2.1-master"</span>,
+        input={<span class="syn-str">"image"</span>: <span class="syn-fn">open</span>(image_path, <span class="syn-str">"rb"</span>), <span class="syn-str">"prompt"</span>: prompt, <span class="syn-str">"duration"</span>: dur})
+
+<span class="syn-cmt"># 4) TTS（MiniMax Speech-02 HD）</span>
+<span class="syn-kw">def</span> <span class="syn-fn">tts</span>(text, voice=<span class="syn-str">"Wise_Woman"</span>):
+    r = requests.<span class="syn-fn">post</span>(<span class="syn-str">"https://api.minimaxi.chat/v1/t2a_v2"</span>,
+        headers={<span class="syn-str">"Authorization"</span>: <span class="syn-str">f"Bearer {MINIMAX_KEY}"</span>},
+        json={<span class="syn-str">"model"</span>: <span class="syn-str">"speech-02-hd"</span>, <span class="syn-str">"text"</span>: text,
+              <span class="syn-str">"voice_setting"</span>: {<span class="syn-str">"voice_id"</span>: voice, <span class="syn-str">"speed"</span>: <span class="syn-num">0.9</span>}})
+    <span class="syn-kw">return</span> r.content  <span class="syn-cmt"># mp3 bytes</span>
+
+<span class="syn-cmt"># 5) 主流程</span>
+<span class="syn-kw">def</span> <span class="syn-fn">animate_book</span>(pdf, out=<span class="syn-str">"out.mp4"</span>):
+    pages = <span class="syn-fn">extract_pages</span>(pdf)
+    clips = []
+    <span class="syn-kw">for</span> i, p <span class="syn-kw">in</span> <span class="syn-fn">enumerate</span>(pages):
+        <span class="syn-fn">open</span>(<span class="syn-str">f"p{i}.png"</span>, <span class="syn-str">"wb"</span>).<span class="syn-fn">write</span>(p[<span class="syn-str">"img"</span>])
+        plan = <span class="syn-fn">plan_scene</span>(p[<span class="syn-str">"text"</span>], i)
+        video_url = <span class="syn-fn">i2v</span>(<span class="syn-str">f"p{i}.png"</span>, plan[<span class="syn-str">"prompt"</span>], plan[<span class="syn-str">"duration_s"</span>])
+        <span class="syn-fn">open</span>(<span class="syn-str">f"p{i}.mp4"</span>, <span class="syn-str">"wb"</span>).<span class="syn-fn">write</span>(requests.<span class="syn-fn">get</span>(video_url).content)
+        <span class="syn-fn">open</span>(<span class="syn-str">f"p{i}.mp3"</span>, <span class="syn-str">"wb"</span>).<span class="syn-fn">write</span>(<span class="syn-fn">tts</span>(p[<span class="syn-str">"text"</span>]))
+        v = <span class="syn-fn">VideoFileClip</span>(<span class="syn-str">f"p{i}.mp4"</span>).<span class="syn-fn">set_audio</span>(<span class="syn-fn">AudioFileClip</span>(<span class="syn-str">f"p{i}.mp3"</span>))
+        clips.<span class="syn-fn">append</span>(v)
+    <span class="syn-fn">concatenate_videoclips</span>(clips).<span class="syn-fn">write_videofile</span>(out, fps=<span class="syn-num">24</span>)
+
+<span class="syn-kw">if</span> __name__ == <span class="syn-str">"__main__"</span>:
+    <span class="syn-fn">animate_book</span>(<span class="syn-str">"caterpillar.pdf"</span>)
+    <span class="syn-cmt"># 30 页 ≈ 15-25 分钟跑完，输出 out.mp4，单本花费 ¥80-120</span></code></pre>
+
+      <div class="callout info">
+        <strong>这段代码真能跑</strong>：替换 Replicate / MiniMax / Anthropic 三个 API Key 就能直接出片。生产化要加：① WhisperX 字幕单词级对齐 ② Remotion 字幕高亮渲染（替换 MoviePy）③ 失败重试 + 中间产物缓存 ④ Slack 通知 ⑤ 角色一致性（用可灵 Multi-Element 而不是 Replicate 简化版）。这 5 项做完代码量约 500-800 行。
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch16 FAQ ============ -->
+  <section class="chapter" id="ch16">
+    <h2><span class="num">16</span><span class="title-text">FAQ · 12 条常见问题</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">国内能不能直接用 Runway / Veo 3 / Sora？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p><strong>Runway</strong>：国内 IP 直接访问受限，需海外网络 + 海外信用卡支付。<strong>不推荐</strong>给国内为主的团队。</p>
+          <p><strong>Veo 3 / Veo 3.1 Lite</strong>：Google 系全套服务国内不可用，Vertex AI / Gemini API 都需要翻墙 + 海外支付。</p>
+          <p><strong>Sora</strong>：已于 <strong>2026-04-26 关停</strong>，2026-09-24 API 也下线，不要再考虑。</p>
+          <p><strong>国内能直接用</strong>：可灵（快手）/ 即梦 Seedance（字节）/ Hailuo（MiniMax）/ Vidu（生数）/ 通义万相（阿里）—— 五家国产模型 2026 年 5 月质量都已经达到「生产可用」，可灵 2.1 Master 是质量最强。</p>
+        </div>
+      </div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">可灵国内版和海外版有什么区别？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p><strong>模型是同一个</strong>，但 API 入口和支付通道不同：</p>
+          <ul>
+            <li>国内：klingai.com + 快手开放平台，人民币支付，需国内手机号实名</li>
+            <li>海外：klingai.com/global + fal.ai / kie.ai / WaveSpeed 等第三方，美元支付</li>
+          </ul>
+          <p>价格基本一致（汇率换算后差 5-10%）。海外版第三方平台经常有免费 quota，可以先在 fal.ai 试用再决定主线。<strong>国内用户做 K12 场景选国内版</strong>，发票 / 合规 / 客服都好。</p>
+        </div>
+      </div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">Wan 2.2 真的能本地跑得动吗？VRAM 要多大？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p><strong>能</strong>。但要分变种看：</p>
+          <ul>
+            <li><strong>Wan 2.2 5B</strong>（FP8 量化）：8-10GB VRAM，<strong>RTX 3060 / 4060 都跑得动</strong>，480p I2V 质量足够日常用</li>
+            <li><strong>Wan 2.2 14B</strong>（FP8）：16-24GB VRAM 跑 480p，需要 RTX 4090（24GB）或 A100；720p 要 40-80GB</li>
+            <li><strong>Wan 2.2 14B GGUF Q4 + T5 CPU offload</strong>：6-8GB VRAM 也能跑 480p，但慢（10-15 分钟/段）</li>
+          </ul>
+          <p>社区项目 <strong>Wan2GP</strong> 专门为消费级 GPU 优化，文档齐全。建议先在 RTX 4090 上验证 workflow，量产时上 AutoDL A100 80GB（¥6/h）。</p>
+        </div>
+      </div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">ElevenLabs 给儿童绘本配音怎么调最自然？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p><strong>关键 3 个设置</strong>：</p>
+          <ul>
+            <li><strong>声音选择</strong>：v3 库里搜 "warm" / "storyteller" / "child-friendly"，挑 30-50 岁女声（母亲式朗读最受儿童欢迎）；不要用「新闻播报」类干声</li>
+            <li><strong>Stability 设置</strong>：30-40%（让情绪起伏，不要 70%+ 那种「机械稳定」）</li>
+            <li><strong>v3 audio tags</strong>：在 prompt 里加 [whispering] / [excited] / [sad] / [curious] / [surprised] —— v3 才支持，v2 不识别</li>
+          </ul>
+          <p><strong>多角色对话</strong>：用 v3 dialogue mode，每个角色独立 voice ID。绘本旁白用一个柔和女声，Caterpillar 用稍年轻 + 好奇的声音，妈妈角色用更成熟的声音。</p>
+          <p><strong>速度</strong>：6 岁以下 0.85x，让小孩跟得上每个词。</p>
+        </div>
+      </div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">PDF 抽页失败 / 文字提取不全怎么办？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p><strong>分两种情况</strong>：</p>
+          <p>① <strong>原生 PDF（带文本层）</strong>：PyMuPDF4LLM 应该一击成功。如果失败，通常是 PDF 字体嵌入异常 —— 试 <code>pdf2image</code> 转图后用 Tesseract / Surya OCR 兜底。</p>
+          <p>② <strong>扫描版绘本</strong>（图片型 PDF）：PyMuPDF 抽不到文字，必须 OCR。2026 年最佳选择 <strong>pdf-craft</strong>（专为扫描书设计）或 <strong>Marker</strong>（多格式 + GPU 加速 OCR）。绘本插画 + 文字混排场景，Marker 把它们分得最干净。</p>
+          <p><strong>低龄绘本</strong>：经常每页只有 1-2 句话 + 大幅插画。这种情况可以直接人工录入文字到 JSON，省 OCR 麻烦（30 页绘本人工 5 分钟搞定）。</p>
+        </div>
+      </div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">角色一致性真做出来效果到底咋样？会不会还是漂？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p><strong>2026 年 5 月真实水平</strong>：</p>
+          <ul>
+            <li><strong>可灵 2.1 Multi-Element Reference</strong>：30 页绘本里同一只 Caterpillar 能保持<strong>肉眼看 90%+ 一致</strong>，偶尔某一段身体段数变化或者颜色饱和度差异。学生不会出戏。</li>
+            <li><strong>Vidu 2.0 Multi-Subject</strong>：多主体场景（角色 + 关键物体）一致性 80-90%，主角识别准但物体细节偶尔偏。</li>
+            <li><strong>开源 IP-Adapter + LoRA 三件套</strong>：训得好的话 95%+，是 2026 年最强方案，但门槛高 + 工时长。</li>
+            <li><strong>纯 prompt 描述（无 reference）</strong>：50% 以下，明显漂移，<strong>不能用</strong>。</li>
+          </ul>
+          <p>实操建议：第一本 demo 用可灵 Multi-Element 跑出来，<strong>对前 3 个学生做盲测</strong>，问"你觉得这是同一只虫子吗？"——如果他们答"是"，就过关。</p>
+        </div>
+      </div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">做一本 30 页绘本到底要花多久？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p><strong>三种路线时间对比</strong>：</p>
+          <ul>
+            <li><strong>路线 A 商业 API</strong>：脚本启动到 mp4 完成 <strong>15-30 分钟</strong>（API 并发跑）</li>
+            <li><strong>路线 B 开源 Wan 2.2 14B @ A100</strong>：<strong>2-4 小时</strong>（每段 5-15 分钟 × 30 段）</li>
+            <li><strong>路线 C 伪动画</strong>：<strong>3-5 分钟</strong>（Ken Burns + AnimateDiff 都是秒级）</li>
+          </ul>
+          <p>这里讲的是<strong>纯生成时间</strong>，不算「人工选 prompt / 调风格 / 改字幕」时间。50 学员阶段允许人工干预，单本含人工大概 1-2 小时（含审核），可量产到日产 3-5 本。</p>
+        </div>
+      </div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">国产 TTS 跟 ElevenLabs 真实差距有多大？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p><strong>差距在缩小</strong>。2026 年 5 月真实评测：</p>
+          <ul>
+            <li><strong>纯英语朗读</strong>：ElevenLabs v3 仍然小幅领先，自然度 + 情绪起伏 + 多角色能力领先 5-10%</li>
+            <li><strong>中文 / 中英双语</strong>：MiniMax Speech-02 HD 略胜 ElevenLabs（中文音色更准、更自然）</li>
+            <li><strong>儿童绘本场景</strong>：MiniMax 的「情绪 preset」+ interjection tag 在儿童场景里很实用</li>
+            <li><strong>价格</strong>：MiniMax $0.10/千字 ≈ 是 ElevenLabs v3 1/2 价格</li>
+          </ul>
+          <p><strong>结论</strong>：国际学校英语绘本场景 ElevenLabs 略优；中英双语 + 国内场景 MiniMax 更适合。可以两家都开账号，按本书需求切换。</p>
+        </div>
+      </div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">为什么不直接用抖音 / 快手散户用的工具就行了？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p><strong>能用，但天花板低</strong>。抖音 / 快手个人创作者用可灵 / 即梦官方网页端 + 剪映拼接，<strong>非自动化</strong>，每本需要人工 1-3 小时干预，规模化困难。</p>
+          <p>半米的工程化目标：</p>
+          <ul>
+            <li>无人值守批量出片（一晚上跑 20 本）</li>
+            <li>统一风格 / 统一角色（学生对系列绘本视觉熟悉）</li>
+            <li>字幕单词级时间戳（教学功能基础）</li>
+            <li>结构化元数据（哪个词在哪一秒，便于词汇追踪）</li>
+            <li>和半米现有词汇系统 / 学习路径打通</li>
+          </ul>
+          <p>这些都是散户手工剪辑做不到的，<strong>是半米的工程护城河</strong>。</p>
+        </div>
+      </div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">Wan 2.2 / LTX-2 / Hunyuan 哪个开源最适合绘本？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p><strong>2026 年 5 月最佳组合</strong>：<strong>Wan 2.2 14B（主力）+ LTX-2 / LTX-Video 2B（快速迭代）</strong>。</p>
+          <ul>
+            <li><strong>Wan 2.2 14B</strong>：Apache 2.0 商用 + 中文社区活跃 + 480p / 720p 灵活 + ComfyUI 节点齐全。绘本场景质量最稳。</li>
+            <li><strong>LTX-Video 2B</strong>：实时（4090 上 30fps）+ 速度比 Wan 快 5-10 倍。调试 prompt / 调风格用它，确定后用 Wan 出最终成片。</li>
+            <li><strong>LTX-2 22B（2026-01 发布）</strong>：原生 audio-video 同步生成，但 22B 参数本地 GPU 吃力，要 A100 起步。</li>
+            <li><strong>HunyuanVideo</strong>：VRAM 60GB+ 太重，不推荐。</li>
+            <li><strong>CogVideoX 1.5</strong>：备份，特殊分辨率（垂直 9:16）时用。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">Sora 已经停服那 OpenAI 是不是退出视频生成了？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p>**官方解释**：算力短缺 + 成本压力 + 战略聚焦企业产品。Sora App <strong>2026-04-26 关停</strong>，API 计划 2026-09-24 全部下线。</p>
+          <p>背后逻辑：OpenAI 把算力优先给 ChatGPT / GPT-5 / 企业产品。视频生成赛道烧钱凶，每秒视频生成成本 $0.05-0.40，规模化亏损严重，竞品（Veo 3 / Kling）有 Google / 快手的算力补贴优势，OpenAI 单打独斗扛不住。</p>
+          <p><strong>对阿杰的影响</strong>：完全没影响，原本就不该把 Sora 列入选型（国内访问受限 + 价格不友好）。继续用可灵 / 即梦 / Wan 即可。</p>
+        </div>
+      </div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q12</span><span class="qtext">半米要不要自己训一个「绘本风」专属模型？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p><strong>50 学员 / 100 本阶段：不要</strong>。</p>
+          <p>原因：</p>
+          <ul>
+            <li>训练一个 fine-tune 模型至少 ¥50,000 算力 + 1-2 人月数据准备</li>
+            <li>50 学员阶段验证的是「学生喜不喜欢」「教学有没有效」，不是「模型多酷」</li>
+            <li>可灵 / Wan 2.2 已经能产出多种风格（卡通 / 写实 / 水彩 / 浮世绘），prompt 工程可覆盖 80% 需求</li>
+          </ul>
+          <p><strong>1000+ 本量产 + 用户付费意愿验证后：可以考虑</strong>。基础选 Open-Sora 2.0（完整训练代码 + 数据 pipeline）或在 Wan 2.2 上做 LoRA fine-tune（更轻量）。专属模型的价值在「视觉风格独占性」—— 让半米绘本看一眼就认得出来。这是阶段 4 的事，2027 年再说。</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p><strong>绘本动画化技术与市场研究</strong> · v1 · 无忌 · 2026-05-24</p>
+  <p>本研究面向半米内部 K12 国际学校 50 学员场景 · 不公开分发 · 商业化前请重新评估版权</p>
+  <p>⚠️ 价格 / 模型版本基于 2026 年 5 月调研，可能随厂商调整变化</p>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+<script>
+  // ===== 主题切换 =====
+  (function() {
+    const saved = localStorage.getItem('storybook-theme');
+    if (saved) document.body.setAttribute('data-theme', saved);
+    const btn = document.getElementById('themeToggle');
+    function syncIcon() {
+      btn.textContent = document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    }
+    syncIcon();
+    btn.addEventListener('click', () => {
+      const cur = document.body.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem('storybook-theme', next);
+      syncIcon();
+    });
+  })();
+
+  // ===== 章节折叠 =====
+  document.querySelectorAll('section.chapter > h2').forEach(h2 => {
+    h2.addEventListener('click', () => {
+      h2.parentElement.classList.toggle('collapsed');
+    });
+  });
+
+  // ===== 顶部进度条 + 回到顶部 =====
+  const progressEl = document.getElementById('progress');
+  const backTopEl = document.getElementById('backToTop');
+  function updateProgress() {
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrolled = window.scrollY;
+    const ratio = docHeight > 0 ? scrolled / docHeight : 0;
+    progressEl.style.width = (ratio * 100) + '%';
+    backTopEl.classList.toggle('show', scrolled > 400);
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+  backTopEl.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // ===== 锚点高亮 =====
+  const anchorLinks = document.querySelectorAll('#anchorList a');
+  const sections = Array.from(anchorLinks).map(a => document.getElementById(a.dataset.target)).filter(Boolean);
+  function highlightAnchor() {
+    const offset = 120;
+    let current = null;
+    for (const sec of sections) {
+      const rect = sec.getBoundingClientRect();
+      if (rect.top - offset <= 0) current = sec.id;
+    }
+    anchorLinks.forEach(a => a.classList.toggle('active', a.dataset.target === current));
+    if (current) {
+      const activeLink = document.querySelector('#anchorList a.active');
+      if (activeLink) {
+        const navWrap = document.querySelector('.anchor-list');
+        const linkRect = activeLink.getBoundingClientRect();
+        const navRect = navWrap.parentElement.getBoundingClientRect();
+        const desiredScroll = activeLink.offsetLeft - navRect.width / 2 + linkRect.width / 2;
+        navWrap.parentElement.scrollTo({ left: desiredScroll, behavior: 'smooth' });
+      }
+    }
+  }
+  window.addEventListener('scroll', highlightAnchor, { passive: true });
+  highlightAnchor();
+
+  // ===== anchor 点击 → 展开折叠章节 =====
+  anchorLinks.forEach(a => {
+    a.addEventListener('click', () => {
+      const target = document.getElementById(a.dataset.target);
+      if (target && target.classList.contains('collapsed')) {
+        target.classList.remove('collapsed');
+      }
+    });
+  });
+
+  // ===== 表格行高亮 =====
+  document.querySelectorAll('tbody tr').forEach(tr => {
+    tr.addEventListener('click', () => {
+      tr.parentElement.querySelectorAll('tr.row-highlight').forEach(o => {
+        if (o !== tr) o.classList.remove('row-highlight');
+      });
+      tr.classList.toggle('row-highlight');
+    });
+  });
+
+  // ===== FAQ =====
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      q.parentElement.classList.toggle('open');
+    });
+  });
+
+  // ===== mini demo: 5 页绘本动画 =====
+  const bookData = [
+    { caption: 'In the light of the moon, a little egg lay on a leaf.', meta: '第 1 / 5 页 · A1 词汇' },
+    { caption: 'One Sunday morning the warm sun came up and—pop!—out of the egg came a tiny and very hungry caterpillar.', meta: '第 2 / 5 页 · A1-A2 词汇' },
+    { caption: 'On Monday he ate through one apple. But he was still hungry.', meta: '第 3 / 5 页 · A1 词汇' },
+    { caption: 'On Saturday he ate through one piece of chocolate cake, one ice-cream cone, one pickle...', meta: '第 4 / 5 页 · A2 词汇' },
+    { caption: 'He was a beautiful butterfly!', meta: '第 5 / 5 页 · A1 词汇' }
+  ];
+
+  let currentPage = 0;
+  let playingInterval = null;
+
+  function renderPage(idx) {
+    currentPage = idx;
+    document.querySelectorAll('.book-scene').forEach((s, i) => {
+      s.classList.toggle('active', i === idx);
+    });
+    document.querySelectorAll('.book-page-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === idx);
+      d.classList.toggle('done', i < idx);
+    });
+    document.getElementById('bookCaption').textContent = bookData[idx].caption;
+    document.getElementById('bookProgress').textContent = bookData[idx].meta;
+  }
+
+  document.getElementById('bookNext').addEventListener('click', () => {
+    renderPage((currentPage + 1) % 5);
+  });
+  document.getElementById('bookPrev').addEventListener('click', () => {
+    renderPage((currentPage - 1 + 5) % 5);
+  });
+  document.querySelectorAll('.book-page-dot').forEach((d, i) => {
+    d.addEventListener('click', () => renderPage(i));
+  });
+
+  document.getElementById('bookPlay').addEventListener('click', function() {
+    if (playingInterval) {
+      clearInterval(playingInterval);
+      playingInterval = null;
+      this.textContent = '▶ 播放';
+      return;
+    }
+    this.textContent = '⏸ 暂停';
+    playingInterval = setInterval(() => {
+      const next = (currentPage + 1) % 5;
+      renderPage(next);
+      if (next === 4) {
+        setTimeout(() => {
+          clearInterval(playingInterval);
+          playingInterval = null;
+          document.getElementById('bookPlay').textContent = '▶ 重放';
+        }, 3500);
+      }
+    }, 3500);
+  });
+
+  document.getElementById('bookTTS').addEventListener('click', function() {
+    const caption = bookData[currentPage].caption;
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(caption);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.85;
+      utterance.pitch = 1.1;
+      window.speechSynthesis.speak(utterance);
+      this.textContent = '🔊 播放中...';
+      utterance.onend = () => { this.textContent = '🔊 模拟 TTS'; };
+    } else {
+      this.textContent = '⚠️ 浏览器不支持';
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>适合半米词汇视频库的 YouTube 频道深度调研 · 阿杰内部使用 · 2026-05-25</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1d23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --border-strong: #cdd2da;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --accent-text: #1d4ed8;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #0891b2;
+    --info-soft: #cffafe;
+    --code-bg: #f1f3f7;
+    --purple: #7c3aed;
+    --purple-soft: #ede9fe;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1c2030;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #b6bcc9;
+    --text-mute: #8a92a3;
+    --border: #2a2f3d;
+    --border-strong: #3a4154;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a55;
+    --accent-text: #93c5fd;
+    --good: #4ade80;
+    --good-soft: #14532d55;
+    --warn: #fbbf24;
+    --warn-soft: #78350f55;
+    --bad: #f87171;
+    --bad-soft: #7f1d1d55;
+    --info: #22d3ee;
+    --info-soft: #155e7555;
+    --code-bg: #0a0d14;
+    --purple: #a78bfa;
+    --purple-soft: #4c1d9555;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  nav.anchor-nav { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; border-top: 1px solid var(--border); background: var(--bg); scrollbar-width: none; }
+  nav.anchor-nav::-webkit-scrollbar { display: none; }
+  .anchor-list { display: flex; gap: 4px; padding: 8px 16px; max-width: 980px; margin: 0 auto; white-space: nowrap; }
+  .anchor-list a { flex: 0 0 auto; min-height: 36px; padding: 7px 12px; border-radius: 999px; font-size: 13px; line-height: 1.3; color: var(--text-soft); text-decoration: none; border: 1px solid transparent; background: var(--bg-soft); transition: all .15s; }
+  .anchor-list a:hover { color: var(--accent-text); }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); font-weight: 600; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 28px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 5000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .node.yes { border-color: var(--good); }
+  .tree .node.no { border-color: var(--bad); }
+  .tree .branches { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  /* Channel card */
+  .ch-card { margin: 12px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .ch-head { padding: 12px 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); }
+  .ch-head .ico { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; background: var(--accent-soft); }
+  .ch-head .name-block { flex: 1; min-width: 140px; }
+  .ch-head .pn { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .ch-head .ph { font-size: 12px; color: var(--text-mute); font-family: ui-monospace, monospace; margin-top: 2px; }
+  .ch-body { padding: 10px 14px; font-size: 14.5px; }
+  .ch-body p { color: var(--text-soft); margin: 6px 0; }
+  .ch-body .stats-row { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12.5px; color: var(--text-soft); margin: 8px 0; padding: 8px 10px; background: var(--bg-soft); border-radius: 6px; }
+  .ch-body .stats-row strong { color: var(--text); }
+  .ch-body .verdict { margin-top: 8px; padding: 8px 10px; border-radius: 8px; border-left: 3px solid; font-size: 13.5px; }
+  .ch-body .verdict.good { background: var(--good-soft); border-color: var(--good); }
+  .ch-body .verdict.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .ch-body .verdict.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .ch-body .verdict::before { font-weight: 700; margin-right: 4px; }
+  .ch-body .verdict.good::before { content: "🟢 推荐："; color: var(--good); }
+  .ch-body .verdict.warn::before { content: "🟡 备选："; color: var(--warn); }
+  .ch-body .verdict.bad::before { content: "🔴 不推："; color: var(--bad); }
+  /* Stage card */
+  .stage-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 16px 0; }
+  .stage-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .stage-head { padding: 10px 14px; background: linear-gradient(135deg, var(--accent-soft), var(--purple-soft)); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .stage-head .badge { padding: 3px 10px; border-radius: 999px; background: var(--accent); color: white; font-weight: 700; font-size: 12px; }
+  .stage-head .stage-title { font-weight: 700; color: var(--text); font-size: 15px; }
+  .stage-body { padding: 10px 14px; font-size: 14px; }
+  /* Matrix */
+  .matrix { display: grid; grid-template-columns: 80px repeat(3, 1fr); gap: 4px; margin: 14px 0; }
+  .matrix .cell { padding: 8px 10px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 6px; font-size: 12.5px; min-height: 70px; }
+  .matrix .cell.header { background: var(--accent-soft); color: var(--accent-text); font-weight: 700; text-align: center; min-height: 32px; display: flex; align-items: center; justify-content: center; }
+  .matrix .cell.row-label { background: var(--purple-soft); color: var(--purple); font-weight: 700; text-align: center; display: flex; align-items: center; justify-content: center; }
+  .matrix .cell ul { margin: 0; padding-left: 16px; font-size: 12px; color: var(--text-soft); }
+  .matrix .cell li { margin: 2px 0; }
+  /* mini demo */
+  .demo-host { margin: 16px 0; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .demo-host h4 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; color: var(--accent-text); }
+  .demo-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 14px; }
+  .demo-chip-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .demo-chip-group .label { font-size: 12px; color: var(--text-mute); font-weight: 600; margin-right: 4px; }
+  .demo-chip { padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-elevated); color: var(--text-soft); font-size: 12.5px; cursor: pointer; transition: all .15s; }
+  .demo-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .demo-result-list { display: grid; gap: 10px; }
+  .demo-card { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; transition: transform .15s, box-shadow .15s; }
+  .demo-card:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: var(--accent); }
+  .demo-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .demo-poster { width: 44px; height: 44px; border-radius: 8px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .demo-meta { flex: 1; min-width: 0; }
+  .demo-title { font-size: 14.5px; font-weight: 700; color: var(--text); }
+  .demo-sub { font-size: 11.5px; color: var(--text-mute); margin-top: 2px; }
+  .demo-pills { margin: 6px 0; display: flex; flex-wrap: wrap; gap: 4px; }
+  .demo-why { font-size: 13px; color: var(--text-soft); padding: 6px 0 0; border-top: 1px dashed var(--border); margin-top: 4px; }
+  .demo-empty { padding: 20px; text-align: center; color: var(--text-mute); font-size: 14px; }
+  .demo-stats { display: flex; gap: 12px; margin: 8px 0 12px; font-size: 12px; color: var(--text-mute); }
+  /* references */
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  sup.cite { font-size: 11px; color: var(--accent-text); font-weight: 700; vertical-align: super; cursor: help; padding: 0 1px; }
+  sup.cite:hover { text-decoration: underline; }
+  @media (max-width: 480px) {
+    .hero { padding: 18px 4px 8px; }
+    .hero h1 { font-size: 22px; }
+    section.chapter > h2 { font-size: 17px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+    .tree .branches { grid-template-columns: 1fr; }
+    .matrix { grid-template-columns: 60px repeat(3, 1fr); }
+    .matrix .cell { min-height: 60px; font-size: 11.5px; padding: 6px 8px; }
+  }
+  @media print {
+    header.topbar, #progress, .back-to-top, nav.anchor-nav { display: none !important; }
+    section.chapter.collapsed .chapter-body { max-height: none !important; padding: 18px 20px 22px !important; }
+    section.chapter.collapsed > h2 .caret { display: none; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">YouTube 频道词汇库选源调研 <span class="tag">v1 · 无忌</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+  <nav class="anchor-nav">
+    <div class="anchor-list" id="anchorList">
+      <a href="#ch1" data-target="ch1">01 执行摘要</a>
+      <a href="#ch2" data-target="ch2">02 阿杰需求</a>
+      <a href="#ch3" data-target="ch3">03 9 格矩阵</a>
+      <a href="#ch4" data-target="ch4">04 A1 启蒙</a>
+      <a href="#ch5" data-target="ch5">05 A2 小学</a>
+      <a href="#ch6" data-target="ch6">06 B1 小高/中学</a>
+      <a href="#ch7" data-target="ch7">07 横向对比</a>
+      <a href="#ch8" data-target="ch8">08 发音/语速</a>
+      <a href="#ch9" data-target="ch9">09 字幕/切片</a>
+      <a href="#ch10" data-target="ch10">10 版权红黄绿</a>
+      <a href="#ch11" data-target="ch11">11 词汇覆盖</a>
+      <a href="#ch12" data-target="ch12">12 半米路线</a>
+      <a href="#ch13" data-target="ch13">13 技术建议</a>
+      <a href="#ch14" data-target="ch14">14 mini demo</a>
+      <a href="#ch15" data-target="ch15">15 FAQ</a>
+      <a href="#ch16" data-target="ch16">16 References</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <div class="hero">
+    <h1>适合半米词汇视频库的 YouTube 频道深度调研<br><span style="font-size: .55em; font-weight: 600;">A1-B1 / 非母语者向 / 慢速 / 20+ 频道深档 + 半米 50/500/5000 三阶段路线</span></h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-25</span>
+      <span>🛠 调研：无忌</span>
+      <span>🎯 半米词汇视频库选源</span>
+      <span>📦 20+ 频道深档</span>
+      <span>📊 4 维度横评</span>
+      <span>🔗 30+ 引用</span>
+    </div>
+    <div class="hero-deck">
+      <strong>三句话结论：</strong>(1) <strong>能直接用、零授权风险的"绿区"频道有 4 家</strong> — VOA Learning English（PD 公共领域）<sup class="cite">[1][2]</sup>、SciShow Kids（Complexly/PBS 教育资助 + Common Sense 认可）<sup class="cite">[3][4]</sup>、Crash Course Kids（同上）<sup class="cite">[5]</sup>、Sesame Workshop YouTube（2026 年起 YouTube 战略合作扩库 + 教育用例预期友好）<sup class="cite">[6][7]</sup>。这四家覆盖 A1→B1 全段、可直接 iframe 嵌入、教育语境下做切片+字幕展示风险极低。(2) <strong>商业 IP 头部"黄区"必须 iframe 嵌入、不可下载二次发布</strong>：Peppa Pig（Hasbro 严格执法）<sup class="cite">[8]</sup>、Cocomelon、Ms Rachel、Bluey、Numberblocks、Steve & Maggie。给学员看可以，切成 mp4 自托管搜索结果不行。(3) <strong>半米 50 学员阶段先做 3 家</strong>：Crash Course Kids（39 集，已在做<sup class="cite">[5]</sup>）+ SciShow Kids（614 视频<sup class="cite">[3]</sup>，已在做）+ VOA Learning English Let's Learn English Level 1/2（PD，零版权风险<sup class="cite">[1]</sup>）。500 学员加入 Sesame Street + English Singsing（5.52M 订阅<sup class="cite">[9]</sup>，韩国制 ESL 专向 + 字幕质量高）+ Easy English 街头采访。**Crash Course 主频道 / TED / Veritasium 全部排除**（180+ WPM 母语者向，超 B2<sup class="cite">[10][11]</sup>）。
+    </div>
+  </div>
+
+  <!-- ============ Ch1 执行摘要 ============ -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">执行摘要 · 3 条核心结论 + 数据快照</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout accent">
+        <p><strong>一句话方案</strong>：半米词汇视频库选源不要在"哪家最好"里纠结 — 按 <strong>授权风险（绿/黄/红）× CEFR 难度（A1/A2/B1）</strong> 切两刀，落到 3×3 的九宫格里，每格选 1-2 家就完事。50 学员阶段先用 3 家全绿区频道，跑出 500 个高频词 × 视频例句的最小可用集；500 学员阶段再扩展到 8-10 家、混入黄区 iframe 嵌入；5000 学员阶段才考虑谈版权或自制。</p>
+      </div>
+
+      <h3>📊 一眼看完核心数字</h3>
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">20+</div><div class="l">深档候选频道</div></div>
+        <div class="metric"><div class="v">4</div><div class="l">绿区零授权风险</div></div>
+        <div class="metric"><div class="v">3</div><div class="l">50 学员先做几家</div></div>
+        <div class="metric"><div class="v">3000</div><div class="l">A2-B1 高频词目标</div></div>
+        <div class="metric"><div class="v">~85%</div><div class="l">前 5 家可覆盖比例（估）</div></div>
+        <div class="metric"><div class="v">95%</div><div class="l">官方英字幕准确率<sup class="cite">[12]</sup></div></div>
+      </div>
+
+      <h3>🎯 三条核心结论</h3>
+
+      <div class="callout good">
+        <p><strong>结论 1 · "先做哪 3 家"答案非常明确：CC Kids + SciShow Kids + VOA Learning English</strong>。前两家阿杰已经在做（<code>scishow-kids-vocab</code> / <code>crashcourse-kids-vocab</code> skill），把已经在做的事做透就是 50 学员阶段的正解，别贪多。VOA 是 PD 公共领域<sup class="cite">[1][2]</sup>，可以放心切片自托管 — 这是"自建视频词典"的安全底座。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>结论 2 · Peppa Pig / Cocomelon / Ms Rachel 这种顶流 IP 只能 iframe 嵌入，不要试图下载切片自托管</strong>。Hasbro 旗下 Entertainment One 对 Peppa 商标 + 著作权执法非常激进（Wolfoo 案<sup class="cite">[8]</sup>）。商业 ESL 产品做下载剪辑会被 Content ID 自动识别 + 三振下号<sup class="cite">[13]</sup>。<strong>iframe 跳秒嵌入是被多个判例认可的合法路径</strong>（Seventh Circuit 判例：embed 不构成侵权）<sup class="cite">[14]</sup>。</p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>结论 3 · Crash Course 主频道 / TED / TED-Ed / Veritasium 全部排除</strong>。John Green 主讲的 Crash Course 主频道公认"语速极快，需要 0.5-0.75 倍速才能跟"<sup class="cite">[10][11]</sup>，单视频 10-15 分钟塞满 C1+ 学术词汇。TED-Ed 受众 13-21 岁<sup class="cite">[15]</sup>、动画 4-7 分钟但词汇 B2+。这些是给母语者或高阶学习者的，跟半米 K12 ESL 受众完全不在一个频道上。<strong>注意：CC Kids（Sabrina Cruz 主讲）是另一回事，必收</strong>。</p>
+      </div>
+
+      <h3>🟢🟡🔴 三色频道概览</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>颜色</th><th>含义</th><th>典型频道</th><th>半米能做啥</th></tr></thead>
+          <tbody>
+            <tr><td>🟢 绿区</td><td>PD/教育资助/CC 友好</td><td>VOA Learning English、SciShow Kids、CC Kids、Sesame Workshop</td><td>下载切片 + 自托管 + 字幕索引 + 词典内嵌</td></tr>
+            <tr><td>🟡 黄区</td><td>商业 IP 但默认允许 embed</td><td>Peppa Pig、Cocomelon、Ms Rachel、Bluey、Numberblocks、Steve & Maggie、English Singsing、BBC Learning English</td><td>iframe + 跳秒嵌入；展示官方字幕；<strong>不可下载</strong></td></tr>
+            <tr><td>🔴 红区</td><td>不适合半米受众</td><td>Crash Course 主、TED、TED-Ed、Veritasium、Vsauce、新闻台</td><td>排除，语速 / 词汇 / 受众错位</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch2 阿杰需求 ============ -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">阿杰需求拆解（4 维度 + 排除清单）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>正式选频道之前，把"半米要什么"先翻译成可筛选的指标。阿杰原话是 4 条硬约束 — 我把每条都翻译成可量化的阈值。</p>
+
+      <h3>4 维度硬约束（必须同时满足）</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>维度</th><th>阿杰原话</th><th>量化阈值</th><th>判断依据</th></tr></thead>
+          <tbody>
+            <tr><td>🎓 难度</td><td>A1-B1，不要 B2/C1</td><td>词汇主体在 Oxford 3000 范围内<sup class="cite">[16]</sup>；高频词占 ≥80%</td><td>B1 学员词汇量约 2000 词<sup class="cite">[16]</sup>，2000 词覆盖 ~80% 文本</td></tr>
+            <tr><td>📝 句子难度</td><td>单词所在句不要太难</td><td>平均句长 ≤12 词；从句嵌套 ≤2 层；无大量学术 / 文学修辞</td><td>EFL 阅读心理学界共识</td></tr>
+            <tr><td>⏱ 语速</td><td>不要太快</td><td>WPM ≤140；理想 100-130<sup class="cite">[17][18]</sup></td><td>对儿童 110-130 WPM；对非母语者 120-130 WPM<sup class="cite">[17]</sup>。EFL 研究：98 WPM 显著提升儿童听力理解<sup class="cite">[18]</sup></td></tr>
+            <tr><td>👥 受众</td><td>K12 + ESL 非母语者</td><td>preschool / primary / lower secondary 段；非"general adult viewer"</td><td>阿杰核心学员国际学校 K12<sup class="cite">[19]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>🔴 明确排除清单（不在频道库里）</h3>
+
+      <div class="callout bad">
+        <p><strong>不要的频道类型</strong>：</p>
+        <ul>
+          <li><strong>Crash Course 主频道</strong>（John Green 主讲 / 180+ WPM / 学术词汇 / 17M 订阅<sup class="cite">[20]</sup>但受众 13-34 岁）<sup class="cite">[10][11]</sup></li>
+          <li><strong>TED / TED-Ed</strong>（受众 13-21 岁<sup class="cite">[15]</sup> / 平均 150+ WPM / B2-C1）</li>
+          <li><strong>BBC News / CNN / Sky News</strong>（母语者向新闻 / 150+ WPM）</li>
+          <li><strong>Veritasium / Vsauce / Kurzgesagt</strong>（C1+ 学术 / 复杂逻辑 / 长视频）</li>
+          <li><strong>纯 podcast 类</strong>（无视频，无法做"看口型 + 看场景"的多模态绑定）</li>
+          <li><strong>母语者向 vlog</strong>（如 Casey Neistat / Mr Beast — 非教学语境，俚语多）</li>
+        </ul>
+      </div>
+
+      <h3>💡 注意分清：CC Kids ≠ Crash Course 主频道</h3>
+
+      <div class="callout info">
+        <p><strong>容易踩的坑</strong>：阿杰说"不要 Crash Course"指的是 John Green 主讲的<strong>主频道</strong>（@crashcourse，17M+ 订阅<sup class="cite">[20]</sup>）。但 <strong>Crash Course Kids</strong>（@crashcoursekids，Sabrina Cruz 主讲<sup class="cite">[5]</sup>）是 3-5 年级科学专向频道、语速明显放慢、词汇贴 NGSS 小学课标 — 必须收。阿杰自己的 <code>crashcourse-kids-vocab</code> skill 已经在用<sup class="cite">[19]</sup>。SciShow Kids 同理：SciShow 主频道是 8M+ 订阅<sup class="cite">[21]</sup>的通用科普，SciShow Kids（1.6M 订阅<sup class="cite">[22]</sup>）是低龄分支、Jessi Knudsen Castañeda 主讲<sup class="cite">[3]</sup>。</p>
+      </div>
+
+      <h3>📐 半米和"通用 ESL 找频道"的差别</h3>
+
+      <p>同样是给学英语找 YouTube 频道，半米跟"我自己想学英语找 channel"有三个本质区别：</p>
+
+      <ol>
+        <li><strong>不是给人看，是给词条建例句</strong>：词汇软件做"happy 这个词在视频里怎么说"，要的是 5-15 秒的<strong>句子级片段</strong>，不是 10 分钟讲一个 topic。所以场景的<strong>独立可截</strong>性比频道大小重要。</li>
+        <li><strong>规模化，要词频覆盖</strong>：单个 highly viral 视频不如 500 个普通视频，因为后者能覆盖更多词汇。"频道存量"比"频道流量"重要。</li>
+        <li><strong>商业产品身份</strong>：阿杰要做付费产品，不是个人学习。Fair Use 教育豁免对<strong>非营利 face-to-face</strong>课堂适用<sup class="cite">[23]</sup>，但对商业 SaaS 不适用 — 必须靠 iframe embed 或正经授权。</li>
+      </ol>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch3 9 格矩阵 ============ -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">频道分类总览（CEFR × 授权 的 9 格矩阵）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>20+ 候选频道塞进 3×3 矩阵 — 横轴 CEFR 难度（A1 启蒙 / A2 小学 / B1 小高初阶），纵轴授权状态（🟢 / 🟡 / 🔴）。这张表是后面所有章节的索引。</p>
+
+      <div class="matrix">
+        <div class="cell header">A1 启蒙</div>
+        <div class="cell header">A2 小学</div>
+        <div class="cell header">B1 小高/初中</div>
+        <div class="cell row-label">🟢 绿区</div>
+        <div class="cell">
+          <ul>
+            <li><strong>Sesame Workshop</strong> 段子片段<sup class="cite">[7]</sup></li>
+            <li>(部分 PBS Kids 公益)</li>
+          </ul>
+        </div>
+        <div class="cell">
+          <ul>
+            <li><strong>SciShow Kids</strong> 🌟<sup class="cite">[3]</sup></li>
+            <li><strong>Crash Course Kids</strong> 🌟<sup class="cite">[5]</sup></li>
+            <li>Free School<sup class="cite">[24]</sup></li>
+          </ul>
+        </div>
+        <div class="cell">
+          <ul>
+            <li><strong>VOA Learning English</strong> 🌟<sup class="cite">[1]</sup></li>
+            <li>(VOA 是 PD，可下载)</li>
+          </ul>
+        </div>
+        <div class="cell row-label">🟡 黄区</div>
+        <div class="cell">
+          <ul>
+            <li>Peppa Pig<sup class="cite">[8]</sup></li>
+            <li>Cocomelon<sup class="cite">[25]</sup></li>
+            <li>Ms Rachel<sup class="cite">[26]</sup></li>
+            <li>Super Simple Songs<sup class="cite">[27]</sup></li>
+            <li>Pinkfong<sup class="cite">[28]</sup></li>
+            <li>Mother Goose Club<sup class="cite">[29]</sup></li>
+          </ul>
+        </div>
+        <div class="cell">
+          <ul>
+            <li>Steve & Maggie<sup class="cite">[30]</sup></li>
+            <li>English Singsing<sup class="cite">[9]</sup></li>
+            <li>English Tree TV<sup class="cite">[31]</sup></li>
+            <li>Maple Leaf Learning<sup class="cite">[32]</sup></li>
+            <li>Bluey<sup class="cite">[33]</sup></li>
+            <li>Numberblocks<sup class="cite">[34]</sup></li>
+            <li>Storyline Online<sup class="cite">[35]</sup></li>
+            <li>Smile and Learn<sup class="cite">[36]</sup></li>
+          </ul>
+        </div>
+        <div class="cell">
+          <ul>
+            <li>BBC Learning English<sup class="cite">[37]</sup></li>
+            <li>Easy English (Mitch & Isi)<sup class="cite">[38]</sup></li>
+            <li>Bob the Canadian<sup class="cite">[39]</sup></li>
+            <li>Learn English with Papa Teach Me<sup class="cite">[40]</sup></li>
+            <li>British Council LearnEnglish Kids<sup class="cite">[41]</sup></li>
+            <li>Oxford Online English<sup class="cite">[42]</sup></li>
+          </ul>
+        </div>
+        <div class="cell row-label">🔴 红区</div>
+        <div class="cell"><em>（A1 段几乎没有红区，启蒙内容天然合规）</em></div>
+        <div class="cell">
+          <ul>
+            <li>(无 — A2 段也没有特别红的)</li>
+          </ul>
+        </div>
+        <div class="cell">
+          <ul>
+            <li>Crash Course 主<sup class="cite">[20]</sup></li>
+            <li>TED / TED-Ed<sup class="cite">[15]</sup></li>
+            <li>Veritasium / Vsauce</li>
+            <li>BBC News / CNN</li>
+            <li>English with Lucy（B2+，11.6M 订阅<sup class="cite">[43]</sup>）</li>
+            <li>mmmEnglish（B1-C1，受众成人<sup class="cite">[44]</sup>）</li>
+          </ul>
+        </div>
+      </div>
+
+      <p style="font-size: 13px; color: var(--text-mute); margin-top: 12px;">🌟 = 阿杰已经在用或最优先；红区 B1 这一格是"看着是 B1 但实际偏 B2+"的"伪 B1"频道，放进来是为了让阿杰一眼能筛掉。English with Lucy 主讲 Lucy Earl 是英语母语者向<strong>高级</strong>British English 教学频道<sup class="cite">[43]</sup>，跟半米核心 K12 受众错位。</p>
+
+      <h3>📌 矩阵阅读指引</h3>
+
+      <ul>
+        <li><strong>左上角（A1 + 绿区）几乎是空的</strong> — 因为 A1 启蒙频道几乎都是商业 IP（顶流卡通是钱赚出来的）。Sesame Workshop 是少数例外，因为它本身是非盈利组织 + 教育资助<sup class="cite">[7]</sup>。</li>
+        <li><strong>中间这一行（A2 + 绿区）是金矿</strong> — SciShow Kids + CC Kids + Free School 三家是半米词汇库 A2 段的核心来源。</li>
+        <li><strong>VOA 是 B1 段唯一的"绝对安全牌"</strong> — 公共领域（PD）<sup class="cite">[1][2]</sup>，可以直接下载 + 切片 + 转载，连 attribution 都不强求。</li>
+        <li><strong>红区下半部 "B2 ESL 频道"</strong>（English with Lucy / mmmEnglish 等）订阅数都很高，容易被误推，要明确排除。它们是给已经 B1+ 的成人学习者用的，词汇过深且语速偏快。</li>
+      </ul>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch4 A1 启蒙 ============ -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">A1 启蒙级频道深档（preschool / K-1）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>A1 段都是给 2-6 岁孩子看的，语速最慢、词汇最简。这一段在半米里主要服务"零基础新手村"或"K-1 学员"。<strong>合规上几乎全是黄区</strong> — 商业大 IP 主导，必须 iframe 嵌入。</p>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🐷</div>
+          <div class="name-block">
+            <div class="pn">Peppa Pig - Official Channel</div>
+            <div class="ph">@peppapigofficial · UK · BrE</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 42.6M（2025-12）<sup class="cite">[45]</sup> · <strong>视频</strong> 8,986 · <strong>上线</strong> 2007（剧）/ 2014（频道） · <strong>WPM</strong> ~110-120（估，学界共识"故意放慢"<sup class="cite">[46]</sup>）
+          </div>
+          <p>ESL 启蒙界事实上的标准。学界论文专门研究 "Learning English with Peppa Pig"，公认它具备<strong>词汇简单、语速慢、高频重复</strong>三大设计优势<sup class="cite">[46][47]</sup>。BrE 口音 + 短句 + 家庭场景词高度集中（家具、食物、动物、动作动词）。</p>
+          <p><strong>字幕</strong>：官方英文字幕齐全；自动字幕准确率 95%（清晰录音棚 + 单一说话人）<sup class="cite">[12]</sup>。 <strong>切片可行性</strong>：4-5 分钟一集，场景独立性强，几乎每个句子都可单独取片段。<strong>授权</strong>：Hasbro 旗下 Entertainment One 拥有，2019 年 Hasbro 38 亿美元收购<sup class="cite">[8]</sup>，对未授权使用执法激进（Wolfoo 案）。</p>
+          <div class="verdict warn">iframe 嵌入到学员端做"happy 这词在 Peppa 里怎么说"完全 OK；切成 mp4 自托管搜索结果有 Content ID 风险。半米 500 学员阶段加入。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🎵</div>
+          <div class="name-block">
+            <div class="pn">Super Simple Songs - Kids Songs</div>
+            <div class="ph">@supersimplesongs · Canada · AmE</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 45.7M（2025-11）<sup class="cite">[27]</sup> · <strong>总播放</strong> 59.1B · <strong>上线</strong> 2006（Tokyo 教室起源）· 频道全球排名 #122
+          </div>
+          <p>2005 年由两个东京 ESL 老师为给孩子教英语而设计的歌曲集。<strong>"为 ESL 而生"</strong>是这家最大卖点 — 歌词刻意慢、刻意重复、配合手势（学界 TPR 教学法）。AmE 中性口音。歌曲长度 2-5 分钟为主，重复词最多的视频每个词出现 10+ 次。</p>
+          <p><strong>字幕</strong>：官方英文歌词字幕齐全。<strong>切片可行性</strong>：歌曲整段为单位，单句切片不如对话类频道方便。<strong>授权</strong>：Skyship Entertainment 持有，商业授权流程清晰但严格。</p>
+          <div class="verdict warn">A1 启蒙顶流，但"歌曲式词条例句"在词汇产品里不如对话类自然 — 学员"听过有印象"但听写难度大。建议作为补充而不是主力。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">👩</div>
+          <div class="name-block">
+            <div class="pn">Ms Rachel - Toddler Learning Videos</div>
+            <div class="ph">@msrachel · US · AmE</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 18.3M（2025-末）<sup class="cite">[26]</sup>（年初 13M<sup class="cite">[26]</sup>，年增 5M） · <strong>真人教师</strong> · 言语治疗师推荐 · 2025 Netflix 签约
+          </div>
+          <p>2025 年最现象级的 ESL 启蒙增长。真人教师 Rachel Accurso 用言语治疗师推荐的<strong>"放慢 + 等待 + 模仿"</strong>方法教 1-3 岁孩子第一批词<sup class="cite">[26]</sup>。AmE 中西部口音，词汇极度集中在 First 100 Words（颜色、动物、动作、家庭成员）。</p>
+          <p><strong>字幕</strong>：官方齐全。<strong>切片可行性</strong>：单视频 30-60 分钟连放、内部分多段子，可用工具按句切。<strong>授权</strong>：Songs for Littles LLC 独立持有，2025 年 Netflix 签约后 IP 管控更严<sup class="cite">[26]</sup>。</p>
+          <div class="verdict warn">如果半米要做"0 基础 ESL 学员的第一批词"，Ms Rachel 是 First Words 段最强单家。但词汇范围窄（设计就是只教 100 词），不适合做核心 3000 词覆盖。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🦈</div>
+          <div class="name-block">
+            <div class="pn">Pinkfong Baby Shark / Kids' Songs & Stories</div>
+            <div class="ph">@pinkfong · South Korea · AmE</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 84M（2025-11）<sup class="cite">[28]</sup> · 全家族跨频道 240M · YouTube 排名 #22 · 韩国 The Pinkfong Company
+          </div>
+          <p>韩国制作的全球 ESL 启蒙巨头，Baby Shark Dance 是 YouTube 史上播放最高单视频（16.4B 播放）<sup class="cite">[28]</sup>。歌曲为主、动物 / 食物 / 安全词重复极多。AmE 中性口音，无明显韩式英语痕迹（专业本地化）。</p>
+          <div class="verdict warn">和 Super Simple Songs 同一定位（歌曲启蒙），加进来作为 AmE 补充就够。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🌳</div>
+          <div class="name-block">
+            <div class="pn">Sesame Street + Sesame Workshop</div>
+            <div class="ph">@sesamestreet · US · AmE</div>
+          </div>
+          <span class="pill good">🟢 绿区（教育性）</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> ~28M（多频道合计）<sup class="cite">[6]</sup> · <strong>过去 1 年播放</strong> 5B+（同比 +130%）· <strong>2026-01 起</strong> YouTube 数百集全集上线<sup class="cite">[6][7]</sup>
+          </div>
+          <p>非盈利 Sesame Workshop 运营，2026 年起 YouTube 成为 Sesame Street 最大数字内容库<sup class="cite">[6][7]</sup>。Sesame Workshop 同时推出 <strong>Sesame Street English</strong> — 专为 3-18 岁 ESL/EFL 学习者设计的多媒体课程<sup class="cite">[48]</sup>。AmE，57 年的台词词汇曲线被研究透了。</p>
+          <p><strong>授权</strong>：版权仍属 Sesame Workshop（不是 CC），但 Workshop 是非营利、与 YouTube 2026 战略合作扩展教育用例 — 教育语境下做引用 / iframe 嵌入 / 字幕索引几乎肯定不会被起诉，比 Hasbro 系友好得多。</p>
+          <div class="verdict good">A1-A2 阶段最优的"绿色感"商业 IP。半米 500 学员阶段必加。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🐻</div>
+          <div class="name-block">
+            <div class="pn">Cocomelon - Nursery Rhymes</div>
+            <div class="ph">@cocomelon · US · AmE</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> ~198-201M（2025-11）<sup class="cite">[25]</sup> · <strong>视频</strong> 1.8K · <strong>总播放</strong> 212B · 全 YouTube 排名 #3
+          </div>
+          <p>世界最大儿童频道（kids 类目第 1）<sup class="cite">[25]</sup>。3D 动画 + 经典童谣 + 原创歌。AmE。但<strong>太低龄</strong>是缺点 — 半米 K12 学员可能觉得幼稚。建议只用其中"日常情境短句"段，不要主推。</p>
+          <div class="verdict warn">订阅最大但不一定最适配 K12。能用，不优先。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🪿</div>
+          <div class="name-block">
+            <div class="pn">Mother Goose Club + Dream English Kids</div>
+            <div class="ph">@MotherGooseClub / @dreamenglishkids · US · AmE</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>MGC 订阅</strong> 7M+<sup class="cite">[29]</sup> · <strong>总播放</strong> 8B+ · 2007 创立 · <strong>Dream English</strong>（Matt Stamp）专为 Pre-K / ESL 设计<sup class="cite">[49]</sup>
+          </div>
+          <p>两家美国传统 ESL 启蒙频道。Mother Goose 用真人 cosplay 童谣，Dream English 是单人吉他 + 歌曲。两家都是慢速 + 重复 + AmE，但视频陈旧（2010s 居多），近年更新不多。</p>
+          <div class="verdict warn">老牌可靠，但内容量级和 Super Simple Songs / Cocomelon 比小很多。备选不优先。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🐶</div>
+          <div class="name-block">
+            <div class="pn">Bluey - Official Channel</div>
+            <div class="ph">@bluey · Australia · AusE</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 10M+<sup class="cite">[33]</sup> · <strong>2018 起</strong> ABC Kids · Ludo Studio 制作 · 言语习得研究案例<sup class="cite">[50]</sup>
+          </div>
+          <p>2025 年最受研究界关注的儿童剧 — 美国小孩看 Bluey 后会冒澳式表达（"brekky"、"rubbish bin"），说明<strong>儿童对 TV 词汇敏感性</strong>极高<sup class="cite">[33][50]</sup>。家庭对话场景特别贴近真实口语，比 Peppa 自然度高。但澳式英语口音对国际学校 K12 学员可能产生口音偏差<strong>取舍点</strong>。</p>
+          <div class="verdict warn">作为"口音多样性"加入很好，但不应做主力（半米学员可能要应对托福 / 雅思 / 国际学校口音偏美/英）。</div>
+        </div>
+      </div>
+
+      <h3>🔍 A1 段总结</h3>
+
+      <div class="callout info">
+        <p><strong>A1 段半米能用 3-5 家就够</strong>：Sesame Workshop（绿区，2026 内容暴增）+ Peppa Pig（黄区 iframe 嵌入）+ Super Simple Songs（黄区，歌曲补充）+ 可选 Ms Rachel（First Words 段最强）+ 可选 Bluey（家庭对话）。<strong>Cocomelon / Pinkfong / 童谣类不优先</strong> — 它们订阅高但词条贡献度不如对话类。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch5 A2 小学 ============ -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">A2 小学级频道深档（primary K-3 / 半米最重要的一档）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>这一段是半米词汇库的<strong>核心阵地</strong> — 国际学校 K12 主体在 G3-G6，对应 CEFR A2-B1，词汇 1000-2000 词，需要"能讲故事讲科学但说话不复杂"的频道。<strong>SciShow Kids + CC Kids 是金牌组合</strong>。</p>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🔬</div>
+          <div class="name-block">
+            <div class="pn">SciShow Kids 🌟（阿杰已用）</div>
+            <div class="ph">@SciShowKids · US · AmE · Complexly / PBS Digital Studios</div>
+          </div>
+          <span class="pill good">🟢 绿区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 1.6M（2026-04）<sup class="cite">[22]</sup>（2025 初 1.3M，1.5M 中段；vidIQ 月增 20K） · <strong>视频</strong> 614<sup class="cite">[22]</sup> · <strong>总播放</strong> 385M · <strong>上线</strong> 2014 · <strong>主讲</strong> Jessi Knudsen Castañeda
+          </div>
+          <p>Complexly（Hank Green 公司）+ PBS Digital Studios 联合制作，定位 Grade 1-3 NGSS 课标科学<sup class="cite">[3]</sup>。每集 3-5 分钟一个科学问题。Common Sense Media WISE 认证<sup class="cite">[51]</sup>。AmE，主讲清晰，配合实景实验 + 卡通虚拟伙伴 Squeaks。词汇科学专向但每集主题词不超 5 个新词、其余都是 A2 常用词。</p>
+          <p><strong>字幕</strong>：官方英文字幕齐全。<strong>切片可行性</strong>：每集 5 分钟内含 30-50 个独立句子，几乎每句可单独截。<strong>授权</strong>：PBS / Complexly 教育资助频道，教育非营利使用合理使用强。商业 SaaS 嵌入更适合 iframe 路径，下载切片自托管走教育合理使用空间。</p>
+          <div class="verdict good">半米 50 学员阶段就要在用。阿杰 <code>scishow-kids-vocab</code> skill 已经在做，方向正确，继续。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🎒</div>
+          <div class="name-block">
+            <div class="pn">Crash Course Kids 🌟（阿杰已用 · 注意不是主频道）</div>
+            <div class="ph">@crashcoursekids · US · AmE · Complexly</div>
+          </div>
+          <span class="pill good">🟢 绿区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> ~1M（估，订阅页未直显）<sup class="cite">[5]</sup> · <strong>视频</strong> ~50 集（完结系列）· <strong>上线</strong> 2015-03 · <strong>主讲</strong> Sabrina Cruz
+          </div>
+          <p>Complexly 2015 年推出的 Grade 3-5 科学专向频道，Sabrina Cruz 主讲<sup class="cite">[5]</sup>，已完结一个完整科学系列（Earth / Habitats / Space / Chemical Reactions / Engineering）。<strong>语速明显比 Crash Course 主频道慢</strong> — 同一公司不同节目，主讲风格刻意调慢以适配小学生。词汇 A2-B1，NGSS 课标对齐。</p>
+          <p><strong>关键区分</strong>：不是 John Green 主讲的那个 Crash Course 主频道（17M 订阅、180 WPM、C1 词汇）<sup class="cite">[20]</sup>。<strong>必须收，必须只收 Kids 版</strong>。</p>
+          <div class="verdict good">阿杰 <code>crashcourse-kids-vocab</code> skill 已经在做<sup class="cite">[19]</sup>。50 学员阶段双主力（与 SciShow Kids 配对）。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">📚</div>
+          <div class="name-block">
+            <div class="pn">Free School</div>
+            <div class="ph">@FreeSchool · US · AmE</div>
+          </div>
+          <span class="pill good">🟢 绿区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 885K<sup class="cite">[24]</sup> · <strong>视频</strong> 336 · <strong>总播放</strong> 294M · <strong>上线</strong> 2014 · 主题：科学 + 历史 + 文学 + 数学
+          </div>
+          <p>独立教育者运营，"温柔精致"风格的 K12 科普<sup class="cite">[24]</sup>。AmE 单人旁白 + 高质量动画 / 实景画面。语速比 SciShow Kids 还慢，词汇覆盖比 CC Kids 更广（不只科学，包括艺术史 / 名画 / 经典文学概述）。</p>
+          <div class="verdict good">半米词汇库的"长尾词"补充神器。SciShow Kids 没有的"莫扎特"、"梵高"、"古希腊"等主题词在 Free School 都能找到。500 学员阶段必加。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🦒</div>
+          <div class="name-block">
+            <div class="pn">National Geographic Kids (Nat Geo Kids)</div>
+            <div class="ph">@natgeokids · US · AmE / BrE 双线</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> ~1M+（具体数 vidIQ 未公开拆分<sup class="cite">[52]</sup>）· <strong>2014 起</strong>独立频道 · 主题：动物 + 自然 + 科学 + 旅行 · Disney 旗下
+          </div>
+          <p>Nat Geo 给孩子的子品牌，Science Camp / Weird But True / Destination World 等系列<sup class="cite">[52]</sup>。AmE 主，部分 BrE 英国主持。词汇集中在动物 / 自然 / 地理 / 物理常识，与 SciShow Kids 互补（一个偏实验、一个偏自然世界）。</p>
+          <p><strong>授权</strong>：Disney 2025 年扩展 Nat Geo 数字内容<sup class="cite">[53]</sup>，主播个人不参与商业化，但商业 IP 自托管切片有风险。</p>
+          <div class="verdict warn">A2 段第二梯队。iframe 嵌入合规，下载切片有 Disney 风险。500 学员可加入。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🇰🇷</div>
+          <div class="name-block">
+            <div class="pn">English Singsing（韩国制 ESL 专向）</div>
+            <div class="ph">@EnglishSingsing · US/Korea · AmE</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 5.52M<sup class="cite">[9]</sup> · <strong>视频</strong> 1,710 · <strong>总播放</strong> 1.38B · <strong>上线</strong> 2014 · 月增 30K 订阅 · 月播放 23M<sup class="cite">[9]</sup>
+          </div>
+          <p>韩国（Genki English 体系延伸）专门为非母语者设计的 ESL 启蒙频道，AmE 标准发音<sup class="cite">[9][54]</sup>。<strong>词汇结构化是它最大优势</strong> — 每段视频明确围绕一个语言点（颜色 / 时间 / 短对话 / TPR 动作），字幕清晰，每句重复至少 2 遍。1710 视频规模够大，方便词频覆盖。</p>
+          <div class="verdict good">A2 段强烈推荐 — 唯一一家"为半米这种受众设计"的非西方频道。500 学员阶段加入，可能扛起对话场景词的主力。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🌳</div>
+          <div class="name-block">
+            <div class="pn">English Tree TV</div>
+            <div class="ph">@englishtree · US · AmE</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 2.7M（一说 3.5M）<sup class="cite">[31]</sup> · <strong>视频</strong> 499 · <strong>总播放</strong> 3.8B · 自述"慢速清晰 + ESL 学生为本"
+          </div>
+          <p>原创歌曲 / 故事 / 卡通 + 自家配音<sup class="cite">[31]</sup>。明确为 ESL 设计、"slow and clear speech easy to follow"是官方定位。词汇 A1-A2 偏 phonics / 字母 / 数字 / 科学常识。</p>
+          <div class="verdict good">A2 段次主力，与 English Singsing 互补（一家强对话、一家强歌曲叙事）。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🍁</div>
+          <div class="name-block">
+            <div class="pn">Maple Leaf Learning</div>
+            <div class="ph">@MapleLeafLearning · Japan · AmE/CanE</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 803K<sup class="cite">[32]</sup> · 日本本土英语学校在内部测试制作 · ESL/EFL 课堂专用<sup class="cite">[32]</sup>
+          </div>
+          <p>日本本土英语学校自制频道<sup class="cite">[32]</sup>，"经验丰富老师内部测试"的设计理念决定了它非常贴近 ESL 课堂实操 — 短歌、TPR 动作指令、问候、动作动词。AmE/CanE 中性口音。</p>
+          <div class="verdict warn">订阅 803K 不算大但定位非常匹配。备选不优先。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🐕</div>
+          <div class="name-block">
+            <div class="pn">Steve and Maggie (Wow English TV)</div>
+            <div class="ph">@SteveAndMaggie · UK · BrE</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 7.42M<sup class="cite">[30]</sup> · <strong>视频</strong> 544 · <strong>总播放</strong> 8.85B · <strong>上线</strong> 2014 · Wattsenglish 出品
+          </div>
+          <p>Wattsenglish 公司出品，Steve（真人）+ Maggie（鸟玩偶）双主持<sup class="cite">[30]</sup>。BrE 清晰，专为非母语 4-7 岁孩子设计。日播放 300 万，证明在 ESL 市场需求强劲。</p>
+          <div class="verdict good">BrE 段最强 ESL 专向频道。如果半米想给 BrE 口音加权（部分国际学校教 BrE），优先级仅次于 SciShow Kids / CC Kids。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">📖</div>
+          <div class="name-block">
+            <div class="pn">Storyline Online</div>
+            <div class="ph">@storylineonline · US · AmE · SAG-AFTRA Foundation</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 908K<sup class="cite">[35]</sup> · 演员（Viola Davis / Meryl Streep / Oprah Winfrey / Chris Pine 等 90+ 人）朗读经典童书 · 配套教学资料
+          </div>
+          <p>SAG-AFTRA Foundation 出品的非营利项目<sup class="cite">[35]</sup>。每个视频 5-15 分钟，演员朗读一本绘本。AmE 中性。词汇绘本级，A1-A2 适配。<strong>大优势</strong>：每本书有配套 literacy specialist 设计的教学资料，词频已知。</p>
+          <div class="verdict good">绿色感商业 IP（非营利 + 教育配套），半米 500 学员可加。但内容量级小（200 本左右），适合做精品例句不适合做规模。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🏫</div>
+          <div class="name-block">
+            <div class="pn">Khan Academy Kids</div>
+            <div class="ph">@khanacademykids · US · AmE</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 167K<sup class="cite">[55]</sup> · 非营利 Khan Academy 旗下 2-8 岁 app 衍生频道 · 月增 7K
+          </div>
+          <p>Khan Academy 旗下 2-8 岁的低龄 app 内容向 YouTube 镜像<sup class="cite">[55]</sup>。订阅相对小（主流量在 app 内），频道更多是营销引流。授权属于 CC BY-NC-SA（与 Khan 主体一致），半米作为商业 SaaS 嵌入需小心 NC 条款。</p>
+          <div class="verdict warn">CC BY-NC-SA 的 NC（非商业）条款对半米有风险 — 不建议作为主要源。可参考但谨慎引用。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">📺</div>
+          <div class="name-block">
+            <div class="pn">PBS Kids（含 Daniel Tiger / Wild Kratts / Odd Squad / Pinkalicious 等）</div>
+            <div class="ph">@PBSKIDS · US · AmE · 非营利公共广播</div>
+          </div>
+          <span class="pill good">🟢 绿区（公共广播）</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 3.1M<sup class="cite">[56]</sup> · <strong>总播放</strong> 3.4B · <strong>视频</strong> 4,300 · 服务 2-8 岁
+          </div>
+          <p>美国公共广播旗下，非营利定位<sup class="cite">[56]</sup>。Wild Kratts（9 Story 制作版 2.15M 订阅<sup class="cite">[57]</sup>）讲动物、Odd Squad 教数学、Daniel Tiger 教情绪 — 词汇覆盖广。AmE。教育非营利身份让授权感觉比商业 IP 友好（但仍需注意单个节目 IP 持有者可能是制作公司）。</p>
+          <div class="verdict good">半米 500 学员阶段加入。Wild Kratts 段（动物 + 自然词）和 SciShow Kids 互补。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">😊</div>
+          <div class="name-block">
+            <div class="pn">Smile and Learn - English</div>
+            <div class="ph">@SmileandLearnEnglish · Spain · AmE/BrE 混</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 1.6M<sup class="cite">[36]</sup> · <strong>总播放</strong> 396M · 3-12 岁定位 · 同时有西班牙文 / 法文版
+          </div>
+          <p>西班牙公司 Smile and Learn 旗下英语频道，3-12 岁定位<sup class="cite">[36]</sup>。词汇结构化（每个视频教 5-10 个主题词），动画风格清晰，配旁白 + 文字打字效果。AmE/BrE 中性。</p>
+          <div class="verdict good">A2 段稳健补充。词汇主题分类明确，做"按主题构建词库"特别方便。</div>
+        </div>
+      </div>
+
+      <h3>🔍 A2 段总结</h3>
+
+      <div class="callout good">
+        <p><strong>A2 段半米的"金三角"已经定了</strong>：SciShow Kids（科学）+ Crash Course Kids（科学）+ Free School（人文 + 科学）。500 学员阶段再加 English Singsing（结构化对话）+ Sesame Workshop（社交场景）+ Wild Kratts/PBS Kids（动物 + 数学）。<strong>这 6 家撑半米 A2 段绰绰有余</strong>。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch6 B1 小高/初中 ============ -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">B1 小高/初中频道深档（primary 4-6 / middle school 初阶）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>B1 段是半米"高阶库存"，给 G6-G9 学员 / 已经会基础日常的中阶学员看。挑战是<strong>词汇要更难但语速不能跟着升</strong> — 这就排除掉了 Crash Course 主、TED-Ed 这种"难度上来但语速也起飞"的频道。</p>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">📰</div>
+          <div class="name-block">
+            <div class="pn">VOA Learning English 🌟（PD 公共领域，可下载！）</div>
+            <div class="ph">@VOALearningEnglish · US · AmE 1500 词核心</div>
+          </div>
+          <span class="pill good">🟢 绿区（PD）</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 2.83M<sup class="cite">[1]</sup> · 1959 年 Special English 起 · <strong>语速</strong> 比正常 VOA 慢 1/3 · 核心 1500 词 · <strong>分级</strong> Beginning / Intermediate
+          </div>
+          <p>美国政府 Voice of America 旗下 ESL 项目<sup class="cite">[1][2]</sup>。所有内容<strong>明确公共领域（PD）</strong> — 美国政府作品按 17 USC §105 自动 PD。这意味着半米<strong>可以下载、可以切片、可以重新发布、不需要 attribution</strong>。</p>
+          <p><strong>分级</strong>：Let's Learn English Level 1（A2-B1）、Level 2（B1-B2）、English in a Minute / Everyday Grammar TV / Learning English TV / News Words / How to Pronounce 等系列<sup class="cite">[58]</sup>。<strong>语速</strong>：固定比正常 VOA 慢 1/3（约 90-100 WPM）。<strong>词汇</strong>：核心 1500 词、避免习语。</p>
+          <div class="verdict good">半米 50 学员阶段必收 — 它是唯一既适配又零版权风险的 B1 段频道。是"自建视频词典"安全底座。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🌍</div>
+          <div class="name-block">
+            <div class="pn">BBC Learning English</div>
+            <div class="ph">@bbclearningenglish · UK · BrE</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 9.1M（2025-11）<sup class="cite">[37]</sup> · <strong>视频</strong> 4,100 · <strong>总播放</strong> 444M · <strong>上线</strong> 2008
+          </div>
+          <p>BBC 旗下 ESL 教学频道，Language Learning Services 类目第 1<sup class="cite">[37]</sup>。BrE 标准。Lower Intermediate / Intermediate / Upper Intermediate 多档分级清晰。每周更新。<strong>注意</strong>：是 BBC 官方分支，不是 BBC News（BBC News 是新闻台、母语者向、排除清单）。</p>
+          <div class="verdict good">B1 段 BrE 主力（与 VOA AmE 互补）。授权 BBC 严格但教育用例宽松，iframe 嵌入 OK。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🚶</div>
+          <div class="name-block">
+            <div class="pn">Easy English (Mitch & Isi - Brighton 街头采访)</div>
+            <div class="ph">@EasyEnglishVideos · UK · BrE 街头</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> ~500K-1M（独立子频道，未公开精确数<sup class="cite">[38]</sup>）· Easy Languages 全家族 ~5M · <strong>上线</strong> 2020-06 · Mitch (UK) + Isi (DE)
+          </div>
+          <p>Easy Languages 全球项目英国分支<sup class="cite">[38]</sup>。<strong>核心定位</strong>：街头采访 + 真实人物 + 实时双语字幕（英 + 学习者母语）。Mitch 与 Isi 双主持，一个母语者、一个学习者代表 — 模拟学员视角问问题。Brighton 主战场，覆盖伦敦、其他英国城市。</p>
+          <p><strong>对半米最有价值</strong>：街头自然口语而不是教学口语，词汇 / 短语 / 填充词（well, you know, kind of）是其他 ESL 频道少有的。<strong>切片可行性</strong>极好 — 每个被采访者就是一段独立 30 秒。</p>
+          <div class="verdict good">B1 段第二主力，与 VOA + BBC LE 三足鼎立。给国际学校学员"真实社会语言"非常重要。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🍁</div>
+          <div class="name-block">
+            <div class="pn">Learn English with Bob the Canadian</div>
+            <div class="ph">@bobthecanadian · Canada · CanE/AmE</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> ~300K（Social Blade 数据需直查<sup class="cite">[39]</sup>） · 加拿大老师 Bob · "Learn English in the Wild" 系列特色
+          </div>
+          <p>多伦多高中老师 Bob，5 个孩子的爸爸，在 flower farm 上拍视频<sup class="cite">[39]</sup>。<strong>"Learn English in the Wild"</strong> 系列把英语放到真实场景（农场、加油站、超市、办公室）边走边说，词汇结合环境视觉。语速很慢、解释新词当场释义。CanE/AmE 中性。</p>
+          <div class="verdict good">B1 段实景词汇补充神器。Bob 视频专门设计"情境 + 词"绑定，跟半米词汇库的"词 → 例句视频"思路天然契合。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🇬🇧</div>
+          <div class="name-block">
+            <div class="pn">Learn English with Papa Teach Me (Aly)</div>
+            <div class="ph">@PapaTeachMe · UK · BrE</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 1.7M<sup class="cite">[40]</sup> · <strong>视频</strong> 712 · <strong>总播放</strong> 79.1M · <strong>上线</strong> 2011-06
+          </div>
+          <p>Aly 是 BrE 教师 + 喜剧表演风格的语法 / 发音 / 词汇主播<sup class="cite">[40]</sup>。<strong>优势</strong>：解释 BrE vs AmE 差异是他的拿手戏。话题集中在词组用法 / 俚语 / 发音规则 — 对半米的"词的真实用法"补充很有用。</p>
+          <div class="verdict warn">B1+ 偏 B2 边缘。半米核心 K12 受众用部分内容（不含俚语段）可以。500 学员可加，5000 阶段必加。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🇬🇧</div>
+          <div class="name-block">
+            <div class="pn">British Council LearnEnglish Kids</div>
+            <div class="ph">@bclearnenglishkids · UK · BrE · 英国文化教育协会官方</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> 中等规模（具体数 vidIQ 未单独公开<sup class="cite">[41]</sup>） · 全球 ESL 第二语言学习者为目标
+          </div>
+          <p>British Council 官方频道<sup class="cite">[41]</sup>。每个动画视频针对一个语言点（短篇故事 / 童谣 / 字母）+ 英文字幕。<strong>授权感觉</strong>：英国政府/文化协会下属，教育非营利定位，教育语境用例宽松。BrE 标准。</p>
+          <div class="verdict good">A2-B1 BrE 段安全选项。和 BBC Learning English 区别：British Council 偏儿童（Kids），BBC LE 偏成人 ESL — 半米国际学校学员两个都用。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">📚</div>
+          <div class="name-block">
+            <div class="pn">Oxford Online English</div>
+            <div class="ph">@oxfordonlineenglish · UK · BrE</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>订阅</strong> ~1M+ · <strong>上线</strong> 2013-06<sup class="cite">[42]</sup> · 每周更新 · 每周三/四 UK 时间 live 课程
+          </div>
+          <p>Oxford Online English 学校频道<sup class="cite">[42]</sup>。语法 / 发音 / 雅思口语 / 商务英语为主。BrE。词汇 B1-B2，覆盖工作场景 / 学术场景。</p>
+          <div class="verdict warn">B1 边缘偏 B2，半米国际学校学员上层可用。500 学员可加。</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-head">
+          <div class="ico">🔢</div>
+          <div class="name-block">
+            <div class="pn">Numberblocks / Alphablocks（CBeebies / Blue Zoo）</div>
+            <div class="ph">@Numberblocks @Alphablocks · UK · BrE</div>
+          </div>
+          <span class="pill warn">🟡 黄区</span>
+        </div>
+        <div class="ch-body">
+          <div class="stats-row">
+            <strong>Numberblocks 订阅</strong> 6M+<sup class="cite">[34]</sup> · <strong>总播放</strong> 5.3B+ · CBeebies 委约制作 · 2025-05 起 5 种外语版本
+          </div>
+          <p>CBeebies 委约 Blue Zoo 制作的 phonics / 数学动画<sup class="cite">[34]</sup>。语速慢、词汇集中数学常识 / 字母音 / 简单短语。BrE。<strong>跨频道 10M+ 总订阅</strong>（Numberblocks + Alphablocks + 多语种）。授权 BBC + Blue Zoo 共有，严格。</p>
+          <div class="verdict warn">A2-B1 数学和 phonics 段强补充，但词汇范围窄。500 学员阶段加部分集。</div>
+        </div>
+      </div>
+
+      <h3>🔍 B1 段总结</h3>
+
+      <div class="callout good">
+        <p><strong>B1 段的"金三角"是：VOA Learning English（AmE PD）+ BBC Learning English（BrE 官方）+ Easy English Brighton（真实街头）</strong>。这三家覆盖了教学英语、官方英语、街头英语三种纬度。Bob the Canadian 是第 4 选项（情景词汇）。<strong>所有 engVid 系（English with Lucy / mmmEnglish / Ronnie / Adam）都跨进 B2 段，半米核心受众不适配，红区</strong>。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch7 横向对比 ============ -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">横向对比表（17 家 × 8 维度）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>这张表把前 6 章所有 finalist 频道在 8 个关键维度上横向打分。<strong>点击任一行高亮</strong>方便手机看。维度含义：</p>
+
+      <ul style="font-size: 13px;">
+        <li><strong>CEFR</strong>：A1 / A2 / B1 实测难度</li>
+        <li><strong>受众</strong>：preschool / primary / lower-secondary / general-ESL</li>
+        <li><strong>WPM</strong>：估算语速（无公开数据时按业内体感）</li>
+        <li><strong>字幕</strong>：✅ 官方齐 / 🟡 仅自动 / ❌ 无</li>
+        <li><strong>切片</strong>：✅ 句级独立可截 / 🟡 段级 / ❌ 长篇连贯</li>
+        <li><strong>CC</strong>：版权区颜色</li>
+        <li><strong>推荐</strong>：半米优先级（高/中/低）</li>
+        <li><strong>备注</strong>：一句话定位</li>
+      </ul>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>频道</th><th>CEFR</th><th>受众</th><th>WPM</th><th>字幕</th><th>切片</th><th>CC</th><th>推荐</th><th>备注</th>
+          </tr></thead>
+          <tbody>
+            <tr><td><strong>SciShow Kids</strong><sup class="cite">[3][22]</sup></td><td>A2</td><td>primary</td><td>~120</td><td>✅</td><td>✅</td><td>🟢</td><td><strong>高</strong></td><td>金牌（已用）</td></tr>
+            <tr><td><strong>Crash Course Kids</strong><sup class="cite">[5]</sup></td><td>A2-B1</td><td>primary</td><td>~130</td><td>✅</td><td>✅</td><td>🟢</td><td><strong>高</strong></td><td>金牌（已用）</td></tr>
+            <tr><td><strong>VOA Learning English</strong><sup class="cite">[1][2]</sup></td><td>A2-B1</td><td>general-ESL</td><td>~95</td><td>✅</td><td>✅</td><td>🟢</td><td><strong>高</strong></td><td>PD 公共领域唯一</td></tr>
+            <tr><td>Free School<sup class="cite">[24]</sup></td><td>A2</td><td>primary</td><td>~110</td><td>✅</td><td>✅</td><td>🟢</td><td>高</td><td>人文 + 科学补充</td></tr>
+            <tr><td>Sesame Street<sup class="cite">[6][7]</sup></td><td>A1-A2</td><td>preschool/primary</td><td>~110</td><td>✅</td><td>✅</td><td>🟢*</td><td>高</td><td>2026 起 YT 扩库</td></tr>
+            <tr><td>English Singsing<sup class="cite">[9]</sup></td><td>A1-A2</td><td>preschool/primary</td><td>~100</td><td>✅</td><td>✅</td><td>🟡</td><td>高</td><td>韩国制 ESL 专向</td></tr>
+            <tr><td>English Tree TV<sup class="cite">[31]</sup></td><td>A1-A2</td><td>preschool/primary</td><td>~100</td><td>✅</td><td>✅</td><td>🟡</td><td>中</td><td>ESL 设计、歌为主</td></tr>
+            <tr><td>Steve & Maggie<sup class="cite">[30]</sup></td><td>A1-A2</td><td>preschool</td><td>~110</td><td>✅</td><td>✅</td><td>🟡</td><td>中</td><td>BrE ESL 强</td></tr>
+            <tr><td>Peppa Pig<sup class="cite">[45][46]</sup></td><td>A1</td><td>preschool</td><td>~115</td><td>✅</td><td>✅</td><td>🟡</td><td>中</td><td>iframe 不下载</td></tr>
+            <tr><td>Super Simple Songs<sup class="cite">[27]</sup></td><td>A1</td><td>preschool</td><td>~90（歌）</td><td>✅</td><td>🟡</td><td>🟡</td><td>中</td><td>歌曲启蒙顶流</td></tr>
+            <tr><td>Ms Rachel<sup class="cite">[26]</sup></td><td>A1</td><td>preschool</td><td>~80</td><td>✅</td><td>🟡</td><td>🟡</td><td>中</td><td>First Words 段最强</td></tr>
+            <tr><td>BBC Learning English<sup class="cite">[37]</sup></td><td>A2-B1</td><td>general-ESL</td><td>~120</td><td>✅</td><td>✅</td><td>🟡</td><td>高</td><td>BrE 主力</td></tr>
+            <tr><td>Easy English<sup class="cite">[38]</sup></td><td>B1</td><td>general-ESL</td><td>~140（街头）</td><td>✅ 双语</td><td>✅</td><td>🟡</td><td>高</td><td>真实街头采访</td></tr>
+            <tr><td>Bob the Canadian<sup class="cite">[39]</sup></td><td>A2-B1</td><td>general-ESL</td><td>~105</td><td>✅</td><td>✅</td><td>🟡</td><td>中</td><td>情境词 in the Wild</td></tr>
+            <tr><td>National Geographic Kids<sup class="cite">[52]</sup></td><td>A2-B1</td><td>primary</td><td>~130</td><td>✅</td><td>🟡</td><td>🟡</td><td>中</td><td>动物自然词补</td></tr>
+            <tr><td>Wild Kratts (9 Story)<sup class="cite">[57]</sup></td><td>A2</td><td>primary</td><td>~125</td><td>✅</td><td>✅</td><td>🟡</td><td>中</td><td>动物专向</td></tr>
+            <tr><td>Numberblocks<sup class="cite">[34]</sup></td><td>A1-A2</td><td>preschool/primary</td><td>~110</td><td>✅</td><td>🟡</td><td>🟡</td><td>低</td><td>数学 + phonics 窄</td></tr>
+            <tr><td>Storyline Online<sup class="cite">[35]</sup></td><td>A1-A2</td><td>primary</td><td>~100</td><td>✅</td><td>✅</td><td>🟡</td><td>低</td><td>绘本朗读、量小</td></tr>
+            <tr><td colspan="9" style="text-align:center; padding: 10px; background: var(--bad-soft); color: var(--bad); font-weight: 700;">⬇️ 排除清单 / 仅做对照</td></tr>
+            <tr><td>Crash Course 主<sup class="cite">[20][10]</sup></td><td>B2-C1</td><td>13-34 岁</td><td>180+</td><td>✅</td><td>❌</td><td>🟡</td><td><strong>排除</strong></td><td>John Green 飞速</td></tr>
+            <tr><td>TED-Ed<sup class="cite">[15]</sup></td><td>B2-C1</td><td>13-21 岁</td><td>~150</td><td>✅</td><td>🟡</td><td>🟡</td><td><strong>排除</strong></td><td>动画好但词难</td></tr>
+            <tr><td>English with Lucy<sup class="cite">[43]</sup></td><td>B2-C1</td><td>成人 ESL</td><td>~135</td><td>✅</td><td>🟡</td><td>🟡</td><td><strong>排除</strong></td><td>BrE 但太成人</td></tr>
+            <tr><td>mmmEnglish<sup class="cite">[44]</sup></td><td>B1-C1</td><td>成人 ESL</td><td>~130</td><td>✅</td><td>🟡</td><td>🟡</td><td><strong>排除</strong></td><td>AusE 但成人导向</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="font-size: 13px; color: var(--text-mute);">🟢* = Sesame Workshop 严格意义不是 CC 但教育用例授权友好，按"绿区感"标。WPM 数字为业内体感 + 抽样估算，缺乏频道公开 WPM 时不应作为严格指标。</p>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch8 发音/语速 ============ -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">发音 / 语速对比专题（BrE / AmE / 中性 各档）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>给国际学校 K12 学员选频道时口音不是"哪个对"而是"哪个学员要应对"。北京 / 上海 / 深圳的国际学校大多以 AmE 为主，部分英系国际学校教 BrE，托福偏 AmE 雅思偏 BrE — 半米词汇库<strong>两路并行 + 标注口音</strong>是最稳。</p>
+
+      <h3>📊 WPM 速度档位与目标人群</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>WPM 档位</th><th>典型频道</th><th>适配学员</th><th>研究背书</th></tr></thead>
+          <tbody>
+            <tr><td>~80-100（极慢）</td><td>Ms Rachel · VOA Let's Learn · English Singsing</td><td>A1 启蒙 / 真零基础</td><td>EFL 儿童研究：98 WPM 显著提升听力<sup class="cite">[18]</sup></td></tr>
+            <tr><td>~100-130（适配）</td><td>SciShow Kids · CC Kids · Free School · BBC LE · Bob the Canadian · English Tree TV · Sesame Street · Peppa Pig</td><td>A2-B1 / 半米核心</td><td>对儿童 110-130 WPM<sup class="cite">[17]</sup>；对非母语者 120-130 WPM<sup class="cite">[17]</sup></td></tr>
+            <tr><td>~130-150（边缘）</td><td>Easy English 街头 · Nat Geo Kids · mmmEnglish · Speak English with Vanessa</td><td>B1+ 已能跟新闻播报</td><td>fast-paced informational YouTube 上限<sup class="cite">[59]</sup></td></tr>
+            <tr><td>~150-180+（过快）</td><td>Crash Course 主 · TED-Ed · 新闻台 · Veritasium</td><td><strong>排除 — 母语者向</strong></td><td>John Green 学生需要 0.5-0.75 倍速<sup class="cite">[11]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>🗣 BrE / AmE / 中性 分档</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>口音</th><th>A1 启蒙</th><th>A2 小学</th><th>B1 小高/初中</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>AmE</strong></td>
+              <td>Super Simple Songs · Cocomelon · Ms Rachel · Sesame Street</td>
+              <td>SciShow Kids · CC Kids · Free School · English Singsing · Wild Kratts</td>
+              <td>VOA Learning English · Bob the Canadian · Speak English with Vanessa</td>
+            </tr>
+            <tr>
+              <td><strong>BrE</strong></td>
+              <td>Peppa Pig · Sarah & Duck (CBeebies)</td>
+              <td>Steve & Maggie · British Council LearnEnglish Kids · Numberblocks / Alphablocks</td>
+              <td>BBC Learning English · Easy English Brighton · Papa Teach Me · Oxford Online English</td>
+            </tr>
+            <tr>
+              <td><strong>其他 / 中性</strong></td>
+              <td>Pinkfong（中性 AmE） · Mother Goose</td>
+              <td>English Tree TV · Maple Leaf Learning · Smile and Learn</td>
+              <td>Bluey（AusE）· mmmEnglish（AusE，但红区）</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <p><strong>实操建议</strong>：半米词典每个词条至少要 2-3 个例句视频，<strong>故意混 AmE + BrE 各 1 个</strong>。学员会自然听到口音差异（"水"在 Peppa Pig 是 BrE，在 SciShow Kids 是 AmE），词典本身就教了"同一词不同口音"。这比硬讲音标对儿童学习者友好 10 倍。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch9 字幕 + 切片 ============ -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">字幕质量 + 切片可行性专题</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>半米词汇库的<strong>底层数据</strong>是"词 → 字幕命中行 → 时间戳"映射，所以字幕质量决定了产品下限。每家频道的字幕状况差距很大。</p>
+
+      <h3>📝 字幕质量分级</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>等级</th><th>含义</th><th>典型频道</th><th>半米能干啥</th></tr></thead>
+          <tbody>
+            <tr><td>🏆 官方人工</td><td>频道方自己上传 SRT</td><td>SciShow Kids / CC Kids / BBC LE / VOA / Sesame Workshop / Storyline Online / Peppa Pig / Super Simple Songs</td><td>99%+ 准确率<sup class="cite">[12]</sup>，直接用</td></tr>
+            <tr><td>🥈 频道双语</td><td>官方上传英 + 学习者语</td><td>Easy English（英 + 学习者语动态切换）· English Singsing 部分</td><td>双语对齐近 0 成本</td></tr>
+            <tr><td>🥉 仅自动</td><td>YouTube ASR 自动生成</td><td>较小独立频道</td><td>清晰录音棚 90-95%、口音多说话人 75-85%<sup class="cite">[12]</sup></td></tr>
+            <tr><td>❌ 自动错</td><td>口音重 / 多人 / 嘈杂</td><td>少数街头采访 / 长直播</td><td>跑本地 Whisper 重转<sup class="cite">[60]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>🎬 切片可行性评估</h3>
+
+      <p>切片可行性 = 能否把视频按字幕行切成 5-15 秒的<strong>独立可懂</strong>片段。三个关键指标：</p>
+
+      <ol>
+        <li><strong>句子完整度</strong>：一句话能不能在 5-15 秒内说完，且<strong>不依赖前一句</strong>。教学频道（SciShow Kids / BBC LE / VOA）几乎每句独立；剧情类（Peppa Pig / Bluey）很多句要前一句铺垫。</li>
+        <li><strong>视觉独立性</strong>：截下来 5-15 秒画面学员能不能理解。教学频道靠主讲人 + 板书，独立性强；剧情类靠场景上下文，独立性弱。</li>
+        <li><strong>时间戳精度</strong>：YouTube 官方字幕通常精确到秒，但<strong>word-level</strong> 精度需要 yt-dlp 的 SRV2 格式才有<sup class="cite">[60]</sup>。</li>
+      </ol>
+
+      <div class="callout good">
+        <p><strong>切片可行性最佳 5 家（半米词汇库优先抓字幕的频道）</strong>：<br>
+        1. <strong>SciShow Kids</strong> — 主讲人每句独立、可视化插图、每集 30-50 个可切片<br>
+        2. <strong>VOA Learning English</strong> — 慢速 + 教学结构、每句完整<br>
+        3. <strong>BBC Learning English</strong> — 每集围绕一个语言点、句句教学独立<br>
+        4. <strong>Easy English Brighton</strong> — 每个被采访者 30 秒就是一片<br>
+        5. <strong>English Singsing</strong> — 结构化重复，每句明显独立</p>
+      </div>
+
+      <h3>💻 字幕下载技术参考</h3>
+
+      <pre>
+# yt-dlp 拉某频道全部视频字幕（不下载视频）
+yt-dlp \
+  --skip-download \
+  --write-subs --sub-langs en \
+  --write-auto-subs \
+  --sub-format vtt \
+  --write-info-json \
+  --output "subs/%(channel)s/%(upload_date)s_%(id)s.%(ext)s" \
+  https://www.youtube.com/@SciShowKids
+
+# 想要 word-level 时间戳（适合做精确跳秒）
+yt-dlp --sub-format srv2 ...
+
+# 仅自动生成字幕（频道没传官方时）
+yt-dlp --write-auto-sub --sub-format json3 ...
+</pre>
+
+      <p style="font-size: 13px; color: var(--text-mute);">这部分技术细节阿杰的 <code>clip-pipeline-research.html</code> 和 <code>subtitle-search-engine-research.html</code> 已经讲过 — 这里只引用<sup class="cite">[60]</sup>。</p>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch10 版权红黄绿 ============ -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">版权 + CC 协议状况（绿/黄/红 三区）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout warn">
+        <p><strong>读这一章先认清两个事实</strong>：（1）<strong>美国合理使用（Fair Use）的"教育豁免"</strong>对<strong>非营利 face-to-face</strong> 课堂适用<sup class="cite">[23]</sup>，但<strong>商业 SaaS 不适用</strong>。半米作为付费产品不能直接套教育豁免。（2）<strong>iframe 嵌入是被多个判例认可的合法路径</strong><sup class="cite">[14]</sup> — Seventh Circuit 明确 "embedding YouTube videos is not copyright infringement"。所以"半米能不能用 X 频道"99% 的答案是<strong>嵌入永远可以，下载切片自托管要看版权区</strong>。</p>
+      </div>
+
+      <h3>🟢 绿区（可下载 + 可切片 + 可自托管）</h3>
+
+      <div class="callout good">
+        <p><strong>1. VOA Learning English</strong>（PD 公共领域）<sup class="cite">[1][2]</sup><br>
+        美国政府作品，17 USC §105 自动 PD。<strong>下载、切片、自托管、重新发布、不需要 attribution</strong> — 零风险。<strong>半米的"自建视频词典"安全底座</strong>。</p>
+        <p><strong>2. PBS Kids（部分）</strong> · <strong>Sesame Workshop</strong>（教育非营利）<sup class="cite">[6][7]</sup><br>
+        非营利公共广播 / 非营利教育组织，教育用例宽松。<strong>iframe 嵌入完全 OK</strong>。下载切片自托管走教育合理使用空间，商业产品引用上下文要谨慎（建议先以 iframe 为主）。</p>
+        <p><strong>3. SciShow Kids / Crash Course Kids / Free School</strong>（教育资助 / 非营利感强）<sup class="cite">[3][5][24]</sup><br>
+        Complexly + PBS Digital 等教育资助渠道，频道方明示鼓励教育使用。<strong>iframe 嵌入零风险</strong>，小规模切片做教学例句业内默认 OK，但半米作为商业 SaaS 要警惕规模化 — 单视频几十帧 OK，下载整集做镜像就不行。</p>
+        <p><strong>4. YouTube CC BY 滤镜下的视频</strong><sup class="cite">[61][62]</sup><br>
+        YouTube 高级搜索可以筛 Creative Commons 标识的视频，全平台 CC BY 视频约 400 万条<sup class="cite">[62]</sup>。下载 + 改 + 商用都行，只需注明来源。但<strong>儿童 ESL 主流频道几乎都不标 CC BY</strong>（卡通版权宝贵），所以这条对半米实操意义有限。</p>
+      </div>
+
+      <h3>🟡 黄区（iframe 永远 OK，下载切片有 Content ID 风险）</h3>
+
+      <div class="callout warn">
+        <p><strong>1. 商业大 IP</strong>：Peppa Pig（Hasbro / Entertainment One）<sup class="cite">[8]</sup>、Cocomelon、Pinkfong / Baby Shark、Ms Rachel（已签 Netflix）<sup class="cite">[26]</sup>、Bluey（Disney+/ABC）、Numberblocks（BBC/CBeebies）<sup class="cite">[34]</sup>。<br>
+        Hasbro/Entertainment One 对未授权使用执法激进（Wolfoo 案<sup class="cite">[8]</sup>）。<strong>半米策略：iframe 嵌入 + 时间戳跳秒，绝不下载切片自托管</strong>。</p>
+        <p><strong>2. ESL 教学独立 IP</strong>：BBC Learning English（BBC）<sup class="cite">[37]</sup>、Steve & Maggie（Wattsenglish）<sup class="cite">[30]</sup>、English Singsing<sup class="cite">[9]</sup>、English Tree TV、Super Simple Songs、Easy English（Patreon 自营）<sup class="cite">[38]</sup>、Maple Leaf Learning、Smile and Learn、Storyline Online（SAG-AFTRA 非营利）<sup class="cite">[35]</sup>、British Council、Oxford Online English。<br>
+        正规商业频道，授权流程清晰但严格。<strong>iframe 嵌入 OK</strong>，部分（特别是 Storyline Online / British Council）通过邮件商讨教育许可有谈成空间。</p>
+      </div>
+
+      <h3>🔴 红区（不适合半米受众或半米法律身份）</h3>
+
+      <div class="callout bad">
+        <p><strong>1. 词汇 / 语速 / 受众错位的</strong>：Crash Course 主<sup class="cite">[10][20]</sup>、TED-Ed<sup class="cite">[15]</sup>、Veritasium、Vsauce、BBC News、English with Lucy（B2+ 成人）<sup class="cite">[43]</sup>、mmmEnglish<sup class="cite">[44]</sup>。<br>
+        语速太快、词汇太深、受众错。</p>
+        <p><strong>2. CC BY-NC-SA 的 NC 条款挡商业</strong>：Khan Academy / Khan Academy Kids<sup class="cite">[55]</sup> 的 NC（非商业）条款让半米作为商业 SaaS 嵌入有合规风险。<strong>建议仅作个人学习参考、不入产品库</strong>。</p>
+      </div>
+
+      <h3>📚 实操：YouTube Content ID 与 Fair Use 边界</h3>
+
+      <p><strong>Content ID 机制</strong>：YouTube 自动扫描你上传的视频，发现你用了 IP 持有人备案过的素材就自动 claim<sup class="cite">[13]</sup>。<strong>三次 strike 在 90 天内 = 频道终结 + 所有视频删除</strong><sup class="cite">[63]</sup>。所以"我下载 Peppa Pig 切片放到自家网站"理论上不会被 YouTube Content ID 立刻干掉（Content ID 只管 YouTube 内的二次上传），但<strong>Entertainment One 可以发 DMCA takedown</strong>，半米的服务器商会被迫下架。</p>
+
+      <p><strong>Fair Use 四要素</strong>对半米的实操判断<sup class="cite">[23][13]</sup>：</p>
+      <ol>
+        <li>使用性质：商业 vs 非营利 — 半米商业，<strong>对 Fair Use 不利</strong></li>
+        <li>原作性质：事实 vs 创意 — Peppa Pig 是创意作品，<strong>对 Fair Use 不利</strong></li>
+        <li>使用比例：5-15 秒一句台词 / 4-5 分钟整集 = 极小比例，<strong>对 Fair Use 有利</strong></li>
+        <li>对原作市场影响：词典查询不替代看动画，<strong>对 Fair Use 中性偏利</strong></li>
+      </ol>
+
+      <p>四要素综合：<strong>商业身份是半米合理使用的最大软肋</strong>，所以策略只能是"iframe 嵌入避免下载 + 切片小段控制比例 + 黄区慎重 + 绿区主力"。</p>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch11 词汇覆盖 ============ -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">词汇匹配可用度评估（A2-B1 高频 3000 词覆盖率）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>半米词汇库的核心 KPI：A2-B1 3000 高频词 × 每词至少 2-3 个视频例句。<strong>前 5 家频道能覆盖多少？</strong></p>
+
+      <h3>🎯 目标词表锚定</h3>
+
+      <p><strong>建议用 Oxford 3000 by CEFR Level</strong><sup class="cite">[16]</sup>作为半米词库底版：</p>
+      <ul>
+        <li>A1-A2 段：约 1500 词（覆盖大约 70-75% 文本）</li>
+        <li>B1 段：约 2000 词（覆盖约 80% 文本）<sup class="cite">[16]</sup></li>
+        <li>B2 段：约 3000 词（覆盖约 85% 文本）</li>
+      </ul>
+      <p>具体说："Oxford 3000 + B1 学员词汇约 2000 词"，这是公认基线。<strong>语料库统计：3000 高频词足以理解 80-85% 日常英语文本</strong><sup class="cite">[16]</sup>。</p>
+
+      <h3>📊 词频覆盖估算（前 5 家频道）</h3>
+
+      <p><strong>方法论</strong>：把每家频道全部官方字幕拉下来（VOA / SciShow Kids / CC Kids / Free School / English Singsing 字幕都齐），用 VocabKitchen CEFR Profiler<sup class="cite">[64]</sup> 跑词频统计 + 反查 Oxford 3000 命中率。下面数字是<strong>估算</strong>（用频道视频数 × 平均字幕词数 × 假设 80% 命中 Oxford 3000 推出），实际跑一遍才有准数。⚠️ 估算 / 行业体感。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>频道</th><th>字幕总词数（估）</th><th>Oxford 3000 估覆盖</th><th>每词例句数（估）</th></tr></thead>
+          <tbody>
+            <tr><td>VOA Learning English</td><td>~500w 词</td><td>~95% (1500 词核心 + 故意限词<sup class="cite">[1]</sup>)</td><td>30-50 个</td></tr>
+            <tr><td>SciShow Kids</td><td>~150w 词（614 视频 × 500 词/集 估）</td><td>~85%</td><td>5-15 个</td></tr>
+            <tr><td>Crash Course Kids</td><td>~30w 词（~50 集 × 700 词/集）</td><td>~80%</td><td>1-3 个</td></tr>
+            <tr><td>Free School</td><td>~100w 词</td><td>~80%</td><td>3-8 个</td></tr>
+            <tr><td>English Singsing</td><td>~200w 词（1710 视频 × 100 词/视频 估）</td><td>~90%（设计就在 1500 词内）</td><td>10-30 个</td></tr>
+            <tr style="background: var(--accent-soft);"><td><strong>合计</strong></td><td><strong>~980w 词</strong></td><td><strong>~95% 总覆盖</strong></td><td><strong>平均 12-25 个/词</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <p><strong>结论：5 家绿区频道全字幕入库后，Oxford 3000 平均每个词能找到 12-25 个例句视频片段</strong>。完全够半米给每词配 2-3 个最优例句的需求，剩下的可以做"难度递进"、"口音切换"或"主题分组"。</p>
+      </div>
+
+      <h3>🔧 词频统计实操</h3>
+
+      <pre>
+# Step 1: 用 yt-dlp 拉一个频道所有字幕
+yt-dlp --skip-download --write-subs --sub-langs en --sub-format vtt \
+  https://www.youtube.com/@SciShowKids -o "subs/%(id)s.vtt"
+
+# Step 2: 把字幕全部 concat 成一份大文本
+cat subs/*.vtt | grep -v "^WEBVTT" | grep -v "^$" | grep -v -E "^[0-9]+:" \
+  > scishowkids_all_text.txt
+
+# Step 3: 词频统计 + Oxford 3000 命中
+python3 -c "
+import re, collections, json
+with open('scishowkids_all_text.txt') as f:
+    text = f.read().lower()
+words = re.findall(r\"[a-z']+\", text)
+freq = collections.Counter(words)
+# 加载 Oxford 3000 词表，比对命中率
+print('Top 20:', freq.most_common(20))
+print('Unique words:', len(freq))
+"
+
+# Step 4: VocabKitchen CEFR Profiler 提供 web UI 一键分级
+# https://www.vocabkitchen.com/profiler/cefr
+</pre>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch12 半米路线建议 ============ -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">半米路线建议 · 50 / 500 / 5000 学员三阶段（阿杰最想看那一章）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout accent">
+        <p><strong>不要一上来就 20 个频道全拉。阶段化分批攻克才是正解</strong>：每阶段聚焦 3-10 家把字幕做透 + 词典做透 + 反馈跑闭环。</p>
+      </div>
+
+      <div class="stage-grid">
+
+        <div class="stage-card">
+          <div class="stage-head">
+            <span class="badge">阶段 1</span>
+            <span class="stage-title">50 学员 · 现在 · 先做 3 家最小可用集</span>
+          </div>
+          <div class="stage-body">
+            <p><strong>触发条件</strong>：阿杰当下、第一批 50 国际学校学员、产品 MVP 阶段。</p>
+            <p><strong>必做 3 家（已有 2 家 skill 在跑）</strong>：</p>
+            <ol>
+              <li><strong>SciShow Kids</strong>（A2 段主力）— <code>scishow-kids-vocab</code> skill 已在做<sup class="cite">[19]</sup>。614 视频跑透 = 学员 G3-G5 段 80% 词覆盖。</li>
+              <li><strong>Crash Course Kids</strong>（A2-B1 过渡）— <code>crashcourse-kids-vocab</code> skill 已在做<sup class="cite">[19]</sup>。已完结系列，~50 集跑透就行。</li>
+              <li><strong>VOA Learning English Let's Learn English Level 1 + Level 2</strong>（B1 段）<sup class="cite">[1]</sup> — PD 零风险，可<strong>下载切片自托管</strong>。这是半米从"iframe 路线"过渡到"真自建视频库"的安全底座。</li>
+            </ol>
+            <p><strong>目标产出</strong>：</p>
+            <ul>
+              <li>500 个高频词（A2-B1）× 每词 2-3 个视频例句</li>
+              <li>词典展示用 SciShow / CC Kids iframe 嵌入；下载切片只对 VOA 做</li>
+              <li>跑通"词 → 视频 → 跳秒播放"完整闭环</li>
+            </ul>
+            <p><strong>不做什么</strong>：不上 Peppa Pig（黄区合规要先验证）；不上 Easy English（街头采访 B1 偏 B1+，先把 A2 段做透）。</p>
+          </div>
+        </div>
+
+        <div class="stage-card">
+          <div class="stage-head">
+            <span class="badge">阶段 2</span>
+            <span class="stage-title">500 学员 · 6-12 月内 · 扩展到 8-10 家</span>
+          </div>
+          <div class="stage-body">
+            <p><strong>触发条件</strong>：学员到 500、产品有付费验证、需要词汇覆盖广、需要不同口音 / 不同场景。</p>
+            <p><strong>新增 5-7 家</strong>（在 50 学员 3 家基础上）：</p>
+            <ol>
+              <li><strong>Free School</strong>（绿区，A2 人文 + 科学，~885K 订阅<sup class="cite">[24]</sup>）— 词汇长尾补充</li>
+              <li><strong>Sesame Workshop</strong>（2026-01 起 YT 内容暴增<sup class="cite">[6][7]</sup>）— A1-A2 社交场景词最强</li>
+              <li><strong>BBC Learning English</strong>（B1 BrE 主力，9.1M<sup class="cite">[37]</sup>）— 给 BrE 国际学校学员 + 雅思预备</li>
+              <li><strong>English Singsing</strong>（A2 韩国制 ESL，5.52M<sup class="cite">[9]</sup>）— 对话场景词主力</li>
+              <li><strong>Peppa Pig</strong>（A1 BrE 启蒙，42.6M<sup class="cite">[45]</sup>，iframe only）— 给新学员或低龄段</li>
+              <li><strong>Easy English Brighton</strong>（B1 街头真实<sup class="cite">[38]</sup>）— 给"快考雅思"学员加真实口语</li>
+              <li>可选 <strong>Storyline Online</strong>（绿色感商业 IP，绘本朗读 + 配套资料<sup class="cite">[35]</sup>）</li>
+            </ol>
+            <p><strong>目标产出</strong>：</p>
+            <ul>
+              <li>2000 高频词覆盖（Oxford 3000 的 65%）× 每词 5-10 个例句</li>
+              <li>每词标注 AmE / BrE / 中性</li>
+              <li>建立"按主题分组"（家庭 / 学校 / 自然 / 运动 / 食物等 12 主题）</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="stage-card">
+          <div class="stage-head">
+            <span class="badge">阶段 3</span>
+            <span class="stage-title">5000 学员 · 1.5-3 年 · 自制 + 谈授权 + 全 20 家</span>
+          </div>
+          <div class="stage-body">
+            <p><strong>触发条件</strong>：5000 付费学员 / 年营收 500w+ / 产品迭代到"词汇 + 听力 + 口语"完整学习路径。</p>
+            <p><strong>三件大事</strong>：</p>
+            <ol>
+              <li><strong>跟"教育友好" IP 谈正式授权</strong>：Sesame Workshop / Storyline Online / British Council / Wattsenglish (Steve & Maggie)。年费 ¥10-50w 区间可获得镜像 + 切片 + 长期使用权。这阶段半米现金流应该撑得起。</li>
+              <li><strong>自制 ~300 个核心视频</strong>：剩下 Oxford 3000 - 已有覆盖 = 长尾 ~500 词 ×"半米官方例句"。一个本土主讲 + 10 万 / 月预算可以稳定产出。</li>
+              <li><strong>用户驱动加新频道</strong>：学员 5000 后会主动反馈"想学某剧 / 某 YouTuber 的词" — 转入 demand-driven 拓展，不再盲铺 20 家。</li>
+            </ol>
+            <p><strong>目标产出</strong>：</p>
+            <ul>
+              <li>Oxford 3000 全覆盖 + 部分 5000 词 × 每词 10-30 例句</li>
+              <li>词典已经能跨越"工具产品"变成"内容平台"</li>
+              <li>合规上 80% 来源是绿区 + 自有，黄区 iframe 占 20%</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+      <h3>🌳 决策树 · 阿杰下周该决定什么</h3>
+
+      <div class="tree">
+        <div class="node q">▶ 50 学员阶段（现在）已经在用 SciShow Kids + CC Kids 两个 skill，接下来扩 1 家是哪家？</div>
+        <div class="branches">
+          <div>
+            <div class="node yes"><span class="lbl y">推荐</span> <strong>VOA Learning English Let's Learn English Level 1</strong><sup class="cite">[1]</sup> — PD 零风险、Level 1 = 30 集左右 = 一周可以全跑完字幕入库。下载切片自托管 = 验证"自建视频词典"技术栈。</div>
+          </div>
+          <div>
+            <div class="node no"><span class="lbl n">不推荐</span> 不要先做 Peppa Pig / Cocomelon — 黄区合规先放一放，先把绿区跑透是更稳的。</div>
+          </div>
+        </div>
+
+        <div class="step-arrow">↓</div>
+
+        <div class="node q">▶ 跑完 VOA 后下一步？</div>
+        <div class="branches">
+          <div>
+            <div class="node yes"><span class="lbl y">触发</span> 学员稳定到 100+、每周新增 10 个高频词需要覆盖 → 加 <strong>Free School</strong> 或 <strong>English Singsing</strong></div>
+          </div>
+          <div>
+            <div class="node no"><span class="lbl m">观望</span> 学员还在 30-50 → 不加新频道，把已有 3 家的字幕、词典、跳秒播放体验打磨到位</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout good">
+        <p><strong>最关键的建议</strong>：阿杰不要看到本报告里 20+ 家频道就想"全都做"。词汇库的产品价值在<strong>"每词都能找到至少 2 个好例句"</strong>而不在频道数量。<strong>3 家做透 &gt; 10 家做半</strong>。先把已经在做的 SciShow Kids + CC Kids 完成度推到 90%，再加 VOA，再扩，节奏不能乱。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch13 技术建议 ============ -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">字幕处理 + 切片技术建议（呼应 clip-pipeline 报告）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>这一章只列要点，详细技术方案看姐妹报告 <code>clip-pipeline-research.html</code>（2026-05-24）和 <code>subtitle-search-engine-research.html</code>（2026-05-25）。</p>
+
+      <h3>🔧 全流程（5 步）</h3>
+
+      <ol>
+        <li><strong>拉字幕</strong>：<code>yt-dlp --skip-download --write-subs --sub-langs en --sub-format vtt</code><sup class="cite">[60]</sup>。优先官方字幕，没有再 auto-sub。</li>
+        <li><strong>分级筛选</strong>：用 VocabKitchen CEFR Profiler 给每个频道整体打分<sup class="cite">[64]</sup> — 确认是 A2 还是 B1。</li>
+        <li><strong>入索引</strong>：SQLite FTS5（参考 <code>subtitle-search-engine-research.html</code>），每条 (channel, video_id, start_ms, end_ms, text)。</li>
+        <li><strong>视频展示</strong>：iframe 嵌入 <code>https://www.youtube.com/embed/{video_id}?start={seconds}&end={seconds+15}</code> 直接跳秒。半米用户不用看广告外挂层，跨设备友好。</li>
+        <li><strong>切片备份</strong>（仅 VOA / 其他 PD）：<code>ffmpeg -ss $start -i video.mp4 -t 15 -c copy clip.mp4</code> 切片保留到自家 CDN，给离线场景或不想依赖 YouTube 时用。</li>
+      </ol>
+
+      <h3>📺 iframe 嵌入与下载的取舍</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>策略</th><th>合规</th><th>UX</th><th>速度</th><th>断网</th><th>建议</th></tr></thead>
+          <tbody>
+            <tr><td>iframe 嵌入</td><td>✅ 永远 OK<sup class="cite">[14]</sup></td><td>YouTube 广告 + 推荐</td><td>受 YT 服务器影响</td><td>❌</td><td><strong>主推</strong> 黄区频道</td></tr>
+            <tr><td>下载切片自托管</td><td>仅绿区 OK</td><td>纯净无广告</td><td>自 CDN 快</td><td>✅</td><td>仅 PD / 教育资助</td></tr>
+            <tr><td>混合（黄区 iframe + 绿区切片）</td><td>✅</td><td>不一致但可控</td><td>视情况</td><td>部分</td><td><strong>半米推荐</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>半米实操：iframe 默认，VOA 例外</strong>。其他黄区频道想下切片时先发邮件谈授权或者用 Storyline Online 这种已经有"教育配套资料"的非营利 IP。</p>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch14 mini demo ============ -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">mini demo · 频道选择器（输入条件出推荐）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>玩一下：选 CEFR 难度 + 偏好口音 + 受众 + 授权颜色，看看符合条件的频道。</p>
+
+      <div class="demo-host">
+        <h4>🎯 半米频道选择器</h4>
+
+        <div class="demo-chip-group">
+          <span class="label">CEFR：</span>
+          <button class="demo-chip" data-group="cefr" data-val="">全部</button>
+          <button class="demo-chip active" data-group="cefr" data-val="A1">A1 启蒙</button>
+          <button class="demo-chip" data-group="cefr" data-val="A2">A2 小学</button>
+          <button class="demo-chip" data-group="cefr" data-val="B1">B1 小高/初中</button>
+        </div>
+
+        <div class="demo-chip-group">
+          <span class="label">口音：</span>
+          <button class="demo-chip active" data-group="accent" data-val="">全部</button>
+          <button class="demo-chip" data-group="accent" data-val="AmE">AmE</button>
+          <button class="demo-chip" data-group="accent" data-val="BrE">BrE</button>
+        </div>
+
+        <div class="demo-chip-group">
+          <span class="label">授权：</span>
+          <button class="demo-chip active" data-group="cc" data-val="">全部</button>
+          <button class="demo-chip" data-group="cc" data-val="green">🟢 绿区</button>
+          <button class="demo-chip" data-group="cc" data-val="yellow">🟡 黄区</button>
+        </div>
+
+        <div class="demo-chip-group">
+          <span class="label">阿杰已用：</span>
+          <button class="demo-chip active" data-group="used" data-val="">全部</button>
+          <button class="demo-chip" data-group="used" data-val="yes">仅已用 skill</button>
+        </div>
+
+        <div class="demo-stats" id="demoStats"></div>
+        <div class="demo-result-list" id="demoResults"></div>
+      </div>
+
+      <p style="font-size: 13px; color: var(--text-mute); margin-top: 14px;">⚠️ Demo 数据是本报告统计快照，单击频道卡片可在新窗口打开对应 YouTube 频道。CEFR / WPM 是估算值，仅作筛选参考。</p>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch15 FAQ ============ -->
+  <section class="chapter" id="ch15">
+    <h2><span class="num">15</span><span class="title-text">FAQ · 12 个最关键问题</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">为什么排除 Crash Course 但包括 Crash Course Kids？</span><span class="toggle">+</span></div>
+        <div class="faq-a">完全是两个频道。<strong>Crash Course 主</strong>（@crashcourse，17M 订阅<sup class="cite">[20]</sup>）是 John Green 主讲，公认语速极快（学生要 0.5-0.75 倍速才能跟<sup class="cite">[11]</sup>）、词汇 B2-C1、受众 13-34 岁、10-15 分钟视频塞满学术词。<strong>Crash Course Kids</strong>（@crashcoursekids，Sabrina Cruz 主讲<sup class="cite">[5]</sup>）是 Complexly 同一公司 2015 年专为 3-5 年级小学生做的科学频道，语速明显放慢，词汇 NGSS 课标对齐，~50 集完结，A2-B1 适配。阿杰说"不要 Crash Course"指的是前者，Kids 版必收且阿杰已有 <code>crashcourse-kids-vocab</code> skill。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">VOA Learning English 慢速到什么程度？</span><span class="toggle">+</span></div>
+        <div class="faq-a">VOA Learning English 明确比正常 VOA 慢 1/3<sup class="cite">[1]</sup>，估算 90-100 WPM（正常英语对话 130-150 WPM）。<strong>核心词汇 1500 词、刻意避免习语</strong>。Let's Learn English Level 1 是 A2 段、Level 2 是 B1-B2 段。除了慢速本身，VOA 的<strong>最大杀手锏是公共领域 PD</strong>（美国政府作品 17 USC §105）<sup class="cite">[2]</sup>：可以下载、切片、自托管、商用、不需注明来源。半米作为商业 SaaS 这是最安全的内容池。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">Easy English 街头采访适合做词汇库吗？</span><span class="toggle">+</span></div>
+        <div class="faq-a">非常适合 B1 段。Easy English<sup class="cite">[38]</sup>（@EasyEnglishVideos，Mitch + Isi 主持，Brighton 起家）是 Easy Languages 全球项目的英国分支，街头采访 + 实时双语字幕。<strong>三个独特价值</strong>：(1) <strong>真实自然口语</strong> — 填充词（well, you know, kind of）、犹豫、自我修正这些在教学频道几乎没有；(2) <strong>双语字幕</strong>给跨语言对齐近 0 成本（半米可以直接拿到中英对照）；(3) <strong>每段独立性强</strong> — 每个被采访者就是 30 秒一片，切片可行性极佳。<strong>缺点</strong>：街头噪音环境下自动字幕准确率会降到 75-85%<sup class="cite">[12]</sup>，要校对一遍。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">TED-Ed 的 lesson 部分可以用吗？</span><span class="toggle">+</span></div>
+        <div class="faq-a">不建议。TED-Ed<sup class="cite">[15]</sup> 受众 13-21 岁、动画做得极好、4-7 分钟一集 — 看起来很像半米想要的。但<strong>词汇 B2-C1</strong>（一集 4 分钟塞满学术词）+ <strong>语速 ~150 WPM</strong>，跟半米核心 K12 ESL 学员（A2-B1）不匹配。<strong>例外</strong>：如果半米将来开发"高阶 / 出国冲刺 / B2+ 学员"产品线，TED-Ed 是合理选项。但当前阶段（50 学员 / A2-B1 主体）不应入库。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">Peppa Pig 版权能用于商业产品吗？</span><span class="toggle">+</span></div>
+        <div class="faq-a">iframe 嵌入完全 OK，下载切片<strong>有显著风险</strong>。Peppa Pig 版权归 Hasbro 旗下 Entertainment One（2019 收购，38 亿美元）<sup class="cite">[8]</sup>，eOne 对未授权使用执法非常激进 — Wolfoo 案是个标志案例。<strong>半米策略</strong>：用 YouTube 官方 iframe 嵌入 + 时间戳跳秒（Seventh Circuit 判例认可<sup class="cite">[14]</sup>），不下载、不重新发布。如果一定要下载切片，必须邮件联系 Hasbro/eOne 谈正式教育许可（年费起步预估 ¥10-50 万）。半米 5000 学员阶段以前不必碰这条路。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">English Singsing 是韩国制的，用 AmE 没问题吗？</span><span class="toggle">+</span></div>
+        <div class="faq-a">没问题。English Singsing<sup class="cite">[9]</sup> 虽然是韩国体系（Genki English 延伸），但<strong>配音用美式中性英语</strong>，听不出韩式口音 — 韩国 ESL 教材出口产业链非常成熟，专业配音员是英美母语者。它的最大优势是<strong>"为非母语者设计的英语"</strong>：每段视频明确围绕一个语言点，字幕清晰，每句重复至少 2 遍，1710 视频规模够大。对半米国际学校 K12 学员，相比于纯母语者制作的频道，这种"设计感"的内容反而更贴。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">Bluey 的澳式口音对半米学员不好吧？</span><span class="toggle">+</span></div>
+        <div class="faq-a">看半米的产品定位。如果学员主要应对托福 / 美式国际学校 → AusE 是噪音，少用；如果学员主要应对雅思 / 英式国际学校 → AusE 是有益的多样性补充。Bluey<sup class="cite">[33]</sup> 最大价值是<strong>家庭日常对话最自然</strong>（言语习得研究案例）<sup class="cite">[50]</sup> — Peppa Pig 偏教学化的"标准句"，Bluey 偏"真家庭怎么说"。半米可以把 Bluey 标 <code>accent=AusE</code> 给愿意听的学员一个选项，但不应作为词条<strong>默认</strong>例句。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">English with Lucy 11.6M 订阅这么大，为啥排除？</span><span class="toggle">+</span></div>
+        <div class="faq-a">Lucy Earl<sup class="cite">[43]</sup> 是<strong>给成人 ESL 学习者</strong>的英式英语博主，受众主体是 18-35 岁打算应对剑桥 / 雅思 / 留学的非母语成人。词汇 B2-C1（俚语、商务、抽象表达多）、语速正常 ~135 WPM、内容偏文化解读 + 高级语法。半米核心 K12 受众（小学到初中）撑不住这个难度。如果将来半米开"高阶产品线"或"出国冲刺包"，可以重新考虑她。同理 mmmEnglish (Emma)<sup class="cite">[44]</sup>、engVid 系（Ronnie / Adam / Alex）全是成人 ESL 向，先排除。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">YouTube auto-caption 准确率到底够不够？</span><span class="toggle">+</span></div>
+        <div class="faq-a">分场景：(1) <strong>清晰录音棚 + 单一英语母语主讲</strong>（SciShow Kids / CC Kids / VOA / BBC LE）→ 90-95% 准确率<sup class="cite">[12]</sup>，半米可以直接用；(2) <strong>多人对话 + 口音 + 环境音</strong>（Easy English 街头 / Bluey / Peppa Pig 多角色）→ 75-85%，要人工校对一遍；(3) <strong>歌曲</strong>（Super Simple Songs / Pinkfong）→ ASR 经常错歌词，建议拉官方歌词字幕。<strong>替代方案</strong>：本地跑 Whisper.cpp large-v3-turbo（Mac M2 上 10 倍实时<sup class="cite">[60]</sup>），可以把清晰内容打到 95-98%。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">中国本土做的英语启蒙 YouTube 账号要不要收？</span><span class="toggle">+</span></div>
+        <div class="faq-a">不优先。原因：(1) 内地"启蒙号"主体在抖音 / 小红书 / 微信视频号，YouTube 镜像账号普遍只有海外华人观看，量级小；(2) 本土 ESL 启蒙号经常有"中式英语口音"问题，对国际学校学员是反向输入；(3) 词汇覆盖与海外大频道高度重合，没有差异化价值。<strong>例外</strong>：English Singsing<sup class="cite">[9]</sup>（韩国制，AmE 标准发音）和 Smile and Learn<sup class="cite">[36]</sup>（西班牙制，多语言版本）是"非西方但发音中性"的代表，已纳入候选。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">Khan Academy Kids 看着也是非盈利，为啥不优先？</span><span class="toggle">+</span></div>
+        <div class="faq-a">Khan Academy 内容用 <strong>CC BY-NC-SA</strong> 协议（非商业 + 同条款共享 + 注明来源），<strong>NC 条款挡住了半米作为商业 SaaS 直接引用</strong><sup class="cite">[55]</sup>。半米要用必须先邮件联系 Khan Academy 获取商业使用豁免（理论上可能因半米的"教育"属性获批，但流程不确定）。<strong>同样问题</strong>：所有 CC BY-NC 协议的视频对商业 SaaS 都不友好。<strong>同理</strong>：vimeo / archive.org 上很多教育视频是 CC BY-NC，半米要先看协议。安全做法：先邮件谈，落到书面授权再入库。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q</span><span class="qtext">阿杰下周该做的具体下一步是啥？</span><span class="toggle">+</span></div>
+        <div class="faq-a"><strong>3 件事</strong>：(1) 把 <code>scishow-kids-vocab</code> + <code>crashcourse-kids-vocab</code> 两个 skill 跑到 90% 完成度（已经在做的事先做透）；(2) 新建 <code>voa-learning-english-vocab</code> skill — VOA Let's Learn English Level 1 一共 30 集左右，一个周末可以全部拉字幕 + 入库 + 切片自托管，<strong>这是验证"自建视频词典"自托管路径的关键试点</strong>；(3) 给 Mission Control 加个任务"评估前 3 家频道 Oxford 3000 实际覆盖率"，跑 VocabKitchen Profiler<sup class="cite">[64]</sup> 拿真数据。完成后再决定阶段 2 的扩展节奏。</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch16 References ============ -->
+  <section class="chapter" id="ch16">
+    <h2><span class="num">16</span><span class="title-text">References · 所有引用来源</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p style="font-size: 13px; color: var(--text-mute);">访问日期统一为 2026-05-25。订阅数 / 视频数等动态数据每天变化，本报告记录的是访问当日的快照。每条来源后括号内是被引用的次数。</p>
+
+      <ol class="ref-list">
+        <li><a href="https://learningenglish.voanews.com/p/5373.html" target="_blank">VOA Learning English - About Us (官方介绍页)</a> <span class="ref-meta">· 2026-05-25 · 引用 8 次</span></li>
+        <li><a href="https://en.wikipedia.org/wiki/Learning_English_(version_of_English)" target="_blank">Learning English (VOA) - Wikipedia</a> <span class="ref-meta">· 2026-05-25 · 引用 4 次</span></li>
+        <li><a href="https://www.youtube.com/user/scishowkids" target="_blank">SciShow Kids - YouTube</a> <span class="ref-meta">· 2026-05-25 · 引用 4 次</span></li>
+        <li><a href="https://screenwiseapp.com/media/scishow-kids-youtube" target="_blank">SciShow Kids – WISE Score & Parent Review | Screenwise</a> <span class="ref-meta">· 2026-05-25 · 引用 2 次</span></li>
+        <li><a href="https://complexly.org/shows/crash-course-kids/" target="_blank">Crash Course Kids - Complexly</a> <span class="ref-meta">· 2026-05-25 · 引用 6 次</span></li>
+        <li><a href="https://blog.youtube/news-and-events/youtube-expanded-partnership-with-sesame-street/" target="_blank">YouTube will become the largest digital home for Sesame Street - YouTube Blog</a> <span class="ref-meta">· 2026-05-25 · 引用 4 次</span></li>
+        <li><a href="https://sesameworkshop.org/about-us/press-room/a-sunny-day-is-coming-to-youtube-youtubes-expanded-partnership-with-sesame-street/" target="_blank">A Sunny Day is Coming to YouTube - Sesame Workshop press</a> <span class="ref-meta">· 2026-05-25 · 引用 4 次</span></li>
+        <li><a href="https://www.marks-clerk.com/insights/latest-insights/102jv74-peppa-pig-v-wolfoo-clash-of-the-cartoons/" target="_blank">Peppa Pig v Wolfoo: clash of the cartoons - Marks & Clerk</a> <span class="ref-meta">· 2026-05-25 · 引用 5 次</span></li>
+        <li><a href="https://vidiq.com/youtube-stats/channel/UCGwA4GjY4nGMIYvaJiA0EGA/" target="_blank">English Singsing's Net Worth, Income & Subscriber Count - vidIQ</a> <span class="ref-meta">· 2026-05-25 · 5.52M 订阅 · 引用 7 次</span></li>
+        <li><a href="https://www.commonsensemedia.org/youtube-reviews/crash-course" target="_blank">Crash Course YouTube Review | Common Sense Media</a> <span class="ref-meta">· 2026-05-25 · 引用 3 次</span></li>
+        <li><a href="https://peterwstanton.medium.com/why-i-dont-use-crash-course-world-history-in-my-classroom-a240ae4dcfcd" target="_blank">Why I Don't Use Crash Course World History in My Classroom - Medium</a> <span class="ref-meta">· 2026-05-25 · 引用 3 次</span></li>
+        <li><a href="https://grabcaptions.com/blog/youtube-auto-captions-accuracy/" target="_blank">YouTube Auto-Caption Accuracy in 2026 — What to Expect</a> <span class="ref-meta">· 2026-05-25 · 85-95% 准确率 · 引用 5 次</span></li>
+        <li><a href="https://support.google.com/youtube/answer/9783148?hl=en" target="_blank">Fair use on YouTube - YouTube Help</a> <span class="ref-meta">· 2026-05-25 · 引用 3 次</span></li>
+        <li><a href="https://websitecreationworkshop.com/articles/embedding-youtube-videos-not-copyright-violation/" target="_blank">Embedding YouTube Videos is Not a Copyright Violation - Seventh Circuit 判例</a> <span class="ref-meta">· 2026-05-25 · 引用 3 次</span></li>
+        <li><a href="https://www.commonsensemedia.org/youtube-reviews/ted-ed" target="_blank">TED-Ed YouTube Review | Common Sense Media</a> <span class="ref-meta">· 2026-05-25 · 引用 4 次</span></li>
+        <li><a href="https://www.oxfordlearnersdictionaries.com/external/pdf/wordlists/oxford-3000-5000/The_Oxford_3000_by_CEFR_level.pdf" target="_blank">Oxford 3000 by CEFR Level - Oxford University Press</a> <span class="ref-meta">· 2026-05-25 · 引用 4 次</span></li>
+        <li><a href="https://flowshorts.app/blog/words-per-minute-speaking" target="_blank">Words Per Minute Speaking: Average Speed for Every Context (2026) - FlowShorts</a> <span class="ref-meta">· 2026-05-25 · 110-130 WPM 对儿童 · 引用 4 次</span></li>
+        <li><a href="https://www.researchgate.net/publication/371830992_Speech_Rate_and_Young_EFL_Learners'_Listening_Comprehension" target="_blank">Speech Rate and Young EFL Learners' Listening Comprehension - ResearchGate</a> <span class="ref-meta">· 2026-05-25 · 98 WPM 显著提升听力 · 引用 2 次</span></li>
+        <li><a href="https://github.com/jayanns/banmi-research" target="_blank">阿杰本人 skill / 项目 — scishow-kids-vocab / crashcourse-kids-vocab</a> <span class="ref-meta">· 2026-05-25 · 内部引用 · 5 次</span></li>
+        <li><a href="https://socialblade.com/youtube/handle/crashcourse" target="_blank">CrashCourse YouTube Statistics - Social Blade</a> <span class="ref-meta">· 2026-05-25 · 17M+ 订阅 · 引用 4 次</span></li>
+        <li><a href="https://en.wikipedia.org/wiki/SciShow" target="_blank">SciShow - Wikipedia</a> <span class="ref-meta">· 2026-05-25 · 引用 1 次</span></li>
+        <li><a href="https://us.youtubers.me/scishow-kids/youtube-estimated-earnings" target="_blank">SciShow Kids - YoutuberStats (us.youtubers.me)</a> <span class="ref-meta">· 2026-05-25 · 1.6M 订阅 · 614 视频 · 引用 3 次</span></li>
+        <li><a href="https://teaching.charlotte.edu/academic-technologies/kaltura-capturespace/fair-use-video-content/" target="_blank">Fair Use for Video Content - UNC Charlotte</a> <span class="ref-meta">· 2026-05-25 · 引用 3 次</span></li>
+        <li><a href="https://us.youtubers.me/free-school/youtuber-stats" target="_blank">Free School - YoutuberStats (us.youtubers.me)</a> <span class="ref-meta">· 2026-05-25 · 885K 订阅 · 336 视频 · 引用 5 次</span></li>
+        <li><a href="https://socialblade.com/youtube/handle/cocomelon" target="_blank">Cocomelon YouTube Statistics - Social Blade</a> <span class="ref-meta">· 2026-05-25 · 198-201M 订阅 · 引用 3 次</span></li>
+        <li><a href="https://www.tubics.com/rankings/channel/UCG2CL6EUjG8TVT1Tpl9nJdg" target="_blank">Ms Rachel YouTube Stats - tubics</a> <span class="ref-meta">· 2026-05-25 · 18.3M 订阅 · 引用 6 次</span></li>
+        <li><a href="https://en.wikipedia.org/wiki/Super_Simple_Songs" target="_blank">Super Simple Songs - Wikipedia</a> <span class="ref-meta">· 2026-05-25 · 45.7M 订阅 · 引用 3 次</span></li>
+        <li><a href="https://www.licenseglobal.com/licensing-resources/pinkfong-baby-shark-joins-50-million-subscriber-club-youtube" target="_blank">Pinkfong Baby Shark - License Global</a> <span class="ref-meta">· 2026-05-25 · 84M 订阅 · 引用 3 次</span></li>
+        <li><a href="https://en.wikipedia.org/wiki/Mother_Goose_Club" target="_blank">Mother Goose Club - Wikipedia</a> <span class="ref-meta">· 2026-05-25 · 7M+ 订阅 · 引用 2 次</span></li>
+        <li><a href="https://us.youtubers.me/wow-english-tv/youtuber-stats" target="_blank">Steve and Maggie (Wow English TV) - YoutuberStats</a> <span class="ref-meta">· 2026-05-25 · 7.42M 订阅 · 544 视频 · 引用 4 次</span></li>
+        <li><a href="https://vidiq.com/youtube-stats/channel/UC4GaQ9fCH5IpAq1AImj7XuQ/" target="_blank">English Tree TV YouTube Stats - vidIQ</a> <span class="ref-meta">· 2026-05-25 · 2.7M 订阅 · 引用 3 次</span></li>
+        <li><a href="https://socialcounts.org/youtube-live-subscriber-count/UCdHK6g8ddMEcMu9B3LgeKYg" target="_blank">Maple Leaf Learning Live Subscriber Count - SocialCounts</a> <span class="ref-meta">· 2026-05-25 · 803K 订阅 · 引用 3 次</span></li>
+        <li><a href="https://www.upworthy.com/american-kids-develop-accents-from-peppa-and-bluey/" target="_blank">Bluey 给美国孩子澳式口音 - Upworthy</a> <span class="ref-meta">· 2026-05-25 · 10M+ 订阅 · 引用 4 次</span></li>
+        <li><a href="https://www.blue-zoo.co.uk/blog/numberblocks-youtube-channel-hits-10-million-subscribers-reflections-from-oli-hyatt-md-of-alphablocks-and-blue-zoo/" target="_blank">Numberblocks YouTube hits 10M Subscribers - Blue Zoo</a> <span class="ref-meta">· 2026-05-25 · 6M+ 单频道、10M+ 全家族 · 引用 4 次</span></li>
+        <li><a href="https://storylineonline.net/about-us/" target="_blank">Storyline Online - About Us</a> <span class="ref-meta">· 2026-05-25 · 908K 订阅 · 引用 4 次</span></li>
+        <li><a href="https://vidiq.com/youtube-stats/channel/UCxoDMG0tvaYO5Xobvtqw5nw" target="_blank">Smile and Learn English - YouTube Stats</a> <span class="ref-meta">· 2026-05-25 · 1.6M 订阅 · 引用 3 次</span></li>
+        <li><a href="https://vidiq.com/youtube-stats/channel/UCHaHD477h-FeBbVh9Sh7syA/" target="_blank">BBC Learning English YouTube Channel Stats - vidIQ</a> <span class="ref-meta">· 2026-05-25 · 9.1M 订阅 · 4.1K 视频 · 引用 4 次</span></li>
+        <li><a href="https://www.easyenglish.video/" target="_blank">Easy English - Official</a> <span class="ref-meta">· 2026-05-25 · 2020-06 起 · 引用 5 次</span></li>
+        <li><a href="https://socialblade.com/youtube/handle/learnenglishwithbobthecanadian" target="_blank">Learn English with Bob the Canadian - Social Blade</a> <span class="ref-meta">· 2026-05-25 · 引用 3 次</span></li>
+        <li><a href="https://us.youtubers.me/learn-english-with-papa-teach-me/youtuber-stats" target="_blank">Papa Teach Me - YoutuberStats</a> <span class="ref-meta">· 2026-05-25 · 1.7M 订阅 · 712 视频 · 引用 3 次</span></li>
+        <li><a href="https://www.youtube.com/channel/UC-qWJlvaPME3MWvrY-yjXeA" target="_blank">British Council | LearnEnglish Kids - YouTube</a> <span class="ref-meta">· 2026-05-25 · 引用 2 次</span></li>
+        <li><a href="https://www.youtube.com/channel/UCNbeSPp8RYKmHUliYBUDizg" target="_blank">Oxford Online English - YouTube</a> <span class="ref-meta">· 2026-05-25 · 2013-06 起 · 引用 2 次</span></li>
+        <li><a href="https://www.networthspot.com/english-with-lucy/net-worth/" target="_blank">English with Lucy Net Worth - NetWorthSpot</a> <span class="ref-meta">· 2026-05-25 · 11.6M 订阅 · 引用 3 次</span></li>
+        <li><a href="https://us.youtubers.me/mmmenglish/youtuber-stats" target="_blank">mmmEnglish (Emma) - YoutuberStats</a> <span class="ref-meta">· 2026-05-25 · 4-5M 订阅 · 引用 3 次</span></li>
+        <li><a href="https://socialblade.com/youtube/handle/peppapigofficial" target="_blank">Peppa Pig Official YouTube Statistics - Social Blade</a> <span class="ref-meta">· 2026-05-25 · 42.6M 订阅 · 8,986 视频 · 引用 2 次</span></li>
+        <li><a href="https://direct.mit.edu/tacl/article/doi/10.1162/tacl_a_00498/112916/Learning-English-with-Peppa-Pig" target="_blank">Learning English with Peppa Pig - MIT Press TACL</a> <span class="ref-meta">· 2026-05-25 · 学界论文 · 引用 2 次</span></li>
+        <li><a href="https://www.oreateai.com/blog/indepth-analysis-of-childrens-english-enlightenment-animation-a-case-study-of-peppa-pigs-educational-growth-practices/" target="_blank">In-Depth Analysis of Peppa Pig - Oreate AI Blog</a> <span class="ref-meta">· 2026-05-25 · 引用 1 次</span></li>
+        <li><a href="https://www.sesamestreetenglish.com/" target="_blank">Sesame Street English - 官方 ESL 项目</a> <span class="ref-meta">· 2026-05-25 · 引用 1 次</span></li>
+        <li><a href="https://music.youtube.com/channel/UC6LKuH7RPkvRmzS9-8URtqA" target="_blank">Dream English Kids YouTube</a> <span class="ref-meta">· 2026-05-25 · 引用 1 次</span></li>
+        <li><a href="https://www.pbs.org/video/is-bluey-giving-your-kid-australian-accent-yspnta/" target="_blank">Is Bluey Giving Your Kid Australian Accent - PBS Otherwords S4E11</a> <span class="ref-meta">· 2026-05-25 · 引用 1 次</span></li>
+        <li><a href="https://screenwiseapp.com/guides/scisho-kids-youtube" target="_blank">SciShow Kids Age Range: Best for Kids Ages 5 to 10 – Screenwise Guide</a> <span class="ref-meta">· 2026-05-25 · 引用 1 次</span></li>
+        <li><a href="https://www.tubics.com/rankings/channel/UCXVCgDuD_QCkI7gTKU7-tpg" target="_blank">Nat Geo Kids - tubics</a> <span class="ref-meta">· 2026-05-25 · ~1M+ 订阅 · 引用 2 次</span></li>
+        <li><a href="https://thewaltdisneycompany.com/news/nat-geo-earth-month-2026/" target="_blank">Disney and Nat Geo 'Step into Wonder' 2026</a> <span class="ref-meta">· 2026-05-25 · 引用 1 次</span></li>
+        <li><a href="https://www.koreaherald.com/article/2828528" target="_blank">YouTube's top five English teachers for Korean viewers - Korea Herald</a> <span class="ref-meta">· 2026-05-25 · 引用 1 次</span></li>
+        <li><a href="https://vidiq.com/youtube-stats/channel/UC2ri4rEb8abnNwXvTjg5ARw/" target="_blank">Khan Academy Kids YouTube Stats - vidIQ</a> <span class="ref-meta">· 2026-05-25 · 167K 订阅 · 引用 2 次</span></li>
+        <li><a href="https://www.tubics.com/rankings/channel/UCrNnk0wFBnCS1awGjq_ijGQ" target="_blank">PBS KIDS YouTube Stats - tubics</a> <span class="ref-meta">· 2026-05-25 · 3.1M 订阅 · 4.3K 视频 · 引用 2 次</span></li>
+        <li><a href="https://us.youtubers.me/wild-kratts/youtuber-stats" target="_blank">Wild Kratts (9 Story) - YoutuberStats</a> <span class="ref-meta">· 2026-05-25 · 2.15M 订阅 · 引用 2 次</span></li>
+        <li><a href="https://americanenglish.state.gov/resources/voa-learning-english-activities" target="_blank">VOA Learning English Activities - American English (state.gov)</a> <span class="ref-meta">· 2026-05-25 · 引用 1 次</span></li>
+        <li><a href="https://www.quora.com/What-is-the-maximum-number-of-words-per-minute-that-should-be-spoken-in-a-fast-paced-informational-YouTube-video" target="_blank">Maximum WPM for fast-paced YouTube videos - Quora</a> <span class="ref-meta">· 2026-05-25 · 引用 1 次</span></li>
+        <li><a href="https://write.corbpie.com/download-a-youtube-video-subtitles-file-with-yt-dlp/" target="_blank">Download YouTube subtitles with yt-dlp - corbpie</a> <span class="ref-meta">· 2026-05-25 · 引用 4 次</span></li>
+        <li><a href="https://support.google.com/youtube/answer/2797468?hl=en" target="_blank">License types on YouTube - YouTube Help</a> <span class="ref-meta">· 2026-05-25 · 引用 2 次</span></li>
+        <li><a href="https://creativecommons.org/tag/youtube/" target="_blank">YouTube Archives - Creative Commons</a> <span class="ref-meta">· 2026-05-25 · 4M CC BY 视频 · 引用 2 次</span></li>
+        <li><a href="https://support.google.com/youtube/answer/2814000?hl=en" target="_blank">Understand copyright strikes - YouTube Help</a> <span class="ref-meta">· 2026-05-25 · 三振下号机制 · 引用 1 次</span></li>
+        <li><a href="https://www.vocabkitchen.com/profiler/cefr" target="_blank">VocabKitchen CEFR Profiler - 文本词汇 CEFR 分级工具</a> <span class="ref-meta">· 2026-05-25 · 引用 3 次</span></li>
+      </ol>
+
+    </div>
+  </section>
+
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+<script>
+  // ===== 主题 =====
+  (function() {
+    const KEY = 'yt-vocab-channels-theme';
+    const saved = localStorage.getItem(KEY);
+    if (saved) document.body.setAttribute('data-theme', saved);
+    const btn = document.getElementById('themeToggle');
+    function syncIcon() {
+      btn.textContent = document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    }
+    syncIcon();
+    btn.addEventListener('click', () => {
+      const cur = document.body.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem(KEY, next);
+      syncIcon();
+    });
+  })();
+
+  // ===== 章节折叠 =====
+  document.querySelectorAll('section.chapter > h2').forEach(h2 => {
+    h2.addEventListener('click', () => {
+      h2.parentElement.classList.toggle('collapsed');
+    });
+  });
+
+  // ===== 进度条 + 回到顶部 =====
+  const progressEl = document.getElementById('progress');
+  const backTopEl = document.getElementById('backToTop');
+  function updateProgress() {
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrolled = window.scrollY;
+    const ratio = docHeight > 0 ? scrolled / docHeight : 0;
+    progressEl.style.width = (ratio * 100) + '%';
+    backTopEl.classList.toggle('show', scrolled > 400);
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+  backTopEl.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // ===== 锚点高亮 =====
+  const anchorLinks = document.querySelectorAll('#anchorList a');
+  const sections = Array.from(anchorLinks).map(a => document.getElementById(a.dataset.target)).filter(Boolean);
+  function highlightAnchor() {
+    const offset = 120;
+    let current = null;
+    for (const sec of sections) {
+      const rect = sec.getBoundingClientRect();
+      if (rect.top - offset <= 0) current = sec.id;
+    }
+    anchorLinks.forEach(a => a.classList.toggle('active', a.dataset.target === current));
+    if (current) {
+      const activeLink = document.querySelector('#anchorList a.active');
+      if (activeLink) {
+        const navWrap = document.querySelector('.anchor-list');
+        const linkRect = activeLink.getBoundingClientRect();
+        const navRect = navWrap.parentElement.getBoundingClientRect();
+        const desiredScroll = activeLink.offsetLeft - navRect.width / 2 + linkRect.width / 2;
+        navWrap.parentElement.scrollTo({ left: desiredScroll, behavior: 'smooth' });
+      }
+    }
+  }
+  window.addEventListener('scroll', highlightAnchor, { passive: true });
+  highlightAnchor();
+
+  // ===== anchor 点击展开折叠章节 =====
+  anchorLinks.forEach(a => {
+    a.addEventListener('click', () => {
+      const target = document.getElementById(a.dataset.target);
+      if (target && target.classList.contains('collapsed')) {
+        target.classList.remove('collapsed');
+      }
+    });
+  });
+
+  // ===== 表格行高亮 =====
+  document.querySelectorAll('tbody tr').forEach(tr => {
+    tr.addEventListener('click', () => {
+      tr.parentElement.querySelectorAll('tr.row-highlight').forEach(o => {
+        if (o !== tr) o.classList.remove('row-highlight');
+      });
+      tr.classList.toggle('row-highlight');
+    });
+  });
+
+  // ===== FAQ =====
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      q.parentElement.classList.toggle('open');
+    });
+  });
+
+  // ===== mini demo · 频道选择器 =====
+  const CHANNEL_DATA = [
+    { name: 'SciShow Kids', emoji: '🔬', cefr: 'A2', accent: 'AmE', cc: 'green', used: 'yes', url: 'https://www.youtube.com/@SciShowKids', subs: '1.6M', wpm: '~120', why: '阿杰已在用。NGSS 课标对齐、A2 主力、绿区。', priority: 'high' },
+    { name: 'Crash Course Kids', emoji: '🎒', cefr: 'A2', accent: 'AmE', cc: 'green', used: 'yes', url: 'https://www.youtube.com/@crashcoursekids', subs: '~1M', wpm: '~130', why: '阿杰已在用。⚠️ 不是主频道，主讲 Sabrina Cruz。', priority: 'high' },
+    { name: 'VOA Learning English', emoji: '📰', cefr: 'B1', accent: 'AmE', cc: 'green', used: 'no', url: 'https://www.youtube.com/@VOALearningEnglish', subs: '2.83M', wpm: '~95', why: 'PD 公共领域、可下载切片自托管、零风险。50 学员阶段必做。', priority: 'high' },
+    { name: 'Free School', emoji: '📚', cefr: 'A2', accent: 'AmE', cc: 'green', used: 'no', url: 'https://www.youtube.com/@FreeSchool', subs: '885K', wpm: '~110', why: '人文 + 科学补充。莫扎特 / 梵高 / 古希腊等长尾词靠它。', priority: 'high' },
+    { name: 'Sesame Street', emoji: '🌳', cefr: 'A1', accent: 'AmE', cc: 'green', used: 'no', url: 'https://www.youtube.com/@sesamestreet', subs: '~28M', wpm: '~110', why: '2026-01 起 YT 数百集上线。非营利、教育友好。', priority: 'high' },
+    { name: 'English Singsing', emoji: '🇰🇷', cefr: 'A2', accent: 'AmE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/@EnglishSingsing', subs: '5.52M', wpm: '~100', why: '韩国制 ESL 专向，1710 视频结构化对话。', priority: 'high' },
+    { name: 'BBC Learning English', emoji: '🌍', cefr: 'B1', accent: 'BrE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/@bbclearningenglish', subs: '9.1M', wpm: '~120', why: 'BrE 主力、官方分级清晰。和 VOA 互补。', priority: 'high' },
+    { name: 'Easy English (Mitch & Isi)', emoji: '🚶', cefr: 'B1', accent: 'BrE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/@EasyEnglishVideos', subs: '~500K-1M', wpm: '~140', why: 'Brighton 街头采访、真实口语、双语字幕。', priority: 'high' },
+    { name: 'Peppa Pig', emoji: '🐷', cefr: 'A1', accent: 'BrE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/@peppapigofficial', subs: '42.6M', wpm: '~115', why: '黄区 iframe only。Hasbro/eOne 执法激进。', priority: 'medium' },
+    { name: 'Super Simple Songs', emoji: '🎵', cefr: 'A1', accent: 'AmE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/@supersimplesongs', subs: '45.7M', wpm: '~90', why: 'ESL 启蒙顶流、为 ESL 教学而设计。', priority: 'medium' },
+    { name: 'Ms Rachel', emoji: '👩', cefr: 'A1', accent: 'AmE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/@msrachel', subs: '18.3M', wpm: '~80', why: 'First Words 段最强。已签 Netflix。', priority: 'medium' },
+    { name: 'Pinkfong Baby Shark', emoji: '🦈', cefr: 'A1', accent: 'AmE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/@pinkfong', subs: '84M', wpm: '~95', why: 'AmE 中性、童谣启蒙。和 Super Simple 同位。', priority: 'low' },
+    { name: 'Steve & Maggie (Wow English)', emoji: '🐕', cefr: 'A2', accent: 'BrE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/@SteveAndMaggie', subs: '7.42M', wpm: '~110', why: 'BrE ESL 专向最强。Wattsenglish 出品。', priority: 'medium' },
+    { name: 'English Tree TV', emoji: '🌳', cefr: 'A2', accent: 'AmE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/@EnglishTreeTV', subs: '2.7M', wpm: '~100', why: '原创歌 + 故事、慢速清晰、ESL 定位。', priority: 'medium' },
+    { name: 'Bob the Canadian', emoji: '🍁', cefr: 'B1', accent: 'AmE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/@bobthecanadian', subs: '~300K', wpm: '~105', why: '"Learn English in the Wild" 实景词汇。', priority: 'medium' },
+    { name: 'National Geographic Kids', emoji: '🦒', cefr: 'A2', accent: 'AmE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/@natgeokids', subs: '~1M+', wpm: '~130', why: '动物 / 自然 / 地理词汇。Disney 旗下。', priority: 'medium' },
+    { name: 'Wild Kratts (9 Story)', emoji: '🐯', cefr: 'A2', accent: 'AmE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/@wildkratts', subs: '2.15M', wpm: '~125', why: '动物专向。PBS 系生态。', priority: 'medium' },
+    { name: 'Numberblocks', emoji: '🔢', cefr: 'A1', accent: 'BrE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/@Numberblocks', subs: '6M+', wpm: '~110', why: '数学 + phonics。词汇范围窄。', priority: 'low' },
+    { name: 'Bluey', emoji: '🐶', cefr: 'A1', accent: 'AusE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/@bluey', subs: '10M+', wpm: '~115', why: '澳式家庭对话、真自然但口音特殊。', priority: 'medium' },
+    { name: 'Storyline Online', emoji: '📖', cefr: 'A2', accent: 'AmE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/@storylineonline', subs: '908K', wpm: '~100', why: 'SAG-AFTRA 非营利、演员朗读绘本。', priority: 'medium' },
+    { name: 'PBS Kids', emoji: '📺', cefr: 'A2', accent: 'AmE', cc: 'green', used: 'no', url: 'https://www.youtube.com/c/PBSKIDS', subs: '3.1M', wpm: '~125', why: '公共广播、Daniel Tiger / Odd Squad 等。', priority: 'medium' },
+    { name: 'British Council LearnEnglish Kids', emoji: '🇬🇧', cefr: 'A2', accent: 'BrE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/user/BritishCouncilLEKids', subs: '中等', wpm: '~115', why: '英国文化协会官方、ESL 第二语言学习者向。', priority: 'medium' },
+    { name: 'Smile and Learn', emoji: '😊', cefr: 'A2', accent: 'AmE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/@SmileandLearnEnglish', subs: '1.6M', wpm: '~115', why: '西班牙公司、3-12 岁定位、主题分类明确。', priority: 'medium' },
+    { name: 'Maple Leaf Learning', emoji: '🍁', cefr: 'A1', accent: 'AmE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/@MapleLeafLearning', subs: '803K', wpm: '~100', why: '日本本土英语学校、ESL 课堂专用。', priority: 'low' },
+    { name: 'Mother Goose Club', emoji: '🪿', cefr: 'A1', accent: 'AmE', cc: 'yellow', used: 'no', url: 'https://www.youtube.com/@MotherGooseClub', subs: '7M+', wpm: '~90', why: '真人 cosplay 童谣、传统启蒙。', priority: 'low' }
+  ];
+
+  const filters = { cefr: 'A1', accent: '', cc: '', used: '' };
+
+  function renderDemo() {
+    const list = CHANNEL_DATA.filter(ch => {
+      if (filters.cefr && ch.cefr !== filters.cefr) return false;
+      if (filters.accent && ch.accent !== filters.accent) return false;
+      if (filters.cc && ch.cc !== filters.cc) return false;
+      if (filters.used && ch.used !== filters.used) return false;
+      return true;
+    });
+
+    const container = document.getElementById('demoResults');
+    const stats = document.getElementById('demoStats');
+
+    stats.innerHTML = `找到 <strong>${list.length}</strong> 个频道 · 共 <strong>${CHANNEL_DATA.length}</strong> 个候选`;
+
+    if (list.length === 0) {
+      container.innerHTML = '<div class="demo-empty">没有匹配的频道。试试放宽条件。</div>';
+      return;
+    }
+
+    container.innerHTML = list.map(ch => {
+      const ccPill = ch.cc === 'green' ? '<span class="pill good">🟢 绿区</span>' :
+                    ch.cc === 'yellow' ? '<span class="pill warn">🟡 黄区</span>' :
+                    '<span class="pill bad">🔴 红区</span>';
+      const usedPill = ch.used === 'yes' ? '<span class="pill accent">已用 skill</span>' : '';
+      const priorityPill = ch.priority === 'high' ? '<span class="pill purple">高优</span>' :
+                          ch.priority === 'medium' ? '<span class="pill info">中优</span>' :
+                          '<span class="pill">低优</span>';
+      return `
+        <a class="demo-card" href="${ch.url}" target="_blank" rel="noopener" style="text-decoration:none; color:inherit; display:block;">
+          <div class="demo-card-head">
+            <div class="demo-poster">${ch.emoji}</div>
+            <div class="demo-meta">
+              <div class="demo-title">${ch.name}</div>
+              <div class="demo-sub">📊 订阅 ${ch.subs} · ⏱ ${ch.wpm} WPM · 🌐 ${ch.accent} · CEFR ${ch.cefr}</div>
+            </div>
+          </div>
+          <div class="demo-pills">${ccPill}${usedPill}${priorityPill}</div>
+          <div class="demo-why">${ch.why}</div>
+        </a>`;
+    }).join('');
+  }
+
+  document.querySelectorAll('.demo-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const group = chip.dataset.group;
+      const val = chip.dataset.val;
+      filters[group] = val;
+      document.querySelectorAll(`.demo-chip[data-group="${group}"]`).forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      renderDemo();
+    });
+  });
+
+  // 初次渲染
+  renderDemo();
+</script>
+
+<footer>
+  <p><strong>适合半米词汇视频库的 YouTube 频道深度调研</strong> · v1 · 无忌 · 2026-05-25</p>
+  <p>面向阿杰半米项目 · 20+ 频道深档 + 4 维度横评 + 半米三阶段路线</p>
+  <p>⚠️ 订阅 / 视频数为访问当日快照；WPM / CEFR 是估算 + 业内体感；商业 / 版权判断不是法律建议，正式商用前请咨询律师</p>
+</footer>
+
+</body>
+</html>

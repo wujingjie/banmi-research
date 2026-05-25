@@ -1052,6 +1052,36 @@
         <p><strong>B1 段的"金三角"是：VOA Learning English（AmE PD）+ BBC Learning English（BrE 官方）+ Easy English Brighton（真实街头）</strong>。这三家覆盖了教学英语、官方英语、街头英语三种纬度。Bob the Canadian 是第 4 选项（情景词汇）。<strong>所有 engVid 系（English with Lucy / mmmEnglish / Ronnie / Adam）都跨进 B2 段，半米核心受众不适配，红区</strong>。</p>
       </div>
 
+      <h3>📥 第二轮调研补充：8 家 ESL 专业频道</h3>
+
+      <div class="callout">
+        <p>对同一主题独立再做一遍对照调研（不同视角），拎出 8 家本报告第一轮没收的 ESL 专业频道，主要集中在 <strong>A1-A2 教学、分级故事、生活场景对话</strong>。建议 500 学员阶段评估加入。优先级低于前 16 家 finalist，先把已选频道用透再考虑这些补充。</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>频道</th>
+              <th>channel_id</th>
+              <th>CEFR</th>
+              <th>定位</th>
+              <th>推荐场景</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Little Fox - Kids Stories<sup class="cite">[65]</sup></td><td><code>UCXRPWm72nrs5sK7fNTSXZrw</code></td><td>A1-B1</td><td>9-level 分级故事 / K-6</td><td>分级阅读型例句</td></tr>
+            <tr><td>Fun Kids English<sup class="cite">[66]</sup></td><td><code>UC4P8csyQKa2_0D5-VtITRIg</code></td><td>A1-A2</td><td>phonics + verbs + daily routines</td><td>低阶 ESL 教学短视频</td></tr>
+            <tr><td>Dream English Kids<sup class="cite">[67]</sup></td><td><code>UC6LKuH7RPkvRmzS9-8URtqA</code></td><td>A1-A2</td><td>ABC / numbers / weather / feelings</td><td>核心基础词主题歌</td></tr>
+            <tr><td>The Singing Walrus<sup class="cite">[68]</sup></td><td><code>UCe1VpF4wS_kdcjyTRSXBcnQ</code></td><td>A1-A2</td><td>call-and-response 歌曲</td><td>互动唱跳 + 短句</td></tr>
+            <tr><td>Mark Kulek<sup class="cite">[69]</sup></td><td><code>UC9VWyvdF-91McG6kt27MeKA</code></td><td>A1-A2</td><td>short mini dialogues</td><td>hotel / supermarket / hospital 场景词</td></tr>
+            <tr><td>Ellii (ESL Library)<sup class="cite">[70]</sup></td><td><code>UCnFRJ3mNt6nL9vMHduwCCyg</code></td><td>A1-B1</td><td>Everyday Dialogues</td><td>实用场景对话（dentist / pharmacy 等）</td></tr>
+            <tr><td>Woodward English<sup class="cite">[71]</sup></td><td><code>UC0kejkXg2LG-pFqAeWD_zLQ</code></td><td>A1-B1</td><td>basic grammar 例句</td><td>语法点 + 规则例句（讲解型，非自然视频）</td></tr>
+            <tr><td>British Council LearnEnglish Teens<sup class="cite">[72]</sup></td><td><code>UCzuOCMm4bYELiv-DZAgfm4g</code></td><td>A2-B1</td><td>13-17 岁青少年 ESL</td><td>Video Zone 按 CEFR 分级</td></tr>
+          </tbody>
+        </table>
+      </div>
+
     </div>
   </section>
 
@@ -1228,6 +1258,56 @@ yt-dlp --write-auto-sub --sub-format json3 ...
 </pre>
 
       <p style="font-size: 13px; color: var(--text-mute);">这部分技术细节阿杰的 <code>clip-pipeline-research.html</code> 和 <code>subtitle-search-engine-research.html</code> 已经讲过 — 这里只引用<sup class="cite">[60]</sup>。</p>
+
+      <h3>📥 第二轮调研补充：字幕句子级二次过滤阈值表</h3>
+
+      <div class="callout warn">
+        <p><strong>核心方法论</strong>：频道白名单只解决"从哪里抓"，<strong>真正让词汇和视频匹配准确，必须在字幕句子层面做二次过滤</strong>。同一个频道内部也会有越界视频（B2/C1 内容、新闻、节日专题、超长合集）。下表是入库时单条字幕句子的具体阈值，按 A1-A2 / B1 两档分别给出。</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>字段</th>
+              <th>A1-A2 阈值</th>
+              <th>B1 阈值</th>
+              <th>说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>字幕来源</strong></td><td colspan="2">优先人工字幕；自动字幕必须过拼写和时间轴检查</td><td>YouTube 自动字幕 85-95% 准确率<sup class="cite">[12]</sup>，对 A2 教学语速够用</td></tr>
+            <tr><td><strong>句长（tokens）</strong></td><td>4-16</td><td>6-24</td><td>太短没语境，太长不适合词卡</td></tr>
+            <tr><td><strong>语速</strong></td><td>≤ 135 WPM</td><td>≤ 155 WPM</td><td>用字幕 start/end 估算；歌曲按行处理</td></tr>
+            <tr><td><strong>未知词密度</strong></td><td>目标词外最多 1 个 A2+ 词</td><td>目标词外最多 2 个 B1+ 词</td><td>可接 Oxford 3000/5000<sup class="cite">[15]</sup>、EVP 或自建词频表</td></tr>
+            <tr><td><strong>句法</strong></td><td>简单句 / 祈使 / be-do-can-have</td><td>允许 because/when/if 常见从句</td><td>过滤多重嵌套从句和被动复杂解释</td></tr>
+            <tr><td><strong>片段长度</strong></td><td>3-8 秒</td><td>4-12 秒</td><td>保留目标词前后 1 个字幕 cue 更自然</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>抓取时的标题过滤词（频道内白名单）</h4>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>✅ 保留关键词</th>
+              <th>🟡 降权关键词</th>
+              <th>⛔ 排除关键词</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>kids vocabulary</code> · <code>easy dialogue</code> · <code>role play</code> · <code>phonics</code> · <code>read-along</code> · <code>beginner</code> · <code>daily conversation</code> · <code>A1</code> · <code>A2</code> · <code>B1</code></td>
+              <td><code>compilation</code> · <code>podcast</code> · <code>live</code> · <code>grammar</code> · <code>IELTS</code> · <code>business</code> · <code>advanced</code></td>
+              <td><code>news</code> · <code>from the news</code> · <code>TED</code> · <code>debate</code> · <code>documentary</code> · <code>lecture</code> · <code>B2</code> · <code>C1</code> · <code>C2</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="font-size: 13px; color: var(--text-mute);">这套阈值表 + 关键词清单可以直接挂进 yt-dlp 抓取脚本和后处理 pipeline，是落库前的最后一道质量门。</p>
 
     </div>
   </section>
@@ -1471,6 +1551,10 @@ print('Unique words:', len(freq))
         <p><strong>最关键的建议</strong>：阿杰不要看到本报告里 20+ 家频道就想"全都做"。词汇库的产品价值在<strong>"每词都能找到至少 2 个好例句"</strong>而不在频道数量。<strong>3 家做透 &gt; 10 家做半</strong>。先把已经在做的 SciShow Kids + CC Kids 完成度推到 90%，再加 VOA，再扩，节奏不能乱。</p>
       </div>
 
+      <div class="callout warn">
+        <p>⚠️ <strong>另一个视角（第二轮调研）</strong>：SciShow Kids / CC Kids 虽然标注 Grades 1-3，但<strong>科学概念密度其实比普通 ESL 频道高</strong>，常有专有名词（光合作用 / 牛顿三定律 / 火星探测器）和因果解释长句。建议字幕入库时跑 <strong>Ch9 末尾的字幕句子级阈值表</strong>，筛掉句长 > 16 tokens / 未知词密度 > 1 / 含专有名词的句子。不是说要换频道，而是要在频道内做精选。<strong>VOA 因为本身是 ESL 教学定位，句子级过滤后留存率会比 SciShow 高得多</strong>。</p>
+      </div>
+
     </div>
   </section>
 
@@ -1696,6 +1780,14 @@ print('Unique words:', len(freq))
         <li><a href="https://creativecommons.org/tag/youtube/" target="_blank">YouTube Archives - Creative Commons</a> <span class="ref-meta">· 2026-05-25 · 4M CC BY 视频 · 引用 2 次</span></li>
         <li><a href="https://support.google.com/youtube/answer/2814000?hl=en" target="_blank">Understand copyright strikes - YouTube Help</a> <span class="ref-meta">· 2026-05-25 · 三振下号机制 · 引用 1 次</span></li>
         <li><a href="https://www.vocabkitchen.com/profiler/cefr" target="_blank">VocabKitchen CEFR Profiler - 文本词汇 CEFR 分级工具</a> <span class="ref-meta">· 2026-05-25 · 引用 3 次</span></li>
+        <li><a href="https://www.youtube.com/channel/UCXRPWm72nrs5sK7fNTSXZrw" target="_blank">Little Fox - Kids Stories and Songs - YouTube</a> <span class="ref-meta">· 2026-05-25 · 9-level reading curriculum · 引用 1 次</span></li>
+        <li><a href="https://funkidsenglish.com/" target="_blank">Fun Kids English - 官网</a> <span class="ref-meta">· 2026-05-25 · phonics / verbs / daily routines · 引用 1 次</span></li>
+        <li><a href="https://www.dreamenglish.com/englishkidsvideo" target="_blank">Dream English Kids 视频集 - 官网</a> <span class="ref-meta">· 2026-05-25 · 250+ 儿童视频按主题分类 · 引用 1 次</span></li>
+        <li><a href="https://www.youtube.com/channel/UCe1VpF4wS_kdcjyTRSXBcnQ" target="_blank">The Singing Walrus - English Songs For Kids - YouTube</a> <span class="ref-meta">· 2026-05-25 · call-and-response 结构 · 引用 1 次</span></li>
+        <li><a href="https://www.youtube.com/channel/UC9VWyvdF-91McG6kt27MeKA" target="_blank">Mark Kulek - YouTube</a> <span class="ref-meta">· 2026-05-25 · short vocab-based conversations · 引用 1 次</span></li>
+        <li><a href="https://ellii.com/collections/videos/dialogues" target="_blank">Ellii (formerly ESL Library) Dialogues - 官网</a> <span class="ref-meta">· 2026-05-25 · Everyday English Dialogues · 引用 1 次</span></li>
+        <li><a href="https://www.woodwardenglish.com/" target="_blank">Woodward English - 官网</a> <span class="ref-meta">· 2026-05-25 · basic-to-advanced grammar/vocabulary · 引用 1 次</span></li>
+        <li><a href="https://learnenglishteens.britishcouncil.org/" target="_blank">British Council LearnEnglish Teens - 官网</a> <span class="ref-meta">· 2026-05-25 · 13-17 岁 / 按 CEFR 分级 · 引用 1 次</span></li>
       </ol>
 
     </div>

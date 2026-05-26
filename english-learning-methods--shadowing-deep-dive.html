@@ -1,0 +1,2306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shadowing 跟读深度研究 · Tamai 30年学术脉络 / 7种变种 / 全球App扒底 / ASR技术栈 / 半米 V0.1→V1.0 实施路径 · 2026-05-26</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1d23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --border-strong: #cdd2da;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --accent-text: #1d4ed8;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #0891b2;
+    --info-soft: #cffafe;
+    --code-bg: #f1f3f7;
+    --purple: #7c3aed;
+    --purple-soft: #ede9fe;
+    --pink: #db2777;
+    --pink-soft: #fce7f3;
+    --teal: #0d9488;
+    --teal-soft: #ccfbf1;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1c2030;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #b6bcc9;
+    --text-mute: #8a92a3;
+    --border: #2a2f3d;
+    --border-strong: #3a4154;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a55;
+    --accent-text: #93c5fd;
+    --good: #4ade80;
+    --good-soft: #14532d55;
+    --warn: #fbbf24;
+    --warn-soft: #78350f55;
+    --bad: #f87171;
+    --bad-soft: #7f1d1d55;
+    --info: #22d3ee;
+    --info-soft: #155e7555;
+    --code-bg: #0a0d14;
+    --purple: #a78bfa;
+    --purple-soft: #4c1d9555;
+    --pink: #f472b6;
+    --pink-soft: #831a4955;
+    --teal: #2dd4bf;
+    --teal-soft: #134e4a55;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .brand { font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  .breadcrumb { width: 100%; padding: 6px 16px 8px; max-width: 980px; margin: 0 auto; font-size: 12.5px; color: var(--text-mute); display: flex; gap: 10px; flex-wrap: wrap; }
+  .breadcrumb a { color: var(--accent-text); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  nav.anchor-nav { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; border-top: 1px solid var(--border); background: var(--bg); scrollbar-width: none; }
+  nav.anchor-nav::-webkit-scrollbar { display: none; }
+  .anchor-list { display: flex; gap: 4px; padding: 8px 16px; max-width: 980px; margin: 0 auto; white-space: nowrap; }
+  .anchor-list a { flex: 0 0 auto; min-height: 36px; padding: 7px 12px; border-radius: 999px; font-size: 13px; line-height: 1.3; color: var(--text-soft); text-decoration: none; border: 1px solid transparent; background: var(--bg-soft); transition: all .15s; }
+  .anchor-list a:hover { color: var(--accent-text); }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); font-weight: 600; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 28px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout.pink { background: var(--pink-soft); border-color: var(--pink); }
+  .callout.teal { background: var(--teal-soft); border-color: var(--teal); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 9px 11px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 8px 11px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  .num-cell { font-family: ui-monospace, monospace; text-align: right; }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 5000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .pill.pink { background: var(--pink-soft); color: var(--pink); border-color: var(--pink); }
+  .pill.teal { background: var(--teal-soft); color: var(--teal); border-color: var(--teal); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  sup.cite { font-size: 11px; color: var(--accent-text); font-weight: 700; vertical-align: super; cursor: help; padding: 0 1px; }
+  .principle-card { padding: 14px 16px; margin: 10px 0; border-radius: 12px; border-left: 5px solid var(--accent); background: var(--bg-elevated); border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .principle-card .head { font-weight: 700; color: var(--text); font-size: 15px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .principle-card .head .badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-text); font-weight: 700; }
+  .principle-card .body { font-size: 14px; color: var(--text-soft); }
+  .tree { font-family: ui-monospace, monospace; font-size: 13px; line-height: 1.7; background: var(--code-bg); padding: 14px 18px; border-radius: 10px; border: 1px solid var(--border); white-space: pre-wrap; color: var(--text); margin: 12px 0; }
+  .method-card { padding: 14px 16px; margin: 12px 0; border-radius: 12px; background: var(--bg-elevated); border: 1px solid var(--border); border-left: 4px solid var(--accent); }
+  .method-card .m-head { font-weight: 700; font-size: 16px; color: var(--text); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .method-card .m-head .m-emoji { font-size: 22px; }
+  .method-card .m-sub { font-size: 13px; color: var(--text-mute); margin-top: 4px; }
+  .method-card .m-body { margin-top: 10px; font-size: 14px; color: var(--text-soft); }
+  .verdict { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+  .v-good { background: var(--good-soft); color: var(--good); }
+  .v-warn { background: var(--warn-soft); color: var(--warn); }
+  .v-bad { background: var(--bad-soft); color: var(--bad); }
+  .v-mid { background: var(--info-soft); color: var(--info); }
+  /* mini demo */
+  .demo-host { margin: 16px 0; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .demo-host h4 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; color: var(--accent-text); }
+  .demo-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 14px; align-items: center; }
+  .demo-chip-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .demo-chip-group .label { font-size: 12px; color: var(--text-mute); font-weight: 600; margin-right: 4px; }
+  .demo-chip { padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-elevated); color: var(--text-soft); font-size: 12.5px; cursor: pointer; transition: all .15s; }
+  .demo-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .demo-output { padding: 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin-top: 8px; }
+  .demo-output .out-h { font-weight: 700; color: var(--text); font-size: 14px; margin-bottom: 6px; }
+  .demo-output .out-line { font-size: 13.5px; color: var(--text-soft); padding: 4px 0; }
+  .demo-output .out-line .tag-out { display: inline-block; padding: 1px 7px; border-radius: 4px; background: var(--accent-soft); color: var(--accent-text); font-size: 11px; font-weight: 700; margin-right: 6px; }
+  .word-good { color: var(--good); font-weight: 700; }
+  .word-warn { color: var(--warn); font-weight: 700; text-decoration: underline dotted; }
+  .word-bad { color: var(--bad); font-weight: 700; text-decoration: underline wavy; }
+  .pitch-svg { width: 100%; height: 80px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; margin: 10px 0; }
+  @media (max-width: 480px) {
+    .hero { padding: 18px 4px 8px; }
+    .hero h1 { font-size: 22px; }
+    section.chapter > h2 { font-size: 17px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media print {
+    header.topbar, #progress, .back-to-top, nav.anchor-nav { display: none !important; }
+    section.chapter.collapsed .chapter-body { max-height: none !important; padding: 18px 20px 22px !important; }
+    section.chapter.collapsed > h2 .caret { display: none; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">Shadowing 深度子报告 <span class="tag">L2 Deep Research · 无忌</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+  <div class="breadcrumb">
+    <a href="./english-learning-methods-research.html">← 回父报告：英语学习方法研究</a>
+    <span>·</span>
+    <a href="./index.html">← 回研究中心</a>
+  </div>
+  <nav class="anchor-nav">
+    <div class="anchor-list" id="anchorList">
+      <a href="#ch1" data-target="ch1">01 摘要 · 3 结论</a>
+      <a href="#ch2" data-target="ch2">02 Tamai 30年学术</a>
+      <a href="#ch3" data-target="ch3">03 7 种变种</a>
+      <a href="#ch4" data-target="ch4">04 日本系 App</a>
+      <a href="#ch5" data-target="ch5">05 中国系 App</a>
+      <a href="#ch6" data-target="ch6">06 欧美系 App</a>
+      <a href="#ch7" data-target="ch7">07 真人评分</a>
+      <a href="#ch8" data-target="ch8">08 ASR 技术栈</a>
+      <a href="#ch9" data-target="ch9">09 评分维度算法</a>
+      <a href="#ch10" data-target="ch10">10 半米 V0.1→V1.0 ★★</a>
+      <a href="#ch11" data-target="ch11">11 半米差异化</a>
+      <a href="#ch12" data-target="ch12">12 mini demo</a>
+      <a href="#ch13" data-target="ch13">13 FAQ</a>
+      <a href="#ch14" data-target="ch14">14 References</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <div class="hero">
+    <h1>Shadowing 跟读深度研究<br><span style="font-size: .55em; font-weight: 600;">Tamai 1992-2024 学术 30 年脉络 / 7 种变种 SOP / 日中欧美 App 扒底 / Whisper-Azure-Speechace 选型 / 半米 demo 4 阶段路径</span></h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-26</span>
+      <span>🛠 整理：无忌</span>
+      <span>🧠 L2 Deep Research</span>
+      <span>🔍 70 次 WebSearch</span>
+      <span>📚 14 章 + FAQ + 50 Ref</span>
+      <span>🎯 第 10 章是阿杰最该看的</span>
+      <span>🔗 父报告 Ch4 子报告</span>
+    </div>
+    <div class="hero-deck">
+      <strong>这份是什么</strong>：父报告（<a href="./english-learning-methods-research.html" style="color: var(--accent-text);">英语学习方法研究</a>）第 4 章把 Shadowing 摘要讲完了；本报告把它<strong>挖到能直接动手做的程度</strong> — Tamai 1992 到 2024 整 30 年学术脉络、市面 20+ App 怎么实现 shadowing、ASR 技术栈选哪个、最重要：<strong>半米从 V0.1（今晚就能跑）到 V1.0（pitch contour 可视化）4 阶段的实施清单</strong>。<br><br>
+      <strong>核心 framing</strong>：Shadowing 是 SLA 学界共识里<strong>对成人学习者最 cost-effective 的方法之一</strong>，但市面把它真正做透的 App 几乎都在日本系（Migaku / shadowing.app / Speak Pro）。中国系除了流利说，大都把跟读做成"录音上传打分"，没有 Tamai 学派要的<strong>"近同步 + 多变种 + prosody 训练"</strong>。<strong>这是半米的市场空白。</strong>
+    </div>
+  </div>
+
+  <!-- ============ Ch1 摘要 ============ -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">执行摘要 · 3 条核心结论 + 关键数字</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout accent">
+        <p><strong>一句话</strong>：Shadowing 不是新方法，是 1992 年 Tamai 在日本 EFL 情境下首次系统化的"跟读"学派<sup class="cite">[1]</sup>；30 年累积了 44+ studies + 系统综述，结论稳定 = <strong>每天 10-20 分钟 × 4-8 周</strong>对 fluency / prosody / intelligibility 有显著增益<sup class="cite">[2][3]</sup>。半米要做的是<strong>把 30 年学界共识包装成"视频例句 → 一键跟读 → ASR 反馈 → pitch contour 对比"的产品流</strong>。</p>
+      </div>
+
+      <h3>📊 关键数字一眼看完</h3>
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">10-20 min</div><div class="l">每天起效门槛<sup class="cite">[1][4]</sup></div></div>
+        <div class="metric"><div class="v">4-8 周</div><div class="l">见显著效果周期<sup class="cite">[3][4]</sup></div></div>
+        <div class="metric"><div class="v">44</div><div class="l">2025 系统综述纳入研究数<sup class="cite">[2]</sup></div></div>
+        <div class="metric"><div class="v">16</div><div class="l">Hamada-Suzuki 整理的 shadowing 变种数<sup class="cite">[5]</sup></div></div>
+        <div class="metric"><div class="v">$0.36/h</div><div class="l">Azure Pronunciation 批处理价<sup class="cite">[14]</sup></div></div>
+        <div class="metric"><div class="v">0.9</div><div class="l">Speechace 与 IELTS Pearson<sup class="cite">[15]</sup></div></div>
+        <div class="metric"><div class="v">¥0</div><div class="l">V0.1 用 Web Speech API 成本<sup class="cite">[16]</sup></div></div>
+        <div class="metric"><div class="v">10×</div><div class="l">M2 Pro whisper-large-v3-turbo 实时倍率<sup class="cite">[17]</sup></div></div>
+        <div class="metric"><div class="v">150 wpm</div><div class="l">英语母语者会话语速<sup class="cite">[18]</sup></div></div>
+        <div class="metric"><div class="v">0.75×</div><div class="l">shadowing 入门推荐慢速<sup class="cite">[19]</sup></div></div>
+        <div class="metric"><div class="v">1.78亿</div><div class="l">英语趣配音注册用户（中国系最大）<sup class="cite">[20]</sup></div></div>
+        <div class="metric"><div class="v">$1B</div><div class="l">Speak app 估值（OpenAI 投）<sup class="cite">[21]</sup></div></div>
+      </div>
+
+      <h3>🎯 3 条核心结论</h3>
+
+      <div class="principle-card" style="border-left-color: var(--good);">
+        <div class="head"><span class="badge" style="background:var(--good-soft);color:var(--good)">结论 #1</span> Shadowing 起效是科学公认事实，但变种比"做不做"重要 100 倍</div>
+        <div class="body">
+          <strong>2025 年 tandfonline 系统综述</strong>纳入 44 篇 shadowing 研究，结论：<strong>shadowing 对 comprehensibility / intelligibility / accentedness（Derwing & Munro 三维框架<sup class="cite">[22]</sup>）+ 流利度 + prosody 有显著增益；但对 segmental（单音素）证据不一致</strong><sup class="cite">[2]</sup>。Hamada-Suzuki 2024 把 16 种变种按"phonological focus"和"meaning focus"两轴归类<sup class="cite">[5]</sup>，<strong>低水平学员（A1-A2）用 mumbling + prosody shadowing 受益最大</strong>，<strong>中高水平（B1+）才进 content + selective shadowing</strong><sup class="cite">[6][7]</sup>。
+          <br><br>
+          <strong>意思是</strong>：半米做 shadowing 不能只做"录音打分"那一种 — 要按 CEFR 分阶段推不同变种。第 3 章给出 7 种变种 + 推荐 CEFR 对应表。
+        </div>
+      </div>
+
+      <div class="principle-card" style="border-left-color: var(--info);">
+        <div class="head"><span class="badge" style="background:var(--info-soft);color:var(--info)">结论 #2</span> ASR 技术选型：V0.1 别上 Azure，先用 Web Speech / Whisper 跑通业务</div>
+        <div class="body">
+          <strong>4 个 ASR 选项的 ROI 对比清晰</strong>：
+          <ul>
+            <li><strong>Web Speech API</strong>：成本 ¥0，仅 Chrome/Edge/Safari 支持，转文本准确率对母语者 OK 但<strong>没有音素 / prosody 评分</strong> — 只能算字面 accuracy<sup class="cite">[16]</sup>。<strong>V0.1 最佳选择</strong>。</li>
+            <li><strong>OpenAI Whisper / whisper.cpp 本地</strong>：M2 Pro 上 large-v3-turbo 10x 实时<sup class="cite">[17]</sup>；准确率 LibriSpeech 2.7% WER，但<strong>中国学习者 ASR 错误率显著高于母语者</strong><sup class="cite">[23]</sup>。<strong>V0.2 转写 + 自建字面 diff 评分</strong>。</li>
+            <li><strong>Azure Speech Pronunciation Assessment</strong>：5 维度（accuracy / fluency / completeness / prosody / 整体）<sup class="cite">[14]</sup>，$0.36/h 批处理（最便宜路径）但 real-time 加 prosody 维度要更贵。<strong>V0.3 升级专业版</strong>。</li>
+            <li><strong>Speechace API</strong>：音素 + 音节级评分，与 IELTS Pearson 相关 0.9<sup class="cite">[15]</sup>，$0.008/15 秒。<strong>V0.3 备选</strong>。</li>
+          </ul>
+          <strong>意思是</strong>：阿杰别一上来就接 Azure / Speechace（每月几百到几千刀，没必要）。<strong>先用 Web Speech 跑通流程</strong>，把"视频例句 → 录音按钮 → 对比反馈"这个 UX 跑顺，再决定 V0.2 上 Whisper / V0.3 上 Azure。
+        </div>
+      </div>
+
+      <div class="principle-card" style="border-left-color: var(--purple);">
+        <div class="head"><span class="badge" style="background:var(--purple-soft);color:var(--purple)">结论 #3</span> 市场空白：跟"词汇库"联动的 shadowing 没人做过</div>
+        <div class="body">
+          扒了 20+ shadowing app 后，所有产品都把 shadowing 做成<strong>独立的"听句子→跟读→打分"循环</strong>：
+          <ul>
+            <li>Migaku / shadowing.app / Speak Pro：从影视剪辑选句子跟读，<strong>没有词汇路径</strong></li>
+            <li>趣配音（1.78亿用户 <sup class="cite">[20]</sup>）：动画配音游戏化，<strong>没有 SRS 词汇</strong></li>
+            <li>流利说（70M 用户峰值<sup class="cite">[24]</sup>）：跟读评分用自己的 309 亿句 ASR<sup class="cite">[24]</sup>，但跟读是<strong>"AI 老师课程"内嵌</strong>，不可单点</li>
+            <li>百词斩：词例句"真人发音 + 跟读"<sup class="cite">[25]</sup>，但<strong>没有评分 + 没有同步度判定</strong>，更像 read-aloud</li>
+          </ul>
+          <strong>半米独门机会</strong>：把 shadowing 焊到<strong>词汇库 + 6 例句</strong>上 — "跟读了 6 例句 = 这个 B1 词的 mastery +50%"，让 shadowing 不是独立循环、是<strong>词汇深度习得的产物</strong>。这是别人没法快速复制的差异化（第 11 章详述）。
+        </div>
+      </div>
+
+      <h3>🚀 给阿杰的直接结论（今晚就动手）</h3>
+      <div class="callout good">
+        <p><strong>今晚先做 V0.1（1-2 天工程量，¥0 成本）</strong>：</p>
+        <ol>
+          <li>选半米已有的 6 例句视频中的 1 句（B1 难度）</li>
+          <li>视频下加 🎤 录音按钮 → MediaRecorder API（注意 Safari 是 mp4，Chrome 是 webm<sup class="cite">[26]</sup>）</li>
+          <li>录完调 Web Speech API 转文本</li>
+          <li>用 Levenshtein distance<sup class="cite">[27]</sup> 算与原句字面相似度</li>
+          <li>显示「你说：X / 原句：Y / 准确率 87%」</li>
+        </ol>
+        <p><strong>1 周内完成 V0.2（whisper.cpp + 字面 diff，仍 ¥0 服务器 CPU）</strong>；<strong>V0.3 再决定要不要上 Azure</strong>（每学员每天 5 句 × $0.01 ≈ ¥0.05/学员/天，规模化后可控）。<strong>详细 4 阶段路径见第 10 章。</strong></p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch2 Tamai 30 年学术脉络 ============ -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">Shadowing 学术研究 30 年脉络 · Tamai 1992 → 2024</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout info">
+        <p>Shadowing 不是日本人发明的（其源头是 1950s 口译训练，Lambert 等用于同声传译预备<sup class="cite">[1]</sup>），但<strong>把它系统化引入 EFL 课堂、做出 30 年累积研究的是日本学界</strong>。本章把核心人物 + 关键论文 + 实证数字按时间线讲清楚。</p>
+      </div>
+
+      <h3>2.1 Tamai Ken — 学派开山者（1992-2017）</h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">📖</span> Tamai (1992) <span class="verdict v-good">开山之作</span></div>
+        <div class="m-sub">"Follow-up no chokairyoku kojo ni oyobosu koka oyobi 'follow-up' noryoku to chokairyoku no kankei" — <em>STEP Bulletin</em>, 4, pp. 48-62<sup class="cite">[1]</sup></div>
+        <div class="m-body">
+          <p><strong>原研究</strong>：神户市外国语大学 Tamai Ken 在 1992 年的硕论（School for International Training, Brattleboro Vermont）+ STEP Bulletin 期刊发表的日文版本，首次在日本 EFL 情境下系统对比 shadowing 与 dictation 的效果。<strong>统计显著结论：shadowing 在听力提升上优于 dictation</strong><sup class="cite">[1]</sup>。</p>
+          <p><strong>定义</strong>（Tamai 1997 改写）：<em>"Shadowing is a training technique of listening in which the learner attempts to repeat the incoming information simultaneously as exactly as possible while listening attentively to the heard speech."</em><sup class="cite">[1]</sup> 延迟 ~0.5 秒，几乎同步。</p>
+          <p><strong>意义</strong>：从此日本 EFL 圈大量后续研究跟进，Shadowing 作为 L2 教学技术在日本进入主流。</p>
+        </div>
+      </div>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">📖</span> Tamai 1997 / 2002 / 2005 <span class="verdict v-good">学派固化</span></div>
+        <div class="m-sub">三篇关键节点 — 从硕论扩成完整研究路线<sup class="cite">[1]</sup></div>
+        <div class="m-body">
+          <ul>
+            <li><strong>Tamai (1997)</strong>："Shadowing no koka to chokai process niokeru ichizuke"（影子练习的效果及其在听力过程中的定位）— <em>Current English Studies</em>, 36, 105-116。把 shadowing 在听力认知过程中的位置定下来（bottom-up phoneme perception）。</li>
+            <li><strong>Tamai (2002)</strong>：JAIS 第 3 届年会主旨演讲 — <em>Interpretation Studies</em>, 2, 178-192。把 shadowing 与口译训练打通。</li>
+            <li><strong>Tamai (2005)</strong>：东京 Kazama 出版社 <em>Listening shidoho to shite no shadowing no koka ni kansuru kenkyu</em>（关于 shadowing 作为听力指导法效果的研究）— 第一本 shadowing 学术专著<sup class="cite">[1]</sup>。</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>2.2 Kadota Shuhei — 认知派代表（2007-2019）</h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🧠</span> Kadota 2007/2012/2015/2019 <span class="verdict v-good">认知机制理论化</span></div>
+        <div class="m-sub">Kwansei Gakuin Univ. — 把 shadowing 焊到工作记忆 + 自动化理论上<sup class="cite">[8]</sup></div>
+        <div class="m-body">
+          <p><strong>核心贡献</strong>：在 2019 年的 <em>Shadowing as a Practice in Second Language Acquisition: Connecting Inputs and Outputs</em>（Routledge）中提出 shadowing 的 <strong>4 效应模型</strong>：</p>
+          <ol>
+            <li><strong>Input 效应</strong> — 提升听力理解</li>
+            <li><strong>Practice 效应</strong> — 增强 phonological working memory 的 subvocal rehearsal 机制（这是新词 / 公式 / 结构习得的关键）</li>
+            <li><strong>Output 效应</strong> — 模拟语音产出的某些阶段</li>
+            <li><strong>Monitoring 效应</strong> — 训练 executive working memory 的元认知监控</li>
+          </ol>
+          <p>Kadota 认为 shadowing 推动 L2 流利度自动化 — <strong>因为它强制学员双任务并行（perception + production）</strong>，比单词处理认知负荷大得多，恰恰是 DeKeyser proceduralization 所需的<sup class="cite">[8]</sup>。</p>
+        </div>
+      </div>
+
+      <h3>2.3 Hamada Yo — 当代主推手（2016-2024）</h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🔬</span> Hamada 2016/2017/2019/2022/2024 <span class="verdict v-good">实证 + 理论双推</span></div>
+        <div class="m-sub">Akita University — shadowing 学界最高产的现代研究者<sup class="cite">[3][6][7][9]</sup></div>
+        <div class="m-body">
+          <p><strong>Hamada (2016)</strong>："Shadowing: Who benefits and how?" 发表在 <em>Language Teaching Research</em> SAGE 期刊<sup class="cite">[3]</sup>。关键发现：</p>
+          <ul>
+            <li><strong>低水平学习者受益最大</strong> — phoneme perception 在低/中两组都提升，但只有低水平组在 high-school 难度听力题上拿到显著增益</li>
+            <li><strong>剂量</strong>：每次 10-15 分钟、每周 3-4 次、持续 6 周即有可测增益</li>
+            <li>音段感知（phoneme perception）在两组都提升</li>
+          </ul>
+          <p><strong>Hamada (2018)</strong>："Shadowing for Pronunciation Development: Haptic-Shadowing and IPA-Shadowing"<sup class="cite">[10]</sup>：</p>
+          <ul>
+            <li><strong>haptic shadowing 组</strong>（手势 + shadowing）在 comprehensibility、segmental、suprasegmental 三维都显著进步</li>
+            <li><strong>IPA shadowing 组</strong>（看 IPA 国际音标跟读）在 comprehensibility 和 segmental 进步</li>
+          </ul>
+          <p><strong>Hamada & Suzuki (2022/2024)</strong>："Situating Shadowing in the Framework of Deliberate Practice: A Guide to Using 16 Techniques"<sup class="cite">[5]</sup>：</p>
+          <ul>
+            <li>把 shadowing 焊到 DeKeyser/Suzuki 的<strong>Skill Acquisition Theory</strong>上</li>
+            <li>整理出 <strong>16 种变种</strong>，分两轴：phonological processing 取向 vs intake through meaning-focused processing 取向</li>
+            <li><strong>低水平学员用 phonological 变种</strong>（mumbling, prosody）；<strong>高水平学员用 meaning-focused 变种</strong>（content, selective）</li>
+          </ul>
+          <p><strong>Hamada (2024)</strong>："Developing a new shadowing procedure for listening vocabulary: selective shadowing" — <em>Innovation in Language Learning and Teaching</em>, 19(2)<sup class="cite">[7]</sup>。日本大学 34 + 25 学生 5 节 Zoom 课。结论：<strong>selective shadowing（只跟某类目标词）有效提升 productive 和 receptive aural vocabulary</strong>。</p>
+        </div>
+      </div>
+
+      <h3>2.4 其它关键证据</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>研究 / 年</th><th>样本 / 设计</th><th>关键发现</th><th>对半米的意义</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Shiki et al. (2010)</strong></td><td>shadowing vs read-aloud 对比<sup class="cite">[11]</sup></td><td>shadowing 中<strong>content words 复制率高于 function words</strong>；<strong>4-5 次重复即足够</strong>到达稳定复制率</td><td>「同一例句跟读上限 4-5 次」是设计指标</td></tr>
+            <tr><td><strong>Kuramoto et al. (2007)</strong></td><td>shadowing vs text-presented shadowing vs read-aloud<sup class="cite">[12]</sup></td><td>shadowing 在 bottom-up 听力上效果最强</td><td>半米 V0.2 应支持「带字幕跟读」"text-presented" 模式作过渡</td></tr>
+            <tr><td><strong>Mori (2011)</strong></td><td>20 日本大学生 × 10 周训练，shadowing + oral reading 组合<sup class="cite">[13]</sup></td><td>stress vs unstressed 音节<strong>对比度</strong>显著提升（用 duration + F0 + intensity 三参数）；句末 pitch range 显著扩大</td><td>半米 V1.0 pitch contour 可视化的<strong>学界依据</strong></td></tr>
+            <tr><td><strong>Foote & McDonough (2017)</strong></td><td>16 名 ESL 学员，iPod 跟读 8 周，每周 4 次 × 10 分钟<sup class="cite">[28]</sup></td><td><strong>comprehensibility 和 fluency 显著提升</strong>；accentedness 没显著变化</td><td>「移动跟读 + 自我录音」是可行 UX，半米验证</td></tr>
+            <tr><td><strong>Hamada (2016) - LTR</strong></td><td>6 周 × 3-4 次/周 × 10-15 分钟<sup class="cite">[3]</sup></td><td>低中水平显著进步</td><td>剂量黄金值：10-15 分钟 × 3-4 次/周</td></tr>
+            <tr><td><strong>tandfonline 系统综述 (2025)</strong></td><td>44 篇研究<sup class="cite">[2]</sup></td><td>对 comprehensibility / intelligibility / accentedness 有积极证据；对 segmental 证据不一致；学员主观评价"有趣、享受、有效"</td><td>半米营销可用「学界共识方法」做信誉支撑</td></tr>
+            <tr><td><strong>Chinese EFL HS (2025)</strong></td><td>30 名中国高中生 × 2 个月<sup class="cite">[29]</sup></td><td>听力 paired-t 显著；问卷显示 speaking / pronunciation / vocabulary / intonation 主观进步；<strong>降低焦虑、提升动机</strong>，但有"重复枯燥"问题</td><td>半米必须设计「分阶段 + 多变种」避免枯燥</td></tr>
+            <tr><td><strong>Korean Middle School</strong></td><td>初中生 shadowing 听说能力<sup class="cite">[30]</sup></td><td>同样显示正向效果</td><td>13-15 岁段半米目标人群可行</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>2.5 30 年研究主线总结</h3>
+
+      <div class="tree">1992 ──── Tamai 硕论 + STEP Bulletin
+              "shadowing > dictation 听力提升" 统计显著
+                ↓
+1997 ──── Tamai 把 shadowing 焊到 bottom-up perception 上
+                ↓
+2002 ──── Tamai + JAIS：与口译训练打通
+                ↓
+2005 ──── Tamai 出第一本专著
+                ↓
+2007 ──── Kadota：认知机制 + 工作记忆理论
+                ↓
+2010 ──── Shiki et al.：content words vs function words；4-5 次重复够用
+                ↓
+2011 ──── Mori：用 acoustic measure（pitch / duration）证 prosody 提升
+                ↓
+2016 ──── Hamada：剂量证据（10-15 min × 3-4/wk × 6 wk）+ 低水平最受益
+                ↓
+2017 ──── Foote & McDonough：移动 shadowing 8 周显著
+                ↓
+2018 ──── Hamada：haptic-shadowing / IPA-shadowing 变种
+                ↓
+2019 ──── Kadota 专著 Routledge：4 效应模型
+                ↓
+2022 ──── Hamada-Suzuki：16 变种 + deliberate practice 理论框架
+                ↓
+2024 ──── Hamada：selective shadowing 对 aural vocabulary 有效
+                ↓
+2025 ──── tandfonline 系统综述（44 篇）：comprehensibility / intelligibility / accentedness 都有积极证据</div>
+
+      <div class="callout teal">
+        <p><strong>给半米的洞察</strong>：30 年学界共识有<strong>5 个铁律</strong>：</p>
+        <ol>
+          <li><strong>近同步</strong> — 延迟 ~0.5 秒，不是"听完再说"（那是 parallel reading / repetition，非 shadowing）</li>
+          <li><strong>剂量</strong> — 每天 10-20 分钟，4-8 周才出效果 <span class="pill warn">用户不能期望快</span></li>
+          <li><strong>低水平受益最大</strong> — A1-A2 学员 ROI > B2-C1 学员</li>
+          <li><strong>多变种轮换</strong> — 单一变种会重复枯燥（中国研究证实）</li>
+          <li><strong>材料必须 i+0 到 i+1</strong> — 听不懂的跟读 = 鹦鹉学舌，无效</li>
+        </ol>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch3 7 种变种 ============ -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">Shadowing 7 种变种 · 定义 / 适用 CEFR / 半米实操优先级</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout info">
+        <p>Hamada-Suzuki (2022/2024) 把 shadowing 拆成 <strong>16 种变种</strong><sup class="cite">[5]</sup>，但其中大多是细微差异。本章选出 <strong>7 种核心变种</strong>，每种给：<strong>定义 / 学术来源 / 适用 CEFR / 难度 / 主要训练目标 / 半米实操优先级</strong>。</p>
+      </div>
+
+      <h3>3.1 7 种变种总览表</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>变种</th><th>核心做法</th><th>难度</th><th>适用 CEFR</th><th>主要训练</th><th>半米实操</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1. Classic Shadowing</strong> 经典同步跟读</td><td>边听边几乎同步说出（延迟 ~0.5s），<strong>不看字幕</strong></td><td>★★★★</td><td>B1+</td><td>prosody + intelligibility + 流利度</td><td><span class="pill warn">V0.2 核心</span></td></tr>
+            <tr><td><strong>2. Prosody Shadowing</strong> 韵律跟读</td><td>只关注节奏 / 重音 / 语调，<strong>可以含混吞词</strong>，不抠词义</td><td>★★★</td><td>A2-B1</td><td>stress + rhythm + intonation</td><td><span class="pill good">V0.1 入门</span></td></tr>
+            <tr><td><strong>3. Content Shadowing</strong> 内容跟读</td><td>理解意思 + 复制内容（含意义层面）</td><td>★★★★★</td><td>B2+</td><td>comprehension + production</td><td><span class="pill info">V0.3 进阶</span></td></tr>
+            <tr><td><strong>4. Mumbling Shadowing</strong> 含糊跟读</td><td>小声跟读，<strong>注意力在 incoming 声音</strong>，不是自己产出</td><td>★★</td><td>A1-A2</td><td>perception + 入门习惯</td><td><span class="pill good">V0.1 第一步</span></td></tr>
+            <tr><td><strong>5. Parallel / Text-Presented Shadowing</strong> 带字幕跟读</td><td>看字幕 + 听一句 → 暂停 → 跟读一句</td><td>★★</td><td>A1-B1</td><td>词与发音对应</td><td><span class="pill good">V0.1 主力</span></td></tr>
+            <tr><td><strong>6. Selective Shadowing</strong> 选择性跟读</td><td>只跟<strong>目标词 / 句型 / 短语</strong>出现的句子</td><td>★★★</td><td>A2-B2</td><td>aural vocabulary + 词汇深度</td><td><span class="pill accent">V0.2 ★ 半米强项</span></td></tr>
+            <tr><td><strong>7. Mirror Shadowing</strong> 全身镜像</td><td>shadowing + 模仿肢体语言 / 面部表情</td><td>★★★★★</td><td>C1+</td><td>full embodiment</td><td><span class="pill bad">不做</span>（视频需求高）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3.2 每种变种深度展开</h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">1️⃣</span> Classic Shadowing 经典同步跟读 <span class="verdict v-good">Tamai 原版</span></div>
+        <div class="m-sub">Tamai (1992) 定义的基线<sup class="cite">[1]</sup></div>
+        <div class="m-body">
+          <p><strong>定义</strong>："The learner attempts to repeat the incoming information simultaneously as exactly as possible while listening attentively."<sup class="cite">[1]</sup> 延迟 0.3-0.7 秒。<strong>不看字幕、不暂停、不缓速</strong>。</p>
+          <p><strong>认知负荷</strong>：极高 — 同时做"perception + production + memory retrieval"，是 Kadota 4 效应里 practice + monitoring 效应的最大化<sup class="cite">[8]</sup>。</p>
+          <p><strong>学界证据</strong>：所有早期 Tamai / Hamada 研究都基于这一变种。Foote & McDonough 2017 用的也是这一变种<sup class="cite">[28]</sup>。</p>
+          <p class="callout teal"><strong>半米实操</strong>：V0.2 的"L3 终态"模式。前置条件：学员已在该例句完成 L1 (parallel) 和 L2 (chorus)。</p>
+        </div>
+      </div>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">2️⃣</span> Prosody Shadowing 韵律跟读 <span class="verdict v-good">A2-B1 最受益</span></div>
+        <div class="m-sub">Saito, Nagasawa, Ishigawa (2004) 分类<sup class="cite">[5][31]</sup></div>
+        <div class="m-body">
+          <p><strong>定义</strong>：学员关注 <strong>stress / rhythm / intonation</strong>，可以 mumble 或哼出来；<strong>不要求每个词都说对</strong>。"在 prosody shadowing 中，学员关注 stress、rhythm、intonation，而 classic shadowing 学员严格关注 phonological 信息"<sup class="cite">[31]</sup>。</p>
+          <p><strong>训练目标</strong>：把英语的"stress rhythm + sound linking (liaison)"内化<sup class="cite">[31]</sup>。Mori (2011) 用 acoustic measure 证明这种训练能<strong>显著扩大 sentence-final pitch range</strong>，并提升 stressed/unstressed 对比度<sup class="cite">[13]</sup>。</p>
+          <p><strong>难点</strong>：中国学员往往字字咬清，不擅长 prosody。这一变种是<strong>"放下完美主义"的训练</strong>。</p>
+          <p class="callout teal"><strong>半米实操</strong>：V0.1 入门 — 不评分"词对不对"，只显示 "你说的整体节奏 ✓"，鼓励 mumble。</p>
+        </div>
+      </div>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">3️⃣</span> Content Shadowing 内容跟读 <span class="verdict v-warn">高阶</span></div>
+        <div class="m-sub">Saito et al. (2004)<sup class="cite">[31]</sup></div>
+        <div class="m-body">
+          <p><strong>定义</strong>："The learner repeats both the content and intonation exactly as in the original."<sup class="cite">[31]</sup> 同步度 + 词义都要对。</p>
+          <p><strong>认知负荷</strong>：最高 — perception + production + comprehension 三任务并行。Hamada 2016 显示这一变种对高水平学员才显效<sup class="cite">[3]</sup>。</p>
+          <p class="callout teal"><strong>半米实操</strong>：V0.3 进阶 — 只对 B2+ 学员开放。需要配 word-level confidence 反馈才有价值。</p>
+        </div>
+      </div>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">4️⃣</span> Mumbling Shadowing 含糊跟读 <span class="verdict v-good">A1 入门神器</span></div>
+        <div class="m-sub">Saito et al. (2004) / Hamada-Suzuki (2022)<sup class="cite">[5][31]</sup></div>
+        <div class="m-body">
+          <p><strong>定义</strong>："Mumbling 是 shadowing 时<strong>注意力放在 incoming 声音</strong>而不是自己产出 — 小声跟、含糊跟、私下跟。"<sup class="cite">[31][32]</sup></p>
+          <p><strong>关键价值</strong>：</p>
+          <ul>
+            <li><strong>降低社交成本</strong> — 在公共场合也能练（地铁、公交、办公室）</li>
+            <li><strong>降低声带疲劳</strong> — 长时间练习不累</li>
+            <li><strong>降低开口焦虑</strong> — A1 学员最大的心理障碍是"怕说错"</li>
+          </ul>
+          <p><strong>争议</strong>：Migaku 2026 指出"mumbling 在低声状态下不训练 auditory perception"<sup class="cite">[32]</sup>。即 mumbling 是 entry stage 不是 endpoint。</p>
+          <p class="callout teal"><strong>半米实操</strong>：V0.1 第一步 — 给录音按钮一个"小声模式"，识别音量低于阈值时<strong>不打分，只显示「✓ 你跟上了节奏」</strong>。</p>
+        </div>
+      </div>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">5️⃣</span> Parallel / Text-Presented Shadowing 带字幕跟读 <span class="verdict v-good">最易入门</span></div>
+        <div class="m-sub">Kuramoto et al. (2007) "text-presented shadowing"<sup class="cite">[12]</sup></div>
+        <div class="m-body">
+          <p><strong>定义</strong>：看字幕 + 听一句 → 短暂暂停（可选）→ 跟读一句。严格说这是"shadowing 的脚手架"而不是真 shadowing — <strong>真 shadowing 必须无字幕</strong>。</p>
+          <p><strong>价值</strong>：把"听懂"和"跟读"两个挑战拆开 — 学员先用字幕保证理解，然后专注模仿发音。<strong>是从 read-aloud 到 classic shadowing 的桥</strong>。</p>
+          <p><strong>Kuramoto 2007 证据</strong>：text-presented shadowing 比纯 shadowing 在 bottom-up 听力上效果更好<sup class="cite">[12]</sup>（因为低水平学员的字幕脚手架反而提升 noticing）。</p>
+          <p class="callout teal"><strong>半米实操</strong>：V0.1 主力 — 学员看视频 + 字幕，按句子级跟读。半米已有视频例句基础设施，这是<strong>0 改动就能上的入门变种</strong>。</p>
+        </div>
+      </div>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">6️⃣</span> Selective Shadowing 选择性跟读 <span class="verdict v-good">★ 半米独门</span></div>
+        <div class="m-sub">Hamada (2024) — 最新提出的变种<sup class="cite">[7]</sup></div>
+        <div class="m-body">
+          <p><strong>定义</strong>："Listeners select only certain words and phrases to shadow."<sup class="cite">[31]</sup> 学员只在<strong>目标词 / 目标句型</strong>出现时跟读，其它时候只听。</p>
+          <p><strong>Hamada 2024 实证</strong>：日本大学 34 + 25 学生 × 5 节 Zoom 课，selective shadowing <strong>显著提升 productive 和 receptive aural vocabulary</strong><sup class="cite">[7]</sup>。学界第一个把 shadowing 和 vocabulary 焊起来的研究。</p>
+          <p><strong>为什么对半米是金矿</strong>：</p>
+          <ul>
+            <li>半米的核心数据资产 = <strong>词汇库 + 6 例句 + B1/B2 难度标</strong></li>
+            <li>selective shadowing 天然适配 — "今天的 10 个 B1 目标词，在视频里出现时跟读"</li>
+            <li>不需要学员蛮力跟完整段，只在"高价值时刻"跟读</li>
+            <li>跟 SRS 闭环：跟读了 = +1 encounter，朝 10-17 次 mastery 推进<sup class="cite">[33]</sup></li>
+          </ul>
+          <p class="callout teal"><strong>半米实操</strong>：V0.2 ★ — 「今日 10 个目标词」+ 配置成视频例句中目标词出现时高亮闪烁 + 自动暂停等学员跟读。<strong>这是别人没法快速复制的差异化</strong>。</p>
+        </div>
+      </div>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">7️⃣</span> Mirror Shadowing 全身镜像 <span class="verdict v-bad">不做</span></div>
+        <div class="m-sub">高级口译训练流派</div>
+        <div class="m-body">
+          <p><strong>定义</strong>：shadowing + 模仿肢体语言 / 面部表情 / 眼神 / 手势。源自同声传译 / 表演训练。</p>
+          <p><strong>问题</strong>：需要<strong>高质量长镜头视频 + 学员摄像头自拍 + 比对算法</strong>（视频处理成本极高），<strong>ROI 对 K12 学习者极低</strong>。</p>
+          <p class="callout teal"><strong>半米实操</strong>：<strong>不做</strong>。如果学员真想要 mirror practice，引导他们去 BoldVoice（专门做accent training，2M 用户）<sup class="cite">[34]</sup>。</p>
+        </div>
+      </div>
+
+      <h3>3.3 CEFR × 变种推荐矩阵</h3>
+
+      <div class="callout teal">
+        <p>给半米学员路径设计的推荐顺序（每周轮换 2-3 种避免枯燥<sup class="cite">[29]</sup>）：</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>CEFR</th><th>Week 1-2 入门</th><th>Week 3-4 主力</th><th>Week 5+ 进阶</th></tr></thead>
+            <tbody>
+              <tr><td><strong>A1</strong></td><td>Mumbling + Parallel (带字幕)</td><td>Prosody（不抠词）</td><td>—</td></tr>
+              <tr><td><strong>A2</strong></td><td>Parallel + Prosody</td><td>+ Selective (5 目标词)</td><td>+ Mumbling 巩固</td></tr>
+              <tr><td><strong>B1</strong></td><td>Prosody + Selective (10 词)</td><td>+ Classic（短句开始）</td><td>+ Content（部分句）</td></tr>
+              <tr><td><strong>B2</strong></td><td>Selective (15 词) + Classic</td><td>+ Content</td><td>引导外接 BoldVoice / italki</td></tr>
+              <tr><td><strong>C1+</strong></td><td>Content + Classic</td><td>外部资源（不在半米闭环内）</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch4 日本系 App ============ -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">日本系 App 深扒 · Migaku / shadowing.app / Speak Pro</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout info">
+        <p>日本是 shadowing 学派的发源地，<strong>市面把 shadowing 做透的 app 几乎都源自日本或受日本流派影响</strong>。本章扒 3 个代表性产品。</p>
+      </div>
+
+      <h3>4.1 Migaku <span class="pill warn">月 $19.99 / 年 $199 / 终身 $200</span></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🎬</span> Migaku <span class="verdict v-good">影视沉浸学派代表</span></div>
+        <div class="m-sub">前身 mpv subs2srs (开源工具) → 2023 起做 SaaS 产品<sup class="cite">[35]</sup></div>
+        <div class="m-body">
+          <p><strong>定位</strong>：从 Netflix / Disney+ / YouTube / Animelon 学日语 / 韩语 / 中文 / 英语。<strong>核心数据资产 = 影视字幕 + Anki-style 卡片自动生成</strong>。</p>
+          <p><strong>Shadowing 实现</strong>：所有课程卡片都有 native speaker 音频 — 学员<strong>反复播一个句子 → 模仿节奏旋律 → 录音 → 自我对比</strong>。Migaku 自己的 2026 guide<sup class="cite">[36]</sup>定位为<strong>"shadowing 实践工具"</strong>而非独立 shadowing 课程。</p>
+          <p><strong>评分</strong>：<strong>主要靠学员自我对比</strong>，没有 ASR 自动评分。是"提供训练场地"型产品。</p>
+          <p><strong>定价</strong>：月 $19.99，年 $199，终身 $200 (限时促销价)<sup class="cite">[37]</sup>。<strong>学员预算门槛高</strong>。</p>
+          <p><strong>优势</strong>：真实影视内容、词汇库强、卡片自动化；<strong>劣势</strong>：不教语法、Shadowing 是工具不是路径、$200 终身价不适合 K12。</p>
+          <p class="callout teal"><strong>对半米的启示</strong>：(1) "影视内容 = 训练材料"路线已经有人占；半米要走<strong>"短视频例句"</strong>差异化路线，时长 10-30 秒比影视片段更适合 K12 短注意力。(2) Migaku 没做自动评分是<strong>留给半米的空白</strong>。</p>
+        </div>
+      </div>
+
+      <h3>4.2 shadowing.app <span class="pill info">免费 + Premium</span></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🦜</span> shadowing.app <span class="verdict v-mid">专一型工具</span></div>
+        <div class="m-sub">主打"shadowing"作为唯一卖点的工具型 app</div>
+        <div class="m-body">
+          <p><strong>定位</strong>：纯 shadowing 训练工具，多语言（英语 / 西语 / 日韩中等）。</p>
+          <p><strong>核心能力</strong>：</p>
+          <ul>
+            <li><strong>AI pace adaptation</strong> — 根据学员熟练度自动调速</li>
+            <li><strong>句子级录音 + AI 反馈</strong></li>
+            <li><strong>自定义素材</strong> — 学员可上传音频或文本</li>
+            <li><strong>跨设备同步进度</strong></li>
+          </ul>
+          <p><strong>定价</strong>：免费试用 + Premium（含无限练习 + AI 反馈）<sup class="cite">[38]</sup>。具体价格不透明。</p>
+          <p><strong>优势</strong>：定位清晰、聚焦；<strong>劣势</strong>：无独立第三方评测，主要靠官方口径；用户量未公开。</p>
+          <p class="callout teal"><strong>对半米的启示</strong>：<strong>把 shadowing 做成独立 app 路径风险高</strong> — 用户没法持续；shadowing 是<strong>学习路径中的一环</strong>，不是单独入口。</p>
+        </div>
+      </div>
+
+      <h3>4.3 Speak Pro (shadowing 专版) <span class="pill info">非 Speak.com</span></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🎤</span> Speak Pro: Shadowing Lessons <span class="verdict v-mid">蹭名字 + 跟读</span></div>
+        <div class="m-sub">不要和 Speak.com（OpenAI 投的独角兽）混淆 — 这是另一家小厂<sup class="cite">[39]</sup></div>
+        <div class="m-body">
+          <p><strong>定位</strong>：iOS app，shadowing TED Talks / interviews / 日常对话。</p>
+          <p><strong>核心做法</strong>：<strong>10-15 分钟每天</strong>（直接引用 Tamai 1992 起的剂量证据<sup class="cite">[39]</sup>）。AI 反馈 pronunciation / rhythm / intonation 三维。</p>
+          <p><strong>语言支持</strong>：英语（美式 + 英式）、西语、法语、德语、日语、韩语、意语。</p>
+          <p><strong>意义</strong>：印证<strong>"shadowing 是当下小厂能切入的产品形态"</strong>。</p>
+        </div>
+      </div>
+
+      <h3>4.4 Onsei Anki (Anki Add-on) <span class="pill good">免费开源</span></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">📊</span> Onsei Anki <span class="verdict v-good">最优雅的开源方案</span></div>
+        <div class="m-sub">itsupera/onsei-anki — Anki 插件，pitch contour 对比<sup class="cite">[40]</sup></div>
+        <div class="m-body">
+          <p><strong>核心</strong>：Anki 卡片 + Shift+V 录音 → 自动显示<strong>学员 pitch contour vs 原音 pitch contour 对比图</strong>。完全免费、开源。</p>
+          <p><strong>意义</strong>：证明 pitch contour 对比技术上完全可行，半米 V1.0 可以借鉴这个数据可视化思路。</p>
+          <p class="callout teal"><strong>对半米的启示</strong>：V1.0 用 parselmouth/Praat 算 pitch contour，然后用 SVG 画对比图（参考 Onsei Anki UI）— <strong>这是低成本高视觉震撼差异化</strong>。</p>
+        </div>
+      </div>
+
+      <h3>4.5 日本系总结</h3>
+
+      <div class="callout teal">
+        <p><strong>日本系共同特征</strong>：</p>
+        <ul>
+          <li>把 shadowing 当<strong>"高级技术"</strong>（30 年学派传统）</li>
+          <li>倾向<strong>真实影视 / TED 内容</strong>（非脚本对话）</li>
+          <li>UX 偏极客向（Migaku / Onsei Anki 都需要折腾）</li>
+          <li><strong>多语种支持</strong>是标配</li>
+        </ul>
+        <p><strong>半米和日本系的差异化</strong>：(1) 半米只做英语 — 集中火力；(2) 半米服务 K12 + ESL — UX 必须傻瓜；(3) 半米的核心数据是<strong>"6 例句 × 词汇库"</strong>，跟日本系的影视片段路径正交，可以共存。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch5 中国系 App ============ -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">中国系 App 深扒 · 流利说 / 趣配音 / 百词斩 / 扇贝</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout info">
+        <p>中国系英语 app 体量远超日本系（趣配音 1.78 亿用户、扇贝 7000 万、流利说峰值 1000 万 MAU），<strong>但把 shadowing 做透的几乎只有流利说</strong>。其它产品要么做"配音游戏化"（趣配音）、要么做"读单词"（百词斩）— 没有真正的 Tamai 学派同步跟读。</p>
+      </div>
+
+      <h3>5.1 流利说（Liulishuo） <span class="pill warn">已私有化 2024</span></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🤖</span> 流利说 LiulishuoAI <span class="verdict v-good">中国最强 ASR 评分</span></div>
+        <div class="m-sub">LAIX 上市 → 2024 年中以 $680 万估值私有化<sup class="cite">[41]</sup></div>
+        <div class="m-body">
+          <p><strong>定位</strong>："AI 老师 + 跟读评分"教成人英语。</p>
+          <p><strong>核心技术</strong>：</p>
+          <ul>
+            <li><strong>309 亿句 + 23 亿分钟 "Chinese English Speech Database"</strong> — 全球最大中式英语语音数据集<sup class="cite">[24]</sup></li>
+            <li><strong>句子 / 单词 / 音素三级评分</strong>，5 维度：accuracy / fluency / completeness / liaison / stress / intonation<sup class="cite">[24]</sup></li>
+            <li>基准是 native American English 数据</li>
+          </ul>
+          <p><strong>用户量</strong>：1.616 亿注册、峰值 1000 万 MAU、300 万付费<sup class="cite">[41]</sup>（2019 数据，私有化前最近完整披露）。</p>
+          <p><strong>历史</strong>：2018 上市 → 上市 3 年市值缩水 90%<sup class="cite">[42]</sup> → 2024 私有化退市。说明<strong>"AI 跟读 + 单点付费"商业模式在中国 C 端不可持续</strong>。</p>
+          <p class="callout teal"><strong>对半米的启示</strong>：(1) 流利说的 ASR 技术是<strong>中国 ESL ASR 天花板</strong> — 半米起步阶段没必要重造；(2) 流利说倒下说明<strong>"单纯 shadowing 当独立产品"在中国市场不可持续</strong> — 半米必须把 shadowing 焊到更宽的学习路径上；(3) <strong>2024 私有化后流利说技术变成"无主"</strong> — 半米可关注是否能接入或挖角。</p>
+        </div>
+      </div>
+
+      <h3>5.2 英语趣配音 / 少儿趣配音 <span class="pill good">1.78 亿用户</span></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🎬</span> 英语趣配音 <span class="verdict v-good">中国系最大用户基</span></div>
+        <div class="m-sub">少儿英语口语训练 app 巨头<sup class="cite">[20]</sup></div>
+        <div class="m-body">
+          <p><strong>定位</strong>：通过<strong>给动画 / 影视片段配音</strong>来训练英语口语。</p>
+          <p><strong>数据资产</strong>：</p>
+          <ul>
+            <li>1.78 亿注册用户<sup class="cite">[20]</sup></li>
+            <li>60 万正版视频资源（Disney / 人教教材授权）</li>
+            <li>10.6 亿用户配音作品累积</li>
+            <li>160 万英语老师推荐</li>
+            <li>450+ 知识产权</li>
+            <li>10 万 UGC 创作者</li>
+          </ul>
+          <p><strong>跟读实现</strong>：本质是 <strong>"句子级配音 + 评分 + 社区分享"</strong>。学员对照视频字幕跟读，AI 给分，UGC 模式上传作品。<strong>更像 KTV 化的跟读</strong>，不是 Tamai 同步 shadowing。</p>
+          <p><strong>优势</strong>：用户量碾压、儿童内容版权丰富、社交化设计强；<strong>劣势</strong>：没有词汇学习闭环、没有 SRS、没有 prosody 训练。</p>
+          <p class="callout teal"><strong>对半米的启示</strong>：(1) <strong>"配音化"包装能极大降低跟读心理门槛</strong> — 半米 UX 可借鉴；(2) 趣配音不做词汇库 = 半米的差异化空间；(3) 趣配音用户基大 = <strong>已经把"跟读"这个概念在中国 K12 家长群里科普透了</strong>，半米不用从 0 教育市场。</p>
+        </div>
+      </div>
+
+      <h3>5.3 百词斩 <span class="pill info">背单词主流</span></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🗡️</span> 百词斩 <span class="verdict v-mid">不做真正 shadowing</span></div>
+        <div class="m-sub">"图片 + 例句 + 真人发音"背单词代表<sup class="cite">[25]</sup></div>
+        <div class="m-body">
+          <p><strong>定位</strong>：单词 + 图片 + 视频/电台 + 例句。</p>
+          <p><strong>跟读功能</strong>：单词有"真人发音可跟读"<sup class="cite">[25]</sup>，<strong>但没有 ASR 评分 + 没有同步度判定</strong> — 只是给学员"听 + 模仿"的素材，不是 shadowing 工具。</p>
+          <p><strong>例句模式</strong>：每词带情景化例句、单词 TV（动画或真人对话）— 这<strong>跟半米的"视频例句"思路最相似</strong>，但<strong>百词斩没把例句和跟读评分焊起来</strong>。</p>
+          <p><strong>劣势</strong>：被知乎社区批评<strong>"只认图不会用"</strong>，因为强化的是 word→image 关联而不是 word→sentence→production<sup class="cite">[43]</sup>。</p>
+          <p class="callout teal"><strong>对半米的启示</strong>：百词斩证明"单词 + 例句视频"在中国 K12 是<strong>已被验证的产品形态</strong>。半米在这之上加 <strong>"selective shadowing + ASR 评分"</strong> 就是颠覆点 — 让"6 例句"从"看懂"升级到"说得出"。</p>
+        </div>
+      </div>
+
+      <h3>5.4 扇贝口语 <span class="pill info">7000万用户</span></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🐚</span> 扇贝口语 <span class="verdict v-mid">跟读 + 评分但弱差异化</span></div>
+        <div class="m-sub">扇贝家族成员，专攻口语<sup class="cite">[44]</sup></div>
+        <div class="m-body">
+          <p><strong>跟读功能</strong>：</p>
+          <ul>
+            <li>"跟读复述"功能 — 句子级 listen-repeat-recite + 中文翻译<sup class="cite">[44]</sup></li>
+            <li>AI 智能评分 + 发音错误纠正</li>
+            <li>支持反复修改提升</li>
+            <li><strong>强调 intonation</strong>（轻读重读）</li>
+          </ul>
+          <p><strong>用户规模</strong>：扇贝集团 7000 万用户（含单词 / 阅读 / 听力 / 口语 4 个 app）<sup class="cite">[44]</sup>。</p>
+          <p><strong>意义</strong>：证明中国市场对"跟读评分"接受度高，<strong>但产品形态没创新</strong> — 跟流利说同质化。</p>
+        </div>
+      </div>
+
+      <h3>5.5 HelloTalk <span class="pill good">免费基础版</span></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">💬</span> HelloTalk <span class="verdict v-mid">语言交换 + 跟读边缘</span></div>
+        <div class="m-sub">260+ 语言交换社交平台<sup class="cite">[45]</sup></div>
+        <div class="m-body">
+          <p><strong>核心定位</strong>：跟全球母语者文字 / 语音 / 视频聊天。</p>
+          <p><strong>shadowing 边缘</strong>：Voice Rooms 可练听说，<strong>但没专门 shadowing 模块</strong>。<strong>更倾向 communicative practice 而非 deliberate shadowing</strong>。</p>
+          <p class="callout teal"><strong>对半米的启示</strong>：HelloTalk 路径（社交化语言交换）是<strong>高水平学员的下游产品</strong> — 半米的 K12 + 入门成人路径与之互补不竞争。</p>
+        </div>
+      </div>
+
+      <h3>5.6 中国系总结</h3>
+
+      <div class="callout teal">
+        <p><strong>中国系 4 个共性问题</strong>：</p>
+        <ol>
+          <li><strong>"跟读 = 录音上传 + 打分"</strong>，没有 Tamai 学派要的"近同步 + 多变种"</li>
+          <li><strong>没有 prosody 训练</strong>（除流利说 intonation 维度算半个）</li>
+          <li><strong>跟读和词汇库各做各的</strong>，没有"selective shadowing 焊词汇"</li>
+          <li><strong>付费墙在跟读评分上太重</strong>（流利说倒下的教训）</li>
+        </ol>
+        <p>这 4 个空白正好是半米的 4 个差异化抓手。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch6 欧美系 App ============ -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">欧美系 App 深扒 · Speak / TalkPal / ELSA / BoldVoice / Parroto</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout info">
+        <p>欧美系正在被 <strong>AI 对话路线（Speak / TalkPal）</strong> 吃掉传统市场 — Duolingo 也在跟进 Video Call。<strong>专做 shadowing</strong> 的欧美玩家相对小，主要是 ELSA / BoldVoice（accent training 路线）。</p>
+      </div>
+
+      <h3>6.1 Speak <span class="pill bad">$1B 独角兽</span></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🚀</span> Speak.com <span class="verdict v-good">AI 对话路线最强</span></div>
+        <div class="m-sub">Y Combinator 投，OpenAI / Khosla / Accel 跟投<sup class="cite">[21]</sup></div>
+        <div class="m-body">
+          <p><strong>关键数字</strong>：</p>
+          <ul>
+            <li>15M 下载</li>
+            <li>500+ 企业客户（含 KPMG / Hyundai）</li>
+            <li><strong>$100M ARR</strong>（首个超百万 ARR 的 AI 语言学习公司）<sup class="cite">[21]</sup></li>
+            <li>$1B 估值，Series C $78M（2024）+ 总融资 $160M</li>
+            <li>40% 日留存</li>
+            <li>用户在 Speak 上比其它 app 多说 5-10 倍话</li>
+          </ul>
+          <p><strong>核心做法</strong>：AI 老师对话（基于 OpenAI 模型），sentence mode 跟读基础句。<strong>不是纯 shadowing 产品，但有跟读模块</strong>。</p>
+          <p><strong>意义</strong>：证明<strong>"AI 对话 + 跟读"组合在 2025 拿到了 PMF</strong>。但 Speak 切的是<strong>成人职业英语</strong>（韩国市场起家 → 全球扩张），不打 K12 + ESL。</p>
+          <p class="callout teal"><strong>对半米的启示</strong>：Speak 证明"AI 对话"路线在成人市场已被验证。半米的 K12 路径不与之直接竞争，但要警惕<strong>Speak 5 年内下沉到 K12 / ESL</strong>的可能性 — 半米要把"K12 ESL + 视频例句 + selective shadowing"的护城河挖深。</p>
+        </div>
+      </div>
+
+      <h3>6.2 ELSA Speak <span class="pill warn">$60M 融资</span></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🦅</span> ELSA Speak <span class="verdict v-good">pronunciation 老牌</span></div>
+        <div class="m-sub">Series C, 2016 创立, $60M 总融资 (Gradient Ventures 等)<sup class="cite">[46]</sup></div>
+        <div class="m-body">
+          <p><strong>定位</strong>：发音 + 流利度训练 — 不是 shadowing 专做，但<strong>所有练习的核心都是"听 + 跟读 + AI 评分"</strong>。</p>
+          <p><strong>用户量 + 营收</strong>：</p>
+          <ul>
+            <li>50M+ 用户跨 200+ 国家</li>
+            <li>2026 年报营收 $49.6M<sup class="cite">[46]</sup></li>
+          </ul>
+          <p><strong>技术</strong>：AI 实时评分 pronunciation / fluency / intonation，针对 spontaneous speech 也能评。</p>
+          <p><strong>意义</strong>：<strong>"发音训练"是足够大的细分市场</strong>，能撑起 $60M 融资的产品。</p>
+          <p class="callout teal"><strong>对半米的启示</strong>：ELSA 不做"内容"（视频例句、故事），只做"发音"。半米可定位为<strong>"ELSA 的内容版"</strong> — 学员有了 ELSA 后还需要"在什么场景下练发音"，半米提供视频例句场景。</p>
+        </div>
+      </div>
+
+      <h3>6.3 BoldVoice <span class="pill info">2M 用户</span></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🎭</span> BoldVoice <span class="verdict v-good">accent training 专做</span></div>
+        <div class="m-sub">$150/年，Hollywood accent coaches + AI<sup class="cite">[34]</sup></div>
+        <div class="m-body">
+          <p><strong>定位</strong>：美式口音训练，针对成人 non-native。</p>
+          <p><strong>核心做法</strong>：Hollywood accent coach 视频课 + AI 即时 pronunciation 反馈。</p>
+          <p><strong>用户</strong>：2M+ 全球用户<sup class="cite">[34]</sup>。</p>
+          <p><strong>定价</strong>：$12.50/月（按年付），$150/年，7 天免费试用。</p>
+          <p class="callout teal"><strong>对半米的启示</strong>：BoldVoice 服务的是<strong>已经会说英语、想去掉口音的成人</strong> — 不是半米的 K12 / ESL 入门人群。但 BoldVoice 的 <strong>"专家视频 + AI 反馈"组合</strong>值得借鉴。</p>
+        </div>
+      </div>
+
+      <h3>6.4 TalkPal <span class="pill good">$4.99-9.99/月</span></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">💬</span> TalkPal AI <span class="verdict v-mid">GPT 套壳但便宜</span></div>
+        <div class="m-sub">57 语言，AI 对话 + sentence mode 跟读<sup class="cite">[47]</sup></div>
+        <div class="m-body">
+          <p><strong>定位</strong>：GPT 套壳的 AI 语言老师。9 种模式（Chat / Word / Dialogue / Sentence / Call / Roleplay / Character / Debate / Photo）。</p>
+          <p><strong>Sentence Mode</strong>：初学者听并跟读简单句 — <strong>这是 parallel shadowing</strong>。</p>
+          <p><strong>评分</strong>：App store 4.7/5。</p>
+          <p><strong>定价</strong>：Premium $9.99/月，年付 $4.99/月。<strong>是 Speak / BoldVoice 一半价</strong>。</p>
+          <p><strong>劣势</strong>：依赖 GPT 通用能力，没有 shadowing 专项设计；音量小、中级以上学员才适合。</p>
+          <p class="callout teal"><strong>对半米的启示</strong>：TalkPal 证明<strong>"GPT 套壳 + 多模式"的廉价 AI 路线能跑通</strong>。但半米要的是<strong>真专项</strong> — Tamai 学派的 shadowing 不是 GPT 套壳能做出来的。</p>
+        </div>
+      </div>
+
+      <h3>6.5 Parroto <span class="pill good">免费 iOS</span></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🦜</span> Parroto <span class="verdict v-mid">新秀，免费</span></div>
+        <div class="m-sub">2024-2025 上架，iOS，dictation + shadowing 组合<sup class="cite">[48]</sup></div>
+        <div class="m-body">
+          <p><strong>定位</strong>：<strong>3 个方法的组合</strong> — Dictation（听写）+ Shadowing（跟读）+ Spaced Repetition（SRS 词汇）。</p>
+          <p><strong>意义</strong>：<strong>跟半米路径几乎重合</strong> — 都是"听写 + 跟读 + 词汇 SRS"三件套！但 Parroto 是英文圈 + iOS 限定 + 没有视频例句基础设施。</p>
+          <p><strong>官方数据</strong>：95% 学员 3 个月后口语信心提升；80% 用户 30 天内听力进步<sup class="cite">[48]</sup>（自报，无第三方验证）。</p>
+          <p class="callout teal"><strong>对半米的最大启示</strong>：Parroto 是<strong>路径正确的早期玩家</strong> — 半米的方向被 Parroto 部分验证了，但 Parroto 缺<strong>视频例句基础设施 + 中文 ESL 市场理解</strong>，半米可以在中国市场赢。</p>
+        </div>
+      </div>
+
+      <h3>6.6 Speak Pro / AiRepeater / Shadow.do <span class="pill info">小型工具</span></h3>
+
+      <div class="callout teal">
+        <p>这一类小工具的共同特征：</p>
+        <ul>
+          <li>主打"shadowing"作为唯一卖点</li>
+          <li>素材来自 YouTube / TED</li>
+          <li>AI 实时 pronunciation / rhythm / intonation 反馈</li>
+          <li><strong>10-15 分钟/天</strong>剂量直接引用 Tamai 学派数据</li>
+          <li>5-7 语言支持，英语为主</li>
+        </ul>
+        <p>它们证明 shadowing 是 2024-2026 年<strong>"小厂能切入的细分赛道"</strong>。</p>
+      </div>
+
+      <h3>6.7 Duolingo（参考） <span class="pill bad">不是 shadowing</span></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🦉</span> Duolingo Listen-Then-Speak <span class="verdict v-warn">弱跟读</span></div>
+        <div class="m-sub">Max 订阅含 Video Call (with Lily)<sup class="cite">[49]</sup></div>
+        <div class="m-body">
+          <p><strong>Listen-Then-Speak</strong>：播放音频片段 → 学员重复一遍。<strong>这是 repetition 不是 shadowing</strong>（没有同步要求）。</p>
+          <p><strong>Pronunciation Tab</strong>：英语课有专门音标 tab。</p>
+          <p><strong>Video Call</strong>：Max 用户跟 AI Lily 视频对话。</p>
+          <p><strong>2025 重要</strong>：Duolingo 发布<strong>"基于 intelligibility 而非 imitation 的发音评分模型"</strong><sup class="cite">[49]</sup> — 这是巨大的方向标，跟 Derwing & Munro 学派一致。</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch7 真人评分 ============ -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">真人评分服务 · italki / Cambly / Speechling</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout info">
+        <p>"真人老师对学员录音给反馈"是 AI 评分的对照组。<strong>真人 ROI 不如 AI</strong>（响应慢 + 成本高），但在<strong>关键节点（B2 升级 / 雅思冲刺）</strong>仍有不可替代价值。</p>
+      </div>
+
+      <h3>7.1 italki <span class="pill warn">$10-30/小时</span></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">👨‍🏫</span> italki <span class="verdict v-good">10M+ 学员</span></div>
+        <div class="m-sub">30,000+ 老师跨 150+ 语言<sup class="cite">[50]</sup></div>
+        <div class="m-body">
+          <p><strong>定位</strong>：找全球老师一对一。</p>
+          <p><strong>对 shadowing 的支持</strong>：可自定义课程内容 — 学员可要求老师专门给跟读反馈 / 发音纠错 / 雅思口语真题。</p>
+          <p><strong>价格</strong>：Community Tutor $5-15/小时；Professional Teacher $20-30+/小时。</p>
+          <p><strong>定位人群</strong>：成人为主，但有 ESL 儿童老师。</p>
+        </div>
+      </div>
+
+      <h3>7.2 Cambly Kids <span class="pill warn">$65/月</span></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">👶</span> Cambly Kids <span class="verdict v-good">K12 ESL 专做</span></div>
+        <div class="m-sub">4-15 岁 + 100% 母语者老师<sup class="cite">[51]</sup></div>
+        <div class="m-body">
+          <p><strong>定位</strong>：4-15 岁英语课程，母语者老师（很多有美/英/加名校研究生学历）。</p>
+          <p><strong>定价</strong>：$65/月起，按 15/30/60 分钟 × 每周 2/3/5 天分档。</p>
+          <p><strong>认证</strong>：kidSAFE Seal Program。</p>
+          <p><strong>劣势</strong>：退款政策严苛 + 老师有时短时间内取消课。</p>
+          <p class="callout teal"><strong>对半米的启示</strong>：半米的 K12 ESL 路径<strong>不需要替代 Cambly</strong> — Cambly 是"真人对话课"，半米是"自学练习场"，<strong>两者互补</strong>。半米可在 V2.0+ 集成 Cambly 推荐链接。</p>
+        </div>
+      </div>
+
+      <h3>7.3 Speechling <span class="pill good">免费 / $19.99 Premium</span></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">📼</span> Speechling <span class="verdict v-good">AI + 人工混合</span></div>
+        <div class="m-sub">Listen-record + 24 小时内真人 coach 反馈<sup class="cite">[52]</sup></div>
+        <div class="m-body">
+          <p><strong>核心做法</strong>：学员录音 → <strong>真人 coach 24 小时内反馈</strong>（不是即时）。</p>
+          <p><strong>免费版</strong>：每月 35 次 coach 反馈。<strong>是给学员的"半免费真人课"</strong>。</p>
+          <p><strong>Premium</strong>：$19.99/月，无限录音 + 优先反馈。</p>
+          <p><strong>意义</strong>：证明<strong>"AI 即时 + 人工延迟"</strong> hybrid 模式商业上可行。</p>
+          <p class="callout teal"><strong>对半米的启示</strong>：V2.0 可考虑加<strong>"难句送人工 review"</strong>选项 — 学员遇到一句死活说不对的，可花 ¥5 送 ESL 老师 24 小时内回反馈。</p>
+        </div>
+      </div>
+
+      <h3>7.4 真人 vs AI 性价比矩阵</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>场景</th><th>真人</th><th>AI</th><th>半米推荐</th></tr></thead>
+          <tbody>
+            <tr><td>日常 shadowing 练习</td><td>太贵 ❌</td><td>即时 ✓</td><td>AI（半米 V0.1-V0.3）</td></tr>
+            <tr><td>音素细节纠错</td><td>慢 ⚠️</td><td>Speechace 音素级 ✓</td><td>AI Speechace</td></tr>
+            <tr><td>prosody / pitch contour</td><td>专家强 ✓</td><td>parselmouth 算 ✓</td><td>AI（V1.0）+ 真人引导</td></tr>
+            <tr><td>口音卡壳的死结句</td><td>真人讲解强 ✓✓</td><td>AI 反馈有限 ⚠️</td><td>真人（Speechling 类）</td></tr>
+            <tr><td>口语考试模拟</td><td>真人强 ✓✓</td><td>Speechace 0.9 与 IELTS Pearson ✓</td><td>混合（Speechace + italki）</td></tr>
+            <tr><td>K12 互动陪练</td><td>Cambly 专做 ✓✓</td><td>AI 弱 ❌</td><td>真人（Cambly Kids）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch8 ASR 技术栈 ============ -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">ASR 技术栈深扒 · Whisper / Azure / Speechace / 国产</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout info">
+        <p>shadowing 评分的<strong>底层就是 ASR（语音转文本）+ 评分逻辑</strong>。本章按"自托管开源 → 第三方 API → 国产"三档梳理选项，配价格 + 准确率 + 评分维度。</p>
+      </div>
+
+      <h3>8.1 选型决策树</h3>
+
+      <div class="tree">需要 shadowing 评分？
+       │
+       ├── 只要"字面对得上"？
+       │     │
+       │     ├── 客户端能跑？ → Web Speech API (¥0, Chrome/Edge/Safari) ★ V0.1
+       │     └── 要更准？     → OpenAI Whisper API ($0.006/min) 或 whisper.cpp 本地 (¥0 CPU) ★ V0.2
+       │
+       ├── 要音素级 / prosody / 5 维度评分？
+       │     │
+       │     ├── 通用学员 → Azure Pronunciation Assessment ($0.36/h 批 / 更贵 real-time + prosody) ★ V0.3
+       │     ├── 雅思/TOEFL 锚定 → Speechace API ($0.008/15s, Pearson 0.9) ★ V0.3 备选
+       │     └── 中式英语 → 流利说技术（私有化后不可获得）或自训
+       │
+       └── 自训 GOP 评分？ → 工程量极大、不做</div>
+
+      <h3>8.2 ASR 引擎横向对比</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>引擎</th><th>定位</th><th>WER (英语)</th><th>评分维度</th><th>价格</th><th>半米建议</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Web Speech API</strong></td><td>浏览器原生</td><td>母语者 OK；非母语者较差</td><td>仅文本，无评分</td><td>¥0</td><td><span class="pill good">V0.1 ★</span></td></tr>
+            <tr><td><strong>Whisper large-v3-turbo</strong></td><td>自托管 ASR</td><td>2.7% (LibriSpeech)<sup class="cite">[23]</sup> / 8-12% real-world</td><td>仅文本 + word timestamp (需 WhisperX)<sup class="cite">[53]</sup></td><td>本地 ¥0 / API $0.006/min</td><td><span class="pill good">V0.2 ★</span></td></tr>
+            <tr><td><strong>OpenAI gpt-4o-mini-transcribe</strong></td><td>云端 API</td><td>~3-4%</td><td>仅文本</td><td>$0.003/min<sup class="cite">[54]</sup></td><td><span class="pill info">V0.2 备选</span></td></tr>
+            <tr><td><strong>Azure Pronunciation Assessment</strong></td><td>专业评分</td><td>—</td><td>accuracy / fluency / completeness / prosody / overall<sup class="cite">[14]</sup></td><td>$0.36/h 批处理 / real-time + prosody 更贵</td><td><span class="pill warn">V0.3 ★</span></td></tr>
+            <tr><td><strong>Speechace API</strong></td><td>专业评分</td><td>音素 + 音节级<sup class="cite">[15]</sup></td><td>pronunciation 0-100 + IELTS/TOEFL/PTE score</td><td>$0.008/15s = $0.032/min<sup class="cite">[15]</sup></td><td><span class="pill warn">V0.3 备选</span></td></tr>
+            <tr><td><strong>Google Speech-to-Text</strong></td><td>云端 API</td><td>4-7% clean / 10-15% noisy<sup class="cite">[55]</sup></td><td>仅文本</td><td>$0.024/min std / $0.036 enhanced</td><td><span class="pill bad">不建议</span></td></tr>
+            <tr><td><strong>AWS Transcribe</strong></td><td>云端 API</td><td>类似 Google</td><td>仅文本</td><td>$0.024/min → $0.0078/min 规模降<sup class="cite">[56]</sup></td><td><span class="pill bad">不建议</span></td></tr>
+            <tr><td><strong>讯飞 ISE (Suntone)</strong></td><td>国产专业评分</td><td>中文友好</td><td>音素 + 流利度</td><td>试用免费 / ¥2万/年<sup class="cite">[57]</sup></td><td><span class="pill info">国产路径 V0.3</span></td></tr>
+            <tr><td><strong>阿里 Paraformer / SenseVoice</strong></td><td>国产 ASR 开源</td><td>SenseVoice 优于 Whisper<sup class="cite">[58]</sup></td><td>仅文本 (含语种 / 情感 / 事件)</td><td>开源 ¥0 / API 便宜</td><td><span class="pill good">V0.2 国产备选</span></td></tr>
+            <tr><td><strong>腾讯云 / 火山</strong></td><td>国产</td><td>类似阿里</td><td>仅文本</td><td>3万次¥72<sup class="cite">[57]</sup></td><td><span class="pill info">备选</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>8.3 Whisper 详解（自托管核心选项）</h3>
+
+      <div class="callout teal">
+        <p><strong>Whisper 系列模型选择</strong>：</p>
+        <ul>
+          <li><strong>large-v3-turbo</strong>：M2 Pro 上 <strong>10× 实时</strong>（60 秒音频 6 秒转完）<sup class="cite">[17]</sup>。Mac M2 都能本地跑实时。</li>
+          <li><strong>large-v3</strong>：准确率略高，但慢得多</li>
+          <li><strong>medium / small / base</strong>：低端硬件，准确率掉</li>
+        </ul>
+        <p><strong>关键限制</strong>：</p>
+        <ul>
+          <li>Whisper 原生<strong>不支持 word-level timestamp</strong>（utterance 级 ±1 秒精度）<sup class="cite">[53]</sup>。要 word-level 必须叠 WhisperX (wav2vec2 forced alignment) 或 whisper-timestamped。</li>
+          <li>Whisper 原生<strong>不支持 phoneme confidence / prosody 评分</strong> — 只能算字面 diff。</li>
+          <li><strong>中国学习者 ASR 错误率显著高于母语者</strong><sup class="cite">[23]</sup>：JASA 2024 研究显示 Whisper 在非母语者口音上 WER 飙升。</li>
+        </ul>
+        <p><strong>部署成本</strong>：</p>
+        <ul>
+          <li>本地 Mac M2 / M3：纯电费，每小时音频成本 ~¥0</li>
+          <li>云端 L40S spot：$0.32/h × 4h = $1.28 转 100 小时音频（vs OpenAI API $36）<sup class="cite">[59]</sup></li>
+          <li>Docker faster-whisper：现成镜像<sup class="cite">[59]</sup></li>
+        </ul>
+      </div>
+
+      <h3>8.4 Azure Pronunciation Assessment 详解</h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🌐</span> Azure Pronunciation Assessment <span class="verdict v-good">最专业 5 维评分</span></div>
+        <div class="m-sub">微软 Foundry Tools<sup class="cite">[14]</sup></div>
+        <div class="m-body">
+          <p><strong>5 维度评分</strong>（scripted 模式）：</p>
+          <ol>
+            <li><strong>Accuracy</strong> — 单词/音节/音素级</li>
+            <li><strong>Fluency</strong> — 语速平滑度</li>
+            <li><strong>Completeness</strong> — 词数完整度</li>
+            <li><strong>Prosody</strong> — intonation / rhythm / stress</li>
+            <li><strong>Overall</strong> — 综合分</li>
+          </ol>
+          <p><strong>Unscripted 模式</strong>还能给 vocabulary / grammar / topic 分。</p>
+          <p><strong>价格</strong>：批处理 $0.36/h；real-time pronunciation 单独 $0.30/h 额外；real-time + prosody 维度更贵<sup class="cite">[14]</sup>。</p>
+          <p><strong>意义</strong>：是<strong>当前最完整的商业 ASR + 评分方案</strong>，5 维全覆盖。但 real-time 实际成本会到 $1+/h。</p>
+        </div>
+      </div>
+
+      <h3>8.5 Speechace 详解</h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🎯</span> Speechace API <span class="verdict v-good">IELTS Pearson 0.9</span></div>
+        <div class="m-sub">专做 pronunciation 评分的 ASR API<sup class="cite">[15]</sup></div>
+        <div class="m-body">
+          <p><strong>技术亮点</strong>：</p>
+          <ul>
+            <li>专利音素 + 音节级评分</li>
+            <li><strong>0.9 Pearson 相关与 IELTS / PTE / TOEFL 人工评分</strong>（hold-out 评估）<sup class="cite">[15]</sup></li>
+            <li>0.82 test-retest 信度</li>
+            <li>0-100 分制 (quality_score)</li>
+          </ul>
+          <p><strong>定价</strong>：</p>
+          <ul>
+            <li>Basic：5,000 次/月 15 秒请求，超出 $0.008/15s</li>
+            <li>Pro：$80/月 含 10,000 次/月</li>
+          </ul>
+          <p><strong>vs Azure</strong>：Speechace 在 IELTS / TOEFL 锚定上更强；Azure 5 维度更完整。</p>
+        </div>
+      </div>
+
+      <h3>8.6 国产 ASR（中式英语 + 价格优势）</h3>
+
+      <div class="callout teal">
+        <p><strong>4 家国产对比</strong>：</p>
+        <ul>
+          <li><strong>讯飞 ISE（Suntone）</strong>：专做<strong>智能口语评测</strong>，针对中式英语调优，是国内教育行业事实标准<sup class="cite">[57]</sup></li>
+          <li><strong>阿里 SenseVoice / Paraformer</strong>：开源 + API 双轨。SenseVoice 在 50+ 语言识别上<strong>优于 Whisper</strong><sup class="cite">[58]</sup>，含掌声 / 笑声等事件检测</li>
+          <li><strong>腾讯云语音</strong>：3 万次 ¥72，每月免费 5000 次</li>
+          <li><strong>火山引擎（字节）</strong>：豆包大模型加持，价格"厘计价"竞争激烈<sup class="cite">[57]</sup></li>
+        </ul>
+        <p><strong>对半米的国产路径建议</strong>：如果半米 V0.3 上专业评分，<strong>讯飞 ISE 是中式英语 ESL 的最佳选择</strong>（针对学员口音调优过）。但讯飞合作流程比 Azure 慢。</p>
+      </div>
+
+      <h3>8.7 客户端实现细节</h3>
+
+      <div class="callout teal">
+        <p><strong>浏览器录音 + 上传链路</strong>：</p>
+        <ul>
+          <li><strong>MediaRecorder API</strong>：Chrome 49+ / Firefox 29+ / Safari 14.5+ iOS<sup class="cite">[26]</sup></li>
+          <li><strong>格式陷阱</strong>：Chrome/Firefox 写 audio/webm + Opus；Safari 写 audio/mp4 + AAC<sup class="cite">[26]</sup>。<strong>服务端必须 re-mux</strong>。</li>
+          <li><strong>实践</strong>：用 <code>MediaRecorder.isTypeSupported()</code> 探测，选最佳格式</li>
+          <li><strong>WaveSurfer.js</strong>：开源音频波形可视化，含 pitch tracking 和 spectrogram 插件<sup class="cite">[60]</sup></li>
+          <li><strong>Native</strong>：iOS Speech (Speech Framework) / Android SpeechRecognizer — 都是 Apple/Google 后端，准确率不如 Whisper 大模型</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch9 评分维度算法 ============ -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">评分维度算法 · 5 维度 + 实现方式</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout info">
+        <p>shadowing 评分不是单一分数，是<strong>5 个维度的组合</strong>。本章逐一讲<strong>每个维度怎么算</strong> + <strong>哪些可以脚本算 / 哪些必须用商业 API</strong>。</p>
+      </div>
+
+      <h3>9.1 5 维度 + 算法清单</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>维度</th><th>定义</th><th>算法</th><th>脚本可算？</th><th>商业 API</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1. Accuracy 准确率</strong></td><td>说的词与原句匹配</td><td>Levenshtein distance + WER</td><td>✅ ASR + diff</td><td>—</td></tr>
+            <tr><td><strong>2. Fluency 流利度</strong></td><td>语速 + pause 频率 + 平滑度</td><td>WPM 计算 + pause 检测</td><td>✅ 时间戳脚本</td><td>Azure / Speechace</td></tr>
+            <tr><td><strong>3. Pronunciation 发音</strong></td><td>单音素准确度</td><td>GOP (Goodness of Pronunciation)</td><td>⚠️ 极难，需 forced alignment</td><td>Azure / Speechace 必上</td></tr>
+            <tr><td><strong>4. Prosody 韵律</strong></td><td>pitch contour + 重音 + 节奏</td><td>F0 提取 + DTW 对比</td><td>✅ parselmouth/Praat</td><td>Azure prosody 维度</td></tr>
+            <tr><td><strong>5. Intelligibility 可懂度</strong></td><td>母语者能否听懂</td><td>无客观算法 — 真人 / 间接代理</td><td>❌</td><td>Speechling 真人</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>9.2 维度 1: Accuracy 准确率（半米 V0.1 就上）</h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">✓</span> Accuracy 算法 <span class="verdict v-good">最简单</span></div>
+        <div class="m-body">
+          <p><strong>算法</strong>：</p>
+          <ol>
+            <li>ASR（Web Speech / Whisper）转写学员录音 → 文本 A</li>
+            <li>原句文本 B（已知）</li>
+            <li>用 <strong>Levenshtein distance</strong> 算编辑距离<sup class="cite">[27]</sup></li>
+            <li>归一化：<code>similarity = 1 - distance / max(len(A), len(B))</code></li>
+          </ol>
+          <p><strong>伪代码</strong>：</p>
+          <pre>function accuracyScore(originalText, asrText):
+  // 1. 标准化：lowercase + 去标点 + tokenize
+  o = normalize(originalText).split(' ')
+  a = normalize(asrText).split(' ')
+  // 2. 词级 Levenshtein
+  dist = levenshtein(o, a)
+  // 3. 归一化 0-100
+  return max(0, 100 * (1 - dist / max(len(o), len(a))))</pre>
+          <p><strong>词级反馈</strong>：用 Levenshtein 的 traceback 找出哪些词错了，标红</p>
+          <p><strong>工程量</strong>：JavaScript 实现 < 50 行</p>
+        </div>
+      </div>
+
+      <h3>9.3 维度 2: Fluency 流利度</h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">⏱️</span> Fluency 算法 <span class="verdict v-good">脚本可算</span></div>
+        <div class="m-body">
+          <p><strong>2 个子指标</strong>：</p>
+          <ol>
+            <li><strong>语速 WPM</strong>：
+              <ul>
+                <li>母语会话 ~150 WPM<sup class="cite">[18]</sup>，TED talks ~163 WPM</li>
+                <li>学员目标：原音 WPM × 80%-120% 算流畅</li>
+                <li>算法：<code>WPM = wordCount / (audioLength / 60)</code></li>
+              </ul>
+            </li>
+            <li><strong>Pause 频率</strong>：
+              <ul>
+                <li>用 WebRTC VAD 或简单振幅阈值检测停顿</li>
+                <li>正常 shadowing 应 ≤ 1 pause / 句</li>
+              </ul>
+            </li>
+          </ol>
+          <p><strong>需要 WhisperX 或 timestamp-aware ASR</strong>得到 word-level 时间戳</p>
+        </div>
+      </div>
+
+      <h3>9.4 维度 3: Pronunciation 发音（必须商业 API）</h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🔤</span> GOP (Goodness of Pronunciation) <span class="verdict v-warn">自建难度极高</span></div>
+        <div class="m-sub">phoneme-level 评分的事实标准<sup class="cite">[61]</sup></div>
+        <div class="m-body">
+          <p><strong>原理</strong>：</p>
+          <ol>
+            <li><strong>Forced alignment</strong>：把音频和 phonetic transcription 强制对齐</li>
+            <li>对每个 phoneme 算<strong>log-likelihood ratio</strong></li>
+            <li>分数 = 该 phoneme 实际匹配的 log 概率 / 该位置最可能 phoneme 的 log 概率</li>
+            <li>比值低 = 发音偏离，比值高 = 发音准</li>
+          </ol>
+          <p><strong>难度</strong>：</p>
+          <ul>
+            <li>需要 acoustic model + pronunciation dict + alignment</li>
+            <li>儿童发音 forced alignment 误差大<sup class="cite">[62]</sup></li>
+            <li>新一代 segmentation-free GOP（2025 arxiv）尝试摆脱 forced alignment 依赖<sup class="cite">[63]</sup></li>
+          </ul>
+          <p><strong>建议</strong>：<strong>不要自建，直接用 Azure (5 维) 或 Speechace（专注 pronunciation）</strong>。</p>
+        </div>
+      </div>
+
+      <h3>9.5 维度 4: Prosody 韵律（V1.0 半米差异化）</h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🎵</span> Prosody 算法 <span class="verdict v-good">parselmouth 可本地算</span></div>
+        <div class="m-sub">Praat 的 Python 接口 — 开源完整<sup class="cite">[64]</sup></div>
+        <div class="m-body">
+          <p><strong>parselmouth</strong> 能提取的特征：</p>
+          <ul>
+            <li><strong>Pitch contour</strong>（F0 曲线）</li>
+            <li><strong>Intensity</strong>（响度）</li>
+            <li><strong>Jitter / Shimmer / HNR</strong>（声学参数）</li>
+            <li><strong>Stress contrast</strong>（重音 vs 非重音 syllable 对比）</li>
+          </ul>
+          <p><strong>对比算法 (DTW)</strong>：</p>
+          <ol>
+            <li>提取原音 pitch contour P_orig 和学员 P_student</li>
+            <li>用 <strong>Dynamic Time Warping</strong> 对齐两条曲线（克服语速差异）</li>
+            <li>算对齐后的均方根误差 (RMSE)</li>
+            <li>归一化为 0-100 分</li>
+          </ol>
+          <p><strong>UI 呈现</strong>：</p>
+          <ul>
+            <li>SVG 画两条 pitch 曲线叠加（学员蓝 / 原音绿）</li>
+            <li>标红学员明显偏离的 syllable</li>
+            <li>对应 Mori 2011 学派的 acoustic feedback<sup class="cite">[13]</sup></li>
+          </ul>
+          <p><strong>工程量</strong>：3-5 天（含 parselmouth Python 后端 + 前端 SVG 画图）</p>
+        </div>
+      </div>
+
+      <h3>9.6 维度 5: Intelligibility 可懂度</h3>
+
+      <div class="callout warn">
+        <p><strong>这是 Derwing & Munro 1995 框架的最高目标</strong><sup class="cite">[22]</sup>：母语者能否听懂学员说的内容。<strong>没有客观算法可测</strong> — 唯一方式：让母语者听 + 转写学员录音。</p>
+        <p><strong>间接代理指标</strong>：</p>
+        <ul>
+          <li>用<strong>另一个 ASR 模型</strong>（与训练用的不同）再转一遍学员录音，看能否还原原文 — 如果能 = 学员说得"够通"被机器理解</li>
+          <li>2024 arxiv 提出"latent speech representation"做 perception-based intelligibility 评估<sup class="cite">[65]</sup>，但还在研究阶段</li>
+        </ul>
+        <p><strong>半米建议</strong>：<strong>V1.0+ 才考虑</strong>。短期内用"另一个 ASR 转写吻合度"做代理。</p>
+      </div>
+
+      <h3>9.7 半米评分公式（V0.3 推荐）</h3>
+
+      <pre>// 综合分（0-100）
+overallScore = 
+  accuracy * 0.35      // 字面对得上是基础
+  + fluency * 0.20     // 流利
+  + pronunciation * 0.25  // 单音素准（Azure / Speechace）
+  + prosody * 0.20     // 韵律（V1.0+，V0.x 可设 0）
+
+// 学员看到的 3 档反馈：
+// 90+ : 🟢 优秀
+// 70-89: 🟡 良好  
+// <70 : 🔴 需再练</pre>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch10 半米 V0.1-V1.0 实施路径 ============ -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">半米 Shadowing 4 阶段实施路径 · V0.1 → V1.0 ★★ 阿杰最该看那一章</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout accent">
+        <p><strong>本章是整份报告的命门</strong>。每个 V 给：<strong>目标 / 工程量 / 成本 / UI mockup（文字）/ 后端架构 / 数据流 / 关键代码片段（参考性）</strong>。<strong>4 个 V 渐进式叠加，不是替换</strong> — V0.1 跑通后保留作低端 fallback。</p>
+      </div>
+
+      <h3>10.1 总览：4 阶段对比</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>版本</th><th>目标</th><th>核心新增</th><th>工程量</th><th>成本</th><th>差异化</th></tr></thead>
+          <tbody>
+            <tr><td><strong>V0.1</strong></td><td>跑通最小闭环</td><td>视频例句 + 录音 + Web Speech 字面评分</td><td>1-2 天</td><td>¥0（浏览器原生）</td><td>0（验证 UX）</td></tr>
+            <tr><td><strong>V0.2</strong></td><td>评分变准 + 加入 selective shadowing</td><td>whisper.cpp 本地 + word confidence + 目标词跟随</td><td>1 周</td><td>¥0（自托管 CPU）</td><td>★ selective shadowing 焊词汇库</td></tr>
+            <tr><td><strong>V0.3</strong></td><td>专业级 5 维评分</td><td>接 Azure Pronunciation API + phoneme 红黄绿</td><td>1 天接 API + 3 天 UI</td><td>~¥0.05/学员/天</td><td>★ 雅思/TOEFL 锚定的专业感</td></tr>
+            <tr><td><strong>V1.0</strong></td><td>Pitch contour 可视化（独门差异化）</td><td>parselmouth pitch 提取 + DTW + SVG 对比图</td><td>3-5 天</td><td>¥0（本地算）</td><td>★★ 中国市场没人做的视觉震撼</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>10.2 V0.1：最小可行 — <em>今晚就能跑通</em></h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🚀</span> V0.1 目标 <span class="verdict v-good">1-2 天 / ¥0</span></div>
+        <div class="m-body">
+          <p><strong>用户故事</strong>：学员打开半米的"今日 6 例句"页面，看到第 1 个例句视频（10 秒，B1 难度，已有素材）；点 🎤 录音按钮；视频自动播放；学员跟读；3 秒后自动停止录音；2 秒内显示「你说的：X / 原句：Y / 准确率 87% 🟡」。</p>
+
+          <h4>UI Mockup（文字描述）</h4>
+          <pre>┌──────────────────────────────────────────┐
+│ 📺 [视频画面 10s SciShow Kids 片段]      │
+│                                          │
+│ "She invented a new machine."            │
+│                                          │
+│ [▶ 播放 / 跟读]    [⚙️ 0.75x 慢速]       │
+└──────────────────────────────────────────┘
+按钮：🎤 跟读   按住说话或点击录音
+─────────────────────────────────
+反馈区（录完后 1 秒内）：
+  你说: She invented a new machine
+  原句: She invented a new machine.
+  准确率: 95% 🟢
+  [↺ 再来一次]  [✓ 已掌握]  [→ 下一句]</pre>
+
+          <h4>后端架构</h4>
+          <pre>客户端（浏览器）
+  ↓ MediaRecorder API 录音
+  ↓ Web Speech API 转写（客户端直接出文本）
+  ↓ JavaScript Levenshtein 算字面相似度
+  ↓ 渲染反馈
+
+服务端（无需改动）
+  - 已有视频例句库（半米现成）
+  - 仅记录学员练习日志（POST /api/shadow-log）</pre>
+
+          <h4>关键代码片段（参考）</h4>
+          <pre>// 客户端 JS - V0.1 核心 30 行
+const recognition = new (window.SpeechRecognition || 
+                          window.webkitSpeechRecognition)();
+recognition.lang = 'en-US';
+recognition.interimResults = false;
+
+const recordBtn = document.getElementById('record');
+recordBtn.onclick = () => {
+  recognition.start();
+};
+
+recognition.onresult = (event) => {
+  const said = event.results[0][0].transcript;
+  const orig = currentSentence.text;
+  const score = computeScore(said, orig);
+  renderFeedback(said, orig, score);
+  logToServer({ sentence_id, said, score, ts: Date.now() });
+};
+
+function computeScore(said, orig) {
+  const a = normalize(said).split(/\s+/);
+  const b = normalize(orig).split(/\s+/);
+  const dist = levenshtein(a, b);
+  return Math.max(0, Math.round(100 * (1 - dist / Math.max(a.length, b.length))));
+}
+// normalize / levenshtein 用现成 npm 包 'fast-levenshtein'</pre>
+
+          <h4>成功标准</h4>
+          <ul>
+            <li>✅ 学员能录音 + 收到分数</li>
+            <li>✅ Chrome / Safari 都跑通</li>
+            <li>✅ Web Speech API 转写延迟 < 2 秒</li>
+            <li>✅ 学员主观感受"靠谱"</li>
+          </ul>
+
+          <h4>已知限制</h4>
+          <ul>
+            <li>⚠️ Web Speech 不支持非常规口音（中式英语转写偏差）</li>
+            <li>⚠️ 只有 accuracy 一个维度</li>
+            <li>⚠️ 移动端 Safari 支持有限</li>
+            <li><strong>这些都是 V0.2/V0.3 解决的</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>10.3 V0.2：whisper.cpp 自托管 + Selective Shadowing</h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🦾</span> V0.2 目标 <span class="verdict v-good">1 周 / ¥0</span></div>
+        <div class="m-body">
+          <p><strong>核心新增</strong>：</p>
+          <ol>
+            <li><strong>whisper.cpp 本地后端</strong>：客户端上传 audio blob → 服务端 whisper.cpp 转写 → 返回带 word confidence 的文本</li>
+            <li><strong>Selective Shadowing 模式</strong>：学员"今日 10 个目标词" → 视频例句中目标词出现时高亮闪烁 + 句子自动暂停等学员跟读</li>
+            <li><strong>Word-level 红黄绿反馈</strong>：每个词单独标色</li>
+            <li><strong>30 天进度图</strong>（不是 streak — 是真实进步可视化）</li>
+          </ol>
+
+          <h4>UI Mockup</h4>
+          <pre>┌──────────────────────────────────────────┐
+│ 📅 今日跟读 · B1 · 10 词                  │
+│ ████████░░ 8/10                          │
+│                                          │
+│ 当前词: invent (发明)                    │
+│ [视频片段：含 "invented" 高亮闪烁]       │
+│                                          │
+│ ⏸ 自动暂停在目标词后                     │
+│ [🎤 跟读 "She invented a new machine"]   │
+└──────────────────────────────────────────┘
+
+反馈：
+  She invented a new machine.
+  ✓     ✓        ✓   ✓     ✓
+  she invented(95) a new machine
+       [目标词命中 +1 encounter]
+
+进度: invent 词跟读 4 次，离 mastery 还差 6 次</pre>
+
+          <h4>后端架构</h4>
+          <pre>客户端
+  ↓ MediaRecorder webm/mp4 blob
+  ↓ POST /api/shadow-transcribe (multipart)
+  
+服务端 (Node.js / Python)
+  ├── 接收 audio → 标准化为 16kHz WAV
+  ├── whisper.cpp CLI: ./main -m models/ggml-large-v3-turbo.bin -f input.wav --output-json
+  ├── 解析 JSON 得 word + confidence + timestamp
+  ├── 调字面 diff（如 V0.1）
+  ├── 返回 { transcript, words: [{w, conf, t_start, t_end}], score }
+  └── 写 DB: shadow_attempts 表
+
+DB schema 新增:
+  shadow_attempts (
+    id, user_id, sentence_id, target_word_id,
+    audio_url, transcript, score, 
+    word_confidences (JSONB), created_at
+  )
+  + vocab_progress (
+    user_id, word_id, 
+    encounter_count, shadow_count,
+    last_shadowed_at, mastery_level
+  )</pre>
+
+          <h4>Selective Shadowing 关键流程</h4>
+          <pre>1. 学员开 selective shadowing 模式
+2. 系统从 vocab_progress 查询：encounter < 10 的 B1 目标词
+3. 加载视频例句库中包含这些词的视频
+4. 视频播放时：
+   - 用句子级 timestamp 定位目标词出现位置
+   - 提前 0.3s 高亮闪烁
+   - 句子结束后自动暂停 3s 等学员跟读
+5. 学员跟读后：
+   - 评分该句 accuracy
+   - 如果目标词单独 word_confidence > 0.8 → 该词 shadow_count +1
+   - 如果 shadow_count + encounter_count ≥ 10 → mastery upgrade</pre>
+
+          <h4>成本</h4>
+          <ul>
+            <li>Mac M2 服务器 / Linux + CPU：~¥500-2000/月（视并发量）</li>
+            <li>云端 GPU spot: $0.32/h（L40S）= 单学员每天几分钱</li>
+            <li><strong>规模化后均摊到学员 < ¥1/月</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>10.4 V0.3：Azure Pronunciation Assessment 接入</h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🌐</span> V0.3 目标 <span class="verdict v-warn">4 天 / ¥0.05/学员/天</span></div>
+        <div class="m-body">
+          <p><strong>核心新增</strong>：</p>
+          <ol>
+            <li><strong>Azure API 接入</strong>：批量上传 → 拿 5 维度分</li>
+            <li><strong>音素级红黄绿</strong>：哪个音读错了能精确到 phoneme</li>
+            <li><strong>IELTS 类似锚定</strong>：（备选）改用 Speechace + IELTS Pearson 0.9 加成</li>
+            <li><strong>"难句送复审"</strong>：学员分 < 60 的句子，自动发邮件给 ESL 老师人工 review</li>
+          </ol>
+
+          <h4>架构变化</h4>
+          <pre>服务端新增 Azure 调用层
+  
+  audio → Azure Speech SDK
+    ↓
+  PronunciationAssessmentConfig {
+    referenceText: "She invented a new machine.",
+    gradingSystem: "HundredMark",
+    granularity: "Phoneme",
+    enableProsodyAssessment: true
+  }
+    ↓
+  返回 5 维分 + word-level phoneme score
+    ↓
+  存 DB + 渲染</pre>
+
+          <h4>UI 升级</h4>
+          <pre>反馈区（V0.3 完整版）：
+┌──────────────────────────────────────────┐
+│ She invented a new machine.              │
+│  ✓  ⚠️phoneme: /ɪ/ 弱  ✓ ✓ ✓               │
+│                                          │
+│ 综合分: 84/100 🟡                         │
+│ ├── Accuracy:        92                  │
+│ ├── Fluency:         88                  │
+│ ├── Completeness:    100                 │
+│ ├── Pronunciation:   76 ⚠️                │
+│ └── Prosody:         85                  │
+│                                          │
+│ 💡 invented 第二音节 /ɛn/ 没说足          │
+│ [听原音 ▶]  [慢速练习 0.75x]              │
+└──────────────────────────────────────────┘</pre>
+
+          <h4>成本估算</h4>
+          <ul>
+            <li>每学员每天 5 句 × 2 秒 = 10 秒音频</li>
+            <li>Azure $0.36/h 批处理 = $0.0001/秒</li>
+            <li>10 秒 × $0.0001 = $0.001/天 ≈ ¥0.007/天</li>
+            <li><strong>1000 学员 × 30 天 = ¥210/月</strong></li>
+            <li>real-time + prosody: ×3 = ¥630/月</li>
+            <li><strong>规模化完全可控</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>10.5 V1.0：Pitch Contour 可视化 — 独门差异化</h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🎵</span> V1.0 目标 <span class="verdict v-good">3-5 天 / ¥0 本地算</span></div>
+        <div class="m-body">
+          <p><strong>核心新增</strong>：学员看到自己的 pitch contour 和原音叠加对比图 + 重音红点标注 — <strong>视觉震撼 + Mori 2011 学派学术依据</strong>。</p>
+          <p><strong>参考</strong>：Onsei Anki 插件（开源）<sup class="cite">[40]</sup>、Study Intonation app<sup class="cite">[66]</sup>、AiRepeater<sup class="cite">[66]</sup>都已验证这个功能形态可行。</p>
+
+          <h4>UI Mockup（视觉冲击）</h4>
+          <pre>┌──────────────────────────────────────────┐
+│ "She invented a new machine."            │
+│                                          │
+│ 🎵 Pitch contour 对比                    │
+│                                          │
+│  300Hz ─                                 │
+│         \___                             │
+│             \__   ← 原音绿               │
+│                \____                     │
+│                                          │
+│  150Hz ─                                 │
+│         \___ ____  ← 你的蓝              │
+│              ⚠️ 此处 pitch 偏低 25Hz       │
+│  100Hz ─                                 │
+│         She invented a new machine       │
+│              ●         (重音命中 ✓)      │
+│                                          │
+│ Prosody 分: 78 🟡                         │
+│ 💡 invented 的重音音节 pitch 应再上扬     │
+└──────────────────────────────────────────┘</pre>
+
+          <h4>技术栈</h4>
+          <pre>后端 Python:
+  - parselmouth (Praat Python 绑定)
+  - 提取 pitch contour: snd.to_pitch().selected_array['frequency']
+  - DTW 对齐: dtaidistance / fastdtw
+  - 计算 RMSE → 转 0-100 分
+
+前端:
+  - SVG 画两条曲线（学员蓝 / 原音绿）
+  - canvas 渲染重音红点
+  - 用 d3 或纯 SVG path
+
+关键 Python 片段:
+  import parselmouth
+  snd = parselmouth.Sound('student.wav')
+  pitch = snd.to_pitch()
+  freqs = pitch.selected_array['frequency']
+  times = pitch.xs()
+  # freqs[freqs == 0] = NaN  # 无声音段
+  return list(zip(times, freqs))</pre>
+
+          <h4>差异化价值</h4>
+          <ul>
+            <li><strong>中国市场没人做过</strong>（流利说 / 趣配音 / 百词斩都没有）</li>
+            <li><strong>Mori 2011 + Tamai 学派学术背书</strong></li>
+            <li><strong>视觉震撼用作营销素材</strong> — 朋友圈晒 pitch contour 图自带传播</li>
+            <li>本地算 ¥0 成本</li>
+          </ul>
+
+          <h4>成本</h4>
+          <ul>
+            <li>纯本地算（parselmouth 是 Python 库，跑 Mac/Linux 都 OK）</li>
+            <li>每句额外 ~50ms CPU 时间</li>
+            <li>规模化均摊 ~¥0</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>10.6 4 阶段时间线 + 决策门</h3>
+
+      <div class="tree">Day 1-2 ──── V0.1 上线
+            ↓ 决策门: 学员主观 "靠谱" + 留存 >30%
+            
+Week 1   ──── V0.2 上线 (whisper.cpp + selective shadowing)
+            ↓ 决策门: selective shadowing 用户参与率 >20%
+            
+Week 3-4 ──── V0.3 决策点
+            ↓ 选项 A: Azure (5 维全) 
+            ↓ 选项 B: Speechace (IELTS 锚定)
+            ↓ 选项 C: 国产讯飞 ISE (中式英语调优)
+            
+Week 5-6 ──── V1.0 上线 (pitch contour)
+            → 营销素材 + 朋友圈传播</div>
+
+      <h3>10.7 阿杰今晚就动手清单（V0.1 全流程）</h3>
+
+      <div class="callout good">
+        <ol>
+          <li><strong>选 1 个例句</strong>：从半米已有 6 例句视频里选 1 个 B1 难度、10 秒以内、清晰的句子</li>
+          <li><strong>前端加录音按钮</strong>：HTML5 button + MediaRecorder API（5 行代码）</li>
+          <li><strong>接 Web Speech API</strong>：<code>new webkitSpeechRecognition()</code>（10 行）</li>
+          <li><strong>npm install fast-levenshtein</strong>，用现成包算编辑距离（5 行）</li>
+          <li><strong>反馈 UI</strong>：3 行文字 + 1 个进度条（10 行）</li>
+          <li><strong>记日志</strong>：<code>POST /api/shadow-log</code>（5 行）</li>
+        </ol>
+        <p><strong>总工程量：~50 行代码 + 现有素材 = 1-2 天 = 今晚就能跑通</strong></p>
+        <p><strong>跑通后给自己 + Joy + Dong 各试一遍</strong>，收集 3 人主观反馈再决定 V0.2 优先级。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch11 半米差异化 ============ -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">半米差异化机会 · 别人没法快速复制的 4 个抓手</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout accent">
+        <p>扒完 20+ 个 shadowing 产品后，能确认<strong>半米有 4 个独门机会</strong>，每个都难以被现有玩家快速复制（不是因为技术难，是因为<strong>需要半米已有的基础设施才能实现</strong>）。</p>
+      </div>
+
+      <h3>11.1 抓手 1: Selective Shadowing × CEFR 词汇库</h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">💎</span> 抓手 1 <span class="verdict v-good">学术背书 + 数据资产</span></div>
+        <div class="m-body">
+          <p><strong>什么</strong>：今日 10 个 B1 目标词 → 视频例句中目标词出现时自动暂停跟读 → 跟读了 = +1 encounter，朝 10-17 次 mastery 推进。</p>
+          <p><strong>为什么半米独有</strong>：</p>
+          <ul>
+            <li>需要<strong>CEFR 词汇库</strong>（半米已建）</li>
+            <li>需要<strong>视频例句库带 word-level timestamp</strong>（半米已有）</li>
+            <li>需要<strong>词汇 mastery 追踪</strong>（半米已建 SRS）</li>
+            <li>需要<strong>shadowing UI + 评分</strong>（V0.2 加上）</li>
+          </ul>
+          <p>没有这 4 个基础设施全部就位的产品，复制不了。Migaku 接近但<strong>用影视片段不是 CEFR 词汇</strong>，趣配音<strong>没词汇库</strong>，百词斩<strong>没 shadowing</strong>。</p>
+          <p><strong>学术背书</strong>：Hamada (2024) selective shadowing 论文 — <em>第一篇把 shadowing 焊到词汇上的实证研究</em><sup class="cite">[7]</sup>。</p>
+        </div>
+      </div>
+
+      <h3>11.2 抓手 2: 听写 → 跟读闭环</h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🔁</span> 抓手 2 <span class="verdict v-good">输入输出闭环</span></div>
+        <div class="m-body">
+          <p><strong>什么</strong>：同一个 6 例句句子 — 学员先做听写挖空（perception 维度）→ 听准后再做跟读（production 维度）。<strong>"听懂 → 说出来"形成完整闭环</strong>。</p>
+          <p><strong>学术依据</strong>：</p>
+          <ul>
+            <li>Krashen 输入假说<sup class="cite">[67]</sup>：先得 i+1 input</li>
+            <li>Swain 输出假说<sup class="cite">[68]</sup>：input 不够，必须 push output</li>
+            <li>Tamai 1992<sup class="cite">[1]</sup>：shadowing > dictation 在听力上</li>
+            <li>Kadota 2019<sup class="cite">[8]</sup>：shadowing 4 效应中 monitoring 效应靠"先听懂再说"激活</li>
+          </ul>
+          <p><strong>为什么独有</strong>：需要<strong>听写挖空</strong>（半米已有 F1 模块）+ <strong>shadowing 评分</strong>（V0.2 上）的组合。</p>
+          <p><strong>UX</strong>：</p>
+          <pre>步骤 1: 听写挖空 → "She invented a ___ machine."
+步骤 2: 学员填 "new" ✓
+步骤 3: 系统弹出："听准了！现在试着说出来 →"
+步骤 4: shadowing 模式 → 评分
+步骤 5: 该词 mastery +1（听 1 次 + 说 1 次 = 双权重）</pre>
+        </div>
+      </div>
+
+      <h3>11.3 抓手 3: 6 例句多场景 × shadowing 重复</h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🎬</span> 抓手 3 <span class="verdict v-good">"6 例句"标准的新价值</span></div>
+        <div class="m-body">
+          <p><strong>什么</strong>：同一个 B1 词在 6 个不同场景跟读 → 等于 6 次不同语境的 selective shadowing → 词汇 productive 掌握。</p>
+          <p><strong>学术依据</strong>：</p>
+          <ul>
+            <li>Nation (2001)<sup class="cite">[2]</sup> 词汇 stages 演进：<strong>varied encounters → varied use</strong></li>
+            <li>Pellicer-Sánchez & Schmitt (2010)<sup class="cite">[33]</sup>: 10-17 次 encounter</li>
+            <li><strong>同一个词在 6 个不同句子跟读 = 6 次 contextual production retrieval</strong></li>
+          </ul>
+          <p><strong>对比</strong>：</p>
+          <ul>
+            <li>百词斩：1 词 + 1-2 例句，<strong>无跟读</strong></li>
+            <li>趣配音：长视频配音，<strong>无词汇标</strong></li>
+            <li>Migaku：影视句子，<strong>无 6 例句标准</strong></li>
+            <li><strong>半米：1 词 × 6 例句 × shadowing → 词汇深度习得</strong></li>
+          </ul>
+          <p><strong>营销话术</strong>："不是听 6 遍发音，是<strong>在 6 个真实场景里说出来</strong>。"</p>
+        </div>
+      </div>
+
+      <h3>11.4 抓手 4: AI 学员路径 + 错题回流</h3>
+
+      <div class="method-card">
+        <div class="m-head"><span class="m-emoji">🔄</span> 抓手 4 <span class="verdict v-mid">长期护城河</span></div>
+        <div class="m-body">
+          <p><strong>什么</strong>：学员对句子点 👎（"太难"或"听不懂"）→ AI 把这个句子分解：</p>
+          <ul>
+            <li>哪个词不会 → 加入 vocab 复习队列</li>
+            <li>是 prosody 问题还是 phoneme 问题 → 推不同 shadowing 变种</li>
+            <li>难度评估有偏差 → 调整 CEFR 标签</li>
+          </ul>
+          <p><strong>独家</strong>：需要半米的<strong>学员行为数据 + CEFR 词汇库 + 6 例句池</strong>三者打通才能做。</p>
+          <p><strong>长期</strong>：积累几万学员的 shadowing 数据后，可<strong>训练专属"半米 ESL ASR 模型"</strong>（fine-tune Whisper），针对中国学习者口音准确率提升 — 这是流利说当年 309 亿句数据的护城河逻辑<sup class="cite">[24]</sup>。半米从一开始就要采集这类数据。</p>
+        </div>
+      </div>
+
+      <h3>11.5 半米 vs 现有玩家对比矩阵</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>能力</th><th>Migaku</th><th>趣配音</th><th>百词斩</th><th>流利说</th><th>Parroto</th><th>半米目标</th></tr></thead>
+          <tbody>
+            <tr><td>视频例句</td><td>影视截</td><td>动画</td><td>有但弱</td><td>课程</td><td>无</td><td>✅ 6 例句标准</td></tr>
+            <tr><td>CEFR 词汇库</td><td>无</td><td>无</td><td>词无标</td><td>无</td><td>无</td><td>✅ 已建</td></tr>
+            <tr><td>Selective Shadowing</td><td>无</td><td>无</td><td>无</td><td>无</td><td>无</td><td>✅ V0.2</td></tr>
+            <tr><td>听写→跟读闭环</td><td>无</td><td>无</td><td>无</td><td>有限</td><td>有</td><td>✅ V0.2</td></tr>
+            <tr><td>Pitch Contour 可视</td><td>无</td><td>无</td><td>无</td><td>无</td><td>无</td><td>✅ V1.0</td></tr>
+            <tr><td>音素级评分</td><td>无</td><td>有</td><td>无</td><td>有(自家)</td><td>有</td><td>✅ V0.3 (Azure)</td></tr>
+            <tr><td>中国 K12 优化</td><td>不</td><td>是</td><td>是</td><td>不</td><td>不</td><td>✅</td></tr>
+            <tr><td>价格</td><td>高 $200</td><td>免费/VIP</td><td>低</td><td>停服</td><td>免费</td><td>✅ 低</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout teal">
+        <p><strong>半米 6 项里独占的 = 4 项</strong>：CEFR 词汇库 / Selective Shadowing / 听写→跟读闭环 / Pitch Contour 可视化。<strong>这 4 项里前 3 项 V0.2 就能上</strong>。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch12 mini demo ============ -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">Mini Demo · 半米 Shadowing UI 交互预览</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout info">
+        <p>这是一个 fake UI mockup，用来感受 V0.3 的 shadowing 反馈体验。<strong>不调真 ASR</strong>，只是切换 4 种典型反馈状态。</p>
+      </div>
+
+      <div class="demo-host">
+        <h4>🎤 SHADOWING DEMO · 半米 V0.3</h4>
+        
+        <div style="background: var(--bg-elevated); padding: 12px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 12px;">
+          <div style="font-size: 12px; color: var(--text-mute); margin-bottom: 4px;">视频例句 · B1 · #4 / 6</div>
+          <div style="font-size: 18px; font-weight: 600; color: var(--text); margin: 8px 0;" id="demo-sentence">"She <span class="word-good">invented</span> a new machine."</div>
+          <div style="font-size: 12px; color: var(--text-mute);">📺 SciShow Kids · Ada Lovelace · 8.2 秒</div>
+        </div>
+
+        <div class="demo-row">
+          <div class="demo-chip-group">
+            <span class="label">变种：</span>
+            <span class="demo-chip" data-demo="variant" data-val="parallel">Parallel</span>
+            <span class="demo-chip active" data-demo="variant" data-val="selective">Selective ★</span>
+            <span class="demo-chip" data-demo="variant" data-val="prosody">Prosody</span>
+            <span class="demo-chip" data-demo="variant" data-val="classic">Classic</span>
+          </div>
+        </div>
+
+        <div class="demo-row">
+          <div class="demo-chip-group">
+            <span class="label">模拟结果：</span>
+            <span class="demo-chip" data-demo="result" data-val="good">🟢 优秀</span>
+            <span class="demo-chip active" data-demo="result" data-val="ok">🟡 良好</span>
+            <span class="demo-chip" data-demo="result" data-val="bad">🔴 需练</span>
+            <span class="demo-chip" data-demo="result" data-val="prosody">韵律偏</span>
+          </div>
+        </div>
+
+        <div class="demo-output" id="demoOut">
+          <!-- 渲染在 JS -->
+        </div>
+
+        <div style="margin-top: 12px; padding: 10px; background: var(--bg-soft); border-radius: 8px; font-size: 12.5px; color: var(--text-mute);">
+          💡 这是 V0.3 的目标体验。V0.1 没有音素分和 prosody 维度，只有 accuracy。
+        </div>
+      </div>
+
+      <h3>12.1 4 种状态详解</h3>
+
+      <ul>
+        <li><strong>🟢 优秀 (90+)</strong>：所有维度都好 → 弹出"已掌握"按钮 → +1 mastery</li>
+        <li><strong>🟡 良好 (70-89)</strong>：主要维度 OK 但某维度弱 → 显示具体改进点 + "再来一次"</li>
+        <li><strong>🔴 需练 (&lt;70)</strong>：多维度弱 → 推荐降级到 Parallel 变种 / 慢速 0.75x</li>
+        <li><strong>韵律偏</strong>：accuracy 高但 prosody 低 → V1.0 弹出 pitch contour 对比图</li>
+      </ul>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch13 FAQ ============ -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">FAQ · 阿杰可能问的 12 个问题</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q1</span><span class="qtext">Shadowing 到底跟 read-aloud / repetition / mimicking 有什么本质区别？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p>核心区别在<strong>同步度</strong>：</p>
+          <ul>
+            <li><strong>Read-aloud</strong>：看字幕大声朗读（无原音参考）</li>
+            <li><strong>Repetition</strong>：听一句、暂停、复述（延迟 5+ 秒，先理解再说）</li>
+            <li><strong>Mimicking / Parallel</strong>：听完整段 → 短暂暂停 → 复述（延迟 1-3 秒）</li>
+            <li><strong>Shadowing (Tamai 定义)</strong>：边听边说，<strong>延迟 ~0.5 秒</strong><sup class="cite">[1]</sup>，几乎同步</li>
+          </ul>
+          <p>Tamai 1992 关键发现就是<strong>"同步性"</strong>带来认知负荷的飞跃 — perception + production 并行而非串行 — 这是 shadowing 独有的训练效应。</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q2</span><span class="qtext">半米学员是 K12 + 入门成人，他们真的能做 shadowing 吗？认知负荷太高吧？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p>对 — <strong>classic shadowing 确实对 A1-A2 学员认知负荷太高</strong>。但 Hamada-Suzuki 2024 整理的 16 变种<sup class="cite">[5]</sup>正是为解决这个问题：</p>
+          <ul>
+            <li><strong>A1-A2 学员先做 mumbling + parallel + prosody</strong>（低同步要求，可看字幕，可含糊）</li>
+            <li><strong>B1 才进 classic + selective</strong></li>
+            <li><strong>B2+ 才进 content + 移除字幕</strong></li>
+          </ul>
+          <p>Hamada 2016 实证<sup class="cite">[3]</sup>：低水平学员甚至比中水平受益更大（前提是用对变种）。半米按 CEFR 推变种就行（详见第 3.3 节）。</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q3</span><span class="qtext">Web Speech API 中式英语识别那么差，V0.1 真的能用吗？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p>能用，但要管理预期 — V0.1 是<strong>验证 UX + 流程</strong>，不是验证评分准确率。</p>
+          <p>策略：</p>
+          <ul>
+            <li>V0.1 给学员讲清楚"AI 还在学，分数仅供参考"</li>
+            <li>设宽松阈值：分 ≥ 70 都算"良好"，不死扣分</li>
+            <li>多给 mumbling / prosody 类反馈，少给 accuracy 死磕反馈</li>
+            <li>V0.2 上 Whisper 后准确率显著改善（Whisper 比 Web Speech 在非母语口音上更好）</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q4</span><span class="qtext">为什么不一上来就用 Azure Pronunciation Assessment？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p>3 个原因：</p>
+          <ol>
+            <li><strong>成本</strong>：real-time + prosody 维度按 $1/h+ 算，<strong>没规模时单学员成本占比高</strong></li>
+            <li><strong>过度工程</strong>：先验证学员愿不愿意按录音按钮、能不能跟上变种、是不是真在学；这些 UX 问题与 ASR 准不准无关</li>
+            <li><strong>锁定风险</strong>：一上来绑死 Azure，后期想换成 Speechace / 讯飞 / 国产时已写死的代码改不动</li>
+          </ol>
+          <p>V0.1-V0.2 用<strong>抽象的 PronunciationProvider 接口</strong>包好（accuracy / fluency / phoneme / prosody 四个方法），V0.3 接 Azure 时只换一个 provider 实现就行。</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q5</span><span class="qtext">10-15 分钟/天 × 6 周才见效，这怎么留住用户？多邻国那种 streak 我们不做了。</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p>4 个不依赖 streak 的留存机制：</p>
+          <ul>
+            <li><strong>30 天进步图</strong>：不是 streak，是<strong>真实进步可视化</strong>（accuracy 趋势、词汇 mastery 数）。学员看到自己变好 = 内驱</li>
+            <li><strong>词汇闭环奖励</strong>：跟读到 10-17 次 mastery 时 trigger "🎉 你掌握了 invent" 的庆祝</li>
+            <li><strong>Selective Shadowing 的"今日 10 词"</strong>：有明确小目标，做完就有完成感</li>
+            <li><strong>Pitch Contour 朋友圈</strong>：V1.0 起，学员可截图自己的曲线 + 进步 → 自传播 + 自我激励</li>
+          </ul>
+          <p>父报告第 13 章详细讨论了 streak 的双刃问题<sup class="cite">[69]</sup>。</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q6</span><span class="qtext">Mumbling shadowing 学员含糊跟读，怎么判定"算完成了"？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p>3 个间接信号：</p>
+          <ol>
+            <li><strong>录音时长 ≈ 原句时长</strong>（80%-120% 区间） → 说明学员真在跟读不是空跟</li>
+            <li><strong>录音中段平均振幅 > 阈值</strong>（不全是静音）</li>
+            <li><strong>"含糊检测" — ASR 转写后置信度低（&lt; 0.5）但有声音</strong> → 这正是 mumbling 的特征</li>
+          </ol>
+          <p>满足这 3 个 = 算完成。<strong>不判定 accuracy</strong>（mumbling 的目的不是字字对）。</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q7</span><span class="qtext">移动端怎么办？iOS Safari MediaRecorder 兼容性怎么处理？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p>iOS Safari 14.5+ 支持 MediaRecorder，但格式是 mp4/AAC 不是 webm/Opus<sup class="cite">[26]</sup>。</p>
+          <p>标准做法：</p>
+          <pre>const mimeType = 
+  MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+    ? 'audio/webm;codecs=opus'
+  : MediaRecorder.isTypeSupported('audio/mp4')
+    ? 'audio/mp4'
+  : 'audio/wav';
+
+const recorder = new MediaRecorder(stream, { mimeType });</pre>
+          <p>服务端 ffmpeg re-mux 成 16kHz WAV 后给 ASR：</p>
+          <pre>ffmpeg -i input.mp4 -ar 16000 -ac 1 -c:a pcm_s16le output.wav</pre>
+          <p><strong>Web Speech API 在 iOS 上不支持</strong> — iOS 必须走 Whisper 后端（V0.2 起）。</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q8</span><span class="qtext">学员如果用普通话发音读英语怎么办？比如 "She" 读成 "西"？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p>这是<strong>中国 ESL 的典型问题</strong>，Web Speech 和 Whisper 都会出现：</p>
+          <ul>
+            <li>Whisper 可能识别成中文（或夹杂中英）</li>
+            <li>Web Speech 设 lang='en-US' 后会强制按英语转写，但准确率掉</li>
+          </ul>
+          <p>3 种应对：</p>
+          <ol>
+            <li><strong>V0.2 Whisper 加 prompt</strong>：<code>--initial-prompt "She invented a new machine"</code> 提示模型这是英语句子 → 显著提升准确率</li>
+            <li><strong>V0.3 Azure</strong>：用 referenceText 锁定 — Azure 知道原句，对偏离会精确判定为发音错误而不是转写错</li>
+            <li><strong>V0.3 讯飞 ISE</strong>：专为中式英语调优<sup class="cite">[57]</sup>，识别 "西-儿" 这种情况就能给到 phoneme 红黄绿反馈</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q9</span><span class="qtext">Selective Shadowing 要做"目标词出现时高亮 + 自动暂停"，技术上怎么实现？需要 word-level timestamp？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p>对 — 需要<strong>视频例句的字幕带 word-level timestamp</strong>。</p>
+          <p>3 种获取方式：</p>
+          <ol>
+            <li><strong>WhisperX 一次性预处理</strong>：所有视频例句库视频用 WhisperX (wav2vec2 forced alignment)<sup class="cite">[53]</sup>跑一遍，存到数据库 — 一次 1-2 美分/视频</li>
+            <li><strong>已有 SRT 字幕</strong>：YouTube / 字幕组的 SRT 一般有 句级 timestamp，<strong>词级需要再细化</strong></li>
+            <li><strong>人工标注</strong>：6 例句的核心句子人工对齐（成本高但最准）</li>
+          </ol>
+          <p>半米建议：现有视频例句库<strong>全量跑一遍 WhisperX</strong>，存 word-level JSON，是<strong>一次性投资 + 长期复利</strong>。</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q10</span><span class="qtext">Pitch contour V1.0 真的有学员看吗？会不会太极客？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p>合理担忧。3 个设计原则避免太极客：</p>
+          <ol>
+            <li><strong>默认不展开</strong>：只有 prosody 分 &lt; 80 时才弹出（说明有问题才看）</li>
+            <li><strong>用通俗语言解释</strong>：不说"F0 contour"说"声音上下波动 / 重音命中"</li>
+            <li><strong>红点标重音命中位置</strong>：学员看到"我重音对了"就有获得感</li>
+          </ol>
+          <p>同时<strong>这是营销资产</strong>：朋友圈晒"看，我重音对了！"的截图，自带传播。Onsei Anki 用户社区里 pitch contour 截图是热门内容<sup class="cite">[40]</sup>。</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q11</span><span class="qtext">流利说 309 亿句中式英语数据现在是无主的，半米能挖角吗？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p>不容易，但值得探索：</p>
+          <ul>
+            <li>2024 年 LAIX 以 $680 万估值私有化退市<sup class="cite">[41]</sup> — 资产归 Cayman 公司 Prilingo</li>
+            <li>309 亿句数据是<strong>用户语音 + 元数据</strong>，理论上有商业价值但有隐私法律问题</li>
+            <li>核心技术团队（Shanghai / Hangzhou / 硅谷 ex-Facebook/IDSIA/Google）<sup class="cite">[24]</sup>已分散</li>
+          </ul>
+          <p>更现实的路径：</p>
+          <ol>
+            <li>挖流利说技术骨干（领英搜 ex-Liulishuo + Speech / ASR）</li>
+            <li>用半米学员数据从 0 训练 — 1 年内积累 1 亿句中式英语数据是可行的</li>
+            <li>外接讯飞 ISE — 它是中国教育行业的中式英语 ASR 事实标准<sup class="cite">[57]</sup></li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q12</span><span class="qtext">如果只能选 3 个 V0.2 功能，按 ROI 哪 3 个先做？</span><span class="toggle">+</span></div>
+        <div class="faq-a">
+          <p>按 ROI 排序：</p>
+          <ol>
+            <li><strong>Selective Shadowing 焊词汇库</strong>（独家差异化 + 立刻吸引用户 + 学术背书 Hamada 2024）</li>
+            <li><strong>whisper.cpp 后端 + word-level confidence</strong>（评分立刻变准，从此学员信任分数）</li>
+            <li><strong>30 天进步图</strong>（替代 streak 的留存机制，配合 Selective Shadowing 的小目标体感）</li>
+          </ol>
+          <p><strong>暂缓</strong>（V0.3+ 再做）：</p>
+          <ul>
+            <li>Azure / Speechace 接入 — 验证完产品后再上专业评分</li>
+            <li>Pitch contour — 视觉震撼但 V0.2 阶段没必要</li>
+            <li>Mirror shadowing — 永远不做</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch14 References ============ -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">References · 50+ 引用</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>所有具体数字 / 学术理论 / App 数据 / ASR 技术的 inline <code>[N]</code> 引用源。访问日期：2026-05-26。</p>
+
+      <ol class="ref-list">
+        <li>Tamai, K. (1992), "Follow-up no chokairyoku kojo ni oyobosu koka oyobi 'follow-up' noryoku to chokairyoku no kankei" [The effect of follow-up on listening comprehension], <em>STEP Bulletin</em>, 4, 48-62; Tamai (1997) <em>Current English Studies</em>, 36; Tamai (2002) <em>Interpretation Studies</em>, 2; Tamai (2005), Kazama Tokyo; learner-perspective summary at <a href="https://link.springer.com/article/10.1186/s40862-017-0039-6" target="_blank">Springer APJSFLE 2017</a> <span class="ref-meta">引用 ×8</span></li>
+        <li>Whitworth, B. N. (2025), "A Systematic Review of Research on the use of Shadowing for Second Language Pronunciation Teaching", <em>Language Teaching</em>; <a href="https://www.tandfonline.com/doi/full/10.1080/29984475.2025.2546827" target="_blank">tandfonline 2025</a> + Oxford version <a href="https://ora.ox.ac.uk/objects/uuid:3104cae1-3a6b-400a-b173-de44384238d2" target="_blank">ora.ox.ac.uk</a> <span class="ref-meta">引用 ×5</span></li>
+        <li>Hamada, Y. (2016), "Shadowing: Who benefits and how? Uncovering a booming EFL teaching technique for listening comprehension", <em>Language Teaching Research</em>; <a href="https://journals.sagepub.com/doi/abs/10.1177/1362168815597504" target="_blank">SAGE LTR 2016</a> <span class="ref-meta">引用 ×4</span></li>
+        <li>Conti, G. (2025), "Shadowing for Fluency, Prosody, and Listening Comprehension — According to SLA Research", <a href="https://gianfrancoconti.com/2025/07/26/shadowing-for-fluency-prosody-and-listening-comprehension-the-what-why-and-how-according-to-sla-research/" target="_blank">The Language Gym</a></li>
+        <li>Hamada, Y. & Suzuki, Y. (2022/2024), "Situating Shadowing in the Framework of Deliberate Practice: A Guide to Using 16 Techniques", <em>RELC Journal</em>; <a href="https://journals.sagepub.com/doi/10.1177/00336882221087508" target="_blank">SAGE 2022/2024</a> <span class="ref-meta">引用 ×3</span></li>
+        <li>Hamada, Y. (2019), "Shadowing: What is It? How to Use It. Where Will It Go?", <em>RELC Journal</em>; <a href="https://journals.sagepub.com/doi/full/10.1177/0033688218771380" target="_blank">SAGE 2019</a></li>
+        <li>Hamada, Y. (2024), "Developing a new shadowing procedure for listening vocabulary: selective shadowing", <em>Innovation in Language Learning and Teaching</em>, 19(2); <a href="https://www.tandfonline.com/doi/full/10.1080/17501229.2024.2340567" target="_blank">tandfonline 2024</a> <span class="ref-meta">引用 ×3</span></li>
+        <li>Kadota, S. (2019), <em>Shadowing as a Practice in Second Language Acquisition: Connecting Inputs and Outputs</em>, Routledge; <a href="https://www.routledge.com/Shadowing-as-a-Practice-in-Second-Language-Acquisition-Connecting-Inputs-and-Outputs/Kadota/p/book/9781032092836" target="_blank">Routledge book</a> + Kadota J-STAGE <a href="https://www.jstage.jst.go.jp/article/secondlanguage/24/0/24_26/_pdf/-char/en" target="_blank">Second Language Vol.24</a></li>
+        <li>Hamada, Y., academic researcher profile, Akita University; <a href="https://akitauinfo.akita-u.ac.jp/html/300000214_ronbn_gencho_en.html" target="_blank">researchmap</a></li>
+        <li>Hamada, Y. (2018), "Shadowing for Pronunciation Development: Haptic-Shadowing and IPA-Shadowing"; <a href="https://www.researchgate.net/publication/324398483" target="_blank">ResearchGate 2018</a></li>
+        <li>Shiki, O. et al. (2010), shadowing vs read-aloud reproduction rates; referenced in shadowing review at <a href="https://allinnovationjournal.com/assets/archives/2025/vol7issue3/7018.pdf" target="_blank">All Innovation Journal 2025 review</a></li>
+        <li>Kuramoto, A. et al. (2007), "Seeking for effective instructions for reading: the impact of shadowing, text-presented shadowing, and reading-aloud tasks", <em>LET Kansai Chapter</em>; cited in <a href="https://www.researchgate.net/publication/394249624" target="_blank">Shadowing for Developing EFL Learners' Bottom-up Listening Skills</a></li>
+        <li>Mori, K. (2011), "Shadowing with Oral Reading: Effects of Combined Training on the Improvement of Japanese EFL Learners' Prosody"; <a href="https://www.jstage.jst.go.jp/article/let/48/0/48_KJ00007329771/_article" target="_blank">J-STAGE LET 48</a></li>
+        <li>Microsoft, Azure Speech Pronunciation Assessment docs; <a href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-pronunciation-assessment" target="_blank">learn.microsoft.com</a> + pricing <a href="https://azure.microsoft.com/en-us/pricing/details/cognitive-services/speech-services/" target="_blank">Azure pricing</a> + Q&A <a href="https://learn.microsoft.com/en-us/answers/questions/5608069/" target="_blank">$0.36/h fast transcription</a> <span class="ref-meta">引用 ×3</span></li>
+        <li>Speechace API Documentation and pricing; <a href="https://www.speechace.com/api-plans/" target="_blank">speechace.com/api-plans</a> + 0.9 Pearson + IELTS validation</li>
+        <li>MDN Web Docs, Web Speech API SpeechRecognition; <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API" target="_blank">developer.mozilla.org</a> + Chrome support + interim biasing notes</li>
+        <li>whisper.cpp Apple Silicon benchmarks; <a href="https://www.voicci.com/blog/apple-silicon-whisper-performance.html" target="_blank">voicci.com</a> + 10× real-time M2 Pro turbo</li>
+        <li>VirtualSpeech, "Average Speaking Rate and Words per Minute"; <a href="https://virtualspeech.com/blog/average-speaking-rate-words-per-minute" target="_blank">virtualspeech.com</a></li>
+        <li>LoopAB / InfiniteLooper, YouTube playback speed for shadowing; <a href="https://loopab.com/slow-down-youtube/" target="_blank">loopab.com</a> + Listening.com on playback effects <a href="https://www.listening.com/blog/how-playback-speed-affects-learning-and-retention" target="_blank">listening.com</a></li>
+        <li>英语趣配音 2025 user stats; <a href="https://m.tech.china.com/hea/hea/xinwen/2025/0816/082025_1715588.html" target="_blank">中华网 2025</a> + 1.78 亿注册用户 / 10.6 亿配音作品 / 60 万视频资源</li>
+        <li>Speak.com Series C announcement; <a href="https://www.speak.com/blog/series-c" target="_blank">speak.com/blog/series-c</a> + Crunchbase <a href="https://news.crunchbase.com/ai/language-learning-startup-unicorn-speak/" target="_blank">news.crunchbase.com</a> + Y Combinator post <a href="https://x.com/ycombinator/status/1988738481636675978" target="_blank">15M downloads, 500+ enterprise, $100M ARR</a> <span class="ref-meta">引用 ×3</span></li>
+        <li>Munro, M. & Derwing, T. (1995), "Foreign Accent, Comprehensibility, and Intelligibility in the Speech of Second Language Learners", <em>Language Learning</em>; <a href="https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1467-1770.1995.tb00963.x" target="_blank">Wiley 1995</a> + 25-year review <a href="https://www.researchgate.net/publication/346953234" target="_blank">ResearchGate 2020</a></li>
+        <li>Wagh, A. et al. (2024), "Evaluating OpenAI's Whisper ASR: Performance analysis across diverse accents and speaker traits", <em>JASA Express Letters</em>; <a href="https://pubs.aip.org/asa/jel/article/4/2/025206/3267247" target="_blank">JASA EL 2024</a> + NovaScribe WER data <a href="https://novascribe.ai/how-accurate-is-whisper" target="_blank">novascribe.ai</a></li>
+        <li>流利说 (Liulishuo) Technology + Chinese English Speech Database; <a href="https://m.liulishuo.com/tech.html" target="_blank">liulishuo.com/tech</a> + product description 应用宝 <a href="https://m.app.mi.com/details?id=com.liulishuo.engzo" target="_blank">小米应用商店</a> <span class="ref-meta">引用 ×4</span></li>
+        <li>百词斩功能介绍 + 测评; <a href="https://www.baicizhan.com/" target="_blank">baicizhan.com</a> + 人人都是产品经理深度评测 <a href="https://www.woshipm.com/evaluating/3923886.html" target="_blank">百词斩效果</a> + 百度经验功能详解</li>
+        <li>MDN, MediaRecorder API; <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder" target="_blank">developer.mozilla.org/MediaRecorder</a> + iPhone Safari guide <a href="https://www.buildwithmatija.com/blog/iphone-safari-mediarecorder-audio-recording-transcription" target="_blank">buildwithmatija.com</a> + caniuse</li>
+        <li>Wikipedia, Levenshtein distance; <a href="https://en.wikipedia.org/wiki/Levenshtein_distance" target="_blank">en.wikipedia.org</a></li>
+        <li>Foote, J. & McDonough, K. (2017), "Using shadowing with mobile technology to improve L2 pronunciation", <em>Journal of Second Language Pronunciation</em>, 3(1), 34-56; <a href="https://www.jbe-platform.com/content/journals/10.1075/jslp.3.1.02foo" target="_blank">John Benjamins</a></li>
+        <li>Wang, Q. et al. (2025), "Effects of the Shadowing Technique on English Listening Comprehension for Chinese EFL Senior High School Students", <em>LEARN Journal</em>; <a href="https://files.eric.ed.gov/fulltext/EJ1479870.pdf" target="_blank">ERIC EJ1479870</a></li>
+        <li>Korean middle school shadowing study; <a href="https://www.researchgate.net/publication/280761077" target="_blank">ResearchGate</a></li>
+        <li>Saito, Y., Nagasawa, Y., Ishigawa, S. (2004), shadowing 4 步骤分类（mumbling/synchronized reading/prosody shadowing/content shadowing）; cited at <a href="https://www.eltschool.jp/en/column/shadowing-effective-method" target="_blank">ELT school 2024 review</a></li>
+        <li>Migaku, "Shadowing for Language Learners: The 2026 Practical Guide"; <a href="https://migaku.com/blog/language-fun/shadowing-how-to-actually-use-it-2026-guide" target="_blank">migaku.com</a> + "A Practitioner's Guide 2026" <a href="https://migaku.com/blog/language-fun/shadowing-a-practitioners-guide-to-the-technique-in-2026" target="_blank">migaku.com practitioners</a></li>
+        <li>Pellicer-Sánchez, A. & Schmitt, N. (2010), "Incidental vocabulary acquisition from an authentic novel: Do Things Fall Apart?", <em>Reading in a Foreign Language</em>; <a href="https://nflrc.hawaii.edu/rfl/item/207" target="_blank">nflrc.hawaii.edu</a></li>
+        <li>BoldVoice, American Accent Training App; <a href="https://boldvoice.com/" target="_blank">boldvoice.com</a> + reviews <a href="https://www.educationalappstore.com/app/boldvoice-learn-pronunciation" target="_blank">Educational App Store</a> + 2M users + $150/year + 7-day trial</li>
+        <li>Migaku app review (Root-Nation); <a href="https://root-nation.com/en/soft-en/apps-en/en-migaku-app-review/" target="_blank">root-nation.com</a> + Tofugu review <a href="https://www.tofugu.com/japanese-learning-resources-database/migaku/" target="_blank">tofugu.com</a></li>
+        <li>Migaku 2026 Shadowing Practitioners Guide; <a href="https://migaku.com/blog/language-fun/shadowing-a-practitioners-guide-to-the-technique-in-2026" target="_blank">migaku.com</a></li>
+        <li>Migaku Pricing; <a href="https://migaku.com/pricing" target="_blank">migaku.com/pricing</a> ($19.99/mo, $199/yr, $200 lifetime sale)</li>
+        <li>shadowing.app pricing and features; <a href="https://shadowing.app/en/pricing" target="_blank">shadowing.app/en</a> + spokira comparison <a href="https://spokira.com/compare/shadowing-app" target="_blank">spokira.com</a></li>
+        <li>Speak Pro: Shadowing Lessons; <a href="https://speakpro.app/" target="_blank">speakpro.app</a> + App Store <a href="https://apps.apple.com/us/app/english-shadowing-speak-pro/id6746413897" target="_blank">apps.apple.com</a></li>
+        <li>itsupera/onsei-anki - Anki addon for shadowing pitch comparison; <a href="https://github.com/itsupera/onsei-anki" target="_blank">github.com/itsupera/onsei-anki</a></li>
+        <li>流利说 LAIX privatization 2024; <a href="https://m.zhitongcaijing.com/contentnew/appcontentdetail.html?content_id=740819" target="_blank">智通财经</a> + 36氪 <a href="https://36kr.com/p/672390855022598" target="_blank">流利说付费用户萎缩</a></li>
+        <li>流利说市值缩水 90% 退市危机; <a href="https://www.qbitai.com/2021/08/27281.html" target="_blank">量子位 2021</a></li>
+        <li>百词斩 vs 墨墨背单词竞品对比 + 知乎社区批评; <a href="https://www.woshipm.com/evaluating/4375543.html" target="_blank">人人都是产品经理</a> + 知乎 <a href="https://www.zhihu.com/question/353576216" target="_blank">为什么大家普遍贬低百词斩</a></li>
+        <li>扇贝口语功能介绍; <a href="https://apps.apple.com/us/app/%E6%89%87%E8%B4%9D%E5%8F%A3%E8%AF%AD-%E5%AD%A6%E4%B9%A0%E5%9C%B0%E9%81%93%E8%8B%B1%E8%AF%AD%E5%8F%91%E9%9F%B3/id1089026929" target="_blank">App Store</a> + 应用宝评论 <a href="https://sj.qq.com/appdetail/com.shanbay.speak/review" target="_blank">扇贝口语评分</a> + 7000万 用户数</li>
+        <li>HelloTalk Features and pricing; <a href="https://www.hellotalk.com/en/features" target="_blank">hellotalk.com/en/features</a> + review <a href="https://www.frenchclassnearme.com/hellotalk-language-exchange-app/" target="_blank">frenchclassnearme.com</a></li>
+        <li>ELSA Speak funding and revenue; <a href="https://tracxn.com/d/companies/elsa-speak/__oUqt06y8Fr5r2uVOAaIrTCxiqTQTMJGQoEAHCu57JWE" target="_blank">Tracxn</a> + Training Industry funding <a href="https://trainingindustry.com/press-release/content-development/elsa-raises-15-million-for-global-expansion-of-its-ai-english-pronunciation-assistant/" target="_blank">$15M Series B</a> + Growjo $49.6M revenue</li>
+        <li>TalkPal AI; <a href="https://apps.apple.com/us/app/talkpal-ai-language-learning/id6468219825" target="_blank">App Store</a> + reviews <a href="https://testprepinsight.com/reviews/talkpal-review/" target="_blank">TestPrepInsight</a> + Unite.AI <a href="https://www.unite.ai/talkpal-review/" target="_blank">TalkPal Review</a></li>
+        <li>Parroto - Shadowing & Dictation app; <a href="https://parroto.app/" target="_blank">parroto.app</a> + App Store <a href="https://apps.apple.com/us/app/parroto-shadowing-dictation/id6752111996" target="_blank">App Store iOS</a></li>
+        <li>Duolingo Listen-Then-Speak + Video Call + pronunciation scoring model 2025; <a href="https://blog.englishtest.duolingo.com/new-research-in-language-learning-a-pronunciation-scoring-model-built-around-intelligibility-not-imitation/" target="_blank">englishtest.duolingo.com</a> + Duoplanet video call <a href="https://duoplanet.com/duolingo-video-call/" target="_blank">duoplanet.com</a></li>
+        <li>italki 10M+ users, 30K+ tutors, 150+ languages; <a href="https://www.italki.com/en/blog/italki-vs-cambly" target="_blank">italki.com vs Cambly</a></li>
+        <li>Cambly Kids; <a href="https://www.cambly.com/kids" target="_blank">cambly.com/kids</a> + tutor review <a href="https://betweenenglandandiowa.com/teaching-cambly-kids/" target="_blank">Between England & Everywhere</a> + AmazingTalker pricing <a href="https://en.amazingtalker.com/blog/en/other/90286/" target="_blank">AmazingTalker</a></li>
+        <li>Speechling - Human coach feedback; <a href="https://speechling.com/" target="_blank">speechling.com</a> + pricing <a href="https://speechling.com/pricing" target="_blank">speechling.com/pricing</a> + reviews <a href="https://www.smartlanguagelearner.com/speechling-review/" target="_blank">smartlanguagelearner.com</a></li>
+        <li>m-bain/whisperX - Word-level timestamps via wav2vec2 forced alignment; <a href="https://github.com/m-bain/whisperX" target="_blank">github.com/m-bain/whisperX</a> + GoTranscript guide <a href="https://gotranscript.com/public/whisperx-fast-whisper-transcription-with-word-timestamps" target="_blank">gotranscript.com</a></li>
+        <li>OpenAI Whisper API pricing; <a href="https://developers.openai.com/api/docs/pricing" target="_blank">OpenAI developers pricing</a> + 2026 update at <a href="https://diyai.io/ai-tools/speech-to-text/openai-whisper-api-pricing-2026/" target="_blank">DIYAI.io</a> ($0.006/min Whisper, $0.003 gpt-4o-mini-transcribe)</li>
+        <li>Google Speech-to-Text pricing + WER benchmarks; <a href="https://brasstranscripts.com/blog/google-cloud-speech-to-text-pricing-2025-gcp-integration-costs" target="_blank">BrassTranscripts 2025</a> + Deepgram benchmarks <a href="https://deepgram.com/learn/speech-to-text-benchmarks" target="_blank">Deepgram</a></li>
+        <li>AWS Transcribe pricing; <a href="https://aws.amazon.com/transcribe/pricing/" target="_blank">aws.amazon.com</a> + BrassTranscripts cost guide <a href="https://brasstranscripts.com/blog/aws-transcribe-pricing-per-minute-2025-better-alternative" target="_blank">brasstranscripts.com 2026</a></li>
+        <li>讯飞 ISE (Suntone) intelligent speech evaluation; <a href="https://www.xfyun.cn/services/suntone_ise" target="_blank">xfyun.cn</a> + 国产 API 价格对比 <a href="https://zhuanlan.zhihu.com/p/1898151223481336179" target="_blank">知乎 ASR 平台 PK</a></li>
+        <li>阿里 SenseVoice / Paraformer 开源; <a href="https://help.aliyun.com/zh/model-studio/sensevoice-speech-recognition/" target="_blank">阿里云百炼</a> + 实测对比 <a href="https://blog.csdn.net/u010522887/article/details/140624599" target="_blank">CSDN SenseVoice 实测优于 Whisper</a></li>
+        <li>Spheron whisper.cpp deployment guide + Docker; <a href="https://www.spheron.network/blog/whisper-v4-asr-gpu-cloud-production-guide/" target="_blank">spheron.network 2026</a></li>
+        <li>WaveSurfer.js audio waveform library; <a href="https://wavesurfer.xyz/" target="_blank">wavesurfer.xyz</a> + GitHub <a href="https://github.com/katspaugh/wavesurfer.js/" target="_blank">katspaugh/wavesurfer.js</a></li>
+        <li>Rudder Analytics, "A Deep Dive into Phoneme-Level Pronunciation Assessment" (GOP explained); <a href="https://rudderanalytics.com/2025/11/04/a-deep-dive-into-phoneme-level-pronunciation-assessment/" target="_blank">rudderanalytics.com 2025</a></li>
+        <li>PMC, "How Does Alignment Error Affect Automated Pronunciation Scoring in Children's Speech?"; <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11977302/" target="_blank">PMC11977302</a></li>
+        <li>Segmentation-free GOP scoring 2025; <a href="https://arxiv.org/html/2507.16838v1" target="_blank">arxiv 2507.16838</a> + Logit-based GOP <a href="https://arxiv.org/html/2506.12067v2" target="_blank">arxiv 2506.12067</a></li>
+        <li>YannickJadoul/Parselmouth - Python interface to Praat; <a href="https://github.com/YannickJadoul/Parselmouth" target="_blank">github.com</a> + ScienceDirect intro paper <a href="https://www.sciencedirect.com/science/article/abs/pii/S0095447017301389" target="_blank">ScienceDirect 2018</a></li>
+        <li>Watanabe, S. et al. (2025), "A Perception-Based L2 Speech Intelligibility Indicator: Leveraging a Rater's Shadowing and Sequence-to-sequence Voice Conversion"; <a href="https://arxiv.org/pdf/2505.24304" target="_blank">arxiv 2505.24304</a></li>
+        <li>Study Intonation mobile app + AiRepeater; <a href="https://tesl-ej.org/wordpress/issues/volume25/ej99x/ej99m3/" target="_blank">TESL-EJ 25</a> + <a href="https://www.airepeater.com/" target="_blank">airepeater.com</a></li>
+        <li>Krashen, S. (1985), <em>The Input Hypothesis: Issues and Implications</em>; theory overview <a href="https://www.sk.com.br/sk-krash-english.html" target="_blank">sk.com.br</a> + 2025 neuro-ecological critique <a href="https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2025.1636777/full" target="_blank">Frontiers 2025</a></li>
+        <li>Swain, M. (1985), "Communicative competence: Some roles of comprehensible input and comprehensible output in its development"; Wikipedia <a href="https://en.wikipedia.org/wiki/Comprehensible_output" target="_blank">Comprehensible output</a></li>
+        <li>Streak gamification critique; The Economy of Meaning <a href="https://theeconomyofmeaning.com/2025/08/25/a-critical-look-at-how-to-make-learning-as-addictive-as-social-media-a-ted-talk-about-duolingo/" target="_blank">theeconomyofmeaning.com 2025</a> + Screen Wise <a href="https://screenwiseapp.com/guides/duolingo-streaks-and-anxiety-in-kids" target="_blank">screenwiseapp.com</a></li>
+      </ol>
+
+      <p style="margin-top: 18px; font-size: 13px; color: var(--text-mute);">注：本报告 70+ 条 inline 引用对应上表 ~70 条 references（部分合并）；所有 URL 在 2026-05-26 访问可达；本报告是父报告《英语学习方法研究》的 Ch4 跟读章节的<strong>深度子报告</strong>，建议两份配合阅读。</p>
+
+    </div>
+  </section>
+
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+<footer>
+  <p><strong>Shadowing 跟读深度研究 · 子报告</strong> · L2 Deep Research · 无忌 · 2026-05-26</p>
+  <p>Tamai 1992-2024 学术 30 年脉络 · 7 种变种 · 全球 App 扒底 · ASR 技术栈 · 半米 V0.1→V1.0 4 阶段路径</p>
+  <p>14 章 · 12 FAQ · 70+ 引用 · 70 次 WebSearch · 父报告：<a href="./english-learning-methods-research.html" style="color: var(--accent-text);">英语学习方法研究 Ch4</a></p>
+</footer>
+
+<script>
+  // ============ 主题 ============
+  (function() {
+    const KEY = 'banmi-shadowing-deepdive-theme';
+    const saved = localStorage.getItem(KEY);
+    if (saved) document.body.setAttribute('data-theme', saved);
+    const btn = document.getElementById('themeToggle');
+    function syncIcon() {
+      btn.textContent = document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    }
+    syncIcon();
+    btn.addEventListener('click', () => {
+      const cur = document.body.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem(KEY, next);
+      syncIcon();
+    });
+  })();
+
+  // ============ 章节折叠 ============
+  document.querySelectorAll('section.chapter > h2').forEach(h2 => {
+    h2.addEventListener('click', () => {
+      h2.parentElement.classList.toggle('collapsed');
+    });
+  });
+
+  // ============ 进度条 + 回到顶部 ============
+  const progressEl = document.getElementById('progress');
+  const backTopEl = document.getElementById('backToTop');
+  function updateProgress() {
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrolled = window.scrollY;
+    const ratio = docHeight > 0 ? scrolled / docHeight : 0;
+    progressEl.style.width = (ratio * 100) + '%';
+    backTopEl.classList.toggle('show', scrolled > 400);
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+  backTopEl.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // ============ 锚点高亮 ============
+  const anchorLinks = document.querySelectorAll('#anchorList a');
+  const sections = Array.from(anchorLinks).map(a => document.getElementById(a.dataset.target)).filter(Boolean);
+  function highlightAnchor() {
+    const offset = 120;
+    let current = null;
+    for (const sec of sections) {
+      const rect = sec.getBoundingClientRect();
+      if (rect.top - offset <= 0) current = sec.id;
+    }
+    anchorLinks.forEach(a => a.classList.toggle('active', a.dataset.target === current));
+    if (current) {
+      const activeLink = document.querySelector('#anchorList a.active');
+      if (activeLink) {
+        const navWrap = document.querySelector('.anchor-list');
+        const linkRect = activeLink.getBoundingClientRect();
+        const navRect = navWrap.parentElement.getBoundingClientRect();
+        const desiredScroll = activeLink.offsetLeft - navRect.width / 2 + linkRect.width / 2;
+        navWrap.parentElement.scrollTo({ left: desiredScroll, behavior: 'smooth' });
+      }
+    }
+  }
+  window.addEventListener('scroll', highlightAnchor, { passive: true });
+  highlightAnchor();
+  anchorLinks.forEach(a => {
+    a.addEventListener('click', () => {
+      const target = document.getElementById(a.dataset.target);
+      if (target && target.classList.contains('collapsed')) {
+        target.classList.remove('collapsed');
+      }
+    });
+  });
+
+  // ============ 表格行高亮 ============
+  document.querySelectorAll('tbody tr').forEach(tr => {
+    tr.addEventListener('click', () => {
+      tr.parentElement.querySelectorAll('tr.row-highlight').forEach(o => {
+        if (o !== tr) o.classList.remove('row-highlight');
+      });
+      tr.classList.toggle('row-highlight');
+    });
+  });
+
+  // ============ FAQ ============
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      q.parentElement.classList.toggle('open');
+    });
+  });
+
+  // ============ Ch12 mini demo ============
+  (function() {
+    const state = { variant: 'selective', result: 'ok' };
+    const outEl = document.getElementById('demoOut');
+
+    const feedbacks = {
+      good: {
+        title: '🟢 优秀 (94/100)',
+        words: 'She <span class="word-good">invented</span> a new machine.',
+        lines: [
+          ['Accuracy', '96'],
+          ['Fluency', '92'],
+          ['Pronunciation', '94'],
+          ['Prosody', '95'],
+        ],
+        msg: '✅ 重音命中、节奏对、发音清晰 → +1 mastery（invent: 6/10）'
+      },
+      ok: {
+        title: '🟡 良好 (82/100)',
+        words: 'She <span class="word-good">invented</span> a <span class="word-warn">new</span> machine.',
+        lines: [
+          ['Accuracy', '88'],
+          ['Fluency', '85'],
+          ['Pronunciation', '78 ⚠️'],
+          ['Prosody', '82'],
+        ],
+        msg: '💡 "new" 的 /n/ 起音偏弱，再来一次试试'
+      },
+      bad: {
+        title: '🔴 需练 (54/100)',
+        words: 'She <span class="word-bad">invent</span> <span class="word-warn">a</span> <span class="word-bad">new</span> <span class="word-bad">machine</span>.',
+        lines: [
+          ['Accuracy', '52'],
+          ['Fluency', '58'],
+          ['Pronunciation', '48'],
+          ['Prosody', '60'],
+        ],
+        msg: '💡 建议先降到 Parallel 变种 + 0.75x 慢速练 3 次'
+      },
+      prosody: {
+        title: '🟡 韵律偏 (74/100)',
+        words: 'She <span class="word-good">invented</span> a <span class="word-good">new</span> <span class="word-warn">machine</span>.',
+        lines: [
+          ['Accuracy', '95'],
+          ['Fluency', '88'],
+          ['Pronunciation', '90'],
+          ['Prosody', '62 ⚠️'],
+        ],
+        msg: '🎵 词都对了，但 invent 的重音 pitch 没上扬，machine 句末没下降 → 弹出 pitch contour 对比图'
+      },
+    };
+
+    function render() {
+      const fb = feedbacks[state.result] || feedbacks.ok;
+      const variantLabel = { 
+        parallel: 'Parallel（看字幕跟读）', 
+        selective: 'Selective（目标词跟读）★', 
+        prosody: 'Prosody（只跟韵律）', 
+        classic: 'Classic（无字幕同步）' 
+      }[state.variant];
+
+      outEl.innerHTML = `
+        <div class="out-h">${fb.title}</div>
+        <div class="out-line"><span class="tag-out">变种</span>${variantLabel}</div>
+        <div class="out-line" style="font-size: 16px; padding: 8px 0;">${fb.words}</div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin: 10px 0;">
+          ${fb.lines.map(([k, v]) => `
+            <div class="out-line" style="background: var(--bg-soft); padding: 6px 10px; border-radius: 6px;">
+              <span style="color: var(--text-mute); font-size: 12px;">${k}</span>: <strong style="font-family: ui-monospace, monospace;">${v}</strong>
+            </div>
+          `).join('')}
+        </div>
+        <div class="out-line" style="margin-top: 10px; padding: 8px 10px; background: var(--accent-soft); border-radius: 6px; color: var(--accent-text);">${fb.msg}</div>
+        ${state.result === 'prosody' ? `
+          <svg class="pitch-svg" viewBox="0 0 600 80" preserveAspectRatio="none" style="margin-top: 10px;">
+            <path d="M 10 40 Q 100 20, 180 30 T 350 50 T 500 60 L 590 65" stroke="#15803d" stroke-width="2.5" fill="none"/>
+            <path d="M 10 45 Q 100 42, 180 45 T 350 48 T 500 50 L 590 55" stroke="#2563eb" stroke-width="2.5" fill="none" stroke-dasharray="4 2"/>
+            <text x="20" y="15" font-size="10" fill="#15803d">原音 (绿)</text>
+            <text x="100" y="15" font-size="10" fill="#2563eb">你的 (蓝)</text>
+            <text x="300" y="76" font-size="10" fill="#7c8493">She    in-ven-ted    a    new    ma-chine</text>
+          </svg>
+        ` : ''}
+      `;
+    }
+
+    document.querySelectorAll('.demo-chip[data-demo]').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const group = chip.dataset.demo;
+        document.querySelectorAll(`.demo-chip[data-demo="${group}"]`).forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        state[group] = chip.dataset.val;
+        render();
+      });
+    });
+    render();
+  })();
+</script>
+
+</body>
+</html>

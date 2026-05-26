@@ -1,0 +1,1519 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Moodle 全功能借鉴分析报告 - 半米 AI Learning System</title>
+  <style>
+    :root {
+      --bg: #f7f3ea;
+      --paper: #fffdf7;
+      --ink: #24201b;
+      --muted: #6f665d;
+      --line: #ded4c5;
+      --strong: #294c3a;
+      --accent: #b56435;
+      --accent-2: #315f73;
+      --soft: #efe6d6;
+      --soft-green: #e5eee4;
+      --soft-blue: #e3edf0;
+      --soft-red: #f2e2db;
+      --code: #2f2a24;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.68;
+      letter-spacing: 0;
+    }
+
+    a {
+      color: var(--accent-2);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 24px 72px;
+    }
+
+    header {
+      padding: 34px 0 24px;
+      border-bottom: 2px solid var(--line);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      color: var(--strong);
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    h1 {
+      max-width: 980px;
+      margin: 12px 0 14px;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      max-width: 920px;
+      color: var(--muted);
+      font-size: 18px;
+      margin: 0 0 22px;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .meta div,
+    .callout,
+    .summary-card,
+    .decision,
+    .source-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .meta div {
+      padding: 12px 14px;
+      min-height: 76px;
+    }
+
+    .meta span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .meta strong {
+      display: block;
+      font-size: 15px;
+    }
+
+    nav {
+      margin: 26px 0;
+      padding: 18px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    nav h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    nav ol {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px 26px;
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    section {
+      margin-top: 38px;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 30px;
+      line-height: 1.22;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 24px 0 10px;
+      font-size: 21px;
+      line-height: 1.32;
+    }
+
+    h4 {
+      margin: 20px 0 8px;
+      font-size: 16px;
+      color: var(--strong);
+    }
+
+    p {
+      margin: 0 0 12px;
+    }
+
+    .lead {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 980px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .summary-card,
+    .source-card {
+      padding: 18px;
+    }
+
+    .summary-card h3,
+    .source-card h3 {
+      margin-top: 0;
+    }
+
+    .summary-card strong {
+      color: var(--strong);
+    }
+
+    .callout {
+      padding: 18px 20px;
+      margin: 16px 0;
+      border-left: 5px solid var(--accent);
+    }
+
+    .callout.green {
+      background: var(--soft-green);
+      border-left-color: var(--strong);
+    }
+
+    .callout.blue {
+      background: var(--soft-blue);
+      border-left-color: var(--accent-2);
+    }
+
+    .callout.red {
+      background: var(--soft-red);
+      border-left-color: #9f4e35;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0 16px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      color: var(--code);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 24px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th,
+    td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #eadfce;
+      color: #302920;
+      font-weight: 800;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+
+    .tag.idea {
+      color: #244734;
+      background: #dce9dc;
+      border-color: #bfd2bf;
+    }
+
+    .tag.api {
+      color: #24495a;
+      background: #d9e8ed;
+      border-color: #b7ced7;
+    }
+
+    .tag.no {
+      color: #7a3325;
+      background: #f1ddd6;
+      border-color: #dab9ae;
+    }
+
+    .tag.later {
+      color: #65521b;
+      background: #f4e8c8;
+      border-color: #dfce9c;
+    }
+
+    .decision {
+      padding: 16px;
+      border-left: 5px solid var(--strong);
+      min-height: 100%;
+    }
+
+    .decision h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    ul,
+    ol {
+      margin-top: 8px;
+      padding-left: 22px;
+    }
+
+    li {
+      margin: 5px 0;
+    }
+
+    code {
+      color: var(--code);
+      background: #efe7dc;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: .92em;
+    }
+
+    pre {
+      margin: 14px 0;
+      padding: 16px;
+      overflow: auto;
+      background: #2f2a24;
+      color: #f6efe4;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .footnotes {
+      margin-top: 48px;
+      padding-top: 22px;
+      border-top: 2px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 860px) {
+      .page {
+        padding: 24px 16px 56px;
+      }
+
+      .meta,
+      .grid.two,
+      .grid.three,
+      nav ol {
+        grid-template-columns: 1fr;
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div class="eyebrow">Banmi Research · Moodle LMS · 2026-05-26</div>
+      <h1>Moodle 全功能借鉴分析报告</h1>
+      <p class="subtitle">目标：把 Moodle 作为成熟 LMS 参照系，判断半米 AI Learning System 哪些功能值得借鉴、借鉴到什么层级、能不能直接借代码，以及 V0.1 到 V0.3 的落地顺序。</p>
+      <div class="meta">
+        <div>
+          <span>研究对象</span>
+          <strong>Moodle LMS 5.2 stable</strong>
+        </div>
+        <div>
+          <span>源码基准</span>
+          <strong><code>MOODLE_502_STABLE</code> / <code>v5.2.0</code></strong>
+        </div>
+        <div>
+          <span>半米当前定位</span>
+          <strong>出国留学学生端到端陪跑系统</strong>
+        </div>
+        <div>
+          <span>核心结论</span>
+          <strong>借思想和接口，不 fork，不搬核心代码</strong>
+        </div>
+      </div>
+    </header>
+
+    <nav aria-label="目录">
+      <h2>目录</h2>
+      <ol>
+        <li><a href="#summary">结论摘要</a></li>
+        <li><a href="#context">半米当前边界</a></li>
+        <li><a href="#moodle-map">Moodle 功能全景</a></li>
+        <li><a href="#source-scan">源码结构核对</a></li>
+        <li><a href="#borrow-matrix">可借鉴矩阵</a></li>
+        <li><a href="#code-policy">能否直接借代码</a></li>
+        <li><a href="#banmi-design">半米设计建议</a></li>
+        <li><a href="#roadmap">落地路线图</a></li>
+        <li><a href="#avoid">不建议借鉴的部分</a></li>
+        <li><a href="#sources">资料来源</a></li>
+      </ol>
+    </nav>
+
+    <section id="summary">
+      <h2>1. 结论摘要</h2>
+      <p class="lead">Moodle 是课程中心、插件化、强管理型 LMS；半米是老师驱动的个性化学习陪跑系统。两者的相似点在“内容、任务、题库、进度、报告、权限、插件边界”，但产品重心完全不同。半米不应该把 Moodle 当产品底座 fork，而应该把它当成熟教育系统的设计词典。</p>
+
+      <div class="grid three">
+        <article class="summary-card">
+          <h3>最值得借的东西</h3>
+          <p><strong>活动/资源插件边界、题库和答题引擎分离、完成条件、限制访问、角色权限上下文、成绩册/报告聚合、事件日志、导入导出。</strong>这些是半米长期会遇到的系统复杂度，Moodle 已经验证过边界。</p>
+        </article>
+        <article class="summary-card">
+          <h3>不建议借的东西</h3>
+          <p><strong>不要 fork Moodle，也不要照搬 Moodle 的课程页、PHP 单体、全量管理员配置、论坛/wiki 社区重心。</strong>这些会把半米从“老师为学生设计路径”拉回传统 LMS。</p>
+        </article>
+        <article class="summary-card">
+          <h3>代码层结论</h3>
+          <p><strong>Moodle 核心是 GPLv3。</strong>半米若按商业 SaaS/闭源路线推进，默认不直接复制核心代码。安全做法是 clean-room 重建、协议集成、导入导出兼容、或写独立 Moodle 插件。</p>
+        </article>
+      </div>
+
+      <div class="callout green">
+        <strong>一句话建议：</strong>半米应做“类 Moodle 的教育对象边界 + 类 AI tutor 的个性化体验”，而不是做“AI 版 Moodle”。V0.1 应只吸收 Moodle 的最小工程骨架：内容项、学习活动、题型、完成条件、事件日志、报告证据链、角色权限。
+      </div>
+
+      <h3>优先级最高的 12 个借鉴点</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>优先级</th>
+            <th>Moodle 能力</th>
+            <th>半米应该借什么</th>
+            <th>借鉴方式</th>
+            <th>代码判断</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>P0</td>
+            <td>Activity / Resource 模块</td>
+            <td>把阅读 LE pattern、题目、视频、作业都视作可注册的学习活动类型</td>
+            <td><span class="tag idea">借思想</span></td>
+            <td><span class="tag no">不搬代码</span></td>
+          </tr>
+          <tr>
+            <td>P0</td>
+            <td>Question bank / Question engine</td>
+            <td>题目定义、题目版本、学生作答过程、评分事件分离</td>
+            <td><span class="tag idea">借思想</span></td>
+            <td><span class="tag no">不搬代码</span></td>
+          </tr>
+          <tr>
+            <td>P0</td>
+            <td>Activity completion</td>
+            <td>Today 任务完成条件、step 完成条件、报告生成触发条件</td>
+            <td><span class="tag idea">借思想</span></td>
+            <td><span class="tag no">不搬代码</span></td>
+          </tr>
+          <tr>
+            <td>P0</td>
+            <td>Availability / Restrict access</td>
+            <td>按日期、完成、成绩、分组、学生画像决定任务是否解锁</td>
+            <td><span class="tag idea">借思想</span></td>
+            <td><span class="tag no">不搬代码</span></td>
+          </tr>
+          <tr>
+            <td>P0</td>
+            <td>Events / Logging</td>
+            <td>把 `event_log` 作为事实源，报告、Mastery、推荐都可重算</td>
+            <td><span class="tag idea">借思想</span></td>
+            <td><span class="tag no">不搬代码</span></td>
+          </tr>
+          <tr>
+            <td>P0</td>
+            <td>Roles / Capabilities / Context</td>
+            <td>支撑 company / school / teacher / student / parent 五层权限</td>
+            <td><span class="tag idea">借思想</span></td>
+            <td><span class="tag no">不搬代码</span></td>
+          </tr>
+          <tr>
+            <td>P1</td>
+            <td>Gradebook / Report builder</td>
+            <td>把作业、测评、练习、阅读表现聚合成老师可决策的报告</td>
+            <td><span class="tag idea">借思想</span></td>
+            <td><span class="tag no">不搬代码</span></td>
+          </tr>
+          <tr>
+            <td>P1</td>
+            <td>Import / Export / Backup</td>
+            <td>内部 JSON、Moodle XML、QTI-like JSON、课程包迁移</td>
+            <td><span class="tag api">借格式/接口</span></td>
+            <td><span class="tag no">clean-room 实现</span></td>
+          </tr>
+          <tr>
+            <td>P1</td>
+            <td>LTI / Web services</td>
+            <td>未来和学校已有 LMS 互通，或让 Moodle 调起半米活动</td>
+            <td><span class="tag api">协议集成</span></td>
+            <td><span class="tag no">不嵌核心代码</span></td>
+          </tr>
+          <tr>
+            <td>P1</td>
+            <td>H5P / Content bank</td>
+            <td>互动内容不要全自研，支持外部互动资源引用和结果记录</td>
+            <td><span class="tag api">标准集成</span></td>
+            <td><span class="tag no">不复制实现</span></td>
+          </tr>
+          <tr>
+            <td>P2</td>
+            <td>Competencies / Learning plans</td>
+            <td>把 skill taxonomy、升学目标、英语能力路径连接起来</td>
+            <td><span class="tag later">后置借鉴</span></td>
+            <td><span class="tag no">不搬代码</span></td>
+          </tr>
+          <tr>
+            <td>P2</td>
+            <td>Badges / Completion awards</td>
+            <td>学生激励、阶段成就、家长可读里程碑</td>
+            <td><span class="tag later">后置借鉴</span></td>
+            <td><span class="tag no">不搬代码</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="context">
+      <h2>2. 半米当前边界</h2>
+      <p>本报告按 Obsidian 中 2026-05-23 后的半米定位判断，而不是按早期“纯英语学习系统”判断。</p>
+
+      <div class="grid two">
+        <div class="decision">
+          <h3>产品定位</h3>
+          <p>半米已升级为“给准备出国留学学生的端到端陪跑系统”：从大学目标倒推路径，并通过内容课程、考试系统、规划系统、老师监督和数据报告持续陪跑。</p>
+        </div>
+        <div class="decision">
+          <h3>V0.1 范围</h3>
+          <p>V0.1 收敛为阅读闭环 demo：老师录入任意阅读产品，AI 生成学习体验，老师审核发布，学生完成 Today 单任务，事件写入 `event_log`，生成 homework report，老师在 Dashboard 处理建议。</p>
+        </div>
+        <div class="decision">
+          <h3>五端架构</h3>
+          <p>公司端、学校端、老师端、学生端、家长端。MVP 只做老师端和学生端 UI，但数据模型必须预留五层权限和多租户边界。</p>
+        </div>
+        <div class="decision">
+          <h3>核心系统原则</h3>
+          <p>老师端是产品引擎，学生端是执行器。学生不主动选学习内容，Today 展示老师设计的当前任务。AI 在第一阶段主要做提醒、记录、分析、文案和草稿，不直接改计划。</p>
+        </div>
+      </div>
+
+      <h3>半米和 Moodle 的根本差异</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>维度</th>
+            <th>Moodle</th>
+            <th>半米</th>
+            <th>产品含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>中心对象</td>
+            <td>课程、活动、资源、用户、成绩</td>
+            <td>学生个人方案、Today 任务、学习事件、老师建议</td>
+            <td>半米不能把“课程页”当第一屏；第一屏应是当前学生路径和任务。</td>
+          </tr>
+          <tr>
+            <td>老师角色</td>
+            <td>课程建设者和班级管理者</td>
+            <td>路径设计者、内容审核者、数据决策者、人类导师</td>
+            <td>老师端应优先做 plan / content / dashboard，不是先做 LMS 管理后台。</td>
+          </tr>
+          <tr>
+            <td>学生体验</td>
+            <td>进入课程，选择活动，提交作业，参与讨论</td>
+            <td>执行老师分配的单任务，按 LE pattern 完成步骤，被 AI 轻提醒</td>
+            <td>Moodle 的丰富课程导航对半米 V0.1 是噪音。</td>
+          </tr>
+          <tr>
+            <td>AI 定位</td>
+            <td>AI subsystem 提供 provider / placement / action 插件</td>
+            <td>AI 是内容草稿、报告总结、建议生成和行为提醒层</td>
+            <td>可以借 Moodle AI 的 provider / placement 解耦思想，但不照搬交互。</td>
+          </tr>
+          <tr>
+            <td>事实源</td>
+            <td>日志、成绩册、活动完成、报告</td>
+            <td>`event_log` 是最可信事实源，派生报告可重算</td>
+            <td>半米可以借 Moodle 日志和 report builder 的成熟边界。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="moodle-map">
+      <h2>3. Moodle 功能全景</h2>
+      <p class="lead">Moodle 的功能不是一个单点应用，而是一整套学习平台能力：课程组织、学习活动、资源管理、测评、成绩、进度、角色权限、集成、报告、移动端、AI 插件和后台运维。</p>
+
+      <h3>3.1 课程与内容组织</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>功能</th>
+            <th>Moodle 做什么</th>
+            <th>半米可借鉴</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Course / Category</td>
+            <td>用课程和课程分类组织教学空间、参与者、活动、成绩和报告。</td>
+            <td>半米不应以 Course 作为学生第一视角，但可用 `course_template` / `learning_product` 承载老师入库内容。</td>
+          </tr>
+          <tr>
+            <td>Course format</td>
+            <td>不同课程格式决定课程页布局，例如 topics / weekly / single activity 等。</td>
+            <td>把 LE pattern 视作“学习体验格式”：短文、绘本、分级读物、小说章节各自有 step renderer。</td>
+          </tr>
+          <tr>
+            <td>Sections / Subsections</td>
+            <td>课程内容可分章节、主题、周次和子章节。</td>
+            <td>可映射到 `plan_week`、`plan_day`、`task_group`、`step_group`，但学生端只显示当前必要信息。</td>
+          </tr>
+          <tr>
+            <td>Resources</td>
+            <td>Book、File、Folder、IMS package、Page、Text and media area、URL。</td>
+            <td>半米需要素材对象：passage、book/chapter、video link、PDF、audio、image、external URL、license metadata。</td>
+          </tr>
+          <tr>
+            <td>Content bank / H5P</td>
+            <td>管理可复用互动内容，并在课程中引用。</td>
+            <td>V0.2 后支持 H5P/互动内容引用，事件进入 `event_log`；不要第一版自研所有互动题。</td>
+          </tr>
+          <tr>
+            <td>Backup / Restore / Reuse</td>
+            <td>课程内容、活动设置和数据可以备份、恢复、导入复用。</td>
+            <td>半米应尽早设计 `export_bundle` / `import_batch`，避免内容只存在数据库里不可迁移。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>3.2 标准活动与资源</h3>
+      <p>Moodle 用户文档列出标准活动，例如 Assignment、BigBlueButton、Choice、Database、Feedback、Forum、Glossary、H5P、Lesson、LTI、Quiz、SCORM、Wiki、Workshop；资源包括 Book、File、Folder、IMS content package、Page、Text and media area、URL。</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Moodle 类型</th>
+            <th>功能用途</th>
+            <th>半米判断</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Assignment</td>
+            <td>学生提交文件、文本或线下作业，老师批改和评分。</td>
+            <td>P1 借鉴作业生命周期：发布、提交、重交、批改、反馈、证据引用。V0.1 homework report 不必做完整 assignment UI。</td>
+          </tr>
+          <tr>
+            <td>Quiz</td>
+            <td>自动/手动评分测验，题库复用，尝试记录，反馈设置。</td>
+            <td>P0 借鉴 question bank 与 attempt/event；考试系统 spike 已确认不要 fork Moodle Quiz。</td>
+          </tr>
+          <tr>
+            <td>Lesson</td>
+            <td>可根据学生选择或答案走不同页面的分支内容。</td>
+            <td>P1 借鉴为 LE pattern 的 branching，但 V0.1 不做真正 adaptive branching。</td>
+          </tr>
+          <tr>
+            <td>Forum / Wiki / Glossary / Database</td>
+            <td>协作讨论、共同编辑、词汇表、结构化条目库。</td>
+            <td>V0.1 不借 UI。长期可借 Glossary 思想做词汇/概念库，但学生社交讨论不是半米首要路径。</td>
+          </tr>
+          <tr>
+            <td>Feedback / Choice</td>
+            <td>调查、投票、反馈收集。</td>
+            <td>可借作老师/学生反馈表单和课堂 pulse，后置。</td>
+          </tr>
+          <tr>
+            <td>Workshop</td>
+            <td>同伴互评工作流。</td>
+            <td>不进入 V0.1。写作/口语互评可以远期参考，但未成年人和质量控制风险较高。</td>
+          </tr>
+          <tr>
+            <td>LTI External tool</td>
+            <td>把外部学习工具嵌入课程，处理 launch、身份、成绩回传。</td>
+            <td>强烈建议 V0.2 预留。半米可成为 Moodle/Canvas 的 LTI tool，而不是替换学校 LMS。</td>
+          </tr>
+          <tr>
+            <td>SCORM / IMS package / H5P</td>
+            <td>兼容传统课件包和互动内容标准。</td>
+            <td>后置支持导入/引用和事件记录，不优先自研播放器。</td>
+          </tr>
+          <tr>
+            <td>BigBlueButton</td>
+            <td>直播课和视频会议集成。</td>
+            <td>半米第二阶段课堂工具可接现成视频会议，不第一版自建直播。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>3.3 测评、题库与成绩</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>功能</th>
+            <th>Moodle 做什么</th>
+            <th>半米可借鉴</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Question bank</td>
+            <td>老师在专门空间创建、预览、编辑、分类和复用题目；题目可跨 quiz 使用。</td>
+            <td>P0。半米必须把 `question` / `question_version` / `skill_tag` / `source_status` 做成独立资产。</td>
+          </tr>
+          <tr>
+            <td>Question types</td>
+            <td>多选、简答、数值、匹配、拖拽、作文、Cloze、排序等题型插件。</td>
+            <td>P0。半米不要把题型塞进一个自由 JSON，至少要有 question type registry + renderer + grader。</td>
+          </tr>
+          <tr>
+            <td>Question behaviours</td>
+            <td>支持 deferred feedback、immediate feedback、interactive try again 等交互行为。</td>
+            <td>P1。半米阅读练习、placement、正式模考需要不同 feedback 行为。</td>
+          </tr>
+          <tr>
+            <td>Quiz attempt</td>
+            <td>一次测验尝试包含多题状态、保存、提交、评分、复查。</td>
+            <td>P0。半米考试和阅读题都应有 `attempt` / `response` / `response_event`，不能只存最终答案。</td>
+          </tr>
+          <tr>
+            <td>Gradebook</td>
+            <td>课程内成绩聚合，支持 grade items、categories、calculations、history、scales、outcomes。</td>
+            <td>P1。半米报告不是成绩单，但需要 gradebook-like aggregation：按学生、skill、LE、时间、任务汇总。</td>
+          </tr>
+          <tr>
+            <td>Advanced grading</td>
+            <td>rubric、marking guide 等高级评分。</td>
+            <td>P1/P2。写作、口语、项目作业需要 rubric-grounded feedback，LLM 只能辅助，不应直接终评。</td>
+          </tr>
+          <tr>
+            <td>Import / Export questions</td>
+            <td>支持多种题目导入格式，Moodle XML 是推荐格式之一。</td>
+            <td>P1。半米 V0.2 支持 Moodle XML/QTI-like JSON，内部仍用 clean-room schema。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>3.4 进度、个性化与激励</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>功能</th>
+            <th>Moodle 做什么</th>
+            <th>半米可借鉴</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Activity completion</td>
+            <td>老师为每个课程项设置完成标准，学生可手动标记或系统自动完成。</td>
+            <td>P0。每个 LE step/task 都要有 completion criteria：viewed、answered、passed、spent time、teacher reviewed。</td>
+          </tr>
+          <tr>
+            <td>Course completion</td>
+            <td>基于活动完成和其它条件判断课程完成。</td>
+            <td>P1。半米可用在一周 plan、reading product、阶段路径完成，不放到 V0.1 首屏。</td>
+          </tr>
+          <tr>
+            <td>Restrict access / Availability</td>
+            <td>按日期、成绩、分组、profile、完成状态控制活动可见性。</td>
+            <td>P0。Today unlock logic 可以直接借这个模型，但半米要把规则表达做得更简单。</td>
+          </tr>
+          <tr>
+            <td>Competencies / Learning plans</td>
+            <td>把能力框架、证据和学习计划连接，支持 competency-based education。</td>
+            <td>P2。半米的升学路径、英语能力、考试 skill taxonomy 最终需要 competency layer。</td>
+          </tr>
+          <tr>
+            <td>Badges</td>
+            <td>按完成或手动规则颁发徽章。</td>
+            <td>P2/P3。可做学生激励和家长可读里程碑，但避免焦虑型排名。</td>
+          </tr>
+          <tr>
+            <td>Analytics / Insights</td>
+            <td>提供描述和预测报告，识别风险学生。</td>
+            <td>P2。半米先把 `event_log` 和 label 采干净，再上 ML 风险预测；LLM 不直接做最终预测。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>3.5 用户、权限与组织</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>功能</th>
+            <th>Moodle 做什么</th>
+            <th>半米可借鉴</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Roles / Permissions</td>
+            <td>角色是权限集合，结合 context 决定用户在某页面能做什么。</td>
+            <td>P0。半米五层 RLS 应学 context 思想：company、school、teacher-student relation、student self、parent child relation。</td>
+          </tr>
+          <tr>
+            <td>Authentication plugins</td>
+            <td>Email、manual、OAuth2、LDAP、LTI、Shibboleth、webservice 等。</td>
+            <td>P1。MVP 先 Email/Google，后续学校客户会需要 SSO/SAML/OIDC/roster。</td>
+          </tr>
+          <tr>
+            <td>Enrolment plugins</td>
+            <td>Manual、自助、guest、cohort、database、LDAP、IMS enterprise、LTI、payment 等。</td>
+            <td>P0/P1。半米 code binding、老师绑定学生、学校批量导入可借 enrolment method 思想。</td>
+          </tr>
+          <tr>
+            <td>Groups / Groupings / Cohorts</td>
+            <td>课程内分组，跨课程 cohort 批量 enrol。</td>
+            <td>P1。半米需要 class/group/cohort，但核心仍是 per-student plan。</td>
+          </tr>
+          <tr>
+            <td>Privacy API / Data requests</td>
+            <td>描述、导出、删除个人数据，支撑隐私合规。</td>
+            <td>P1/P2。未成年人数据合规必须预留 consent、export、delete、audit。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>3.6 沟通、报告、集成与运维</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>功能</th>
+            <th>Moodle 做什么</th>
+            <th>半米可借鉴</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Messaging / Notifications / Calendar</td>
+            <td>站内消息、通知偏好、课程/用户/群组日历事件。</td>
+            <td>P1。半米的提醒应连接 plan、due date、teacher action，不做泛通知堆叠。</td>
+          </tr>
+          <tr>
+            <td>Forum / Comments</td>
+            <td>异步讨论和评论。</td>
+            <td>V0.1 只做带上下文的学生提问和老师回复，不开放社区型论坛。</td>
+          </tr>
+          <tr>
+            <td>Reports / Logs / Report builder</td>
+            <td>课程活动、完成、参与、日志、实时日志、安全、性能、进度、统计和自定义报告。</td>
+            <td>P1。半米需要 teacher dashboard 和可追溯 evidence_refs，不急着做自定义报表 UI。</td>
+          </tr>
+          <tr>
+            <td>Web services / External functions</td>
+            <td>将函数暴露为外部 web service。</td>
+            <td>P1/P2。半米要为未来移动端、Moodle/LMS 集成、学校系统同步预留 API 边界。</td>
+          </tr>
+          <tr>
+            <td>LTI</td>
+            <td>Moodle 可作为 LTI consumer 或 publish as LTI tool。</td>
+            <td>P1。半米可以作为外部 LTI 学习活动接入学校 LMS，降低 B2B 采购阻力。</td>
+          </tr>
+          <tr>
+            <td>Mobile app</td>
+            <td>Moodle App 支持移动端访问，并通过 API 和插件适配。</td>
+            <td>P2。半米先 Web，之后移动端 API 应从一开始保持清晰。</td>
+          </tr>
+          <tr>
+            <td>AI subsystem</td>
+            <td>Placement、Action、Provider、Manager 解耦，支持不同 AI provider。</td>
+            <td>P1。半米可借 provider/action 分层：内容生成、提示生成、报告总结、能力解释都走统一 LLM 存证。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="source-scan">
+      <h2>4. Moodle 5.2 源码结构核对</h2>
+      <p>本次用 GitHub `MOODLE_502_STABLE` 分支和 `v5.2.0` tag 做核对。Moodle 5.2 的源码中很多插件目录在 `public/` 下。</p>
+
+      <h3>4.1 核心模块目录</h3>
+      <p class="small">以下为 `public/` 下的主要子系统目录，说明 Moodle 的功能面广度。</p>
+      <div class="pill-row">
+        <span class="pill">admin</span><span class="pill">ai</span><span class="pill">analytics</span><span class="pill">auth</span><span class="pill">availability</span><span class="pill">backup</span><span class="pill">badges</span><span class="pill">blocks</span><span class="pill">calendar</span><span class="pill">cohort</span><span class="pill">communication</span><span class="pill">competency</span><span class="pill">completion</span><span class="pill">contentbank</span><span class="pill">course</span><span class="pill">customfield</span><span class="pill">enrol</span><span class="pill">files</span><span class="pill">grade</span><span class="pill">group</span><span class="pill">h5p</span><span class="pill">message</span><span class="pill">mod</span><span class="pill">payment</span><span class="pill">plagiarism</span><span class="pill">portfolio</span><span class="pill">privacy</span><span class="pill">question</span><span class="pill">report</span><span class="pill">reportbuilder</span><span class="pill">repository</span><span class="pill">search</span><span class="pill">tag</span><span class="pill">theme</span><span class="pill">user</span><span class="pill">webservice</span>
+      </div>
+
+      <h3>4.2 `public/mod` 核心活动/资源目录</h3>
+      <div class="pill-row">
+        <span class="pill">assign</span><span class="pill">bigbluebuttonbn</span><span class="pill">book</span><span class="pill">choice</span><span class="pill">data</span><span class="pill">feedback</span><span class="pill">folder</span><span class="pill">forum</span><span class="pill">glossary</span><span class="pill">h5pactivity</span><span class="pill">imscp</span><span class="pill">label</span><span class="pill">lesson</span><span class="pill">lti</span><span class="pill">page</span><span class="pill">qbank</span><span class="pill">quiz</span><span class="pill">resource</span><span class="pill">scorm</span><span class="pill">subsection</span><span class="pill">url</span><span class="pill">wiki</span><span class="pill">workshop</span>
+      </div>
+
+      <h3>4.3 题型目录</h3>
+      <div class="pill-row">
+        <span class="pill">calculated</span><span class="pill">calculatedmulti</span><span class="pill">calculatedsimple</span><span class="pill">ddimageortext</span><span class="pill">ddmarker</span><span class="pill">ddwtos</span><span class="pill">description</span><span class="pill">essay</span><span class="pill">gapselect</span><span class="pill">match</span><span class="pill">missingtype</span><span class="pill">multianswer</span><span class="pill">multichoice</span><span class="pill">numerical</span><span class="pill">ordering</span><span class="pill">randomsamatch</span><span class="pill">shortanswer</span><span class="pill">truefalse</span>
+      </div>
+
+      <h3>4.4 权限、注册、限制访问与 AI 插件</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>目录</th>
+            <th>核到的核心插件/条件</th>
+            <th>半米含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>public/auth</code></td>
+            <td>email、ldap、lti、manual、nologin、none、oauth2、shibboleth、webservice</td>
+            <td>未来学校 SSO 会成为真实需求。MVP 不要过度做，但 schema 要留外部身份绑定。</td>
+          </tr>
+          <tr>
+            <td><code>public/enrol</code></td>
+            <td>category、cohort、database、fee、flatfile、guest、imsenterprise、ldap、lti、manual、meta、paypal、self</td>
+            <td>半米 code binding、批量导入、学校 roster、付费开通都可以借“enrol method”抽象。</td>
+          </tr>
+          <tr>
+            <td><code>public/availability/condition</code></td>
+            <td>completion、date、grade、group、grouping、profile</td>
+            <td>半米 Today 解锁规则可以从这 6 类开始，不要一开始做无限规则引擎。</td>
+          </tr>
+          <tr>
+            <td><code>public/ai/provider</code></td>
+            <td>awsbedrock、azureai、deepseek、gemini、ollama、openai</td>
+            <td>半米的 LLM 层也应 provider 化，记录 provider、model_version、prompt_version、evidence_refs。</td>
+          </tr>
+          <tr>
+            <td><code>public/ai/placement</code></td>
+            <td>courseassist、editor</td>
+            <td>AI 交互位置和 AI provider 解耦。半米可映射为 content authoring、student hint、teacher dashboard summary。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>4.5 报告和成绩相关目录</h3>
+      <p>源码中 `public/report` 包含 backups、competency、completion、courseoverview、eventlist、insights、log、loglive、outline、participation、performance、progress、questioninstances、security、stats、status 等报告；`public/grade/report` 包含 grader、history、outcomes、overview、singleview、summary、user。</p>
+      <div class="callout blue">
+        <strong>半米启示：</strong>Moodle 的成熟度来自“每个动作都有管理视角和审计视角”。半米 V0.1 不需要全量 report builder，但 `event_log -> structured_metrics -> report -> evidence_refs` 必须一开始做对。
+      </div>
+    </section>
+
+    <section id="borrow-matrix">
+      <h2>5. 可借鉴矩阵</h2>
+      <p class="lead">下面按半米模块拆解 Moodle 借鉴方式。判断标准：是否能帮半米更快做出稳定产品，而不是 Moodle 本身功能是否强大。</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>半米模块</th>
+            <th>Moodle 对应能力</th>
+            <th>半米应借鉴</th>
+            <th>落地对象</th>
+            <th>阶段</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>老师课程入库</td>
+            <td>Resources、Activity modules、Content bank、Backup API</td>
+            <td>素材和学习活动分离；素材可复用，活动是一次教学配置；导入批次可追踪。</td>
+            <td><code>content_asset</code>、<code>learning_activity</code>、<code>import_batch</code></td>
+            <td>V0.1</td>
+          </tr>
+          <tr>
+            <td>LE pattern renderer</td>
+            <td>Activity module plugin structure、Course format</td>
+            <td>每个 LE pattern 有 renderer、step schema、event types、validation、report mapping。</td>
+            <td><code>le_pattern_registry</code>、<code>step_definition</code></td>
+            <td>V0.1</td>
+          </tr>
+          <tr>
+            <td>阅读题库</td>
+            <td>Question bank、Question types、Question categories</td>
+            <td>题目作为一等资产；版本化；按 skill、难度、来源、状态、review 管理。</td>
+            <td><code>question</code>、<code>question_version</code>、<code>question_asset</code></td>
+            <td>V0.1</td>
+          </tr>
+          <tr>
+            <td>学生答题</td>
+            <td>Question engine、Quiz attempt、Question behaviours</td>
+            <td>把作答过程拆成 open/save/submit/grade/review 事件，不只存最终答案。</td>
+            <td><code>attempt</code>、<code>response</code>、<code>response_event</code></td>
+            <td>V0.1</td>
+          </tr>
+          <tr>
+            <td>Today 单任务</td>
+            <td>Activity completion、Availability</td>
+            <td>任务显示和解锁由 completion/availability 规则决定，但学生只看到当前任务。</td>
+            <td><code>task_completion_rule</code>、<code>task_unlock_rule</code></td>
+            <td>V0.1</td>
+          </tr>
+          <tr>
+            <td>一周 plan</td>
+            <td>Course sections、Calendar、Completion</td>
+            <td>一周计划是轻量 course path，但不能变成 Moodle 式复杂课程页。</td>
+            <td><code>plan</code>、<code>plan_day</code>、<code>plan_task</code></td>
+            <td>V0.1</td>
+          </tr>
+          <tr>
+            <td>Homework report</td>
+            <td>Gradebook、Reports、Logs</td>
+            <td>报告从事实事件聚合，保留 claim range、confidence、evidence_refs。</td>
+            <td><code>report</code>、<code>structured_metrics</code></td>
+            <td>V0.1</td>
+          </tr>
+          <tr>
+            <td>老师 Dashboard</td>
+            <td>Course reports、Insights、Report builder</td>
+            <td>老师只需要下一步行动：低置信度、未完成、未回复、待批准建议。</td>
+            <td><code>teacher_dashboard_view</code>、<code>recommendation_queue</code></td>
+            <td>V0.1</td>
+          </tr>
+          <tr>
+            <td>AI 内容生成</td>
+            <td>AI subsystem provider/placement/action</td>
+            <td>AI provider 和 AI 使用场景分离；所有输出落 `llm_generation` 存证。</td>
+            <td><code>llm_generation</code>、<code>ai_action</code></td>
+            <td>V0.1/V0.2</td>
+          </tr>
+          <tr>
+            <td>多租户权限</td>
+            <td>Roles、Capabilities、Context、Groups、Cohorts</td>
+            <td>按 context 判断能力，不用一个粗暴 role 字段解决所有权限。</td>
+            <td><code>user_role</code>、<code>scope</code>、RLS helper function</td>
+            <td>V0.1</td>
+          </tr>
+          <tr>
+            <td>学校集成</td>
+            <td>LTI、Web services、Enrolment plugins、Authentication plugins</td>
+            <td>未来学校已有 LMS 时，让半米作为外部工具或数据服务接入。</td>
+            <td>LTI launch、API token、external identity mapping</td>
+            <td>V0.2/V0.3</td>
+          </tr>
+          <tr>
+            <td>数据合规</td>
+            <td>Privacy API、logs、roles</td>
+            <td>未成年人数据导出、删除、授权、审计不能后补太晚。</td>
+            <td><code>consent_record</code>、<code>audit_log</code>、data export job</td>
+            <td>V0.1/V0.2</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>借鉴强度分级</h3>
+      <div class="grid three">
+        <div class="decision">
+          <h3>A 级：直接借设计边界</h3>
+          <p>Question bank/engine、completion、availability、roles/capabilities/context、events/logging。这些是半米必须早做对的底层边界。</p>
+        </div>
+        <div class="decision">
+          <h3>B 级：借协议和格式</h3>
+          <p>LTI、Moodle XML、QTI-like JSON、H5P/SCORM 引用、web services。这里不是照搬代码，而是为学校和内容生态留接口。</p>
+        </div>
+        <div class="decision">
+          <h3>C 级：远期参考</h3>
+          <p>Competencies、badges、full report builder、portfolio、payment、plagiarism、mobile app plugin support。等半米主闭环跑通后再吸收。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="code-policy">
+      <h2>6. 能否直接借 Moodle 代码</h2>
+      <div class="callout red">
+        <strong>默认答案：不建议直接借 Moodle 核心代码。</strong>Moodle README 和 COPYING 显示 Moodle 以 GNU GPL v3 发布。半米如果走商业 SaaS、闭源部署、未来学校私有化交付或 App 分发路线，直接复制核心代码会带来许可证和交付边界风险。
+      </div>
+
+      <h3>6.1 法务和工程边界</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>做法</th>
+            <th>是否建议</th>
+            <th>原因</th>
+            <th>半米推荐动作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>直接复制 Moodle PHP 代码到半米代码库</td>
+            <td><span class="tag no">不建议</span></td>
+            <td>GPLv3/copyleft 风险高，技术栈也不匹配 Next.js/Supabase/FastAPI。</td>
+            <td>只读源码理解边界，内部 clean-room 实现。</td>
+          </tr>
+          <tr>
+            <td>fork Moodle 做半米主产品</td>
+            <td><span class="tag no">不建议</span></td>
+            <td>产品重心会变成传统 LMS，且 UI/架构/许可都会拖累半米。</td>
+            <td>不 fork。必要时部署 Moodle 作为外部 LMS demo。</td>
+          </tr>
+          <tr>
+            <td>写 Moodle 插件调用半米服务</td>
+            <td><span class="tag api">可行</span></td>
+            <td>插件按 Moodle 生态规则发布，半米服务独立运行，边界清楚。</td>
+            <td>V0.2 后可做 `mod_banmi` 或 LTI 工具，先不用。</td>
+          </tr>
+          <tr>
+            <td>半米作为 LTI tool 接入 Moodle</td>
+            <td><span class="tag api">推荐</span></td>
+            <td>标准协议边界清晰，适合学校已有 LMS 场景。</td>
+            <td>V0.2 预留 LTI 1.3 launch / grade passback。</td>
+          </tr>
+          <tr>
+            <td>支持 Moodle XML 题目导入</td>
+            <td><span class="tag api">推荐</span></td>
+            <td>兼容老师已有题库和开源生态；实现可 clean-room。</td>
+            <td>V0.2 做 importer/exporter，不复制 Moodle parser。</td>
+          </tr>
+          <tr>
+            <td>照抄数据库表结构</td>
+            <td><span class="tag no">不建议</span></td>
+            <td>Moodle 表结构服务于 PHP LMS，不服务于半米的 per-student plan 和 event_log 事实源。</td>
+            <td>借关系，不借表名和字段。</td>
+          </tr>
+          <tr>
+            <td>使用 Moodle 商标做营销</td>
+            <td><span class="tag no">谨慎</span></td>
+            <td>Moodle 的商标政策限制商业用途、软件命名、域名、广告关键词等。</td>
+            <td>只说“支持 Moodle XML 导入”或“可通过 LTI 与 Moodle 集成”，不要把 Moodle 放进产品名。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>6.2 安全的借鉴方式</h3>
+      <ol>
+        <li><strong>Clean-room 重建：</strong>先写半米自己的对象模型和验收测试，再实现 importer、renderer、grader。</li>
+        <li><strong>协议级集成：</strong>LTI、OAuth/OIDC、webhook、CSV/OneRoster、Moodle XML、QTI-like JSON。</li>
+        <li><strong>独立服务边界：</strong>如果必须使用 Moodle 功能，把 Moodle 当单独系统部署，通过 API/LTI 交互，不把核心代码混入半米。</li>
+        <li><strong>插件边界：</strong>未来若服务 Moodle 用户，可写 GPL-compatible Moodle 插件，插件负责 launch/iframe/grade passback，半米核心服务保持独立。</li>
+        <li><strong>文档化来源：</strong>在技术文档中标注“inspired by Moodle concepts”，不要复制源码注释、函数、文件结构和 UI 文案。</li>
+      </ol>
+
+      <h3>6.3 什么时候可以直接借代码</h3>
+      <p>只有以下情况才可考虑直接用 Moodle 代码：</p>
+      <ul>
+        <li>半米决定整个相关组件按 GPLv3 兼容方式开源并接受相应义务。</li>
+        <li>代码作为独立 Moodle 插件发布，不混入半米闭源核心。</li>
+        <li>只用于本地研究，不进入产品仓库、部署镜像、客户交付和 App 包。</li>
+      </ul>
+      <p>默认商业产品路线下，建议把 Moodle 当“架构参考和互操作目标”，不是代码来源。</p>
+    </section>
+
+    <section id="banmi-design">
+      <h2>7. 半米设计建议</h2>
+
+      <h3>7.1 V0.1 数据对象调整建议</h3>
+      <p>半米当前已经有 `event_log`、`report`、`recommendation_queue`、`llm_generation` 等正确方向。结合 Moodle，建议 V0.1 明确以下对象边界：</p>
+      <pre><code>learning_product
+  // 阅读产品类型：短文、绘本、分级读物、小说章节、Reading A-Z 类体系
+
+content_asset
+  // passage / image / audio / video link / PDF / book chapter / license metadata
+
+le_pattern
+  // LE01 / LE04 / LE05 / LE06，每种 pattern 定义 step schema、renderer、event mapping
+
+learning_activity
+  // 老师把素材配置成一次可发布学习活动，类似 Moodle activity instance
+
+question
+question_version
+question_asset
+question_skill_tag
+  // 题目本体、版本、素材、skill 标签、review 状态
+
+plan
+plan_task
+task_unlock_rule
+task_completion_rule
+  // 一周 plan、Today 单任务、解锁与完成条件
+
+attempt
+response
+response_event
+  // 学生一次任务/题目尝试和过程事件
+
+event_log
+report
+recommendation_queue
+llm_generation
+  // 事实源、报告、老师确认队列、LLM 存证</code></pre>
+
+      <h3>7.2 Moodle-inspired 但半米化的插件模型</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Moodle 插件思想</th>
+            <th>半米对应</th>
+            <th>必须包含</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Activity module</td>
+            <td>LE pattern module</td>
+            <td>step schema、student renderer、teacher authoring UI、event mapping、report mapping。</td>
+          </tr>
+          <tr>
+            <td>Question type plugin</td>
+            <td>Question type registry</td>
+            <td>response schema、grader、review UI、student UI、import/export mapping。</td>
+          </tr>
+          <tr>
+            <td>Availability condition</td>
+            <td>Task unlock rule</td>
+            <td>date、previous completion、score/band、teacher approval、profile/group。</td>
+          </tr>
+          <tr>
+            <td>Completion API</td>
+            <td>Task/step completion contract</td>
+            <td>viewed、submitted、passed、teacher reviewed、minimum evidence。</td>
+          </tr>
+          <tr>
+            <td>AI provider/placement</td>
+            <td>LLM provider/action/surface</td>
+            <td>provider、model_version、prompt_version、evidence_refs、input_hash、safety flags。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>7.3 Today 和 Learning Screen 的规则表达</h3>
+      <p>Moodle 的 availability 条件可以为半米提供一个足够简单的 V0.1 起点：</p>
+      <table>
+        <thead>
+          <tr>
+            <th>规则类型</th>
+            <th>Moodle 来源</th>
+            <th>半米 V0.1 规则</th>
+            <th>例子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>日期</td>
+            <td>availability/date</td>
+            <td>任务只有在 plan_day 到达后可见。</td>
+            <td>周三的小说章节不提前显示。</td>
+          </tr>
+          <tr>
+            <td>完成</td>
+            <td>availability/completion</td>
+            <td>前一个 step 完成后解锁下一个 step。</td>
+            <td>泛读完成后才进入精读题。</td>
+          </tr>
+          <tr>
+            <td>成绩/表现</td>
+            <td>availability/grade</td>
+            <td>根据正确率、confidence、卡点触发补充练习建议。</td>
+            <td>inference 题低于阈值，生成 recommendation_queue。</td>
+          </tr>
+          <tr>
+            <td>分组</td>
+            <td>availability/group/grouping</td>
+            <td>按班级、学生群、项目 cohort 发任务。</td>
+            <td>雅思班统一发一组 passage，但每个学生 task 顺序可不同。</td>
+          </tr>
+          <tr>
+            <td>画像</td>
+            <td>availability/profile</td>
+            <td>按学生目标、年级、语言背景、能力 band 选择默认材料。</td>
+            <td>Korean international school student 与 IELTS 高中生走不同模板。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>7.4 报告系统应学 Moodle，但不要变成成绩册</h3>
+      <p>Moodle 的 gradebook 很强，但半米报告的第一目的不是分数管理，而是让老师做下一步决策。因此半米应该借 gradebook 的聚合能力，不借它的完整 UI 复杂度。</p>
+      <div class="grid two">
+        <div class="decision">
+          <h3>要借</h3>
+          <ul>
+            <li>每个活动可向报告/成绩聚合层提交结构化结果。</li>
+            <li>保留历史记录，避免题目或评分规则更新影响旧报告。</li>
+            <li>支持按学生、时间、skill、任务、课程模板汇总。</li>
+            <li>老师可展开 evidence_refs。</li>
+          </ul>
+        </div>
+        <div class="decision">
+          <h3>不要借</h3>
+          <ul>
+            <li>不要第一版做复杂 grade calculations。</li>
+            <li>不要把所有学习表现变成一个总分。</li>
+            <li>不要让 LLM summary 替代 structured metrics。</li>
+            <li>不要把家长端报告做成实时错误监控。</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>7.5 和学校 LMS 的关系</h3>
+      <p>半米未来面对国际学校、双语学校或培训机构时，不一定要替换 Moodle/Canvas/Google Classroom。更合理的商业路径是：</p>
+      <ol>
+        <li><strong>V0.1：</strong>半米独立运行，老师手动建学生和任务。</li>
+        <li><strong>V0.2：</strong>支持导出报告、CSV roster、Moodle XML/QTI-like 导入。</li>
+        <li><strong>V0.3：</strong>半米作为 LTI tool 接入学校 LMS，老师在 Moodle 课程里打开半米活动，成绩/完成状态回传。</li>
+        <li><strong>后续：</strong>做 OneRoster/SIS/SSO/DPA，进入真实 B2B 采购流程。</li>
+      </ol>
+    </section>
+
+    <section id="roadmap">
+      <h2>8. 落地路线图</h2>
+
+      <h3>V0.1：只借最小可运行骨架</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>任务</th>
+            <th>Moodle 借鉴</th>
+            <th>交付判断</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>建立 LE pattern registry</td>
+            <td>Activity module / course format</td>
+            <td>LE01、LE04、LE05、LE06 都能定义 step schema 和 event mapping。</td>
+          </tr>
+          <tr>
+            <td>题库和作答事件拆分</td>
+            <td>Question bank / engine</td>
+            <td>题目版本、学生 response、response_event 分离；历史尝试不被题目更新污染。</td>
+          </tr>
+          <tr>
+            <td>Today unlock/completion</td>
+            <td>Availability / completion</td>
+            <td>能按日期、前置完成、老师发布状态控制任务可见和完成。</td>
+          </tr>
+          <tr>
+            <td>event_log 事实源</td>
+            <td>Events / logs</td>
+            <td>关键行为都 append-only；报告可从事件重算。</td>
+          </tr>
+          <tr>
+            <td>report 三层 contract</td>
+            <td>Gradebook / reports</td>
+            <td>所有结论都有 claim_range、confidence、evidence_refs。</td>
+          </tr>
+          <tr>
+            <td>teacher review queue</td>
+            <td>Workflow / reports</td>
+            <td>AI 建议先入 `recommendation_queue`，老师批准后才变 `plan_patch`。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>V0.2：做互操作和正式考试基础</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>任务</th>
+            <th>借鉴/标准</th>
+            <th>为什么放 V0.2</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Moodle XML importer/exporter</td>
+            <td>Question import/export</td>
+            <td>内容迁移有价值，但 V0.1 先证明学习闭环。</td>
+          </tr>
+          <tr>
+            <td>QTI-like internal JSON</td>
+            <td>QTI / TAO / Moodle Quiz 边界</td>
+            <td>考试和题库标准化要在正式模考前做。</td>
+          </tr>
+          <tr>
+            <td>LTI 1.3 launch 预研</td>
+            <td>LTI External tool</td>
+            <td>学校集成会影响 B2B 销售，但不是内测第一步。</td>
+          </tr>
+          <tr>
+            <td>H5P/SCORM 引用策略</td>
+            <td>H5P / SCORM</td>
+            <td>互动内容生态可借力，但不要拖慢自有阅读闭环。</td>
+          </tr>
+          <tr>
+            <td>正式 placement / mock attempt</td>
+            <td>Quiz attempt / question behaviours</td>
+            <td>第二阶段检测系统需要更完整的 attempt 和 integrity model。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>V0.3 以后：吸收 LMS 生态能力</h3>
+      <ul>
+        <li>Report builder-like 自定义报告，给学校/公司端做聚合视图。</li>
+        <li>Competency framework，把出国规划、CEFR/IELTS skill、阅读能力 band 和课程证据连接起来。</li>
+        <li>Badges/portfolio，转成学生成长档案和家长可读里程碑。</li>
+        <li>SSO、SIS、OneRoster、DPA、审计日志，进入学校采购。</li>
+        <li>Mobile API 和离线/弱网策略，服务长期学生端使用。</li>
+      </ul>
+    </section>
+
+    <section id="avoid">
+      <h2>9. 不建议借鉴的部分</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>不建议借</th>
+            <th>原因</th>
+            <th>半米替代方案</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Moodle 课程首页信息架构</td>
+            <td>课程页适合 LMS，但半米学生端应是 Today 单任务和个性化执行。</td>
+            <td>老师端有课程/内容管理，学生端只显示当前路径必要信息。</td>
+          </tr>
+          <tr>
+            <td>全量论坛/wiki/social 功能</td>
+            <td>V0.1 的学习闭环不依赖开放协作，且未成年人内容治理成本高。</td>
+            <td>只做带上下文的学生提问、老师回复、证据引用。</td>
+          </tr>
+          <tr>
+            <td>复杂管理员配置后台</td>
+            <td>Moodle 的可配置性是成熟 LMS 的资产，但会拖慢半米 MVP。</td>
+            <td>先用固定配置 + 数据模型预留，后续再开放公司/学校端设置。</td>
+          </tr>
+          <tr>
+            <td>PHP 单体架构</td>
+            <td>半米已收敛 Next.js / Supabase / FastAPI / R2，不应为了借功能换技术栈。</td>
+            <td>用半米现有技术栈 clean-room 实现对象边界。</td>
+          </tr>
+          <tr>
+            <td>完整 gradebook UI</td>
+            <td>成绩册很强但复杂，容易把学习报告变成分数表。</td>
+            <td>先做 teacher decision dashboard，再抽象聚合层。</td>
+          </tr>
+          <tr>
+            <td>Moodle 多功能首屏</td>
+            <td>半米差异化是老师路径设计 + AI evidence/report，不是功能大全。</td>
+            <td>V0.1 坚持阅读闭环和老师确认队列。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="sources">
+      <h2>10. 资料来源</h2>
+      <div class="grid two">
+        <article class="source-card">
+          <h3>Moodle 官方资料</h3>
+          <ul>
+            <li><a href="https://moodledev.io/general/releases" target="_blank" rel="noreferrer">Moodle releases</a>：官方版本支持表；5.2 初始发布日期为 2026-04-20。</li>
+            <li><a href="https://moodledev.io/general/releases/5.2" target="_blank" rel="noreferrer">Moodle 5.2 release notes</a>：5.2 主要更新、服务器要求、AI provider、新 dashboard、quiz/question bank、report builder 等。</li>
+            <li><a href="https://moodledev.io/docs/5.2" target="_blank" rel="noreferrer">Moodle 5.2 developer docs</a>：5.2 文档入口和支持周期。</li>
+            <li><a href="https://moodledev.io/docs/5.2/apis" target="_blank" rel="noreferrer">Moodle API guides</a>：Access、Files、Events、Availability、Gradebook、Question、Web services、Privacy、Report builder 等 API。</li>
+            <li><a href="https://moodledev.io/docs/5.2/apis/plugintypes/mod" target="_blank" rel="noreferrer">Activity modules developer docs</a>：活动模块插件结构和文件边界。</li>
+            <li><a href="https://moodledev.io/docs/5.2/apis/subsystems/ai" target="_blank" rel="noreferrer">AI subsystem</a>：Placements、Actions、Providers、Manager 的设计。</li>
+            <li><a href="https://moodledev.io/docs/5.2/apis/plugintypes/ai" target="_blank" rel="noreferrer">AI plugins</a>：Provider plugin 与 Placement plugin 解耦。</li>
+          </ul>
+        </article>
+        <article class="source-card">
+          <h3>Moodle 用户文档</h3>
+          <ul>
+            <li><a href="https://docs.moodle.org/502/en/Module" target="_blank" rel="noreferrer">Activities</a>：标准活动列表和定义。</li>
+            <li><a href="https://docs.moodle.org/502/en/Resources" target="_blank" rel="noreferrer">Resources</a>：Book、File、Folder、IMS package、Page、Text and media、URL。</li>
+            <li><a href="https://docs.moodle.org/502/en/Tracking_progress" target="_blank" rel="noreferrer">Tracking progress</a>：成绩、competencies、completion、badges、reports、analytics。</li>
+            <li><a href="https://docs.moodle.org/502/en/Grades" target="_blank" rel="noreferrer">Grades</a>：Gradebook、grade items、categories、calculations、history、rubrics 等。</li>
+            <li><a href="https://docs.moodle.org/502/en/Question_bank" target="_blank" rel="noreferrer">Question banks</a>：题库、分类、共享、过滤、版本与状态。</li>
+            <li><a href="https://docs.moodle.org/502/en/Quiz" target="_blank" rel="noreferrer">Quiz activity</a>：quiz 题库复用、attempt、反馈、teacher/student view。</li>
+            <li><a href="https://docs.moodle.org/502/en/Question_types" target="_blank" rel="noreferrer">Question types</a>：标准 quiz 题型列表。</li>
+            <li><a href="https://docs.moodle.org/502/en/Import_questions" target="_blank" rel="noreferrer">Import questions</a>：题目导入格式，Moodle XML 为推荐格式之一。</li>
+            <li><a href="https://docs.moodle.org/en/Roles_and_permissions" target="_blank" rel="noreferrer">Roles and permissions</a>：角色、权限和 context 关系。</li>
+            <li><a href="https://docs.moodle.org/502/en/Enrolment_methods" target="_blank" rel="noreferrer">Enrolment methods</a>：manual、self、guest、cohort、meta、payment 等注册方式。</li>
+          </ul>
+        </article>
+        <article class="source-card">
+          <h3>Moodle GitHub 源码核对</h3>
+          <ul>
+            <li><a href="https://github.com/moodle/moodle/tree/MOODLE_502_STABLE/public/mod" target="_blank" rel="noreferrer">public/mod</a>：核心活动/资源模块目录。</li>
+            <li><a href="https://github.com/moodle/moodle/tree/MOODLE_502_STABLE/public/question/type" target="_blank" rel="noreferrer">public/question/type</a>：核心题型目录。</li>
+            <li><a href="https://github.com/moodle/moodle/tree/MOODLE_502_STABLE/public/auth" target="_blank" rel="noreferrer">public/auth</a>：认证插件目录。</li>
+            <li><a href="https://github.com/moodle/moodle/tree/MOODLE_502_STABLE/public/enrol" target="_blank" rel="noreferrer">public/enrol</a>：注册插件目录。</li>
+            <li><a href="https://github.com/moodle/moodle/tree/MOODLE_502_STABLE/public/availability/condition" target="_blank" rel="noreferrer">availability conditions</a>：completion、date、grade、group、grouping、profile。</li>
+            <li><a href="https://github.com/moodle/moodle/tree/MOODLE_502_STABLE/public/ai/provider" target="_blank" rel="noreferrer">AI providers</a>：awsbedrock、azureai、deepseek、gemini、ollama、openai。</li>
+            <li><a href="https://github.com/moodle/moodle/blob/MOODLE_502_STABLE/COPYING.txt" target="_blank" rel="noreferrer">COPYING.txt</a>：GNU GPL v3。</li>
+            <li><a href="https://github.com/moodle/moodle/blob/MOODLE_502_STABLE/TRADEMARK.txt" target="_blank" rel="noreferrer">TRADEMARK.txt</a>：Moodle 商标政策。</li>
+          </ul>
+        </article>
+        <article class="source-card">
+          <h3>半米本地资料</h3>
+          <ul>
+            <li><code>/Users/jay/Desktop/Obsidian/01 系统开发/2.AI学习系统：半米/README.md</code></li>
+            <li><code>1.产品思路/1.五端/0.总览.md</code></li>
+            <li><code>2.MVP-产品手册/0-V0.1阅读闭环总纲.md</code></li>
+            <li><code>2.MVP-产品手册/2-技术架构.md</code></li>
+            <li><code>2.MVP-产品手册/3-数据与报告契约.md</code></li>
+            <li><code>4.专题研究/2026-05-23/done 考试系统开源项目Spike-2026-05-23.md</code></li>
+            <li><code>4.专题研究/2026-05-23/半米系统审查与竞品调研报告-2026-05-23.md</code></li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="footnotes">
+      <p><strong>报告生成说明：</strong>本报告在 2026-05-26 生成。Moodle 版本信息按官方 releases 页面、Moodle 5.2 release notes、GitHub `MOODLE_502_STABLE` 分支和 `v5.2.0` tag 核对。由于当前日期早于官方页面列出的 2026-06-08 维护发布日期，本报告不把 5.2.1 当作已发布基准。</p>
+      <p><strong>法律说明：</strong>许可证与商标部分是工程风险判断，不等同正式法律意见。若半米准备发布 Moodle 插件、兼容包、商业集成或私有化交付，应在实施前做一次独立法务复核。</p>
+    </section>
+  </main>
+</body>
+</html>

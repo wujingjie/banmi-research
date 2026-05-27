@@ -228,17 +228,53 @@
     section.chapter.collapsed > h2 .caret { display: none; }
   }
 
-  /* === actionable references (2026-05-27 patch) === */
-  .ref-list li:target {
-    animation: ref-highlight 2.4s ease-out;
+
+  /* === actionable references · popover (2026-05-27 v2) === */
+  sup.cite {
+    cursor: help;
+    position: relative;
+    border-bottom: 1px dotted currentColor;
+    padding: 0 1px;
   }
-  @keyframes ref-highlight {
-    0%   { background: rgba(250, 204, 21, 0.55); }
-    60%  { background: rgba(250, 204, 21, 0.55); }
-    100% { background: transparent; }
+  sup.cite:hover {
+    background: rgba(250, 204, 21, 0.3);
+    border-radius: 3px;
   }
-  sup.cite a { text-decoration: none; color: inherit; }
-  sup.cite a:hover { text-decoration: underline; }
+  .cite-popover {
+    position: absolute;
+    z-index: 9999;
+    background: var(--bg-elevated, #ffffff);
+    color: var(--text, #1a1a23);
+    border: 1px solid var(--border, #e3e6ec);
+    border-radius: 10px;
+    padding: 12px 14px;
+    max-width: 380px;
+    min-width: 220px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+    font-size: 13px;
+    line-height: 1.55;
+    font-weight: normal;
+    pointer-events: auto;
+  }
+  [data-theme="dark"] .cite-popover {
+    background: #1a1e2a;
+    color: #e6e9f0;
+    border-color: #2a2f3a;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+  .cite-popover a {
+    color: var(--accent, #2563eb);
+    text-decoration: underline;
+    word-break: break-all;
+  }
+  [data-theme="dark"] .cite-popover a {
+    color: #60a5fa;
+  }
+  .cite-popover ul, .cite-popover ol {
+    margin: 4px 0 0;
+    padding-left: 18px;
+  }
+  .cite-popover ::before { content: none !important; }
 
 </style>
 </head>
@@ -302,20 +338,20 @@
     <div class="chapter-body">
 
       <div class="callout accent">
-        <p><strong>一句话</strong>：Dictation 不是 1970s 的"机械训练"标签那样简单。Cai 2013<sup class="cite"><a href="#ref-1">[1]</a></sup>、Kuo 2010<sup class="cite"><a href="#ref-2">[2]</a></sup>、Yu/Boers/Tremblay 2025<sup class="cite"><a href="#ref-3">[3]</a></sup> 系列实证证明 <strong>partial dictation 在 confirmatory factor analysis 上跟 higher-order listening 测的是同一个 latent construct</strong>，dictogloss 还能在词汇 + 语法两端起效。半米的视频例句库 + CEFR 分级数据 → <strong>做听写是零迁移成本的下一步功能</strong>。</p>
+        <p><strong>一句话</strong>：Dictation 不是 1970s 的"机械训练"标签那样简单。Cai 2013<sup class="cite" data-refid="1">[1]</sup>、Kuo 2010<sup class="cite" data-refid="2">[2]</sup>、Yu/Boers/Tremblay 2025<sup class="cite" data-refid="3">[3]</sup> 系列实证证明 <strong>partial dictation 在 confirmatory factor analysis 上跟 higher-order listening 测的是同一个 latent construct</strong>，dictogloss 还能在词汇 + 语法两端起效。半米的视频例句库 + CEFR 分级数据 → <strong>做听写是零迁移成本的下一步功能</strong>。</p>
       </div>
 
       <h3>📊 关键数字一眼看完</h3>
 
       <div class="metric-grid">
-        <div class="metric"><div class="v">.69-.89</div><div class="l">cloze/dictation 与 TOEFL 总分相关系数<sup class="cite"><a href="#ref-4">[4]</a></sup></div></div>
-        <div class="metric"><div class="v">367</div><div class="l">Cai 2013 confirmatory factor analysis 样本量<sup class="cite"><a href="#ref-1">[1]</a></sup></div></div>
-        <div class="metric"><div class="v">10M+</div><div class="l">Lyrics Training 全球用户<sup class="cite"><a href="#ref-5">[5]</a></sup></div></div>
-        <div class="metric"><div class="v">13</div><div class="l">Lyrics Training 支持语言数<sup class="cite"><a href="#ref-5">[5]</a></sup></div></div>
-        <div class="metric"><div class="v">12M</div><div class="l">2014 中国汉字听写大会参赛学生<sup class="cite"><a href="#ref-6">[6]</a></sup></div></div>
-        <div class="metric"><div class="v">12.8</div><div class="l">Whisper 英语 ASR 平均 WER %<sup class="cite"><a href="#ref-7">[7]</a></sup></div></div>
-        <div class="metric"><div class="v">$15</div><div class="l">OpenAI TTS 每百万字符（最便宜档）<sup class="cite"><a href="#ref-8">[8]</a></sup></div></div>
-        <div class="metric"><div class="v">6-9</div><div class="l">DET Listen-and-Type 题目数<sup class="cite"><a href="#ref-9">[9]</a></sup></div></div>
+        <div class="metric"><div class="v">.69-.89</div><div class="l">cloze/dictation 与 TOEFL 总分相关系数<sup class="cite" data-refid="4">[4]</sup></div></div>
+        <div class="metric"><div class="v">367</div><div class="l">Cai 2013 confirmatory factor analysis 样本量<sup class="cite" data-refid="1">[1]</sup></div></div>
+        <div class="metric"><div class="v">10M+</div><div class="l">Lyrics Training 全球用户<sup class="cite" data-refid="5">[5]</sup></div></div>
+        <div class="metric"><div class="v">13</div><div class="l">Lyrics Training 支持语言数<sup class="cite" data-refid="5">[5]</sup></div></div>
+        <div class="metric"><div class="v">12M</div><div class="l">2014 中国汉字听写大会参赛学生<sup class="cite" data-refid="6">[6]</sup></div></div>
+        <div class="metric"><div class="v">12.8</div><div class="l">Whisper 英语 ASR 平均 WER %<sup class="cite" data-refid="7">[7]</sup></div></div>
+        <div class="metric"><div class="v">$15</div><div class="l">OpenAI TTS 每百万字符（最便宜档）<sup class="cite" data-refid="8">[8]</sup></div></div>
+        <div class="metric"><div class="v">6-9</div><div class="l">DET Listen-and-Type 题目数<sup class="cite" data-refid="9">[9]</sup></div></div>
       </div>
 
       <h3>🎯 3 条核心结论</h3>
@@ -323,21 +359,21 @@
       <div class="principle-card" style="border-left-color: var(--good);">
         <div class="head"><span class="badge" style="background:var(--good-soft);color:var(--good)">结论 #1</span> Partial / Cloze 听写测的不是"机械拼写"，而是 higher-order listening</div>
         <div class="body">
-          Cai 2013 在 367 名中国大学 EFL 学习者上做 confirmatory factor analysis，<strong>bi-factor model 最佳拟合</strong>，证明 partial dictation 跟 gap-filling、constructed response 同测一个 latent listening competence<sup class="cite"><a href="#ref-1">[1]</a></sup>。这从根上推翻了 Heaton 1975 / Davies 1977 "dictation 太 imprecise 测不到高阶能力"的批评<sup class="cite"><a href="#ref-10">[10]</a></sup>。<strong>对半米的意义：cloze 听写不是低档练习，是 B1+ 学员的核心训练模式</strong>。
+          Cai 2013 在 367 名中国大学 EFL 学习者上做 confirmatory factor analysis，<strong>bi-factor model 最佳拟合</strong>，证明 partial dictation 跟 gap-filling、constructed response 同测一个 latent listening competence<sup class="cite" data-refid="1">[1]</sup>。这从根上推翻了 Heaton 1975 / Davies 1977 "dictation 太 imprecise 测不到高阶能力"的批评<sup class="cite" data-refid="10">[10]</sup>。<strong>对半米的意义：cloze 听写不是低档练习，是 B1+ 学员的核心训练模式</strong>。
         </div>
       </div>
 
       <div class="principle-card" style="border-left-color: var(--info);">
         <div class="head"><span class="badge" style="background:var(--info-soft);color:var(--info)">结论 #2</span> 4 种类型按 CEFR 分配，半米的 V0.1 应从 word-level cloze 起步</div>
         <div class="body">
-          句子级（A2-C2 全档）/ 词级（A1-A2）/ 段落级（B2-C2）/ Cloze 挖空（A2-C1）<sup class="cite"><a href="#ref-11">[11]</a></sup>。半米首批用户 A2-B1 居多，<strong>用现成 6 例句视频做"字幕显示 + 挖目标词"的 cloze 模式</strong>，工程量 1-2 天可落地，跟"6 例句"标准无缝接入 — 这就是 V0.1。再叠 V0.2 句级、V0.3 段级、V1.0 dictogloss 形成 4 阶梯。
+          句子级（A2-C2 全档）/ 词级（A1-A2）/ 段落级（B2-C2）/ Cloze 挖空（A2-C1）<sup class="cite" data-refid="11">[11]</sup>。半米首批用户 A2-B1 居多，<strong>用现成 6 例句视频做"字幕显示 + 挖目标词"的 cloze 模式</strong>，工程量 1-2 天可落地，跟"6 例句"标准无缝接入 — 这就是 V0.1。再叠 V0.2 句级、V0.3 段级、V1.0 dictogloss 形成 4 阶梯。
         </div>
       </div>
 
       <div class="principle-card" style="border-left-color: var(--purple);">
         <div class="head"><span class="badge" style="background:var(--purple-soft);color:var(--purple)">结论 #3</span> 半米对比竞品的 4 大差异化优势</div>
         <div class="body">
-          跟 Lyrics Training（歌词挖空 / 全球 10M+ 用户）<sup class="cite"><a href="#ref-5">[5]</a></sup>、不背单词（中国 50M+ 注册用户 / 听写模式）<sup class="cite"><a href="#ref-12">[12]</a></sup>、扇贝听力（120K+ 真实材料 / 句级精听）<sup class="cite"><a href="#ref-13">[13]</a></sup>、DET Listen-and-Type（高利害考试）<sup class="cite"><a href="#ref-9">[9]</a></sup> 比，半米的差异化是：(1) <strong>词汇 CEFR 等级联动出题</strong>（不是孤立 audio）；(2) <strong>真实视频例句</strong>（不是 TTS 合成 / 不是歌词 — 跟 narrow listening 学派对齐）；(3) <strong>跟读 + 听写 + AI 对话四件套联动</strong>（不是单点功能）；(4) <strong>UGC 错题反哺</strong>（学员👎过的句子优先出题）。
+          跟 Lyrics Training（歌词挖空 / 全球 10M+ 用户）<sup class="cite" data-refid="5">[5]</sup>、不背单词（中国 50M+ 注册用户 / 听写模式）<sup class="cite" data-refid="12">[12]</sup>、扇贝听力（120K+ 真实材料 / 句级精听）<sup class="cite" data-refid="13">[13]</sup>、DET Listen-and-Type（高利害考试）<sup class="cite" data-refid="9">[9]</sup> 比，半米的差异化是：(1) <strong>词汇 CEFR 等级联动出题</strong>（不是孤立 audio）；(2) <strong>真实视频例句</strong>（不是 TTS 合成 / 不是歌词 — 跟 narrow listening 学派对齐）；(3) <strong>跟读 + 听写 + AI 对话四件套联动</strong>（不是单点功能）；(4) <strong>UGC 错题反哺</strong>（学员👎过的句子优先出题）。
         </div>
       </div>
 
@@ -346,7 +382,7 @@
         <p><strong>半米 dictation 模块 V0.1-V1.0 路线</strong>：</p>
         <ol>
           <li><strong>V0.1（1-2 天）</strong>：词级 cloze。复用现成 6 例句 + 字幕 timestamp + 字符匹配评分（Levenshtein）。<strong>本周末可上</strong>。</li>
-          <li><strong>V0.2（+1 天）</strong>：扩到 1-3 词的句级挖空 + 重听控制（YouTube iframe playbackRate=0.75）<sup class="cite"><a href="#ref-14">[14]</a></sup>。</li>
+          <li><strong>V0.2（+1 天）</strong>：扩到 1-3 词的句级挖空 + 重听控制（YouTube iframe playbackRate=0.75）<sup class="cite" data-refid="14">[14]</sup>。</li>
           <li><strong>V0.3（+2-3 天）</strong>：段落级听写（30-60s 多句拼接 + working memory 难度）。</li>
           <li><strong>V1.0（+3-5 天）</strong>：Dictogloss 重建听写 + GPT-4o-mini 评分（Wajnryb 1990 原型 + Yu/Boers 2025 实证<sup class="cite">[3][15]</sup>）。</li>
         </ol>
@@ -367,15 +403,15 @@
 
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">📜</span> Oller 1971 "Dictation as a Device for Testing Foreign Language Proficiency" <span class="verdict v-good">奠基</span></div>
-        <div class="m-sub">English Language Teaching, 25, 254-259<sup class="cite"><a href="#ref-16">[16]</a></sup></div>
+        <div class="m-sub">English Language Teaching, 25, 254-259<sup class="cite" data-refid="16">[16]</sup></div>
         <div class="m-body">
-          <p>Oller 1971 是公认 dictation 进入主流测试理论的奠基论文。他论证 dictation 不是"机械听写"，而是激活学习者<strong>internalized grammar of expectancy</strong>：学员必须 (1) 区分音素单元；(2) 决定词边界；(3) 解出能成立的词序；(4) 翻译为 graphemic representation<sup class="cite"><a href="#ref-16">[16]</a></sup>。这四步同时调用音系、词汇、语法、语用 — 是 <strong>integrative test</strong> 的范式标本。</p>
-          <p>跟随的 Oller 1979 <em>Language Tests at School: A Pragmatic Approach</em><sup class="cite"><a href="#ref-17">[17]</a></sup> 把整个 integrative testing 派别系统化。学界还有 Sawyer & Silver 1961/1972<sup class="cite"><a href="#ref-18">[18]</a></sup> 早期实证 + Lado 1961 测试理论基础<sup class="cite"><a href="#ref-19">[19]</a></sup>。</p>
+          <p>Oller 1971 是公认 dictation 进入主流测试理论的奠基论文。他论证 dictation 不是"机械听写"，而是激活学习者<strong>internalized grammar of expectancy</strong>：学员必须 (1) 区分音素单元；(2) 决定词边界；(3) 解出能成立的词序；(4) 翻译为 graphemic representation<sup class="cite" data-refid="16">[16]</sup>。这四步同时调用音系、词汇、语法、语用 — 是 <strong>integrative test</strong> 的范式标本。</p>
+          <p>跟随的 Oller 1979 <em>Language Tests at School: A Pragmatic Approach</em><sup class="cite" data-refid="17">[17]</sup> 把整个 integrative testing 派别系统化。学界还有 Sawyer & Silver 1961/1972<sup class="cite" data-refid="18">[18]</sup> 早期实证 + Lado 1961 测试理论基础<sup class="cite" data-refid="19">[19]</sup>。</p>
         </div>
       </div>
 
       <div class="callout info">
-        <p>🔍 <strong>关键数据点</strong>：Oller & Streiff 1975 + Oller & Conrad 1971 给出 cloze/dictation 跟 TOEFL 总分的相关系数 .69-.89<sup class="cite"><a href="#ref-4">[4]</a></sup>。Irvine/Atai/Oller 1974 拆细：dictation vs TOEFL Listening r=.69，vs Structure r=.63，vs Vocabulary r=.47，vs Reading r=.53，vs Writing r=.52<sup class="cite"><a href="#ref-4">[4]</a></sup>。<strong>结论</strong>：dictation 跟 listening 子分关联最紧，但跟其他子分都显著相关 — 即 integrative 性质成立。</p>
+        <p>🔍 <strong>关键数据点</strong>：Oller & Streiff 1975 + Oller & Conrad 1971 给出 cloze/dictation 跟 TOEFL 总分的相关系数 .69-.89<sup class="cite" data-refid="4">[4]</sup>。Irvine/Atai/Oller 1974 拆细：dictation vs TOEFL Listening r=.69，vs Structure r=.63，vs Vocabulary r=.47，vs Reading r=.53，vs Writing r=.52<sup class="cite" data-refid="4">[4]</sup>。<strong>结论</strong>：dictation 跟 listening 子分关联最紧，但跟其他子分都显著相关 — 即 integrative 性质成立。</p>
       </div>
 
       <h3>2.2 1975-1985 批评期 · Heaton / Davies / discrete-point 学派反扑</h3>
@@ -383,40 +419,40 @@
       <p>Oller 风头过盛后，1975-1985 的批评期开始。代表人物：</p>
 
       <ul>
-        <li><strong>Heaton 1975</strong>：dictation 不是单技能测量工具，因为它同时测了太多东西 — 既测拼写、又测听辨、又测语法、又测词汇 — 这<strong>反而是 construct validity 的问题</strong>，你说不清它测的是哪个能力<sup class="cite"><a href="#ref-10">[10]</a></sup></li>
-        <li><strong>Davies 1977</strong>：dictation 作为测试方法<strong>imprecise</strong>，没办法 isolate 出特定能力<sup class="cite"><a href="#ref-10">[10]</a></sup></li>
-        <li><strong>discrete-point vs integrative 大论战</strong>：1976-1980s 学界 split 成两派 — discrete-point 派要求每题测一个独立 micro-skill（典型如 multiple choice 语法题）；integrative 派认为语言是 unitary competence，应该用 cloze / dictation 这种综合任务测<sup class="cite"><a href="#ref-20">[20]</a></sup></li>
+        <li><strong>Heaton 1975</strong>：dictation 不是单技能测量工具，因为它同时测了太多东西 — 既测拼写、又测听辨、又测语法、又测词汇 — 这<strong>反而是 construct validity 的问题</strong>，你说不清它测的是哪个能力<sup class="cite" data-refid="10">[10]</sup></li>
+        <li><strong>Davies 1977</strong>：dictation 作为测试方法<strong>imprecise</strong>，没办法 isolate 出特定能力<sup class="cite" data-refid="10">[10]</sup></li>
+        <li><strong>discrete-point vs integrative 大论战</strong>：1976-1980s 学界 split 成两派 — discrete-point 派要求每题测一个独立 micro-skill（典型如 multiple choice 语法题）；integrative 派认为语言是 unitary competence，应该用 cloze / dictation 这种综合任务测<sup class="cite" data-refid="20">[20]</sup></li>
       </ul>
 
       <div class="callout warn">
-        <p>⚠️ <strong>历史误读</strong>：很多 ELT 教师以为 "dictation 1970s 后过气了" — 其实是被<strong>1980-1990s communicative language teaching (CLT)</strong> 浪潮挤出聚光灯，因为 CLT 主推 task-based 真实场景，而 dictation 看起来太"非沟通"。但学术上从未真正被证伪。Buck 2001<sup class="cite"><a href="#ref-21">[21]</a></sup> 在 <em>Assessing Listening</em> 里明确"defends the plausibility of dictation as an integrative test"。</p>
+        <p>⚠️ <strong>历史误读</strong>：很多 ELT 教师以为 "dictation 1970s 后过气了" — 其实是被<strong>1980-1990s communicative language teaching (CLT)</strong> 浪潮挤出聚光灯，因为 CLT 主推 task-based 真实场景，而 dictation 看起来太"非沟通"。但学术上从未真正被证伪。Buck 2001<sup class="cite" data-refid="21">[21]</sup> 在 <em>Assessing Listening</em> 里明确"defends the plausibility of dictation as an integrative test"。</p>
       </div>
 
       <h3>2.3 1990 转折 · Wajnryb 提出 dictogloss</h3>
 
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">🔄</span> Wajnryb 1990 <em>Grammar Dictation</em> — 用 dictation 教 grammar <span class="verdict v-good">范式重塑</span></div>
-        <div class="m-sub">Cambridge University Press<sup class="cite"><a href="#ref-15">[15]</a></sup></div>
+        <div class="m-sub">Cambridge University Press<sup class="cite" data-refid="15">[15]</sup></div>
         <div class="m-body">
           <p>澳大利亚教师 Ruth Wajnryb 1990 出版 <em>Grammar Dictation</em>，提出 <strong>dictogloss</strong>（"听写重建"）—— 跟传统 dictation 关键差异：<strong>学员不立刻写下来，而是听原速 2 遍 → 只做关键词笔记 → 小组协作重建全文 → 跟原文对比</strong><sup class="cite">[15][22]</sup>。</p>
-          <p>4 步原型：(1) preparation 预热 + 主题词汇；(2) dictation 原速读两遍 + 学员记关键词；(3) reconstruction 小组重建；(4) analysis & correction 跟原文对比 + 师生分析<sup class="cite"><a href="#ref-22">[22]</a></sup>。<strong>核心创新</strong>：从 input-only 翻到 output-friendly — 学员被迫调用 Swain pushed output。</p>
+          <p>4 步原型：(1) preparation 预热 + 主题词汇；(2) dictation 原速读两遍 + 学员记关键词；(3) reconstruction 小组重建；(4) analysis & correction 跟原文对比 + 师生分析<sup class="cite" data-refid="22">[22]</sup>。<strong>核心创新</strong>：从 input-only 翻到 output-friendly — 学员被迫调用 Swain pushed output。</p>
         </div>
       </div>
 
       <h3>2.4 2001-2013 复兴期 · Buck / Cai / Kuo / Prince</h3>
 
-      <p>从 Buck 2001 <em>Assessing Listening</em><sup class="cite"><a href="#ref-21">[21]</a></sup> 起到 Cai 2013<sup class="cite"><a href="#ref-1">[1]</a></sup>，dictation 重新回到 SLA 主流：</p>
+      <p>从 Buck 2001 <em>Assessing Listening</em><sup class="cite" data-refid="21">[21]</sup> 起到 Cai 2013<sup class="cite" data-refid="1">[1]</sup>，dictation 重新回到 SLA 主流：</p>
 
       <div class="table-wrap">
         <table>
           <thead><tr><th>研究</th><th>年份</th><th>样本 / 设计</th><th>关键发现</th></tr></thead>
           <tbody>
-            <tr><td>Buck <em>Assessing Listening</em></td><td>2001</td><td>Cambridge 教科书</td><td>defends dictation as integrative test, "back into vogue"<sup class="cite"><a href="#ref-21">[21]</a></sup></td></tr>
-            <tr><td>Kuo</td><td>2010</td><td>31 名台湾大一工程系学员 + partial dictation 配合英语广播</td><td>paired-samples t-test 显著改善 listening comprehension；针对 word recognition + word segmentation 决码问题<sup class="cite"><a href="#ref-2">[2]</a></sup></td></tr>
-            <tr><td>Field <em>Listening in the Language Classroom</em></td><td>2008</td><td>information-processing model</td><td>建立 bottom-up listening 模型：phoneme → word → phrase → utterance<sup class="cite"><a href="#ref-23">[23]</a></sup></td></tr>
-            <tr><td><strong>Cai ★</strong></td><td>2013</td><td>367 名中国大学生 + partial dictation + gap-filling + constructed response → CFA</td><td>bi-factor model 最佳拟合；partial dictation 跟"高阶 listening"测同一 construct<sup class="cite"><a href="#ref-1">[1]</a></sup></td></tr>
-            <tr><td>Prince</td><td>2013</td><td>dictogloss task variation 研究</td><td>探索 task implementation 变量对学员产出的影响<sup class="cite"><a href="#ref-24">[24]</a></sup></td></tr>
-            <tr><td>Vandergrift & Goh</td><td>2012</td><td><em>Teaching and Learning Second Language Listening: Metacognition in Action</em></td><td>把 dictation 纳入 metacognitive listening pedagogy<sup class="cite"><a href="#ref-25">[25]</a></sup></td></tr>
+            <tr><td>Buck <em>Assessing Listening</em></td><td>2001</td><td>Cambridge 教科书</td><td>defends dictation as integrative test, "back into vogue"<sup class="cite" data-refid="21">[21]</sup></td></tr>
+            <tr><td>Kuo</td><td>2010</td><td>31 名台湾大一工程系学员 + partial dictation 配合英语广播</td><td>paired-samples t-test 显著改善 listening comprehension；针对 word recognition + word segmentation 决码问题<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td>Field <em>Listening in the Language Classroom</em></td><td>2008</td><td>information-processing model</td><td>建立 bottom-up listening 模型：phoneme → word → phrase → utterance<sup class="cite" data-refid="23">[23]</sup></td></tr>
+            <tr><td><strong>Cai ★</strong></td><td>2013</td><td>367 名中国大学生 + partial dictation + gap-filling + constructed response → CFA</td><td>bi-factor model 最佳拟合；partial dictation 跟"高阶 listening"测同一 construct<sup class="cite" data-refid="1">[1]</sup></td></tr>
+            <tr><td>Prince</td><td>2013</td><td>dictogloss task variation 研究</td><td>探索 task implementation 变量对学员产出的影响<sup class="cite" data-refid="24">[24]</sup></td></tr>
+            <tr><td>Vandergrift & Goh</td><td>2012</td><td><em>Teaching and Learning Second Language Listening: Metacognition in Action</em></td><td>把 dictation 纳入 metacognitive listening pedagogy<sup class="cite" data-refid="25">[25]</sup></td></tr>
           </tbody>
         </table>
       </div>
@@ -426,23 +462,23 @@
       <div class="callout good">
         <p>🟢 <strong>最新 5 年实证（高质量）</strong>：</p>
         <ul>
-          <li><strong>Hamada 2016</strong>：shadowing 的姐妹研究，证明 dictation + shadowing 联动对 bottom-up decoding 增益最大<sup class="cite"><a href="#ref-26">[26]</a></sup>。半米的"听写 + 跟读"组合<strong>直接对应这个证据</strong>。</li>
-          <li><strong>Yu, Boers, Tremblay 2025</strong>（<em>Language Teaching Research</em> Vol 29 Issue 6）<sup class="cite"><a href="#ref-3">[3]</a></sup>：142 名中国 EFL 学员准实验，对比 <strong>dictation vs dictogloss vs comprehension questions</strong>。结果：(1) dictation 和 dictogloss 在<strong>立即测验</strong>都显著优于 comprehension questions；(2) <strong>2 周延迟测验</strong>差距缩小，且 <strong>dictation 的衰减比 dictogloss 更明显</strong> — 说明 dictogloss 的长期保持更好。</li>
-          <li><strong>AI-driven speech recognition RCT 2025</strong>（<em>Humanities and Social Sciences Communications</em>）：84 名中国大学生 RCT，AI ASR 组在 listening skill / flow / 焦虑三项都显著优于对照组，3 周 follow-up 仍维持<sup class="cite"><a href="#ref-27">[27]</a></sup>。<strong>对半米的意义</strong>：Whisper + 评分反馈不只是"工具"，是有学习效果证据的干预手段。</li>
-          <li><strong>Wakitsu et al. 2023 meta-analysis</strong>：15 项研究 + 38 effect sizes，ASR 整体 medium 效应（g=0.69）；indirect feedback 如 ASR dictation 中等效应<sup class="cite"><a href="#ref-28">[28]</a></sup>。</li>
+          <li><strong>Hamada 2016</strong>：shadowing 的姐妹研究，证明 dictation + shadowing 联动对 bottom-up decoding 增益最大<sup class="cite" data-refid="26">[26]</sup>。半米的"听写 + 跟读"组合<strong>直接对应这个证据</strong>。</li>
+          <li><strong>Yu, Boers, Tremblay 2025</strong>（<em>Language Teaching Research</em> Vol 29 Issue 6）<sup class="cite" data-refid="3">[3]</sup>：142 名中国 EFL 学员准实验，对比 <strong>dictation vs dictogloss vs comprehension questions</strong>。结果：(1) dictation 和 dictogloss 在<strong>立即测验</strong>都显著优于 comprehension questions；(2) <strong>2 周延迟测验</strong>差距缩小，且 <strong>dictation 的衰减比 dictogloss 更明显</strong> — 说明 dictogloss 的长期保持更好。</li>
+          <li><strong>AI-driven speech recognition RCT 2025</strong>（<em>Humanities and Social Sciences Communications</em>）：84 名中国大学生 RCT，AI ASR 组在 listening skill / flow / 焦虑三项都显著优于对照组，3 周 follow-up 仍维持<sup class="cite" data-refid="27">[27]</sup>。<strong>对半米的意义</strong>：Whisper + 评分反馈不只是"工具"，是有学习效果证据的干预手段。</li>
+          <li><strong>Wakitsu et al. 2023 meta-analysis</strong>：15 项研究 + 38 effect sizes，ASR 整体 medium 效应（g=0.69）；indirect feedback 如 ASR dictation 中等效应<sup class="cite" data-refid="28">[28]</sup>。</li>
         </ul>
       </div>
 
       <h3>2.6 中国本土脉络 · 钟道隆透析法（1980s-至今）</h3>
 
-      <p>不能跳过 — 中国英语教育里"听写"概念被钟道隆 1980s 提出的<strong>逆向英语学习法（透析法）</strong>反复塑造。45 岁的通信工程师钟道隆从英语薄弱到能做翻译只用了 18 个月，方法浓缩成<strong>"听、写、说、背、想"5 步</strong>，材料用 VOA Special English<sup class="cite"><a href="#ref-29">[29]</a></sup>。</p>
+      <p>不能跳过 — 中国英语教育里"听写"概念被钟道隆 1980s 提出的<strong>逆向英语学习法（透析法）</strong>反复塑造。45 岁的通信工程师钟道隆从英语薄弱到能做翻译只用了 18 个月，方法浓缩成<strong>"听、写、说、背、想"5 步</strong>，材料用 VOA Special English<sup class="cite" data-refid="29">[29]</sup>。</p>
 
       <div class="callout teal">
         <p><strong>透析法 SLA 对照</strong>（参见父报告 Ch6）：</p>
         <ul>
           <li>"逐句听写慢速 VOA" = <strong>narrow listening (Krashen)</strong> + <strong>classical dictation (Oller/Cai)</strong></li>
           <li>"反对查字典 / 慢速反复" = <strong>i+1 + dictogloss</strong> 在缺乏母语环境下的中国式落地</li>
-          <li>记录效果：钟道隆指导过的学校英语四级通过率从 40% → 100%<sup class="cite"><a href="#ref-29">[29]</a></sup> ⚠️ 自报数据需谨慎</li>
+          <li>记录效果：钟道隆指导过的学校英语四级通过率从 40% → 100%<sup class="cite" data-refid="29">[29]</sup> ⚠️ 自报数据需谨慎</li>
         </ul>
         <p><strong>对半米的意义</strong>：透析法被中文圈贴"伪科学"标签是误读 — 它在 SLA 学界 5 个理论坐标里站得住。<strong>半米的 VOA / SciShow Kids 视频例句库 + 听写挖空就是透析法的现代化版本</strong>。</p>
       </div>
@@ -482,11 +518,11 @@
         <table>
           <thead><tr><th>类型</th><th>CEFR 适配</th><th>主测</th><th>难度</th><th>半米可做</th><th>学术证据</th></tr></thead>
           <tbody>
-            <tr><td><strong>句子级</strong> Sentence Dictation</td><td>A2-C2 全档</td><td>音节切分 + 拼写 + 短期记忆</td><td>★★★★</td><td>V0.3 句级 / V0.5 整段</td><td>Oller 1971 原型<sup class="cite"><a href="#ref-16">[16]</a></sup></td></tr>
-            <tr><td><strong>词级</strong> Word Dictation</td><td>A1-A2</td><td>音素辨识 + 拼写</td><td>★★</td><td>已部分实现（不背模式）</td><td>spelling 类研究<sup class="cite"><a href="#ref-30">[30]</a></sup></td></tr>
-            <tr><td><strong>段落级</strong> Passage Dictation</td><td>B2-C2</td><td>working memory + 重组</td><td>★★★★★</td><td>V0.3 30-60s 段落</td><td>IELTS Listening Section 4 模式<sup class="cite"><a href="#ref-31">[31]</a></sup></td></tr>
-            <tr><td><strong>Cloze 挖空</strong> Partial Dictation ★</td><td>A2-C1</td><td>focused listening + 词汇 recall</td><td>★★☆</td><td><strong>V0.1 首选 ✅</strong></td><td>Cai 2013 CFA<sup class="cite"><a href="#ref-1">[1]</a></sup></td></tr>
-            <tr><td><strong>Dictogloss</strong> 重建听写</td><td>B1-C1</td><td>意义理解 + 语法重构 + output</td><td>★★★★</td><td>V1.0 高级模式</td><td>Wajnryb 1990<sup class="cite"><a href="#ref-15">[15]</a></sup> + Yu 2025<sup class="cite"><a href="#ref-3">[3]</a></sup></td></tr>
+            <tr><td><strong>句子级</strong> Sentence Dictation</td><td>A2-C2 全档</td><td>音节切分 + 拼写 + 短期记忆</td><td>★★★★</td><td>V0.3 句级 / V0.5 整段</td><td>Oller 1971 原型<sup class="cite" data-refid="16">[16]</sup></td></tr>
+            <tr><td><strong>词级</strong> Word Dictation</td><td>A1-A2</td><td>音素辨识 + 拼写</td><td>★★</td><td>已部分实现（不背模式）</td><td>spelling 类研究<sup class="cite" data-refid="30">[30]</sup></td></tr>
+            <tr><td><strong>段落级</strong> Passage Dictation</td><td>B2-C2</td><td>working memory + 重组</td><td>★★★★★</td><td>V0.3 30-60s 段落</td><td>IELTS Listening Section 4 模式<sup class="cite" data-refid="31">[31]</sup></td></tr>
+            <tr><td><strong>Cloze 挖空</strong> Partial Dictation ★</td><td>A2-C1</td><td>focused listening + 词汇 recall</td><td>★★☆</td><td><strong>V0.1 首选 ✅</strong></td><td>Cai 2013 CFA<sup class="cite" data-refid="1">[1]</sup></td></tr>
+            <tr><td><strong>Dictogloss</strong> 重建听写</td><td>B1-C1</td><td>意义理解 + 语法重构 + output</td><td>★★★★</td><td>V1.0 高级模式</td><td>Wajnryb 1990<sup class="cite" data-refid="15">[15]</sup> + Yu 2025<sup class="cite" data-refid="3">[3]</sup></td></tr>
           </tbody>
         </table>
       </div>
@@ -499,7 +535,7 @@
           <p><strong>实现</strong>：(1) 播一句完整音频；(2) 学员有 X 秒打字；(3) 重听 1-2 次；(4) 提交 → 字符级 diff 显示对错。</p>
           <p><strong>难度可调参数</strong>：句长（3-30 词）/ 语速（0.75x-1.2x）/ 主题熟悉度 / 重听次数（1 次 / 2 次 / 无限）。</p>
           <p><strong>CEFR 适配</strong>：A2 → 5-8 词简单句；B1 → 10-15 词复合句；B2 → 含从句的长句；C1+ → 学术演讲单句。</p>
-          <p><strong>学术证据</strong>：Oller 1971 原型；Cai 2013 把它跟 partial dictation 一起做 CFA<sup class="cite"><a href="#ref-1">[1]</a></sup>；Vietnam 2024 study<sup class="cite"><a href="#ref-32">[32]</a></sup> 显示 young learners 也 receptive。</p>
+          <p><strong>学术证据</strong>：Oller 1971 原型；Cai 2013 把它跟 partial dictation 一起做 CFA<sup class="cite" data-refid="1">[1]</sup>；Vietnam 2024 study<sup class="cite" data-refid="32">[32]</sup> 显示 young learners 也 receptive。</p>
           <p><strong>优</strong>：测最全面的 listening 能力（音系 + 词汇 + 语法 + 短期记忆）。<strong>劣</strong>：A1 学员负担过重；评分要容忍同义改写。</p>
         </div>
       </div>
@@ -511,7 +547,7 @@
         <div class="m-body">
           <p><strong>实现</strong>：(1) 播放单词音频（带例句重音）；(2) 学员打字；(3) 提交 → 拼写匹配。中国系 App "不背单词" / "百词斩" 标配此模式<sup class="cite">[12][33]</sup>。</p>
           <p><strong>CEFR 适配</strong>：A1 高频词；A2 学术启蒙词。<strong>B1+ 学员单纯背单词意义有限</strong>，应升级到 cloze 听写。</p>
-          <p><strong>学术证据</strong>：Quizlet Spell mode（要求每词正确拼 2 次）<sup class="cite"><a href="#ref-34">[34]</a></sup>；Drops 用 audio + 词义图像组合<sup class="cite"><a href="#ref-35">[35]</a></sup>；中国系教材同步类 App 大量做此<sup class="cite"><a href="#ref-36">[36]</a></sup>。</p>
+          <p><strong>学术证据</strong>：Quizlet Spell mode（要求每词正确拼 2 次）<sup class="cite" data-refid="34">[34]</sup>；Drops 用 audio + 词义图像组合<sup class="cite" data-refid="35">[35]</sup>；中国系教材同步类 App 大量做此<sup class="cite" data-refid="36">[36]</sup>。</p>
           <p><strong>优</strong>：低门槛 / 学员爽感强 / 反馈即时。<strong>劣</strong>：单词脱离语境 → 不到 noticing-in-context（参见父报告 §2.3 Schmidt）；只够到 declarative 阶段，过不去 procedural（DeKeyser）。</p>
           <p><strong>半米对此的态度</strong>：词级听写不是"竞品做得好我也做"，而是<strong>夹在 cloze 听写里做</strong> — 半米的视频例句 + 字幕挖目标词 = 词级 + cloze 二合一，比脱离语境单词听写好。</p>
         </div>
@@ -522,9 +558,9 @@
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">📜</span> 30-60s 段落 → 学员听 1-2 次写完整段 <span class="verdict v-warn">高阶</span></div>
         <div class="m-body">
-          <p><strong>实现</strong>：(1) 播放完整 30-60s 段落；(2) 学员可重听 1-2 次；(3) 写下完整段落；(4) 句级 token 比对。<strong>IELTS Listening Section 4</strong> 就是这种 — 学术 lecture + note completion / sentence completion / summary completion<sup class="cite"><a href="#ref-31">[31]</a></sup>。</p>
+          <p><strong>实现</strong>：(1) 播放完整 30-60s 段落；(2) 学员可重听 1-2 次；(3) 写下完整段落；(4) 句级 token 比对。<strong>IELTS Listening Section 4</strong> 就是这种 — 学术 lecture + note completion / sentence completion / summary completion<sup class="cite" data-refid="31">[31]</sup>。</p>
           <p><strong>CEFR 适配</strong>：B2 简单学术段；C1 含从句和过渡的演讲段；C2 复杂论证。</p>
-          <p><strong>认知负载</strong>：极重 — working memory 是 bottleneck。SAGE 综述（Sakai）<sup class="cite"><a href="#ref-37">[37]</a></sup> 指出 WM capacity 跟 L2 listening comprehension 正相关，<strong>low proficiency 学员 WM 限制更严</strong>。</p>
+          <p><strong>认知负载</strong>：极重 — working memory 是 bottleneck。SAGE 综述（Sakai）<sup class="cite" data-refid="37">[37]</sup> 指出 WM capacity 跟 L2 listening comprehension 正相关，<strong>low proficiency 学员 WM 限制更严</strong>。</p>
           <p><strong>优</strong>：训练 working memory + discourse-level inference + 模拟真实学术听力。<strong>劣</strong>：对 A2-B1 太残忍；改卷复杂（需要忍同义改写 + 标点容错）。</p>
         </div>
       </div>
@@ -538,10 +574,10 @@
           <p><strong>CEFR 适配</strong>：A2 挖 1 个目标词；B1 挖 1-3 词；B2 挖 5+ 词或词组；C1 挖关键搭配。</p>
           <p><strong>学术证据（强）</strong>：</p>
           <ul>
-            <li>Cai 2013（367 名中国 EFL）confirmatory factor analysis 证明 <strong>partial dictation 跟"高阶 listening"测的是同一个 construct</strong>，不是"低阶机械"<sup class="cite"><a href="#ref-1">[1]</a></sup></li>
-            <li>Kuo 2010（31 名台湾大一）partial dictation + 英语广播 t-test 显著改善 listening comprehension<sup class="cite"><a href="#ref-2">[2]</a></sup></li>
-            <li>Lyrics Training（13 种语言 / 10M+ 用户）<sup class="cite"><a href="#ref-5">[5]</a></sup> = cloze dictation 商业化最成功案例 — 证明产品端可行</li>
-            <li>Yu/Boers 2025<sup class="cite"><a href="#ref-3">[3]</a></sup>：dictation 包含 cloze 对 multiword items 学习有用，立即效果显著</li>
+            <li>Cai 2013（367 名中国 EFL）confirmatory factor analysis 证明 <strong>partial dictation 跟"高阶 listening"测的是同一个 construct</strong>，不是"低阶机械"<sup class="cite" data-refid="1">[1]</sup></li>
+            <li>Kuo 2010（31 名台湾大一）partial dictation + 英语广播 t-test 显著改善 listening comprehension<sup class="cite" data-refid="2">[2]</sup></li>
+            <li>Lyrics Training（13 种语言 / 10M+ 用户）<sup class="cite" data-refid="5">[5]</sup> = cloze dictation 商业化最成功案例 — 证明产品端可行</li>
+            <li>Yu/Boers 2025<sup class="cite" data-refid="3">[3]</sup>：dictation 包含 cloze 对 multiword items 学习有用，立即效果显著</li>
           </ul>
           <p><strong>优</strong>：(1) 难度可调；(2) 工程简单（字符匹配）；(3) 适配现成视频字幕；(4) 学员负担适中；(5) 学术证据最强。<strong>劣</strong>：太多挖空时变成"猜词练习"，离 listening 远；要平衡挖空密度。</p>
           <p class="callout teal" style="margin-top: 10px;"><strong>半米现成条件</strong>：每个例句已有视频 + timestamp + CEFR 等级 + 学员 UGC 评价。Cloze 听写<strong>对应零迁移成本</strong>：增一张 <code>dictation_attempts</code> 表存学员答题历史即可。</p>
@@ -558,10 +594,10 @@
           <p><strong>CEFR 适配</strong>：B1-C1。比 dictation 更偏 output，强 Swain pushed output（参见父报告 §2.4）。</p>
           <p><strong>学术证据</strong>：</p>
           <ul>
-            <li>Wajnryb 1990 原创<sup class="cite"><a href="#ref-15">[15]</a></sup>。</li>
-            <li>Prince 2013：dictogloss 学生在 task implementation 变量上对产出有显著影响<sup class="cite"><a href="#ref-24">[24]</a></sup>。</li>
-            <li>Yu/Boers/Tremblay 2025（142 名中国 EFL 学员）<strong>关键发现</strong>：dictogloss 的<strong>2 周延迟测验保持率优于传统 dictation</strong><sup class="cite"><a href="#ref-3">[3]</a></sup> — 这是 dictogloss 比 dictation 强的实证差距。</li>
-            <li>2016-2024 综合 40 篇 dictogloss 研究：显著提升<strong>写作连贯性 + 语法准确率</strong>（父报告 Ch3 数据点）<sup class="cite"><a href="#ref-22">[22]</a></sup>。</li>
+            <li>Wajnryb 1990 原创<sup class="cite" data-refid="15">[15]</sup>。</li>
+            <li>Prince 2013：dictogloss 学生在 task implementation 变量上对产出有显著影响<sup class="cite" data-refid="24">[24]</sup>。</li>
+            <li>Yu/Boers/Tremblay 2025（142 名中国 EFL 学员）<strong>关键发现</strong>：dictogloss 的<strong>2 周延迟测验保持率优于传统 dictation</strong><sup class="cite" data-refid="3">[3]</sup> — 这是 dictogloss 比 dictation 强的实证差距。</li>
+            <li>2016-2024 综合 40 篇 dictogloss 研究：显著提升<strong>写作连贯性 + 语法准确率</strong>（父报告 Ch3 数据点）<sup class="cite" data-refid="22">[22]</sup>。</li>
           </ul>
           <p><strong>优</strong>：跨听·读·写·说四技能；语法 noticing 强；长期保持好。<strong>劣</strong>：需要 LLM 评分（成本 + 准确性）；A1-A2 学员做不了。</p>
         </div>
@@ -570,11 +606,11 @@
       <h3>3.7 5 种课堂变体（仅供参考，App 不适合）</h3>
 
       <ul>
-        <li><strong>Running Dictation</strong>：墙上贴文，学员跑去看一句 → 跑回来口述 → 同伴写。课堂 only<sup class="cite"><a href="#ref-38">[38]</a></sup>。</li>
-        <li><strong>Picture Dictation</strong>：教师描述一幅画 → 学员听 + 画。练 prepositions of place（A1-A2 启蒙）<sup class="cite"><a href="#ref-39">[39]</a></sup>。</li>
-        <li><strong>Pair Dictation</strong>：双人轮流 reader/writer，文本"分散"在两人手里<sup class="cite"><a href="#ref-38">[38]</a></sup>。</li>
-        <li><strong>Jigsaw Dictation</strong>：句子被打乱顺序贴墙上 → 学员重建文本结构<sup class="cite"><a href="#ref-38">[38]</a></sup>。</li>
-        <li><strong>Grammar Dictation</strong>：Davis & Rinvolucri 1988 <em>Dictation: New Methods, New Possibilities</em><sup class="cite"><a href="#ref-40">[40]</a></sup> 给出的若干变体 — 教师 / 学员谁选文本 / 谁纠错 / 怎么纠都开放。</li>
+        <li><strong>Running Dictation</strong>：墙上贴文，学员跑去看一句 → 跑回来口述 → 同伴写。课堂 only<sup class="cite" data-refid="38">[38]</sup>。</li>
+        <li><strong>Picture Dictation</strong>：教师描述一幅画 → 学员听 + 画。练 prepositions of place（A1-A2 启蒙）<sup class="cite" data-refid="39">[39]</sup>。</li>
+        <li><strong>Pair Dictation</strong>：双人轮流 reader/writer，文本"分散"在两人手里<sup class="cite" data-refid="38">[38]</sup>。</li>
+        <li><strong>Jigsaw Dictation</strong>：句子被打乱顺序贴墙上 → 学员重建文本结构<sup class="cite" data-refid="38">[38]</sup>。</li>
+        <li><strong>Grammar Dictation</strong>：Davis & Rinvolucri 1988 <em>Dictation: New Methods, New Possibilities</em><sup class="cite" data-refid="40">[40]</sup> 给出的若干变体 — 教师 / 学员谁选文本 / 谁纠错 / 怎么纠都开放。</li>
       </ul>
 
       <div class="callout info">
@@ -595,12 +631,12 @@
 
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">🎵</span> Lyrics Training · 全球听写挖空学习 <span class="verdict v-good">cloze 商业化最佳案例</span></div>
-        <div class="m-sub">2010 创立于西班牙瓜达拉哈拉<sup class="cite"><a href="#ref-5">[5]</a></sup></div>
+        <div class="m-sub">2010 创立于西班牙瓜达拉哈拉<sup class="cite" data-refid="5">[5]</sup></div>
         <div class="m-body">
           <p><strong>定位</strong>：歌曲歌词挖空听写。播放 MV，跟着音乐填掉的词。Web + iOS + Android（iOS 名 LingoClip）。</p>
-          <p><strong>数据点</strong>：13 种语言<sup class="cite"><a href="#ref-5">[5]</a></sup>；全球 10M+ 用户<sup class="cite"><a href="#ref-5">[5]</a></sup>；Google Play 评分 4.55 / Apple App Store 评分 4.8。</p>
+          <p><strong>数据点</strong>：13 种语言<sup class="cite" data-refid="5">[5]</sup>；全球 10M+ 用户<sup class="cite" data-refid="5">[5]</sup>；Google Play 评分 4.55 / Apple App Store 评分 4.8。</p>
           <p><strong>实现方式</strong>：(1) 字幕显示歌词 + 挖掉若干词；(2) MV 自动跑 + 字幕同步；(3) 学员打字填空，错时音频自动倒带；(4) 4 个难度档（10% / 25% / 50% / 100% 挖空率）；(5) 多人 PK 模式。</p>
-          <p><strong>定价</strong>：网页版免费 + 3 次/天限游戏（移动端）；premium ~$4.99/月 + 无限游戏<sup class="cite"><a href="#ref-41">[41]</a></sup>。</p>
+          <p><strong>定价</strong>：网页版免费 + 3 次/天限游戏（移动端）；premium ~$4.99/月 + 无限游戏<sup class="cite" data-refid="41">[41]</sup>。</p>
           <p><strong>评分逻辑</strong>：单词级 token 匹配；不容忍拼写错；punctuation 不计。</p>
           <p><strong>优</strong>：(1) 用户体验极佳（音乐 + 游戏感）；(2) 版权拿到了 MV 用户协议（少见）；(3) 多语言支持。<strong>劣</strong>：(1) 学员唱词跟自然对话差距大；(2) CEFR 等级粗（歌词难度跟分级语料不对应）；(3) prosody 偏歌唱不是日常。</p>
           <p class="callout info" style="margin-top: 10px;"><strong>对半米的启示</strong>：Lyrics Training 证明 cloze dictation 是<strong>可大规模商业化的产品形态</strong>。半米跟它的差异化 = 用"真实对话视频"（SciShow Kids / VOA）替"歌曲歌词"，跟 CEFR 词汇库联动，做"i+1 正中靶心"的挖空。</p>
@@ -612,8 +648,8 @@
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">🦜</span> Parroto · AI dictation + shadowing 双引擎 <span class="verdict v-mid">2024 新生代</span></div>
         <div class="m-body">
-          <p><strong>定位</strong>：5-10 分钟/天 dictation + shadowing + SRS 三件套<sup class="cite"><a href="#ref-42">[42]</a></sup>。iOS only。</p>
-          <p><strong>数据点</strong>：4.8/5 评分；37K+ 下载（小但增速快）；用户自报"92% 听力改进 / 95% 口语信心提升"（自报数据 ⚠️ 行业体感）<sup class="cite"><a href="#ref-42">[42]</a></sup>。</p>
+          <p><strong>定位</strong>：5-10 分钟/天 dictation + shadowing + SRS 三件套<sup class="cite" data-refid="42">[42]</sup>。iOS only。</p>
+          <p><strong>数据点</strong>：4.8/5 评分；37K+ 下载（小但增速快）；用户自报"92% 听力改进 / 95% 口语信心提升"（自报数据 ⚠️ 行业体感）<sup class="cite" data-refid="42">[42]</sup>。</p>
           <p><strong>实现</strong>：(1) 真实视频 → 抽段；(2) Dictation 模式 = AI 检查拼写；(3) Shadowing 模式 = AI 反馈节奏 + 准确度；(4) SRS 收错题。</p>
           <p><strong>对半米的启示</strong>：Parroto 的产品架构（dictation + shadowing + SRS）<strong>跟半米规划 V0.1-V0.3 高度同构</strong>。如果半米跟它对标，差异点要打在：(1) 中文界面；(2) 国内可用（不被墙）；(3) 跟视频例句库无缝；(4) 跟 K12 教材同步。</p>
         </div>
@@ -622,9 +658,9 @@
       <h3>4.3 Daily Dictation by Coach Shane · YouTube 老牌（免费）</h3>
 
       <ul>
-        <li><strong>定位</strong>：YouTube + 自建 web (dailydictation.com) + iOS app<sup class="cite"><a href="#ref-43">[43]</a></sup></li>
+        <li><strong>定位</strong>：YouTube + 自建 web (dailydictation.com) + iOS app<sup class="cite" data-refid="43">[43]</sup></li>
         <li><strong>数据点</strong>：iOS app 127K+ 下载，4.9/5 评分；YouTube 频道 dailydictation 累计数十万订阅</li>
-        <li><strong>实现</strong>：每天 1 段 1-3 分钟视频 → Coach Shane 慢速读 → 学员听写 → 答案视频 → 句子解析。1000+ 个习题<sup class="cite"><a href="#ref-43">[43]</a></sup></li>
+        <li><strong>实现</strong>：每天 1 段 1-3 分钟视频 → Coach Shane 慢速读 → 学员听写 → 答案视频 → 句子解析。1000+ 个习题<sup class="cite" data-refid="43">[43]</sup></li>
         <li><strong>价格</strong>：100% 免费</li>
         <li><strong>差异</strong>：内容 driven（不是 algorithm driven），适合 B1 起步学员的<strong>"听 → 写 → 听讲解"循环</strong></li>
       </ul>
@@ -634,9 +670,9 @@
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">📚</span> 不背单词 · 50M+ 注册用户 · 听写模式核心 <span class="verdict v-good">中国词级标杆</span></div>
         <div class="m-body">
-          <p><strong>定位</strong>：英语单词学习 App，主打"自然记忆 + 例句沉浸"。听写模式是核心 SKU 之一<sup class="cite"><a href="#ref-12">[12]</a></sup>。</p>
-          <p><strong>数据点</strong>：2021 年 11 月 MAU 进入百万级<sup class="cite"><a href="#ref-12">[12]</a></sup>；累计注册超 5000 万；终身会员 ¥99（半价促销期 ¥49 起）；按 8800 词词包另购 ¥88 起<sup class="cite"><a href="#ref-12">[12]</a></sup>。</p>
-          <p><strong>听写模式</strong>：3 种 — (1) 单词听写（听音写词）；(2) 例句听写（听例句填词）；(3) 复习听写（错题集复测）<sup class="cite"><a href="#ref-12">[12]</a></sup>。</p>
+          <p><strong>定位</strong>：英语单词学习 App，主打"自然记忆 + 例句沉浸"。听写模式是核心 SKU 之一<sup class="cite" data-refid="12">[12]</sup>。</p>
+          <p><strong>数据点</strong>：2021 年 11 月 MAU 进入百万级<sup class="cite" data-refid="12">[12]</sup>；累计注册超 5000 万；终身会员 ¥99（半价促销期 ¥49 起）；按 8800 词词包另购 ¥88 起<sup class="cite" data-refid="12">[12]</sup>。</p>
+          <p><strong>听写模式</strong>：3 种 — (1) 单词听写（听音写词）；(2) 例句听写（听例句填词）；(3) 复习听写（错题集复测）<sup class="cite" data-refid="12">[12]</sup>。</p>
           <p><strong>优</strong>：(1) 例句库丰富（含真实视频片段）；(2) 听写自动 SRS 关联；(3) 中文界面 + iOS/Android 全平台。<strong>劣</strong>：(1) 词级为主，没做完整句听写；(2) "例句听写"挖空只挖目标词，半米可做得更细。</p>
           <p class="callout teal"><strong>差异化</strong>：半米的<strong>cloze 挖空</strong>对标不背的"例句听写"，但半米强 (a) 跟 CEFR 等级 联动出题；(b) 视频例句更多元（SciShow Kids / Peppa / VOA / 学术 talk）；(c) UGC 反馈反哺出题。</p>
         </div>
@@ -647,9 +683,9 @@
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">🐚</span> 扇贝听力口语 · 120K+ 真实材料 + 句级精听 <span class="verdict v-good">中国精听旗舰</span></div>
         <div class="m-body">
-          <p><strong>定位</strong>：教育部 2019 年备案；专精听力 + 口语<sup class="cite"><a href="#ref-13">[13]</a></sup>。</p>
-          <p><strong>数据点</strong>：120,000+ 真实材料（VOA / BBC / 教材 / 真题）；8 个难度档（初中 → 雅思）；月卡 / 年卡会员制（具体价格不公开）<sup class="cite"><a href="#ref-13">[13]</a></sup>。</p>
-          <p><strong>听写实现</strong>：句子逐句拆 → 听到懂为止 → 精听 / 填空 / 拼写 3 种模式 → 跟读 + 复述 2 种 output 模式<sup class="cite"><a href="#ref-13">[13]</a></sup>。<strong>填空模式 = partial dictation</strong>，拼写模式 = standard dictation。</p>
+          <p><strong>定位</strong>：教育部 2019 年备案；专精听力 + 口语<sup class="cite" data-refid="13">[13]</sup>。</p>
+          <p><strong>数据点</strong>：120,000+ 真实材料（VOA / BBC / 教材 / 真题）；8 个难度档（初中 → 雅思）；月卡 / 年卡会员制（具体价格不公开）<sup class="cite" data-refid="13">[13]</sup>。</p>
+          <p><strong>听写实现</strong>：句子逐句拆 → 听到懂为止 → 精听 / 填空 / 拼写 3 种模式 → 跟读 + 复述 2 种 output 模式<sup class="cite" data-refid="13">[13]</sup>。<strong>填空模式 = partial dictation</strong>，拼写模式 = standard dictation。</p>
           <p><strong>优</strong>：(1) 材料体量大；(2) 拆句颗粒度细；(3) 跟读 + 听写 + 复述三件套联动。<strong>劣</strong>：(1) UI 比较老；(2) 没做 video → 全是 audio + 文字字幕；(3) 缺 AI 反馈。</p>
         </div>
       </div>
@@ -657,8 +693,8 @@
       <h3>4.6 每日英语听力 · 中国免费王者</h3>
 
       <ul>
-        <li><strong>定位</strong>：欧路（Eudic）旗下，跟欧路词典深度联动<sup class="cite"><a href="#ref-44">[44]</a></sup></li>
-        <li><strong>数据点</strong>：App Store 4.9/5；中国免费听力 App 长期 Top 10；2020 年 4 月就在中国外语类 Top 10<sup class="cite"><a href="#ref-44">[44]</a></sup></li>
+        <li><strong>定位</strong>：欧路（Eudic）旗下，跟欧路词典深度联动<sup class="cite" data-refid="44">[44]</sup></li>
+        <li><strong>数据点</strong>：App Store 4.9/5；中国免费听力 App 长期 Top 10；2020 年 4 月就在中国外语类 Top 10<sup class="cite" data-refid="44">[44]</sup></li>
         <li><strong>听写实现</strong>：内嵌"听写模式" — 单句循环 + 字幕暂时隐藏 + 学员打字；评分基础但 OK</li>
         <li><strong>价格</strong>：免费 + 会员升级（VIP 频道 / 离线缓存 / AI 上下文）</li>
         <li><strong>跟半米对比</strong>：每日英语听力的"听写模式"非常基础，没做 cloze 难度梯度，没做诊断画像 — 半米可以在这两点上明显胜出</li>
@@ -670,10 +706,10 @@
         <table>
           <thead><tr><th>App</th><th>定位</th><th>用户量</th><th>价格</th><th>dictation 实现</th><th>评分逻辑</th><th>差距 vs 半米机会</th></tr></thead>
           <tbody>
-            <tr><td><strong>Lyrics Training</strong></td><td>歌词 cloze</td><td>10M+ 全球<sup class="cite"><a href="#ref-5">[5]</a></sup></td><td>$4.99/月 premium</td><td>4 档挖空率</td><td>词级 token 匹配</td><td>歌词≠对话；CEFR 弱</td></tr>
+            <tr><td><strong>Lyrics Training</strong></td><td>歌词 cloze</td><td>10M+ 全球<sup class="cite" data-refid="5">[5]</sup></td><td>$4.99/月 premium</td><td>4 档挖空率</td><td>词级 token 匹配</td><td>歌词≠对话；CEFR 弱</td></tr>
             <tr><td><strong>Parroto</strong></td><td>dict + shadow</td><td>37K+ iOS</td><td>订阅制</td><td>AI 反馈</td><td>AI 检查</td><td>没本地化中国</td></tr>
             <tr><td><strong>Daily Dictation</strong></td><td>YouTube</td><td>127K+ iOS</td><td>免费</td><td>整句听写</td><td>提供答案视频</td><td>没 SRS 错题</td></tr>
-            <tr><td><strong>不背单词</strong></td><td>词例句</td><td>50M+ 注册<sup class="cite"><a href="#ref-12">[12]</a></sup></td><td>¥99 终身</td><td>3 种听写</td><td>字符匹配</td><td>没 cloze 难度梯度</td></tr>
+            <tr><td><strong>不背单词</strong></td><td>词例句</td><td>50M+ 注册<sup class="cite" data-refid="12">[12]</sup></td><td>¥99 终身</td><td>3 种听写</td><td>字符匹配</td><td>没 cloze 难度梯度</td></tr>
             <tr><td><strong>扇贝听力口语</strong></td><td>句精听</td><td>~5M MAU</td><td>会员制</td><td>精听 + 填空 + 拼写</td><td>句级 token</td><td>UI 老 / 无 AI</td></tr>
             <tr><td><strong>每日英语听力</strong></td><td>泛听 + 听写</td><td>免费 Top10</td><td>免费 + VIP</td><td>单句循环</td><td>基础对错</td><td>无诊断画像</td></tr>
             <tr><td><strong>半米目标</strong> 🎯</td><td>视频例句 cloze + CEFR</td><td>—</td><td>—</td><td>L0-L5 6 档 + Dictogloss V1.0</td><td>Levenshtein + lemma + 诊断标签</td><td>UGC 反哺 / 跟读联动</td></tr>
@@ -694,17 +730,17 @@
       <h3>5.1 Quizlet Spell · 词级听写做到工业级</h3>
 
       <ul>
-        <li><strong>体量</strong>：50M+ MAU<sup class="cite"><a href="#ref-45">[45]</a></sup>；2024 营收 $80M；2025 $139M<sup class="cite"><a href="#ref-45">[45]</a></sup></li>
-        <li><strong>Spell mode</strong>：听音写词，每 round 7 题，每词需正确拼 2 次<sup class="cite"><a href="#ref-34">[34]</a></sup></li>
-        <li><strong>纳入 Learn</strong>：2023 起 Spell 整合进 Learn mode（Plus 订阅）；自由用户每天有限 round 数<sup class="cite"><a href="#ref-34">[34]</a></sup></li>
+        <li><strong>体量</strong>：50M+ MAU<sup class="cite" data-refid="45">[45]</sup>；2024 营收 $80M；2025 $139M<sup class="cite" data-refid="45">[45]</sup></li>
+        <li><strong>Spell mode</strong>：听音写词，每 round 7 题，每词需正确拼 2 次<sup class="cite" data-refid="34">[34]</sup></li>
+        <li><strong>纳入 Learn</strong>：2023 起 Spell 整合进 Learn mode（Plus 订阅）；自由用户每天有限 round 数<sup class="cite" data-refid="34">[34]</sup></li>
         <li><strong>跟半米对比</strong>：Quizlet Spell 是工业级词级听写，但<strong>词都是孤立的 — 没语境</strong>。半米的 cloze 挖空 = 把 Quizlet Spell 的词放回原句视频里 = 升级版</li>
       </ul>
 
       <h3>5.2 Anki · DIY 听写圣地（addon 生态）</h3>
 
       <div class="callout info">
-        <p>Anki 本身不内置 dictation，但有多个 addon 把它实现：<strong>Speech Recognition (411601849)</strong> / <strong>Test Your Pronunciation (Cloud Speech to Text 673333980)</strong> / <strong>Speech to Text (319520119)</strong><sup class="cite"><a href="#ref-46">[46]</a></sup>。</p>
-        <p><strong>典型用法</strong>：cloze deletion 卡 + 音频 → 学员听音频 → 写出被挖词。社区有完整 Bulk Generating Cloze Deletions for Language Learning 教程<sup class="cite"><a href="#ref-47">[47]</a></sup>。</p>
+        <p>Anki 本身不内置 dictation，但有多个 addon 把它实现：<strong>Speech Recognition (411601849)</strong> / <strong>Test Your Pronunciation (Cloud Speech to Text 673333980)</strong> / <strong>Speech to Text (319520119)</strong><sup class="cite" data-refid="46">[46]</sup>。</p>
+        <p><strong>典型用法</strong>：cloze deletion 卡 + 音频 → 学员听音频 → 写出被挖词。社区有完整 Bulk Generating Cloze Deletions for Language Learning 教程<sup class="cite" data-refid="47">[47]</sup>。</p>
         <p><strong>对半米的意义</strong>：Anki DIY 生态证明 dictation + cloze + audio 是 power users 的刚需 — 但只有 ~1% 学员有耐心搭 DIY workflow。半米的机会 = <strong>把这套体验做成"开箱即用"</strong>。</p>
       </div>
 
@@ -713,8 +749,8 @@
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">🦉</span> Duolingo · 听写题作为核心题型 <span class="verdict v-good">最大规模实战</span></div>
         <div class="m-body">
-          <p><strong>普通课程的 Type What You Hear</strong>：(1) 播放完整句音频；(2) 有 turtle button 慢速重听；(3) 学员打字整句<sup class="cite"><a href="#ref-48">[48]</a></sup>。本质就是 standard dictation。</p>
-          <p><strong>DET (Duolingo English Test) 的 Listen and Type</strong>：高利害考试用<sup class="cite"><a href="#ref-9">[9]</a></sup>：</p>
+          <p><strong>普通课程的 Type What You Hear</strong>：(1) 播放完整句音频；(2) 有 turtle button 慢速重听；(3) 学员打字整句<sup class="cite" data-refid="48">[48]</sup>。本质就是 standard dictation。</p>
+          <p><strong>DET (Duolingo English Test) 的 Listen and Type</strong>：高利害考试用<sup class="cite" data-refid="9">[9]</sup>：</p>
           <ul>
             <li>1 题 60 秒；总共 6-9 题</li>
             <li>音频可重听 2 次（共 3 次听）</li>
@@ -730,8 +766,8 @@
       <h3>5.4 FluentU · 视频字幕 + 4 档 dictation</h3>
 
       <ul>
-        <li><strong>定位</strong>：真实视频（电影 / 音乐 / TED / 新闻）+ 互动字幕<sup class="cite"><a href="#ref-49">[49]</a></sup></li>
-        <li><strong>Dictation 实现</strong>：4 档 — L1 单句填空；L2 较长填空；L3 整句；L4 段落<sup class="cite"><a href="#ref-49">[49]</a></sup></li>
+        <li><strong>定位</strong>：真实视频（电影 / 音乐 / TED / 新闻）+ 互动字幕<sup class="cite" data-refid="49">[49]</sup></li>
+        <li><strong>Dictation 实现</strong>：4 档 — L1 单句填空；L2 较长填空；L3 整句；L4 段落<sup class="cite" data-refid="49">[49]</sup></li>
         <li><strong>互动字幕</strong>：任意词点击 → 定义 + 音频 + 例句 + 图像。<strong>跟半米 V1.1 频道标准的视频例句强联系</strong></li>
         <li><strong>跟半米对比</strong>：FluentU 是<strong>半米英文界面最直接对标对象</strong>。FluentU 缺：中文界面 / K12 教材联动 / 跟读评分。半米三个都做了</li>
       </ul>
@@ -739,23 +775,23 @@
       <h3>5.5 eJOY · 越南起家的 YouTube 学习方案</h3>
 
       <ul>
-        <li><strong>体量</strong>：Chrome extension 200K+ 用户；4.8/5 评分；2019 创立<sup class="cite"><a href="#ref-50">[50]</a></sup></li>
-        <li><strong>实现</strong>：YouTube → interactive 听 → shadowing → dictation → role play 四件套<sup class="cite"><a href="#ref-50">[50]</a></sup></li>
+        <li><strong>体量</strong>：Chrome extension 200K+ 用户；4.8/5 评分；2019 创立<sup class="cite" data-refid="50">[50]</sup></li>
+        <li><strong>实现</strong>：YouTube → interactive 听 → shadowing → dictation → role play 四件套<sup class="cite" data-refid="50">[50]</sup></li>
         <li><strong>启示</strong>：eJOY 证明<strong>Chrome extension 改造 YouTube</strong>是低成本切入路径 — 半米现在路径（自建视频例句库）相对重，但<strong>Chrome extension 形态可考虑做学员的"任意 YouTube 视频"听写工具</strong>，V2.0 探索方向</li>
       </ul>
 
       <h3>5.6 Migaku · immersion 学派的 dictation</h3>
 
       <ul>
-        <li><strong>定位</strong>：immersion learning 工具；Netflix / YouTube / 任意网页 → 双字幕 + 词查询 + 卡片<sup class="cite"><a href="#ref-51">[51]</a></sup></li>
-        <li><strong>Dictation 说法</strong>：官方文档明确说 "dictation exercises push your listening skills hard - you play a short dialogue segment, pause, and try to write down exactly what you heard, then check against the subtitles, which reveals which sounds you're mishearing"<sup class="cite"><a href="#ref-51">[51]</a></sup></li>
+        <li><strong>定位</strong>：immersion learning 工具；Netflix / YouTube / 任意网页 → 双字幕 + 词查询 + 卡片<sup class="cite" data-refid="51">[51]</sup></li>
+        <li><strong>Dictation 说法</strong>：官方文档明确说 "dictation exercises push your listening skills hard - you play a short dialogue segment, pause, and try to write down exactly what you heard, then check against the subtitles, which reveals which sounds you're mishearing"<sup class="cite" data-refid="51">[51]</sup></li>
         <li><strong>跟半米对比</strong>：Migaku 重 immersion + 词卡片，dictation 是次要功能；半米可学其"任意视频 → 字幕互动"理念，但 dictation 要做主线而不是次要</li>
       </ul>
 
       <h3>5.7 Drops · 几乎没做 dictation（反面案例）</h3>
 
       <ul>
-        <li>50+ 种语言 / 5,000+ 词 / 5 分钟/天<sup class="cite"><a href="#ref-35">[35]</a></sup></li>
+        <li>50+ 种语言 / 5,000+ 词 / 5 分钟/天<sup class="cite" data-refid="35">[35]</sup></li>
         <li>有发音 + 听 + 看图，但<strong>没有正式 dictation 功能</strong></li>
         <li>说明：纯词卡片 + visual mnemonic 路线不需要 dictation — 但这也是 Drops 被批"用户记不住 / 学不到自由表达"的原因之一</li>
       </ul>
@@ -763,7 +799,7 @@
       <h3>5.8 Babbel · 听写嵌在课程里</h3>
 
       <ul>
-        <li>14 种语言 / 课程内有 fill-in-the-blank + 听写 + 微录音<sup class="cite"><a href="#ref-52">[52]</a></sup></li>
+        <li>14 种语言 / 课程内有 fill-in-the-blank + 听写 + 微录音<sup class="cite" data-refid="52">[52]</sup></li>
         <li>没有独立"听写模式"，是课程任务的一部分</li>
         <li>启示：dictation 不必单独成模块，可以<strong>嵌进学员的日常学习流</strong>（半米的"看 6 例句"任务里直接掺入 1 道 cloze 听写）</li>
       </ul>
@@ -781,33 +817,33 @@
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">🎓</span> IELTS Section 4 · 学术 lecture + note completion <span class="verdict v-warn">高利害听写</span></div>
         <div class="m-body">
-          <p><strong>形式</strong>：一个 speaker 一个学术主题（健康 / 动物 / 历史 / 科学），10 题 note completion / sentence completion / summary completion<sup class="cite"><a href="#ref-31">[31]</a></sup>。</p>
+          <p><strong>形式</strong>：一个 speaker 一个学术主题（健康 / 动物 / 历史 / 科学），10 题 note completion / sentence completion / summary completion<sup class="cite" data-refid="31">[31]</sup>。</p>
           <p><strong>评分规则（关键）</strong>：</p>
           <ul>
-            <li><strong>二元评分</strong> — 100% 对或 100% 错。"environment" 拼成 "enviorment" = 0 分<sup class="cite"><a href="#ref-31">[31]</a></sup></li>
-            <li>word limit 严格 — "NO MORE THAN TWO WORDS" 超出立扣分<sup class="cite"><a href="#ref-31">[31]</a></sup></li>
+            <li><strong>二元评分</strong> — 100% 对或 100% 错。"environment" 拼成 "enviorment" = 0 分<sup class="cite" data-refid="31">[31]</sup></li>
+            <li>word limit 严格 — "NO MORE THAN TWO WORDS" 超出立扣分<sup class="cite" data-refid="31">[31]</sup></li>
             <li>词都是 common knowledge，但<strong>spelling 是 bottleneck</strong></li>
           </ul>
-          <p><strong>跟半米的关系</strong>：B2+ 学员准备雅思／托福需要这种练习。半米的<strong>段落级听写 V0.3</strong>可以包装成"IELTS Section 4 模拟"。市面上的 IELTS Liz / FluentDictation / Daily Dictation 都有这类专项<sup class="cite"><a href="#ref-53">[53]</a></sup>。</p>
+          <p><strong>跟半米的关系</strong>：B2+ 学员准备雅思／托福需要这种练习。半米的<strong>段落级听写 V0.3</strong>可以包装成"IELTS Section 4 模拟"。市面上的 IELTS Liz / FluentDictation / Daily Dictation 都有这类专项<sup class="cite" data-refid="53">[53]</sup>。</p>
         </div>
       </div>
 
       <h3>6.2 Cambridge KET / PET Listening</h3>
 
       <ul>
-        <li><strong>KET (A2)</strong>：5 部分 25 题，<strong>每题听 2 遍</strong>，含 gap-fill 部分需写词或数字，"spelling 可识别即可，除非题目要求精确拼写"<sup class="cite"><a href="#ref-54">[54]</a></sup></li>
-        <li><strong>PET (B1)</strong>：4 部分 30 分钟 + 6 分钟 transfer，每段听 2 遍；含 note completion 部分必须用<strong>音频原话</strong>填空<sup class="cite"><a href="#ref-54">[54]</a></sup></li>
+        <li><strong>KET (A2)</strong>：5 部分 25 题，<strong>每题听 2 遍</strong>，含 gap-fill 部分需写词或数字，"spelling 可识别即可，除非题目要求精确拼写"<sup class="cite" data-refid="54">[54]</sup></li>
+        <li><strong>PET (B1)</strong>：4 部分 30 分钟 + 6 分钟 transfer，每段听 2 遍；含 note completion 部分必须用<strong>音频原话</strong>填空<sup class="cite" data-refid="54">[54]</sup></li>
         <li><strong>启示</strong>：KET/PET 听写题是 partial dictation 的<strong>正规考试形态</strong>，半米可以按 KET → PET → FCE → CAE 阶梯设计练习</li>
       </ul>
 
       <h3>6.3 Duolingo English Test (DET) Listen and Type</h3>
 
-      <p>已在 §5.3 详述。再加一笔：DET 在 2024-2025 被越来越多大学接受作雅思替代<sup class="cite"><a href="#ref-9">[9]</a></sup> — Listen-and-Type 这种听写题正在被<strong>"高利害化"</strong>。半米跟着出"DET 模拟"产品形态成立。</p>
+      <p>已在 §5.3 详述。再加一笔：DET 在 2024-2025 被越来越多大学接受作雅思替代<sup class="cite" data-refid="9">[9]</sup> — Listen-and-Type 这种听写题正在被<strong>"高利害化"</strong>。半米跟着出"DET 模拟"产品形态成立。</p>
 
       <h3>6.4 BBC Learning English · 免费泛听 + 转写</h3>
 
       <ul>
-        <li>BBC Learning English 内容免费：6 Minute English / English at Work / News Review<sup class="cite"><a href="#ref-55">[55]</a></sup></li>
+        <li>BBC Learning English 内容免费：6 Minute English / English at Work / News Review<sup class="cite" data-refid="55">[55]</sup></li>
         <li>BBC 本身不做"dictation 平台"，但 eJOY / Daily Dictation / dailydictation.com 等第三方<strong>把 BBC 内容做成 dictation 训练</strong></li>
         <li>启示：内容免费 → 第三方做练习层。半米跟 BBC 学的不是产品，是"内容免费 + 练习层付费"的拆分逻辑</li>
       </ul>
@@ -815,17 +851,17 @@
       <h3>6.5 VOA Special English · 1500 词慢速</h3>
 
       <ul>
-        <li>VOA Learning English 用<strong>~1500 词 + 1/3 慢速朗读</strong><sup class="cite"><a href="#ref-56">[56]</a></sup></li>
-        <li>专门第三方平台 DictationToday.com 把 VOA 段子拆成"句听写"练习<sup class="cite"><a href="#ref-57">[57]</a></sup></li>
-        <li>钟道隆透析法的核心材料就是 VOA Special English — 中国学员"听慢速 VOA 写下来"的传统 30+ 年了<sup class="cite"><a href="#ref-29">[29]</a></sup></li>
+        <li>VOA Learning English 用<strong>~1500 词 + 1/3 慢速朗读</strong><sup class="cite" data-refid="56">[56]</sup></li>
+        <li>专门第三方平台 DictationToday.com 把 VOA 段子拆成"句听写"练习<sup class="cite" data-refid="57">[57]</sup></li>
+        <li>钟道隆透析法的核心材料就是 VOA Special English — 中国学员"听慢速 VOA 写下来"的传统 30+ 年了<sup class="cite" data-refid="29">[29]</sup></li>
         <li>对半米的意义：<strong>VOA 内容免费可用，是 B1-B2 段听写的优质素材</strong>。可以考虑做"VOA 听写专题"内容栏目</li>
       </ul>
 
       <h3>6.6 IELTS Liz / FluentDictation / engNovate · 第三方雅思练习</h3>
 
       <ul>
-        <li>IELTS Liz：B1+ 学员熟知，免费 IELTS Listening 练习 + 听写专项<sup class="cite"><a href="#ref-53">[53]</a></sup></li>
-        <li>FluentDictation：YouTube 频道 + 网站，IELTS / TOEFL / Cambridge 真题听写<sup class="cite"><a href="#ref-53">[53]</a></sup></li>
+        <li>IELTS Liz：B1+ 学员熟知，免费 IELTS Listening 练习 + 听写专项<sup class="cite" data-refid="53">[53]</sup></li>
+        <li>FluentDictation：YouTube 频道 + 网站，IELTS / TOEFL / Cambridge 真题听写<sup class="cite" data-refid="53">[53]</sup></li>
         <li>都证明：<strong>"考试导向听写"是有付费意愿的细分市场</strong> — 半米可以做半米学员升 B2 后专项的"考试听写"模块</li>
       </ul>
 
@@ -842,10 +878,10 @@
       <h3>7.1 美国 Scripps National Spelling Bee</h3>
 
       <ul>
-        <li><strong>历史</strong>：spelling bee 短语最早 1850 见诸印刷；Benjamin Franklin 1750 就提议作为学校固定环节<sup class="cite"><a href="#ref-58">[58]</a></sup></li>
-        <li><strong>National 始于 1925</strong>，Courier Journal of Louisville 主办；目前 The E.W. Scripps Company 运营，291 个赞助商，覆盖美国 + 欧洲 + 加拿大 + 新西兰 + 关岛 + 牙买加 + 巴哈马 + 加纳 + 波多黎各 + 美属维京群岛 + 美属萨摩亚<sup class="cite"><a href="#ref-58">[58]</a></sup></li>
-        <li><strong>2024 数据</strong>：第 96 届 245 名参赛者；Bruhat Soma (12 岁) 夺冠，spell-off 新纪录 — 30 词拼对 29 个<sup class="cite"><a href="#ref-59">[59]</a></sup></li>
-        <li><strong>奖励</strong>：$50,000 现金 + Scripps Cup + Merriam-Webster 词典套装 + Britannica 全集 + 学校 $1,000 奖学金<sup class="cite"><a href="#ref-59">[59]</a></sup></li>
+        <li><strong>历史</strong>：spelling bee 短语最早 1850 见诸印刷；Benjamin Franklin 1750 就提议作为学校固定环节<sup class="cite" data-refid="58">[58]</sup></li>
+        <li><strong>National 始于 1925</strong>，Courier Journal of Louisville 主办；目前 The E.W. Scripps Company 运营，291 个赞助商，覆盖美国 + 欧洲 + 加拿大 + 新西兰 + 关岛 + 牙买加 + 巴哈马 + 加纳 + 波多黎各 + 美属维京群岛 + 美属萨摩亚<sup class="cite" data-refid="58">[58]</sup></li>
+        <li><strong>2024 数据</strong>：第 96 届 245 名参赛者；Bruhat Soma (12 岁) 夺冠，spell-off 新纪录 — 30 词拼对 29 个<sup class="cite" data-refid="59">[59]</sup></li>
+        <li><strong>奖励</strong>：$50,000 现金 + Scripps Cup + Merriam-Webster 词典套装 + Britannica 全集 + 学校 $1,000 奖学金<sup class="cite" data-refid="59">[59]</sup></li>
         <li><strong>跟语言习得的关系</strong>：spelling bee 偏 "rare word + 词源 + 拼写规则"，跟 EFL 学员的 listening + 词汇 needs 关系<strong>不大</strong>。但它建立了"听写 = 严肃学术"的文化认知</li>
       </ul>
 
@@ -854,17 +890,17 @@
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">📺</span> 中国汉字听写大会 · CCTV 全民现象级听写赛事 <span class="verdict v-good">文化母语版</span></div>
         <div class="m-body">
-          <p><strong>背景</strong>：CCTV-10 + 国家语委 2013 联合主办；针对"提笔忘字"危机；针对中学生<sup class="cite"><a href="#ref-6">[6]</a></sup>。</p>
+          <p><strong>背景</strong>：CCTV-10 + 国家语委 2013 联合主办；针对"提笔忘字"危机；针对中学生<sup class="cite" data-refid="6">[6]</sup>。</p>
           <p><strong>规模（2014）</strong>：</p>
           <ul>
             <li>43 亿不重复观众</li>
             <li>平均首播收视率 1.099%（仅次于<em>爸爸去哪儿</em>和<em>中国好声音</em>）</li>
             <li>5 个月预选；4,700+ 场比赛</li>
             <li>34 省份 + 1,700 城市 + 30,000 学校</li>
-            <li>约 <strong>1200 万名学生参赛</strong><sup class="cite"><a href="#ref-6">[6]</a></sup></li>
+            <li>约 <strong>1200 万名学生参赛</strong><sup class="cite" data-refid="6">[6]</sup></li>
             <li>"全民焐热冰冻汉字行动" 60 亿浏览量</li>
           </ul>
-          <p><strong>批评</strong>：用词过于生僻；功利化学习<sup class="cite"><a href="#ref-6">[6]</a></sup>。</p>
+          <p><strong>批评</strong>：用词过于生僻；功利化学习<sup class="cite" data-refid="6">[6]</sup>。</p>
           <p><strong>意义</strong>：在中国文化里，<strong>"听写"自带学术/严肃信号</strong>。半米做"听写"模块时<strong>文案上可以借这个文化共鸣</strong> — "回到学习的本质"。</p>
         </div>
       </div>
@@ -872,17 +908,17 @@
       <h3>7.3 中国 ESL 中考 / 高考听力</h3>
 
       <ul>
-        <li><strong>中高考英语听力</strong>：通常 20 题、25-30 分钟、约占总分 20%。题型含 multiple choice + note completion（partial dictation 性质）<sup class="cite"><a href="#ref-60">[60]</a></sup></li>
-        <li><strong>2010-2013 北京试点</strong>：探索高中英语听说计算机化测试；2013 起部分省份正式上线<sup class="cite"><a href="#ref-60">[60]</a></sup></li>
-        <li><strong>2024+ 趋势</strong>：中文化内容增加（用英语讨论中国传统文化）；computer-based listening + speaking 测试推广<sup class="cite"><a href="#ref-60">[60]</a></sup></li>
+        <li><strong>中高考英语听力</strong>：通常 20 题、25-30 分钟、约占总分 20%。题型含 multiple choice + note completion（partial dictation 性质）<sup class="cite" data-refid="60">[60]</sup></li>
+        <li><strong>2010-2013 北京试点</strong>：探索高中英语听说计算机化测试；2013 起部分省份正式上线<sup class="cite" data-refid="60">[60]</sup></li>
+        <li><strong>2024+ 趋势</strong>：中文化内容增加（用英语讨论中国传统文化）；computer-based listening + speaking 测试推广<sup class="cite" data-refid="60">[60]</sup></li>
         <li><strong>对半米的意义</strong>：中考备考 + 高考备考 = 几千万学员的刚需。半米的"听写"模块可以做"中考听力专项 / 高考听力专项"细分内容包，对接教材出版社</li>
       </ul>
 
       <h3>7.4 中国小学 / 初中"听写本"文化</h3>
 
       <ul>
-        <li>中国家长长期给孩子做"听写本" — 妈妈读，孩子写。这是中国 K12 的文化惯例<sup class="cite"><a href="#ref-36">[36]</a></sup></li>
-        <li><strong>教材同步类 App</strong>："英语听写"（包含中小学 + 大学 + 四六级）；"英语朗读宝"（1000 万用户，30+ 出版社教材）；"人教口语"（人教社官方）；"小学英语点读课堂"；"爱点读"<sup class="cite"><a href="#ref-36">[36]</a></sup></li>
+        <li>中国家长长期给孩子做"听写本" — 妈妈读，孩子写。这是中国 K12 的文化惯例<sup class="cite" data-refid="36">[36]</sup></li>
+        <li><strong>教材同步类 App</strong>："英语听写"（包含中小学 + 大学 + 四六级）；"英语朗读宝"（1000 万用户，30+ 出版社教材）；"人教口语"（人教社官方）；"小学英语点读课堂"；"爱点读"<sup class="cite" data-refid="36">[36]</sup></li>
         <li>共同特征：(1) 同步教材；(2) 听音听写 + 拼写；(3) 家长 / 老师可设置词表；(4) 错题统计</li>
         <li><strong>对半米的意义</strong>：教材同步是中国 K12 的<strong>护城河</strong>。半米目前没做教材同步 — 可考虑 V2.0 加"教材包"（人教版 / 外研版 / 北师大版 word list 自动出听写）</li>
       </ul>
@@ -910,10 +946,10 @@
           <thead><tr><th>素材源</th><th>真实性</th><th>版权</th><th>成本</th><th>多样性</th><th>CEFR 对齐</th><th>半米适用</th></tr></thead>
           <tbody>
             <tr><td><strong>半米现成视频例句</strong></td><td>★★★★★ 真实视频</td><td>已处理（iframe 跳秒）</td><td>极低（已有）</td><td>★★★★ 6 例句库</td><td>★★★★★ 已分级</td><td><strong>V0.1 首选 ✅</strong></td></tr>
-            <tr><td><strong>TTS 生成</strong> (Azure / OpenAI / ElevenLabs)</td><td>★★ 合成</td><td>商用许可</td><td>$15-180/百万字符<sup class="cite"><a href="#ref-8">[8]</a></sup></td><td>无限</td><td>★★★ 可控</td><td>V0.2 补单词 / 短句</td></tr>
+            <tr><td><strong>TTS 生成</strong> (Azure / OpenAI / ElevenLabs)</td><td>★★ 合成</td><td>商用许可</td><td>$15-180/百万字符<sup class="cite" data-refid="8">[8]</sup></td><td>无限</td><td>★★★ 可控</td><td>V0.2 补单词 / 短句</td></tr>
             <tr><td><strong>歌曲</strong> (歌词挖空)</td><td>★★★ 真实但偏唱</td><td>复杂（Lyrics Training 拿到）</td><td>高</td><td>★★★★ 文化多元</td><td>★★ 难分级</td><td>不做（坑深）</td></tr>
             <tr><td><strong>真实视频</strong> (SciShow / VOA / 学术 talk)</td><td>★★★★★</td><td>YouTube iframe</td><td>免费</td><td>★★★★★</td><td>★★★ 需人工标</td><td>V0.3 段落用</td></tr>
-            <tr><td><strong>新闻播音</strong> (VOA 慢速 / BBC LE)</td><td>★★★★</td><td>免费许可</td><td>免费</td><td>★★★</td><td>★★★ 慢速 1500 词限<sup class="cite"><a href="#ref-56">[56]</a></sup></td><td>V0.3 段落用</td></tr>
+            <tr><td><strong>新闻播音</strong> (VOA 慢速 / BBC LE)</td><td>★★★★</td><td>免费许可</td><td>免费</td><td>★★★</td><td>★★★ 慢速 1500 词限<sup class="cite" data-refid="56">[56]</sup></td><td>V0.3 段落用</td></tr>
           </tbody>
         </table>
       </div>
@@ -924,7 +960,7 @@
         <p>🟢 <strong>半米独占资源</strong>：6 例句视频已带：(1) YouTube 视频 ID；(2) 句子级 timestamp（start_sec / end_sec）；(3) 句子文本；(4) 自动字幕；(5) CEFR 等级标注（B1 词例句优先匹配 A2 视频，已在 V1.1 频道标准做）；(6) 学员 UGC 评价（👍/👎）。</p>
         <p><strong>对应到听写</strong>：</p>
         <ul>
-          <li>视频 ID + timestamp → YouTube iframe API 的 <code>cueVideoById({videoId, startSeconds, endSeconds})</code> + <code>setPlaybackRate(0.75)</code> 实现精确播放<sup class="cite"><a href="#ref-14">[14]</a></sup></li>
+          <li>视频 ID + timestamp → YouTube iframe API 的 <code>cueVideoById({videoId, startSeconds, endSeconds})</code> + <code>setPlaybackRate(0.75)</code> 实现精确播放<sup class="cite" data-refid="14">[14]</sup></li>
           <li>句子文本 → 用作 cloze 题答案 / standard dictation 比对原文</li>
           <li>字幕 timestamp → cloze 模式动态挖目标词位置</li>
           <li>CEFR 等级 → 学员当前等级 → 出题难度自动匹配</li>
@@ -944,7 +980,7 @@
       </ol>
 
       <div class="callout info">
-        <p><strong>TTS 服务推荐（2026 价格）</strong><sup class="cite"><a href="#ref-8">[8]</a></sup>：</p>
+        <p><strong>TTS 服务推荐（2026 价格）</strong><sup class="cite" data-refid="8">[8]</sup>：</p>
         <ul>
           <li><strong>OpenAI gpt-4o-mini-tts</strong>: $0.60/M text input + $12/M audio output = <strong>约 $0.015/分钟音频</strong>。最便宜。</li>
           <li><strong>OpenAI TTS standard</strong>: $15/M 字符。</li>
@@ -1012,7 +1048,7 @@ Layer 5: 同义改写容忍 (LLM 评 — V1.0 才上)
       <h3>9.2 Layer 1+2 · Levenshtein 编辑距离实现</h3>
 
       <div class="callout info">
-        <p><strong>Levenshtein distance</strong>（Vladimir Levenshtein 1965）= 把字符串 A 变成字符串 B 所需的最少单字符编辑（增 / 删 / 替）次数<sup class="cite"><a href="#ref-61">[61]</a></sup>。动态规划，O(mn) 时空。NPM <code>fast-levenshtein</code> / Python <code>python-Levenshtein</code> 都是标准库。</p>
+        <p><strong>Levenshtein distance</strong>（Vladimir Levenshtein 1965）= 把字符串 A 变成字符串 B 所需的最少单字符编辑（增 / 删 / 替）次数<sup class="cite" data-refid="61">[61]</sup>。动态规划，O(mn) 时空。NPM <code>fast-levenshtein</code> / Python <code>python-Levenshtein</code> 都是标准库。</p>
         <p><strong>用法</strong>：</p>
         <ul>
           <li>distance ≤ 1（10 字以内单词） → 半对（给 0.7 分）+ 提示拼写</li>
@@ -1031,7 +1067,7 @@ Layer 5: 同义改写容忍 (LLM 评 — V1.0 才上)
 
       <h3>9.4 Layer 4 · 同音异形容忍 (homophone)</h3>
 
-      <p>their / there / they're 这种典型错误<sup class="cite"><a href="#ref-62">[62]</a></sup>：</p>
+      <p>their / there / they're 这种典型错误<sup class="cite" data-refid="62">[62]</sup>：</p>
 
       <ul>
         <li>用预制 homophone 字典（开源的 <code>english-homophones</code> JSON）</li>
@@ -1052,8 +1088,8 @@ Layer 5: 同义改写容忍 (LLM 评 — V1.0 才上)
       <h3>9.6 ASR 评分（V0.5 跟读联动）</h3>
 
       <div class="callout teal">
-        <p><strong>跟 Shadowing 模块联动</strong>：学员听写完后 → 朗读句子 → Whisper ASR 转写 → 比对原文 → 一个练习"听 + 写 + 说"三件套<sup class="cite"><a href="#ref-63">[63]</a></sup>。Whisper 在英语 read speech 上平均 WER ~12.8%（native），non-native 偏高<sup class="cite"><a href="#ref-7">[7]</a></sup>。要做容错 buffer。</p>
-        <p><strong>Wakitsu 2023 meta-analysis</strong>（15 项研究 / 38 effect sizes）<sup class="cite"><a href="#ref-28">[28]</a></sup>：ASR with indirect feedback（如 ASR dictation）<strong>moderately effective</strong> (medium 效应 g=0.69)。这说明半米的"听写 + ASR 跟读"联动是有学术支撑的。</p>
+        <p><strong>跟 Shadowing 模块联动</strong>：学员听写完后 → 朗读句子 → Whisper ASR 转写 → 比对原文 → 一个练习"听 + 写 + 说"三件套<sup class="cite" data-refid="63">[63]</sup>。Whisper 在英语 read speech 上平均 WER ~12.8%（native），non-native 偏高<sup class="cite" data-refid="7">[7]</sup>。要做容错 buffer。</p>
+        <p><strong>Wakitsu 2023 meta-analysis</strong>（15 项研究 / 38 effect sizes）<sup class="cite" data-refid="28">[28]</sup>：ASR with indirect feedback（如 ASR dictation）<strong>moderately effective</strong> (medium 效应 g=0.69)。这说明半米的"听写 + ASR 跟读"联动是有学术支撑的。</p>
       </div>
 
       <h3>9.7 错误诊断 (diagnostic tagging)</h3>
@@ -1128,10 +1164,10 @@ dictogloss_reconstructions (
         <table>
           <thead><tr><th>版本</th><th>类型</th><th>CEFR</th><th>工程量</th><th>核心新增</th><th>对标对手</th><th>关键 SLA 理论</th></tr></thead>
           <tbody>
-            <tr><td><strong>V0.1</strong> 单词级 cloze ✅</td><td>partial dictation</td><td>A2-B1</td><td>1-2 天</td><td>视频字幕挖词 + Levenshtein</td><td>Lyrics Training (cloze)</td><td>Schmidt noticing<sup class="cite"><a href="#ref-64">[64]</a></sup></td></tr>
-            <tr><td><strong>V0.2</strong> 句子级 cloze + 短句听写</td><td>partial dictation 进阶</td><td>A2-B2</td><td>+1 天</td><td>1-3 词挖空 + 重听控制</td><td>不背单词例句听写</td><td>Cai 2013 higher-order<sup class="cite"><a href="#ref-1">[1]</a></sup></td></tr>
-            <tr><td><strong>V0.3</strong> 段落级听写</td><td>passage dictation</td><td>B2-C1</td><td>+2-3 天</td><td>30-60s 段落 + WM 难度</td><td>IELTS Section 4 / 扇贝</td><td>Field bottom-up<sup class="cite"><a href="#ref-23">[23]</a></sup></td></tr>
-            <tr><td><strong>V1.0</strong> Dictogloss 重建</td><td>output 训练</td><td>C1-C2</td><td>+3-5 天</td><td>LLM 评分 (GPT-4o-mini)</td><td>无（市场空白）</td><td>Wajnryb 1990 + Swain<sup class="cite"><a href="#ref-15">[15]</a></sup></td></tr>
+            <tr><td><strong>V0.1</strong> 单词级 cloze ✅</td><td>partial dictation</td><td>A2-B1</td><td>1-2 天</td><td>视频字幕挖词 + Levenshtein</td><td>Lyrics Training (cloze)</td><td>Schmidt noticing<sup class="cite" data-refid="64">[64]</sup></td></tr>
+            <tr><td><strong>V0.2</strong> 句子级 cloze + 短句听写</td><td>partial dictation 进阶</td><td>A2-B2</td><td>+1 天</td><td>1-3 词挖空 + 重听控制</td><td>不背单词例句听写</td><td>Cai 2013 higher-order<sup class="cite" data-refid="1">[1]</sup></td></tr>
+            <tr><td><strong>V0.3</strong> 段落级听写</td><td>passage dictation</td><td>B2-C1</td><td>+2-3 天</td><td>30-60s 段落 + WM 难度</td><td>IELTS Section 4 / 扇贝</td><td>Field bottom-up<sup class="cite" data-refid="23">[23]</sup></td></tr>
+            <tr><td><strong>V1.0</strong> Dictogloss 重建</td><td>output 训练</td><td>C1-C2</td><td>+3-5 天</td><td>LLM 评分 (GPT-4o-mini)</td><td>无（市场空白）</td><td>Wajnryb 1990 + Swain<sup class="cite" data-refid="15">[15]</sup></td></tr>
           </tbody>
         </table>
       </div>
@@ -1200,7 +1236,7 @@ Response: {
           <li>□ 数据库迁移：新建 <code>dictation_attempts</code> 表</li>
           <li>□ 后端 API：<code>POST /api/dictation/attempt</code> + Levenshtein 库（NPM <code>fast-levenshtein</code>）</li>
           <li>□ 前端组件：<code>&lt;DictationPlayer&gt;</code> 接收 sentence_id + target_word</li>
-          <li>□ YouTube iframe API 集成（<code>cueVideoById</code> + <code>setPlaybackRate</code> + <code>onStateChange</code> 监听）<sup class="cite"><a href="#ref-14">[14]</a></sup></li>
+          <li>□ YouTube iframe API 集成（<code>cueVideoById</code> + <code>setPlaybackRate</code> + <code>onStateChange</code> 监听）<sup class="cite" data-refid="14">[14]</sup></li>
           <li>□ 错题入 SRS（接现有 spaced repetition logic）</li>
           <li>□ 字幕挖空显示组件（regex replace target word with input field）</li>
           <li>□ 简单 homophone 字典（30 个最常见对，预制 JSON）</li>
@@ -1352,8 +1388,8 @@ Response: {
 
         <h4>⚙️ 学术依据 + 工程注意</h4>
         <div class="callout info">
-          <p><strong>Yu/Boers/Tremblay 2025</strong>（142 名中国 EFL）<sup class="cite"><a href="#ref-3">[3]</a></sup>：dictogloss 跟 dictation 在<strong>立即测验</strong>都比 comprehension questions 好；<strong>2 周延迟测验 dictogloss 保持率更高</strong>。这是 V1.0 dictogloss 比 V0.3 dictation 价值更高的实证依据。</p>
-          <p><strong>Prince 2013</strong>：dictogloss 学生在 task implementation 变量上对产出有显著影响<sup class="cite"><a href="#ref-24">[24]</a></sup>。</p>
+          <p><strong>Yu/Boers/Tremblay 2025</strong>（142 名中国 EFL）<sup class="cite" data-refid="3">[3]</sup>：dictogloss 跟 dictation 在<strong>立即测验</strong>都比 comprehension questions 好；<strong>2 周延迟测验 dictogloss 保持率更高</strong>。这是 V1.0 dictogloss 比 V0.3 dictation 价值更高的实证依据。</p>
+          <p><strong>Prince 2013</strong>：dictogloss 学生在 task implementation 变量上对产出有显著影响<sup class="cite" data-refid="24">[24]</sup>。</p>
           <p><strong>工程注意</strong>：</p>
           <ul>
             <li>LLM 评分有 ±5% 噪声 — 不要 1 分误差就显示给学员</li>
@@ -1426,7 +1462,7 @@ C2 ──── dictogloss 加难 + 学术 lecture 段</div>
             <li>学员 B1 → 升级到 B1 词例句 + 部分 B2 词挑战</li>
             <li>学员的 weak tag 自动反馈 → 弱项词重复出现</li>
           </ul>
-          <p><strong>对应 SLA 理论</strong>：Krashen i+1 + Nation 95% coverage<sup class="cite"><a href="#ref-65">[65]</a></sup>。<strong>市场上没有 dictation App 做到这一层 CEFR 自适应</strong> — 因为他们没半米的词汇分级数据。</p>
+          <p><strong>对应 SLA 理论</strong>：Krashen i+1 + Nation 95% coverage<sup class="cite" data-refid="65">[65]</sup>。<strong>市场上没有 dictation App 做到这一层 CEFR 自适应</strong> — 因为他们没半米的词汇分级数据。</p>
         </div>
       </div>
 
@@ -1436,7 +1472,7 @@ C2 ──── dictogloss 加难 + 学术 lecture 段</div>
         <div class="head"><span class="badge" style="background:var(--info-soft);color:var(--info)">优势 #2</span> 真实视频 i+1 例句</div>
         <div class="body">
           <p>Lyrics Training 用歌曲（artistic 但脱离日常对话）；Quizlet Spell 用 TTS（不真实）；不背单词例句多但碎；扇贝有内容但没视频。</p>
-          <p>半米的视频例句 = <strong>真实场景 + Krashen comprehensible input + Pellicer-Sánchez narrow listening 三大理论合体</strong><sup class="cite"><a href="#ref-65">[65]</a></sup>：</p>
+          <p>半米的视频例句 = <strong>真实场景 + Krashen comprehensible input + Pellicer-Sánchez narrow listening 三大理论合体</strong><sup class="cite" data-refid="65">[65]</sup>：</p>
           <ul>
             <li>SciShow Kids 例句 → A2-B1 自然科学场景</li>
             <li>Peppa / Ms Rachel → A1-A2 启蒙日常</li>
@@ -1581,7 +1617,7 @@ C2 ──── dictogloss 加难 + 学术 lecture 段</div>
           <ol>
             <li><strong>工程量</strong>：V0.1 1-2 天 vs V0.3 2-3 天，<strong>边际成本最低</strong>。</li>
             <li><strong>学员适配</strong>：半米首批学员以 A2-B1 为主，段落听写对他们太残忍，cloze 是<strong>i+1 正中靶心</strong>。</li>
-            <li><strong>学术证据</strong>：Cai 2013 CFA 证 partial dictation 测的就是 higher-order listening<sup class="cite"><a href="#ref-1">[1]</a></sup>。不存在"先简单后复杂"的层级 — cloze 本身就够测高阶。</li>
+            <li><strong>学术证据</strong>：Cai 2013 CFA 证 partial dictation 测的就是 higher-order listening<sup class="cite" data-refid="1">[1]</sup>。不存在"先简单后复杂"的层级 — cloze 本身就够测高阶。</li>
           </ol>
         </div>
       </div>
@@ -1615,7 +1651,7 @@ C2 ──── dictogloss 加难 + 学术 lecture 段</div>
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q4</span><span class="qtext">Whisper ASR 在 non-native 学员上 WER 多高？跟读评分准不准？</span><span class="toggle">+</span></div>
         <div class="faq-a">
-          <p>Whisper 在 native English read speech 上 WER ~12.8%<sup class="cite"><a href="#ref-7">[7]</a></sup>；non-native 偏高（Graham & Roll 2024 测 14 种 L1 背景 mean MER 0.157，Ballier 2024 法国学员 WER 0.132）<sup class="cite"><a href="#ref-63">[63]</a></sup>。<strong>对半米的意义</strong>：单纯字面匹配 ASR 输出不可靠 — 要做"模糊比对 + 关键词容错 + 不要把"r/l 不分"当严重错"。Wakitsu 2023 meta-analysis 显示 ASR with indirect feedback (像 dictation) 中等效应 g=0.69<sup class="cite"><a href="#ref-28">[28]</a></sup>，<strong>跟读评分作"参考反馈"是 OK 的，作"严格打分"会伤学员</strong>。</p>
+          <p>Whisper 在 native English read speech 上 WER ~12.8%<sup class="cite" data-refid="7">[7]</sup>；non-native 偏高（Graham & Roll 2024 测 14 种 L1 背景 mean MER 0.157，Ballier 2024 法国学员 WER 0.132）<sup class="cite" data-refid="63">[63]</sup>。<strong>对半米的意义</strong>：单纯字面匹配 ASR 输出不可靠 — 要做"模糊比对 + 关键词容错 + 不要把"r/l 不分"当严重错"。Wakitsu 2023 meta-analysis 显示 ASR with indirect feedback (像 dictation) 中等效应 g=0.69<sup class="cite" data-refid="28">[28]</sup>，<strong>跟读评分作"参考反馈"是 OK 的，作"严格打分"会伤学员</strong>。</p>
         </div>
       </div>
 
@@ -1638,7 +1674,7 @@ C2 ──── dictogloss 加难 + 学术 lecture 段</div>
         <div class="faq-a">
           <p>透析法被中文圈贴"伪科学"标签是片面的（参见父报告 §6 详解）。学术对应：</p>
           <ul>
-            <li>"逐句听写慢速 VOA" = classical dictation (Oller 1971)<sup class="cite"><a href="#ref-16">[16]</a></sup> + narrow listening (Krashen)<sup class="cite"><a href="#ref-65">[65]</a></sup></li>
+            <li>"逐句听写慢速 VOA" = classical dictation (Oller 1971)<sup class="cite" data-refid="16">[16]</sup> + narrow listening (Krashen)<sup class="cite" data-refid="65">[65]</sup></li>
             <li>"反对查字典 / 慢速反复" = i+1 + dictogloss 在缺乏母语环境下的实践版</li>
             <li>"再听再说" = 轻量 shadowing (Tamai 1992)</li>
           </ul>
@@ -1651,9 +1687,9 @@ C2 ──── dictogloss 加难 + 学术 lecture 段</div>
         <div class="faq-a">
           <p>这是个流传广的误读。<strong>Dictation 学术上从未被证伪</strong>：</p>
           <ul>
-            <li>1975-1985 Heaton/Davies 批它 imprecise<sup class="cite"><a href="#ref-10">[10]</a></sup> — 主要是"测试用途"的批评（测不出独立 micro-skill），不是"教学用途"的批评。</li>
+            <li>1975-1985 Heaton/Davies 批它 imprecise<sup class="cite" data-refid="10">[10]</sup> — 主要是"测试用途"的批评（测不出独立 micro-skill），不是"教学用途"的批评。</li>
             <li>同期 communicative language teaching (CLT) 浪潮挤压 dictation 的曝光度，因为它"看起来不沟通"。</li>
-            <li>2001 起 Buck<sup class="cite"><a href="#ref-21">[21]</a></sup>、Cai 2013<sup class="cite"><a href="#ref-1">[1]</a></sup>、Kuo 2010<sup class="cite"><a href="#ref-2">[2]</a></sup>、Yu/Boers 2025<sup class="cite"><a href="#ref-3">[3]</a></sup> 一系列实证<strong>把它焊回主流</strong>。</li>
+            <li>2001 起 Buck<sup class="cite" data-refid="21">[21]</sup>、Cai 2013<sup class="cite" data-refid="1">[1]</sup>、Kuo 2010<sup class="cite" data-refid="2">[2]</sup>、Yu/Boers 2025<sup class="cite" data-refid="3">[3]</sup> 一系列实证<strong>把它焊回主流</strong>。</li>
             <li>市场端：Lyrics Training 10M+ 用户 / Quizlet 50M+ MAU 都做 dictation 类<strong>—— 商业端验证</strong>。</li>
           </ul>
         </div>
@@ -1662,7 +1698,7 @@ C2 ──── dictogloss 加难 + 学术 lecture 段</div>
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q8</span><span class="qtext">半米要不要做"DET 听写考试模拟"细分？</span><span class="toggle">+</span></div>
         <div class="faq-a">
-          <p>建议：<strong>V0.3 后再考虑</strong>。DET (Duolingo English Test) Listen-and-Type 是高利害考试题型<sup class="cite"><a href="#ref-9">[9]</a></sup>，市场需求强但<strong>已经有 GoArno / TST Prep / DETPractice 等专门玩家</strong>。半米单独做这个细分会陷入红海。可考虑的<strong>侧面切入</strong>：</p>
+          <p>建议：<strong>V0.3 后再考虑</strong>。DET (Duolingo English Test) Listen-and-Type 是高利害考试题型<sup class="cite" data-refid="9">[9]</sup>，市场需求强但<strong>已经有 GoArno / TST Prep / DETPractice 等专门玩家</strong>。半米单独做这个细分会陷入红海。可考虑的<strong>侧面切入</strong>：</p>
           <ul>
             <li>(1) 在通用听写模块里加一个"DET 模拟"主题包（给已是半米用户的考试需求者）</li>
             <li>(2) 不单独做 DET 营销，作为"听写功能"的次级 use case</li>
@@ -1675,24 +1711,24 @@ C2 ──── dictogloss 加难 + 学术 lecture 段</div>
         <div class="faq-a">
           <p>合适但要适配：</p>
           <ul>
-            <li><strong>5-8 岁</strong>：不做正式 dictation，用 picture dictation（听 → 画 / 选图）<sup class="cite"><a href="#ref-39">[39]</a></sup></li>
+            <li><strong>5-8 岁</strong>：不做正式 dictation，用 picture dictation（听 → 画 / 选图）<sup class="cite" data-refid="39">[39]</sup></li>
             <li><strong>8-10 岁 (A1-A2)</strong>：V0.1 单词 cloze，从 SciShow Kids / Peppa 短句开始</li>
             <li><strong>10+ (A2-B1)</strong>：V0.1-V0.2 全套</li>
           </ul>
-          <p>2024 Vietnam 研究<sup class="cite"><a href="#ref-32">[32]</a></sup> 显示 young learners 对 dictation 接受度高，但要 adapt speech rate + 用 engaging content。半米的 SciShow Kids / Peppa 例句视频是天然适配。</p>
+          <p>2024 Vietnam 研究<sup class="cite" data-refid="32">[32]</sup> 显示 young learners 对 dictation 接受度高，但要 adapt speech rate + 用 engaging content。半米的 SciShow Kids / Peppa 例句视频是天然适配。</p>
         </div>
       </div>
 
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q10</span><span class="qtext">听写做完后，学员立刻"看完整字幕 + 再听一次"对学习有用吗？</span><span class="toggle">+</span></div>
         <div class="faq-a">
-          <p>有 — 这是<strong>Schmidt noticing 的高质量实施</strong><sup class="cite"><a href="#ref-64">[64]</a></sup>：</p>
+          <p>有 — 这是<strong>Schmidt noticing 的高质量实施</strong><sup class="cite" data-refid="64">[64]</sup>：</p>
           <ul>
             <li>学员先没字幕听 → 发现自己听不清 → noticing the gap</li>
             <li>给完整字幕 → 学员看到"正确"对照</li>
             <li>再听一遍 → 这次能匹配上音和字 → 把听不清的部分"焊"进 implicit knowledge</li>
           </ul>
-          <p>这就是 Oller 1971 说的 "active process of analysis"<sup class="cite"><a href="#ref-16">[16]</a></sup>。半米一定要保留"提交后立即给完整字幕 + 自动重播一次"流程。</p>
+          <p>这就是 Oller 1971 说的 "active process of analysis"<sup class="cite" data-refid="16">[16]</sup>。半米一定要保留"提交后立即给完整字幕 + 自动重播一次"流程。</p>
         </div>
       </div>
 
@@ -1703,7 +1739,7 @@ C2 ──── dictogloss 加难 + 学术 lecture 段</div>
           <ul>
             <li><strong>(1) 跟整体会员绑定</strong>：dictation 是会员权益之一（跟跟读 / AI 对话同档）— 不单卖，提升整体留存。</li>
             <li><strong>(2) 内容主题包付费</strong>：免费学员用基础视频例句；高考听力专项 / IELTS 真题段 / 大学英语听写 = 主题付费包（参考扇贝）。</li>
-            <li><strong>(3) B2B 教材同步</strong>：跟出版社合作，做"人教版小学英语听写 App"，按学校采购付费（参考"英语朗读宝" 1000 万用户路径<sup class="cite"><a href="#ref-36">[36]</a></sup>）。</li>
+            <li><strong>(3) B2B 教材同步</strong>：跟出版社合作，做"人教版小学英语听写 App"，按学校采购付费（参考"英语朗读宝" 1000 万用户路径<sup class="cite" data-refid="36">[36]</sup>）。</li>
           </ul>
           <p><strong>不要</strong>用 streak / 焦虑机制变现（参见父报告 Ch9 多邻国质疑）。</p>
         </div>
@@ -1712,7 +1748,7 @@ C2 ──── dictogloss 加难 + 学术 lecture 段</div>
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q12</span><span class="qtext">如果阿杰只看一句结论，是什么？</span><span class="toggle">+</span></div>
         <div class="faq-a">
-          <p style="font-size: 16px; font-weight: 600; padding: 14px; background: var(--accent-soft); color: var(--text); border-radius: 10px; border-left: 4px solid var(--accent);">"V0.1 单词级 cloze 听写本周末就能上 — 用现成 6 例句视频 + 字幕挖目标词 + Levenshtein 评分，1-2 天工程量。学术证据强 (Cai 2013<sup class="cite"><a href="#ref-1">[1]</a></sup>)，竞品空白（不背做词级 / 扇贝做句精听 / Lyrics 用歌词都不踩半米的 niche），跟现有词汇库零迁移。后续 V0.2-V1.0 用 7-11 人天补齐 4 阶段，做完没有第二家。"</p>
+          <p style="font-size: 16px; font-weight: 600; padding: 14px; background: var(--accent-soft); color: var(--text); border-radius: 10px; border-left: 4px solid var(--accent);">"V0.1 单词级 cloze 听写本周末就能上 — 用现成 6 例句视频 + 字幕挖目标词 + Levenshtein 评分，1-2 天工程量。学术证据强 (Cai 2013<sup class="cite" data-refid="1">[1]</sup>)，竞品空白（不背做词级 / 扇贝做句精听 / Lyrics 用歌词都不踩半米的 niche），跟现有词汇库零迁移。后续 V0.2-V1.0 用 7-11 人天补齐 4 阶段，做完没有第二家。"</p>
         </div>
       </div>
 
@@ -1928,5 +1964,91 @@ C2 ──── dictogloss 加难 + 学术 lecture 段</div>
     render();
   })();
 </script>
+
+<script>
+(function() {
+  let activePopover = null;
+  let activeTrigger = null;
+  let hideTimer = null;
+
+  function getRefContent(refid) {
+    const refEl = document.getElementById('ref-' + refid);
+    if (!refEl) return null;
+    return refEl.innerHTML;
+  }
+
+  function positionPopover(pop, trigger) {
+    const r = trigger.getBoundingClientRect();
+    const popW = pop.offsetWidth;
+    const popH = pop.offsetHeight;
+    const vw = window.innerWidth;
+    const sy = window.scrollY;
+    let left = r.left + window.scrollX;
+    if (left + popW > vw - 12) left = vw - popW - 12;
+    if (left < 12) left = 12;
+    let top = r.bottom + sy + 6;
+    // if no space below, flip up
+    if (r.bottom + popH > window.innerHeight - 12 && r.top > popH + 12) {
+      top = r.top + sy - popH - 6;
+    }
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+  }
+
+  function showPopover(trigger) {
+    if (activeTrigger === trigger && activePopover) return;
+    if (activePopover) { activePopover.remove(); activePopover = null; }
+    const refid = trigger.getAttribute('data-refid');
+    const content = getRefContent(refid);
+    if (!content) return;
+    const pop = document.createElement('div');
+    pop.className = 'cite-popover';
+    pop.innerHTML = content;
+    document.body.appendChild(pop);
+    positionPopover(pop, trigger);
+    activePopover = pop;
+    activeTrigger = trigger;
+
+    pop.addEventListener('mouseenter', () => { if (hideTimer) clearTimeout(hideTimer); });
+    pop.addEventListener('mouseleave', () => scheduleHide());
+  }
+
+  function scheduleHide() {
+    if (hideTimer) clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      if (activePopover) { activePopover.remove(); activePopover = null; activeTrigger = null; }
+    }, 200);
+  }
+
+  function bindCites() {
+    document.querySelectorAll('sup.cite[data-refid]').forEach(sup => {
+      sup.addEventListener('mouseenter', () => showPopover(sup));
+      sup.addEventListener('mouseleave', () => scheduleHide());
+      // touch / click for mobile
+      sup.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (activeTrigger === sup && activePopover) {
+          activePopover.remove(); activePopover = null; activeTrigger = null;
+        } else {
+          showPopover(sup);
+        }
+      });
+    });
+    document.addEventListener('click', e => {
+      if (!activePopover) return;
+      if (e.target.closest('.cite-popover') || e.target.closest('sup.cite')) return;
+      activePopover.remove(); activePopover = null; activeTrigger = null;
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindCites);
+  } else {
+    bindCites();
+  }
+})();
+</script>
+
 </body>
 </html>

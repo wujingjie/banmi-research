@@ -129,17 +129,53 @@
     th, td { padding: 8px 10px; font-size: 12px; }
   }
 
-  /* === actionable references (2026-05-27 patch) === */
-  .ref-list li:target {
-    animation: ref-highlight 2.4s ease-out;
+
+  /* === actionable references · popover (2026-05-27 v2) === */
+  sup.cite {
+    cursor: help;
+    position: relative;
+    border-bottom: 1px dotted currentColor;
+    padding: 0 1px;
   }
-  @keyframes ref-highlight {
-    0%   { background: rgba(250, 204, 21, 0.55); }
-    60%  { background: rgba(250, 204, 21, 0.55); }
-    100% { background: transparent; }
+  sup.cite:hover {
+    background: rgba(250, 204, 21, 0.3);
+    border-radius: 3px;
   }
-  sup.cite a { text-decoration: none; color: inherit; }
-  sup.cite a:hover { text-decoration: underline; }
+  .cite-popover {
+    position: absolute;
+    z-index: 9999;
+    background: var(--bg-elevated, #ffffff);
+    color: var(--text, #1a1a23);
+    border: 1px solid var(--border, #e3e6ec);
+    border-radius: 10px;
+    padding: 12px 14px;
+    max-width: 380px;
+    min-width: 220px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+    font-size: 13px;
+    line-height: 1.55;
+    font-weight: normal;
+    pointer-events: auto;
+  }
+  [data-theme="dark"] .cite-popover {
+    background: #1a1e2a;
+    color: #e6e9f0;
+    border-color: #2a2f3a;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+  .cite-popover a {
+    color: var(--accent, #2563eb);
+    text-decoration: underline;
+    word-break: break-all;
+  }
+  [data-theme="dark"] .cite-popover a {
+    color: #60a5fa;
+  }
+  .cite-popover ul, .cite-popover ol {
+    margin: 4px 0 0;
+    padding-left: 18px;
+  }
+  .cite-popover ::before { content: none !important; }
 
 </style>
 </head>
@@ -1747,6 +1783,92 @@ function runDemo() {
   html += `<em style="font-size:12px; color:var(--muted);">⚠️ 推荐基于本研究 20+ 学校样本规则匹配。真实选校请 email 学校 admissions 索 fee schedule + 安排 campus visit。</em>`;
   document.getElementById('demo-result').innerHTML = html;
 }
+</script>
+
+
+<script>
+(function() {
+  let activePopover = null;
+  let activeTrigger = null;
+  let hideTimer = null;
+
+  function getRefContent(refid) {
+    const refEl = document.getElementById('ref-' + refid);
+    if (!refEl) return null;
+    return refEl.innerHTML;
+  }
+
+  function positionPopover(pop, trigger) {
+    const r = trigger.getBoundingClientRect();
+    const popW = pop.offsetWidth;
+    const popH = pop.offsetHeight;
+    const vw = window.innerWidth;
+    const sy = window.scrollY;
+    let left = r.left + window.scrollX;
+    if (left + popW > vw - 12) left = vw - popW - 12;
+    if (left < 12) left = 12;
+    let top = r.bottom + sy + 6;
+    // if no space below, flip up
+    if (r.bottom + popH > window.innerHeight - 12 && r.top > popH + 12) {
+      top = r.top + sy - popH - 6;
+    }
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+  }
+
+  function showPopover(trigger) {
+    if (activeTrigger === trigger && activePopover) return;
+    if (activePopover) { activePopover.remove(); activePopover = null; }
+    const refid = trigger.getAttribute('data-refid');
+    const content = getRefContent(refid);
+    if (!content) return;
+    const pop = document.createElement('div');
+    pop.className = 'cite-popover';
+    pop.innerHTML = content;
+    document.body.appendChild(pop);
+    positionPopover(pop, trigger);
+    activePopover = pop;
+    activeTrigger = trigger;
+
+    pop.addEventListener('mouseenter', () => { if (hideTimer) clearTimeout(hideTimer); });
+    pop.addEventListener('mouseleave', () => scheduleHide());
+  }
+
+  function scheduleHide() {
+    if (hideTimer) clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      if (activePopover) { activePopover.remove(); activePopover = null; activeTrigger = null; }
+    }, 200);
+  }
+
+  function bindCites() {
+    document.querySelectorAll('sup.cite[data-refid]').forEach(sup => {
+      sup.addEventListener('mouseenter', () => showPopover(sup));
+      sup.addEventListener('mouseleave', () => scheduleHide());
+      // touch / click for mobile
+      sup.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (activeTrigger === sup && activePopover) {
+          activePopover.remove(); activePopover = null; activeTrigger = null;
+        } else {
+          showPopover(sup);
+        }
+      });
+    });
+    document.addEventListener('click', e => {
+      if (!activePopover) return;
+      if (e.target.closest('.cite-popover') || e.target.closest('sup.cite')) return;
+      activePopover.remove(); activePopover = null; activeTrigger = null;
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindCites);
+  } else {
+    bindCites();
+  }
+})();
 </script>
 
 </body>

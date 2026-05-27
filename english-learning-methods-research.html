@@ -214,17 +214,53 @@
     section.chapter.collapsed > h2 .caret { display: none; }
   }
 
-  /* === actionable references (2026-05-27 patch) === */
-  .ref-list li:target {
-    animation: ref-highlight 2.4s ease-out;
+
+  /* === actionable references · popover (2026-05-27 v2) === */
+  sup.cite {
+    cursor: help;
+    position: relative;
+    border-bottom: 1px dotted currentColor;
+    padding: 0 1px;
   }
-  @keyframes ref-highlight {
-    0%   { background: rgba(250, 204, 21, 0.55); }
-    60%  { background: rgba(250, 204, 21, 0.55); }
-    100% { background: transparent; }
+  sup.cite:hover {
+    background: rgba(250, 204, 21, 0.3);
+    border-radius: 3px;
   }
-  sup.cite a { text-decoration: none; color: inherit; }
-  sup.cite a:hover { text-decoration: underline; }
+  .cite-popover {
+    position: absolute;
+    z-index: 9999;
+    background: var(--bg-elevated, #ffffff);
+    color: var(--text, #1a1a23);
+    border: 1px solid var(--border, #e3e6ec);
+    border-radius: 10px;
+    padding: 12px 14px;
+    max-width: 380px;
+    min-width: 220px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+    font-size: 13px;
+    line-height: 1.55;
+    font-weight: normal;
+    pointer-events: auto;
+  }
+  [data-theme="dark"] .cite-popover {
+    background: #1a1e2a;
+    color: #e6e9f0;
+    border-color: #2a2f3a;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+  .cite-popover a {
+    color: var(--accent, #2563eb);
+    text-decoration: underline;
+    word-break: break-all;
+  }
+  [data-theme="dark"] .cite-popover a {
+    color: #60a5fa;
+  }
+  .cite-popover ul, .cite-popover ol {
+    margin: 4px 0 0;
+    padding-left: 18px;
+  }
+  .cite-popover ::before { content: none !important; }
 
 </style>
 </head>
@@ -301,14 +337,14 @@
       <h3>📊 关键数字一眼看完</h3>
 
       <div class="metric-grid">
-        <div class="metric"><div class="v">10-17</div><div class="l">词汇可靠习得所需 encounter 次数<sup class="cite"><a href="#ref-6">[6]</a></sup></div></div>
-        <div class="metric"><div class="v">95-98%</div><div class="l">阅读理解所需 lexical coverage<sup class="cite"><a href="#ref-7">[7]</a></sup></div></div>
-        <div class="metric"><div class="v">135M</div><div class="l">Duolingo Q3 2025 MAU<sup class="cite"><a href="#ref-15">[15]</a></sup></div></div>
-        <div class="metric"><div class="v">$1.04B</div><div class="l">Duolingo 2025 全年营收<sup class="cite"><a href="#ref-15">[15]</a></sup></div></div>
-        <div class="metric"><div class="v">3.5×</div><div class="l">streak ≥7 天 vs 无 streak 留存倍数<sup class="cite"><a href="#ref-18">[18]</a></sup></div></div>
-        <div class="metric"><div class="v">62%</div><div class="l">Duolingo 用户漏一天会"内疚"<sup class="cite"><a href="#ref-34">[34]</a></sup></div></div>
-        <div class="metric"><div class="v">5 单元</div><div class="l">= 4 学期大学语言课<sup class="cite"><a href="#ref-16">[16]</a></sup></div></div>
-        <div class="metric"><div class="v">15-20 min</div><div class="l">shadowing 每天起效门槛<sup class="cite"><a href="#ref-10">[10]</a></sup></div></div>
+        <div class="metric"><div class="v">10-17</div><div class="l">词汇可靠习得所需 encounter 次数<sup class="cite" data-refid="6">[6]</sup></div></div>
+        <div class="metric"><div class="v">95-98%</div><div class="l">阅读理解所需 lexical coverage<sup class="cite" data-refid="7">[7]</sup></div></div>
+        <div class="metric"><div class="v">135M</div><div class="l">Duolingo Q3 2025 MAU<sup class="cite" data-refid="15">[15]</sup></div></div>
+        <div class="metric"><div class="v">$1.04B</div><div class="l">Duolingo 2025 全年营收<sup class="cite" data-refid="15">[15]</sup></div></div>
+        <div class="metric"><div class="v">3.5×</div><div class="l">streak ≥7 天 vs 无 streak 留存倍数<sup class="cite" data-refid="18">[18]</sup></div></div>
+        <div class="metric"><div class="v">62%</div><div class="l">Duolingo 用户漏一天会"内疚"<sup class="cite" data-refid="34">[34]</sup></div></div>
+        <div class="metric"><div class="v">5 单元</div><div class="l">= 4 学期大学语言课<sup class="cite" data-refid="16">[16]</sup></div></div>
+        <div class="metric"><div class="v">15-20 min</div><div class="l">shadowing 每天起效门槛<sup class="cite" data-refid="10">[10]</sup></div></div>
       </div>
 
       <h3>🎯 5 条核心结论</h3>
@@ -316,7 +352,7 @@
       <div class="principle-card" style="border-left-color: var(--bad);">
         <div class="head"><span class="badge" style="background:var(--bad-soft);color:var(--bad)">颠覆 #1</span> 多邻国"5 单元 = 4 学期大学课"是真的，但有大前提</div>
         <div class="body">
-          Duolingo 官方研究 (Jiang et al. 2021, <em>Foreign Language Annals</em>) 显示完成 5 单元 = 4 学期大学西/法语课的阅读+听力水平<sup class="cite"><a href="#ref-16">[16]</a></sup>。但学界质疑：(1) 只测了<strong>识别（recognition），没测产出（recall / production）</strong>；(2) 听说读写四技能里<strong>说和写几乎没测</strong>；(3) 长期保持效果没数据<sup class="cite"><a href="#ref-17">[17]</a></sup>。
+          Duolingo 官方研究 (Jiang et al. 2021, <em>Foreign Language Annals</em>) 显示完成 5 单元 = 4 学期大学西/法语课的阅读+听力水平<sup class="cite" data-refid="16">[16]</sup>。但学界质疑：(1) 只测了<strong>识别（recognition），没测产出（recall / production）</strong>；(2) 听说读写四技能里<strong>说和写几乎没测</strong>；(3) 长期保持效果没数据<sup class="cite" data-refid="17">[17]</sup>。
           <br><br>
           <strong>意思是</strong>：多邻国适合"被动识别 + 基础词汇"；想真用英语开口、写论文、读小说仍需别的方法。半米可以学多邻国的产品形态，<strong>但不能学多邻国的学习指标</strong>。
         </div>
@@ -325,28 +361,28 @@
       <div class="principle-card" style="border-left-color: var(--good);">
         <div class="head"><span class="badge" style="background:var(--good-soft);color:var(--good)">结论 #2</span> 词汇习得"6+ 次 encounter"是误传，真实数是 10-17 次</div>
         <div class="body">
-          Pellicer-Sánchez & Schmitt (2010) + Webb (2007) 在 SLA 经典研究里测得：<strong>5-8 次 encounter 开始有显著进步，10-17 次后形式 + 意义识别率达 ~80%</strong><sup class="cite"><a href="#ref-6">[6]</a></sup>。Nation 本人 2017 综述也指出"完全掌握需 10+ 次重复"<sup class="cite"><a href="#ref-3">[3]</a></sup>。半米的 <strong>"6 例句"</strong> 标准是<strong>识别门槛</strong>（够用），但要"真用得出来"<strong>必须配合 SRS 让总 encounter 数到 10-17</strong>。
+          Pellicer-Sánchez & Schmitt (2010) + Webb (2007) 在 SLA 经典研究里测得：<strong>5-8 次 encounter 开始有显著进步，10-17 次后形式 + 意义识别率达 ~80%</strong><sup class="cite" data-refid="6">[6]</sup>。Nation 本人 2017 综述也指出"完全掌握需 10+ 次重复"<sup class="cite" data-refid="3">[3]</sup>。半米的 <strong>"6 例句"</strong> 标准是<strong>识别门槛</strong>（够用），但要"真用得出来"<strong>必须配合 SRS 让总 encounter 数到 10-17</strong>。
         </div>
       </div>
 
       <div class="principle-card" style="border-left-color: var(--info);">
         <div class="head"><span class="badge" style="background:var(--info-soft);color:var(--info)">结论 #3</span> Shadowing 是最被低估的高 ROI 方法</div>
         <div class="body">
-          Tamai (1992) 起 30 年研究稳定显示：<strong>每天 15-20 分钟 shadowing 几周即有显著的流利度、prosody、intelligibility 提升</strong><sup class="cite"><a href="#ref-10">[10]</a></sup>。这是 SLA 学界共识里<strong>对成人学习者最 cost-effective 的方法之一</strong>。但市面 App 里把它做透的几乎只有日本系（Migaku / shadowing 类工具），中国系 App（流利说除外）大多不做。<strong>半米 V0.2 接入 Whisper ASR + 跟读评分是高 ROI 切入点</strong>。
+          Tamai (1992) 起 30 年研究稳定显示：<strong>每天 15-20 分钟 shadowing 几周即有显著的流利度、prosody、intelligibility 提升</strong><sup class="cite" data-refid="10">[10]</sup>。这是 SLA 学界共识里<strong>对成人学习者最 cost-effective 的方法之一</strong>。但市面 App 里把它做透的几乎只有日本系（Migaku / shadowing 类工具），中国系 App（流利说除外）大多不做。<strong>半米 V0.2 接入 Whisper ASR + 跟读评分是高 ROI 切入点</strong>。
         </div>
       </div>
 
       <div class="principle-card" style="border-left-color: var(--warn);">
         <div class="head"><span class="badge" style="background:var(--warn-soft);color:var(--warn)">结论 #4</span> "streak 系统"双刃 — 短期粘性强，长期可能伤害学习</div>
         <div class="body">
-          Duolingo 内部数据：streak >7 天用户留存是普通用户 <strong>3.5 倍</strong><sup class="cite"><a href="#ref-18">[18]</a></sup>。但 2022 用户调查：<strong>62% 漏一天会"内疚"，34% 看到通知会"焦虑"</strong><sup class="cite"><a href="#ref-34">[34]</a></sup>，未成年人尤甚。教育心理学界开始警告 streak 制造"为不丢 streak 而学"的<strong>外驱动机替代</strong><sup class="cite">[20][68]</sup>。<strong>半米若做 streak，必须设"streak 保护卡"和"健康暂停"机制</strong>。
+          Duolingo 内部数据：streak >7 天用户留存是普通用户 <strong>3.5 倍</strong><sup class="cite" data-refid="18">[18]</sup>。但 2022 用户调查：<strong>62% 漏一天会"内疚"，34% 看到通知会"焦虑"</strong><sup class="cite" data-refid="34">[34]</sup>，未成年人尤甚。教育心理学界开始警告 streak 制造"为不丢 streak 而学"的<strong>外驱动机替代</strong><sup class="cite">[20][68]</sup>。<strong>半米若做 streak，必须设"streak 保护卡"和"健康暂停"机制</strong>。
         </div>
       </div>
 
       <div class="principle-card" style="border-left-color: var(--purple);">
         <div class="head"><span class="badge" style="background:var(--purple-soft);color:var(--purple)">结论 #5</span> 钟道隆透析法 = 中国版 narrow listening + dictation，SLA 学界有交集</div>
         <div class="body">
-          钟道隆 1980s 提出的"逐句听写慢速 VOA → 跟读 → 再听 → 再说"流派<sup class="cite"><a href="#ref-37">[37]</a></sup>，在 SLA 框架里恰恰是<strong>Krashen narrow listening<sup class="cite"><a href="#ref-39">[39]</a></sup> + 经典 dictation<sup class="cite"><a href="#ref-8">[8]</a></sup> + 轻量 shadowing</strong> 的组合。被中文圈贴上"伪科学/苦修"标签是片面的 — 它的"反对查字典""慢速反复"等做法本就是 i+1 + dictogloss 在中国 ESL 缺乏母语环境下的<strong>务实落地</strong>。<strong>半米的 VOA / SciShow Kids 视频例句库就是透析法的现代化版本</strong>。
+          钟道隆 1980s 提出的"逐句听写慢速 VOA → 跟读 → 再听 → 再说"流派<sup class="cite" data-refid="37">[37]</sup>，在 SLA 框架里恰恰是<strong>Krashen narrow listening<sup class="cite" data-refid="39">[39]</sup> + 经典 dictation<sup class="cite" data-refid="8">[8]</sup> + 轻量 shadowing</strong> 的组合。被中文圈贴上"伪科学/苦修"标签是片面的 — 它的"反对查字典""慢速反复"等做法本就是 i+1 + dictogloss 在中国 ESL 缺乏母语环境下的<strong>务实落地</strong>。<strong>半米的 VOA / SciShow Kids 视频例句库就是透析法的现代化版本</strong>。
         </div>
       </div>
 
@@ -355,10 +391,10 @@
         <p><strong>半米 V0.1 上线先做的 3 个方法对接（按 ROI 排序）</strong>：</p>
         <ol>
           <li><strong>视频例句库 + 6-12 次 encounter SRS</strong>（已在做，对应 Krashen narrow listening + Nation 频次理论 + Pellicer-Sánchez 10-17 次实证）</li>
-          <li><strong>透析法 / 听写模式</strong>（视频例句 → 全字幕 → 部分挖空 → 全挖三阶；Whisper 自动批改；对应 dictation 学界证据 + Schmidt noticing<sup class="cite"><a href="#ref-4">[4]</a></sup>）</li>
-          <li><strong>Shadowing 跟读</strong>（视频例句循环播放 → Whisper ASR 评分 → 慢速→原速三阶；对应 Tamai 30 年研究<sup class="cite"><a href="#ref-10">[10]</a></sup>，是市场空白）</li>
+          <li><strong>透析法 / 听写模式</strong>（视频例句 → 全字幕 → 部分挖空 → 全挖三阶；Whisper 自动批改；对应 dictation 学界证据 + Schmidt noticing<sup class="cite" data-refid="4">[4]</sup>）</li>
+          <li><strong>Shadowing 跟读</strong>（视频例句循环播放 → Whisper ASR 评分 → 慢速→原速三阶；对应 Tamai 30 年研究<sup class="cite" data-refid="10">[10]</sup>，是市场空白）</li>
         </ol>
-        <p><strong>暂不做</strong>（坑深、ROI 低）：streak 系统（V0.3 再考虑，必带健康暂停）/ ChatGPT 全自由对话（B2 以下学员效果有限<sup class="cite"><a href="#ref-28">[28]</a></sup>）/ VR 沉浸（成本太高 / 词汇结果混杂<sup class="cite"><a href="#ref-44">[44]</a></sup>）。</p>
+        <p><strong>暂不做</strong>（坑深、ROI 低）：streak 系统（V0.3 再考虑，必带健康暂停）/ ChatGPT 全自由对话（B2 以下学员效果有限<sup class="cite" data-refid="28">[28]</sup>）/ VR 沉浸（成本太高 / 词汇结果混杂<sup class="cite" data-refid="44">[44]</sup>）。</p>
       </div>
 
     </div>
@@ -377,11 +413,11 @@
 
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">📥</span> Comprehensible Input + i+1 + Affective Filter <span class="verdict v-good">SLA 基石</span></div>
-        <div class="m-sub">Stephen Krashen (1985)，整套 Monitor Model 含 5 个 hypothesis<sup class="cite"><a href="#ref-60">[60]</a></sup></div>
+        <div class="m-sub">Stephen Krashen (1985)，整套 Monitor Model 含 5 个 hypothesis<sup class="cite" data-refid="60">[60]</sup></div>
         <div class="m-body">
-          <p><strong>5 个 hypothesis</strong>：(1) Acquisition-Learning（无意识"习得" vs 有意识"学习"，前者主，后者只能做监控）；(2) Monitor（有意识知识只能编辑产出，不是产出源）；(3) Natural Order（语法点习得有固定顺序，教学顺序改不了）；(4) Input（i+1，输入需略高于当前水平）；(5) Affective Filter（焦虑 / 低自信 / 低动机会"过滤"输入<sup class="cite"><a href="#ref-60">[60]</a></sup>）。</p>
-          <p><strong>实证证据</strong>：narrow reading + narrow listening 在 Kang (2015) 等研究中显示能显著提升词汇习得<sup class="cite"><a href="#ref-39">[39]</a></sup>；95-98% lexical coverage 阈值（Laufer 1989, Nation 2006）支持 i+1 量化<sup class="cite"><a href="#ref-7">[7]</a></sup>。</p>
-          <p><strong>学界质疑</strong> ⚠️：Gregg (1984) 起就批 affective filter 缺实证 — 没办法测<sup class="cite"><a href="#ref-1">[1]</a></sup>；2025 Frontiers 神经生态学批评指出"i+1 太模糊，个体差异巨大，one-size-fits-all 不成立"<sup class="cite">[1][55]</sup>；忽略了 output 和 interaction 的作用。</p>
+          <p><strong>5 个 hypothesis</strong>：(1) Acquisition-Learning（无意识"习得" vs 有意识"学习"，前者主，后者只能做监控）；(2) Monitor（有意识知识只能编辑产出，不是产出源）；(3) Natural Order（语法点习得有固定顺序，教学顺序改不了）；(4) Input（i+1，输入需略高于当前水平）；(5) Affective Filter（焦虑 / 低自信 / 低动机会"过滤"输入<sup class="cite" data-refid="60">[60]</sup>）。</p>
+          <p><strong>实证证据</strong>：narrow reading + narrow listening 在 Kang (2015) 等研究中显示能显著提升词汇习得<sup class="cite" data-refid="39">[39]</sup>；95-98% lexical coverage 阈值（Laufer 1989, Nation 2006）支持 i+1 量化<sup class="cite" data-refid="7">[7]</sup>。</p>
+          <p><strong>学界质疑</strong> ⚠️：Gregg (1984) 起就批 affective filter 缺实证 — 没办法测<sup class="cite" data-refid="1">[1]</sup>；2025 Frontiers 神经生态学批评指出"i+1 太模糊，个体差异巨大，one-size-fits-all 不成立"<sup class="cite">[1][55]</sup>；忽略了 output 和 interaction 的作用。</p>
           <p class="callout teal"><strong>半米启示</strong>：i+1 落地 = <strong>用 B1 词例句优先匹配 A2 视频</strong>（已在 V1.1 频道标准做）；affective filter 落地 = <strong>不强迫输出、错了不扣血</strong>（避开多邻国的内疚机制）。</p>
         </div>
       </div>
@@ -390,16 +426,16 @@
 
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">📚</span> 频次理论 + 4 stage of word knowledge + 95% coverage <span class="verdict v-good">词汇圣经</span></div>
-        <div class="m-sub">Paul Nation (Victoria University of Wellington)，<em>Learning Vocabulary in Another Language</em> (2001/2013)<sup class="cite"><a href="#ref-2">[2]</a></sup></div>
+        <div class="m-sub">Paul Nation (Victoria University of Wellington)，<em>Learning Vocabulary in Another Language</em> (2001/2013)<sup class="cite" data-refid="2">[2]</sup></div>
         <div class="m-body">
           <p><strong>核心数字</strong>：</p>
           <ul>
-            <li><strong>95% lexical coverage</strong>（认识 95% 的词）= 阅读能"勉强懂"的下限，需 ~3,000 word families<sup class="cite"><a href="#ref-7">[7]</a></sup></li>
-            <li><strong>98% coverage</strong> = 真正独立阅读，需 8,000-9,000 word families<sup class="cite"><a href="#ref-7">[7]</a></sup></li>
-            <li><strong>10-17 次 encounter</strong> 才能可靠习得（Pellicer-Sánchez & Schmitt 2010；Webb 2007）<sup class="cite"><a href="#ref-6">[6]</a></sup></li>
-            <li>5-stage 词知识演进：noticing → retrieval → varied encounters → varied use → elaboration（Nation 三阶段 → 五阶段演化）<sup class="cite"><a href="#ref-2">[2]</a></sup></li>
+            <li><strong>95% lexical coverage</strong>（认识 95% 的词）= 阅读能"勉强懂"的下限，需 ~3,000 word families<sup class="cite" data-refid="7">[7]</sup></li>
+            <li><strong>98% coverage</strong> = 真正独立阅读，需 8,000-9,000 word families<sup class="cite" data-refid="7">[7]</sup></li>
+            <li><strong>10-17 次 encounter</strong> 才能可靠习得（Pellicer-Sánchez & Schmitt 2010；Webb 2007）<sup class="cite" data-refid="6">[6]</sup></li>
+            <li>5-stage 词知识演进：noticing → retrieval → varied encounters → varied use → elaboration（Nation 三阶段 → 五阶段演化）<sup class="cite" data-refid="2">[2]</sup></li>
           </ul>
-          <p><strong>实证</strong>：Pellicer-Sánchez & Schmitt 用真实小说 <em>Things Fall Apart</em> 测，10-17 次 encounter 后形式 + 意义识别率 ~80%<sup class="cite"><a href="#ref-6">[6]</a></sup>。单次 encounter 只对"识别词形"有效，"识别意义"和"recall 意义"都需要多次。</p>
+          <p><strong>实证</strong>：Pellicer-Sánchez & Schmitt 用真实小说 <em>Things Fall Apart</em> 测，10-17 次 encounter 后形式 + 意义识别率 ~80%<sup class="cite" data-refid="6">[6]</sup>。单次 encounter 只对"识别词形"有效，"识别意义"和"recall 意义"都需要多次。</p>
           <p class="callout teal"><strong>半米启示</strong>：(1) "6 例句"不够 — 那只到识别门槛，要让学员真用得出来必须配 SRS 让总暴露次数到 10-17 次；(2) 95% coverage = i+1 的量化下限，半米例句必须保证学员认识 95% 周围词才推（前面 vocab-research / subtitle-volume-estimation 已经做了）；(3) 5-stage 对应半米可设 5 档"词汇掌握度"标签。</p>
         </div>
       </div>
@@ -408,10 +444,10 @@
 
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">👀</span> Noticing = 学到 / 没 notice 就没学到 <span class="verdict v-mid">主流但有争议</span></div>
-        <div class="m-sub">Richard Schmidt (1990, 2001) — 自己学葡萄牙语日记观察发起<sup class="cite"><a href="#ref-4">[4]</a></sup></div>
+        <div class="m-sub">Richard Schmidt (1990, 2001) — 自己学葡萄牙语日记观察发起<sup class="cite" data-refid="4">[4]</sup></div>
         <div class="m-body">
           <p><strong>核心论点</strong>：学习者必须在<strong>意识层面 notice 到</strong>语言特征（语法、搭配、发音），才能习得它。无意识暴露不够。</p>
-          <p><strong>实证支持</strong>：Leow (1997, 2000)、Izumi (2002)、Mackey (2006) 多项研究支持 noticing 与习得的相关性<sup class="cite"><a href="#ref-4">[4]</a></sup>。被认为是"SLA 主流构念"。</p>
+          <p><strong>实证支持</strong>：Leow (1997, 2000)、Izumi (2002)、Mackey (2006) 多项研究支持 noticing 与习得的相关性<sup class="cite" data-refid="4">[4]</sup>。被认为是"SLA 主流构念"。</p>
           <p><strong>质疑</strong>：N. Ellis 等指出 formulaic sequences 可以无意识习得<sup class="cite">[4][5]</sup>；notice 到什么时候算"出现在产出"有时差，难测。</p>
           <p class="callout teal"><strong>半米启示</strong>：(1) <strong>词高亮 + 颜色标记</strong>（生词橙色、新词红色）就是 noticing 机制；(2) <strong>听写挖空</strong>强制学员 notice 到目标词的拼写 + 发音；(3) <strong>例句配对比</strong>（"这里用 since 不是 because"）就是 noticing 的最大化。</p>
         </div>
@@ -421,12 +457,12 @@
 
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">📤</span> Comprehensible Output + Pushed Output <span class="verdict v-good">输出派核心</span></div>
-        <div class="m-sub">Merrill Swain (1985) — 观察加拿大法语 immersion 学生只输入不输出，听懂但不会说<sup class="cite"><a href="#ref-5">[5]</a></sup></div>
+        <div class="m-sub">Merrill Swain (1985) — 观察加拿大法语 immersion 学生只输入不输出，听懂但不会说<sup class="cite" data-refid="5">[5]</sup></div>
         <div class="m-body">
-          <p><strong>核心反驳 Krashen</strong>：纯输入不够 — Swain 观察到加拿大法语 immersion 学生有大量 comprehensible input，但产出仍弱<sup class="cite"><a href="#ref-5">[5]</a></sup>。原因：<strong>输入时可以靠语义"猜过去"，输出时必须语法精确</strong>。</p>
+          <p><strong>核心反驳 Krashen</strong>：纯输入不够 — Swain 观察到加拿大法语 immersion 学生有大量 comprehensible input，但产出仍弱<sup class="cite" data-refid="5">[5]</sup>。原因：<strong>输入时可以靠语义"猜过去"，输出时必须语法精确</strong>。</p>
           <p><strong>3 大功能</strong>：(1) Noticing — 产出时发现"我不知道怎么说"；(2) Hypothesis testing — 试说看反馈；(3) Metalinguistic — 用语言反思语言。</p>
-          <p><strong>Pushed Output</strong>：让学员说/写<strong>稍高于当前水平</strong>的内容，逼他们调用 syntactic processing 而非语义 shortcut<sup class="cite"><a href="#ref-5">[5]</a></sup>。Sun 2020 综述显示 pushed output 在准确率和流利度上都有显著提升。</p>
-          <p class="callout teal"><strong>半米启示</strong>：(1) <strong>跟读 + Whisper ASR 评分</strong> = 最低成本的 pushed output；(2) <strong>读后续写</strong>（中国流派"读后续写"由 Wang Chuming 2012 提出，证据强<sup class="cite"><a href="#ref-64">[64]</a></sup>）可以加入半米写作模块；(3) <strong>AI 对话（ChatGPT Voice）</strong> = 全自由 pushed output 但成本高 + 效果分化（参见 §13）。</p>
+          <p><strong>Pushed Output</strong>：让学员说/写<strong>稍高于当前水平</strong>的内容，逼他们调用 syntactic processing 而非语义 shortcut<sup class="cite" data-refid="5">[5]</sup>。Sun 2020 综述显示 pushed output 在准确率和流利度上都有显著提升。</p>
+          <p class="callout teal"><strong>半米启示</strong>：(1) <strong>跟读 + Whisper ASR 评分</strong> = 最低成本的 pushed output；(2) <strong>读后续写</strong>（中国流派"读后续写"由 Wang Chuming 2012 提出，证据强<sup class="cite" data-refid="64">[64]</sup>）可以加入半米写作模块；(3) <strong>AI 对话（ChatGPT Voice）</strong> = 全自由 pushed output 但成本高 + 效果分化（参见 §13）。</p>
         </div>
       </div>
 
@@ -434,10 +470,10 @@
 
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">⚙️</span> Declarative → Procedural → Automatic <span class="verdict v-good">认知派核心</span></div>
-        <div class="m-sub">Robert DeKeyser (1997, 2007, 2025 with Suzuki)<sup class="cite"><a href="#ref-12">[12]</a></sup></div>
+        <div class="m-sub">Robert DeKeyser (1997, 2007, 2025 with Suzuki)<sup class="cite" data-refid="12">[12]</sup></div>
         <div class="m-body">
           <p><strong>3 阶段</strong>：(1) <strong>Declarative</strong> — 知道规则（"现在完成时用 have + 过去分词"）；(2) <strong>Procedural</strong> — 能在练习中正确用（思考几秒）；(3) <strong>Automatic</strong> — 用得快又准（不思考也对）。</p>
-          <p><strong>关键证据</strong>：DeKeyser (1997) 显示 <strong>proceduralization 在前 16 个练习 block 内基本完成</strong>，之后是漫长的 automatization<sup class="cite"><a href="#ref-12">[12]</a></sup>。这就是为什么"懂了规则但说不出口" — 没过 procedural 关。</p>
+          <p><strong>关键证据</strong>：DeKeyser (1997) 显示 <strong>proceduralization 在前 16 个练习 block 内基本完成</strong>，之后是漫长的 automatization<sup class="cite" data-refid="12">[12]</sup>。这就是为什么"懂了规则但说不出口" — 没过 procedural 关。</p>
           <p><strong>对教学的颠覆</strong>：<strong>练习量 + 类型多样性 + 即时反馈</strong>比"懂规则"重要得多。光看课文/听讲解只到 declarative，永远到不了 automatic。</p>
           <p class="callout teal"><strong>半米启示</strong>：(1) <strong>词汇不是"背"，是"练到 automatic"</strong> — 半米的多次 encounter + 跟读 + 听写 + AI 对话四种 modality = 4 种 procedural practice；(2) <strong>反馈必须即时</strong>（多邻国做到了，所以快）；(3) 学员"看 6 例句"≠ 掌握，必须"用 6 例句做听写/挖空/跟读"才算 procedural；这一点对半米 UI 设计是核心。</p>
         </div>
@@ -447,10 +483,10 @@
 
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">🧠</span> 隐性习得 vs 显性学习 <span class="verdict v-mid">两派之争</span></div>
-        <div class="m-sub">Rod Ellis (2005, 2009) — 设计了测量两种知识的标准测试<sup class="cite"><a href="#ref-13">[13]</a></sup></div>
+        <div class="m-sub">Rod Ellis (2005, 2009) — 设计了测量两种知识的标准测试<sup class="cite" data-refid="13">[13]</sup></div>
         <div class="m-body">
           <p><strong>两种知识</strong>：(1) <strong>Implicit</strong> 隐性 — 类似母语者直觉，不能 explain；(2) <strong>Explicit</strong> 显性 — 能说出"为什么" 的规则知识。</p>
-          <p><strong>研究结论</strong>：多数对比研究显示 <strong>explicit learning 短期效果优于 implicit</strong>，但 implicit 知识才是真正的语言能力<sup class="cite"><a href="#ref-13">[13]</a></sup>。N. Ellis 用 frequency effect 证明无意识习得是真实的。</p>
+          <p><strong>研究结论</strong>：多数对比研究显示 <strong>explicit learning 短期效果优于 implicit</strong>，但 implicit 知识才是真正的语言能力<sup class="cite" data-refid="13">[13]</sup>。N. Ellis 用 frequency effect 证明无意识习得是真实的。</p>
           <p class="callout teal"><strong>半米启示</strong>：(1) 半米需要<strong>两条并行</strong> — 大量例句（implicit）+ 关键语法点的 explicit 解释（B1+ 学员需要）；(2) <strong>不要把语法做成 Anki 卡</strong>（那是 explicit），而要做成"听 5 个例句然后选哪个对"（这才接近 implicit）。</p>
         </div>
       </div>
@@ -507,11 +543,11 @@
       <div class="callout good">
         <p>🟢 <strong>多源验证</strong>：</p>
         <ul>
-          <li><strong>Cai (2013)</strong>：partial dictation 在 367 名 EFL 学习者上 confirmatory factor analysis 证明<strong>它与"高阶 listening"测的是同一个构念</strong>（不是低阶机械能力）<sup class="cite"><a href="#ref-8">[8]</a></sup></li>
-          <li><strong>Kuo (2010)</strong>：partial dictation 配合英语广播持续训练能显著提升 listening comprehension<sup class="cite"><a href="#ref-8">[8]</a></sup></li>
-          <li><strong>Prince (2013)</strong>：dictogloss 学生在语法准确性上显著优于对照组<sup class="cite"><a href="#ref-9">[9]</a></sup></li>
-          <li><strong>Wajnryb (1990)</strong>：dictogloss 原创人，证据强调"reconstructing"比单纯听写更能促 noticing<sup class="cite"><a href="#ref-9">[9]</a></sup></li>
-          <li>2016-2024 综合 40 篇 dictogloss 研究<strong>显著提升写作连贯性 + 语法准确率</strong><sup class="cite"><a href="#ref-9">[9]</a></sup></li>
+          <li><strong>Cai (2013)</strong>：partial dictation 在 367 名 EFL 学习者上 confirmatory factor analysis 证明<strong>它与"高阶 listening"测的是同一个构念</strong>（不是低阶机械能力）<sup class="cite" data-refid="8">[8]</sup></li>
+          <li><strong>Kuo (2010)</strong>：partial dictation 配合英语广播持续训练能显著提升 listening comprehension<sup class="cite" data-refid="8">[8]</sup></li>
+          <li><strong>Prince (2013)</strong>：dictogloss 学生在语法准确性上显著优于对照组<sup class="cite" data-refid="9">[9]</sup></li>
+          <li><strong>Wajnryb (1990)</strong>：dictogloss 原创人，证据强调"reconstructing"比单纯听写更能促 noticing<sup class="cite" data-refid="9">[9]</sup></li>
+          <li>2016-2024 综合 40 篇 dictogloss 研究<strong>显著提升写作连贯性 + 语法准确率</strong><sup class="cite" data-refid="9">[9]</sup></li>
         </ul>
       </div>
 
@@ -562,7 +598,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
     <h2><span class="num">04</span><span class="title-text">跟读 Shadowing · 深度方法学</span><span class="caret">▼</span></h2>
     <div class="chapter-body">
 
-      <p>Shadowing 起源自<strong>口译训练</strong>（同声传译预备练习），1990s 由日本学者 Tamai 系统化引入 EFL，30 年研究稳定显示是<strong>对成人学习者最 cost-effective 的方法之一</strong><sup class="cite"><a href="#ref-10">[10]</a></sup>。</p>
+      <p>Shadowing 起源自<strong>口译训练</strong>（同声传译预备练习），1990s 由日本学者 Tamai 系统化引入 EFL，30 年研究稳定显示是<strong>对成人学习者最 cost-effective 的方法之一</strong><sup class="cite" data-refid="10">[10]</sup>。</p>
 
       <h3>4.1 4 种跟读法</h3>
 
@@ -583,11 +619,11 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <div class="callout good">
         <p>🟢 <strong>多源验证 + 30 年累积证据</strong>：</p>
         <ul>
-          <li><strong>Tamai (1992)</strong> 起：<strong>每天 15-20 分钟 shadowing，几周内显著提升听力 + 流利度</strong><sup class="cite"><a href="#ref-10">[10]</a></sup></li>
-          <li><strong>Hamada (2016)</strong> 综述：shadowing 对低水平学习者增益最大<sup class="cite"><a href="#ref-51">[51]</a></sup></li>
-          <li><strong>Foote & McDonough (2017)</strong>、<strong>Mori (2011)</strong>：mobile shadowing 显著提升发音准确率和 prosody fluency<sup class="cite"><a href="#ref-10">[10]</a></sup></li>
+          <li><strong>Tamai (1992)</strong> 起：<strong>每天 15-20 分钟 shadowing，几周内显著提升听力 + 流利度</strong><sup class="cite" data-refid="10">[10]</sup></li>
+          <li><strong>Hamada (2016)</strong> 综述：shadowing 对低水平学习者增益最大<sup class="cite" data-refid="51">[51]</sup></li>
+          <li><strong>Foote & McDonough (2017)</strong>、<strong>Mori (2011)</strong>：mobile shadowing 显著提升发音准确率和 prosody fluency<sup class="cite" data-refid="10">[10]</sup></li>
           <li><strong>2025 系统综述</strong>（Tandfonline）：shadowing 对 comprehensibility、intelligibility、accentedness 都有积极证据，但对 segmental（音段）改善证据不一致<sup class="cite">[10][11]</sup></li>
-          <li>越南、台湾、土耳其多项 quasi-experimental 研究均显示实验组显著优于对照组<sup class="cite"><a href="#ref-11">[11]</a></sup></li>
+          <li>越南、台湾、土耳其多项 quasi-experimental 研究均显示实验组显著优于对照组<sup class="cite" data-refid="11">[11]</sup></li>
         </ul>
       </div>
 
@@ -609,7 +645,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
         <table>
           <thead><tr><th>方案</th><th>定位</th><th>价格</th><th>评分粒度</th><th>半米建议</th></tr></thead>
           <tbody>
-            <tr><td><strong>Speechace API</strong></td><td>商业 ASR 评分</td><td>$0.06-0.10/min</td><td>音素 + 音节级，跟 IELTS/TOEFL 0.9 Pearson<sup class="cite"><a href="#ref-42">[42]</a></sup></td><td>V0.2 首选</td></tr>
+            <tr><td><strong>Speechace API</strong></td><td>商业 ASR 评分</td><td>$0.06-0.10/min</td><td>音素 + 音节级，跟 IELTS/TOEFL 0.9 Pearson<sup class="cite" data-refid="42">[42]</sup></td><td>V0.2 首选</td></tr>
             <tr><td><strong>Azure Speech Pronunciation</strong></td><td>大厂全托管</td><td>$0.30/小时</td><td>音素级 + 流利度 + 完整度</td><td>V0.2 备选</td></tr>
             <tr><td><strong>Whisper (OpenAI)</strong></td><td>自托管 ASR</td><td>开源 / API $0.006/min</td><td>转文本无评分，需自建对比逻辑</td><td>V0.1 自建 ★</td></tr>
             <tr><td><strong>SenseVoice / Paraformer (阿里)</strong></td><td>国产 ASR</td><td>开源 / API 便宜</td><td>转文本，需自建评分</td><td>V0.1 备选</td></tr>
@@ -617,7 +653,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
         </table>
       </div>
 
-      <p><strong>半米路线</strong>：V0.1 用 <strong>Whisper 转写 + 字面 diff + 字符相似度</strong>自建简易评分（开发 1 周内）；V0.2 接 Speechace 给音素级反馈（专业感强但费钱）。Whisper 对中国学习者 ASR 错误率显著高于母语者<sup class="cite"><a href="#ref-42">[42]</a></sup>，要做 prompt 提示纠偏。</p>
+      <p><strong>半米路线</strong>：V0.1 用 <strong>Whisper 转写 + 字面 diff + 字符相似度</strong>自建简易评分（开发 1 周内）；V0.2 接 Speechace 给音素级反馈（专业感强但费钱）。Whisper 对中国学习者 ASR 错误率显著高于母语者<sup class="cite" data-refid="42">[42]</sup>，要做 prompt 提示纠偏。</p>
 
       <h3>4.5 半米对接</h3>
 
@@ -645,14 +681,14 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
     <h2><span class="num">05</span><span class="title-text">绘本阅读 · 4 层教学法 (Fountas & Pinnell)</span><span class="caret">▼</span></h2>
     <div class="chapter-body">
 
-      <p>Fountas & Pinnell 框架是欧美 K-G2 阅读教学事实标准，全美几乎所有公立小学采用<sup class="cite"><a href="#ref-19">[19]</a></sup>。半米要做 K12 国际学校 + ESL，绘本就要照这套来。</p>
+      <p>Fountas & Pinnell 框架是欧美 K-G2 阅读教学事实标准，全美几乎所有公立小学采用<sup class="cite" data-refid="19">[19]</sup>。半米要做 K12 国际学校 + ESL，绘本就要照这套来。</p>
 
       <h3>5.1 4 层（实际 5 层）教学法</h3>
 
       <div class="principle-card" style="border-left-color: var(--good);">
         <div class="head"><span class="badge" style="background:var(--good-soft);color:var(--good)">L1</span> Interactive Read-Aloud（家长/老师读 — 全包扶持）</div>
         <div class="body">
-          <strong>难度</strong>：可以超过学员独立阅读水平。<strong>谁主导</strong>：成人完全主导。<strong>核心</strong>：让孩子接触<strong>更高级语言模式</strong>（"听懂"上限可比"读懂"高 1-2 年级）。Ms Rachel 的视频本质是 read-aloud<sup class="cite"><a href="#ref-40">[40]</a></sup>。
+          <strong>难度</strong>：可以超过学员独立阅读水平。<strong>谁主导</strong>：成人完全主导。<strong>核心</strong>：让孩子接触<strong>更高级语言模式</strong>（"听懂"上限可比"读懂"高 1-2 年级）。Ms Rachel 的视频本质是 read-aloud<sup class="cite" data-refid="40">[40]</sup>。
         </div>
       </div>
 
@@ -666,14 +702,14 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <div class="principle-card" style="border-left-color: var(--accent);">
         <div class="head"><span class="badge">L3</span> Guided Reading（引导阅读 — 中扶持）</div>
         <div class="body">
-          <strong>做法</strong>：4-6 人小组，老师选与组水平匹配的 leveled book。学员先独立读，遇到困难老师引导（不直接给答案）。Fountas & Pinnell 把"小组"是这一层的灵魂<sup class="cite"><a href="#ref-19">[19]</a></sup>。
+          <strong>做法</strong>：4-6 人小组，老师选与组水平匹配的 leveled book。学员先独立读，遇到困难老师引导（不直接给答案）。Fountas & Pinnell 把"小组"是这一层的灵魂<sup class="cite" data-refid="19">[19]</sup>。
         </div>
       </div>
 
       <div class="principle-card" style="border-left-color: var(--warn);">
         <div class="head"><span class="badge" style="background:var(--warn-soft);color:var(--warn)">L4</span> Independent Reading（独立阅读 — 低扶持）</div>
         <div class="body">
-          <strong>做法</strong>：学员自选 just-right 书独立读。<strong>五指法则</strong>：开页读，每页不认识 2-3 个词 = 刚好；0-1 个 = 太易；4+ = 太难<sup class="cite"><a href="#ref-21">[21]</a></sup>。配合 Day & Bamford <strong>extensive reading 10 principles</strong>（读得多、自选、为乐趣读、读快不读慢）<sup class="cite"><a href="#ref-14">[14]</a></sup>。
+          <strong>做法</strong>：学员自选 just-right 书独立读。<strong>五指法则</strong>：开页读，每页不认识 2-3 个词 = 刚好；0-1 个 = 太易；4+ = 太难<sup class="cite" data-refid="21">[21]</sup>。配合 Day & Bamford <strong>extensive reading 10 principles</strong>（读得多、自选、为乐趣读、读快不读慢）<sup class="cite" data-refid="14">[14]</sup>。
         </div>
       </div>
 
@@ -690,7 +726,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
         <table>
           <thead><tr><th>体系</th><th>用法</th><th>覆盖年龄</th><th>半米已集成</th></tr></thead>
           <tbody>
-            <tr><td>五指法则</td><td>1 页不认识词数判断难度<sup class="cite"><a href="#ref-21">[21]</a></sup></td><td>K-G2</td><td>V0.1 ✅</td></tr>
+            <tr><td>五指法则</td><td>1 页不认识词数判断难度<sup class="cite" data-refid="21">[21]</sup></td><td>K-G2</td><td>V0.1 ✅</td></tr>
             <tr><td><strong>Lexile</strong></td><td>BR-1200L+，主流美国体系</td><td>K-G12</td><td>k12-reading-library 报告已规划</td></tr>
             <tr><td><strong>CEFR</strong></td><td>A1-C2，国际通用</td><td>全</td><td>vocab 系统主轴</td></tr>
             <tr><td>F&P Levels A-Z</td><td>26 级，F&P 自家</td><td>K-G6</td><td>V0.2 候选</td></tr>
@@ -705,7 +741,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
         <li><strong>Retelling 复述</strong> — 学员用自己的话复述，是 pushed output（Swain）+ noticing 强化</li>
         <li><strong>Role-Play 角色扮演</strong> — Cocomelon、Peppa Pig 研究均显示对学习者形式产出有显著正向<sup class="cite">[40][49]</sup></li>
         <li><strong>Word Cards 词卡</strong> — 配 SRS 转 Anki/半米词汇库</li>
-        <li><strong>Writing Extension 写作延伸</strong> — "如果故事继续 / 主人公说..." 这就是中国流派<strong>读后续写</strong>，Wang Chuming 2012 提出，证据强<sup class="cite"><a href="#ref-64">[64]</a></sup></li>
+        <li><strong>Writing Extension 写作延伸</strong> — "如果故事继续 / 主人公说..." 这就是中国流派<strong>读后续写</strong>，Wang Chuming 2012 提出，证据强<sup class="cite" data-refid="64">[64]</sup></li>
       </ul>
 
       <h3>5.4 半米对接</h3>
@@ -715,7 +751,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
         <ol>
           <li><strong>L1 Read-Aloud</strong> = 半米 AI 配音版绘本（已规划，结合 storybook-animation）+ Ms Rachel 类视频嵌入</li>
           <li><strong>L2 Shared Reading</strong> = 半米"指词跟读"模式，每词点击发音，词高亮跟读</li>
-          <li><strong>L3 Guided Reading</strong> = AI 助教模式：学员卡住时 AI 用引导而非答案（参考 Khanmigo Socratic 模式<sup class="cite"><a href="#ref-59">[59]</a></sup>）</li>
+          <li><strong>L3 Guided Reading</strong> = AI 助教模式：学员卡住时 AI 用引导而非答案（参考 Khanmigo Socratic 模式<sup class="cite" data-refid="59">[59]</sup>）</li>
           <li><strong>L4 Independent</strong> = 半米电子书架 + 五指法则自评 + 阅读时长统计</li>
           <li><strong>L5 Book Clubs</strong> = V0.3 Discord 群组 + AI 主持讨论</li>
         </ol>
@@ -729,7 +765,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
     <h2><span class="num">06</span><span class="title-text">原点 / 透析法 · 钟道隆系深度解读 + SLA 对照</span><span class="caret">▼</span></h2>
     <div class="chapter-body">
 
-      <p>"透析法" / "逆向法" 是 1980s 中国少将<strong>钟道隆</strong>（45 岁零基础自学英语成同声传译）原创的中国 ESL 流派<sup class="cite"><a href="#ref-37">[37]</a></sup>。中文圈毁誉参半：被赞"务实有效"，也被批"机械苦修"。本章用 SLA 学界框架重新审视。</p>
+      <p>"透析法" / "逆向法" 是 1980s 中国少将<strong>钟道隆</strong>（45 岁零基础自学英语成同声传译）原创的中国 ESL 流派<sup class="cite" data-refid="37">[37]</sup>。中文圈毁誉参半：被赞"务实有效"，也被批"机械苦修"。本章用 SLA 学界框架重新审视。</p>
 
       <h3>6.1 透析法核心做法</h3>
 
@@ -748,13 +784,13 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
         <table>
           <thead><tr><th>透析法做法</th><th>SLA 学界对应</th><th>证据等级</th></tr></thead>
           <tbody>
-            <tr><td>慢速 VOA = i+0 to i+1</td><td>Krashen 输入假说<sup class="cite"><a href="#ref-1">[1]</a></sup></td><td>🟢 经典理论</td></tr>
-            <tr><td>专听一类材料（VOA）</td><td>Krashen narrow listening<sup class="cite"><a href="#ref-39">[39]</a></sup></td><td>🟢 多研究支持</td></tr>
-            <tr><td>逐句听写</td><td>Cai / Kuo dictation 学派<sup class="cite"><a href="#ref-8">[8]</a></sup></td><td>🟢 多研究支持</td></tr>
-            <tr><td>跟读</td><td>Tamai shadowing 学派<sup class="cite"><a href="#ref-10">[10]</a></sup></td><td>🟢 30 年累积证据</td></tr>
-            <tr><td>反复 5-10 次每句</td><td>Nation 10-17 次 encounter<sup class="cite"><a href="#ref-6">[6]</a></sup></td><td>🟢 实证</td></tr>
-            <tr><td>"想"（反思错处）</td><td>Schmidt noticing<sup class="cite"><a href="#ref-4">[4]</a></sup></td><td>🟢 SLA 主流</td></tr>
-            <tr><td>不查字典 / 上下文推断</td><td>incidental vocabulary acquisition<sup class="cite"><a href="#ref-63">[63]</a></sup></td><td>🟡 需要 95% coverage 才有效</td></tr>
+            <tr><td>慢速 VOA = i+0 to i+1</td><td>Krashen 输入假说<sup class="cite" data-refid="1">[1]</sup></td><td>🟢 经典理论</td></tr>
+            <tr><td>专听一类材料（VOA）</td><td>Krashen narrow listening<sup class="cite" data-refid="39">[39]</sup></td><td>🟢 多研究支持</td></tr>
+            <tr><td>逐句听写</td><td>Cai / Kuo dictation 学派<sup class="cite" data-refid="8">[8]</sup></td><td>🟢 多研究支持</td></tr>
+            <tr><td>跟读</td><td>Tamai shadowing 学派<sup class="cite" data-refid="10">[10]</sup></td><td>🟢 30 年累积证据</td></tr>
+            <tr><td>反复 5-10 次每句</td><td>Nation 10-17 次 encounter<sup class="cite" data-refid="6">[6]</sup></td><td>🟢 实证</td></tr>
+            <tr><td>"想"（反思错处）</td><td>Schmidt noticing<sup class="cite" data-refid="4">[4]</sup></td><td>🟢 SLA 主流</td></tr>
+            <tr><td>不查字典 / 上下文推断</td><td>incidental vocabulary acquisition<sup class="cite" data-refid="63">[63]</sup></td><td>🟡 需要 95% coverage 才有效</td></tr>
             <tr><td>"逐字背下来"</td><td>memorization / formulaic chunks</td><td>🟡 部分支持（formulaic sequences）</td></tr>
           </tbody>
         </table>
@@ -771,7 +807,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
         <ul>
           <li><strong>儿童不适用</strong> — 透析法需要高自律 + 抽象推理能力，钟道隆原版是给 45 岁中年男人设计的。给 K12 学生硬套会激发逆反。</li>
           <li><strong>纯输入不够</strong> — Swain output 假说 (1985) 证明 immersion 学生光听不说也练不出来。透析法应 + AI 对话 / 跟读评分。</li>
-          <li><strong>"不查字典"门槛高</strong> — Laufer (1989) 显示需要 95%+ coverage 才能 incidental 学到生词<sup class="cite"><a href="#ref-7">[7]</a></sup>。零基础学员 VOA 1500 词都不到，"不查字典"等于猜。修正：A2 以下应该查，B1+ 才执行"不查"。</li>
+          <li><strong>"不查字典"门槛高</strong> — Laufer (1989) 显示需要 95%+ coverage 才能 incidental 学到生词<sup class="cite" data-refid="7">[7]</sup>。零基础学员 VOA 1500 词都不到，"不查字典"等于猜。修正：A2 以下应该查，B1+ 才执行"不查"。</li>
         </ul>
       </div>
 
@@ -784,8 +820,8 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
           <li><strong>iframe 跳秒</strong> — 学员可以反复听同一句（钟道隆要倒带，半米一键）</li>
           <li><strong>挖空听写</strong>（参见 §3.3）— 把"逐句写下来"自动化打分</li>
           <li><strong>Whisper 跟读评分</strong>（参见 §4.5）— 把"跟读"做客观反馈</li>
-          <li><strong>AI 上下文推断助手</strong> — 学员遇到生词不直接给翻译，先给"这个词在这里啥语境下出现"（Khanmigo Socratic 模式<sup class="cite"><a href="#ref-59">[59]</a></sup>）→ B1+ 学员 / A2 以下给直接翻译</li>
-          <li><strong>SRS 节奏</strong>（FSRS<sup class="cite"><a href="#ref-22">[22]</a></sup>）替代钟道隆"凭感觉重听"，更高效</li>
+          <li><strong>AI 上下文推断助手</strong> — 学员遇到生词不直接给翻译，先给"这个词在这里啥语境下出现"（Khanmigo Socratic 模式<sup class="cite" data-refid="59">[59]</sup>）→ B1+ 学员 / A2 以下给直接翻译</li>
+          <li><strong>SRS 节奏</strong>（FSRS<sup class="cite" data-refid="22">[22]</sup>）替代钟道隆"凭感觉重听"，更高效</li>
         </ol>
         <p><strong>定位话术</strong>："半米 = 钟道隆透析法的 AI 时代落地"。给中国家长一句话能听懂的卖点。</p>
       </div>
@@ -806,7 +842,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
           <tbody>
             <tr><td>🎵 听歌</td><td>Lyrics Training / Spotify Lyrics</td><td>听力 + 词汇</td><td>🟢 多研究<sup class="cite">[24][25][53]</sup></td><td>歌词挖空模块</td></tr>
             <tr><td>🎬 看电影</td><td>Language Reactor / Lingopie</td><td>听力 + 词汇 + 文化</td><td>🟢 多研究<sup class="cite">[26][50]</sup></td><td>iframe 跳秒（已做）</td></tr>
-            <tr><td>🎙 听播客</td><td>Pocket Casts / 6 Minute English</td><td>听力 + 流利度</td><td>🟢 多研究<sup class="cite"><a href="#ref-45">[45]</a></sup></td><td>V0.3 慢速播客</td></tr>
+            <tr><td>🎙 听播客</td><td>Pocket Casts / 6 Minute English</td><td>听力 + 流利度</td><td>🟢 多研究<sup class="cite" data-refid="45">[45]</sup></td><td>V0.3 慢速播客</td></tr>
             <tr><td>🎮 玩游戏</td><td>Drops / Mondly / Duolingo</td><td>词汇（初阶）</td><td>🟡 短期记忆有效，长期质疑</td><td>谨慎做（参见 §13）</td></tr>
             <tr><td>💬 跟人说</td><td>Cambly / italki</td><td>说 + 流利</td><td>🟢 共识</td><td>V0.3 接 italki API</td></tr>
             <tr><td>📚 读书</td><td>LingQ / Beelinguapp</td><td>词汇 + 阅读</td><td>🟢 extensive reading<sup class="cite">[14][48]</sup></td><td>V0.2 阅读屏</td></tr>
@@ -820,8 +856,8 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">🎵</span> 听歌学英语 — Lyrics Training 流派 <span class="verdict v-good">证据强</span></div>
         <div class="m-body">
-          <p><strong>原理</strong>：旋律辅助记忆（memory via lyric-based repetition）+ 情感激活（affective regulation）+ 韵律内化（rhythmic-prosodic entrainment）<sup class="cite"><a href="#ref-24">[24]</a></sup>。</p>
-          <p><strong>实证</strong>：Frontiers 2022 Wang & Liu 研究 — singing 组在词汇 + 发音两项都显著优于 speech 组<sup class="cite"><a href="#ref-53">[53]</a></sup>。Lyrics Training App 用挖空听歌词模式，学员在听力 + 词汇上均显著提升<sup class="cite"><a href="#ref-24">[24]</a></sup>。听 3 次效果优于 1 次或 5 次（边际递减）<sup class="cite"><a href="#ref-53">[53]</a></sup>。</p>
+          <p><strong>原理</strong>：旋律辅助记忆（memory via lyric-based repetition）+ 情感激活（affective regulation）+ 韵律内化（rhythmic-prosodic entrainment）<sup class="cite" data-refid="24">[24]</sup>。</p>
+          <p><strong>实证</strong>：Frontiers 2022 Wang & Liu 研究 — singing 组在词汇 + 发音两项都显著优于 speech 组<sup class="cite" data-refid="53">[53]</sup>。Lyrics Training App 用挖空听歌词模式，学员在听力 + 词汇上均显著提升<sup class="cite" data-refid="24">[24]</sup>。听 3 次效果优于 1 次或 5 次（边际递减）<sup class="cite" data-refid="53">[53]</sup>。</p>
           <p><strong>半米路线</strong>：歌词挖空模块（V0.2）— 选 A2-B1 难度的英文流行/儿歌，挖目标词，跟 Lyrics Training 形态相同但接半米词库。</p>
         </div>
       </div>
@@ -829,9 +865,9 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">🎬</span> 看电影学英语 — Language Reactor / Lingopie <span class="verdict v-good">高 ROI</span></div>
         <div class="m-body">
-          <p><strong>Language Reactor</strong>（Chrome 扩展，免费 + Pro $5.95/月）— Netflix/YouTube 加双语字幕 + 弹出词典<sup class="cite"><a href="#ref-26">[26]</a></sup>。优点：完全免费用最大量真实内容；缺点：没有 speaking/grammar 训练，需配其他工具。</p>
-          <p><strong>Lingopie</strong>（独立平台，~€12/月）— 自有内容库 + 内置词卡 + 测试。优点：一站式；缺点：内容比 Netflix 少<sup class="cite"><a href="#ref-26">[26]</a></sup>。</p>
-          <p><strong>学界证据</strong>：Pujadas & Muñoz (2019) 测 captioned vs subtitled TV series — extensive viewing 显著提升词汇<sup class="cite"><a href="#ref-50">[50]</a></sup>。L1 字幕适合低水平，L2 字幕适合高水平。</p>
+          <p><strong>Language Reactor</strong>（Chrome 扩展，免费 + Pro $5.95/月）— Netflix/YouTube 加双语字幕 + 弹出词典<sup class="cite" data-refid="26">[26]</sup>。优点：完全免费用最大量真实内容；缺点：没有 speaking/grammar 训练，需配其他工具。</p>
+          <p><strong>Lingopie</strong>（独立平台，~€12/月）— 自有内容库 + 内置词卡 + 测试。优点：一站式；缺点：内容比 Netflix 少<sup class="cite" data-refid="26">[26]</sup>。</p>
+          <p><strong>学界证据</strong>：Pujadas & Muñoz (2019) 测 captioned vs subtitled TV series — extensive viewing 显著提升词汇<sup class="cite" data-refid="50">[50]</sup>。L1 字幕适合低水平，L2 字幕适合高水平。</p>
           <p><strong>半米路线</strong>：iframe 跳秒已经做了（参见 youglish-tech / clip-pipeline）— 这本质是"自建半米版 Language Reactor"。下一步加双语字幕切换。</p>
         </div>
       </div>
@@ -839,7 +875,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">💬</span> 真人对话 — Cambly / italki <span class="verdict v-good">效果最强</span></div>
         <div class="m-body">
-          <p><strong>italki</strong>：30,000+ 教师，Professional Teachers vs Community Tutors 双线<sup class="cite"><a href="#ref-27">[27]</a></sup>。150+ 语言。</p>
+          <p><strong>italki</strong>：30,000+ 教师，Professional Teachers vs Community Tutors 双线<sup class="cite" data-refid="27">[27]</sup>。150+ 语言。</p>
           <p><strong>Cambly</strong>：母语教师，主打 conversation，不要求认证。</p>
           <p><strong>定位</strong>：italki 适合"有目标"（雅思/考证），Cambly 适合"练口语" — 两者本质都是 Swain pushed output 的人肉版。</p>
           <p><strong>半米</strong>：不自建真人 — 太重；V0.3 接入 italki API 让半米学员"半米练 → italki 实战"。</p>
@@ -849,8 +885,8 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">🤖</span> AI 对话 — ChatGPT Voice / Speak <span class="verdict v-mid">证据短期</span></div>
         <div class="m-body">
-          <p><strong>Speak App</strong>：15+ 语言，结构化课程 + AI 对话<sup class="cite"><a href="#ref-28">[28]</a></sup>。2025 Thao 等研究 — 8 周后 speaking 平均提升 75%。但 feedback 浅、定制化弱。</p>
-          <p><strong>ChatGPT Voice</strong>：免费 + Plus 选项。Sage 模型 + 实时对话。2025 多项研究显示对 EFL 学生 speaking 改进、anxiety 降低显著<sup class="cite"><a href="#ref-41">[41]</a></sup>，但<strong>不能替代真人</strong> — 复杂语境、文化暗示 AI 还不够<sup class="cite"><a href="#ref-41">[41]</a></sup>。</p>
+          <p><strong>Speak App</strong>：15+ 语言，结构化课程 + AI 对话<sup class="cite" data-refid="28">[28]</sup>。2025 Thao 等研究 — 8 周后 speaking 平均提升 75%。但 feedback 浅、定制化弱。</p>
+          <p><strong>ChatGPT Voice</strong>：免费 + Plus 选项。Sage 模型 + 实时对话。2025 多项研究显示对 EFL 学生 speaking 改进、anxiety 降低显著<sup class="cite" data-refid="41">[41]</sup>，但<strong>不能替代真人</strong> — 复杂语境、文化暗示 AI 还不够<sup class="cite" data-refid="41">[41]</sup>。</p>
           <p><strong>半米路线</strong>：V0.2 接 ChatGPT API 做"单词测试 + 故事接龙"（参见 §14）— 不是全自由对话（成本 + 安全风险），而是限定场景。</p>
         </div>
       </div>
@@ -858,9 +894,9 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">📚</span> 读书学英语 — LingQ / Beelinguapp <span class="verdict v-good">extensive reading 派</span></div>
         <div class="m-body">
-          <p><strong>LingQ</strong>：Steve Kaufmann 创办，自定义文本 + 词汇追踪 + SRS。advanced 学习者最爱<sup class="cite"><a href="#ref-48">[48]</a></sup>。</p>
-          <p><strong>Beelinguapp</strong>：双语并列阅读 + 音频，适合启蒙到中阶<sup class="cite"><a href="#ref-48">[48]</a></sup>。</p>
-          <p><strong>理论根据</strong>：Day & Bamford 10 principles<sup class="cite"><a href="#ref-14">[14]</a></sup> + Krashen narrow reading<sup class="cite"><a href="#ref-39">[39]</a></sup>。</p>
+          <p><strong>LingQ</strong>：Steve Kaufmann 创办，自定义文本 + 词汇追踪 + SRS。advanced 学习者最爱<sup class="cite" data-refid="48">[48]</sup>。</p>
+          <p><strong>Beelinguapp</strong>：双语并列阅读 + 音频，适合启蒙到中阶<sup class="cite" data-refid="48">[48]</sup>。</p>
+          <p><strong>理论根据</strong>：Day & Bamford 10 principles<sup class="cite" data-refid="14">[14]</sup> + Krashen narrow reading<sup class="cite" data-refid="39">[39]</sup>。</p>
           <p><strong>半米</strong>：V0.2 接绘本电子书架 + 词汇追踪（基本上做半米版 LingQ + 半米词汇库联动）。</p>
         </div>
       </div>
@@ -868,8 +904,8 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <div class="method-card">
         <div class="m-head"><span class="m-emoji">🎮</span> VR 沉浸 — Mondly VR / Immerse <span class="verdict v-warn">前景大 / 证据不足</span></div>
         <div class="m-body">
-          <p><strong>Mondly VR</strong>：场景化（机场 / 餐厅 / 出租车）+ AI 对话 + 发音识别<sup class="cite"><a href="#ref-44">[44]</a></sup>。</p>
-          <p><strong>学界</strong>：Kaplan-Rakowski (2025) 测 high-immersion VR 对词汇学习有显著效果<sup class="cite"><a href="#ref-44">[44]</a></sup>。但研究都是短期，长期效果未知。设备门槛（Quest $300+）+ 内容缺乏限制普及。</p>
+          <p><strong>Mondly VR</strong>：场景化（机场 / 餐厅 / 出租车）+ AI 对话 + 发音识别<sup class="cite" data-refid="44">[44]</sup>。</p>
+          <p><strong>学界</strong>：Kaplan-Rakowski (2025) 测 high-immersion VR 对词汇学习有显著效果<sup class="cite" data-refid="44">[44]</sup>。但研究都是短期，长期效果未知。设备门槛（Quest $300+）+ 内容缺乏限制普及。</p>
           <p><strong>半米</strong>：暂不做（太重），观望。</p>
         </div>
       </div>
@@ -877,7 +913,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <h3>7.3 TPR（全身反应法）特殊补充</h3>
 
       <div class="callout info">
-        <p><strong>James Asher (1960s) 提出</strong>：先听指令 + 做动作，再开口<sup class="cite"><a href="#ref-46">[46]</a></sup>。研究表明对幼儿 + 启蒙学习者有效（降低 anxiety + 提升 retention）。Ms Rachel 视频<strong>就是 TPR + read-aloud 的电子版</strong>。半米对 K-G2 学员可以做 TPR 类视频任务（"point to red"、"clap 3 times"）。</p>
+        <p><strong>James Asher (1960s) 提出</strong>：先听指令 + 做动作，再开口<sup class="cite" data-refid="46">[46]</sup>。研究表明对幼儿 + 启蒙学习者有效（降低 anxiety + 提升 retention）。Ms Rachel 视频<strong>就是 TPR + read-aloud 的电子版</strong>。半米对 K-G2 学员可以做 TPR 类视频任务（"point to red"、"clap 3 times"）。</p>
       </div>
 
     </div>
@@ -897,11 +933,11 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
         <div class="body">
           <p><strong>优势</strong>：</p>
           <ul>
-            <li>词汇重复率超高 — Peppa Pig 一项 EFL 研究测得：前 3000 word families + 专有名词覆盖 95.45%<sup class="cite"><a href="#ref-49">[49]</a></sup></li>
+            <li>词汇重复率超高 — Peppa Pig 一项 EFL 研究测得：前 3000 word families + 专有名词覆盖 95.45%<sup class="cite" data-refid="49">[49]</sup></li>
             <li>角色一致性 — Peppa / George / Daddy Pig 等同一组人物 = 学员认知锚点稳定</li>
             <li>场景渐进 — 学校 / 公园 / 游泳池等场景有规律出现</li>
             <li>同一发音风格 — Peppa = 英音标准、Cocomelon = 美音 — 学员不被多口音淹没</li>
-            <li>Greek EFL 研究：4-5 岁孩童看 4 集 Peppa（80 min）+ 测试 = 识别率 ~33%，4 岁组词汇翻倍，5 岁组三倍<sup class="cite"><a href="#ref-49">[49]</a></sup></li>
+            <li>Greek EFL 研究：4-5 岁孩童看 4 集 Peppa（80 min）+ 测试 = 识别率 ~33%，4 岁组词汇翻倍，5 岁组三倍<sup class="cite" data-refid="49">[49]</sup></li>
           </ul>
           <p><strong>劣势</strong>：</p>
           <ul>
@@ -938,7 +974,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
         <div class="body">
           <p><strong>优势</strong>：</p>
           <ul>
-            <li>场景化记忆效率高 — 跟 narrow listening 理论一致<sup class="cite"><a href="#ref-39">[39]</a></sup>，相同场景词反复出现</li>
+            <li>场景化记忆效率高 — 跟 narrow listening 理论一致<sup class="cite" data-refid="39">[39]</sup>，相同场景词反复出现</li>
             <li>主题词学习集中 — 学"厨房"就把 stove/knife/pan/peel/chop 一次学透</li>
             <li>易迁移 — 学员去真实厨房用得上</li>
           </ul>
@@ -1003,22 +1039,22 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <h3>9.1 用户量与营收（2025 全年数据）</h3>
 
       <div class="metric-grid">
-        <div class="metric"><div class="v">135.3M</div><div class="l">Q3 2025 MAU<sup class="cite"><a href="#ref-15">[15]</a></sup></div></div>
-        <div class="metric"><div class="v">133M</div><div class="l">Q4 2025 MAU<sup class="cite"><a href="#ref-15">[15]</a></sup></div></div>
-        <div class="metric"><div class="v">12.2M</div><div class="l">Q4 2025 付费<sup class="cite"><a href="#ref-15">[15]</a></sup></div></div>
-        <div class="metric"><div class="v">$1.04B</div><div class="l">2025 全年营收<sup class="cite"><a href="#ref-15">[15]</a></sup></div></div>
-        <div class="metric"><div class="v">39%</div><div class="l">YoY 增速<sup class="cite"><a href="#ref-15">[15]</a></sup></div></div>
-        <div class="metric"><div class="v">83%</div><div class="l">订阅占总营收<sup class="cite"><a href="#ref-15">[15]</a></sup></div></div>
+        <div class="metric"><div class="v">135.3M</div><div class="l">Q3 2025 MAU<sup class="cite" data-refid="15">[15]</sup></div></div>
+        <div class="metric"><div class="v">133M</div><div class="l">Q4 2025 MAU<sup class="cite" data-refid="15">[15]</sup></div></div>
+        <div class="metric"><div class="v">12.2M</div><div class="l">Q4 2025 付费<sup class="cite" data-refid="15">[15]</sup></div></div>
+        <div class="metric"><div class="v">$1.04B</div><div class="l">2025 全年营收<sup class="cite" data-refid="15">[15]</sup></div></div>
+        <div class="metric"><div class="v">39%</div><div class="l">YoY 增速<sup class="cite" data-refid="15">[15]</sup></div></div>
+        <div class="metric"><div class="v">83%</div><div class="l">订阅占总营收<sup class="cite" data-refid="15">[15]</sup></div></div>
       </div>
 
-      <p>对比：流利说 2019 MAU ~10M，付费 240 万；2021 后<strong>Q4 营收增速跌至 3%</strong>，2024 起付费用户萎缩约 30%<sup class="cite"><a href="#ref-58">[58]</a></sup>。中国市场上多邻国（中国版 + 出海）压倒性碾压本土同类。</p>
+      <p>对比：流利说 2019 MAU ~10M，付费 240 万；2021 后<strong>Q4 营收增速跌至 3%</strong>，2024 起付费用户萎缩约 30%<sup class="cite" data-refid="58">[58]</sup>。中国市场上多邻国（中国版 + 出海）压倒性碾压本土同类。</p>
 
       <h3>9.2 Hook Model 4 步拆解（Nir Eyal 框架在多邻国的精装落地）</h3>
 
       <div class="principle-card" style="border-left-color: var(--accent);">
         <div class="head"><span class="badge">Step 1</span> Trigger（触发）</div>
         <div class="body">
-          推送通知 "You're one lesson away from keeping your 14-day streak"<sup class="cite"><a href="#ref-31">[31]</a></sup>，定时性触发（lunch break / before bed），用 urgency + loss aversion 调起 action。<strong>每天平均 4-7 条通知</strong>，逐渐升级语气（"Duo misses you" → "Duo is sad" → "This is your last chance"）。
+          推送通知 "You're one lesson away from keeping your 14-day streak"<sup class="cite" data-refid="31">[31]</sup>，定时性触发（lunch break / before bed），用 urgency + loss aversion 调起 action。<strong>每天平均 4-7 条通知</strong>，逐渐升级语气（"Duo misses you" → "Duo is sad" → "This is your last chance"）。
         </div>
       </div>
 
@@ -1032,21 +1068,21 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <div class="principle-card" style="border-left-color: var(--accent);">
         <div class="head"><span class="badge">Step 3</span> Variable Reward（变动奖赏）</div>
         <div class="body">
-          每次 lesson 完成的奖励<strong>随机</strong>：奖励 XP / 解锁新 skill / 满分庆祝动画 / level up / 宝箱 / 通关后 surprise streak freeze。<strong>这是赌博机 / 老虎机原理</strong>（Skinner box / variable ratio reinforcement）— Nir Eyal 自己说这是 Hook 4 步里最关键的一步<sup class="cite"><a href="#ref-30">[30]</a></sup>。大脑永远不知道下一次会拿什么 → 多巴胺持续分泌。
+          每次 lesson 完成的奖励<strong>随机</strong>：奖励 XP / 解锁新 skill / 满分庆祝动画 / level up / 宝箱 / 通关后 surprise streak freeze。<strong>这是赌博机 / 老虎机原理</strong>（Skinner box / variable ratio reinforcement）— Nir Eyal 自己说这是 Hook 4 步里最关键的一步<sup class="cite" data-refid="30">[30]</sup>。大脑永远不知道下一次会拿什么 → 多巴胺持续分泌。
         </div>
       </div>
 
       <div class="principle-card" style="border-left-color: var(--accent);">
         <div class="head"><span class="badge">Step 4</span> Investment（投入）</div>
         <div class="body">
-          streak 系统 = investment 的极致体现。<strong>越长的 streak 越难放弃</strong>（loss aversion + sunk cost）。配合 streak freeze（用 gem 买保命）= 把焦虑转化为变现。<strong>streak > 7 天用户留存是普通用户 3.5×</strong>，这是多邻国内部数据<sup class="cite"><a href="#ref-18">[18]</a></sup>。
+          streak 系统 = investment 的极致体现。<strong>越长的 streak 越难放弃</strong>（loss aversion + sunk cost）。配合 streak freeze（用 gem 买保命）= 把焦虑转化为变现。<strong>streak > 7 天用户留存是普通用户 3.5×</strong>，这是多邻国内部数据<sup class="cite" data-refid="18">[18]</sup>。
         </div>
       </div>
 
       <h3>9.3 streak 心理学详拆</h3>
 
       <div class="callout warn">
-        <p><strong>Kahneman-Tversky prospect theory</strong>：人对"失去"的痛感是"得到"同等价值的 <strong>~2 倍</strong><sup class="cite"><a href="#ref-18">[18]</a></sup>。streak 把"已经积累 200 天"从抽象数字变成<strong>个人身份资产</strong> — 失去 = 自我形象崩塌（"我不是那种能坚持的人"）。</p>
+        <p><strong>Kahneman-Tversky prospect theory</strong>：人对"失去"的痛感是"得到"同等价值的 <strong>~2 倍</strong><sup class="cite" data-refid="18">[18]</sup>。streak 把"已经积累 200 天"从抽象数字变成<strong>个人身份资产</strong> — 失去 = 自我形象崩塌（"我不是那种能坚持的人"）。</p>
         <p>多邻国进一步加强：</p>
         <ul>
           <li>火焰动画 — 当天没完成时火焰逐渐变小（视觉紧迫感）</li>
@@ -1065,25 +1101,25 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
             <tr>
               <td><strong>Duolingo 官方</strong></td>
               <td>5 单元 = 4 学期大学课<br>7 单元 = 5 学期</td>
-              <td>Jiang et al. 2021, <em>Foreign Language Annals</em><sup class="cite"><a href="#ref-16">[16]</a></sup></td>
+              <td>Jiang et al. 2021, <em>Foreign Language Annals</em><sup class="cite" data-refid="16">[16]</sup></td>
               <td>只测 reading + listening；说 + 写没测</td>
             </tr>
             <tr>
               <td>Duolingo 官方</td>
               <td>97% 老师认为有效</td>
-              <td>2024 white paper 北美教师 survey<sup class="cite"><a href="#ref-17">[17]</a></sup></td>
+              <td>2024 white paper 北美教师 survey<sup class="cite" data-refid="17">[17]</sup></td>
               <td>survey 偏选择 bias；老师 ≠ 学生</td>
             </tr>
             <tr>
               <td><strong>学界质疑</strong></td>
               <td>"研究 quality 弱、样本小"</td>
-              <td>The Economy of Meaning 2025 critique<sup class="cite"><a href="#ref-17">[17]</a></sup></td>
+              <td>The Economy of Meaning 2025 critique<sup class="cite" data-refid="17">[17]</sup></td>
               <td>多数研究测词汇识别，不测 production</td>
             </tr>
             <tr>
               <td>学界质疑</td>
               <td>"engagement ≠ learning"</td>
-              <td>多个 SLA 学者公开撰文<sup class="cite"><a href="#ref-33">[33]</a></sup></td>
+              <td>多个 SLA 学者公开撰文<sup class="cite" data-refid="33">[33]</sup></td>
               <td>von Ahn 自己 TED talk 强调 motivation</td>
             </tr>
             <tr>
@@ -1095,7 +1131,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
             <tr>
               <td>独立研究</td>
               <td>Colombia 1 学期实验：Duolingo 组 4 技能均显著提升</td>
-              <td>2024 LangCorp study<sup class="cite"><a href="#ref-16">[16]</a></sup></td>
+              <td>2024 LangCorp study<sup class="cite" data-refid="16">[16]</sup></td>
               <td>组对照学校英语课，比较 baseline 不公</td>
             </tr>
           </tbody>
@@ -1105,7 +1141,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <h3>9.5 Duolingo Owl Meme + 通知策略</h3>
 
       <div class="callout info">
-        <p>多邻国 marketing 团队 2021-2023 把"猫头鹰威胁你"的用户吐槽<strong>反向放大成 TikTok 流量</strong> — 主动制造 passive-aggressive 通知（"Duo 已经把你的西班牙语笔记烧了"），TikTok 账号 1500w+ 粉<sup class="cite"><a href="#ref-35">[35]</a></sup>。<strong>把负面口碑变成 viral marketing 是 Duolingo 营销最妙的一步</strong>。</p>
+        <p>多邻国 marketing 团队 2021-2023 把"猫头鹰威胁你"的用户吐槽<strong>反向放大成 TikTok 流量</strong> — 主动制造 passive-aggressive 通知（"Duo 已经把你的西班牙语笔记烧了"），TikTok 账号 1500w+ 粉<sup class="cite" data-refid="35">[35]</sup>。<strong>把负面口碑变成 viral marketing 是 Duolingo 营销最妙的一步</strong>。</p>
         <p>对半米的启示：用户讨厌的"特征"如果有<strong>意识地玩梗化</strong>反而能成资产 — 比如半米可以用"无忌严格审查你的发音"做梗。</p>
       </div>
 
@@ -1128,8 +1164,8 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
           <li>Streak 系统（V0.1 不上 — V0.3 再考虑，且必带"健康暂停"）— 见 §13</li>
           <li>Streak Freeze 货币化 — 把焦虑当生意是道德灰色</li>
           <li>排行榜 + leaderboards — 制造同伴焦虑 + 攀比，对国际学校敏感家长是 deal-breaker</li>
-          <li>"心数 (hearts)" 错就扣血 — Affective Filter (Krashen<sup class="cite"><a href="#ref-1">[1]</a></sup>) 升高，焦虑学员退课</li>
-          <li>过度通知 — Duolingo 用户调查 34% 看到通知会焦虑<sup class="cite"><a href="#ref-34">[34]</a></sup>，国际学校家长会投诉</li>
+          <li>"心数 (hearts)" 错就扣血 — Affective Filter (Krashen<sup class="cite" data-refid="1">[1]</sup>) 升高，焦虑学员退课</li>
+          <li>过度通知 — Duolingo 用户调查 34% 看到通知会焦虑<sup class="cite" data-refid="34">[34]</sup>，国际学校家长会投诉</li>
           <li>课程"识别"导向（只测 multiple choice）— 必须配 production 任务（跟读 / 听写 / 写作）才到 DeKeyser procedural 关</li>
         </ul>
       </div>
@@ -1148,24 +1184,24 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
           <tbody>
             <tr>
               <td><strong>Babbel</strong></td>
-              <td>€352M (2024) / $750M (2025 ARR)<sup class="cite"><a href="#ref-36">[36]</a></sup></td>
-              <td>16M+ 订阅卖出<sup class="cite"><a href="#ref-36">[36]</a></sup></td>
+              <td>€352M (2024) / $750M (2025 ARR)<sup class="cite" data-refid="36">[36]</sup></td>
+              <td>16M+ 订阅卖出<sup class="cite" data-refid="36">[36]</sup></td>
               <td>结构化 lesson + 真人语料 + 文化笔记</td>
-              <td>Michigan State 研究 — 59% 用户口语提升 ≥1 ACTFL sublevel；15h+ 用户达 75%<sup class="cite"><a href="#ref-36">[36]</a></sup></td>
+              <td>Michigan State 研究 — 59% 用户口语提升 ≥1 ACTFL sublevel；15h+ 用户达 75%<sup class="cite" data-refid="36">[36]</sup></td>
             </tr>
             <tr>
               <td><strong>Memrise</strong></td>
-              <td>$13.3M (2024)，连续 3 年下滑<sup class="cite"><a href="#ref-36">[36]</a></sup></td>
-              <td>72M 注册用户<sup class="cite"><a href="#ref-36">[36]</a></sup></td>
+              <td>$13.3M (2024)，连续 3 年下滑<sup class="cite" data-refid="36">[36]</sup></td>
+              <td>72M 注册用户<sup class="cite" data-refid="36">[36]</sup></td>
               <td>Mems（联想记忆）+ 母语者视频 + SRS</td>
               <td>survey 数据 — 互动元素受好评</td>
             </tr>
             <tr>
               <td><strong>Drops</strong></td>
               <td>未公开</td>
-              <td>50M+ 用户<sup class="cite"><a href="#ref-43">[43]</a></sup></td>
+              <td>50M+ 用户<sup class="cite" data-refid="43">[43]</sup></td>
               <td>5 分钟限时 + 视觉记忆 + SRS</td>
-              <td>2024 加 Speaking Practice + Multiplayer<sup class="cite"><a href="#ref-43">[43]</a></sup></td>
+              <td>2024 加 Speaking Practice + Multiplayer<sup class="cite" data-refid="43">[43]</sup></td>
             </tr>
           </tbody>
         </table>
@@ -1174,16 +1210,16 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <h3>10.1 Babbel — 最被低估的"严肃派"</h3>
 
       <div class="callout good">
-        <p><strong>Babbel</strong> 没多邻国大众，但学术效果证据反而更强。Michigan State 2017 研究：59% 用户口语 ACTFL sublevel 提升，15h+ 用户 75%<sup class="cite"><a href="#ref-36">[36]</a></sup>。<strong>方法上更接近 DeKeyser skill acquisition</strong> — 结构化练习 + 反馈 + 反复 → procedural。半米的"结构化"比"游戏化"更应该学 Babbel。</p>
+        <p><strong>Babbel</strong> 没多邻国大众，但学术效果证据反而更强。Michigan State 2017 研究：59% 用户口语 ACTFL sublevel 提升，15h+ 用户 75%<sup class="cite" data-refid="36">[36]</sup>。<strong>方法上更接近 DeKeyser skill acquisition</strong> — 结构化练习 + 反馈 + 反复 → procedural。半米的"结构化"比"游戏化"更应该学 Babbel。</p>
       </div>
 
       <h3>10.2 Memrise — "学习社区"路线的衰落</h3>
 
-      <p>Memrise 早期靠 Mems（用户上传的联想记忆图卡）+ 母语者视频 cool。但 2022-2024 营收<strong>3 年连降</strong><sup class="cite"><a href="#ref-36">[36]</a></sup> — 原因：(1) Mems 被 ChatGPT 时代降维打击；(2) SRS 算法不及 Anki 极客 + 不及多邻国可玩；(3) 没有清晰差异化。<strong>给半米的教训</strong>：靠"用户上传"做内容护城河现在很难，必须做 AI + UGC 混合 + 强分级才能立。</p>
+      <p>Memrise 早期靠 Mems（用户上传的联想记忆图卡）+ 母语者视频 cool。但 2022-2024 营收<strong>3 年连降</strong><sup class="cite" data-refid="36">[36]</sup> — 原因：(1) Mems 被 ChatGPT 时代降维打击；(2) SRS 算法不及 Anki 极客 + 不及多邻国可玩；(3) 没有清晰差异化。<strong>给半米的教训</strong>：靠"用户上传"做内容护城河现在很难，必须做 AI + UGC 混合 + 强分级才能立。</p>
 
       <h3>10.3 Drops — 视觉极简 5 分钟流派</h3>
 
-      <p>Drops 把"<strong>5 分钟限时 + 图片 + 拖动连线</strong>"做到极致<sup class="cite"><a href="#ref-43">[43]</a></sup>。词汇启蒙阶段有效 — 减少翻译中间步骤（图 → 词，跳过 mother tongue）。但只能学词，不能学语法 / 听力 / 写作。<strong>半米可借鉴 5 分钟限时模式</strong>做"启蒙词包"，但不能作主线。</p>
+      <p>Drops 把"<strong>5 分钟限时 + 图片 + 拖动连线</strong>"做到极致<sup class="cite" data-refid="43">[43]</sup>。词汇启蒙阶段有效 — 减少翻译中间步骤（图 → 词，跳过 mother tongue）。但只能学词，不能学语法 / 听力 / 写作。<strong>半米可借鉴 5 分钟限时模式</strong>做"启蒙词包"，但不能作主线。</p>
 
       <h3>10.4 半米可借鉴</h3>
 
@@ -1213,35 +1249,35 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
           <tbody>
             <tr>
               <td><strong>百词斩</strong></td>
-              <td>1998 万（2021）<sup class="cite"><a href="#ref-37">[37]</a></sup></td>
+              <td>1998 万（2021）<sup class="cite" data-refid="37">[37]</sup></td>
               <td>图片记忆 + 视频 + 词根</td>
               <td>K12 应试主力</td>
               <td>"图 → 词"路径值得学（绕过翻译）</td>
             </tr>
             <tr>
               <td><strong>扇贝单词</strong></td>
-              <td>百万级<sup class="cite"><a href="#ref-37">[37]</a></sup></td>
+              <td>百万级<sup class="cite" data-refid="37">[37]</sup></td>
               <td>词根词缀 + Ebbinghaus SRS + 真题例句</td>
               <td>大学应试（四六级/考研）</td>
               <td>"真题例句"= 半米"真实视频例句" 的同理</td>
             </tr>
             <tr>
               <td><strong>流利说</strong></td>
-              <td>2019 MAU 10M / 2024 萎缩 30%<sup class="cite"><a href="#ref-58">[58]</a></sup></td>
-              <td>AI 老师 + 跟读评分（中式英语 309 亿句训练数据）<sup class="cite"><a href="#ref-52">[52]</a></sup></td>
+              <td>2019 MAU 10M / 2024 萎缩 30%<sup class="cite" data-refid="58">[58]</sup></td>
+              <td>AI 老师 + 跟读评分（中式英语 309 亿句训练数据）<sup class="cite" data-refid="52">[52]</sup></td>
               <td>口语 + 一对一感</td>
               <td>"AI 老师 + 中式英语训练数据"是真护城河</td>
             </tr>
             <tr>
               <td><strong>墨墨背单词</strong></td>
-              <td>3 亿累计下载 / 月活 60w<sup class="cite"><a href="#ref-38">[38]</a></sup></td>
+              <td>3 亿累计下载 / 月活 60w<sup class="cite" data-refid="38">[38]</sup></td>
               <td>记忆矩阵（艾宾浩斯 + 个性化）+ 极简界面</td>
               <td>考研 + 雅思托福主力</td>
               <td>"记忆矩阵"是 Anki + 个性化的中文落地</td>
             </tr>
             <tr>
               <td><strong>不背单词</strong></td>
-              <td>月活 60w<sup class="cite"><a href="#ref-38">[38]</a></sup></td>
+              <td>月活 60w<sup class="cite" data-refid="38">[38]</sup></td>
               <td>150 万原声例句（英美剧 / 纪录片）+ 选词</td>
               <td>看剧学单词流派</td>
               <td><strong>核心竞品 — 真实视频例句</strong>跟半米直接对标</td>
@@ -1255,12 +1291,12 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <div class="callout info">
         <p><strong>流利说护城河</strong>：</p>
         <ul>
-          <li>"中国人英语语音数据库"<strong>309 亿句 + 23 亿分钟录音</strong><sup class="cite"><a href="#ref-52">[52]</a></sup> — 全球最大的非母语者英语语料库</li>
+          <li>"中国人英语语音数据库"<strong>309 亿句 + 23 亿分钟录音</strong><sup class="cite" data-refid="52">[52]</sup> — 全球最大的非母语者英语语料库</li>
           <li>音准 + 流利 + 完整 + 连读 + 重音 + 语调<strong>六维度评分</strong></li>
           <li>"轻松学" + "定制学" 双轨</li>
-          <li>746 名学员 36.88 小时学习后<strong>40% 提升 ≥1 欧标等级</strong><sup class="cite"><a href="#ref-52">[52]</a></sup></li>
+          <li>746 名学员 36.88 小时学习后<strong>40% 提升 ≥1 欧标等级</strong><sup class="cite" data-refid="52">[52]</sup></li>
         </ul>
-        <p><strong>衰落原因</strong>：(1) ChatGPT Voice 直接降维（免费 GPT 4o Voice = 千倍流利说自有 LLM）；(2) 用户增长依赖 K12 应试补习，2021 双减政策直接腰斩；(3) toB 转型失败<sup class="cite"><a href="#ref-58">[58]</a></sup>。</p>
+        <p><strong>衰落原因</strong>：(1) ChatGPT Voice 直接降维（免费 GPT 4o Voice = 千倍流利说自有 LLM）；(2) 用户增长依赖 K12 应试补习，2021 双减政策直接腰斩；(3) toB 转型失败<sup class="cite" data-refid="58">[58]</sup>。</p>
       </div>
 
       <h3>11.3 不背单词 — 半米最直接的竞品</h3>
@@ -1285,7 +1321,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
 
       <h3>11.4 百词斩"图片 → 词"路径的 SLA 价值</h3>
 
-      <p>百词斩用一张图片配一个词 + 一段视频 + 词根拆分<sup class="cite"><a href="#ref-37">[37]</a></sup>。<strong>"图 → 词"的优势</strong>：跳过母语 → 目标语翻译这一步，符合 DeKeyser proceduralization（减少认知中间步）+ Schmidt noticing（图像作为强 cue）+ Krashen comprehensible input。<strong>但</strong>仅停留在词汇识别 = 没到 production，也没到语法 / 阅读 / 听力。</p>
+      <p>百词斩用一张图片配一个词 + 一段视频 + 词根拆分<sup class="cite" data-refid="37">[37]</sup>。<strong>"图 → 词"的优势</strong>：跳过母语 → 目标语翻译这一步，符合 DeKeyser proceduralization（减少认知中间步）+ Schmidt noticing（图像作为强 cue）+ Krashen comprehensible input。<strong>但</strong>仅停留在词汇识别 = 没到 production，也没到语法 / 阅读 / 听力。</p>
 
       <h3>11.5 中国学员行为特点（对半米产品设计的影响）</h3>
 
@@ -1320,7 +1356,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
        ↓ 3 变量记忆模型（Difficulty + Stability + Retrievability）
        ↓ 基于 statistical model 拟合每个学员的实际遗忘曲线
        ↓
-2023 — Anki 23.10 把 FSRS 列默认 ★<sup class="cite"><a href="#ref-22">[22]</a></sup>
+2023 — Anki 23.10 把 FSRS 列默认 ★<sup class="cite" data-refid="22">[22]</sup>
        ↓ 20-30% 少复习次数 同等留存
        ↓
 2024-2025 — FSRS 持续 minor 更新 / 数十万 Anki 用户数据训练</div>
@@ -1331,10 +1367,10 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
         <table>
           <thead><tr><th>维度</th><th>SM-2 (1987)</th><th>FSRS (2022+)</th></tr></thead>
           <tbody>
-            <tr><td>记忆模型</td><td>单变量（ease factor）</td><td>3 变量（Difficulty + Stability + Retrievability）<sup class="cite"><a href="#ref-22">[22]</a></sup></td></tr>
+            <tr><td>记忆模型</td><td>单变量（ease factor）</td><td>3 变量（Difficulty + Stability + Retrievability）<sup class="cite" data-refid="22">[22]</sup></td></tr>
             <tr><td>是否个性化</td><td>否（all learner 同曲线）</td><td>是（拟合个人复习历史）</td></tr>
             <tr><td>难度恢复</td><td>permanently damaged</td><td>mean reversion（多次答对会恢复 baseline）</td></tr>
-            <tr><td>同等留存所需复习</td><td>baseline</td><td>少 20-30%<sup class="cite"><a href="#ref-22">[22]</a></sup></td></tr>
+            <tr><td>同等留存所需复习</td><td>baseline</td><td>少 20-30%<sup class="cite" data-refid="22">[22]</sup></td></tr>
             <tr><td>所需训练数据</td><td>无</td><td>~1000 review 后才能 fit 个人 model</td></tr>
             <tr><td>开源实现</td><td>全部</td><td>open-spaced-repetition (GitHub)</td></tr>
           </tbody>
@@ -1351,7 +1387,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
             <tr><td>用户群</td><td>极客 + 医学生 + 高级语言学习者</td><td>K-12 + 大学新生</td></tr>
             <tr><td>核心方法</td><td>纯 SRS（SM-2 / FSRS）</td><td>SRS + 游戏（Match / Quizlet Live）</td></tr>
             <tr><td>哲学</td><td>不让你"开心" — 让你"记住"</td><td>让你"愿意来" — 然后顺便记住</td></tr>
-            <tr><td>研究证据</td><td>Anki Vs flashcard 显著优势<sup class="cite"><a href="#ref-54">[54]</a></sup></td><td>纸卡 vs Quizlet 同效，但 Quizlet 动力强<sup class="cite"><a href="#ref-23">[23]</a></sup></td></tr>
+            <tr><td>研究证据</td><td>Anki Vs flashcard 显著优势<sup class="cite" data-refid="54">[54]</sup></td><td>纸卡 vs Quizlet 同效，但 Quizlet 动力强<sup class="cite" data-refid="23">[23]</sup></td></tr>
           </tbody>
         </table>
       </div>
@@ -1393,7 +1429,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
             <tr>
               <td><strong>Trigger</strong>（通知 / streak 警告）</td>
               <td>显著提升 daily return</td>
-              <td>"为不丢 streak 而学"替代"为学语言而学" = motivation crowding out<sup class="cite"><a href="#ref-20">[20]</a></sup></td>
+              <td>"为不丢 streak 而学"替代"为学语言而学" = motivation crowding out<sup class="cite" data-refid="20">[20]</sup></td>
             </tr>
             <tr>
               <td><strong>Action</strong>（5 分钟 bite）</td>
@@ -1407,8 +1443,8 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
             </tr>
             <tr>
               <td><strong>Investment</strong>（streak / 等级）</td>
-              <td>留存 3.5×<sup class="cite"><a href="#ref-18">[18]</a></sup></td>
-              <td>62% 内疚 / 34% 焦虑<sup class="cite"><a href="#ref-34">[34]</a></sup> — Krashen affective filter 升高<sup class="cite"><a href="#ref-1">[1]</a></sup>，反伤学习</td>
+              <td>留存 3.5×<sup class="cite" data-refid="18">[18]</sup></td>
+              <td>62% 内疚 / 34% 焦虑<sup class="cite" data-refid="34">[34]</sup> — Krashen affective filter 升高<sup class="cite" data-refid="1">[1]</sup>，反伤学习</td>
             </tr>
           </tbody>
         </table>
@@ -1426,14 +1462,14 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <div class="principle-card" style="border-left-color: var(--bad);">
         <div class="head"><span class="badge" style="background:var(--bad-soft);color:var(--bad)">警示 2</span> Engagement ≠ Learning</div>
         <div class="body">
-          多个 SLA 学者 2023-2025 公开撰文质疑 von Ahn TED talk<sup class="cite"><a href="#ref-33">[33]</a></sup>："motivation 应该是 learning 的<strong>手段</strong>而非<strong>目的</strong>。当 engagement 成主要 KPI，产品就被 metric goal-divergence 拖偏。" 多邻国的 NPV 由 streak 用户撑起，这是上市公司故事；但学员的语言水平 NPV 没人测得清楚。
+          多个 SLA 学者 2023-2025 公开撰文质疑 von Ahn TED talk<sup class="cite" data-refid="33">[33]</sup>："motivation 应该是 learning 的<strong>手段</strong>而非<strong>目的</strong>。当 engagement 成主要 KPI，产品就被 metric goal-divergence 拖偏。" 多邻国的 NPV 由 streak 用户撑起，这是上市公司故事；但学员的语言水平 NPV 没人测得清楚。
         </div>
       </div>
 
       <div class="principle-card" style="border-left-color: var(--bad);">
         <div class="head"><span class="badge" style="background:var(--bad-soft);color:var(--bad)">警示 3</span> 未成年人心理健康风险</div>
         <div class="body">
-          2025 多项儿童心理学研究<sup class="cite"><a href="#ref-68">[68]</a></sup> + 家长投诉表明：streak 系统对 12 岁以下儿童引发<strong>损失厌恶 + 强迫倾向 + 焦虑</strong>。一篇 Substack 父亲贴文"我女儿戒掉 Duolingo 因为 streak 让她哭" 引发广泛共鸣<sup class="cite"><a href="#ref-20">[20]</a></sup>。国际学校家长群对此尤其敏感。
+          2025 多项儿童心理学研究<sup class="cite" data-refid="68">[68]</sup> + 家长投诉表明：streak 系统对 12 岁以下儿童引发<strong>损失厌恶 + 强迫倾向 + 焦虑</strong>。一篇 Substack 父亲贴文"我女儿戒掉 Duolingo 因为 streak 让她哭" 引发广泛共鸣<sup class="cite" data-refid="20">[20]</sup>。国际学校家长群对此尤其敏感。
         </div>
       </div>
 
@@ -1443,9 +1479,9 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
         <p>🟡 <strong>持平视角</strong>：</p>
         <ul>
           <li>"<strong>没有引擎就根本不学</strong>" — 一个 Duolingo 用户的 streak 即便不完美，至少他在动。比"完美方法但不动"强 N 倍。</li>
-          <li><strong>gamification 减少 anxiety</strong>（部分研究<sup class="cite"><a href="#ref-68">[68]</a></sup>）— 把"应试英语"包装成"打怪升级"，对 K12 应试焦虑学员是<strong>正向缓冲</strong>。</li>
-          <li><strong>Quizlet vs 纸卡</strong>研究<sup class="cite"><a href="#ref-23">[23]</a></sup> — 学习成果相同但 engagement 显著更高，最终决定坚持时长 → 总学习量增加。</li>
-          <li><strong>多邻国词汇研究</strong> — 学生确实在词汇 test 上比传统方法的对照组好<sup class="cite"><a href="#ref-17">[17]</a></sup>。</li>
+          <li><strong>gamification 减少 anxiety</strong>（部分研究<sup class="cite" data-refid="68">[68]</sup>）— 把"应试英语"包装成"打怪升级"，对 K12 应试焦虑学员是<strong>正向缓冲</strong>。</li>
+          <li><strong>Quizlet vs 纸卡</strong>研究<sup class="cite" data-refid="23">[23]</sup> — 学习成果相同但 engagement 显著更高，最终决定坚持时长 → 总学习量增加。</li>
+          <li><strong>多邻国词汇研究</strong> — 学生确实在词汇 test 上比传统方法的对照组好<sup class="cite" data-refid="17">[17]</sup>。</li>
         </ul>
       </div>
 
@@ -1530,7 +1566,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
             <li>反馈：每词单独 🟢/🟡/🔴 + 整体分数</li>
             <li>错音点击 → 慢速播放 + 口型示意图（V0.2 接 forced alignment）</li>
             <li>5 次后 L1 解锁 L2，10 次后 L2 解锁 L3</li>
-            <li>每周 5 个 shadowing 任务 × 15-20 分钟（Tamai 起效门槛<sup class="cite"><a href="#ref-10">[10]</a></sup>）</li>
+            <li>每周 5 个 shadowing 任务 × 15-20 分钟（Tamai 起效门槛<sup class="cite" data-refid="10">[10]</sup>）</li>
           </ol>
           <p><strong>对应 SLA 理论</strong>：Tamai shadowing 30 年研究 + Swain pushed output + DeKeyser automatization。</p>
         </div>
@@ -1544,9 +1580,9 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
           <ol>
             <li>学员进绘本首页 → 按 Lexile / CEFR / F&P Level 三种分级选书</li>
             <li>开页 → 5 finger test 自评（"不认识的词 N 个" → 1-3 = 刚好，0-1 = 升级，4+ = 降级）</li>
-            <li>选 4 种模式：<strong>L1 听读</strong>（AI 配音家长读）/ <strong>L2 共读</strong>（指词跟读，词高亮）/ <strong>L3 引导</strong>（卡词时 AI 用引导问句，参考 Khanmigo 模式<sup class="cite"><a href="#ref-59">[59]</a></sup>）/ <strong>L4 独读</strong>（自由读 + 词典查询）</li>
+            <li>选 4 种模式：<strong>L1 听读</strong>（AI 配音家长读）/ <strong>L2 共读</strong>（指词跟读，词高亮）/ <strong>L3 引导</strong>（卡词时 AI 用引导问句，参考 Khanmigo 模式<sup class="cite" data-refid="59">[59]</sup>）/ <strong>L4 独读</strong>（自由读 + 词典查询）</li>
             <li>读完 → 拓展任务（4 选 1）：复述 / 词卡 / 写作续写 / 角色扮演</li>
-            <li>写作续写 = 中国流派 Wang Chuming 读后续写法<sup class="cite"><a href="#ref-64">[64]</a></sup> + AI 反馈</li>
+            <li>写作续写 = 中国流派 Wang Chuming 读后续写法<sup class="cite" data-refid="64">[64]</sup> + AI 反馈</li>
           </ol>
           <p><strong>对应 SLA 理论</strong>：Fountas & Pinnell + Day & Bamford extensive reading + Wang Chuming continuation。</p>
         </div>
@@ -1598,7 +1634,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
             <li>对了 = 继续；错了 = 重听一次副歌</li>
             <li>完整唱完 = streak +1（这里 streak 是合适的 — 听歌本身是娱乐 affective filter 低）</li>
           </ol>
-          <p><strong>对应 SLA 理论</strong>：Wang & Liu 2025 singing 优于 speech<sup class="cite"><a href="#ref-53">[53]</a></sup> + Schmidt noticing + Krashen 低 affective filter。</p>
+          <p><strong>对应 SLA 理论</strong>：Wang & Liu 2025 singing 优于 speech<sup class="cite" data-refid="53">[53]</sup> + Schmidt noticing + Krashen 低 affective filter。</p>
         </div>
       </div>
 
@@ -1740,7 +1776,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q1.</span><span class="qtext">多邻国学习效果是不是真有用？我跟孩子家长怎么说？</span><span class="toggle">+</span></div>
         <div class="faq-a">
-          <p><strong>答</strong>：双视角说。Duolingo 官方 Jiang 2021 论文：5 单元 = 4 学期大学课的<strong>识别能力</strong><sup class="cite"><a href="#ref-16">[16]</a></sup>。但学界质疑：(1) 只测识别不测产出；(2) 听说读写四技能里产出技能几乎没测；(3) 长期保持没数据<sup class="cite"><a href="#ref-17">[17]</a></sup>。</p>
+          <p><strong>答</strong>：双视角说。Duolingo 官方 Jiang 2021 论文：5 单元 = 4 学期大学课的<strong>识别能力</strong><sup class="cite" data-refid="16">[16]</sup>。但学界质疑：(1) 只测识别不测产出；(2) 听说读写四技能里产出技能几乎没测；(3) 长期保持没数据<sup class="cite" data-refid="17">[17]</sup>。</p>
           <p>对家长话术：<strong>"多邻国适合零基础启蒙 + 单词识别，但学到能开口能写作必须配跟读 / 听写 / 真人对话。半米是这个组合包。"</strong></p>
         </div>
       </div>
@@ -1762,28 +1798,28 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q4.</span><span class="qtext">Streak 设几天合理？要不要做？</span><span class="toggle">+</span></div>
         <div class="faq-a">
-          <p><strong>答</strong>：V0.1 不做，V0.3 才考虑，且必带"健康暂停"（请假 / 度假 / 病假不破 streak）。Duolingo 内部数据 streak >7 天留存 3.5×<sup class="cite"><a href="#ref-18">[18]</a></sup>，但 62% 用户漏一天会"内疚"<sup class="cite"><a href="#ref-34">[34]</a></sup>，对国际学校家长是 deal-breaker。<strong>真正激发的不是 streak 而是"真实进度可视化"</strong>（"30 天学了 200 词 + 距 IELTS 7 还差 1500 词"）。</p>
+          <p><strong>答</strong>：V0.1 不做，V0.3 才考虑，且必带"健康暂停"（请假 / 度假 / 病假不破 streak）。Duolingo 内部数据 streak >7 天留存 3.5×<sup class="cite" data-refid="18">[18]</sup>，但 62% 用户漏一天会"内疚"<sup class="cite" data-refid="34">[34]</sup>，对国际学校家长是 deal-breaker。<strong>真正激发的不是 streak 而是"真实进度可视化"</strong>（"30 天学了 200 词 + 距 IELTS 7 还差 1500 词"）。</p>
         </div>
       </div>
 
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q5.</span><span class="qtext">ChatGPT Voice 能替代 italki / Cambly 吗？</span><span class="toggle">+</span></div>
         <div class="faq-a">
-          <p><strong>答</strong>：不能完全替代。2025 研究 ChatGPT Voice 显著降低 speaking anxiety + 提升基础发音<sup class="cite"><a href="#ref-41">[41]</a></sup>，但复杂语境、文化暗示、修辞表达 AI 仍弱。<strong>半米路线</strong>：自家做"限定场景"AI 对话（单词测试 + 故事接龙 + 视频 follow-up），V0.3 接 italki API 给真人实战。</p>
+          <p><strong>答</strong>：不能完全替代。2025 研究 ChatGPT Voice 显著降低 speaking anxiety + 提升基础发音<sup class="cite" data-refid="41">[41]</sup>，但复杂语境、文化暗示、修辞表达 AI 仍弱。<strong>半米路线</strong>：自家做"限定场景"AI 对话（单词测试 + 故事接龙 + 视频 follow-up），V0.3 接 italki API 给真人实战。</p>
         </div>
       </div>
 
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q6.</span><span class="qtext">为什么 6 例句不够？我已经做了 6 例句怎么还要改？</span><span class="toggle">+</span></div>
         <div class="faq-a">
-          <p><strong>答</strong>：6 例句是 Nation 老版 "<strong>识别</strong>" 门槛。但 Pellicer-Sánchez & Schmitt 2010、Webb 2007 实证：要达到"<strong>recall + production</strong>" 需要 10-17 次 encounter<sup class="cite"><a href="#ref-6">[6]</a></sup>。<strong>解决方法</strong>：6 例句首次学 + SRS 让总 encounter 在 30 天内累积到 10-17（每次 1-2 例句 + 偶尔再加新例句）。半米 V0.1 SRS 默认调度已经焊死这套节奏。</p>
+          <p><strong>答</strong>：6 例句是 Nation 老版 "<strong>识别</strong>" 门槛。但 Pellicer-Sánchez & Schmitt 2010、Webb 2007 实证：要达到"<strong>recall + production</strong>" 需要 10-17 次 encounter<sup class="cite" data-refid="6">[6]</sup>。<strong>解决方法</strong>：6 例句首次学 + SRS 让总 encounter 在 30 天内累积到 10-17（每次 1-2 例句 + 偶尔再加新例句）。半米 V0.1 SRS 默认调度已经焊死这套节奏。</p>
         </div>
       </div>
 
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q7.</span><span class="qtext">国际学校学员真的会用半米吗？他们都用 Khanmigo 了。</span><span class="toggle">+</span></div>
         <div class="faq-a">
-          <p><strong>答</strong>：Khanmigo 强在 STEM tutor（数学 / 科学），早期 2025 在 language arts 仍弱<sup class="cite"><a href="#ref-59">[59]</a></sup>。半米的差异化：<strong>母语非英语的 ESL 学员定制 + CEFR 严格分级 + 视频例句库 + 跟读评分</strong> — 这些 Khanmigo 都不做。<strong>共存关系</strong>：学员用 Khanmigo 学数学 + 半米学英语。</p>
+          <p><strong>答</strong>：Khanmigo 强在 STEM tutor（数学 / 科学），早期 2025 在 language arts 仍弱<sup class="cite" data-refid="59">[59]</sup>。半米的差异化：<strong>母语非英语的 ESL 学员定制 + CEFR 严格分级 + 视频例句库 + 跟读评分</strong> — 这些 Khanmigo 都不做。<strong>共存关系</strong>：学员用 Khanmigo 学数学 + 半米学英语。</p>
         </div>
       </div>
 
@@ -1810,7 +1846,7 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q10.</span><span class="qtext">FSRS 真比 SM-2 强多少？值得 V0.2 升级吗？</span><span class="toggle">+</span></div>
         <div class="faq-a">
-          <p><strong>答</strong>：同等留存 FSRS 少 20-30% 复习次数<sup class="cite"><a href="#ref-22">[22]</a></sup>。但前提：用户已积累 ~1000 次 review，FSRS 才能拟合个人 model；之前 fallback 跟 SM-2 差不多。<strong>建议</strong>：V0.1 用 SM-2（简单），V0.2 后台并行 FSRS（无感升级），用户积累 1000+ review 自动切。</p>
+          <p><strong>答</strong>：同等留存 FSRS 少 20-30% 复习次数<sup class="cite" data-refid="22">[22]</sup>。但前提：用户已积累 ~1000 次 review，FSRS 才能拟合个人 model；之前 fallback 跟 SM-2 差不多。<strong>建议</strong>：V0.1 用 SM-2（简单），V0.2 后台并行 FSRS（无感升级），用户积累 1000+ review 自动切。</p>
         </div>
       </div>
 
@@ -1824,14 +1860,14 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q12.</span><span class="qtext">Whisper 对中国学员发音识别准吗？</span><span class="toggle">+</span></div>
         <div class="faq-a">
-          <p><strong>答</strong>：Whisper 对 native speaker 准确，对非母语者 error rate 显著上升<sup class="cite"><a href="#ref-42">[42]</a></sup>。<strong>解决</strong>：(1) 用 prompt 提示（"this speaker is a Chinese learner of English"）；(2) 字面 diff + 音素近似度双层判断；(3) V0.2 接 Speechace API（专测非母语者，IELTS/TOEFL 等校 0.9 Pearson<sup class="cite"><a href="#ref-42">[42]</a></sup>）。Whisper 用作低成本 V0.1 baseline，Speechace 给 V0.2 升级。</p>
+          <p><strong>答</strong>：Whisper 对 native speaker 准确，对非母语者 error rate 显著上升<sup class="cite" data-refid="42">[42]</sup>。<strong>解决</strong>：(1) 用 prompt 提示（"this speaker is a Chinese learner of English"）；(2) 字面 diff + 音素近似度双层判断；(3) V0.2 接 Speechace API（专测非母语者，IELTS/TOEFL 等校 0.9 Pearson<sup class="cite" data-refid="42">[42]</sup>）。Whisper 用作低成本 V0.1 baseline，Speechace 给 V0.2 升级。</p>
         </div>
       </div>
 
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q13.</span><span class="qtext">读后续写 (Wang Chuming) 适合 K12 国际学校吗？</span><span class="toggle">+</span></div>
         <div class="faq-a">
-          <p><strong>答</strong>：适合 B1+ 学员（小高到高中）。Wang Chuming 2012 起 10 年+ 中文圈实证：interactive alignment 显著提升写作准确率 + 流利度<sup class="cite"><a href="#ref-64">[64]</a></sup>。<strong>半米实施</strong>：绘本读完后给"续写"任务 → AI 配关键词提示（learners pay attention to person/tense/vocab/sentence/rhetoric, 续写时模仿原文风格）→ 提交后 AI 反馈（参考原文哪点 align 哪点偏）。</p>
+          <p><strong>答</strong>：适合 B1+ 学员（小高到高中）。Wang Chuming 2012 起 10 年+ 中文圈实证：interactive alignment 显著提升写作准确率 + 流利度<sup class="cite" data-refid="64">[64]</sup>。<strong>半米实施</strong>：绘本读完后给"续写"任务 → AI 配关键词提示（learners pay attention to person/tense/vocab/sentence/rhetoric, 续写时模仿原文风格）→ 提交后 AI 反馈（参考原文哪点 align 哪点偏）。</p>
         </div>
       </div>
 
@@ -2135,6 +2171,92 @@ L5：全句无字幕 → 标准   → 学员从听到打字一字不差</div>
     });
     render();
   })();
+</script>
+
+
+<script>
+(function() {
+  let activePopover = null;
+  let activeTrigger = null;
+  let hideTimer = null;
+
+  function getRefContent(refid) {
+    const refEl = document.getElementById('ref-' + refid);
+    if (!refEl) return null;
+    return refEl.innerHTML;
+  }
+
+  function positionPopover(pop, trigger) {
+    const r = trigger.getBoundingClientRect();
+    const popW = pop.offsetWidth;
+    const popH = pop.offsetHeight;
+    const vw = window.innerWidth;
+    const sy = window.scrollY;
+    let left = r.left + window.scrollX;
+    if (left + popW > vw - 12) left = vw - popW - 12;
+    if (left < 12) left = 12;
+    let top = r.bottom + sy + 6;
+    // if no space below, flip up
+    if (r.bottom + popH > window.innerHeight - 12 && r.top > popH + 12) {
+      top = r.top + sy - popH - 6;
+    }
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+  }
+
+  function showPopover(trigger) {
+    if (activeTrigger === trigger && activePopover) return;
+    if (activePopover) { activePopover.remove(); activePopover = null; }
+    const refid = trigger.getAttribute('data-refid');
+    const content = getRefContent(refid);
+    if (!content) return;
+    const pop = document.createElement('div');
+    pop.className = 'cite-popover';
+    pop.innerHTML = content;
+    document.body.appendChild(pop);
+    positionPopover(pop, trigger);
+    activePopover = pop;
+    activeTrigger = trigger;
+
+    pop.addEventListener('mouseenter', () => { if (hideTimer) clearTimeout(hideTimer); });
+    pop.addEventListener('mouseleave', () => scheduleHide());
+  }
+
+  function scheduleHide() {
+    if (hideTimer) clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      if (activePopover) { activePopover.remove(); activePopover = null; activeTrigger = null; }
+    }, 200);
+  }
+
+  function bindCites() {
+    document.querySelectorAll('sup.cite[data-refid]').forEach(sup => {
+      sup.addEventListener('mouseenter', () => showPopover(sup));
+      sup.addEventListener('mouseleave', () => scheduleHide());
+      // touch / click for mobile
+      sup.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (activeTrigger === sup && activePopover) {
+          activePopover.remove(); activePopover = null; activeTrigger = null;
+        } else {
+          showPopover(sup);
+        }
+      });
+    });
+    document.addEventListener('click', e => {
+      if (!activePopover) return;
+      if (e.target.closest('.cite-popover') || e.target.closest('sup.cite')) return;
+      activePopover.remove(); activePopover = null; activeTrigger = null;
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindCites);
+  } else {
+    bindCites();
+  }
+})();
 </script>
 
 </body>

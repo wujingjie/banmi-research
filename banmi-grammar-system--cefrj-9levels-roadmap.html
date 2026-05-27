@@ -203,17 +203,53 @@
     section.chapter.collapsed > h2 .caret { display: none; }
   }
 
-  /* === actionable references (2026-05-27 patch) === */
-  .ref-list li:target {
-    animation: ref-highlight 2.4s ease-out;
+
+  /* === actionable references · popover (2026-05-27 v2) === */
+  sup.cite {
+    cursor: help;
+    position: relative;
+    border-bottom: 1px dotted currentColor;
+    padding: 0 1px;
   }
-  @keyframes ref-highlight {
-    0%   { background: rgba(250, 204, 21, 0.55); }
-    60%  { background: rgba(250, 204, 21, 0.55); }
-    100% { background: transparent; }
+  sup.cite:hover {
+    background: rgba(250, 204, 21, 0.3);
+    border-radius: 3px;
   }
-  sup.cite a { text-decoration: none; color: inherit; }
-  sup.cite a:hover { text-decoration: underline; }
+  .cite-popover {
+    position: absolute;
+    z-index: 9999;
+    background: var(--bg-elevated, #ffffff);
+    color: var(--text, #1a1a23);
+    border: 1px solid var(--border, #e3e6ec);
+    border-radius: 10px;
+    padding: 12px 14px;
+    max-width: 380px;
+    min-width: 220px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+    font-size: 13px;
+    line-height: 1.55;
+    font-weight: normal;
+    pointer-events: auto;
+  }
+  [data-theme="dark"] .cite-popover {
+    background: #1a1e2a;
+    color: #e6e9f0;
+    border-color: #2a2f3a;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+  .cite-popover a {
+    color: var(--accent, #2563eb);
+    text-decoration: underline;
+    word-break: break-all;
+  }
+  [data-theme="dark"] .cite-popover a {
+    color: #60a5fa;
+  }
+  .cite-popover ul, .cite-popover ol {
+    margin: 4px 0 0;
+    padding-left: 18px;
+  }
+  .cite-popover ::before { content: none !important; }
 
 </style>
 </head>
@@ -276,24 +312,24 @@
     <div class="chapter-body">
 
       <div class="callout accent">
-        <p><strong>一句话</strong>：CEFR-J Grammar Profile<sup class="cite"><a href="#ref-1">[1]</a></sup>（Tono 实验室, 东京外国语大学）把 A1/A2/B1/B2 各自切成 2-3 档子级，给「亚洲 EFL 学员」（≈ 中国 K12 公立学员）做了 corpus-driven 颗粒度细分。本地 CSV 解析得到：<strong>9 档共 161 条 grammar items</strong>（A1 系 63 + A2 系 31 + B1 系 38 + B2 系 29）<sup class="cite"><a href="#ref-1">[1]</a></sup>。这是半米 V0.1+V0.2+V0.3 的<strong>天然分桶骨架</strong>。</p>
+        <p><strong>一句话</strong>：CEFR-J Grammar Profile<sup class="cite" data-refid="1">[1]</sup>（Tono 实验室, 东京外国语大学）把 A1/A2/B1/B2 各自切成 2-3 档子级，给「亚洲 EFL 学员」（≈ 中国 K12 公立学员）做了 corpus-driven 颗粒度细分。本地 CSV 解析得到：<strong>9 档共 161 条 grammar items</strong>（A1 系 63 + A2 系 31 + B1 系 38 + B2 系 29）<sup class="cite" data-refid="1">[1]</sup>。这是半米 V0.1+V0.2+V0.3 的<strong>天然分桶骨架</strong>。</p>
       </div>
 
       <h3>📊 关键数字一眼看完</h3>
 
       <div class="metric-grid">
-        <div class="metric"><div class="v">12</div><div class="l">CEFR-J 总 sublevel 数（Pre-A1 至 C2）<sup class="cite"><a href="#ref-2">[2]</a></sup></div></div>
+        <div class="metric"><div class="v">12</div><div class="l">CEFR-J 总 sublevel 数（Pre-A1 至 C2）<sup class="cite" data-refid="2">[2]</sup></div></div>
         <div class="metric"><div class="v">9</div><div class="l">本报告聚焦的 A1.1-B2.2 子级数</div></div>
-        <div class="metric"><div class="v">161</div><div class="l">CEFR-J 9 档 grammar items 总数<sup class="cite"><a href="#ref-1">[1]</a></sup></div></div>
+        <div class="metric"><div class="v">161</div><div class="l">CEFR-J 9 档 grammar items 总数<sup class="cite" data-refid="1">[1]</sup></div></div>
         <div class="metric"><div class="v">52</div><div class="l">V0.1 (A1.1+A1.2) 条数</div></div>
         <div class="metric"><div class="v">94</div><div class="l">V0.2 累计 (+A1.3+A2.x) 条数</div></div>
         <div class="metric"><div class="v">161</div><div class="l">V0.3 累计 (+B1.x+B2.x) 条数</div></div>
-        <div class="metric"><div class="v">1,239</div><div class="l">EGP master（V0.4 备料来源）<sup class="cite"><a href="#ref-3">[3]</a></sup></div></div>
-        <div class="metric"><div class="v">80%</div><div class="l">CEFR-J 设计前的日本学员 A/B 段占比<sup class="cite"><a href="#ref-2">[2]</a></sup></div></div>
-        <div class="metric"><div class="v">CSE1=A1</div><div class="l">中国小学毕业目标 (CEFR 对应)<sup class="cite"><a href="#ref-4">[4]</a></sup></div></div>
-        <div class="metric"><div class="v">CSE3=A2</div><div class="l">中国初中毕业目标<sup class="cite"><a href="#ref-4">[4]</a></sup></div></div>
-        <div class="metric"><div class="v">CSE5=B1</div><div class="l">中国高中毕业目标<sup class="cite"><a href="#ref-4">[4]</a></sup></div></div>
-        <div class="metric"><div class="v">800</div><div class="l">中国小学新课标词汇量 (2022)<sup class="cite"><a href="#ref-5">[5]</a></sup></div></div>
+        <div class="metric"><div class="v">1,239</div><div class="l">EGP master（V0.4 备料来源）<sup class="cite" data-refid="3">[3]</sup></div></div>
+        <div class="metric"><div class="v">80%</div><div class="l">CEFR-J 设计前的日本学员 A/B 段占比<sup class="cite" data-refid="2">[2]</sup></div></div>
+        <div class="metric"><div class="v">CSE1=A1</div><div class="l">中国小学毕业目标 (CEFR 对应)<sup class="cite" data-refid="4">[4]</sup></div></div>
+        <div class="metric"><div class="v">CSE3=A2</div><div class="l">中国初中毕业目标<sup class="cite" data-refid="4">[4]</sup></div></div>
+        <div class="metric"><div class="v">CSE5=B1</div><div class="l">中国高中毕业目标<sup class="cite" data-refid="4">[4]</sup></div></div>
+        <div class="metric"><div class="v">800</div><div class="l">中国小学新课标词汇量 (2022)<sup class="cite" data-refid="5">[5]</sup></div></div>
       </div>
 
       <h3>🎯 3 条核心结论</h3>
@@ -308,14 +344,14 @@
       <div class="principle-card" style="border-left-color: var(--info);">
         <div class="head"><span class="badge" style="background:var(--info-soft);color:var(--info)">结论 #2</span> CEFR-J 9 档颗粒度天然对齐中国 K12 + CSE 量表</div>
         <div class="body">
-          中国 CSE 量表<sup class="cite"><a href="#ref-4">[4]</a></sup>：CSE1 (=CEFR A1) 是<strong>小学毕业目标</strong>；CSE3 (=A2) 是<strong>初中毕业目标</strong>；CSE5 (=B1) 是<strong>高中毕业目标</strong>；CSE7+ (=B2/C1) 是大学 / 出国留学水平。CEFR-J 把 A1 再切成 A1.1/A1.2/A1.3（≈ 小学 3/4/5-6 年级），A2.1/A2.2（≈ 初中 1-2 / 初中 3 年级）。<strong>颗粒度对中国 K12 学员 = 一档 ≈ 半学期</strong>，远比 EGP 原版（一档 2-3 年）适配半米的渐进式产品节奏 + 每月出新模块的运营节奏。
+          中国 CSE 量表<sup class="cite" data-refid="4">[4]</sup>：CSE1 (=CEFR A1) 是<strong>小学毕业目标</strong>；CSE3 (=A2) 是<strong>初中毕业目标</strong>；CSE5 (=B1) 是<strong>高中毕业目标</strong>；CSE7+ (=B2/C1) 是大学 / 出国留学水平。CEFR-J 把 A1 再切成 A1.1/A1.2/A1.3（≈ 小学 3/4/5-6 年级），A2.1/A2.2（≈ 初中 1-2 / 初中 3 年级）。<strong>颗粒度对中国 K12 学员 = 一档 ≈ 半学期</strong>，远比 EGP 原版（一档 2-3 年）适配半米的渐进式产品节奏 + 每月出新模块的运营节奏。
         </div>
       </div>
 
       <div class="principle-card" style="border-left-color: var(--warn);">
         <div class="head"><span class="badge" style="background:var(--warn-soft);color:var(--warn)">结论 #3</span> 中国学员的「真实 vs 期望」CEFR 分布严重偏左</div>
         <div class="body">
-          <strong>公立体系</strong>：CSE 标的小学 = A1，初中 = A2，高中 = B1<sup class="cite"><a href="#ref-4">[4]</a></sup>。但 2024 雅思官方报告中国学员平均听力 6.0 = B2 下沿，实际中位数公立高中毕业生 ≈ A2-B1 之间。<strong>国际学校 K12</strong>：IBDP 入学最低 B2 (IELTS 6+ / TOEFL 80+)<sup class="cite"><a href="#ref-6">[6]</a></sup>；MYP 中段≈ B1-B2。所以半米学员实际 CEFR 分布：<strong>公立 K12 集中在 A1.1-A2.2 (V0.1+V0.2)；国际学校集中在 B1.1-B2.2 (V0.3)；雅思留学冲刺集中在 B2.1+ (V0.4)</strong>。意味着<strong>半米最大学员池在 V0.1+V0.2（94 条 grammar items 覆盖 70-80% 公立 K12 学员）</strong>。
+          <strong>公立体系</strong>：CSE 标的小学 = A1，初中 = A2，高中 = B1<sup class="cite" data-refid="4">[4]</sup>。但 2024 雅思官方报告中国学员平均听力 6.0 = B2 下沿，实际中位数公立高中毕业生 ≈ A2-B1 之间。<strong>国际学校 K12</strong>：IBDP 入学最低 B2 (IELTS 6+ / TOEFL 80+)<sup class="cite" data-refid="6">[6]</sup>；MYP 中段≈ B1-B2。所以半米学员实际 CEFR 分布：<strong>公立 K12 集中在 A1.1-A2.2 (V0.1+V0.2)；国际学校集中在 B1.1-B2.2 (V0.3)；雅思留学冲刺集中在 B2.1+ (V0.4)</strong>。意味着<strong>半米最大学员池在 V0.1+V0.2（94 条 grammar items 覆盖 70-80% 公立 K12 学员）</strong>。
         </div>
       </div>
 
@@ -349,7 +385,7 @@
         </table>
       </div>
 
-      <p style="font-size:12px;color:var(--text-mute)">CSE-CEFR 对应数据来源<sup class="cite">[4][7]</sup>，CEFR-J 子级定义来自 Tono Laboratory<sup class="cite"><a href="#ref-2">[2]</a></sup>。CSE-学段对应来自教育部官方文件 + 2022 新课标<sup class="cite"><a href="#ref-5">[5]</a></sup>。</p>
+      <p style="font-size:12px;color:var(--text-mute)">CSE-CEFR 对应数据来源<sup class="cite">[4][7]</sup>，CEFR-J 子级定义来自 Tono Laboratory<sup class="cite" data-refid="2">[2]</sup>。CSE-学段对应来自教育部官方文件 + 2022 新课标<sup class="cite" data-refid="5">[5]</sup>。</p>
 
       <h3>2.2 为什么 9 档对中国 K12 更适配 · 4 条理由</h3>
 
@@ -358,15 +394,15 @@
       </div>
 
       <div class="callout good">
-        <p><strong>理由 #2 · CSE 量表是中国教育部 9 级 + CEFR-J 也是 9 档</strong>，编号对应天然顺手。半米可以做「<strong>半米英语九段</strong>」品牌叙事 — 跟围棋段位类似，每个段位有清晰仪式感。CSE5 = 高考目标，半米可以打「冲刺高考 = 突破半米第五段 = CEFR B1」的营销 hook<sup class="cite"><a href="#ref-4">[4]</a></sup>。</p>
+        <p><strong>理由 #2 · CSE 量表是中国教育部 9 级 + CEFR-J 也是 9 档</strong>，编号对应天然顺手。半米可以做「<strong>半米英语九段</strong>」品牌叙事 — 跟围棋段位类似，每个段位有清晰仪式感。CSE5 = 高考目标，半米可以打「冲刺高考 = 突破半米第五段 = CEFR B1」的营销 hook<sup class="cite" data-refid="4">[4]</sup>。</p>
       </div>
 
       <div class="callout good">
-        <p><strong>理由 #3 · 亚洲 EFL 学员实际分布严重压在 A/B 段</strong>。Tono 实验室<sup class="cite"><a href="#ref-2">[2]</a></sup> 设计 CEFR-J 的原因正是「日本 80% 学员压在 A/B 段，原 CEFR 6 档区分度不够」。中国学员分布跟日本几乎完全一致（同为 EFL 环境 + 同为零母语接触 + 同为应试驱动）→ 9 档颗粒度<strong>把 80% 学员区分成 8 档</strong>，而不是 2 档。</p>
+        <p><strong>理由 #3 · 亚洲 EFL 学员实际分布严重压在 A/B 段</strong>。Tono 实验室<sup class="cite" data-refid="2">[2]</sup> 设计 CEFR-J 的原因正是「日本 80% 学员压在 A/B 段，原 CEFR 6 档区分度不够」。中国学员分布跟日本几乎完全一致（同为 EFL 环境 + 同为零母语接触 + 同为应试驱动）→ 9 档颗粒度<strong>把 80% 学员区分成 8 档</strong>，而不是 2 档。</p>
       </div>
 
       <div class="callout good">
-        <p><strong>理由 #4 · 数据集已开源 + 161 条 grammar items 可直接灌进数据库</strong>。CEFR-J Grammar Profile (v20180315) 在 Tono Laboratory 网站公开下载，许可证允许研究和商业使用（cite 即可）<sup class="cite"><a href="#ref-8">[8]</a></sup>。相比 EGP 的 CC BY-NC 限制商用<sup class="cite"><a href="#ref-3">[3]</a></sup>，CEFR-J 是<strong>半米能直接用的「合规版语法分级数据」</strong>。这条本身就值半个报告。</p>
+        <p><strong>理由 #4 · 数据集已开源 + 161 条 grammar items 可直接灌进数据库</strong>。CEFR-J Grammar Profile (v20180315) 在 Tono Laboratory 网站公开下载，许可证允许研究和商业使用（cite 即可）<sup class="cite" data-refid="8">[8]</sup>。相比 EGP 的 CC BY-NC 限制商用<sup class="cite" data-refid="3">[3]</sup>，CEFR-J 是<strong>半米能直接用的「合规版语法分级数据」</strong>。这条本身就值半个报告。</p>
       </div>
 
       <h3>2.3 9 档划分的颠覆性发现 · A1.1 ≠ "零基础"</h3>
@@ -463,7 +499,7 @@ C2       ≈ 60-100 条 (EGP 估算)
           <p><strong>学员画像</strong>：</p>
           <ul>
             <li><strong>公立体系</strong>：中国小学 1-3 年级 / K1-G2 国际学校 / 海外华裔幼儿园</li>
-            <li><strong>词汇量</strong>：300-800 (2022 新课标小学要求 800<sup class="cite"><a href="#ref-5">[5]</a></sup>)</li>
+            <li><strong>词汇量</strong>：300-800 (2022 新课标小学要求 800<sup class="cite" data-refid="5">[5]</sup>)</li>
             <li><strong>典型 IELTS</strong>：—（无 IELTS，未达 KET）</li>
             <li><strong>已会</strong>：字母 / 数字 / 颜色 / 家庭成员 / 招呼语 / 简单指令</li>
             <li><strong>还不会</strong>：完整句子 / 一般疑问句 / 否定句 / 任何时态变化</li>
@@ -526,7 +562,7 @@ C2       ≈ 60-100 条 (EGP 估算)
     </tbody>
   </table>
 </div>
-<p style="text-align:right;font-size:12px;color:var(--text-mute)">A1.1 共 <strong>33</strong> 条 · CSV 解析自 CEFR-J Grammar Profile v20180315<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+<p style="text-align:right;font-size:12px;color:var(--text-mute)">A1.1 共 <strong>33</strong> 条 · CSV 解析自 CEFR-J Grammar Profile v20180315<sup class="cite" data-refid="1">[1]</sup></p>
 
 
       <h3>4.2 A1.2 全 19 条 grammar items</h3>
@@ -561,7 +597,7 @@ C2       ≈ 60-100 条 (EGP 估算)
     </tbody>
   </table>
 </div>
-<p style="text-align:right;font-size:12px;color:var(--text-mute)">A1.2 共 <strong>19</strong> 条 · CSV 解析自 CEFR-J Grammar Profile v20180315<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+<p style="text-align:right;font-size:12px;color:var(--text-mute)">A1.2 共 <strong>19</strong> 条 · CSV 解析自 CEFR-J Grammar Profile v20180315<sup class="cite" data-refid="1">[1]</sup></p>
 
 
       <h3>4.3 V0.1 验收 KPI</h3>
@@ -569,7 +605,7 @@ C2       ≈ 60-100 条 (EGP 估算)
       <div class="callout teal">
         <ul>
           <li>50 学员内测 / 7 天内 80% 完成 V0.1 placement 测 (16 题 5 分钟)</li>
-          <li>每条 grammar item 平均通过率 70-85% (DeKeyser 黄金区间<sup class="cite"><a href="#ref-9">[9]</a></sup>)</li>
+          <li>每条 grammar item 平均通过率 70-85% (DeKeyser 黄金区间<sup class="cite" data-refid="9">[9]</sup>)</li>
           <li>NPS 7+ / 月留存 60% / 平均日活 8-12 分钟</li>
           <li>52 条 item 至少 50 条触达过 (96% 覆盖率)</li>
         </ul>
@@ -635,7 +671,7 @@ C2       ≈ 60-100 条 (EGP 估算)
     </tbody>
   </table>
 </div>
-<p style="text-align:right;font-size:12px;color:var(--text-mute)">A1.3 共 <strong>11</strong> 条 · CSV 解析自 CEFR-J Grammar Profile v20180315<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+<p style="text-align:right;font-size:12px;color:var(--text-mute)">A1.3 共 <strong>11</strong> 条 · CSV 解析自 CEFR-J Grammar Profile v20180315<sup class="cite" data-refid="1">[1]</sup></p>
 
 
       <h3>5.2 A2.1 全 24 条新增 grammar items</h3>
@@ -675,7 +711,7 @@ C2       ≈ 60-100 条 (EGP 估算)
     </tbody>
   </table>
 </div>
-<p style="text-align:right;font-size:12px;color:var(--text-mute)">A2.1 共 <strong>24</strong> 条 · CSV 解析自 CEFR-J Grammar Profile v20180315<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+<p style="text-align:right;font-size:12px;color:var(--text-mute)">A2.1 共 <strong>24</strong> 条 · CSV 解析自 CEFR-J Grammar Profile v20180315<sup class="cite" data-refid="1">[1]</sup></p>
 
 
       <h3>5.3 A2.2 全 7 条新增 grammar items</h3>
@@ -698,7 +734,7 @@ C2       ≈ 60-100 条 (EGP 估算)
     </tbody>
   </table>
 </div>
-<p style="text-align:right;font-size:12px;color:var(--text-mute)">A2.2 共 <strong>7</strong> 条 · CSV 解析自 CEFR-J Grammar Profile v20180315<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+<p style="text-align:right;font-size:12px;color:var(--text-mute)">A2.2 共 <strong>7</strong> 条 · CSV 解析自 CEFR-J Grammar Profile v20180315<sup class="cite" data-refid="1">[1]</sup></p>
 
 
       <h3>5.4 V0.2 验收 KPI</h3>
@@ -726,7 +762,7 @@ C2       ≈ 60-100 条 (EGP 估算)
           <p><strong>学员画像</strong>：</p>
           <ul>
             <li><strong>公立体系</strong>：初中 3 年级 → 高中 → 雅思 5-6 分 / SAT W&amp;L 入门</li>
-            <li><strong>国际学校</strong>：MYP 中段 → IBDP 入学准备 (B2 = IELTS 6+ / TOEFL 80+)<sup class="cite"><a href="#ref-6">[6]</a></sup></li>
+            <li><strong>国际学校</strong>：MYP 中段 → IBDP 入学准备 (B2 = IELTS 6+ / TOEFL 80+)<sup class="cite" data-refid="6">[6]</sup></li>
             <li><strong>词汇量</strong>：1,500-5,000</li>
             <li><strong>典型 IELTS</strong>：4.5-6.5</li>
             <li><strong>已会</strong>：6 大时态系统 / 简单从句 / 基础情态 / 比较级</li>
@@ -783,7 +819,7 @@ C2       ≈ 60-100 条 (EGP 估算)
     </tbody>
   </table>
 </div>
-<p style="text-align:right;font-size:12px;color:var(--text-mute)">B1.1 共 <strong>25</strong> 条 · CSV 解析自 CEFR-J Grammar Profile v20180315<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+<p style="text-align:right;font-size:12px;color:var(--text-mute)">B1.1 共 <strong>25</strong> 条 · CSV 解析自 CEFR-J Grammar Profile v20180315<sup class="cite" data-refid="1">[1]</sup></p>
 
 
       <h3>6.2 B1.2 全 13 条新增 grammar items</h3>
@@ -812,7 +848,7 @@ C2       ≈ 60-100 条 (EGP 估算)
     </tbody>
   </table>
 </div>
-<p style="text-align:right;font-size:12px;color:var(--text-mute)">B1.2 共 <strong>13</strong> 条 · CSV 解析自 CEFR-J Grammar Profile v20180315<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+<p style="text-align:right;font-size:12px;color:var(--text-mute)">B1.2 共 <strong>13</strong> 条 · CSV 解析自 CEFR-J Grammar Profile v20180315<sup class="cite" data-refid="1">[1]</sup></p>
 
 
       <h3>6.3 B2.1 全 22 条新增 grammar items</h3>
@@ -850,7 +886,7 @@ C2       ≈ 60-100 条 (EGP 估算)
     </tbody>
   </table>
 </div>
-<p style="text-align:right;font-size:12px;color:var(--text-mute)">B2.1 共 <strong>22</strong> 条 · CSV 解析自 CEFR-J Grammar Profile v20180315<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+<p style="text-align:right;font-size:12px;color:var(--text-mute)">B2.1 共 <strong>22</strong> 条 · CSV 解析自 CEFR-J Grammar Profile v20180315<sup class="cite" data-refid="1">[1]</sup></p>
 
 
       <h3>6.4 B2.2 全 7 条新增 grammar items</h3>
@@ -873,7 +909,7 @@ C2       ≈ 60-100 条 (EGP 估算)
     </tbody>
   </table>
 </div>
-<p style="text-align:right;font-size:12px;color:var(--text-mute)">B2.2 共 <strong>7</strong> 条 · CSV 解析自 CEFR-J Grammar Profile v20180315<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+<p style="text-align:right;font-size:12px;color:var(--text-mute)">B2.2 共 <strong>7</strong> 条 · CSV 解析自 CEFR-J Grammar Profile v20180315<sup class="cite" data-refid="1">[1]</sup></p>
 
 
       <h3>6.5 V0.3 验收 KPI</h3>
@@ -908,9 +944,9 @@ C2       ≈ 60-100 条 (EGP 估算)
           <p><strong>50 学员阶段比例估算</strong>：占总学员 ≈ 8-12% (但 ARPU 高 3-5×)</p>
           <p><strong>数据来源</strong>：</p>
           <ul>
-            <li><strong>CEFR-J 不覆盖 C1/C2</strong>（Tono 实验室刻意聚焦亚洲学员主力区段<sup class="cite"><a href="#ref-2">[2]</a></sup>）</li>
-            <li>用 <strong>EGP master xlsx (1,239 条)</strong><sup class="cite"><a href="#ref-3">[3]</a></sup>，filter CEFR=C1/C2 拿到 ~250-300 条</li>
-            <li>结合 <strong>EVP C1/C2 vocabulary list</strong><sup class="cite"><a href="#ref-10">[10]</a></sup>（2012 年完成）做词汇 + 语法双线</li>
+            <li><strong>CEFR-J 不覆盖 C1/C2</strong>（Tono 实验室刻意聚焦亚洲学员主力区段<sup class="cite" data-refid="2">[2]</sup>）</li>
+            <li>用 <strong>EGP master xlsx (1,239 条)</strong><sup class="cite" data-refid="3">[3]</sup>，filter CEFR=C1/C2 拿到 ~250-300 条</li>
+            <li>结合 <strong>EVP C1/C2 vocabulary list</strong><sup class="cite" data-refid="10">[10]</sup>（2012 年完成）做词汇 + 语法双线</li>
             <li>引入 <strong>SAT writing &amp; language</strong> 标点 + 修辞专项（CEFR 不直接覆盖）</li>
           </ul>
           <p><strong>EGP C1/C2 估算分布</strong>（基于 EGP master xlsx 抽样）：</p>
@@ -918,7 +954,7 @@ C2       ≈ 60-100 条 (EGP 估算)
             <li><strong>C1 (~150 条)</strong>：高阶虚拟 / 强调结构 / mixed conditionals / 倒装句 / participle clauses / 复杂分裂句 / 抽象名词化</li>
             <li><strong>C2 (~80 条)</strong>：习语化结构 / 文学化倒装 / Marked thematic structures / 古英语残留结构 / register-specific 语法</li>
           </ul>
-          <p><strong>合规警告</strong>：EGP 是 CC BY-NC 许可证<sup class="cite"><a href="#ref-11">[11]</a></sup>，半米直接灌库违反条款（参考父报告 Ch1 颠覆 #1）。V0.4 用 EGP 时必须：(1) 把 EGP 当 reference / inspiration，自家重写描述符；(2) 主动联系 Cambridge English 谈商用授权；(3) 同时用 EGP-J cross-ref + 北外 / 北师大教学语料补正。</p>
+          <p><strong>合规警告</strong>：EGP 是 CC BY-NC 许可证<sup class="cite" data-refid="11">[11]</sup>，半米直接灌库违反条款（参考父报告 Ch1 颠覆 #1）。V0.4 用 EGP 时必须：(1) 把 EGP 当 reference / inspiration，自家重写描述符；(2) 主动联系 Cambridge English 谈商用授权；(3) 同时用 EGP-J cross-ref + 北外 / 北师大教学语料补正。</p>
         </div>
       </div>
 
@@ -936,7 +972,7 @@ C2       ≈ 60-100 条 (EGP 估算)
 
       <h3>8.1 旋元佑《语法俱乐部》22 章 → 9 档对应</h3>
 
-      <p>旋元佑 22 章分初/中/高三篇<sup class="cite"><a href="#ref-12">[12]</a></sup>：初级 11 章 (Ch1-Ch11) / 中级 4 章 (Ch12-Ch15) / 高级 7 章 (Ch16-Ch22)。<strong>跟 9 档子级映射</strong>：</p>
+      <p>旋元佑 22 章分初/中/高三篇<sup class="cite" data-refid="12">[12]</sup>：初级 11 章 (Ch1-Ch11) / 中级 4 章 (Ch12-Ch15) / 高级 7 章 (Ch16-Ch22)。<strong>跟 9 档子级映射</strong>：</p>
 
       <div class="table-wrap">
         <table>
@@ -972,7 +1008,7 @@ C2       ≈ 60-100 条 (EGP 估算)
 
       <h3>8.2 张满胜《语法新思维》三部曲 → 9 档对应</h3>
 
-      <p>张满胜系列对应初中 / 高中 / 大学三阶段<sup class="cite"><a href="#ref-13">[13]</a></sup>：</p>
+      <p>张满胜系列对应初中 / 高中 / 大学三阶段<sup class="cite" data-refid="13">[13]</sup>：</p>
 
       <div class="table-wrap">
         <table>
@@ -1041,7 +1077,7 @@ C2       ≈ 60-100 条 (EGP 估算)
             <tr><td>G3-G5</td><td>PYP (IB Primary)</td><td>—</td><td>A1.3 - A2.2</td><td>V0.1-V0.2</td></tr>
             <tr><td>G6-G8 MYP 早段</td><td>MYP (IB Middle)</td><td>KET / PET</td><td>A2.2 - B1.2</td><td>V0.2-V0.3</td></tr>
             <tr><td>G9-G10 MYP 末段</td><td>MYP / IGCSE</td><td>FCE / PET</td><td>B1.1 - B2.1</td><td>V0.3</td></tr>
-            <tr><td>G11-G12 DP / A-Level / AP</td><td>IBDP / A-Level / AP</td><td>IELTS 6+ / TOEFL 80+<sup class="cite"><a href="#ref-6">[6]</a></sup></td><td><strong>B2.2 - C1</strong></td><td>V0.3-V0.4</td></tr>
+            <tr><td>G11-G12 DP / A-Level / AP</td><td>IBDP / A-Level / AP</td><td>IELTS 6+ / TOEFL 80+<sup class="cite" data-refid="6">[6]</sup></td><td><strong>B2.2 - C1</strong></td><td>V0.3-V0.4</td></tr>
           </tbody>
         </table>
       </div>
@@ -1202,7 +1238,7 @@ C2       ≈ 60-100 条 (EGP 估算)
 
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q1</span><span class="qtext">为什么用 CEFR-J 不用原 CEFR 6 档？</span><span class="toggle">+</span></div>
-        <div class="faq-a"><p>CEFR 6 档对中国 K12 颗粒度过粗 — A1-A2 跨度 = 中国小学 3-6 年级 4 学年，玩家心理上感受不到「升级」。CEFR-J 把 A1/A2/B1/B2 各自切 2-3 档，一档 ≈ 半学期到一学年，跟半米每月运营节奏匹配。Tono 2019 论文<sup class="cite"><a href="#ref-2">[2]</a></sup> 提到「日本 80% 学员压在 A/B 段」— 中国学员分布几乎一模一样。</p></div>
+        <div class="faq-a"><p>CEFR 6 档对中国 K12 颗粒度过粗 — A1-A2 跨度 = 中国小学 3-6 年级 4 学年，玩家心理上感受不到「升级」。CEFR-J 把 A1/A2/B1/B2 各自切 2-3 档，一档 ≈ 半学期到一学年，跟半米每月运营节奏匹配。Tono 2019 论文<sup class="cite" data-refid="2">[2]</sup> 提到「日本 80% 学员压在 A/B 段」— 中国学员分布几乎一模一样。</p></div>
       </div>
 
       <div class="faq-item">
@@ -1212,7 +1248,7 @@ C2       ≈ 60-100 条 (EGP 估算)
 
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q3</span><span class="qtext">CEFR-J 数据集 license 跟 EGP 的 CC BY-NC 是同一个问题吗？</span><span class="toggle">+</span></div>
-        <div class="faq-a"><p><strong>不是同一个</strong>。EGP 是 Cambridge English 持有，CC BY-NC 4.0 明确禁止商用<sup class="cite"><a href="#ref-11">[11]</a></sup>。CEFR-J 是 Tono Laboratory at TUFS 持有，<strong>允许研究 + 商业使用</strong>，前提是正确 cite 数据集<sup class="cite"><a href="#ref-8">[8]</a></sup>。这是半米 V0.1-V0.3 选 CEFR-J 而不是直接灌 EGP 的<strong>合规层面理由</strong>，比"颗粒度匹配"更重要。</p></div>
+        <div class="faq-a"><p><strong>不是同一个</strong>。EGP 是 Cambridge English 持有，CC BY-NC 4.0 明确禁止商用<sup class="cite" data-refid="11">[11]</sup>。CEFR-J 是 Tono Laboratory at TUFS 持有，<strong>允许研究 + 商业使用</strong>，前提是正确 cite 数据集<sup class="cite" data-refid="8">[8]</sup>。这是半米 V0.1-V0.3 选 CEFR-J 而不是直接灌 EGP 的<strong>合规层面理由</strong>，比"颗粒度匹配"更重要。</p></div>
       </div>
 
       <div class="faq-item">
@@ -1242,7 +1278,7 @@ C2       ≈ 60-100 条 (EGP 估算)
 
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q9</span><span class="qtext">公立小学毕业 = CEFR A1 是教育部官方对接吗？</span><span class="toggle">+</span></div>
-        <div class="faq-a"><p>是的。2018 年国家教委发布 CSE<sup class="cite"><a href="#ref-4">[4]</a></sup>，剑桥英语<sup class="cite"><a href="#ref-7">[7]</a></sup> 和 British Council<sup class="cite"><a href="#ref-15">[15]</a></sup> 都做过 CSE-CEFR 对接研究。官方对接：CSE1 = A1 (小学毕业目标) / CSE3 = A2 (初中毕业目标) / CSE5 = B1 (高中毕业目标) / CSE7 = B2 / CSE8 = C1 / CSE9 = C1-C2。<strong>但实际学员普遍低于课标目标 1-2 档</strong>（应试导向 + 输入少 + 输出更少），所以半米实际市场画像应按 §9.2 调整。</p></div>
+        <div class="faq-a"><p>是的。2018 年国家教委发布 CSE<sup class="cite" data-refid="4">[4]</sup>，剑桥英语<sup class="cite" data-refid="7">[7]</sup> 和 British Council<sup class="cite" data-refid="15">[15]</sup> 都做过 CSE-CEFR 对接研究。官方对接：CSE1 = A1 (小学毕业目标) / CSE3 = A2 (初中毕业目标) / CSE5 = B1 (高中毕业目标) / CSE7 = B2 / CSE8 = C1 / CSE9 = C1-C2。<strong>但实际学员普遍低于课标目标 1-2 档</strong>（应试导向 + 输入少 + 输出更少），所以半米实际市场画像应按 §9.2 调整。</p></div>
       </div>
 
       <div class="faq-item">
@@ -1257,7 +1293,7 @@ C2       ≈ 60-100 条 (EGP 估算)
 
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q12</span><span class="qtext">CEFR-J Grammar Profile 跟 CEFR-J Vocabulary Profile 是什么关系？</span><span class="toggle">+</span></div>
-        <div class="faq-a"><p>是<strong>同一个 Tono Lab 产出的双胞胎数据集</strong>。Vocabulary Profile 有 7,570 lemma 按 12 档分布<sup class="cite"><a href="#ref-2">[2]</a></sup>；Grammar Profile 有约 500 条 (本地解析 499 + 161 条带 9 档标签)。半米词汇板块（已上线 V1.1）用 EVP 对标，建议<strong>同时挂 CEFR-J Wordlist</strong> 做亚洲学员特调版交叉验证。Grammar 板块用 CEFR-J Grammar Profile 做主骨架是合规 + 颗粒度双优解。</p></div>
+        <div class="faq-a"><p>是<strong>同一个 Tono Lab 产出的双胞胎数据集</strong>。Vocabulary Profile 有 7,570 lemma 按 12 档分布<sup class="cite" data-refid="2">[2]</sup>；Grammar Profile 有约 500 条 (本地解析 499 + 161 条带 9 档标签)。半米词汇板块（已上线 V1.1）用 EVP 对标，建议<strong>同时挂 CEFR-J Wordlist</strong> 做亚洲学员特调版交叉验证。Grammar 板块用 CEFR-J Grammar Profile 做主骨架是合规 + 颗粒度双优解。</p></div>
       </div>
 
     </div>
@@ -1414,5 +1450,91 @@ C2       ≈ 60-100 条 (EGP 估算)
     });
   });
 </script>
+
+<script>
+(function() {
+  let activePopover = null;
+  let activeTrigger = null;
+  let hideTimer = null;
+
+  function getRefContent(refid) {
+    const refEl = document.getElementById('ref-' + refid);
+    if (!refEl) return null;
+    return refEl.innerHTML;
+  }
+
+  function positionPopover(pop, trigger) {
+    const r = trigger.getBoundingClientRect();
+    const popW = pop.offsetWidth;
+    const popH = pop.offsetHeight;
+    const vw = window.innerWidth;
+    const sy = window.scrollY;
+    let left = r.left + window.scrollX;
+    if (left + popW > vw - 12) left = vw - popW - 12;
+    if (left < 12) left = 12;
+    let top = r.bottom + sy + 6;
+    // if no space below, flip up
+    if (r.bottom + popH > window.innerHeight - 12 && r.top > popH + 12) {
+      top = r.top + sy - popH - 6;
+    }
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+  }
+
+  function showPopover(trigger) {
+    if (activeTrigger === trigger && activePopover) return;
+    if (activePopover) { activePopover.remove(); activePopover = null; }
+    const refid = trigger.getAttribute('data-refid');
+    const content = getRefContent(refid);
+    if (!content) return;
+    const pop = document.createElement('div');
+    pop.className = 'cite-popover';
+    pop.innerHTML = content;
+    document.body.appendChild(pop);
+    positionPopover(pop, trigger);
+    activePopover = pop;
+    activeTrigger = trigger;
+
+    pop.addEventListener('mouseenter', () => { if (hideTimer) clearTimeout(hideTimer); });
+    pop.addEventListener('mouseleave', () => scheduleHide());
+  }
+
+  function scheduleHide() {
+    if (hideTimer) clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      if (activePopover) { activePopover.remove(); activePopover = null; activeTrigger = null; }
+    }, 200);
+  }
+
+  function bindCites() {
+    document.querySelectorAll('sup.cite[data-refid]').forEach(sup => {
+      sup.addEventListener('mouseenter', () => showPopover(sup));
+      sup.addEventListener('mouseleave', () => scheduleHide());
+      // touch / click for mobile
+      sup.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (activeTrigger === sup && activePopover) {
+          activePopover.remove(); activePopover = null; activeTrigger = null;
+        } else {
+          showPopover(sup);
+        }
+      });
+    });
+    document.addEventListener('click', e => {
+      if (!activePopover) return;
+      if (e.target.closest('.cite-popover') || e.target.closest('sup.cite')) return;
+      activePopover.remove(); activePopover = null; activeTrigger = null;
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindCites);
+  } else {
+    bindCites();
+  }
+})();
+</script>
+
 </body>
 </html>

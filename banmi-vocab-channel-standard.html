@@ -237,17 +237,53 @@
     section.chapter.collapsed > h2 .caret { display: none; }
   }
 
-  /* === actionable references (2026-05-27 patch) === */
-  .ref-list li:target {
-    animation: ref-highlight 2.4s ease-out;
+
+  /* === actionable references · popover (2026-05-27 v2) === */
+  sup.cite {
+    cursor: help;
+    position: relative;
+    border-bottom: 1px dotted currentColor;
+    padding: 0 1px;
   }
-  @keyframes ref-highlight {
-    0%   { background: rgba(250, 204, 21, 0.55); }
-    60%  { background: rgba(250, 204, 21, 0.55); }
-    100% { background: transparent; }
+  sup.cite:hover {
+    background: rgba(250, 204, 21, 0.3);
+    border-radius: 3px;
   }
-  sup.cite a { text-decoration: none; color: inherit; }
-  sup.cite a:hover { text-decoration: underline; }
+  .cite-popover {
+    position: absolute;
+    z-index: 9999;
+    background: var(--bg-elevated, #ffffff);
+    color: var(--text, #1a1a23);
+    border: 1px solid var(--border, #e3e6ec);
+    border-radius: 10px;
+    padding: 12px 14px;
+    max-width: 380px;
+    min-width: 220px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+    font-size: 13px;
+    line-height: 1.55;
+    font-weight: normal;
+    pointer-events: auto;
+  }
+  [data-theme="dark"] .cite-popover {
+    background: #1a1e2a;
+    color: #e6e9f0;
+    border-color: #2a2f3a;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+  .cite-popover a {
+    color: var(--accent, #2563eb);
+    text-decoration: underline;
+    word-break: break-all;
+  }
+  [data-theme="dark"] .cite-popover a {
+    color: #60a5fa;
+  }
+  .cite-popover ul, .cite-popover ol {
+    margin: 4px 0 0;
+    padding-left: 18px;
+  }
+  .cite-popover ::before { content: none !important; }
 
 </style>
 </head>
@@ -315,9 +351,9 @@
         <div class="metric"><div class="v">30+</div><div class="l">总频道数</div></div>
         <div class="metric"><div class="v">5</div><div class="l">V0.1 先做的频道数</div></div>
         <div class="metric"><div class="v">10-12</div><div class="l">V0.2 扩到的频道数</div></div>
-        <div class="metric"><div class="v">234</div><div class="l">NatGeo Kids B1 unique types<sup class="cite"><a href="#ref-1">[1]</a></sup></div></div>
-        <div class="metric"><div class="v">220</div><div class="l">VOA B1 unique types<sup class="cite"><a href="#ref-1">[1]</a></sup></div></div>
-        <div class="metric"><div class="v">163</div><div class="l">SciShow Kids B1 unique types<sup class="cite"><a href="#ref-1">[1]</a></sup></div></div>
+        <div class="metric"><div class="v">234</div><div class="l">NatGeo Kids B1 unique types<sup class="cite" data-refid="1">[1]</sup></div></div>
+        <div class="metric"><div class="v">220</div><div class="l">VOA B1 unique types<sup class="cite" data-refid="1">[1]</sup></div></div>
+        <div class="metric"><div class="v">163</div><div class="l">SciShow Kids B1 unique types<sup class="cite" data-refid="1">[1]</sup></div></div>
         <div class="metric"><div class="v">13</div><div class="l">Pipeline V1.4 步数</div></div>
       </div>
 
@@ -325,7 +361,7 @@
 
       <div class="principle-card" style="border-left-color: var(--good);">
         <div class="head"><span class="badge" style="background:var(--good-soft);color:var(--good)">P1</span> 所有频道平等抓字幕入库</div>
-        <div class="body">"实测 B1 unique types"<sup class="cite"><a href="#ref-1">[1]</a></sup> 是 Agent B 抓 132 集字幕跑出来的<strong>参考数据</strong>，不是"做不做"的开关。30+ 家频道都进数据库，差异只体现在<strong>句子打分权重</strong>和<strong>i+1 桶分配</strong>，不在"主力 vs 补充"的二元标签里。</div>
+        <div class="body">"实测 B1 unique types"<sup class="cite" data-refid="1">[1]</sup> 是 Agent B 抓 132 集字幕跑出来的<strong>参考数据</strong>，不是"做不做"的开关。30+ 家频道都进数据库，差异只体现在<strong>句子打分权重</strong>和<strong>i+1 桶分配</strong>，不在"主力 vs 补充"的二元标签里。</div>
       </div>
 
       <div class="principle-card" style="border-left-color: var(--info);">
@@ -351,7 +387,7 @@
 
       <div class="principle-card" style="border-left-color: var(--purple);">
         <div class="head"><span class="badge" style="background:var(--purple-soft);color:var(--purple)">P5</span> iframe 路线 + 学生 UGC review</div>
-        <div class="body">V0.1 走<strong>嵌入 YouTube iframe</strong>（不下载切片）— 所有 30+ 家都合法可用，零版权风险<sup class="cite"><a href="#ref-2">[2]</a></sup>。展示时用 <code>?start=Ns&end=Ms</code> 跳秒播放。例句质量靠<strong>学生 UGC review</strong>：每个例句配 👍/👎，连续 N 次 👎 自动从备选池（每词 12-20 句）调下一句替换。</div>
+        <div class="body">V0.1 走<strong>嵌入 YouTube iframe</strong>（不下载切片）— 所有 30+ 家都合法可用，零版权风险<sup class="cite" data-refid="2">[2]</sup>。展示时用 <code>?start=Ns&end=Ms</code> 跳秒播放。例句质量靠<strong>学生 UGC review</strong>：每个例句配 👍/👎，连续 N 次 👎 自动从备选池（每词 12-20 句）调下一句替换。</div>
       </div>
 
       <h3>🔗 跟前面报告的关系</h3>
@@ -369,7 +405,7 @@
 
       <h3>🚀 立即可行（V0.1）</h3>
       <div class="callout good">
-        <p><strong>5 家先跑</strong>：Sesame Street（A1）/ SciShow Kids（A2，已有 skill）/ Crash Course Kids（A2，已有 skill）/ Bob the Canadian（B1）/ VOA Learning English（B1，PD 零版权）。覆盖 A1/A2/B1 三档主力 — Oxford 3000 A1/A2/B1 词表 ~70% 覆盖（基于 Ch5 实测数据外推<sup class="cite"><a href="#ref-1">[1]</a></sup>）。</p>
+        <p><strong>5 家先跑</strong>：Sesame Street（A1）/ SciShow Kids（A2，已有 skill）/ Crash Course Kids（A2，已有 skill）/ Bob the Canadian（B1）/ VOA Learning English（B1，PD 零版权）。覆盖 A1/A2/B1 三档主力 — Oxford 3000 A1/A2/B1 词表 ~70% 覆盖（基于 Ch5 实测数据外推<sup class="cite" data-refid="1">[1]</sup>）。</p>
       </div>
 
     </div>
@@ -389,7 +425,7 @@
         <div class="seg c2"><div class="name">C2</div><div class="desc">雅思 7.5+</div></div>
       </div>
 
-      <p>下表是<strong>30+ 家频道按 CEFR 六档全分布</strong>，每行含口音、实测 B1 unique types（如有）<sup class="cite"><a href="#ref-1">[1]</a></sup>、半米接入状态。<strong>实测 B1 unique types</strong> 是 Agent B 跑 yt-dlp 抓 132 集字幕、Oxford 3000 词频比对后的数据，详见 <code>subtitle-volume-estimation.html</code><sup class="cite"><a href="#ref-1">[1]</a></sup>。</p>
+      <p>下表是<strong>30+ 家频道按 CEFR 六档全分布</strong>，每行含口音、实测 B1 unique types（如有）<sup class="cite" data-refid="1">[1]</sup>、半米接入状态。<strong>实测 B1 unique types</strong> 是 Agent B 跑 yt-dlp 抓 132 集字幕、Oxford 3000 词频比对后的数据，详见 <code>subtitle-volume-estimation.html</code><sup class="cite" data-refid="1">[1]</sup>。</p>
 
       <div class="callout info">
         <p><strong>读表小贴士</strong>：(1) "实测 B1=N" 表示该频道字幕样本里覆盖了 Oxford 3000 B1 词表（686 词）中 N 个独立 lemma；(2) "待实测" = 本轮 132 集样本未覆盖；(3) "半米状态" = 当前接入进度：<span class="pill good">V0.1</span> 已选 / <span class="pill warn">V0.2</span> 候选 / <span class="pill info">V0.3</span> 后期扩 / <span class="pill bad">黄区</span> 限制可见。</p>
@@ -403,7 +439,7 @@
               <th>频道</th>
               <th>口音</th>
               <th>类型</th>
-              <th class="num-cell">实测 B1<sup class="cite"><a href="#ref-1">[1]</a></sup></th>
+              <th class="num-cell">实测 B1<sup class="cite" data-refid="1">[1]</sup></th>
               <th>半米状态</th>
               <th>备注</th>
             </tr>
@@ -418,9 +454,9 @@
         <table>
           <thead><tr><th>档</th><th>含频道数</th><th class="num-cell">总 B1 types（实测合并去重）</th><th>角色定位</th></tr></thead>
           <tbody>
-            <tr><td><span class="pill good">A1</span></td><td>8 家</td><td class="num-cell">~190（A1 不是主要喂 B1 词）<sup class="cite"><a href="#ref-1">[1]</a></sup></td><td>A1 词例句主仓 + 启蒙阶段</td></tr>
-            <tr><td><span class="pill info">A2</span></td><td>11 家</td><td class="num-cell">~450（B1 词主仓）<sup class="cite"><a href="#ref-1">[1]</a></sup></td><td>★ B1 词例句金矿 · A2 词例句兜底</td></tr>
-            <tr><td><span class="pill accent">B1</span></td><td>11 家</td><td class="num-cell">~520（B1 词兜底）<sup class="cite"><a href="#ref-1">[1]</a></sup></td><td>B1 词例句兜底 · 真实场景词</td></tr>
+            <tr><td><span class="pill good">A1</span></td><td>8 家</td><td class="num-cell">~190（A1 不是主要喂 B1 词）<sup class="cite" data-refid="1">[1]</sup></td><td>A1 词例句主仓 + 启蒙阶段</td></tr>
+            <tr><td><span class="pill info">A2</span></td><td>11 家</td><td class="num-cell">~450（B1 词主仓）<sup class="cite" data-refid="1">[1]</sup></td><td>★ B1 词例句金矿 · A2 词例句兜底</td></tr>
+            <tr><td><span class="pill accent">B1</span></td><td>11 家</td><td class="num-cell">~520（B1 词兜底）<sup class="cite" data-refid="1">[1]</sup></td><td>B1 词例句兜底 · 真实场景词</td></tr>
             <tr><td><span class="pill warn">B2</span></td><td>~9 家</td><td class="num-cell">待实测</td><td>B2 词例句源 · 雅思应试</td></tr>
             <tr><td><span class="pill purple">C1</span></td><td>~7 家</td><td class="num-cell">待实测</td><td>C1 词触发 · 价值递减区</td></tr>
             <tr><td><span class="pill pink">C2</span></td><td>~6 家</td><td class="num-cell">待实测</td><td>C2 词仅 2-3 例句 · 不展开</td></tr>
@@ -430,8 +466,8 @@
 
       <p><strong>三条聚合观察</strong>：</p>
       <ul>
-        <li><strong>B1 词不一定来自 B1 频道</strong> — A2 段（SciShow / NatGeo / Crash Course Kids）的 B1 unique types 数 ~450、密度 3.86-7.10 token/min，比 B1 段 VOA（密度 2.88/min）还高<sup class="cite"><a href="#ref-1">[1]</a></sup>。"用 B1+ 词解释 A2 概念的科普频道"才是 B1 词金矿。</li>
-        <li><strong>A1 段不能兜底 B1 词</strong> — Sesame Street 11 小时样本只覆盖 107 个 B1 lemma（15.6% of 686 词）<sup class="cite"><a href="#ref-1">[1]</a></sup>。i+1 反向流不通，所以 P3 铁律里 B1 词的"A1 也行"只是补充例句，不是主仓。</li>
+        <li><strong>B1 词不一定来自 B1 频道</strong> — A2 段（SciShow / NatGeo / Crash Course Kids）的 B1 unique types 数 ~450、密度 3.86-7.10 token/min，比 B1 段 VOA（密度 2.88/min）还高<sup class="cite" data-refid="1">[1]</sup>。"用 B1+ 词解释 A2 概念的科普频道"才是 B1 词金矿。</li>
+        <li><strong>A1 段不能兜底 B1 词</strong> — Sesame Street 11 小时样本只覆盖 107 个 B1 lemma（15.6% of 686 词）<sup class="cite" data-refid="1">[1]</sup>。i+1 反向流不通，所以 P3 铁律里 B1 词的"A1 也行"只是补充例句，不是主仓。</li>
         <li><strong>B2 以上待实测</strong> — 本轮 Agent B 没抓 B2+ 频道字幕。下一轮（V0.2 阶段）需要补抓 TED-Ed / Vox / English with Lucy 等 B2/C1 频道。</li>
       </ul>
 
@@ -444,7 +480,7 @@
     <div class="chapter-body">
 
       <div class="callout good">
-        <p><strong>A1 档角色</strong>：A1 词例句<strong>主仓</strong>（不向上兜底 B1/A2）。i+0 模式 — A1 词在 A1 视频里出现频次极高（Ms Rachel 111.9 A1 token/min<sup class="cite"><a href="#ref-1">[1]</a></sup>），不需要外援。半米学员 50 阶段（启蒙）主要消费这档。</p>
+        <p><strong>A1 档角色</strong>：A1 词例句<strong>主仓</strong>（不向上兜底 B1/A2）。i+0 模式 — A1 词在 A1 视频里出现频次极高（Ms Rachel 111.9 A1 token/min<sup class="cite" data-refid="1">[1]</sup>），不需要外援。半米学员 50 阶段（启蒙）主要消费这档。</p>
       </div>
 
       <div class="table-wrap">
@@ -454,18 +490,18 @@
               <th>频道</th>
               <th>口音</th>
               <th>订阅 / 视频数</th>
-              <th class="num-cell">实测 B1<sup class="cite"><a href="#ref-1">[1]</a></sup></th>
+              <th class="num-cell">实测 B1<sup class="cite" data-refid="1">[1]</sup></th>
               <th>半米状态</th>
               <th>备注</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td><strong>🌳 Sesame Street</strong></td><td>AmE</td><td>~28M / 3000 集</td><td class="num-cell">107</td><td><span class="pill good">V0.1 ✅</span></td><td>Agent B 已抓 sample 6 集 / 661 分钟<sup class="cite"><a href="#ref-1">[1]</a></sup> · A1 词覆盖 61.1%</td></tr>
+            <tr><td><strong>🌳 Sesame Street</strong></td><td>AmE</td><td>~28M / 3000 集</td><td class="num-cell">107</td><td><span class="pill good">V0.1 ✅</span></td><td>Agent B 已抓 sample 6 集 / 661 分钟<sup class="cite" data-refid="1">[1]</sup> · A1 词覆盖 61.1%</td></tr>
             <tr><td><strong>🐷 Peppa Pig</strong></td><td>BrE</td><td>42.6M / 8986 集</td><td class="num-cell">89</td><td><span class="pill bad">🟡 iframe only</span></td><td>Entertainment One 严控官方分发；iframe 嵌入合法<sup class="cite">[2][3]</sup></td></tr>
-            <tr><td><strong>🎵 Super Simple Songs</strong></td><td>AmE</td><td>46.2M / 879 集</td><td class="num-cell">70</td><td><span class="pill warn">V0.2</span></td><td>A1 启蒙 + 童谣 · 押韵记忆 · 实测 OOV 25.6%<sup class="cite"><a href="#ref-1">[1]</a></sup></td></tr>
-            <tr><td><strong>🪿 Mother Goose Club</strong></td><td>AmE</td><td>9.87M / 1671 集</td><td class="num-cell">56</td><td><span class="pill warn">V0.2</span></td><td>童谣启蒙 · OOV 27.6%<sup class="cite"><a href="#ref-1">[1]</a></sup></td></tr>
-            <tr><td><strong>👩 Ms Rachel</strong></td><td>AmE</td><td>18.3M / 120 集</td><td class="num-cell">40</td><td><span class="pill warn">V0.2</span></td><td>A1 First Words 最强 · A1/min 111.9<sup class="cite"><a href="#ref-1">[1]</a></sup> · 母婴大 IP</td></tr>
-            <tr><td><strong>🦈 Pinkfong / Baby Shark</strong></td><td>AmE</td><td>84.5M / 3853 集</td><td class="num-cell">36</td><td><span class="pill info">V0.3</span></td><td>OOV 最高 37.4%<sup class="cite"><a href="#ref-1">[1]</a></sup> · 启蒙补强 · 角色 IP 干扰</td></tr>
+            <tr><td><strong>🎵 Super Simple Songs</strong></td><td>AmE</td><td>46.2M / 879 集</td><td class="num-cell">70</td><td><span class="pill warn">V0.2</span></td><td>A1 启蒙 + 童谣 · 押韵记忆 · 实测 OOV 25.6%<sup class="cite" data-refid="1">[1]</sup></td></tr>
+            <tr><td><strong>🪿 Mother Goose Club</strong></td><td>AmE</td><td>9.87M / 1671 集</td><td class="num-cell">56</td><td><span class="pill warn">V0.2</span></td><td>童谣启蒙 · OOV 27.6%<sup class="cite" data-refid="1">[1]</sup></td></tr>
+            <tr><td><strong>👩 Ms Rachel</strong></td><td>AmE</td><td>18.3M / 120 集</td><td class="num-cell">40</td><td><span class="pill warn">V0.2</span></td><td>A1 First Words 最强 · A1/min 111.9<sup class="cite" data-refid="1">[1]</sup> · 母婴大 IP</td></tr>
+            <tr><td><strong>🦈 Pinkfong / Baby Shark</strong></td><td>AmE</td><td>84.5M / 3853 集</td><td class="num-cell">36</td><td><span class="pill info">V0.3</span></td><td>OOV 最高 37.4%<sup class="cite" data-refid="1">[1]</sup> · 启蒙补强 · 角色 IP 干扰</td></tr>
             <tr><td><strong>🍁 Maple Leaf Learning</strong></td><td>CanE/AmE</td><td>2M+ / 数百集</td><td class="num-cell">待实测</td><td><span class="pill info">V0.3</span></td><td>幼儿 ESL · 加拿大口音 · 教师做</td></tr>
             <tr><td><strong>🌟 Dream English Kids</strong></td><td>AmE</td><td>2M+ / 数百集</td><td class="num-cell">待实测</td><td><span class="pill info">V0.3</span></td><td>幼儿英语歌 · A1 词高频重复</td></tr>
           </tbody>
@@ -475,7 +511,7 @@
       <h3>🎯 A1 档使用建议</h3>
 
       <ul>
-        <li><strong>主仓选 3 家</strong>：Sesame Street（实测最全，覆盖 A1 词 61.1%<sup class="cite"><a href="#ref-1">[1]</a></sup>）+ Ms Rachel（A1 密度最高）+ Super Simple Songs（押韵）。这 3 家全量入库就能覆盖 ~95% 的 Oxford A1 词表。</li>
+        <li><strong>主仓选 3 家</strong>：Sesame Street（实测最全，覆盖 A1 词 61.1%<sup class="cite" data-refid="1">[1]</sup>）+ Ms Rachel（A1 密度最高）+ Super Simple Songs（押韵）。这 3 家全量入库就能覆盖 ~95% 的 Oxford A1 词表。</li>
         <li><strong>Peppa Pig 走 iframe</strong>：不下载 / 不切片，前端嵌入 YouTube player <code>?start=N</code> 跳秒播放<sup class="cite">[2][3]</sup>。Entertainment One 法务很严，但 YouTube 官方频道嵌入合法。</li>
         <li><strong>童谣型频道</strong>（Pinkfong / Super Simple / Mother Goose）：OOV 25-37% 偏高，<strong>不适合做 CEFR 标准词例句</strong>，但适合 phonics / 角色识别。半米路线放<strong>启蒙补充</strong>位置。</li>
         <li><strong>Maple Leaf / Dream English</strong>：V0.3 阶段再补抓字幕看实测数据，目前先标"待实测"。</li>
@@ -483,7 +519,7 @@
 
       <h3>📌 A1 段反直觉点</h3>
       <div class="callout purple">
-        <p><strong>"A1 段比 A2 段 A1% 占比反而低"</strong>（61% vs 66%）<sup class="cite"><a href="#ref-1">[1]</a></sup>。原因：A1 频道 OOV 占比 31.4% — Pinkfong / Sesame 一堆专有名词（角色名）、儿语（itsy bitsy / yum yum）、歌词重复。<strong>OOV 不等于难，但它确实"不可用作 Oxford 标准 CEFR 词的例句来源"</strong>。</p>
+        <p><strong>"A1 段比 A2 段 A1% 占比反而低"</strong>（61% vs 66%）<sup class="cite" data-refid="1">[1]</sup>。原因：A1 频道 OOV 占比 31.4% — Pinkfong / Sesame 一堆专有名词（角色名）、儿语（itsy bitsy / yum yum）、歌词重复。<strong>OOV 不等于难，但它确实"不可用作 Oxford 标准 CEFR 词的例句来源"</strong>。</p>
       </div>
 
     </div>
@@ -495,7 +531,7 @@
     <div class="chapter-body">
 
       <div class="callout accent">
-        <p><strong>A2 档是半米词汇库的核心档</strong>。"用 B1+ 词解释 A2 概念"的科普频道（SciShow / NatGeo / Crash Course Kids）是 B1 词例句的<strong>金矿</strong> — 平均 4.13 B1 token/min<sup class="cite"><a href="#ref-1">[1]</a></sup>，比 VOA（专门 B1 教学）还高 ~40%。SciShow Kids 6 集 118 分钟就覆盖 23.8% Oxford B1 词表<sup class="cite"><a href="#ref-1">[1]</a></sup>。</p>
+        <p><strong>A2 档是半米词汇库的核心档</strong>。"用 B1+ 词解释 A2 概念"的科普频道（SciShow / NatGeo / Crash Course Kids）是 B1 词例句的<strong>金矿</strong> — 平均 4.13 B1 token/min<sup class="cite" data-refid="1">[1]</sup>，比 VOA（专门 B1 教学）还高 ~40%。SciShow Kids 6 集 118 分钟就覆盖 23.8% Oxford B1 词表<sup class="cite" data-refid="1">[1]</sup>。</p>
       </div>
 
       <div class="table-wrap">
@@ -505,23 +541,23 @@
               <th>频道</th>
               <th>口音</th>
               <th>订阅 / 视频数</th>
-              <th class="num-cell">实测 B1<sup class="cite"><a href="#ref-1">[1]</a></sup></th>
+              <th class="num-cell">实测 B1<sup class="cite" data-refid="1">[1]</sup></th>
               <th>半米状态</th>
               <th>备注</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td><strong>🦒 Nat Geo Kids</strong></td><td>AmE/BrE</td><td>1.59M / 1120 集</td><td class="num-cell"><strong>234</strong></td><td><span class="pill warn">V0.2</span></td><td>★ B1 unique types 21 家最高<sup class="cite"><a href="#ref-1">[1]</a></sup> · B2 type 155 · 自然词金矿</td></tr>
-            <tr><td><strong>🔬 SciShow Kids</strong></td><td>AmE</td><td>1.6M / 614 集</td><td class="num-cell"><strong>163</strong></td><td><span class="pill good">V0.1 ✅</span></td><td>★ B1/min 6.30<sup class="cite"><a href="#ref-1">[1]</a></sup> · 已有 <code>scishow-kids-vocab</code> skill · Complexly 出品</td></tr>
+            <tr><td><strong>🦒 Nat Geo Kids</strong></td><td>AmE/BrE</td><td>1.59M / 1120 集</td><td class="num-cell"><strong>234</strong></td><td><span class="pill warn">V0.2</span></td><td>★ B1 unique types 21 家最高<sup class="cite" data-refid="1">[1]</sup> · B2 type 155 · 自然词金矿</td></tr>
+            <tr><td><strong>🔬 SciShow Kids</strong></td><td>AmE</td><td>1.6M / 614 集</td><td class="num-cell"><strong>163</strong></td><td><span class="pill good">V0.1 ✅</span></td><td>★ B1/min 6.30<sup class="cite" data-refid="1">[1]</sup> · 已有 <code>scishow-kids-vocab</code> skill · Complexly 出品</td></tr>
             <tr><td><strong>📺 PBS Kids / Wild Kratts</strong></td><td>AmE</td><td>3.49M / 4300 集</td><td class="num-cell">72</td><td><span class="pill warn">V0.2</span></td><td>动物 / 自然 · 公共电视 · OOV 26.4%</td></tr>
-            <tr><td><strong>📚 Free School</strong></td><td>AmE</td><td>885K / 336 集</td><td class="num-cell">62</td><td><span class="pill warn">V0.2</span></td><td>人文历史 · B1/min 5.38<sup class="cite"><a href="#ref-1">[1]</a></sup> · 适合 G4-G5</td></tr>
-            <tr><td><strong>🎒 Crash Course Kids</strong></td><td>AmE</td><td>~1M / 50 集</td><td class="num-cell">54</td><td><span class="pill good">V0.1 ✅</span></td><td>★ B1/min 21 家最高 7.10<sup class="cite"><a href="#ref-1">[1]</a></sup> · 已有 <code>crashcourse-kids-vocab</code> skill · NGSS 对齐</td></tr>
-            <tr><td><strong>📖 Storyline Online</strong></td><td>AmE</td><td>908K / 150 集</td><td class="num-cell">35</td><td><span class="pill info">V0.3</span></td><td>演员朗读绘本 · SAG-AFTRA 公益<sup class="cite"><a href="#ref-1">[1]</a></sup></td></tr>
-            <tr><td><strong>🐕 Steve & Maggie</strong></td><td>BrE</td><td>12M+ / 800 集</td><td class="num-cell">4 ⚠️</td><td><span class="pill info">V0.3</span></td><td>样本仅 27 分钟<sup class="cite"><a href="#ref-1">[1]</a></sup> · 词汇范围窄 · 需重抽样</td></tr>
-            <tr><td><strong>🌳 English Tree TV</strong></td><td>AmE</td><td>2.7M / 499 集</td><td class="num-cell">4 ⚠️</td><td><span class="pill info">V0.3</span></td><td>词汇范围最窄<sup class="cite"><a href="#ref-1">[1]</a></sup> · 仅适合 ESL 启蒙</td></tr>
-            <tr><td><strong>😊 Smile and Learn</strong></td><td>AmE/BrE</td><td>1.6M / 1500 集</td><td class="num-cell">17</td><td><span class="pill info">V0.3</span></td><td>主题分类清晰<sup class="cite"><a href="#ref-1">[1]</a></sup> · 样本量小需重抽</td></tr>
-            <tr><td><strong>🇰🇷 English Singsing</strong></td><td>AmE / Korean made</td><td>4.7M / 1500 集</td><td class="num-cell">1 ⚠️</td><td><span class="pill bad">字幕轨异常</span></td><td>样本仅 5.7 分钟<sup class="cite"><a href="#ref-1">[1]</a></sup> · 字幕格式特殊 · 需特殊解析</td></tr>
-            <tr><td><strong>🇬🇧 British Council LearnEnglish Kids</strong></td><td>BrE</td><td>中等 / 250 集</td><td class="num-cell">0 ⚠️</td><td><span class="pill bad">字幕极少</span></td><td>B1 lemma 为 0<sup class="cite"><a href="#ref-1">[1]</a></sup> · 不适合做例句源 · 仅做素材参考</td></tr>
+            <tr><td><strong>📚 Free School</strong></td><td>AmE</td><td>885K / 336 集</td><td class="num-cell">62</td><td><span class="pill warn">V0.2</span></td><td>人文历史 · B1/min 5.38<sup class="cite" data-refid="1">[1]</sup> · 适合 G4-G5</td></tr>
+            <tr><td><strong>🎒 Crash Course Kids</strong></td><td>AmE</td><td>~1M / 50 集</td><td class="num-cell">54</td><td><span class="pill good">V0.1 ✅</span></td><td>★ B1/min 21 家最高 7.10<sup class="cite" data-refid="1">[1]</sup> · 已有 <code>crashcourse-kids-vocab</code> skill · NGSS 对齐</td></tr>
+            <tr><td><strong>📖 Storyline Online</strong></td><td>AmE</td><td>908K / 150 集</td><td class="num-cell">35</td><td><span class="pill info">V0.3</span></td><td>演员朗读绘本 · SAG-AFTRA 公益<sup class="cite" data-refid="1">[1]</sup></td></tr>
+            <tr><td><strong>🐕 Steve & Maggie</strong></td><td>BrE</td><td>12M+ / 800 集</td><td class="num-cell">4 ⚠️</td><td><span class="pill info">V0.3</span></td><td>样本仅 27 分钟<sup class="cite" data-refid="1">[1]</sup> · 词汇范围窄 · 需重抽样</td></tr>
+            <tr><td><strong>🌳 English Tree TV</strong></td><td>AmE</td><td>2.7M / 499 集</td><td class="num-cell">4 ⚠️</td><td><span class="pill info">V0.3</span></td><td>词汇范围最窄<sup class="cite" data-refid="1">[1]</sup> · 仅适合 ESL 启蒙</td></tr>
+            <tr><td><strong>😊 Smile and Learn</strong></td><td>AmE/BrE</td><td>1.6M / 1500 集</td><td class="num-cell">17</td><td><span class="pill info">V0.3</span></td><td>主题分类清晰<sup class="cite" data-refid="1">[1]</sup> · 样本量小需重抽</td></tr>
+            <tr><td><strong>🇰🇷 English Singsing</strong></td><td>AmE / Korean made</td><td>4.7M / 1500 集</td><td class="num-cell">1 ⚠️</td><td><span class="pill bad">字幕轨异常</span></td><td>样本仅 5.7 分钟<sup class="cite" data-refid="1">[1]</sup> · 字幕格式特殊 · 需特殊解析</td></tr>
+            <tr><td><strong>🇬🇧 British Council LearnEnglish Kids</strong></td><td>BrE</td><td>中等 / 250 集</td><td class="num-cell">0 ⚠️</td><td><span class="pill bad">字幕极少</span></td><td>B1 lemma 为 0<sup class="cite" data-refid="1">[1]</sup> · 不适合做例句源 · 仅做素材参考</td></tr>
           </tbody>
         </table>
       </div>
@@ -529,20 +565,20 @@
       <h3>🎯 A2 档三档（按 B1 密度）</h3>
 
       <div class="callout good">
-        <p><strong>第一档（B1 主力，B1/min ≥ 3.8）</strong>：SciShow Kids 6.30 / Crash Course Kids 7.10 / Free School 5.38 / NatGeo Kids 3.86<sup class="cite"><a href="#ref-1">[1]</a></sup>。<strong>科普 + 自然 + 历史型</strong>必然带"概念词"，是 B1 词例句的<strong>金矿</strong>。这 4 家全量入库后估算覆盖 B1 词表 60-70%。</p>
+        <p><strong>第一档（B1 主力，B1/min ≥ 3.8）</strong>：SciShow Kids 6.30 / Crash Course Kids 7.10 / Free School 5.38 / NatGeo Kids 3.86<sup class="cite" data-refid="1">[1]</sup>。<strong>科普 + 自然 + 历史型</strong>必然带"概念词"，是 B1 词例句的<strong>金矿</strong>。这 4 家全量入库后估算覆盖 B1 词表 60-70%。</p>
       </div>
 
       <div class="callout warn">
-        <p><strong>第二档（B1 偶遇，B1/min 2-3.5）</strong>：Storyline 2.78 / Smile 3.05 / PBS Kids 2.53 / English Tree 2.90<sup class="cite"><a href="#ref-1">[1]</a></sup>。<strong>叙事 + 教学型</strong>，B1 词靠故事情节带出。补充用，不做主仓。</p>
+        <p><strong>第二档（B1 偶遇，B1/min 2-3.5）</strong>：Storyline 2.78 / Smile 3.05 / PBS Kids 2.53 / English Tree 2.90<sup class="cite" data-refid="1">[1]</sup>。<strong>叙事 + 教学型</strong>，B1 词靠故事情节带出。补充用，不做主仓。</p>
       </div>
 
       <div class="callout bad">
-        <p><strong>第三档（B1 极少，B1/min &lt;1）</strong>：Steve & Maggie 0.92 / Singsing 0.71 / British Council Kids 0.00<sup class="cite"><a href="#ref-1">[1]</a></sup>。<strong>对话循环 + 词汇高度集中</strong>，不适合做 B1 例句源。<strong>但样本量太小（5-27 分钟）</strong>，不能据此判定全频道，V0.3 阶段重抽样后再判。</p>
+        <p><strong>第三档（B1 极少，B1/min &lt;1）</strong>：Steve & Maggie 0.92 / Singsing 0.71 / British Council Kids 0.00<sup class="cite" data-refid="1">[1]</sup>。<strong>对话循环 + 词汇高度集中</strong>，不适合做 B1 例句源。<strong>但样本量太小（5-27 分钟）</strong>，不能据此判定全频道，V0.3 阶段重抽样后再判。</p>
       </div>
 
       <h3>📌 A2 段反直觉点</h3>
       <div class="callout purple">
-        <p><strong>"B1 段 B1% 没有特别高"</strong>（2.2%）<sup class="cite"><a href="#ref-1">[1]</a></sup>。VOA 用 1500 词控制写法是核心原因 — 这是"为 ESL 学习者写的清晰新闻"，反而 B1 词分布稀疏。<strong>真正的 B1 词集中在 A2 的科普频道（SciShow / NatGeo）</strong>，这是关键洞察。</p>
+        <p><strong>"B1 段 B1% 没有特别高"</strong>（2.2%）<sup class="cite" data-refid="1">[1]</sup>。VOA 用 1500 词控制写法是核心原因 — 这是"为 ESL 学习者写的清晰新闻"，反而 B1 词分布稀疏。<strong>真正的 B1 词集中在 A2 的科普频道（SciShow / NatGeo）</strong>，这是关键洞察。</p>
       </div>
 
     </div>
@@ -564,16 +600,16 @@
               <th>频道</th>
               <th>口音</th>
               <th>订阅 / 视频数</th>
-              <th class="num-cell">实测 B1<sup class="cite"><a href="#ref-1">[1]</a></sup></th>
+              <th class="num-cell">实测 B1<sup class="cite" data-refid="1">[1]</sup></th>
               <th>半米状态</th>
               <th>备注</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td><strong>📰 VOA Learning English</strong></td><td>AmE / PD</td><td>2.83M / 6500 集</td><td class="num-cell"><strong>220</strong></td><td><span class="pill good">V0.1 ✅</span></td><td>★ 唯一公共领域可下载<sup class="cite"><a href="#ref-4">[4]</a></sup> · 1500 词控制写法 · B1 广度最高</td></tr>
-            <tr><td><strong>🍁 Bob the Canadian</strong></td><td>CanE</td><td>2.3M / 350 集</td><td class="num-cell"><strong>205</strong></td><td><span class="pill good">V0.1 ✅</span></td><td>★ 实景词 + 街头实拍<sup class="cite"><a href="#ref-1">[1]</a></sup> · B1/min 6.14 · 加拿大口音</td></tr>
-            <tr><td><strong>🚶 Easy English (Brighton)</strong></td><td>BrE</td><td>~500K-1M / 400 集</td><td class="num-cell">67</td><td><span class="pill warn">V0.2</span></td><td>★ 街头采访 + 双语字幕<sup class="cite"><a href="#ref-1">[1]</a></sup> · B1/min 7.32 最高</td></tr>
-            <tr><td><strong>🌍 BBC Learning English</strong></td><td>BrE</td><td>9.37M / 4174 集</td><td class="num-cell">46</td><td><span class="pill warn">V0.2</span></td><td>BBC 官方 ESL · BrE 兜底 · OOV 21.8%<sup class="cite"><a href="#ref-1">[1]</a></sup></td></tr>
+            <tr><td><strong>📰 VOA Learning English</strong></td><td>AmE / PD</td><td>2.83M / 6500 集</td><td class="num-cell"><strong>220</strong></td><td><span class="pill good">V0.1 ✅</span></td><td>★ 唯一公共领域可下载<sup class="cite" data-refid="4">[4]</sup> · 1500 词控制写法 · B1 广度最高</td></tr>
+            <tr><td><strong>🍁 Bob the Canadian</strong></td><td>CanE</td><td>2.3M / 350 集</td><td class="num-cell"><strong>205</strong></td><td><span class="pill good">V0.1 ✅</span></td><td>★ 实景词 + 街头实拍<sup class="cite" data-refid="1">[1]</sup> · B1/min 6.14 · 加拿大口音</td></tr>
+            <tr><td><strong>🚶 Easy English (Brighton)</strong></td><td>BrE</td><td>~500K-1M / 400 集</td><td class="num-cell">67</td><td><span class="pill warn">V0.2</span></td><td>★ 街头采访 + 双语字幕<sup class="cite" data-refid="1">[1]</sup> · B1/min 7.32 最高</td></tr>
+            <tr><td><strong>🌍 BBC Learning English</strong></td><td>BrE</td><td>9.37M / 4174 集</td><td class="num-cell">46</td><td><span class="pill warn">V0.2</span></td><td>BBC 官方 ESL · BrE 兜底 · OOV 21.8%<sup class="cite" data-refid="1">[1]</sup></td></tr>
             <tr><td><strong>🎓 LearnEnglish Teens (British Council)</strong></td><td>BrE</td><td>~1M / 数百集</td><td class="num-cell">待实测</td><td><span class="pill info">V0.3</span></td><td>13-17 岁专属 · BC 官方资源</td></tr>
             <tr><td><strong>🎙️ Papa Teach Me</strong></td><td>BrE</td><td>~1M / 数百集</td><td class="num-cell">待实测</td><td><span class="pill info">V0.3</span></td><td>BrE/AmE 对比讲解 · 适合 G7-G9</td></tr>
             <tr><td><strong>💬 Mark Kulek</strong></td><td>AmE</td><td>~3M / 1000+ 集</td><td class="num-cell">待实测</td><td><span class="pill info">V0.3</span></td><td>短对话 ESL · 慢速重复</td></tr>
@@ -588,15 +624,15 @@
       <h3>🎯 B1 档使用建议</h3>
 
       <ul>
-        <li><strong>V0.1 主选 VOA + Bob</strong>：VOA 是<strong>唯一公共领域</strong>可下载频道<sup class="cite"><a href="#ref-4">[4]</a></sup>（不限于 iframe），B1 unique types 220 排第一；Bob 是<strong>实景词</strong>主力（街头实拍录，B1 types 205）。这两家加上 A2 档的 SciShow / NatGeo，B1 词覆盖能到 70%+。</li>
-        <li><strong>V0.2 加 Easy English (Brighton)</strong>：B1/min 21 家最高 7.32<sup class="cite"><a href="#ref-1">[1]</a></sup> · 街头采访自带双语字幕 · 适合做"真实口语 vs 教材"对比。</li>
+        <li><strong>V0.1 主选 VOA + Bob</strong>：VOA 是<strong>唯一公共领域</strong>可下载频道<sup class="cite" data-refid="4">[4]</sup>（不限于 iframe），B1 unique types 220 排第一；Bob 是<strong>实景词</strong>主力（街头实拍录，B1 types 205）。这两家加上 A2 档的 SciShow / NatGeo，B1 词覆盖能到 70%+。</li>
+        <li><strong>V0.2 加 Easy English (Brighton)</strong>：B1/min 21 家最高 7.32<sup class="cite" data-refid="1">[1]</sup> · 街头采访自带双语字幕 · 适合做"真实口语 vs 教材"对比。</li>
         <li><strong>BBC Learning English 走 iframe</strong>：4174 集大频道但 BBC 官方分发严格，不下载只嵌入。</li>
         <li><strong>V0.3 6 家待补抓</strong>：Papa Teach Me / Mark Kulek / Ellii / Oxford Online English 等，下一轮 Agent B 抓字幕跑数据后再排优先级。</li>
       </ul>
 
       <h3>📌 B1 段反直觉点（重复强调）</h3>
       <div class="callout warn">
-        <p><strong>VOA 不是 B1 主仓 — 是 A2 频道的 SciShow / NatGeo</strong>。VOA "1500 词控制写法"<sup class="cite"><a href="#ref-4">[4]</a></sup> 反而稀释 B1 词密度（2.88/min），但 unique types 数（220）依然第一<sup class="cite"><a href="#ref-1">[1]</a></sup>。这意味着 VOA 的角色是<strong>"B1 词广度兜底"</strong>（覆盖低频 B1 词），SciShow Kids 是<strong>"B1 词高频供应"</strong>（密度高、易挑例句）。<strong>两家分工互补，都要做</strong>。</p>
+        <p><strong>VOA 不是 B1 主仓 — 是 A2 频道的 SciShow / NatGeo</strong>。VOA "1500 词控制写法"<sup class="cite" data-refid="4">[4]</sup> 反而稀释 B1 词密度（2.88/min），但 unique types 数（220）依然第一<sup class="cite" data-refid="1">[1]</sup>。这意味着 VOA 的角色是<strong>"B1 词广度兜底"</strong>（覆盖低频 B1 词），SciShow Kids 是<strong>"B1 词高频供应"</strong>（密度高、易挑例句）。<strong>两家分工互补，都要做</strong>。</p>
       </div>
 
     </div>
@@ -608,7 +644,7 @@
     <div class="chapter-body">
 
       <div class="callout warn">
-        <p><strong>B2 档角色</strong>：B2 词例句<strong>兜底仓</strong> · 雅思应试主仓。学员到 5000 阶段（高中）消费。本档<strong>待实测</strong> — V0.2 阶段 Agent B 需要补抓字幕跑数据。优先级排序基于市场调研<sup class="cite"><a href="#ref-5">[5]</a></sup>，<strong>不是基于本轮 132 集字幕实测</strong>。</p>
+        <p><strong>B2 档角色</strong>：B2 词例句<strong>兜底仓</strong> · 雅思应试主仓。学员到 5000 阶段（高中）消费。本档<strong>待实测</strong> — V0.2 阶段 Agent B 需要补抓字幕跑数据。优先级排序基于市场调研<sup class="cite" data-refid="5">[5]</sup>，<strong>不是基于本轮 132 集字幕实测</strong>。</p>
       </div>
 
       <div class="table-wrap">
@@ -624,8 +660,8 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td><strong>🦘 mmmEnglish (Emma)</strong></td><td>AusE</td><td>4-5M / 学习者向</td><td class="num-cell">待实测</td><td><span class="pill warn">V0.2</span></td><td>B2-C1 学习者向<sup class="cite"><a href="#ref-5">[5]</a></sup> · 澳洲口音 · 雅思应试覆盖</td></tr>
-            <tr><td><strong>💎 Speak English with Vanessa</strong></td><td>AmE</td><td>~3M / 学习者向</td><td class="num-cell">待实测</td><td><span class="pill warn">V0.2</span></td><td>慢速 B2 advanced<sup class="cite"><a href="#ref-5">[5]</a></sup> · 适合美式雅思</td></tr>
+            <tr><td><strong>🦘 mmmEnglish (Emma)</strong></td><td>AusE</td><td>4-5M / 学习者向</td><td class="num-cell">待实测</td><td><span class="pill warn">V0.2</span></td><td>B2-C1 学习者向<sup class="cite" data-refid="5">[5]</sup> · 澳洲口音 · 雅思应试覆盖</td></tr>
+            <tr><td><strong>💎 Speak English with Vanessa</strong></td><td>AmE</td><td>~3M / 学习者向</td><td class="num-cell">待实测</td><td><span class="pill warn">V0.2</span></td><td>慢速 B2 advanced<sup class="cite" data-refid="5">[5]</sup> · 适合美式雅思</td></tr>
             <tr><td><strong>🌊 Linguamarina</strong></td><td>Russian ESL</td><td>~5M / 学习者向</td><td class="num-cell">待实测</td><td><span class="pill info">V0.3</span></td><td>B2 学习者讨论 · 非母语者讲非母语</td></tr>
             <tr><td><strong>🎩 English Addict with Mr Steve</strong></td><td>BrE</td><td>~500K / 直播</td><td class="num-cell">待实测</td><td><span class="pill info">V0.3</span></td><td>B2 grammar 深度 · BrE 学院派</td></tr>
             <tr><td><strong>💡 TED-Ed</strong></td><td>多口音</td><td>20M+ / 科普短</td><td class="num-cell">待实测</td><td><span class="pill warn">V0.2</span></td><td>★ B2 科普 5-10 min 短视频 · 字幕优质 · 全档可用</td></tr>
@@ -641,7 +677,7 @@
 
       <ul>
         <li><strong>V0.2 优先 TED-Ed + mmmEnglish + Vanessa</strong>：TED-Ed 5-10 min 短科普是 B2 例句最佳载体（视频不长 → 容易找 6 句例句）；mmmEnglish + Vanessa 学习者向，词汇刻意控制在 B2，例句质量稳定。</li>
-        <li><strong>V0.3 加雅思应试频道</strong>：E2 IELTS / IELTS Liz / Cambridge English 等，针对雅思 4-6 分段学员，词汇更聚焦在<strong>学术高频词</strong>（Coxhead's AWL 570 词<sup class="cite"><a href="#ref-6">[6]</a></sup>）。</li>
+        <li><strong>V0.3 加雅思应试频道</strong>：E2 IELTS / IELTS Liz / Cambridge English 等，针对雅思 4-6 分段学员，词汇更聚焦在<strong>学术高频词</strong>（Coxhead's AWL 570 词<sup class="cite" data-refid="6">[6]</sup>）。</li>
         <li><strong>Vox 视频偏长</strong>：10-15 min 视频对 "iframe 跳秒展示 6 句例句" 体验差（学员看完一段 30 秒还要回去 / 等 buffer）。优先级降到 V0.3。</li>
       </ul>
 
@@ -762,28 +798,28 @@
     <div class="chapter-body">
 
       <div class="callout accent">
-        <p><strong>本章是 V1.1 标准的核心约束</strong>。给定一个目标词 + 它的 CEFR 等级，决定"去哪些 CEFR 档的视频里找例句"。Krashen i+1 理论<sup class="cite"><a href="#ref-7">[7]</a></sup>：学员应在"略高于当前水平"的输入里学习，太低无新词，太高被淹没。</p>
+        <p><strong>本章是 V1.1 标准的核心约束</strong>。给定一个目标词 + 它的 CEFR 等级，决定"去哪些 CEFR 档的视频里找例句"。Krashen i+1 理论<sup class="cite" data-refid="7">[7]</sup>：学员应在"略高于当前水平"的输入里学习，太低无新词，太高被淹没。</p>
       </div>
 
       <h3>🎯 i+1 配比铁律（5 档完整版）</h3>
 
       <div class="principle-card" style="border-left-color: var(--good);">
         <div class="head"><span class="badge" style="background:var(--good-soft);color:var(--good)">A1 词</span></div>
-        <div class="body"><strong>例句来源 → 全 A1 视频</strong>（i+0）。原因：启蒙阶段学员对所有词都是新词，不需要"i+1 挑战"；A1 视频对 A1 词有海量重复供应（Ms Rachel 111.9 A1 token/min<sup class="cite"><a href="#ref-1">[1]</a></sup>）。<strong>不要在 A1 词例句里塞 A2/B1 视频片段</strong> — 启蒙学员对未知词容忍度低。</div>
+        <div class="body"><strong>例句来源 → 全 A1 视频</strong>（i+0）。原因：启蒙阶段学员对所有词都是新词，不需要"i+1 挑战"；A1 视频对 A1 词有海量重复供应（Ms Rachel 111.9 A1 token/min<sup class="cite" data-refid="1">[1]</sup>）。<strong>不要在 A1 词例句里塞 A2/B1 视频片段</strong> — 启蒙学员对未知词容忍度低。</div>
       </div>
 
       <div class="principle-card" style="border-left-color: var(--info);">
         <div class="head"><span class="badge" style="background:var(--info-soft);color:var(--info)">A2 词</span></div>
-        <div class="body"><strong>优先 A1 视频，A2 兜底</strong>。原因：A1 视频里 A2 token 密度 5-11/min<sup class="cite"><a href="#ref-1">[1]</a></sup>，一集 5 分钟提供 25-55 个 A2 例句，绰绰有余。Sesame Street 661 分钟覆盖 30.7% Oxford A2 词表<sup class="cite"><a href="#ref-1">[1]</a></sup>，剩 70% 由 A2 频道（SciShow 286 types / NatGeo 400 types）补足。</div>
+        <div class="body"><strong>优先 A1 视频，A2 兜底</strong>。原因：A1 视频里 A2 token 密度 5-11/min<sup class="cite" data-refid="1">[1]</sup>，一集 5 分钟提供 25-55 个 A2 例句，绰绰有余。Sesame Street 661 分钟覆盖 30.7% Oxford A2 词表<sup class="cite" data-refid="1">[1]</sup>，剩 70% 由 A2 频道（SciShow 286 types / NatGeo 400 types）补足。</div>
       </div>
 
       <div class="principle-card" style="border-left-color: var(--accent);">
         <div class="head"><span class="badge">B1 词 ★ 核心</span></div>
         <div class="body"><strong>优先 A2 视频，A1 也行，B1 兜底，绝不超 B1</strong>。详细顺序：<br>
-          1. <strong>A2 科普频道</strong>（SciShow / NatGeo / CC Kids / Free School）— B1 词金矿，密度 3.86-7.10/min<sup class="cite"><a href="#ref-1">[1]</a></sup><br>
+          1. <strong>A2 科普频道</strong>（SciShow / NatGeo / CC Kids / Free School）— B1 词金矿，密度 3.86-7.10/min<sup class="cite" data-refid="1">[1]</sup><br>
           2. <strong>A1 视频补充</strong>（Sesame / Ms Rachel / Peppa）— B1 token 0.7-3.8/min，适合做"特殊语境"例句<br>
           3. <strong>B1 频道兜底</strong>（VOA / Bob / Easy English）— 提供真实场景词、低频 B1 词<br>
-          4. <strong>不要碰 B2/C1</strong>：B1 学员到 B2 视频会被 OOV 淹没（B2 频道未知词密度 5-15%）<sup class="cite"><a href="#ref-8">[8]</a></sup>。</div>
+          4. <strong>不要碰 B2/C1</strong>：B1 学员到 B2 视频会被 OOV 淹没（B2 频道未知词密度 5-15%）<sup class="cite" data-refid="8">[8]</sup>。</div>
       </div>
 
       <div class="principle-card" style="border-left-color: var(--warn);">
@@ -886,7 +922,7 @@
             <li>🍁 <strong>Bob the Canadian</strong> (B1)</li>
             <li>📰 <strong>VOA Learning English</strong> (B1)</li>
           </ul>
-          <div class="count">覆盖估算：Oxford A1/A2/B1 ~70%<sup class="cite"><a href="#ref-1">[1]</a></sup><br>所有 5 家 Agent B 已抓 sample · 可立即跑 Pipeline V1.4</div>
+          <div class="count">覆盖估算：Oxford A1/A2/B1 ~70%<sup class="cite" data-refid="1">[1]</sup><br>所有 5 家 Agent B 已抓 sample · 可立即跑 Pipeline V1.4</div>
         </div>
 
         <div class="route-card">
@@ -926,7 +962,7 @@
             <tr><td>Crash Course Kids</td><td>已有 <code>crashcourse-kids-vocab</code> skill · 同上跑全 50 集</td><td><span class="pill good">✅ skill 已就绪</span></td><td>~5 min</td></tr>
             <tr><td>Sesame Street</td><td>新建抓字幕脚本 · Agent B 已抓 6 集 sample · 扩到 100-300 集</td><td><span class="pill warn">⚙️ 需建脚本</span></td><td>~1 小时</td></tr>
             <tr><td>Bob the Canadian</td><td>新建抓字幕脚本 · 全 350 集</td><td><span class="pill warn">⚙️ 需建脚本</span></td><td>~30 min</td></tr>
-            <tr><td>VOA Learning English</td><td><strong>可直接下载 mp4 + transcript</strong>（PD 公共领域<sup class="cite"><a href="#ref-4">[4]</a></sup>）· 不需要 yt-dlp · 用官网 API</td><td><span class="pill good">✅ 零版权</span></td><td>~1 小时</td></tr>
+            <tr><td>VOA Learning English</td><td><strong>可直接下载 mp4 + transcript</strong>（PD 公共领域<sup class="cite" data-refid="4">[4]</sup>）· 不需要 yt-dlp · 用官网 API</td><td><span class="pill good">✅ 零版权</span></td><td>~1 小时</td></tr>
           </tbody>
         </table>
       </div>
@@ -1031,7 +1067,7 @@
 
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q3</span><span class="qtext">iframe 嵌入会不会被 YouTube 阻断？比如哪天政策变了</span><span class="toggle">+</span></div>
-        <div class="faq-a">短期风险低，长期需要 Plan B：<br><br><strong>短期（2026 内）</strong>：YouTube iframe player 是<strong>官方推荐的嵌入方式</strong><sup class="cite"><a href="#ref-2">[2]</a></sup>，全球数亿网站在用，不可能阻断。频道方（如 Sesame Workshop）也通过 iframe 嵌入获 ad 分成，封禁伤己。<br><br><strong>中期风险</strong>：(1) 某频道在 YouTube 设"嵌入禁用"（一般是版权方法务后），那家频道不能用，但学员体验感知不到——半米只是从 6 例句里挑别家的 6 个；(2) 国内网络环境波动 → YouTube 嵌入需要科学上网，影响阿杰团队当下的目标群体（国际学校 K12，多数家庭有翻墙能力）。<br><br><strong>Plan B</strong>：VOA Learning English 是 PD 公共领域<sup class="cite"><a href="#ref-4">[4]</a></sup>，可以下载切片自托管 — 万一 YouTube iframe 出问题，VOA 至少能保住 B1 段。</div>
+        <div class="faq-a">短期风险低，长期需要 Plan B：<br><br><strong>短期（2026 内）</strong>：YouTube iframe player 是<strong>官方推荐的嵌入方式</strong><sup class="cite" data-refid="2">[2]</sup>，全球数亿网站在用，不可能阻断。频道方（如 Sesame Workshop）也通过 iframe 嵌入获 ad 分成，封禁伤己。<br><br><strong>中期风险</strong>：(1) 某频道在 YouTube 设"嵌入禁用"（一般是版权方法务后），那家频道不能用，但学员体验感知不到——半米只是从 6 例句里挑别家的 6 个；(2) 国内网络环境波动 → YouTube 嵌入需要科学上网，影响阿杰团队当下的目标群体（国际学校 K12，多数家庭有翻墙能力）。<br><br><strong>Plan B</strong>：VOA Learning English 是 PD 公共领域<sup class="cite" data-refid="4">[4]</sup>，可以下载切片自托管 — 万一 YouTube iframe 出问题，VOA 至少能保住 B1 段。</div>
       </div>
 
       <div class="faq-item">
@@ -1056,7 +1092,7 @@
 
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q8</span><span class="qtext">"待实测"的 B2/C1/C2 频道下一步什么时候补？</span><span class="toggle">+</span></div>
-        <div class="faq-a">V0.2 阶段（V0.1 跑通后 1 个月）。具体动作：<br><br>1. <strong>挑 5-8 家 B2/C1 优先频道</strong>：TED-Ed / mmmEnglish / Vanessa / Linguamarina / English with Lucy / Kurzgesagt / Veritasium<br>2. <strong>Agent B 跑相同 yt-dlp pipeline</strong>：每家抓 3-8 集字幕 sample，跑 Oxford 5000 词频比对（注意是 5000 不是 3000 — Oxford 5000 含 B2/C1<sup class="cite"><a href="#ref-9">[9]</a></sup>）<br>3. <strong>输出"B2/C1 unique types 数 + 密度"</strong>：参照本报告 Ch4-5 的 A2/B1 实测格式，更新到本 spec 的 Ch6-7 表格<br>4. <strong>判定哪几家进 V0.2 主仓 vs V0.3 候选</strong>：基于实测密度 + 学员反馈结合<br><br>预估 V0.2 阶段补抓 + 跑 estimator 1 周内能搞定，更新本 spec 到 V1.2。</div>
+        <div class="faq-a">V0.2 阶段（V0.1 跑通后 1 个月）。具体动作：<br><br>1. <strong>挑 5-8 家 B2/C1 优先频道</strong>：TED-Ed / mmmEnglish / Vanessa / Linguamarina / English with Lucy / Kurzgesagt / Veritasium<br>2. <strong>Agent B 跑相同 yt-dlp pipeline</strong>：每家抓 3-8 集字幕 sample，跑 Oxford 5000 词频比对（注意是 5000 不是 3000 — Oxford 5000 含 B2/C1<sup class="cite" data-refid="9">[9]</sup>）<br>3. <strong>输出"B2/C1 unique types 数 + 密度"</strong>：参照本报告 Ch4-5 的 A2/B1 实测格式，更新到本 spec 的 Ch6-7 表格<br>4. <strong>判定哪几家进 V0.2 主仓 vs V0.3 候选</strong>：基于实测密度 + 学员反馈结合<br><br>预估 V0.2 阶段补抓 + 跑 estimator 1 周内能搞定，更新本 spec 到 V1.2。</div>
       </div>
 
       <h3>📚 References · 数据源 + 工具引用</h3>
@@ -1285,6 +1321,92 @@
   <p>CEFR 六档 30+ 频道 · i+1 配比铁律 · V0.1-V0.3 渐进路线 · Pipeline V1.4 附录</p>
   <p>⚠️ 实测 B1 unique types 数据来源：<a href="./subtitle-volume-estimation.html">17 家 YouTube 频道字幕量级实测</a>（Agent B 抓 132 集字幕跑 Oxford 3000 词频比对）· "待实测"频道下一轮 Agent B 补抓</p>
 </footer>
+
+
+<script>
+(function() {
+  let activePopover = null;
+  let activeTrigger = null;
+  let hideTimer = null;
+
+  function getRefContent(refid) {
+    const refEl = document.getElementById('ref-' + refid);
+    if (!refEl) return null;
+    return refEl.innerHTML;
+  }
+
+  function positionPopover(pop, trigger) {
+    const r = trigger.getBoundingClientRect();
+    const popW = pop.offsetWidth;
+    const popH = pop.offsetHeight;
+    const vw = window.innerWidth;
+    const sy = window.scrollY;
+    let left = r.left + window.scrollX;
+    if (left + popW > vw - 12) left = vw - popW - 12;
+    if (left < 12) left = 12;
+    let top = r.bottom + sy + 6;
+    // if no space below, flip up
+    if (r.bottom + popH > window.innerHeight - 12 && r.top > popH + 12) {
+      top = r.top + sy - popH - 6;
+    }
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+  }
+
+  function showPopover(trigger) {
+    if (activeTrigger === trigger && activePopover) return;
+    if (activePopover) { activePopover.remove(); activePopover = null; }
+    const refid = trigger.getAttribute('data-refid');
+    const content = getRefContent(refid);
+    if (!content) return;
+    const pop = document.createElement('div');
+    pop.className = 'cite-popover';
+    pop.innerHTML = content;
+    document.body.appendChild(pop);
+    positionPopover(pop, trigger);
+    activePopover = pop;
+    activeTrigger = trigger;
+
+    pop.addEventListener('mouseenter', () => { if (hideTimer) clearTimeout(hideTimer); });
+    pop.addEventListener('mouseleave', () => scheduleHide());
+  }
+
+  function scheduleHide() {
+    if (hideTimer) clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      if (activePopover) { activePopover.remove(); activePopover = null; activeTrigger = null; }
+    }, 200);
+  }
+
+  function bindCites() {
+    document.querySelectorAll('sup.cite[data-refid]').forEach(sup => {
+      sup.addEventListener('mouseenter', () => showPopover(sup));
+      sup.addEventListener('mouseleave', () => scheduleHide());
+      // touch / click for mobile
+      sup.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (activeTrigger === sup && activePopover) {
+          activePopover.remove(); activePopover = null; activeTrigger = null;
+        } else {
+          showPopover(sup);
+        }
+      });
+    });
+    document.addEventListener('click', e => {
+      if (!activePopover) return;
+      if (e.target.closest('.cite-popover') || e.target.closest('sup.cite')) return;
+      activePopover.remove(); activePopover = null; activeTrigger = null;
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindCites);
+  } else {
+    bindCites();
+  }
+})();
+</script>
 
 </body>
 </html>

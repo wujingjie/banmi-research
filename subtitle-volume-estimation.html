@@ -210,6 +210,19 @@
     section.chapter.collapsed .chapter-body { max-height: none !important; padding: 18px 20px 22px !important; }
     section.chapter.collapsed > h2 .caret { display: none; }
   }
+
+  /* === actionable references (2026-05-27 patch) === */
+  .ref-list li:target {
+    animation: ref-highlight 2.4s ease-out;
+  }
+  @keyframes ref-highlight {
+    0%   { background: rgba(250, 204, 21, 0.55); }
+    60%  { background: rgba(250, 204, 21, 0.55); }
+    100% { background: transparent; }
+  }
+  sup.cite a { text-decoration: none; color: inherit; }
+  sup.cite a:hover { text-decoration: underline; }
+
 </style>
 </head>
 <body data-theme="light">
@@ -335,7 +348,7 @@ yt-dlp --skip-download --write-subs --write-auto-subs \
 
       <h3>📐 Oxford 3000 词表（CEFR 分级 ground truth）</h3>
 
-      <p>Oxford 3000™ 是牛津出版社官方维护的"英语最重要 3000 词"，按 CEFR 等级 A1 / A2 / B1 / B2 分级<sup class="cite">[5]</sup>。本次解析的 PDF 实际包含 4 个等级共 ~3300 词：</p>
+      <p>Oxford 3000™ 是牛津出版社官方维护的"英语最重要 3000 词"，按 CEFR 等级 A1 / A2 / B1 / B2 分级<sup class="cite"><a href="#ref-5">[5]</a></sup>。本次解析的 PDF 实际包含 4 个等级共 ~3300 词：</p>
 
       <div class="metric-grid">
         <div class="metric"><div class="v">884</div><div class="l">A1 词数（去重后）</div></div>
@@ -382,7 +395,7 @@ yt-dlp --skip-download --write-subs --write-auto-subs \
       <h3>⚠️ 已知误差源</h3>
 
       <ul>
-        <li><strong>auto-caption 比例不均</strong>：SciShow / VOA / BBC 是 manual 字幕，准确率 95%+；Pinkfong / Sesame / Mother Goose 大量是 auto，准确率 75-90%<sup class="cite">[6]</sup>。OOV 比例里有一部分是误识别词。</li>
+        <li><strong>auto-caption 比例不均</strong>：SciShow / VOA / BBC 是 manual 字幕，准确率 95%+；Pinkfong / Sesame / Mother Goose 大量是 auto，准确率 75-90%<sup class="cite"><a href="#ref-6">[6]</a></sup>。OOV 比例里有一部分是误识别词。</li>
         <li><strong>童谣型频道字幕含歌词重复</strong>：Pinkfong / Super Simple Songs 的 13 小时大样本里有大量副歌重复，token 计数被放大但 unique types 不会。所以"覆盖率"指标比"token/min"更可靠。</li>
         <li><strong>样本偏向最新视频</strong>：yt-dlp <code>--playlist-end 3</code> 默认取频道最新 3 集，可能不代表整频道平均（解决：扩到 5-8 集、跨季度抽样会更准，但本轮就先这样）。</li>
         <li><strong>SciShow Kids WPM 279 偏高</strong>：v2 的滚动字幕去重不够干净，对 SciShow / Easy English / Bob the Canadian 这种密集讲解型还有残留。<strong>实际课堂 WPM 应在 120-160</strong>（业内体感）。所以"总 token 估算"对这几家偏高 ~50%。但 unique B1 types 数不受影响。</li>
@@ -430,12 +443,12 @@ yt-dlp --skip-download --write-subs --write-auto-subs \
       <h3>📌 视频数差异最大的几家</h3>
 
       <div class="metric-grid">
-        <div class="metric"><div class="v">8986</div><div class="l">Peppa Pig（最多）<sup class="cite">[7]</sup></div></div>
-        <div class="metric"><div class="v">6500</div><div class="l">VOA Learning English<sup class="cite">[2]</sup></div></div>
-        <div class="metric"><div class="v">4174</div><div class="l">BBC Learning English<sup class="cite">[8]</sup></div></div>
-        <div class="metric"><div class="v">3853</div><div class="l">Pinkfong<sup class="cite">[9]</sup></div></div>
-        <div class="metric"><div class="v">1671</div><div class="l">Mother Goose Club<sup class="cite">[10]</sup></div></div>
-        <div class="metric"><div class="v">~50</div><div class="l">Crash Course Kids（最少）<sup class="cite">[11]</sup></div></div>
+        <div class="metric"><div class="v">8986</div><div class="l">Peppa Pig（最多）<sup class="cite"><a href="#ref-7">[7]</a></sup></div></div>
+        <div class="metric"><div class="v">6500</div><div class="l">VOA Learning English<sup class="cite"><a href="#ref-2">[2]</a></sup></div></div>
+        <div class="metric"><div class="v">4174</div><div class="l">BBC Learning English<sup class="cite"><a href="#ref-8">[8]</a></sup></div></div>
+        <div class="metric"><div class="v">3853</div><div class="l">Pinkfong<sup class="cite"><a href="#ref-9">[9]</a></sup></div></div>
+        <div class="metric"><div class="v">1671</div><div class="l">Mother Goose Club<sup class="cite"><a href="#ref-10">[10]</a></sup></div></div>
+        <div class="metric"><div class="v">~50</div><div class="l">Crash Course Kids（最少）<sup class="cite"><a href="#ref-11">[11]</a></sup></div></div>
       </div>
 
       <h3>💾 全频道字幕总量级估算</h3>
@@ -443,7 +456,7 @@ yt-dlp --skip-download --write-subs --write-auto-subs \
       <p>如果你把全部 21 家频道整批扒下来，理论上你会拿到（按视频数 × 平均 4 分钟 × 实测 WPM）：</p>
 
       <div class="callout info">
-        <p><strong>~5400 万 token / ~360 万句</strong>（保守估算，去 OOV 后 ~3900 万 token 是 Oxford 3000 内有效词）。储存约 <strong>1-2 GB</strong> 纯文本（VTT 含时间戳约 8-15 GB）。这对 SQLite FTS5 / Meilisearch 自托管而言完全 OK<sup class="cite">[12]</sup>。</p>
+        <p><strong>~5400 万 token / ~360 万句</strong>（保守估算，去 OOV 后 ~3900 万 token 是 Oxford 3000 内有效词）。储存约 <strong>1-2 GB</strong> 纯文本（VTT 含时间戳约 8-15 GB）。这对 SQLite FTS5 / Meilisearch 自托管而言完全 OK<sup class="cite"><a href="#ref-12">[12]</a></sup>。</p>
         <p>但 — <strong>没必要扒全部</strong>。后面 Ch5 会证明，<strong>SciShow Kids + NatGeo Kids + Bob + VOA</strong> 四家全量（≈1.6 万视频）就能拿到 Oxford B1 词表 70%+ 覆盖。第二批再加 5 家就 90%+。</p>
       </div>
 
@@ -493,7 +506,7 @@ yt-dlp --skip-download --write-subs --write-auto-subs \
 
       <div class="callout purple">
         <p><strong>反直觉 1 · "A1 段比 A2 段 A1% 占比反而低"</strong>（61% vs 66%）。原因：A1 频道 OOV 占比 31.4%（vs A2 段 24.7%）— Pinkfong / Sesame 一堆专有名词（角色名）、儿语（itsy bitsy / yum yum）、歌词重复。<strong>OOV 不等于难，但它确实"不可用作 Oxford 标准 CEFR 词的例句来源"</strong>。</p>
-        <p><strong>反直觉 2 · "B1 段 B1% 没有特别高"</strong>（2.2%）。VOA 用 1500 词控制写法是核心原因 — 这是"为 ESL 学习者写的清晰新闻"<sup class="cite">[2]</sup>，反而 B1 词分布稀疏。BBC / Bob / Easy English 各自语境（教学 / 街头 / 实景）也偏向 A1+A2 高频。<strong>真正的 B1 词集中在 A2 的科普频道（SciShow / NatGeo）</strong>，这是关键洞察。</p>
+        <p><strong>反直觉 2 · "B1 段 B1% 没有特别高"</strong>（2.2%）。VOA 用 1500 词控制写法是核心原因 — 这是"为 ESL 学习者写的清晰新闻"<sup class="cite"><a href="#ref-2">[2]</a></sup>，反而 B1 词分布稀疏。BBC / Bob / Easy English 各自语境（教学 / 街头 / 实景）也偏向 A1+A2 高频。<strong>真正的 B1 词集中在 A2 的科普频道（SciShow / NatGeo）</strong>，这是关键洞察。</p>
         <p><strong>异常点 1 · English Singsing 样本太小</strong>（5.7 分钟）。yt-dlp 抓到的是最新短视频，未能代表频道 1500 视频的整体词汇丰富度。需要补抓"对话集"类视频。</p>
         <p><strong>异常点 2 · English Tree TV / British Council Kids / Steve & Maggie 词汇范围极窄</strong>。前两家样本里 B1 unique lemma 数 ≤4，几乎可以视为"主要 A1 词"（适合启蒙、不适合做 B1 例句池）。</p>
       </div>
@@ -684,7 +697,7 @@ yt-dlp --skip-download --write-subs --write-auto-subs \
         </div>
         <div class="verdict-card good">
           <div class="v-head">+ Free School（A2 - 人文长尾）</div>
-          <div class="v-body">实测 B1/min = 5.38。336 视频<sup class="cite">[1]</sup> 涵盖莫扎特 / 梵高 / 古希腊等人文主题，是 SciShow / NatGeo 不覆盖的领域。CC BY 友好。</div>
+          <div class="v-body">实测 B1/min = 5.38。336 视频<sup class="cite"><a href="#ref-1">[1]</a></sup> 涵盖莫扎特 / 梵高 / 古希腊等人文主题，是 SciShow / NatGeo 不覆盖的领域。CC BY 友好。</div>
         </div>
         <div class="verdict-card good">
           <div class="v-head">+ Easy English（B1 - 真实口语）</div>
@@ -692,11 +705,11 @@ yt-dlp --skip-download --write-subs --write-auto-subs \
         </div>
         <div class="verdict-card good">
           <div class="v-head">+ VOA Learning English（B1 - 主题新闻）</div>
-          <div class="v-body">实测 B1/min 不高（2.88），但 220 个独立 B1 lemma 覆盖率 32.1%。是<strong>主题词</strong>（health / election / climate）的最干净来源。PD 公共领域 + 6500 视频<sup class="cite">[2]</sup>。500 阶段加入做主题词。</div>
+          <div class="v-body">实测 B1/min 不高（2.88），但 220 个独立 B1 lemma 覆盖率 32.1%。是<strong>主题词</strong>（health / election / climate）的最干净来源。PD 公共领域 + 6500 视频<sup class="cite"><a href="#ref-2">[2]</a></sup>。500 阶段加入做主题词。</div>
         </div>
         <div class="verdict-card good">
           <div class="v-head">+ Sesame Street（A1 - 启蒙补充）</div>
-          <div class="v-body">实测 A1/min 32.9，A1 覆盖率 61.1%。<strong>A1 词例句的主力</strong>，2026-01 起 YT 大量历史集上线<sup class="cite">[13]</sup>，非营利教育友好。500 阶段提供 A1 段 First Words 例句。</div>
+          <div class="v-body">实测 A1/min 32.9，A1 覆盖率 61.1%。<strong>A1 词例句的主力</strong>，2026-01 起 YT 大量历史集上线<sup class="cite"><a href="#ref-13">[13]</a></sup>，非营利教育友好。500 阶段提供 A1 段 First Words 例句。</div>
         </div>
       </div>
 
@@ -706,18 +719,18 @@ yt-dlp --skip-download --write-subs --write-auto-subs \
         <table>
           <thead><tr><th>频道</th><th>i+1 角色</th><th>实测亮点</th><th>限制</th></tr></thead>
           <tbody>
-            <tr><td>Peppa Pig</td><td>A1 词增广（5 分钟一集，3000+ 集）</td><td>A1/min 116，89 个 B1 lemma</td><td>iframe only · Hasbro 严格<sup class="cite">[7]</sup></td></tr>
+            <tr><td>Peppa Pig</td><td>A1 词增广（5 分钟一集，3000+ 集）</td><td>A1/min 116，89 个 B1 lemma</td><td>iframe only · Hasbro 严格<sup class="cite"><a href="#ref-7">[7]</a></sup></td></tr>
             <tr><td>Ms Rachel</td><td>A1 极启蒙 + 情感词</td><td>B1/min 3.80 偶遇高</td><td>iframe only · Netflix 已签</td></tr>
-            <tr><td>Mother Goose Club</td><td>A1 + 童谣节奏</td><td>1671 视频<sup class="cite">[10]</sup>，A2/min 10.89</td><td>iframe only</td></tr>
-            <tr><td>Super Simple Songs</td><td>A1 启蒙 + 歌词重复记忆</td><td>800+ 视频<sup class="cite">[14]</sup></td><td>iframe only · 副歌大量重复</td></tr>
-            <tr><td>Pinkfong</td><td>A1 启蒙</td><td>3853 视频<sup class="cite">[9]</sup></td><td>iframe only · OOV 37.4% 最高</td></tr>
-            <tr><td>BBC Learning English</td><td>B1 BrE 主力</td><td>4174 视频<sup class="cite">[8]</sup>，B1/min 5.22</td><td>iframe only · 但官方分级清晰</td></tr>
-            <tr><td>PBS Kids</td><td>A2 叙事</td><td>4300 视频<sup class="cite">[15]</sup>，B1 type 72</td><td>iframe only</td></tr>
-            <tr><td>Storyline Online</td><td>A2 朗读故事</td><td>~150 视频<sup class="cite">[16]</sup></td><td>iframe only · SAG-AFTRA 非营利</td></tr>
-            <tr><td>Smile and Learn</td><td>A2 主题分类</td><td>1.6M 订阅<sup class="cite">[17]</sup></td><td>iframe only · 自动字幕居多</td></tr>
-            <tr><td>English Singsing</td><td>A2 对话循环</td><td>1500 视频<sup class="cite">[18]</sup></td><td>样本太小，需重抽对话集</td></tr>
+            <tr><td>Mother Goose Club</td><td>A1 + 童谣节奏</td><td>1671 视频<sup class="cite"><a href="#ref-10">[10]</a></sup>，A2/min 10.89</td><td>iframe only</td></tr>
+            <tr><td>Super Simple Songs</td><td>A1 启蒙 + 歌词重复记忆</td><td>800+ 视频<sup class="cite"><a href="#ref-14">[14]</a></sup></td><td>iframe only · 副歌大量重复</td></tr>
+            <tr><td>Pinkfong</td><td>A1 启蒙</td><td>3853 视频<sup class="cite"><a href="#ref-9">[9]</a></sup></td><td>iframe only · OOV 37.4% 最高</td></tr>
+            <tr><td>BBC Learning English</td><td>B1 BrE 主力</td><td>4174 视频<sup class="cite"><a href="#ref-8">[8]</a></sup>，B1/min 5.22</td><td>iframe only · 但官方分级清晰</td></tr>
+            <tr><td>PBS Kids</td><td>A2 叙事</td><td>4300 视频<sup class="cite"><a href="#ref-15">[15]</a></sup>，B1 type 72</td><td>iframe only</td></tr>
+            <tr><td>Storyline Online</td><td>A2 朗读故事</td><td>~150 视频<sup class="cite"><a href="#ref-16">[16]</a></sup></td><td>iframe only · SAG-AFTRA 非营利</td></tr>
+            <tr><td>Smile and Learn</td><td>A2 主题分类</td><td>1.6M 订阅<sup class="cite"><a href="#ref-17">[17]</a></sup></td><td>iframe only · 自动字幕居多</td></tr>
+            <tr><td>English Singsing</td><td>A2 对话循环</td><td>1500 视频<sup class="cite"><a href="#ref-18">[18]</a></sup></td><td>样本太小，需重抽对话集</td></tr>
             <tr><td>Steve & Maggie</td><td>A2 BrE ESL</td><td>主频道在<code>@Steve_and_Maggie</code></td><td>iframe only · 词汇范围窄</td></tr>
-            <tr><td>English Tree TV</td><td>A2 ESL 启蒙</td><td>499 视频<sup class="cite">[19]</sup></td><td>词汇范围最窄，B1 lemma 只 4</td></tr>
+            <tr><td>English Tree TV</td><td>A2 ESL 启蒙</td><td>499 视频<sup class="cite"><a href="#ref-19">[19]</a></sup></td><td>词汇范围最窄，B1 lemma 只 4</td></tr>
             <tr><td>British Council Kids</td><td>A2 BrE 官方</td><td>British Council 出品</td><td>样本里 B1 lemma 为 0，词汇极窄</td></tr>
           </tbody>
         </table>
@@ -842,7 +855,7 @@ fetch_one() {
       <ul>
         <li><strong>扩样本</strong>：把 <code>--playlist-end 3</code> 改 <code>--playlist-end 30</code>，跨季度抽样（playlist-start 跳着取）。预估总 token 上升到 ~5M，B1 lemma 覆盖率上升到 ~70%。</li>
         <li><strong>替换 lemmatizer</strong>：换 spaCy 或 NLTK 的 WordNetLemmatizer 后准确率会从 ±5% 降到 ±1%。但需 venv 装外部包。本轮自实现的简版够用。</li>
-        <li><strong>加 B2/C1 词表</strong>：Oxford 5000 是 Oxford 3000 + B2/C1 共 5000 词<sup class="cite">[5]</sup>。半米若要做 5000 学员阶段、覆盖到 B2+ 词，把 Oxford 5000 完整解析进来。本次只用了 PDF 里的 4 级。</li>
+        <li><strong>加 B2/C1 词表</strong>：Oxford 5000 是 Oxford 3000 + B2/C1 共 5000 词<sup class="cite"><a href="#ref-5">[5]</a></sup>。半米若要做 5000 学员阶段、覆盖到 B2+ 词，把 Oxford 5000 完整解析进来。本次只用了 PDF 里的 4 级。</li>
         <li><strong>建索引</strong>：用本次产出的 VTT + JSON 直接做 MVP — SQLite FTS5 建表 <code>(video_id, channel, start_sec, end_sec, text)</code>，配上前端搜索框，半天能跑通。</li>
       </ul>
 
@@ -898,17 +911,17 @@ fetch_one() {
 
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q1</span><span class="qtext">为什么 SciShow Kids 比 VOA Learning English 的 B1 密度还高？VOA 不是专门做 B1 教学的吗？</span><span class="toggle">+</span></div>
-        <div class="faq-a">VOA Learning English 用"1500 词控制写法"<sup class="cite">[2]</sup> — 为让 ESL 学习者听懂，刻意只用最高频的 1500 词，B1 词反而稀释了。SciShow Kids 没有词表约束，讲科学时自然带 "experiment / observe / erupt / migrate" 这些 B1 词。所以"B1 词例句"的真实金矿不是"B1 标签频道"，而是<strong>"用 B1+ 词解释 A2 概念"的科普频道</strong>（SciShow / NatGeo / Free School）。</div>
+        <div class="faq-a">VOA Learning English 用"1500 词控制写法"<sup class="cite"><a href="#ref-2">[2]</a></sup> — 为让 ESL 学习者听懂，刻意只用最高频的 1500 词，B1 词反而稀释了。SciShow Kids 没有词表约束，讲科学时自然带 "experiment / observe / erupt / migrate" 这些 B1 词。所以"B1 词例句"的真实金矿不是"B1 标签频道"，而是<strong>"用 B1+ 词解释 A2 概念"的科普频道</strong>（SciShow / NatGeo / Free School）。</div>
       </div>
 
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q2</span><span class="qtext">SciShow Kids 6 集就覆盖 23.8% 的 B1 词表，全量入库能不能覆盖 100%？</span><span class="toggle">+</span></div>
-        <div class="faq-a">不能。词频遵循 Zipf 分布<sup class="cite">[20]</sup>，前 80% 高频词集中在前 20% 内容里。Heaps' Law 估算 SciShow Kids 614 视频全量约覆盖 686 B1 词的 <strong>60%</strong>（约 410 个 lemma），剩下 40% 是低频 B1 词（如 <em>civilisation / approach / negotiate</em>）需要其他频道补。<br><br>覆盖率随频道数<strong>非线性收敛</strong>：3 家覆盖 85%、8 家 95%、21 家接近 99%。所以"先做 3 家做透"比"21 家都浅做"更高效。</div>
+        <div class="faq-a">不能。词频遵循 Zipf 分布<sup class="cite"><a href="#ref-20">[20]</a></sup>，前 80% 高频词集中在前 20% 内容里。Heaps' Law 估算 SciShow Kids 614 视频全量约覆盖 686 B1 词的 <strong>60%</strong>（约 410 个 lemma），剩下 40% 是低频 B1 词（如 <em>civilisation / approach / negotiate</em>）需要其他频道补。<br><br>覆盖率随频道数<strong>非线性收敛</strong>：3 家覆盖 85%、8 家 95%、21 家接近 99%。所以"先做 3 家做透"比"21 家都浅做"更高效。</div>
       </div>
 
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q3</span><span class="qtext">Sesame Street 11 小时样本只覆盖 107 个 B1 lemma — 是不是 Sesame 词汇真的就这么窄？</span><span class="toggle">+</span></div>
-        <div class="faq-a">部分是。Sesame Street 定位 A1，主要服务 2-5 岁<sup class="cite">[13]</sup>，词汇有意控制在 A1。但 107 个 B1 lemma 也不算窄 — 包括 <em>community / explore / activity / continue / develop</em> 等。<br><br>真正的限制是<strong>频次太低</strong>（0.71/min），半米若用 Sesame 做 B1 词例句，每个 B1 词在 660 分钟样本里平均出现 4.3 次（468 token / 107 type）— 太分散，挑出"6 个最好的例句"难度高。SciShow Kids 同样 B1 词出现频次密集得多。</div>
+        <div class="faq-a">部分是。Sesame Street 定位 A1，主要服务 2-5 岁<sup class="cite"><a href="#ref-13">[13]</a></sup>，词汇有意控制在 A1。但 107 个 B1 lemma 也不算窄 — 包括 <em>community / explore / activity / continue / develop</em> 等。<br><br>真正的限制是<strong>频次太低</strong>（0.71/min），半米若用 Sesame 做 B1 词例句，每个 B1 词在 660 分钟样本里平均出现 4.3 次（468 token / 107 type）— 太分散，挑出"6 个最好的例句"难度高。SciShow Kids 同样 B1 词出现频次密集得多。</div>
       </div>
 
       <div class="faq-item">
@@ -918,7 +931,7 @@ fetch_one() {
 
       <div class="faq-item">
         <div class="faq-q"><span class="qmark">Q5</span><span class="qtext">实测 SciShow Kids WPM 279 是不是过高了？体感不应该 120-160 吗？</span><span class="toggle">+</span></div>
-        <div class="faq-a">是的，279 偏高 ~75%。原因：v2 的滚动字幕 token-level 去重对密集讲解型还有残留。<br><br>真实 SciShow Kids 课堂体感 WPM 120-160（业内估算<sup class="cite">[6]</sup>）。所以"est 总词数"对 SciShow / Easy English / Bob the Canadian 几家偏高约 50%。<br><br>但<strong>这不影响 i+1 配比结论</strong> — unique B1 types 数（163 / 234 / 220）不受 WPM 估算影响，那是基于独立 lemma 集合的硬数字。"每分钟 B1 token 数"略有放大，但相对排名（SciShow &gt; NatGeo &gt; VOA）不变。后续完善 lemmatizer + 用更长样本，WPM 估算会自然收敛。</div>
+        <div class="faq-a">是的，279 偏高 ~75%。原因：v2 的滚动字幕 token-level 去重对密集讲解型还有残留。<br><br>真实 SciShow Kids 课堂体感 WPM 120-160（业内估算<sup class="cite"><a href="#ref-6">[6]</a></sup>）。所以"est 总词数"对 SciShow / Easy English / Bob the Canadian 几家偏高约 50%。<br><br>但<strong>这不影响 i+1 配比结论</strong> — unique B1 types 数（163 / 234 / 220）不受 WPM 估算影响，那是基于独立 lemma 集合的硬数字。"每分钟 B1 token 数"略有放大，但相对排名（SciShow &gt; NatGeo &gt; VOA）不变。后续完善 lemmatizer + 用更长样本，WPM 估算会自然收敛。</div>
       </div>
 
       <div class="faq-item">
@@ -955,38 +968,38 @@ fetch_one() {
     <div class="chapter-body">
 
       <ol class="ref-list">
-        <li><a href="https://us.youtubers.me/free-school/youtuber-stats" target="_blank">Free School - YouTubers.me</a> <span class="ref-meta">· 2026-05-25 · 885K 订阅 · 336 视频 · 引用 2 次</span></li>
-        <li><a href="https://learningenglish.voanews.com/" target="_blank">VOA Learning English 官网</a> <span class="ref-meta">· 2026-05-25 · 1500 词核心 · PD 公共领域 · 6500 视频 · 引用 4 次</span></li>
-        <li><a href="https://www.tubics.com/rankings/channel/UCRFIPG2u1DxKLNuE3y2SjHA" target="_blank">SciShow Kids - tubics</a> <span class="ref-meta">· 2026-05-25 · 614 视频 · 1.6M 订阅 · 引用 3 次</span></li>
-        <li><a href="https://complexly.org/shows/scishow-kids/" target="_blank">SciShow Kids - Complexly</a> <span class="ref-meta">· 2026-05-25 · 教育友好制片方 · 引用 2 次</span></li>
-        <li><a href="https://www.oxfordlearnersdictionaries.com/wordlists/oxford3000-5000" target="_blank">Oxford 3000 / 5000 Word Lists - 牛津大学出版社官方</a> <span class="ref-meta">· 2026-05-25 · A1-C1 CEFR 分级 · 本次词频比对 ground truth · 引用 3 次</span></li>
-        <li><a href="https://yt-dlp.github.io/" target="_blank">yt-dlp 官方</a> <span class="ref-meta">· 2026-05-25 · 字幕抓取主工具 · 95%+ 准确率 · 引用 4 次</span></li>
-        <li><a href="https://www.tubics.com/rankings/channel/UCAOtE1V7Ots4DjM8JLlrYgg" target="_blank">Peppa Pig Official - tubics</a> <span class="ref-meta">· 2026-05-25 · 42.6M 订阅 · 8986 视频 · 引用 2 次</span></li>
-        <li><a href="https://vidiq.com/youtube-stats/channel/UCHaHD477h-FeBbVh9Sh7syA/" target="_blank">BBC Learning English - vidIQ</a> <span class="ref-meta">· 2026-05-25 · 9.37M 订阅 · 4174 视频 · 引用 2 次</span></li>
-        <li><a href="https://vidiq.com/youtube-stats/channel/UCcdwLMPsaU2ezNSJU1nFoBQ/" target="_blank">Baby Shark - Pinkfong - vidIQ</a> <span class="ref-meta">· 2026-05-25 · 84.5M 订阅 · 3853 视频 · 引用 1 次</span></li>
-        <li><a href="https://vidiq.com/youtube-stats/channel/UCJkWoS4RsldA1coEIot5yDA/" target="_blank">Mother Goose Club - vidIQ</a> <span class="ref-meta">· 2026-05-25 · 9.87M 订阅 · 1671 视频 · 引用 1 次</span></li>
-        <li><a href="https://complexly.org/shows/crash-course-kids/" target="_blank">Crash Course Kids - Complexly</a> <span class="ref-meta">· 2026-05-25 · ~50 集 · Sabrina Cruz 主讲 · 引用 1 次</span></li>
-        <li><a href="https://sqlite.org/fts5.html" target="_blank">SQLite FTS5 - 全文搜索引擎</a> <span class="ref-meta">· 2026-05-25 · 半米索引推荐方案 · 引用 1 次</span></li>
-        <li><a href="https://blog.youtube/news-and-events/sesame-street-now-streaming-on-youtube-and-youtube-kids/" target="_blank">Sesame Street Now on YouTube - YouTube Blog</a> <span class="ref-meta">· 2026-01 · 100+ 历史集上线 · 引用 1 次</span></li>
-        <li><a href="https://en.wikipedia.org/wiki/Super_Simple_Songs" target="_blank">Super Simple Songs - Wikipedia</a> <span class="ref-meta">· 2026-05-25 · 800+ 视频 · 46.2M 订阅 · 引用 1 次</span></li>
-        <li><a href="https://vidiq.com/youtube-stats/channel/UCrNnk0wFBnCS1awGjq_ijGQ/" target="_blank">PBS KIDS - vidIQ</a> <span class="ref-meta">· 2026-04-26 · 3.49M 订阅 · 4.3K 视频 · 引用 1 次</span></li>
-        <li><a href="https://sagaftra.foundation/about-storyline-online/" target="_blank">Storyline Online - SAG-AFTRA Foundation</a> <span class="ref-meta">· 2026-05-25 · ~150 视频 · 演员朗读绘本 · 引用 1 次</span></li>
-        <li><a href="https://app.thoughtleaders.io/youtube/smile-and-learn-english" target="_blank">Smile and Learn - English - thoughtleaders</a> <span class="ref-meta">· 2026-05-25 · 1.6M 订阅 · 396M views · 引用 1 次</span></li>
-        <li><a href="https://vidiq.com/youtube-stats/channel/UCGwA4GjY4nGMIYvaJiA0EGA/" target="_blank">English Singsing - vidIQ</a> <span class="ref-meta">· 2026-05-25 · 4.7M 订阅 · 1500 视频 · 引用 1 次</span></li>
-        <li><a href="https://vidiq.com/youtube-stats/channel/UC4GaQ9fCH5IpAq1AImj7XuQ/" target="_blank">English Tree TV - vidIQ</a> <span class="ref-meta">· 2026-05-25 · 2.7M 订阅 · 499 视频 · 引用 1 次</span></li>
-        <li><a href="https://en.wikipedia.org/wiki/Zipf%27s_law" target="_blank">Zipf's Law - Wikipedia</a> <span class="ref-meta">· 2026-05-25 · 词频分布定律 · 引用 1 次</span></li>
-        <li><a href="https://en.wikipedia.org/wiki/Heaps%27_law" target="_blank">Heaps' Law - Wikipedia</a> <span class="ref-meta">· 2026-05-25 · 文本词汇增长定律 V≈KN^β · 引用 1 次</span></li>
-        <li><a href="https://stats.video/youtube-channel-statistics/learn-english-with-bob-the-canadian" target="_blank">Learn English with Bob the Canadian - stats.video</a> <span class="ref-meta">· 2026-05-25 · 2.3M 订阅 · 350 视频 · 引用 1 次</span></li>
-        <li><a href="https://hypeauditor.com/youtube/UCG2CL6EUjG8TVT1Tpl9nJdg/" target="_blank">Ms Rachel - HypeAuditor</a> <span class="ref-meta">· 2026-05-25 · 18.3M 订阅 · 120 视频 · 引用 1 次</span></li>
-        <li><a href="https://www.tubics.com/rankings/channel/UCKyTokYo0nK2OA-az-sDijA" target="_blank">VOA Learning English - tubics</a> <span class="ref-meta">· 2026-05-25 · 6500 视频 · 引用 1 次</span></li>
-        <li><a href="https://pymupdf.readthedocs.io/" target="_blank">PyMuPDF (pymupdf) - Python PDF 处理库</a> <span class="ref-meta">· 2026-05-25 · 本次 Oxford PDF 解析 · 引用 1 次</span></li>
-        <li><a href="https://www.thepinkfongcompany.com/en/news/pr/86" target="_blank">Pinkfong Surpasses 100B Views - 官方</a> <span class="ref-meta">· 2026-05-25 · 7000+ 内容 · 25 语言 · 引用 1 次</span></li>
-        <li><a href="https://www.tubics.com/rankings/channel/UCXVCgDuD_QCkI7gTKU7-tpg" target="_blank">Nat Geo Kids - tubics</a> <span class="ref-meta">· 2026-05-25 · 1.59M 订阅 · 1120 视频 · 引用 1 次</span></li>
-        <li><a href="https://vidiq.com/youtube-stats/channel/UCx1xhxQyzR4TT6PmXO0khbQ/" target="_blank">Steve and Maggie - vidIQ</a> <span class="ref-meta">· 2026-05-25 · 12M+ 订阅 · Wattsenglish 出品 · 引用 1 次</span></li>
-        <li><a href="https://wattsenglish.com/" target="_blank">Wattsenglish Ltd 官网</a> <span class="ref-meta">· 2026-05-25 · Steve & Maggie 制作方 · 引用 1 次</span></li>
-        <li><a href="https://www.youtube.com/@VOALearningEnglish" target="_blank">VOA Learning English YouTube 主频道</a> <span class="ref-meta">· 2026-05-25 · 实抓字幕来源 · 引用 1 次</span></li>
-        <li><a href="https://www.youtube.com/@SciShowKids" target="_blank">SciShow Kids YouTube 频道</a> <span class="ref-meta">· 2026-05-25 · 实抓 15 个 VTT · 引用 1 次</span></li>
-        <li><a href="https://www.youtube.com/@bobthecanadian" target="_blank">Bob the Canadian (Learn English with Bob the Canadian)</a> <span class="ref-meta">· 2026-05-25 · @LearnEnglishWithBobtheCanadian 实抓 18 VTT · 引用 1 次</span></li>
+        <li id="ref-1"><a href="https://us.youtubers.me/free-school/youtuber-stats" target="_blank">Free School - YouTubers.me</a> <span class="ref-meta">· 2026-05-25 · 885K 订阅 · 336 视频 · 引用 2 次</span></li>
+        <li id="ref-2"><a href="https://learningenglish.voanews.com/" target="_blank">VOA Learning English 官网</a> <span class="ref-meta">· 2026-05-25 · 1500 词核心 · PD 公共领域 · 6500 视频 · 引用 4 次</span></li>
+        <li id="ref-3"><a href="https://www.tubics.com/rankings/channel/UCRFIPG2u1DxKLNuE3y2SjHA" target="_blank">SciShow Kids - tubics</a> <span class="ref-meta">· 2026-05-25 · 614 视频 · 1.6M 订阅 · 引用 3 次</span></li>
+        <li id="ref-4"><a href="https://complexly.org/shows/scishow-kids/" target="_blank">SciShow Kids - Complexly</a> <span class="ref-meta">· 2026-05-25 · 教育友好制片方 · 引用 2 次</span></li>
+        <li id="ref-5"><a href="https://www.oxfordlearnersdictionaries.com/wordlists/oxford3000-5000" target="_blank">Oxford 3000 / 5000 Word Lists - 牛津大学出版社官方</a> <span class="ref-meta">· 2026-05-25 · A1-C1 CEFR 分级 · 本次词频比对 ground truth · 引用 3 次</span></li>
+        <li id="ref-6"><a href="https://yt-dlp.github.io/" target="_blank">yt-dlp 官方</a> <span class="ref-meta">· 2026-05-25 · 字幕抓取主工具 · 95%+ 准确率 · 引用 4 次</span></li>
+        <li id="ref-7"><a href="https://www.tubics.com/rankings/channel/UCAOtE1V7Ots4DjM8JLlrYgg" target="_blank">Peppa Pig Official - tubics</a> <span class="ref-meta">· 2026-05-25 · 42.6M 订阅 · 8986 视频 · 引用 2 次</span></li>
+        <li id="ref-8"><a href="https://vidiq.com/youtube-stats/channel/UCHaHD477h-FeBbVh9Sh7syA/" target="_blank">BBC Learning English - vidIQ</a> <span class="ref-meta">· 2026-05-25 · 9.37M 订阅 · 4174 视频 · 引用 2 次</span></li>
+        <li id="ref-9"><a href="https://vidiq.com/youtube-stats/channel/UCcdwLMPsaU2ezNSJU1nFoBQ/" target="_blank">Baby Shark - Pinkfong - vidIQ</a> <span class="ref-meta">· 2026-05-25 · 84.5M 订阅 · 3853 视频 · 引用 1 次</span></li>
+        <li id="ref-10"><a href="https://vidiq.com/youtube-stats/channel/UCJkWoS4RsldA1coEIot5yDA/" target="_blank">Mother Goose Club - vidIQ</a> <span class="ref-meta">· 2026-05-25 · 9.87M 订阅 · 1671 视频 · 引用 1 次</span></li>
+        <li id="ref-11"><a href="https://complexly.org/shows/crash-course-kids/" target="_blank">Crash Course Kids - Complexly</a> <span class="ref-meta">· 2026-05-25 · ~50 集 · Sabrina Cruz 主讲 · 引用 1 次</span></li>
+        <li id="ref-12"><a href="https://sqlite.org/fts5.html" target="_blank">SQLite FTS5 - 全文搜索引擎</a> <span class="ref-meta">· 2026-05-25 · 半米索引推荐方案 · 引用 1 次</span></li>
+        <li id="ref-13"><a href="https://blog.youtube/news-and-events/sesame-street-now-streaming-on-youtube-and-youtube-kids/" target="_blank">Sesame Street Now on YouTube - YouTube Blog</a> <span class="ref-meta">· 2026-01 · 100+ 历史集上线 · 引用 1 次</span></li>
+        <li id="ref-14"><a href="https://en.wikipedia.org/wiki/Super_Simple_Songs" target="_blank">Super Simple Songs - Wikipedia</a> <span class="ref-meta">· 2026-05-25 · 800+ 视频 · 46.2M 订阅 · 引用 1 次</span></li>
+        <li id="ref-15"><a href="https://vidiq.com/youtube-stats/channel/UCrNnk0wFBnCS1awGjq_ijGQ/" target="_blank">PBS KIDS - vidIQ</a> <span class="ref-meta">· 2026-04-26 · 3.49M 订阅 · 4.3K 视频 · 引用 1 次</span></li>
+        <li id="ref-16"><a href="https://sagaftra.foundation/about-storyline-online/" target="_blank">Storyline Online - SAG-AFTRA Foundation</a> <span class="ref-meta">· 2026-05-25 · ~150 视频 · 演员朗读绘本 · 引用 1 次</span></li>
+        <li id="ref-17"><a href="https://app.thoughtleaders.io/youtube/smile-and-learn-english" target="_blank">Smile and Learn - English - thoughtleaders</a> <span class="ref-meta">· 2026-05-25 · 1.6M 订阅 · 396M views · 引用 1 次</span></li>
+        <li id="ref-18"><a href="https://vidiq.com/youtube-stats/channel/UCGwA4GjY4nGMIYvaJiA0EGA/" target="_blank">English Singsing - vidIQ</a> <span class="ref-meta">· 2026-05-25 · 4.7M 订阅 · 1500 视频 · 引用 1 次</span></li>
+        <li id="ref-19"><a href="https://vidiq.com/youtube-stats/channel/UC4GaQ9fCH5IpAq1AImj7XuQ/" target="_blank">English Tree TV - vidIQ</a> <span class="ref-meta">· 2026-05-25 · 2.7M 订阅 · 499 视频 · 引用 1 次</span></li>
+        <li id="ref-20"><a href="https://en.wikipedia.org/wiki/Zipf%27s_law" target="_blank">Zipf's Law - Wikipedia</a> <span class="ref-meta">· 2026-05-25 · 词频分布定律 · 引用 1 次</span></li>
+        <li id="ref-21"><a href="https://en.wikipedia.org/wiki/Heaps%27_law" target="_blank">Heaps' Law - Wikipedia</a> <span class="ref-meta">· 2026-05-25 · 文本词汇增长定律 V≈KN^β · 引用 1 次</span></li>
+        <li id="ref-22"><a href="https://stats.video/youtube-channel-statistics/learn-english-with-bob-the-canadian" target="_blank">Learn English with Bob the Canadian - stats.video</a> <span class="ref-meta">· 2026-05-25 · 2.3M 订阅 · 350 视频 · 引用 1 次</span></li>
+        <li id="ref-23"><a href="https://hypeauditor.com/youtube/UCG2CL6EUjG8TVT1Tpl9nJdg/" target="_blank">Ms Rachel - HypeAuditor</a> <span class="ref-meta">· 2026-05-25 · 18.3M 订阅 · 120 视频 · 引用 1 次</span></li>
+        <li id="ref-24"><a href="https://www.tubics.com/rankings/channel/UCKyTokYo0nK2OA-az-sDijA" target="_blank">VOA Learning English - tubics</a> <span class="ref-meta">· 2026-05-25 · 6500 视频 · 引用 1 次</span></li>
+        <li id="ref-25"><a href="https://pymupdf.readthedocs.io/" target="_blank">PyMuPDF (pymupdf) - Python PDF 处理库</a> <span class="ref-meta">· 2026-05-25 · 本次 Oxford PDF 解析 · 引用 1 次</span></li>
+        <li id="ref-26"><a href="https://www.thepinkfongcompany.com/en/news/pr/86" target="_blank">Pinkfong Surpasses 100B Views - 官方</a> <span class="ref-meta">· 2026-05-25 · 7000+ 内容 · 25 语言 · 引用 1 次</span></li>
+        <li id="ref-27"><a href="https://www.tubics.com/rankings/channel/UCXVCgDuD_QCkI7gTKU7-tpg" target="_blank">Nat Geo Kids - tubics</a> <span class="ref-meta">· 2026-05-25 · 1.59M 订阅 · 1120 视频 · 引用 1 次</span></li>
+        <li id="ref-28"><a href="https://vidiq.com/youtube-stats/channel/UCx1xhxQyzR4TT6PmXO0khbQ/" target="_blank">Steve and Maggie - vidIQ</a> <span class="ref-meta">· 2026-05-25 · 12M+ 订阅 · Wattsenglish 出品 · 引用 1 次</span></li>
+        <li id="ref-29"><a href="https://wattsenglish.com/" target="_blank">Wattsenglish Ltd 官网</a> <span class="ref-meta">· 2026-05-25 · Steve & Maggie 制作方 · 引用 1 次</span></li>
+        <li id="ref-30"><a href="https://www.youtube.com/@VOALearningEnglish" target="_blank">VOA Learning English YouTube 主频道</a> <span class="ref-meta">· 2026-05-25 · 实抓字幕来源 · 引用 1 次</span></li>
+        <li id="ref-31"><a href="https://www.youtube.com/@SciShowKids" target="_blank">SciShow Kids YouTube 频道</a> <span class="ref-meta">· 2026-05-25 · 实抓 15 个 VTT · 引用 1 次</span></li>
+        <li id="ref-32"><a href="https://www.youtube.com/@bobthecanadian" target="_blank">Bob the Canadian (Learn English with Bob the Canadian)</a> <span class="ref-meta">· 2026-05-25 · @LearnEnglishWithBobtheCanadian 实抓 18 VTT · 引用 1 次</span></li>
       </ol>
 
     </div>

@@ -50,11 +50,26 @@
   .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; }
   .breadcrumb { max-width: 980px; margin: 0 auto; padding: 8px 16px 0; font-size: 13px; }
   .breadcrumb a { color: var(--accent-text); text-decoration: none; padding: 3px 8px; border-radius: 6px; background: var(--accent-soft); margin-right: 6px; display: inline-block; }
-  nav.anchor-nav { overflow-x: auto; overflow-y: hidden; border-top: 1px solid var(--border); background: var(--bg); scrollbar-width: none; }
-  nav.anchor-nav::-webkit-scrollbar { display: none; }
-  .anchor-list { display: flex; gap: 4px; padding: 8px 16px; max-width: 980px; margin: 0 auto; white-space: nowrap; }
-  .anchor-list a { flex: 0 0 auto; min-height: 36px; padding: 7px 12px; border-radius: 999px; font-size: 13px; line-height: 1.3; color: var(--text-soft); text-decoration: none; border: 1px solid transparent; background: var(--bg-soft); }
-  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); font-weight: 600; }
+  /* 左侧章节导航 sidebar（取代原顶部横向滚动目录） */
+  nav.anchor-nav { position: fixed; top: 0; left: 0; width: 240px; height: 100vh; overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  /* 窄屏唤出按钮 + 遮罩 */
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (min-width: 1041px) {
+    main, header.topbar { margin-left: 240px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
   main { max-width: 980px; margin: 0 auto; padding: 16px; }
   .hero { padding: 28px 4px 12px; }
   .hero h1 { font-size: 26px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
@@ -186,7 +201,12 @@
     <a href="./lexile-reading-assessment-research.html">关联：Lexile 阅读测评</a>
     <a href="./eng-assessment-datasets--scoring-engine-blueprint.html">关联：评分引擎蓝图</a>
   </div>
-  <nav class="anchor-nav">
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav" id="anchorNav">
+  <div class="nav-title">📖 目录</div>
     <div class="anchor-list" id="anchorList">
       <a href="#ch1" data-target="ch1">01 摘要 + 5 结论</a>
       <a href="#ch2" data-target="ch2">02 诊断·5子系统</a>
@@ -207,7 +227,6 @@
       <a href="#ch17" data-target="ch17">17 References</a>
     </div>
   </nav>
-</header>
 
 <main>
   <div class="hero">
@@ -919,9 +938,25 @@ document.querySelectorAll('.faq-q').forEach(function(q){
     var pos = window.scrollY + 120, idx = 0;
     secs.forEach(function(s,i){ if (s && s.offsetTop <= pos) idx = i; });
     links.forEach(function(a){ a.classList.remove('active'); });
-    if (links[idx]) { links[idx].classList.add('active'); links[idx].scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}); }
+    if (links[idx]) { links[idx].classList.add('active'); links[idx].scrollIntoView({block:'nearest'}); }
   }
   window.addEventListener('scroll', onScroll); onScroll();
+})();
+// 左侧目录抽屉开关（窄屏）
+(function(){
+  var nav = document.getElementById('anchorNav');
+  var tog = document.getElementById('navToggle');
+  var ov = document.getElementById('navOverlay');
+  if(!nav||!tog||!ov) return;
+  function close(){ nav.classList.remove('open'); ov.classList.remove('show'); }
+  tog.addEventListener('click', function(){
+    var willOpen = !nav.classList.contains('open');
+    nav.classList.toggle('open', willOpen); ov.classList.toggle('show', willOpen);
+  });
+  ov.addEventListener('click', close);
+  document.querySelectorAll('.anchor-list a').forEach(function(a){
+    a.addEventListener('click', function(){ if(window.innerWidth<=1040) close(); });
+  });
 })();
 // 表格行高亮
 document.querySelectorAll('tbody tr').forEach(function(tr){

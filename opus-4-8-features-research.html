@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Claude Opus 4.8 新功能 + 快速模式 + Dynamic Workflows 实用指南 · 官方查证版 · 发布 2026-05-28 真实 · vs 4.7 benchmark/价格/context 对比 · 快速模式 speed:fast 用法+Case · Dynamic Workflows /workflows·ultracode 用法+Case · 对阿杰落地建议 · 2026-05-29</title>
+<style>
+  :root {
+    --bg: #ffffff; --bg-soft: #f7f8fa; --bg-elevated: #ffffff; --bg-stripe: #f5f7fa;
+    --text: #1a1d23; --text-soft: #4a5160; --text-mute: #7c8493;
+    --border: #e3e6ec; --border-strong: #cdd2da;
+    --accent: #2563eb; --accent-soft: #dbeafe; --accent-text: #1d4ed8;
+    --good: #15803d; --good-soft: #dcfce7;
+    --warn: #b45309; --warn-soft: #fef3c7;
+    --bad: #b91c1c; --bad-soft: #fee2e2;
+    --info: #0891b2; --info-soft: #cffafe;
+    --code-bg: #f1f3f7;
+    --purple: #7c3aed; --purple-soft: #ede9fe;
+    --pink: #db2777; --pink-soft: #fce7f3;
+    --teal: #0d9488; --teal-soft: #ccfbf1;
+    --shadow: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+    --shadow-lg: 0 10px 25px rgba(15,23,42,.08), 0 4px 10px rgba(15,23,42,.04);
+    --radius: 10px; --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117; --bg-soft: #161922; --bg-elevated: #1c2030; --bg-stripe: #1a1e2a;
+    --text: #e6e9f0; --text-soft: #b6bcc9; --text-mute: #8a92a3;
+    --border: #2a2f3d; --border-strong: #3a4154;
+    --accent: #60a5fa; --accent-soft: #1e3a8a55; --accent-text: #93c5fd;
+    --good: #4ade80; --good-soft: #14532d55;
+    --warn: #fbbf24; --warn-soft: #78350f55;
+    --bad: #f87171; --bad-soft: #7f1d1d55;
+    --info: #22d3ee; --info-soft: #155e7555;
+    --code-bg: #0a0d14;
+    --purple: #a78bfa; --purple-soft: #4c1d9555;
+    --pink: #f472b6; --pink-soft: #831a4955;
+    --teal: #2dd4bf; --teal-soft: #134e4a55;
+    --shadow: 0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,.5), 0 4px 10px rgba(0,0,0,.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body { margin: 0; font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif; font-size: 16px; line-height: 1.7; color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; padding-bottom: 60px; transition: background-color .25s, color .25s; }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-weight: 700; font-size: 15px; color: var(--text); }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; }
+  .breadcrumb { max-width: 980px; margin: 0 auto; padding: 8px 16px 0; font-size: 13px; }
+  .breadcrumb a { color: var(--accent-text); text-decoration: none; padding: 3px 8px; border-radius: 6px; background: var(--accent-soft); margin-right: 6px; display: inline-block; }
+  /* 左侧章节导航 sidebar */
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 26px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); min-height: 56px; }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout.pink { background: var(--pink-soft); border-color: var(--pink); }
+  .callout.teal { background: var(--teal-soft); border-color: var(--teal); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 9px 11px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; }
+  tbody td { padding: 8px 11px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 5000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  /* step timeline */
+  .timeline { position: relative; margin: 18px 0 8px; padding-left: 4px; }
+  .step { position: relative; padding: 0 0 6px 52px; margin-bottom: 18px; }
+  .step::before { content: ""; position: absolute; left: 19px; top: 36px; bottom: -18px; width: 2px; background: var(--border-strong); }
+  .step:last-child::before { display: none; }
+  .step .badge { position: absolute; left: 0; top: 0; width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; box-shadow: var(--shadow); z-index: 2; }
+  .step.done .badge { background: var(--good); }
+  .step.hard .badge { background: var(--bad); }
+  .step .step-card { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+  .step .step-card h4 { margin: 0 0 6px; font-size: 15.5px; color: var(--text); }
+  .step .step-card .meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
+  .step .step-card .meta .pill { font-size: 10.5px; }
+  .step .step-card ul { margin: 6px 0; }
+  /* demo */
+  .demo-host { margin: 16px 0; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .demo-host h4 { margin: 0 0 4px; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; color: var(--accent-text); }
+  .demo-bars { margin: 12px 0; }
+  .bar-row { display: flex; align-items: center; gap: 8px; margin: 7px 0; font-size: 12px; }
+  .bar-row .bl { width: 120px; flex: 0 0 120px; color: var(--text-mute); }
+  .bar-track { flex: 1; height: 18px; border-radius: 999px; background: var(--bg-stripe); overflow: hidden; position: relative; }
+  .bar-fill { height: 100%; border-radius: 999px; transition: width .8s cubic-bezier(.4,0,.2,1); display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; color: #fff; font-size: 10px; font-weight: 700; }
+  .demo-btn { margin: 8px 6px 0 0; padding: 9px 16px; border: none; border-radius: 9px; background: var(--accent); color: #fff; font-weight: 700; font-size: 13.5px; cursor: pointer; font-family: inherit; }
+  .demo-btn.ghost { background: var(--bg-elevated); color: var(--text-soft); border: 1px solid var(--border); }
+  .arch-grid { display: grid; gap: 10px; margin: 14px 0; }
+  .arch-box { padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-soft); cursor: pointer; transition: border-color .2s, transform .1s; }
+  .arch-box:hover { border-color: var(--accent); }
+  .arch-box.active { border-color: var(--accent); background: var(--accent-soft); }
+  .arch-box .ah { font-weight: 700; font-size: 14px; margin-bottom: 4px; color: var(--text); }
+  .arch-box .ad { font-size: 13px; color: var(--text-soft); }
+  @media (max-width: 480px) { .hero { padding: 18px 4px 8px; } .hero h1 { font-size: 21px; } section.chapter > h2 { font-size: 17px; padding: 14px 14px; } .chapter-body { padding: 14px 14px 18px; } h3 { font-size: 16px; } .step { padding-left: 46px; } .bar-row .bl { width: 92px; flex: 0 0 92px; } }
+  .chapter-body { column-count: 1 !important; column-width: auto !important; }
+  .chapter-body > .callout { display: block !important; float: none !important; width: auto !important; clear: both !important; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; font-size: 11px; color: var(--accent-text); font-weight: 700; vertical-align: super; }
+  sup.cite:hover { background: rgba(250, 204, 21, 0.3); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated, #ffffff); color: var(--text, #1a1a23); border: 1px solid var(--border, #e3e6ec); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(15,23,42,.18); font-size: 13px; line-height: 1.55; font-weight: normal; pointer-events: auto; }
+  [data-theme="dark"] .cite-popover { background: #1a1e2a; color: #e6e9f0; border-color: #2a2f3a; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+  .cite-popover a { color: var(--accent, #2563eb); text-decoration: underline; word-break: break-all; }
+  [data-theme="dark"] .cite-popover a { color: #60a5fa; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">Claude Opus 4.8 实用指南 <span class="tag">L2 · 官方查证 · 无忌</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+  <div class="breadcrumb">
+    <a href="./index.html">← 回研究中心</a>
+    <a href="./cheap-models-pipeline-research.html">关联：便宜模型 × 半米 pipeline</a>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav" id="anchorNav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 摘要 + 5 结论</a>
+    <a href="#ch2" data-target="ch2">02 4.8 概况·发布查证</a>
+    <a href="#ch3" data-target="ch3">03 4.8 vs 4.7 对比表</a>
+    <a href="#ch4" data-target="ch4">04 快速模式·是什么+怎么开</a>
+    <a href="#ch5" data-target="ch5">05 快速模式·Case+场景</a>
+    <a href="#ch6" data-target="ch6">06 Dynamic Workflows·是什么</a>
+    <a href="#ch7" data-target="ch7">07 Dynamic Workflows·怎么用</a>
+    <a href="#ch8" data-target="ch8">08 Dynamic Workflows·Case</a>
+    <a href="#ch9" data-target="ch9">09 其他新功能 + 用法</a>
+    <a href="#ch10" data-target="ch10">10 ⭐对阿杰的实用建议</a>
+    <a href="#ch11" data-target="ch11">11 mini demo</a>
+    <a href="#ch12" data-target="ch12">12 FAQ</a>
+    <a href="#ch13" data-target="ch13">13 References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>Claude Opus 4.8 新功能 + 快速模式 + Dynamic Workflows 实用指南<br><span style="font-size: .5em; font-weight: 600;">官方查证版 · 4.8 发布 2026-05-28 已确认真实 · vs 4.7 benchmark/价格/context/model ID 全表 · 快速模式 speed:fast 用法+3 Case · Dynamic Workflows /workflows·ultracode 用法+3 Case · 对阿杰（半米单人全栈 + 重度 Claude Code）的落地建议</span></h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-29</span>
+      <span>🛠 整理：无忌</span>
+      <span>🧠 L2 Deep Research · 全程官方查证</span>
+      <span>🔍 20+ WebSearch/Fetch</span>
+      <span>📚 13 章 + 12 FAQ + 18 Refs</span>
+      <span>🔴 编不了的诚实标</span>
+    </div>
+    <div class="hero-deck">
+      <strong>这份是什么</strong>：阿杰让做一份 Opus 4.8 的新功能 + 快速模式 + Dynamic Workflows 实用指南。<strong>因为 4.8 很可能在我训练截止之后发布，我没凭一句记忆，先联网把它查实了 —— 全报告 100% 以 Anthropic 官方公告 / docs / release notes 为准，每个数字都挂了官方引用。</strong><br><br>
+      <strong>一句话先给结论</strong>：<strong>① Opus 4.8 是真的，2026-05-28 已正式发布</strong><sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>，model ID 就是 <code>claude-opus-4-8</code><sup class="cite" data-refid="3">[3]</sup>，价格跟 4.7 一样（$5/$25 每百万 token），是个"点版本"升级 —— 编码 / 长上下文 / 数学 / 诚实度都涨了，但不是换代级跳变。<strong>② 快速模式（Fast mode）= 同一个模型用更快的推理配置跑，输出速度最高 2.5 倍，智能不变</strong>，API 上设 <code>speed: "fast"</code>，Claude Code 里 <code>/fast on</code>，研究预览需申请；4.8 上它比 4.7 便宜 3 倍（$10/$50 vs 4.7 的 $30/$150）<sup class="cite" data-refid="5">[5]</sup>。<strong>③ Dynamic Workflows（动态工作流）是 Claude Code 的新功能</strong>（不是 API、不是 Agent SDK）：Claude 现写一段 JavaScript 编排脚本，在后台跑几十到上百个 subagent，最多 1000 个 / 同时 16 个，结果会互相交叉验证后才合并<sup class="cite" data-refid="6">[6]</sup>。它就是把"研究 SOP 里那套多 Agent 调研"做成了产品内置功能。
+    </div>
+  </div>
+
+  <!-- ============ CH1 ============ -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">摘要 + 5 条核心结论（每条独立 callout）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>1.1 一段话总结</h3>
+      <p><strong>Claude Opus 4.8 真实存在，2026 年 5 月 28 日由 Anthropic 正式发布</strong><sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>，距上一代 Opus 4.7 仅 41 天 —— 升级节奏明显加快<sup class="cite" data-refid="9">[9]</sup>。它定位为"Anthropic 目前最强的通用可用模型"，主打 <strong>更准的判断力、对自己进度更诚实、能更长时间自主工作</strong><sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="18">[18]</sup>。技术上是个 <strong>点版本（point release）</strong>：1M token 上下文、128k 输出上限、$5/$25 价格全部与 4.7 持平<sup class="cite" data-refid="3">[3]</sup><sup class="cite" data-refid="4">[4]</sup>，但 benchmark 普遍上涨（SWE-bench Verified 87.6%→88.6%、SWE-bench Pro 64.3%→69.2%、长上下文 GraphWalks BFS 在 1M 子集上 40.3%→68.1% 暴涨、USAMO 2026 数学 69.3%→96.7%）<sup class="cite" data-refid="10">[10]</sup><sup class="cite" data-refid="11">[11]</sup>。同时随它一起上线两个对阿杰最相关的东西：<strong>4.8 版快速模式</strong>（同模型加速、比 4.7 便宜 3 倍）<sup class="cite" data-refid="5">[5]</sup> 和 <strong>Dynamic Workflows</strong>（Claude Code 内置的多 subagent 编排，研究预览）<sup class="cite" data-refid="6">[6]</sup>。本报告把这三件事的官方用法、Case、和对阿杰的落地建议讲清楚。</p>
+
+      <h3>1.2 全局速览（先扫数字，全部官方源）</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">2026-05-28</div><div class="l">官方发布日（确认真实）<sup class="cite" data-refid="1">[1]</sup></div></div>
+        <div class="metric"><div class="v">claude-opus-4-8</div><div class="l">API model ID（无日期戳）<sup class="cite" data-refid="3">[3]</sup></div></div>
+        <div class="metric"><div class="v">$5 / $25</div><div class="l">输入/输出 每 MTok（同 4.7）<sup class="cite" data-refid="4">[4]</sup></div></div>
+        <div class="metric"><div class="v">1M / 128k</div><div class="l">上下文 / 输出上限 token<sup class="cite" data-refid="3">[3]</sup></div></div>
+        <div class="metric"><div class="v">2.5×</div><div class="l">快速模式输出速度倍数<sup class="cite" data-refid="5">[5]</sup></div></div>
+        <div class="metric"><div class="v">16 / 1000</div><div class="l">DW 同时/总 subagent 上限<sup class="cite" data-refid="6">[6]</sup></div></div>
+      </div>
+
+      <h3>1.3 5 条核心结论</h3>
+
+      <div class="callout good">
+        <p><strong>🟢 结论 #1 —— Opus 4.8 发布了没？发了，2026-05-28，是真的。最大变化是「诚实度」+「长上下文」+「编码」三项，不是换代级跳变</strong></p>
+        <p>这是阿杰最关心的第一问，直接回答：<strong>真实发布，不是传闻、不是名字搞错。</strong> Anthropic 官方博客《Introducing Claude Opus 4.8》<sup class="cite" data-refid="1">[1]</sup>、官方 docs《What's new in Claude Opus 4.8》<sup class="cite" data-refid="2">[2]</sup>、AWS Bedrock / GitHub Copilot 上架公告全都在 5 月 28 日同步落地<sup class="cite" data-refid="14">[14]</sup>。它是 4.7 的"点版本"升级（同价、同上下文、同输出上限、无 breaking API 改动）<sup class="cite" data-refid="13">[13]</sup>，所以别指望像 4→4.5 那种代差。<strong>真正值得注意的三个变化</strong>：(1) <strong>诚实度</strong> —— 官方说 4.8"放任自己写的代码缺陷不吭声"的概率比 4.7 低约 <strong>4 倍</strong>，更愿意主动 flag 不确定性<sup class="cite" data-refid="1">[1]</sup>；(2) <strong>长上下文</strong> —— GraphWalks BFS 在 1M token 子集从 40.3% 跳到 68.1%，长 agentic 任务更少跑偏 / 更少压缩<sup class="cite" data-refid="11">[11]</sup>；(3) <strong>编码 + 数学</strong>（见结论 #2 的表）。<strong>对一个重度用 Claude Code 跑研究的人，"诚实度 +4 倍少漏报"这条比 benchmark 涨几个点更有体感。</strong></p>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>🔵 结论 #2 —— vs 4.7 全部官方 benchmark 都涨（除 GPQA 微跌 0.6），最猛的是长上下文检索和数学，编码稳步小涨</strong></p>
+        <p>全部来自 Anthropic 官方公告 + system card 自报，第三方媒体交叉一致<sup class="cite" data-refid="10">[10]</sup><sup class="cite" data-refid="11">[11]</sup>：<strong>SWE-bench Verified 87.6→88.6（+1.0）、SWE-bench Pro 64.3→69.2（+4.9）、OSWorld-Verified 电脑操作 78.0→83.4、Terminal-Bench 2.1 = 74.6（换了版本号 2.0→2.1 不直接可比）、USAMO 2026 数学 69.3→96.7（巨涨）、GraphWalks BFS 1M 子集 40.3→68.1（长上下文巨涨）、Finance Agent v2 = 53.9</strong>。唯一微跌：<strong>GPQA Diamond 94.2→93.6（−0.6，基本噪声级）</strong><sup class="cite" data-refid="10">[10]</sup>。⚠️ 提醒：这些都是<strong>厂商自报</strong>，且有两个 benchmark 换了版本（Terminal-Bench、Finance Agent），所以官方把它们标成"独立分数"而非 delta —— 看的时候心里有数，别把"换版本后的新高分"当成纯进步。完整表见 Ch3。</p>
+      </div>
+
+      <div class="callout teal">
+        <p><strong>🟢 结论 #3 —— 快速模式一句话：同一个 Opus 4.8，用更快推理配置跑，输出 token/秒最高 2.5 倍、智能完全不变，加价但 4.8 比 4.7 便宜 3 倍</strong></p>
+        <p>这是阿杰核心诉求之一，先给一句话能用版：<strong>API 上加 <code>speed: "fast"</code> + beta header <code>fast-mode-2026-02-01</code>；Claude Code 里 <code>/fast on</code>。</strong><sup class="cite" data-refid="5">[5]</sup><sup class="cite" data-refid="15">[15]</sup> 底层<strong>不是换小模型</strong> —— 官方明确写"same model weights and behavior (not a different model)"，只是换了更快的推理配置，所以质量零损失<sup class="cite" data-refid="5">[5]</sup>。代价：<strong>premium 定价</strong>，4.8 是 $10/$50 每 MTok（输入/输出），刚好是标准价的 2 倍；但比 4.6/4.7 的 $30/$150 便宜了整 3 倍<sup class="cite" data-refid="4">[4]</sup>。<strong>关键限制</strong>：① 只加速"输出 token/秒（OTPS）"，<strong>不改善首字延迟（TTFT）</strong>；② 仍是研究预览，要 waitlist / account manager 开通<sup class="cite" data-refid="5">[5]</sup>；③ 切换 fast/standard 会让 prompt cache 失效。完整步骤 + 3 个 Case 见 Ch4/Ch5。</p>
+      </div>
+
+      <div class="callout purple">
+        <p><strong>🟣 结论 #4 —— Dynamic Workflows 是什么？是 Claude Code 的新功能（不是 API / 不是 Agent SDK），让 Claude 写一段 JS 脚本在后台跑成百个 subagent，相当于把「研究 SOP 那套多 Agent」做成了产品内置</strong></p>
+        <p>阿杰特别让查证"这到底是什么产品的功能"。<strong>官方答案：Dynamic Workflows 是 Claude Code 的功能，官方文档在 <code>code.claude.com/docs/en/workflows</code></strong><sup class="cite" data-refid="6">[6]</sup>。定义：<strong>一个 dynamic workflow 就是一段 Claude 当场写出来的 JavaScript 编排脚本，由一个独立 runtime 在后台执行，你的会话同时保持可用。</strong><sup class="cite" data-refid="6">[6]</sup> 它跟 subagent / skill 的本质区别是"谁拿着计划"：subagent 是 Claude 一回合一回合决定下一步、中间结果全塞进 Claude 的 context；workflow 把循环 / 分支 / 中间结果挪进脚本变量里，Claude 的 context 只留最终答案，所以能 scale 到几十到上百个 agent<sup class="cite" data-refid="6">[6]</sup>。三种触发：① prompt 里写 <code>workflow</code> 这个词、② <code>/effort ultracode</code> 让 Claude 自己决定何时编排、③ 跑内置的 <code>/deep-research</code>。<strong>有意思的点</strong>：它内置的 <code>/deep-research</code> 工作流，逻辑跟阿杰这套研究 skill 几乎一模一样 —— 多角度 fan-out 搜索、交叉验证、对没通过验证的 claim 直接过滤、出带引用的报告<sup class="cite" data-refid="6">[6]</sup>。怎么用 + 3 Case 见 Ch7/Ch8。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>🟡 结论 #5 —— 对阿杰：值得用 4.8（无脑升，无 breaking 改动），但快速模式 + Dynamic Workflows 都有「钱包警告」，要挑场景用；有一处只能存疑</strong></p>
+        <p>给阿杰（半米单人全栈 + 重度 Claude Code 跑研究/开发）的实用结论：<strong>(1) 模型升级无脑做</strong> —— Claude Code 里 <code>/model claude-opus-4-8</code> 即可，官方说对现有 4.7 prompt 零改动开箱即用<sup class="cite" data-refid="13">[13]</sup>，而且 4.8 的 tool-use 系统提示从 4.7 的 675 token 砍到 290 token，agentic loop 省 token<sup class="cite" data-refid="4">[4]</sup>。<strong>(2) 快速模式 = 钱包换速度</strong>，且要先 waitlist 开通 —— 适合"等不及看输出、且任务短"的交互场景，不适合长研究跑批（贵一倍且不省时间，因为它不改 TTFT）。<strong>(3) Dynamic Workflows = 重武器</strong>，官方反复警告"比普通会话烧多得多的 token"<sup class="cite" data-refid="6">[6]</sup><sup class="cite" data-refid="16">[16]</sup>，适合全库审计 / 大迁移 / 交叉验证研究，不适合日常小改。<strong>⚠️ 唯一只能存疑的点</strong>：4.8 版快速模式具体是否已经能在阿杰的 Claude Code 里直接 <code>/fast on</code>（vs 仍需 API waitlist 审批）——官方写它是"研究预览、需申请"，Claude Code 端的开通门槛官方没逐字说死，阿杰要自己 <code>/fast</code> 试一下才知道有没有权限。详见 Ch10。</p>
+      </div>
+
+      <div class="callout info">
+        <p>📌 <strong>诚实声明</strong>：本报告所有 4.8 的功能 / 参数 / 价格 / benchmark 全部来自联网查到的 <strong>Anthropic 官方源</strong>（anthropic.com/news、platform.claude.com/docs、code.claude.com/docs）+ 可信媒体交叉验证。🟢 = 官方 docs/公告直接写明；🟡 = 可信媒体报道（已尽量与官方对齐）；🔴 = 社区推测（本报告基本不用）。凡官方未逐字披露的，我都明确写"⚠️ 未确认 / 存疑"，没有一处是凭训练记忆脑补的 AI 功能。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ CH2 ============ -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">Opus 4.8 概况 · 发布查证 / 定位 / model ID</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>2.1 它是真的吗？—— 查证过程（这是本报告的根）</h3>
+      <p>因为 Opus 4.8 极可能在我的训练截止（2026-01）之后发布，我没有任何可靠的记忆可依，所以第一件事就是<strong>联网查证它是否真实存在</strong>。查证结果：<strong>确认真实，多个独立官方 + 一线媒体源在 2026-05-28 同日落地，互相印证。</strong></p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>证据类型</th><th>来源</th><th>说了什么</th><th>可信度</th></tr></thead>
+          <tbody>
+            <tr><td>官方博客</td><td>anthropic.com/news/claude-opus-4-8<sup class="cite" data-refid="1">[1]</sup></td><td>《Introducing Claude Opus 4.8》正式发布公告</td><td>🟢 官方</td></tr>
+            <tr><td>官方 API docs</td><td>platform.claude.com/docs《What's new in Claude Opus 4.8》<sup class="cite" data-refid="2">[2]</sup></td><td>新功能 / 行为变化逐条</td><td>🟢 官方</td></tr>
+            <tr><td>官方模型总览</td><td>platform.claude.com/docs models/overview<sup class="cite" data-refid="3">[3]</sup></td><td>model ID、context、输出、价格、训练截止</td><td>🟢 官方</td></tr>
+            <tr><td>云平台上架</td><td>AWS Bedrock + GitHub Copilot changelog<sup class="cite" data-refid="14">[14]</sup></td><td>同日 GA 上架</td><td>🟢 官方</td></tr>
+            <tr><td>一线媒体</td><td>TechCrunch / Axios / MacRumors / 9to5Mac<sup class="cite" data-refid="9">[9]</sup><sup class="cite" data-refid="2">[2]</sup></td><td>独立报道发布，细节与官方一致</td><td>🟡 可信媒体</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout warn">
+        <p>⚠️ <strong>一个反面教材，正好说明为什么必须查证</strong>：发布前（5 月底早些）有一篇 cryptobriefing 文章<sup class="cite" data-refid="12">[12]</sup>当时写"Anthropic 尚未官方发布 4.8 ... 流传的'快速模式便宜 3 倍'是未经证实的传闻 ... 把它当未确认对待"。这篇<strong>在发布前是对的</strong>（它谨慎地区分了"泄露的代码引用"和"已发货的产品"），但 5 月 28 日官方发布后这些"传闻"全部坐实成官方事实。<strong>启示：AI 模型的功能传闻满天飞，谁说都不算，只有官方公告 + docs 落地才算数。本报告就是按这个原则做的。</strong></p>
+      </div>
+
+      <h3>2.2 官方定位</h3>
+      <p>Anthropic 对 4.8 的官方描述：<strong>"Anthropic 目前最强的通用可用模型，用于复杂推理、长周期 agentic 编码、高自主度工作"</strong><sup class="cite" data-refid="3">[3]</sup>，三个关键词 —— <strong>更准的判断力（sharper judgement）、对自己进度更诚实（more honesty about its progress）、能比前代更长时间独立工作</strong><sup class="cite" data-refid="1">[1]</sup>。官方点名的改进领域：agentic 编码、多学科推理、agentic 电脑操作、知识工作、agentic 金融分析<sup class="cite" data-refid="1">[1]</sup>。</p>
+
+      <h3>2.3 model ID 与调用方式</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>平台</th><th>model ID</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td>Claude API（第一方）</td><td><code>claude-opus-4-8</code></td><td>ID 与 alias 相同，无日期戳但仍是 pinned snapshot<sup class="cite" data-refid="3">[3]</sup></td></tr>
+            <tr><td>Amazon Bedrock</td><td><code>anthropic.claude-opus-4-8</code></td><td>Messages-API 端点<sup class="cite" data-refid="3">[3]</sup></td></tr>
+            <tr><td>Vertex AI</td><td><code>claude-opus-4-8</code></td><td>支持 1M context<sup class="cite" data-refid="3">[3]</sup></td></tr>
+            <tr><td>Microsoft Foundry</td><td><code>claude-opus-4-8</code></td><td>⚠️ 仅 200k context（不是 1M）<sup class="cite" data-refid="3">[3]</sup></td></tr>
+            <tr><td>Claude Code</td><td><code>/model claude-opus-4-8</code></td><td>需 Claude Code v2.1.154+<sup class="cite" data-refid="15">[15]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout info">
+        <p>📌 <strong>命名约定（官方）</strong>：从 Claude 4.6 这一代起，model ID 用"无日期格式"（如 <code>claude-opus-4-8</code>），但它<strong>仍然是一个固定快照</strong>，不是会自动滚动到新版的 evergreen 指针<sup class="cite" data-refid="3">[3]</sup>。所以写死 <code>claude-opus-4-8</code> 不会哪天偷偷变成 4.9。</p>
+      </div>
+
+      <h3>2.4 API 约束（从 4.7 继承，写代码要知道）</h3>
+      <ul>
+        <li><strong>不支持采样参数</strong>：设 <code>temperature</code> / <code>top_p</code> / <code>top_k</code> 为非默认值会返回 400 错误 —— 跟 4.7 一样。用 prompt 引导行为<sup class="cite" data-refid="2">[2]</sup>。</li>
+        <li><strong>只支持 adaptive thinking</strong>：不支持 extended thinking budget，设 <code>thinking: {"type":"enabled","budget_tokens":N}</code> 返回 400。用 <code>thinking: {type:"adaptive"}</code> + <code>effort</code> 参数控制思考深度<sup class="cite" data-refid="2">[2]</sup>。</li>
+        <li><strong>无 breaking API 改动</strong>：在 4.7 上能跑的代码，换成 <code>claude-opus-4-8</code> 即可，无需其他改动<sup class="cite" data-refid="13">[13]</sup>。</li>
+      </ul>
+
+    </div>
+  </section>
+
+  <!-- ============ CH3 ============ -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">4.8 vs 4.7 官方对比（benchmark / 价格 / context / model ID）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>3.1 规格 / 价格对比</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>维度</th><th>Opus 4.8</th><th>Opus 4.7</th><th>差异</th></tr></thead>
+          <tbody>
+            <tr><td>API model ID</td><td><code>claude-opus-4-8</code></td><td><code>claude-opus-4-7</code></td><td>仅换名</td></tr>
+            <tr><td>上下文窗口</td><td>1M token（Foundry 上 200k）</td><td>1M token</td><td>持平<sup class="cite" data-refid="3">[3]</sup></td></tr>
+            <tr><td>最大输出</td><td>128k token（Batch API 可到 300k）</td><td>128k token</td><td>持平<sup class="cite" data-refid="3">[3]</sup></td></tr>
+            <tr><td>标准价 输入/输出</td><td>$5 / $25 每 MTok</td><td>$5 / $25 每 MTok</td><td>持平<sup class="cite" data-refid="4">[4]</sup></td></tr>
+            <tr><td>缓存读取（cache hit）</td><td>$0.50 / MTok</td><td>$0.50 / MTok</td><td>持平<sup class="cite" data-refid="4">[4]</sup></td></tr>
+            <tr><td>Batch API 输入/输出</td><td>$2.50 / $12.50 每 MTok</td><td>$2.50 / $12.50</td><td>持平<sup class="cite" data-refid="4">[4]</sup></td></tr>
+            <tr><td>快速模式价 输入/输出</td><td>$10 / $50 每 MTok</td><td>$30 / $150 每 MTok</td><td><strong>4.8 便宜 3 倍</strong><sup class="cite" data-refid="4">[4]</sup></td></tr>
+            <tr><td>最低可缓存 prompt</td><td>1,024 token</td><td>更高（&gt;1024）</td><td><strong>4.8 门槛更低，短 prompt 也能缓存</strong><sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td>tool-use 系统提示开销</td><td>290 token（auto/none）</td><td>675 token</td><td><strong>4.8 砍掉一半多，agentic 省 token</strong><sup class="cite" data-refid="4">[4]</sup></td></tr>
+            <tr><td>effort 默认值</td><td><code>high</code>（所有平台含 Claude Code）</td><td><code>high</code></td><td>持平<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td>thinking 模式</td><td>仅 adaptive thinking</td><td>仅 adaptive thinking</td><td>持平<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td>可靠知识截止</td><td>2026 年 1 月</td><td>2026 年 1 月</td><td>持平<sup class="cite" data-refid="3">[3]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3.2 Benchmark 对比（全部 Anthropic 官方自报 + 第三方交叉）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Benchmark（类别）</th><th>Opus 4.8</th><th>Opus 4.7</th><th>Δ / 说明</th></tr></thead>
+          <tbody>
+            <tr><td>SWE-bench Verified（agentic 编码）</td><td>88.6%</td><td>87.6%</td><td>+1.0<sup class="cite" data-refid="10">[10]</sup></td></tr>
+            <tr><td>SWE-bench Pro（agentic 编码）</td><td>69.2%</td><td>64.3%</td><td><strong>+4.9</strong><sup class="cite" data-refid="10">[10]</sup></td></tr>
+            <tr><td>SWE-bench Multilingual</td><td>84.4%</td><td>未提供</td><td>独立分<sup class="cite" data-refid="11">[11]</sup></td></tr>
+            <tr><td>Terminal-Bench 2.1（终端 agent）</td><td>74.6%</td><td>69.4%（v2.0）</td><td>⚠️ 换版本 2.0→2.1 不直接可比<sup class="cite" data-refid="11">[11]</sup></td></tr>
+            <tr><td>OSWorld-Verified（电脑操作）</td><td>83.4%</td><td>78.0%</td><td>+5.4（harness 有更新）<sup class="cite" data-refid="11">[11]</sup></td></tr>
+            <tr><td>MCP-Atlas（工具调用）</td><td>82.2%</td><td>77.3%</td><td>+4.9<sup class="cite" data-refid="11">[11]</sup></td></tr>
+            <tr><td>GraphWalks BFS（长上下文 1M 子集）</td><td>68.1%</td><td>40.3%</td><td><strong>+27.8 巨涨</strong><sup class="cite" data-refid="11">[11]</sup></td></tr>
+            <tr><td>GraphWalks BFS（256k 子集）</td><td>85.9%</td><td>未提供</td><td>独立分<sup class="cite" data-refid="11">[11]</sup></td></tr>
+            <tr><td>USAMO 2026（数学）</td><td>96.7%</td><td>69.3%</td><td><strong>+27.4 巨涨</strong><sup class="cite" data-refid="10">[10]</sup></td></tr>
+            <tr><td>GPQA Diamond（推理）</td><td>93.6%</td><td>94.2%</td><td><strong>−0.6 微跌</strong>（噪声级）<sup class="cite" data-refid="10">[10]</sup></td></tr>
+            <tr><td>Finance Agent v2（金融）</td><td>53.9%</td><td>51.5%（v1）</td><td>⚠️ 换版本 v1→v2<sup class="cite" data-refid="10">[10]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <p>⚠️ <strong>看 benchmark 必须知道的两个坑（官方自己也说了）</strong>：(1) 这些分数<strong>全是 Anthropic 厂商自报</strong>（出自官方公告 + system card），不是独立第三方评测 —— 任何厂商自报都要打个折看<sup class="cite" data-refid="10">[10]</sup>。(2) 官方明说"有两个 benchmark 在 4.8 换了版本（Terminal-Bench 2.0→2.1、Finance Agent v1→v2），所以这两项标成独立分数而非 delta"<sup class="cite" data-refid="11">[11]</sup> —— 别把"换版本后的新分"直接当成对 4.7 的纯提升。<strong>最干净、可比、且最有体感的提升是 SWE-bench Pro（+4.9）、长上下文 GraphWalks（+27.8）、数学 USAMO（+27.4）。</strong></p>
+      </div>
+
+      <h3>3.3 竞品定位（官方公告口径，🟡 仅供参考）</h3>
+      <p>官方公告把 4.8 跟 GPT-5.5 / Gemini 3.1 Pro 做了对比，称在多个 agentic / 编码 benchmark 领先<sup class="cite" data-refid="1">[1]</sup>。第三方整理的同表数字（🟡 媒体二手，谨慎看）<sup class="cite" data-refid="10">[10]</sup>：SWE-bench Pro 上 4.8 = 69.2% vs GPT-5.5 = 58.6% vs Gemini 3.1 Pro = 54.2%；OSWorld 上 4.8 = 83.4% vs GPT-5.5 = 78.7%。⚠️ <strong>竞品对比尤其要小心</strong>：不同厂商用不同 harness 跑同一 benchmark 分数差很大（如 Terminal-Bench 上 GPT-5.5 用自家 Codex CLI 能到 83.4%），所以跨厂商横比意义有限，本报告不把它当结论用。</p>
+
+      <h3>3.4 行为变化（不是 API breaking，但可能要调 prompt）</h3>
+      <ul>
+        <li><strong>更少浪费思考 token</strong>：adaptive thinking 下 4.8 每回合自己决定要不要思考，同 effort 等级下比 4.7 更省<sup class="cite" data-refid="2">[2]</sup>。</li>
+        <li><strong>工具触发更好</strong>：4.7 上有人反映"该调工具时跳过了"，4.8 更少漏调<sup class="cite" data-refid="2">[2]</sup>。</li>
+        <li><strong>压缩（compaction）恢复更好</strong>：长 agentic 轨迹在 context 压缩后更少跑偏<sup class="cite" data-refid="2">[2]</sup>。</li>
+      </ul>
+
+    </div>
+  </section>
+
+  <!-- ============ CH4 ============ -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">快速模式（Fast mode）· 是什么 + 怎么开（步骤）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>4.1 一句话定义（官方）</h3>
+      <div class="callout teal">
+        <p><strong>快速模式 = 让支持的 Opus 模型用「更快的推理配置」跑同一个模型，输出 token/秒最高 2.5 倍，智能和能力完全不变，代价是 premium 定价。</strong><sup class="cite" data-refid="5">[5]</sup> 官方原话："Fast mode runs the same model with a faster inference configuration. There is no change to intelligence or capabilities... Same model weights and behavior (not a different model)."</p>
+      </div>
+
+      <h3>4.2 底层是什么？换小模型还是同模型加速？（阿杰特别问的）</h3>
+      <p><strong>明确：同模型加速，不是换小模型。</strong> 官方 docs 在《How fast mode works》一节里逐字写明"same model weights and behavior (not a different model)"<sup class="cite" data-refid="5">[5]</sup>。这跟"切到 Haiku/Sonnet 那种换小模型提速"是两回事 —— 你拿到的还是 Opus 4.8 的全部智能，只是它吐字更快。<strong>但有个关键技术细节</strong>：加速只作用在"输出 token 每秒（OTPS）"，<strong>不改善首字延迟（TTFT）</strong>——也就是说"等它开口"的时间不变，"开口后吐得多快"变快 2.5 倍<sup class="cite" data-refid="5">[5]</sup>。所以对"长输出"任务收益大，对"短输出但要快开口"任务基本没用。</p>
+
+      <h3>4.3 支持哪些模型</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>模型</th><th>快速模式</th><th>价格 输入/输出</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td>Opus 4.8</td><td>✅ 支持</td><td>$10 / $50 每 MTok</td><td>研究预览（API + Claude Managed Agents only）<sup class="cite" data-refid="5">[5]</sup></td></tr>
+            <tr><td>Opus 4.7</td><td>✅ 支持</td><td>$30 / $150 每 MTok</td><td>可用<sup class="cite" data-refid="5">[5]</sup></td></tr>
+            <tr><td>Opus 4.6</td><td>⚠️ 已弃用</td><td>$30 / $150 每 MTok</td><td>4.8 发布后约 30 天移除，之后请求会回落到标准速<sup class="cite" data-refid="5">[5]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout warn">
+        <p>⚠️ <strong>4.8 的快速模式只在 Claude API（含 Claude Managed Agents）上是研究预览</strong>，<strong>不在第三方平台</strong>（Vertex AI / Amazon Bedrock / Microsoft Foundry / Claude Platform on AWS）上提供<sup class="cite" data-refid="5">[5]</sup>。也不支持 Batch API 和 Priority Tier。</p>
+      </div>
+
+      <h3>4.4 怎么开（A. 用 API / SDK）</h3>
+      <p>步骤：① 申请权限（research preview，找 account manager 或 <a href="https://claude.com/fast-mode" target="_blank" rel="noopener">join waitlist</a>）<sup class="cite" data-refid="5">[5]</sup> → ② 请求里加 beta header <code>fast-mode-2026-02-01</code> + <code>speed: "fast"</code>。Python 示例（官方）：</p>
+      <pre><code>import anthropic
+client = anthropic.Anthropic()
+
+response = client.beta.messages.create(
+    model="claude-opus-4-8",
+    max_tokens=4096,
+    speed="fast",                          # ← 开启快速模式
+    betas=["fast-mode-2026-02-01"],        # ← 必带 beta header
+    messages=[{"role": "user",
+               "content": "Refactor this module to use dependency injection"}],
+)
+print(response.content[0].text)
+print(response.usage.speed)  # 返回 "fast" 或 "standard"，可校验实际跑的哪个</code></pre>
+      <p>cURL 等价写法：header 加 <code>--header "anthropic-beta: fast-mode-2026-02-01"</code>，body 加 <code>"speed": "fast"</code><sup class="cite" data-refid="5">[5]</sup>。响应的 <code>usage.speed</code> 字段会告诉你这次实际是 fast 还是 standard。</p>
+
+      <h3>4.5 怎么开（B. 在 Claude Code 里 —— 阿杰最常用）</h3>
+      <div class="timeline">
+        <div class="step done">
+          <div class="badge">1</div>
+          <div class="step-card">
+            <h4>升级 Claude Code 到 v2.1.154+</h4>
+            <div class="meta"><span class="pill">前置</span></div>
+            <p>4.8 + 相关功能需要这个版本<sup class="cite" data-refid="15">[15]</sup>。</p>
+          </div>
+        </div>
+        <div class="step done">
+          <div class="badge">2</div>
+          <div class="step-card">
+            <h4>切到 4.8 模型</h4>
+            <div class="meta"><span class="pill accent">/model</span></div>
+            <p>命令行里 <code>/model claude-opus-4-8</code>。快速模式只支持 Opus 4.8/4.7/4.6，所以模型得对。</p>
+          </div>
+        </div>
+        <div class="step hard">
+          <div class="badge">3</div>
+          <div class="step-card">
+            <h4>开快速模式：<code>/fast on</code></h4>
+            <div class="meta"><span class="pill warn">需权限</span></div>
+            <p>第三方资料显示 Claude Code 里用 <code>/fast on</code> 切换快速模式<sup class="cite" data-refid="15">[15]</sup>。⚠️ <strong>注意</strong>：快速模式整体仍是研究预览、需 waitlist/account manager 开通<sup class="cite" data-refid="5">[5]</sup>。阿杰若 <code>/fast on</code> 提示无权限，说明账号还没开通，得去 waitlist 申请。</p>
+          </div>
+        </div>
+      </div>
+
+      <h3>4.6 限制与成本影响（用之前必看）</h3>
+      <ul>
+        <li>💰 <strong>premium 定价</strong>：4.8 快速模式输入/输出是标准价的整 2 倍（$10/$50 vs $5/$25）<sup class="cite" data-refid="4">[4]</sup>。速度翻 2.5 倍、钱翻 2 倍。</li>
+        <li>⏱ <strong>只快「输出速度」不快「首字延迟」</strong>：TTFT 不变<sup class="cite" data-refid="5">[5]</sup>。</li>
+        <li>🗄 <strong>切换 fast/standard 会让 prompt cache 失效</strong>：不同速度的请求不共享缓存前缀，回退时会 cache miss<sup class="cite" data-refid="5">[5]</sup>。</li>
+        <li>🚦 <strong>独立 rate limit</strong>：快速模式有单独的速率限制，超了返回 429 + retry-after<sup class="cite" data-refid="5">[5]</sup>。</li>
+        <li>🚫 <strong>不支持</strong>：Batch API、Priority Tier、第三方云平台<sup class="cite" data-refid="5">[5]</sup>。</li>
+      </ul>
+
+    </div>
+  </section>
+
+  <!-- ============ CH5 ============ -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">快速模式 · 具体 Case + 适用 / 不适用场景</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>5.1 判断口诀</h3>
+      <div class="callout accent">
+        <p>🧭 <strong>一句话判断</strong>：任务<strong>输出长 + 你在盯着等结果 + 不在乎多花一倍钱</strong> → 开快速模式；任务<strong>跑批 / 后台 / 长上下文研究 / 预算敏感</strong> → 别开（贵一倍还不省你的等待时间）。</p>
+      </div>
+
+      <h3>5.2 三个具体 Case</h3>
+
+      <div class="callout good">
+        <p><strong>✅ Case 1（该用）—— 交互式大重构 / 长代码生成，你坐在屏幕前等</strong></p>
+        <p>场景：阿杰在 Claude Code 里让 4.8 一次性重构半米后端一个大模块、或生成一大段 React 组件代码，输出有几千 token，你正盯着等它写完好继续下一步。<strong>为什么该用</strong>：输出长 → 2.5 倍 OTPS 直接把"看着它一行行吐"的等待砍掉一大半<sup class="cite" data-refid="5">[5]</sup>；你在交互、时间就是体验。<strong>成本</strong>：贵一倍，但单次重构的 token 量不大、绝对金额低，换来的流畅度值。官方 docs 的示例 prompt 正是"Refactor this module to use dependency injection"<sup class="cite" data-refid="5">[5]</sup>，就是冲这个场景。</p>
+      </div>
+
+      <div class="callout good">
+        <p><strong>✅ Case 2（该用）—— 低延迟交互 demo / 给客户现场演示的实时生成</strong></p>
+        <p>场景：半米给老师 / 家长演示"AI 实时生成一篇分级阅读短文 + 题目"，现场要快、要顺。<strong>为什么该用</strong>：现场演示对"吐字速度"高度敏感，标准速可能让观众觉得卡；快速模式同质量、快 2.5 倍，演示效果好<sup class="cite" data-refid="5">[5]</sup>。<strong>注意</strong>：因为它不改 TTFT，"点按钮到开口"那一下还是原速，所以 UI 上配个 loading 动画盖住首字延迟体验最好。</p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>⛔ Case 3（不该用）—— 后台批量跑 / 长研究报告 / 深度调研这类「跑就跑、人不盯」的任务</strong></p>
+        <p>场景：阿杰让无忌跑一份 50-80 次搜索的深度研究报告、或夜里批量处理一堆 SciShow 词表、或长上下文喂整个代码库做分析。<strong>为什么不该用</strong>：(1) 这些是后台任务，<strong>人不在屏幕前等</strong>，吐字快慢无所谓；(2) <strong>贵一倍</strong>，长研究 token 量大，金额差距明显；(3) <strong>不支持 Batch API</strong>，而批量任务本来就该走 Batch（享 50% 折扣）<sup class="cite" data-refid="5">[5]</sup>；(4) 长上下文研究的瓶颈是"思考 + 搜索 + 验证"轮次，不是吐字速度。<strong>结论：跑批 / 长研究就用标准速（甚至 Batch），把省下的钱花在多跑几轮验证上。</strong></p>
+      </div>
+
+      <h3>5.3 速查表</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>任务类型</th><th>开快速模式？</th><th>理由</th></tr></thead>
+          <tbody>
+            <tr><td>交互式大重构 / 长代码生成（你在等）</td><td>🟢 该开</td><td>输出长，2.5× 直接省等待</td></tr>
+            <tr><td>现场 demo / 实时交互生成</td><td>🟢 该开</td><td>对吐字速度敏感</td></tr>
+            <tr><td>聊天式短问答</td><td>🟡 看情况</td><td>输出短，收益有限；TTFT 不变所以"快"体感弱</td></tr>
+            <tr><td>深度研究 / 长报告（后台跑）</td><td>🔴 别开</td><td>人不等、贵一倍、不支持 Batch</td></tr>
+            <tr><td>夜间批量处理</td><td>🔴 别开</td><td>该走 Batch API（−50%），快速模式不兼容 Batch</td></tr>
+            <tr><td>预算敏感的任何任务</td><td>🔴 别开</td><td>价格翻倍</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ CH6 ============ -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">Dynamic Workflows · 是什么（查证 + 定义）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>6.1 查证：这到底是什么产品的功能？（阿杰特别让查）</h3>
+      <div class="callout purple">
+        <p><strong>官方答案：Dynamic Workflows（动态工作流）是「Claude Code」的功能 —— 不是 API 功能、不是 Agent SDK 功能、不是 claude.ai 的功能。</strong> 官方文档明确挂在 Claude Code 文档站：<code>code.claude.com/docs/en/workflows</code>，标题《Orchestrate subagents at scale with dynamic workflows》<sup class="cite" data-refid="6">[6]</sup>。Anthropic 官方博客也叫《Introducing dynamic workflows in Claude Code》<sup class="cite" data-refid="7">[7]</sup>。（注：它在 CLI、桌面 app、IDE 扩展、<code>claude -p</code> 无头模式、以及 Agent SDK 上都能用<sup class="cite" data-refid="6">[6]</sup>，但本质是 Claude Code 这条产品线的能力，不是裸 Messages API 的参数。）</p>
+      </div>
+
+      <h3>6.2 官方定义</h3>
+      <p>官方原话："<strong>A dynamic workflow is a JavaScript script that orchestrates subagents at scale. Claude writes the script for the task you describe, and a runtime executes it in the background while your session stays responsive.</strong>"<sup class="cite" data-refid="6">[6]</sup></p>
+      <p>翻译：<strong>一个动态工作流就是一段 JavaScript 编排脚本 —— Claude 根据你的任务当场写出这段脚本，由一个独立 runtime 在后台执行，期间你的会话照常可用。</strong> 它把"计划 / 循环 / 分支 / 中间结果"从 Claude 的 context 里挪进了脚本变量里，所以能 scale 到几十到上百个 subagent，而 Claude 的 context 只留最终答案。</p>
+
+      <h3>6.3 跟 subagent / skill 的区别（官方对比表，关键在「谁拿着计划」）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th></th><th>Subagents</th><th>Skills</th><th>Workflows</th></tr></thead>
+          <tbody>
+            <tr><td>是什么</td><td>Claude 派出的 worker</td><td>Claude 遵循的指令</td><td>runtime 执行的脚本</td></tr>
+            <tr><td>谁决定下一步跑什么</td><td>Claude，一回合一回合</td><td>Claude，照 prompt</td><td><strong>脚本</strong></td></tr>
+            <tr><td>中间结果存哪</td><td>Claude 的 context</td><td>Claude 的 context</td><td><strong>脚本变量</strong></td></tr>
+            <tr><td>什么可复用</td><td>worker 定义</td><td>指令</td><td><strong>整个编排本身</strong></td></tr>
+            <tr><td>规模</td><td>每回合几个委派任务</td><td>同 subagent</td><td><strong>每次跑几十到上百个 agent</strong></td></tr>
+            <tr><td>中断</td><td>重启该回合</td><td>重启该回合</td><td><strong>同会话内可恢复</strong></td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:12px;color:var(--text-mute);padding:0 11px 8px;">来源：Claude Code 官方 workflows 文档<sup class="cite" data-refid="6">[6]</sup></p>
+      </div>
+      <div class="callout info">
+        <p>📌 <strong>本质</strong>：subagent/skill 里 Claude 是编排者（一回合一回合决定派谁），结果全落进 Claude 的 context；workflow 把编排逻辑（循环 / 分支 / 中间结果）<strong>写成代码</strong>，所以能跑得更大、更可重复，还能套一个"质量模式"——比如让独立 agent 对抗式互审彼此的发现、或从几个角度各起草一个方案再权衡，得到比单次跑更可信的结果<sup class="cite" data-refid="6">[6]</sup>。</p>
+      </div>
+
+      <h3>6.4 限制（官方硬约束）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>约束</th><th>值 / 说明</th></tr></thead>
+          <tbody>
+            <tr><td>同时并发 agent 上限</td><td>16 个（CPU 核少的机器更少）<sup class="cite" data-refid="6">[6]</sup></td></tr>
+            <tr><td>单次运行总 agent 上限</td><td>1,000 个（防失控循环）<sup class="cite" data-refid="6">[6]</sup></td></tr>
+            <tr><td>运行中能否插话</td><td>不能，只有 agent 权限提示能暂停；分阶段签字要把每阶段拆成独立 workflow<sup class="cite" data-refid="6">[6]</sup></td></tr>
+            <tr><td>脚本本身能否读写文件/跑命令</td><td>不能，由 agent 读写跑，脚本只负责协调<sup class="cite" data-refid="6">[6]</sup></td></tr>
+            <tr><td>跨会话恢复</td><td>仅同会话内可恢复；退出 Claude Code 后下次会重新跑<sup class="cite" data-refid="6">[6]</sup></td></tr>
+            <tr><td>Claude Code 版本</td><td>需 v2.1.154+<sup class="cite" data-refid="6">[6]</sup></td></tr>
+            <tr><td>可用计划</td><td>所有付费计划（Pro/Max/Team/Enterprise）；Pro 上需在 /config 里手动开<sup class="cite" data-refid="6">[6]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ CH7 ============ -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">Dynamic Workflows · 怎么用（步骤 + 命令）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>7.1 三种触发方式（官方）</h3>
+      <div class="callout accent">
+        <p>① <strong>prompt 里写 <code>workflow</code> 这个词</strong> → Claude 给这个单任务写一段 workflow 脚本（不改会话 effort 等级）。<br>② <strong><code>/effort ultracode</code></strong> → Claude 对会话里每个实质性任务自动决定是否编排 workflow（ultracode = xhigh 推理 + 自动编排）。<br>③ <strong>跑现成的 workflow</strong> → 内置的 <code>/deep-research</code>，或你自己存的。<sup class="cite" data-refid="6">[6]</sup></p>
+      </div>
+
+      <h3>7.2 最快上手：跑内置的 <code>/deep-research</code></h3>
+      <div class="timeline">
+        <div class="step done">
+          <div class="badge">1</div>
+          <div class="step-card">
+            <h4>运行命令</h4>
+            <div class="meta"><span class="pill accent">/deep-research</span></div>
+            <pre><code>/deep-research What changed in the Node.js permission model between v20 and v22?</code></pre>
+            <p>它会从多个角度 fan-out 网页搜索、抓取并交叉验证来源、合成一份带引用的报告<sup class="cite" data-refid="6">[6]</sup>。需要 WebSearch 工具可用。</p>
+          </div>
+        </div>
+        <div class="step done">
+          <div class="badge">2</div>
+          <div class="step-card">
+            <h4>允许工作流运行</h4>
+            <div class="meta"><span class="pill">权限</span></div>
+            <p>Claude Code 会问是否允许，选 <strong>Yes</strong>。可以 <code>View raw script</code> 先读脚本再决定，<code>Ctrl+G</code> 在编辑器打开脚本<sup class="cite" data-refid="6">[6]</sup>。</p>
+          </div>
+        </div>
+        <div class="step done">
+          <div class="badge">3</div>
+          <div class="step-card">
+            <h4>看进度</h4>
+            <div class="meta"><span class="pill accent">/workflows</span></div>
+            <p>后台跑、会话照常可用。<code>/workflows</code> 列出运行中/已完成的，方向键选、回车进进度视图，看每个 phase 的 agent 数 / token 总量 / 耗时。键位：<code>p</code> 暂停/恢复、<code>x</code> 停、<code>s</code> 保存脚本为命令<sup class="cite" data-refid="6">[6]</sup>。</p>
+          </div>
+        </div>
+        <div class="step done">
+          <div class="badge">4</div>
+          <div class="step-card">
+            <h4>读报告</h4>
+            <div class="meta"><span class="pill good">完成</span></div>
+            <p>跑完报告落进会话，每条 claim 标了来源，没通过交叉验证的 claim 已被过滤掉<sup class="cite" data-refid="6">[6]</sup>。</p>
+          </div>
+        </div>
+      </div>
+
+      <h3>7.3 给自己的任务写 workflow + 存成命令</h3>
+      <p>① prompt 里带 <code>workflow</code> 这个词（Claude Code 会高亮它），例：</p>
+      <pre><code>Run a workflow to audit every API endpoint under src/routes/ for missing auth checks</code></pre>
+      <p>Claude 会写一段编排脚本而非一回合回合干。如果你不想触发，按 <code>alt+w</code> 忽略这个词<sup class="cite" data-refid="6">[6]</sup>。<br>② 跑出满意结果后，<code>/workflows</code> 选中那次运行，按 <code>s</code> 保存，存到：</p>
+      <ul>
+        <li><code>.claude/workflows/</code>（项目内，clone 的人都能用）</li>
+        <li><code>~/.claude/workflows/</code>（个人 home，所有项目可用，只你可见）</li>
+      </ul>
+      <p>存完它就变成 <code>/&lt;名字&gt;</code> 命令，以后在 <code>/</code> 自动补全里出现，跟内置工作流一样用<sup class="cite" data-refid="6">[6]</sup>。</p>
+
+      <h3>7.4 ultracode 模式（让 Claude 自己决定何时编排）</h3>
+      <pre><code>/effort ultracode</code></pre>
+      <p>开了之后 Claude 对每个实质性任务自动规划 workflow，一个请求可能连开几个 workflow（一个理解代码、一个改、一个验证）<sup class="cite" data-refid="6">[6]</sup>。只持续当前会话，新会话重置。回常规活用 <code>/effort high</code> 退出。</p>
+      <div class="callout warn">
+        <p>⚠️ <strong>关键澄清（很多文章搞混）</strong>：<strong>ultracode 不是一个 API 的 effort 等级</strong>。官方 effort doc 写明 API 接受的完整 effort 等级是 <code>low / medium / high / xhigh / max</code>，<strong>没有 ultracode</strong><sup class="cite" data-refid="8">[8]</sup>。ultracode 只是 Claude Code 界面里的概念 = <strong>xhigh 等级 + 给 Claude Code「随时可发起多 agent workflow」的常驻许可</strong>（通过 mid-conversation system messages 授予）<sup class="cite" data-refid="8">[8]</sup>。所以你在 API 里设 <code>effort: "ultracode"</code> 是无效的。</p>
+      </div>
+
+      <h3>7.5 关 / 限制 workflow</h3>
+      <ul>
+        <li><code>/config</code> 里把 Dynamic workflows 关掉（跨会话持久）。</li>
+        <li><code>~/.claude/settings.json</code> 里设 <code>"disableWorkflows": true</code>。</li>
+        <li>环境变量 <code>CLAUDE_CODE_DISABLE_WORKFLOWS=1</code>。<sup class="cite" data-refid="6">[6]</sup></li>
+      </ul>
+
+    </div>
+  </section>
+
+  <!-- ============ CH8 ============ -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">Dynamic Workflows · 具体 Case</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>8.1 官方点名的适用场景</h3>
+      <p>官方说 workflow 适合"<strong>需要的 agent 数量超过一个会话能协调的，或者你想把编排固化成可读可重跑的脚本</strong>"的任务，列了四类例子：<strong>全库 bug 扫荡、500 文件大迁移、需要来源互相交叉验证的研究问题、值得从几个独立角度各起草一遍再定的硬计划</strong><sup class="cite" data-refid="6">[6]</sup>。Anthropic 内部 + 早期用户已用它做：全库 bug hunt、profiler 引导的性能优化审计、安全审计、死代码清理<sup class="cite" data-refid="7">[7]</sup>。</p>
+
+      <div class="callout good">
+        <p><strong>✅ Case 1 —— 全库安全/认证审计</strong></p>
+        <p>官方示例 prompt：<code>Run a workflow to audit every API endpoint under src/routes/ for missing auth checks</code><sup class="cite" data-refid="6">[6]</sup>。Claude 写脚本把每个 endpoint 分给一个 agent 查认证缺失，几十个并发跑，最后汇总成一份"哪些路由缺认证"的清单。<strong>为什么适合 workflow 而不是普通 subagent</strong>：endpoint 多到一个 context 装不下，且每个独立可并行，结果存脚本变量不污染 Claude context。</p>
+      </div>
+
+      <div class="callout good">
+        <p><strong>✅ Case 2 —— 大规模迁移（官方的旗舰例子：Bun 重写）</strong></p>
+        <p>官方博客举的真实案例：<strong>Bun 团队用并行 agent + 每文件双 reviewer 审查，把约 75 万行 Rust 在 11 天内重写完成</strong><sup class="cite" data-refid="7">[7]</sup>。官方原话"Work you'd normally plan in quarters now finishes in days"（本来按季度排的活现在几天干完）<sup class="cite" data-refid="7">[7]</sup>。<strong>workflow 的价值</strong>：不只是"跑更多 agent"，而是能套一个"可重复的质量模式"——独立 agent 改、另一批 agent 审，结果通过验证才合并。</p>
+      </div>
+
+      <div class="callout good">
+        <p><strong>✅ Case 3 —— 交叉验证式深度研究（就是 <code>/deep-research</code>）</strong></p>
+        <p>内置 <code>/deep-research</code> 工作流：多角度 fan-out 网页搜索 → 抓取并 cross-check 来源 → 对每条 claim 投票 → 出带引用的报告，没通过交叉验证的 claim 直接过滤掉<sup class="cite" data-refid="6">[6]</sup>。<strong>对无忌的研究 SOP 极其眼熟</strong>：这跟阿杰这套 research skill 的"多轮迭代 + cross-check 同一数字至少 2 源 + freshness 检查 + 强制 citation"几乎是同一套方法论，只是 Anthropic 把它做成了产品内置命令。</p>
+      </div>
+
+      <h3>8.2 什么时候别用 workflow</h3>
+      <div class="callout bad">
+        <p><strong>⛔ 不适合 workflow 的任务</strong>：(1) <strong>日常小改</strong>（改个 bug、加个函数）——普通对话或单个 subagent 就够，开 workflow 是杀鸡用牛刀且烧 token；(2) <strong>需要中途人工介入决策</strong>的任务——workflow 运行中不能插话，只有权限提示能暂停<sup class="cite" data-refid="6">[6]</sup>；(3) <strong>预算紧</strong>的时候——官方反复警告 workflow 比普通会话烧多得多的 token<sup class="cite" data-refid="6">[6]</sup>。</p>
+      </div>
+
+      <h3>8.3 成本控制（官方建议）</h3>
+      <ul>
+        <li>大 run 前先 <code>/model</code> 确认模型（别拿最贵模型跑全部 agent）<sup class="cite" data-refid="6">[6]</sup>。</li>
+        <li>描述任务时让 Claude 给"不需要最强模型的阶段"用小模型<sup class="cite" data-refid="6">[6]</sup>。</li>
+        <li>workflow 里 subagent 默认用你会话的模型，且永远在 <code>acceptEdits</code> 模式跑、文件编辑自动批准——长 run 前把需要的命令加进 allowlist 免得中途被打断<sup class="cite" data-refid="6">[6]</sup>。</li>
+        <li>随时可在 <code>/workflows</code> 里停掉，已完成的工作不丢<sup class="cite" data-refid="6">[6]</sup>。</li>
+      </ul>
+
+    </div>
+  </section>
+
+  <!-- ============ CH9 ============ -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">其他新功能 + 用法</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>9.1 会话中途插系统消息（Mid-conversation system messages）</h3>
+      <p>4.8 接受在 user 回合后直接插 <code>role: "system"</code> 消息（受 placement 规则限制）<sup class="cite" data-refid="2">[2]</sup>。<strong>用处</strong>：长会话里追加新指令不用重述整个 system prompt，从而<strong>保住前面回合的 prompt cache 命中、降低 agentic loop 的输入成本</strong>。无需 beta header<sup class="cite" data-refid="2">[2]</sup>。（前面说的 ultracode 常驻许可就是靠这个机制实现的。）</p>
+
+      <h3>9.2 effort 默认值改为 high（含 Claude Code）+ effort 等级体系</h3>
+      <p>4.8 的 <code>effort</code> 参数<strong>所有平台默认 <code>high</code></strong>（包括 API 和 Claude Code）<sup class="cite" data-refid="2">[2]</sup>。如果你之前显式设过 effort，不受影响。官方说 4.8 默认 high 在编码任务上花的 token 跟 4.7 默认值差不多，但表现更好<sup class="cite" data-refid="2">[2]</sup><sup class="cite" data-refid="17">[17]</sup>。完整等级（API 接受的全集）：</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>等级</th><th>说明</th><th>典型用途</th></tr></thead>
+          <tbody>
+            <tr><td><code>max</code></td><td>无 token 约束的最高能力</td><td>真·前沿难题；多数任务性价比低、可能 overthink<sup class="cite" data-refid="8">[8]</sup></td></tr>
+            <tr><td><code>xhigh</code></td><td>长周期工作的扩展能力</td><td><strong>编码 + agentic 的推荐起点</strong>（30 分钟以上、token 上百万的长任务）<sup class="cite" data-refid="8">[8]</sup></td></tr>
+            <tr><td><code>high</code>（默认）</td><td>高能力 = 不设参数</td><td>复杂推理、难编码、agentic 任务<sup class="cite" data-refid="8">[8]</sup></td></tr>
+            <tr><td><code>medium</code></td><td>平衡、适度省 token</td><td>要平衡速度/成本/性能的 agentic 任务<sup class="cite" data-refid="8">[8]</sup></td></tr>
+            <tr><td><code>low</code></td><td>最省，能力略降</td><td>简单任务、追求速度/低成本，如 subagent<sup class="cite" data-refid="8">[8]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>官方对 4.8 的具体建议：<strong>编码 / agentic 从 <code>xhigh</code> 起步，其他智能敏感工作用 <code>high</code></strong>，测过 evals 确认低等级不掉质量再降到 medium/low<sup class="cite" data-refid="8">[8]</sup>。跑 xhigh/max 时把 <code>max_tokens</code> 设大（64k 起步），给模型思考和跨 subagent 行动的空间<sup class="cite" data-refid="8">[8]</sup>。</p>
+
+      <h3>9.3 拒绝原因细节（Refusal stop details）</h3>
+      <p>4.8 公开记录了拒绝响应上的 <code>stop_details</code> 对象（自 4.7 起就有，现在文档化）<sup class="cite" data-refid="2">[2]</sup>。Claude 拒绝时除了 <code>refusal</code> stop reason，还会给一个"拒绝类别"，方便应用区分不同类拒绝、把用户导向正确的下一步。无需 beta header<sup class="cite" data-refid="2">[2]</sup>。</p>
+
+      <h3>9.4 更低的 prompt cache 门槛（1,024 token）</h3>
+      <p>4.8 最低可缓存 prompt 长度降到 1,024 token（比 4.7 低）<sup class="cite" data-refid="2">[2]</sup>。<strong>用处</strong>：以前在 4.7 上太短不能缓存的 prompt，现在能建缓存了，零代码改动就省钱<sup class="cite" data-refid="2">[2]</sup>。</p>
+
+      <h3>9.5 Claude Code v2.1.154 的其他改动（🟡 第三方整理）</h3>
+      <ul>
+        <li>effort slider 标签从 "Speed/Intelligence" 改成 "Faster/Smarter"<sup class="cite" data-refid="15">[15]</sup>。</li>
+        <li>后台 shell 执行：<code>! &lt;command&gt;</code> 或 <code>claude --bg --exec '&lt;command&gt;'</code><sup class="cite" data-refid="15">[15]</sup>。</li>
+        <li>插件管理 <code>/plugin</code>、浏览器选择 <code>/chrome</code><sup class="cite" data-refid="15">[15]</sup>。</li>
+        <li>Opus 4.8 支持 + 4.7→4.8 迁移指引已加进 <code>/claude-api</code> skill<sup class="cite" data-refid="15">[15]</sup>。</li>
+      </ul>
+
+      <h3>9.6 Mythos（背景，跟 4.8 无直接关系但同期）</h3>
+      <p>同期 Anthropic 提到一个叫 Mythos 的"研究预览模型"，用于防御性网络安全工作流（Project Glasswing），<strong>邀请制、无自助注册</strong>，预计未来几周向客户推出<sup class="cite" data-refid="3">[3]</sup>。⚠️ 这跟 Opus 4.8 是两个东西，阿杰短期用不上，列出仅供背景。</p>
+
+    </div>
+  </section>
+
+  <!-- ============ CH10 ============ -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">⭐ 对阿杰的实用建议（升不升级 / 怎么落地）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>阿杰 = 半米（AI 英语学习系统）单人全栈开发者 + 重度用 Claude Code 跑研究/开发。下面全是冲这个画像给的具体可执行建议。</p>
+
+      <h3>10.1 要不要升级 4.8？—— 升，无脑升，今天就升</h3>
+      <div class="callout good">
+        <p>✅ <strong>结论：立刻升，零风险</strong>。理由：(1) <strong>同价</strong>（$5/$25，跟 4.7 一模一样）<sup class="cite" data-refid="4">[4]</sup>；(2) <strong>无 breaking API 改动</strong>，现有 4.7 prompt / eval 开箱即用<sup class="cite" data-refid="13">[13]</sup>；(3) benchmark 普遍涨，尤其长上下文（GraphWalks 1M +27.8）和编码（SWE-bench Pro +4.9）<sup class="cite" data-refid="11">[11]</sup>；(4) <strong>诚实度 +4 倍少漏报</strong>——对单人开发者，"AI 不偷偷放过自己写的 bug"比涨几个点 benchmark 实在得多<sup class="cite" data-refid="1">[1]</sup>；(5) <strong>tool-use 系统提示从 675→290 token</strong>，agentic loop 还省 token<sup class="cite" data-refid="4">[4]</sup>。<strong>怎么升</strong>：Claude Code 升到 v2.1.154+，然后 <code>/model claude-opus-4-8</code> 完事。半米后端调 API 的地方把 model 字符串改成 <code>claude-opus-4-8</code> 即可。</p>
+      </div>
+
+      <h3>10.2 effort 怎么设（对阿杰最实用的一条）</h3>
+      <div class="callout accent">
+        <p>🔵 <strong>日常开发用默认 <code>high</code> 就好</strong>（4.8 默认就是 high，不用动）。<strong>遇到长周期 agentic 编码 / 大重构 / 复杂调试，<code>/effort xhigh</code></strong>——官方对 4.8 的明确建议就是"编码和 agentic 从 xhigh 起步"<sup class="cite" data-refid="8">[8]</sup>。<strong>跑无忌这种长研究、或日常小问答想省钱，<code>/effort medium</code> 甚至 <code>low</code></strong>。别动不动上 <code>max</code>——官方说多数任务 max 性价比差还可能 overthink<sup class="cite" data-refid="8">[8]</sup>。</p>
+      </div>
+
+      <h3>10.3 快速模式在阿杰流程里怎么落地</h3>
+      <div class="callout teal">
+        <p>🟢 <strong>用在</strong>：交互式大重构 / 长代码生成时你坐着等的场景（Ch5 Case 1），<code>/fast on</code> 把吐字等待砍一半。<br>🔴 <strong>别用在</strong>：无忌跑的深度研究、夜里批量处理 SciShow 词表、长上下文喂代码库——这些后台跑、人不等、且贵一倍还不支持 Batch（Ch5 Case 3）。<br>⚠️ <strong>先确认权限</strong>：快速模式是研究预览、要 waitlist/account manager 开通<sup class="cite" data-refid="5">[5]</sup>。阿杰先 <code>/fast on</code> 试，提示无权限就去 <a href="https://claude.com/fast-mode" target="_blank" rel="noopener">claude.com/fast-mode</a> 排队。<strong>这是本报告唯一我无法替你确认的点：你账号现在到底开通了没——只能你自己试。</strong></p>
+      </div>
+
+      <h3>10.4 Dynamic Workflows 在阿杰研究 + 开发流程里怎么落地</h3>
+      <div class="callout purple">
+        <p>🟣 <strong>研究侧</strong>：<code>/deep-research</code> 跟无忌这套 research skill 是同一套方法论（多角度 + 交叉验证 + 过滤未验证 claim + 带引用）<sup class="cite" data-refid="6">[6]</sup>。阿杰可以拿它做"快速一手扫"，再让无忌按 banmi-research SOP 出正式 HTML 报告——<strong>两者互补不冲突</strong>：<code>/deep-research</code> 出原料，无忌出可归档的左侧导航 HTML + popover 引用 + 半米路线建议。<br>🟣 <strong>开发侧</strong>：半米有几个天然适合 workflow 的活——<strong>全库审计</strong>（如 Ch8 Case 1 的"审所有 API 路由认证缺失"）、<strong>大重构 / 大迁移</strong>（如把 9 套前端 demo 统一成 1 套参数化 UI，正好是上次阅读测试报告的窄切口建议）、<strong>跨文件一致性检查</strong>。<br>⚠️ <strong>钱包警告</strong>：workflow 烧 token 多<sup class="cite" data-refid="6">[6]</sup>，单人开发者先用小任务试水、<code>/model</code> 选合适模型、能停就停，别一上来 ultracode 全开。</p>
+      </div>
+
+      <h3>10.5 决策树：阿杰该用哪个</h3>
+      <div class="arch-grid">
+        <div class="arch-box" data-pick="a"><div class="ah">▸ 日常写代码 / 改 bug / 问问题</div><div class="ad">点这里看建议</div></div>
+        <div class="arch-box" data-pick="b"><div class="ah">▸ 大重构 / 长 agentic 编码（你在等）</div><div class="ad">点这里看建议</div></div>
+        <div class="arch-box" data-pick="c"><div class="ah">▸ 全库审计 / 大迁移 / 交叉验证研究</div><div class="ad">点这里看建议</div></div>
+        <div class="arch-box" data-pick="d"><div class="ah">▸ 后台批量 / 长研究报告</div><div class="ad">点这里看建议</div></div>
+      </div>
+      <div id="pick-out" class="callout info" style="margin-top:6px;"></div>
+
+      <h3>10.6 一句话总账</h3>
+      <div class="callout good">
+        <p>🟢 <strong>升级 4.8（无脑）→ 默认 high、长编码 xhigh → 快速模式只在「你坐着等的长输出交互」开且先确认权限 → Dynamic Workflows 留给全库审计/大迁移/深研究且控好成本。</strong> 半米单人开发场景下，4.8 最大的两个实在好处是"诚实度 +4 倍少放过 bug" 和 "长上下文检索大涨"——这俩比任何花哨功能都更直接帮到一个人扛全栈。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ CH11 mini demo ============ -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">mini demo · 快速模式 vs 标准模式 + Dynamic Workflows 流程图（可玩）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>11.1 快速模式 vs 标准模式 · 输出速度模拟器</h3>
+      <p>下面是个简化模拟：同一个 Opus 4.8、同样要吐 2000 个输出 token，标准速 vs 快速模式（2.5×）谁先吐完。<strong>注意首字延迟（TTFT）两边一样</strong>——快速模式只快"吐字"不快"开口"，这是官方的关键点<sup class="cite" data-refid="5">[5]</sup>。</p>
+      <div class="demo-host">
+        <h4>⚡ 输出速度对比（模拟，非真实 API 计时）</h4>
+        <div class="demo-bars">
+          <div class="bar-row"><div class="bl">标准速</div><div class="bar-track"><div class="bar-fill" id="bar-std" style="width:0%;background:var(--text-mute);"></div></div></div>
+          <div class="bar-row"><div class="bl">快速模式 2.5×</div><div class="bar-track"><div class="bar-fill" id="bar-fast" style="width:0%;background:var(--teal);"></div></div></div>
+        </div>
+        <div id="demo-speed-status" style="font-size:13px;color:var(--text-soft);min-height:40px;">点"开始吐字"看两边赛跑。两边都先有一段一样的"开口延迟"（TTFT），之后快速模式吐字快 2.5 倍。</div>
+        <button class="demo-btn" id="speed-start">▶ 开始吐字</button>
+        <button class="demo-btn ghost" id="speed-reset">重置</button>
+        <div id="demo-speed-cost" style="font-size:12px;color:var(--text-mute);margin-top:8px;"></div>
+      </div>
+
+      <h3>11.2 Dynamic Workflows · 编排流程交互图</h3>
+      <p>点下面的阶段，看一个 workflow 怎么从"你的一句话"fan-out 成上百个 subagent、交叉验证、再收敛成一份答案（对照官方描述）<sup class="cite" data-refid="6">[6]</sup>。</p>
+      <div class="demo-host">
+        <h4>🪆 dynamic workflow 跑起来长什么样</h4>
+        <div class="arch-grid">
+          <div class="arch-box active" data-wf="0"><div class="ah">① 你说一句话</div><div class="ad">"Run a workflow to audit every API endpoint for missing auth"</div></div>
+          <div class="arch-box" data-wf="1"><div class="ah">② Claude 写 JS 编排脚本</div><div class="ad">点查看</div></div>
+          <div class="arch-box" data-wf="2"><div class="ah">③ runtime 后台 fan-out</div><div class="ad">点查看</div></div>
+          <div class="arch-box" data-wf="3"><div class="ah">④ 交叉验证 + 收敛</div><div class="ad">点查看</div></div>
+          <div class="arch-box" data-wf="4"><div class="ah">⑤ 一份答案落回会话</div><div class="ad">点查看</div></div>
+        </div>
+        <div id="wf-out" class="callout purple" style="margin-top:6px;"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ CH12 FAQ ============ -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">FAQ（12 条）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Opus 4.8 真的发布了吗？还是传闻？</span><span class="toggle">＋</span></div><div class="faq-a">真发布了。2026-05-28 由 Anthropic 正式发布，官方博客、官方 docs、AWS/GitHub 上架公告 + 多家一线媒体同日落地，互相印证<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup><sup class="cite" data-refid="14">[14]</sup>。本报告所有内容都是按"先查证再写"的原则做的，没有凭记忆脑补。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">model ID 是什么？怎么在代码里调？</span><span class="toggle">＋</span></div><div class="faq-a"><code>claude-opus-4-8</code>（API/Vertex/Claude Code 同名，Bedrock 是 <code>anthropic.claude-opus-4-8</code>）<sup class="cite" data-refid="3">[3]</sup>。它是固定快照不是会滚动的指针。半米后端把 model 字符串换成它即可，无 breaking 改动<sup class="cite" data-refid="13">[13]</sup>。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">4.8 比 4.7 强多少？值得换吗？</span><span class="toggle">＋</span></div><div class="faq-a">点版本升级，同价。benchmark 普遍涨：SWE-bench Verified 87.6→88.6、SWE-bench Pro 64.3→69.2、长上下文 GraphWalks 1M 40.3→68.1、数学 USAMO 69.3→96.7<sup class="cite" data-refid="10">[10]</sup><sup class="cite" data-refid="11">[11]</sup>。GPQA 微跌 0.6（噪声级）。同价 + 无 breaking + 更诚实 + 长上下文大涨 → 无脑换。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">快速模式是换了个更小的模型吗？质量会降吗？</span><span class="toggle">＋</span></div><div class="faq-a">不是换小模型，质量不降。官方逐字写"same model weights and behavior (not a different model)"，只是用更快的推理配置<sup class="cite" data-refid="5">[5]</sup>。输出 token/秒最高 2.5×，但首字延迟（TTFT）不变。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">快速模式贵多少？</span><span class="toggle">＋</span></div><div class="faq-a">4.8 快速模式 $10/$50 每 MTok（输入/输出），是标准价 $5/$25 的整 2 倍<sup class="cite" data-refid="4">[4]</sup>。但比 4.6/4.7 的 $30/$150 便宜了整 3 倍——这就是"4.8 快速模式便宜 3 倍"这句话的来源<sup class="cite" data-refid="5">[5]</sup>。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">快速模式怎么开？我现在就能用吗？</span><span class="toggle">＋</span></div><div class="faq-a">API：加 beta header <code>fast-mode-2026-02-01</code> + <code>speed: "fast"</code>；Claude Code：<code>/fast on</code><sup class="cite" data-refid="5">[5]</sup><sup class="cite" data-refid="15">[15]</sup>。但它是研究预览，要 account manager 或 <a href="https://claude.com/fast-mode" target="_blank" rel="noopener">waitlist</a> 开通——你能不能直接用得自己试，这点官方没替每个账号说死。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Dynamic Workflows 是 API 功能还是 Claude Code 功能？</span><span class="toggle">＋</span></div><div class="faq-a">是 Claude Code 的功能，官方文档在 <code>code.claude.com/docs/en/workflows</code><sup class="cite" data-refid="6">[6]</sup>。它在 CLI/桌面/IDE 扩展/无头模式/Agent SDK 都能用，但本质是 Claude Code 这条产品线的能力，不是裸 Messages API 的参数。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">怎么触发一个 dynamic workflow？</span><span class="toggle">＋</span></div><div class="faq-a">三种：① prompt 里写 <code>workflow</code> 这个词；② <code>/effort ultracode</code> 让 Claude 自动决定；③ 跑内置 <code>/deep-research</code> 或自己存的<sup class="cite" data-refid="6">[6]</sup>。用 <code>/workflows</code> 看进度/管理。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">workflow 最多能跑多少 agent？</span><span class="toggle">＋</span></div><div class="faq-a">同时最多 16 个并发（CPU 核少更少），单次运行总计最多 1,000 个<sup class="cite" data-refid="6">[6]</sup>。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">ultracode 是个新的 effort 等级吗？API 里能设吗？</span><span class="toggle">＋</span></div><div class="faq-a">不是 API effort 等级，API 设不了。API 接受的完整等级是 low/medium/high/xhigh/max<sup class="cite" data-refid="8">[8]</sup>。ultracode 只是 Claude Code 界面概念 = xhigh + 给 Claude Code 常驻发起 workflow 的许可<sup class="cite" data-refid="8">[8]</sup>。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Dynamic Workflows / 快速模式会让我账单暴涨吗？</span><span class="toggle">＋</span></div><div class="faq-a">会，两者都有"钱包警告"。workflow 一次跑成百 agent，官方反复说"比普通会话烧多得多 token"<sup class="cite" data-refid="6">[6]</sup>；快速模式价格翻倍<sup class="cite" data-refid="4">[4]</sup>。建议小任务试水、控好 <code>/model</code>、能停就停。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">这报告里有没有查不到、只能存疑的地方？</span><span class="toggle">＋</span></div><div class="faq-a">有一处，已诚实标出：<strong>4.8 版快速模式在阿杰的 Claude Code 账号里是否已经能直接 <code>/fast on</code>（vs 仍需 API waitlist 审批）</strong>——官方写它是研究预览、需申请，但没逐字说死 Claude Code 端每个账号的开通门槛，只能阿杰自己 <code>/fast</code> 试。另外所有 benchmark 都是 Anthropic 厂商自报、且有两项换了版本，看的时候要打折。除此之外，功能/参数/价格/用法全部有官方源支撑。</div></div>
+
+    </div>
+  </section>
+
+  <!-- ============ CH13 References ============ -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">References（18 条，🟢 官方为主）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13px;color:var(--text-mute);">访问日期均为 2026-05-29。🟢 = Anthropic 官方 / 官方云平台；🟡 = 可信科技媒体。鼠标移到正文 <sup class="cite" data-refid="1">[1]</sup> 这类标记上可弹出对应来源。</p>
+      <ol class="ref-list">
+        <li id="ref-1">🟢 <a href="https://www.anthropic.com/news/claude-opus-4-8" target="_blank" rel="noopener">Anthropic — Introducing Claude Opus 4.8（官方发布公告）</a><span class="ref-meta">· 2026-05-29 · 引用 9 次</span></li>
+        <li id="ref-2">🟢 <a href="https://platform.claude.com/docs/en/about-claude/models/whats-new-claude-4-8" target="_blank" rel="noopener">Claude API Docs — What's new in Claude Opus 4.8</a><span class="ref-meta">· 2026-05-29 · 引用 12 次</span></li>
+        <li id="ref-3">🟢 <a href="https://platform.claude.com/docs/en/about-claude/models/overview" target="_blank" rel="noopener">Claude API Docs — Models overview（model ID/context/输出/训练截止）</a><span class="ref-meta">· 2026-05-29 · 引用 9 次</span></li>
+        <li id="ref-4">🟢 <a href="https://platform.claude.com/docs/en/about-claude/pricing" target="_blank" rel="noopener">Claude API Docs — Pricing（标准/缓存/Batch/快速模式/tool-use token）</a><span class="ref-meta">· 2026-05-29 · 引用 9 次</span></li>
+        <li id="ref-5">🟢 <a href="https://platform.claude.com/docs/en/build-with-claude/fast-mode" target="_blank" rel="noopener">Claude API Docs — Fast mode (research preview)</a><span class="ref-meta">· 2026-05-29 · 引用 15 次</span></li>
+        <li id="ref-6">🟢 <a href="https://code.claude.com/docs/en/workflows" target="_blank" rel="noopener">Claude Code Docs — Orchestrate subagents at scale with dynamic workflows</a><span class="ref-meta">· 2026-05-29 · 引用 18 次</span></li>
+        <li id="ref-7">🟢 <a href="https://claude.com/blog/introducing-dynamic-workflows-in-claude-code" target="_blank" rel="noopener">Anthropic — Introducing dynamic workflows in Claude Code（含 Bun 75 万行 11 天案例）</a><span class="ref-meta">· 2026-05-29 · 引用 4 次</span></li>
+        <li id="ref-8">🟢 <a href="https://platform.claude.com/docs/en/build-with-claude/effort" target="_blank" rel="noopener">Claude API Docs — Effort（等级 low/medium/high/xhigh/max + ultracode 澄清）</a><span class="ref-meta">· 2026-05-29 · 引用 6 次</span></li>
+        <li id="ref-9">🟡 <a href="https://techcrunch.com/2026/05/28/anthropic-releases-opus-4-8-with-new-dynamic-workflow-tool/" target="_blank" rel="noopener">TechCrunch — Anthropic releases Opus 4.8 with new 'dynamic workflow' tool（距 4.7 仅 41 天）</a><span class="ref-meta">· 2026-05-29 · 引用 2 次</span></li>
+        <li id="ref-10">🟡 <a href="https://www.digitalapplied.com/blog/claude-opus-4-8-release-dynamic-workflows-2026" target="_blank" rel="noopener">Digital Applied — Claude Opus 4.8: Benchmarks, Effort & Dynamic Workflows（benchmark 汇总）</a><span class="ref-meta">· 2026-05-29 · 引用 6 次</span></li>
+        <li id="ref-11">🟡 <a href="https://llm-stats.com/blog/research/claude-opus-4-8-launch" target="_blank" rel="noopener">LLM-Stats — Claude Opus 4.8 Release, Benchmarks And More（benchmark + 版本变更说明）</a><span class="ref-meta">· 2026-05-29 · 引用 6 次</span></li>
+        <li id="ref-12">🟡 <a href="https://cryptobriefing.com/anthropic-claude-opus-4-8-fast-mode/" target="_blank" rel="noopener">Crypto Briefing — 发布前的"已知 vs 传闻"分析（反面教材：当时未确认）</a><span class="ref-meta">· 2026-05-29 · 引用 1 次</span></li>
+        <li id="ref-13">🟢 <a href="https://platform.claude.com/docs/en/about-claude/models/migration-guide" target="_blank" rel="noopener">Claude API Docs — Migration guide（4.7→4.8 无 breaking）</a><span class="ref-meta">· 2026-05-29 · 引用 3 次</span></li>
+        <li id="ref-14">🟢 来源簇：4.8 同日云平台/工具上架<span class="ref-meta">· 2026-05-29 · 引用 2 次 · 多源</span>
+          <ul>
+            <li>🟢 <a href="https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-anthropic-claude-opus-4-8.html" target="_blank" rel="noopener">AWS — Claude Opus 4.8 on Amazon Bedrock model card</a></li>
+            <li>🟢 <a href="https://github.blog/changelog/2026-05-28-claude-opus-4-8-is-generally-available-for-github-copilot/" target="_blank" rel="noopener">GitHub Changelog — Claude Opus 4.8 GA for GitHub Copilot</a></li>
+            <li>🟢 <a href="https://aws.amazon.com/about-aws/whats-new/2026/05/claude-opus-4.8-aws/" target="_blank" rel="noopener">AWS What's New — Claude Opus 4.8 is now available on AWS</a></li>
+          </ul>
+        </li>
+        <li id="ref-15">🟡 <a href="https://dev.classmethod.jp/en/articles/20260529-claude-code-updates-v2-1-154/" target="_blank" rel="noopener">DevelopersIO — Claude Code v2.1.154 Major Updates (Opus 4.8 / /fast / /workflows)</a><span class="ref-meta">· 2026-05-29 · 引用 5 次</span></li>
+        <li id="ref-16">🟡 <a href="https://www.marktechpost.com/2026/05/28/anthropic-ships-claude-opus-4-8-alongside-dynamic-workflows-and-cheaper-fast-mode-with-workflows-capped-at-1000-subagents/" target="_blank" rel="noopener">MarkTechPost — Opus 4.8 + Dynamic Workflows + cheaper Fast mode（1000 subagent cap）</a><span class="ref-meta">· 2026-05-29 · 引用 1 次</span></li>
+        <li id="ref-17">🟡 <a href="https://thenewstack.io/claude-opus-48-release/" target="_blank" rel="noopener">The New Stack — Claude Opus 4.8: effort controls, dynamic workflows, cheaper fast mode</a><span class="ref-meta">· 2026-05-29 · 引用 1 次</span></li>
+        <li id="ref-18">🟡 <a href="https://www.axios.com/2026/05/28/anthropic-opus-release-mythos" target="_blank" rel="noopener">Axios — Anthropic releases new model, Opus 4.8</a><span class="ref-meta">· 2026-05-29 · 引用 1 次</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <footer>
+    Claude Opus 4.8 实用指南 · L2 Deep Research · 全程 Anthropic 官方查证 · 编不了的诚实标 ⚠️ · 整理：无忌 · 2026-05-29<br>
+    <span style="font-size:12px;">本报告所有功能/参数/价格/benchmark 均来自联网查到的官方源 + 可信媒体交叉验证，无训练记忆脑补。</span>
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+<script>
+// 主题切换
+(function(){
+  var saved = localStorage.getItem('banmi-theme');
+  if (saved) document.body.setAttribute('data-theme', saved);
+  var btn = document.getElementById('themeToggle');
+  function sync(){ btn.textContent = document.body.getAttribute('data-theme')==='dark' ? '☀️' : '🌙'; }
+  sync();
+  btn.addEventListener('click', function(){
+    var t = document.body.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', t);
+    localStorage.setItem('banmi-theme', t); sync();
+  });
+})();
+// 进度条 + 回顶部
+window.addEventListener('scroll', function(){
+  var h = document.documentElement;
+  var pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+  document.getElementById('backToTop').classList.toggle('show', h.scrollTop > 600);
+});
+document.getElementById('backToTop').addEventListener('click', function(){ window.scrollTo({top:0,behavior:'smooth'}); });
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click', function(){ h.parentElement.classList.toggle('collapsed'); });
+});
+// FAQ 折叠
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click', function(){ q.parentElement.classList.toggle('open'); });
+});
+// 锚点高亮 scroll-spy
+(function(){
+  var links = document.querySelectorAll('.anchor-list a');
+  var secs = Array.prototype.map.call(links, function(a){ return document.getElementById(a.dataset.target); });
+  function onScroll(){
+    var pos = window.scrollY + 120, idx = 0;
+    secs.forEach(function(s,i){ if (s && s.offsetTop <= pos) idx = i; });
+    links.forEach(function(a){ a.classList.remove('active'); });
+    if (links[idx]) { links[idx].classList.add('active'); links[idx].scrollIntoView({block:'nearest'}); }
+  }
+  window.addEventListener('scroll', onScroll); onScroll();
+})();
+// 左侧目录抽屉开关（窄屏）
+(function(){
+  var nav = document.getElementById('anchorNav');
+  var tog = document.getElementById('navToggle');
+  var ov = document.getElementById('navOverlay');
+  if(!nav||!tog||!ov) return;
+  function close(){ nav.classList.remove('open'); ov.classList.remove('show'); }
+  tog.addEventListener('click', function(){
+    var willOpen = !nav.classList.contains('open');
+    nav.classList.toggle('open', willOpen); ov.classList.toggle('show', willOpen);
+  });
+  ov.addEventListener('click', close);
+  document.querySelectorAll('.anchor-list a').forEach(function(a){
+    a.addEventListener('click', function(){ if(window.innerWidth<=1040) close(); });
+  });
+})();
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(tr){
+  tr.addEventListener('click', function(){ tr.style.background = tr.style.background ? '' : 'var(--accent-soft)'; });
+});
+
+// ===== mini demo 1: 快速模式 vs 标准速 输出速度模拟 =====
+(function(){
+  var stdEl=document.getElementById('bar-std'), fastEl=document.getElementById('bar-fast');
+  var statusEl=document.getElementById('demo-speed-status'), costEl=document.getElementById('demo-speed-cost');
+  var startBtn=document.getElementById('speed-start'), resetBtn=document.getElementById('speed-reset');
+  var timer=null;
+  var TTFT=18;        // 一样的"开口延迟"百分比段
+  function reset(){
+    if(timer) clearInterval(timer); timer=null;
+    stdEl.style.transition='none'; fastEl.style.transition='none';
+    stdEl.style.width='0%'; fastEl.style.width='0%';
+    stdEl.textContent=''; fastEl.textContent='';
+    statusEl.textContent='点"开始吐字"看两边赛跑。两边都先有一段一样的"开口延迟"（TTFT），之后快速模式吐字快 2.5 倍。';
+    costEl.textContent='';
+    startBtn.disabled=false;
+  }
+  function run(){
+    startBtn.disabled=true; reset(); startBtn.disabled=true;
+    var t=0;
+    // 阶段1：两边一样的 TTFT
+    statusEl.textContent='① 两边同时"开口延迟"中（TTFT 相同——快速模式不改这一段）…';
+    var phase=0, stdW=0, fastW=0;
+    timer=setInterval(function(){
+      t+=1;
+      if(phase===0){
+        // TTFT 段，两边都不动 bar，仅计时
+        if(t>=TTFT){ phase=1; t=0; statusEl.textContent='② 开始吐字：标准速 1× / 快速模式 2.5×（同质量）…'; }
+        return;
+      }
+      stdW += 1.6;       // 标准速吐字速率
+      fastW += 4.0;      // 快速模式 ≈2.5×
+      if(stdW>100)stdW=100; if(fastW>100)fastW=100;
+      stdEl.style.width=stdW+'%'; fastEl.style.width=fastW+'%';
+      if(fastW>=100 && fastEl.textContent!=='✓ 完成'){ fastEl.textContent='✓ 完成'; }
+      if(stdW>=100 && stdEl.textContent!=='✓ 完成'){ stdEl.textContent='✓ 完成'; }
+      if(stdW>=100){
+        clearInterval(timer); timer=null;
+        statusEl.textContent='✅ 都吐完 2000 token。快速模式约早 60% 时间完成——但注意开头那段 TTFT 两边一样长。';
+        costEl.innerHTML='💰 这 2000 输出 token 成本：标准速 ≈ $0.05（$25/MTok）vs 快速模式 ≈ $0.10（$50/MTok）——<strong>快 2.5 倍，贵 2 倍</strong>。';
+        startBtn.disabled=false;
+      }
+    }, 45);
+  }
+  startBtn.addEventListener('click', run);
+  resetBtn.addEventListener('click', reset);
+  reset();
+})();
+
+// ===== mini demo 2: dynamic workflow 流程交互 =====
+(function(){
+  var out=document.getElementById('wf-out');
+  var data=[
+    '<strong>① 你说一句话</strong><br>你在 Claude Code 输入：<code>Run a workflow to audit every API endpoint under src/routes/ for missing auth checks</code>。Claude Code 高亮 <code>workflow</code> 这个词，准备写编排脚本（不想触发可按 alt+w）。',
+    '<strong>② Claude 当场写一段 JavaScript 编排脚本</strong><br>脚本里定义：扫描 src/routes/ 列出所有 endpoint → 每个 endpoint 派一个 subagent 检查认证 → 收集结果到脚本变量 → 汇总。你可以 "View raw script" / Ctrl+G 先读再批准。中间结果存在脚本变量里，不污染你的对话 context。',
+    '<strong>③ runtime 后台 fan-out 几十到上百个 subagent</strong><br>独立 runtime 在后台执行脚本，最多 16 个并发、总计上限 1000 个 agent。你的会话同时保持可用。<code>/workflows</code> 看每个 phase 的 agent 数 / token / 耗时；p 暂停、x 停。',
+    '<strong>④ 交叉验证 + 收敛</strong><br>workflow 能套"质量模式"：独立 agent 从不同角度查，另一批 agent 试图反驳，迭代到答案收敛。比单次跑更可信——这正是它比普通 subagent 强的地方。',
+    '<strong>⑤ 一份协调好的答案落回会话</strong><br>跑完报告落进你的会话，标注每条发现来源，没通过交叉验证的已过滤。可按 s 把这段脚本存成 /命令 以后重跑。⚠️ 烧 token 多，控好成本。'
+  ];
+  function show(i){ out.innerHTML=data[i]; }
+  document.querySelectorAll('[data-wf]').forEach(function(c){
+    c.addEventListener('click',function(){
+      document.querySelectorAll('[data-wf]').forEach(function(x){x.classList.remove('active');});
+      c.classList.add('active'); show(+c.dataset.wf);
+    });
+  });
+  show(0);
+})();
+
+// ===== Ch10 决策树 =====
+(function(){
+  var out=document.getElementById('pick-out');
+  var data={
+    a:'<strong>日常写代码 / 改 bug / 问问题</strong> → 用 <strong>4.8 默认（effort high）标准速</strong>。不用开快速模式（输出短、收益小），不用 workflow（杀鸡用牛刀）。',
+    b:'<strong>大重构 / 长 agentic 编码（你坐着等）</strong> → <code>/effort xhigh</code>（官方对 4.8 编码的推荐起点）+ 可选 <strong>快速模式 /fast on</strong>（输出长、你在等，2.5× 省等待，贵一倍可接受）。先确认账号有快速模式权限。',
+    c:'<strong>全库审计 / 大迁移 / 交叉验证研究</strong> → 用 <strong>Dynamic Workflows</strong>：prompt 带 workflow 关键词，或 /deep-research，或 /effort ultracode。⚠️ 烧 token 多，先小任务试、/model 选合适模型、能停就停。',
+    d:'<strong>后台批量 / 长研究报告</strong> → 用 <strong>标准速 + 合适 effort（medium 省钱）</strong>，批量任务走 Batch API（−50%）。<strong>千万别开快速模式</strong>（贵一倍、人不等、还不支持 Batch）。研究可让无忌按 banmi-research SOP 出正式 HTML。'
+  };
+  function show(k){ out.innerHTML=data[k]; }
+  document.querySelectorAll('[data-pick]').forEach(function(c){
+    c.addEventListener('click',function(){
+      document.querySelectorAll('[data-pick]').forEach(function(x){x.classList.remove('active');});
+      c.classList.add('active'); show(c.dataset.pick);
+    });
+  });
+  show('a');
+  document.querySelector('[data-pick="a"]').classList.add('active');
+})();
+
+// ===== popover references =====
+(function() {
+  let activePopover = null, activeTrigger = null, hideTimer = null;
+  function getRefContent(refid) {
+    const el = document.getElementById('ref-' + refid);
+    return el ? el.innerHTML : null;
+  }
+  function positionPopover(pop, trigger) {
+    const r = trigger.getBoundingClientRect();
+    const popW = pop.offsetWidth, popH = pop.offsetHeight;
+    let left = r.left + window.scrollX;
+    if (left + popW > window.innerWidth - 12) left = window.innerWidth - popW - 12;
+    if (left < 12) left = 12;
+    let top = r.bottom + window.scrollY + 6;
+    if (r.bottom + popH > window.innerHeight - 12 && r.top > popH + 12) {
+      top = r.top + window.scrollY - popH - 6;
+    }
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+  }
+  function showPopover(trigger) {
+    if (activeTrigger === trigger && activePopover) return;
+    if (activePopover) { activePopover.remove(); activePopover = null; }
+    const content = getRefContent(trigger.getAttribute('data-refid'));
+    if (!content) return;
+    const pop = document.createElement('div');
+    pop.className = 'cite-popover';
+    pop.innerHTML = content;
+    document.body.appendChild(pop);
+    positionPopover(pop, trigger);
+    activePopover = pop; activeTrigger = trigger;
+    pop.addEventListener('mouseenter', () => { if (hideTimer) clearTimeout(hideTimer); });
+    pop.addEventListener('mouseleave', scheduleHide);
+  }
+  function scheduleHide() {
+    if (hideTimer) clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      if (activePopover) { activePopover.remove(); activePopover = null; activeTrigger = null; }
+    }, 200);
+  }
+  function bindCites() {
+    document.querySelectorAll('sup.cite[data-refid]').forEach(sup => {
+      sup.addEventListener('mouseenter', () => showPopover(sup));
+      sup.addEventListener('mouseleave', scheduleHide);
+      sup.addEventListener('click', e => {
+        e.preventDefault(); e.stopPropagation();
+        if (activeTrigger === sup && activePopover) {
+          activePopover.remove(); activePopover = null; activeTrigger = null;
+        } else { showPopover(sup); }
+      });
+    });
+    document.addEventListener('click', e => {
+      if (!activePopover) return;
+      if (e.target.closest('.cite-popover') || e.target.closest('sup.cite')) return;
+      activePopover.remove(); activePopover = null; activeTrigger = null;
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindCites);
+  } else { bindCites(); }
+})();
+</script>
+</body>
+</html>

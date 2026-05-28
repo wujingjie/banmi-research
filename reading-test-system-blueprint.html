@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>半米阅读能力测试系统 · 现状诊断 + 别人怎么测 + 清晰解决方案 · 5个各自为政子系统/5个P0根因 · CAT+IRT/Rasch机理 · Lexile/剑桥/ETS/Duolingo对标 · 文本难度≠题目难度 · cloze黄金题型 · 4困惑逐个解 · canonical尺度=CEFR-J · 拨乱反正路线 + 最小自适应闭环窄切口 · 2026-05-28</title>
+<style>
+  :root {
+    --bg: #ffffff; --bg-soft: #f7f8fa; --bg-elevated: #ffffff; --bg-stripe: #f5f7fa;
+    --text: #1a1d23; --text-soft: #4a5160; --text-mute: #7c8493;
+    --border: #e3e6ec; --border-strong: #cdd2da;
+    --accent: #2563eb; --accent-soft: #dbeafe; --accent-text: #1d4ed8;
+    --good: #15803d; --good-soft: #dcfce7;
+    --warn: #b45309; --warn-soft: #fef3c7;
+    --bad: #b91c1c; --bad-soft: #fee2e2;
+    --info: #0891b2; --info-soft: #cffafe;
+    --code-bg: #f1f3f7;
+    --purple: #7c3aed; --purple-soft: #ede9fe;
+    --pink: #db2777; --pink-soft: #fce7f3;
+    --teal: #0d9488; --teal-soft: #ccfbf1;
+    --shadow: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+    --shadow-lg: 0 10px 25px rgba(15,23,42,.08), 0 4px 10px rgba(15,23,42,.04);
+    --radius: 10px; --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117; --bg-soft: #161922; --bg-elevated: #1c2030; --bg-stripe: #1a1e2a;
+    --text: #e6e9f0; --text-soft: #b6bcc9; --text-mute: #8a92a3;
+    --border: #2a2f3d; --border-strong: #3a4154;
+    --accent: #60a5fa; --accent-soft: #1e3a8a55; --accent-text: #93c5fd;
+    --good: #4ade80; --good-soft: #14532d55;
+    --warn: #fbbf24; --warn-soft: #78350f55;
+    --bad: #f87171; --bad-soft: #7f1d1d55;
+    --info: #22d3ee; --info-soft: #155e7555;
+    --code-bg: #0a0d14;
+    --purple: #a78bfa; --purple-soft: #4c1d9555;
+    --pink: #f472b6; --pink-soft: #831a4955;
+    --teal: #2dd4bf; --teal-soft: #134e4a55;
+    --shadow: 0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,.5), 0 4px 10px rgba(0,0,0,.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body { margin: 0; font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif; font-size: 16px; line-height: 1.7; color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; padding-bottom: 60px; transition: background-color .25s, color .25s; }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-weight: 700; font-size: 15px; color: var(--text); }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; }
+  .breadcrumb { max-width: 980px; margin: 0 auto; padding: 8px 16px 0; font-size: 13px; }
+  .breadcrumb a { color: var(--accent-text); text-decoration: none; padding: 3px 8px; border-radius: 6px; background: var(--accent-soft); margin-right: 6px; display: inline-block; }
+  nav.anchor-nav { overflow-x: auto; overflow-y: hidden; border-top: 1px solid var(--border); background: var(--bg); scrollbar-width: none; }
+  nav.anchor-nav::-webkit-scrollbar { display: none; }
+  .anchor-list { display: flex; gap: 4px; padding: 8px 16px; max-width: 980px; margin: 0 auto; white-space: nowrap; }
+  .anchor-list a { flex: 0 0 auto; min-height: 36px; padding: 7px 12px; border-radius: 999px; font-size: 13px; line-height: 1.3; color: var(--text-soft); text-decoration: none; border: 1px solid transparent; background: var(--bg-soft); }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); font-weight: 600; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 26px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); min-height: 56px; }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout.pink { background: var(--pink-soft); border-color: var(--pink); }
+  .callout.teal { background: var(--teal-soft); border-color: var(--teal); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 9px 11px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; }
+  tbody td { padding: 8px 11px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 5000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  /* step timeline */
+  .timeline { position: relative; margin: 18px 0 8px; padding-left: 4px; }
+  .step { position: relative; padding: 0 0 6px 52px; margin-bottom: 18px; }
+  .step::before { content: ""; position: absolute; left: 19px; top: 36px; bottom: -18px; width: 2px; background: var(--border-strong); }
+  .step:last-child::before { display: none; }
+  .step .badge { position: absolute; left: 0; top: 0; width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; box-shadow: var(--shadow); z-index: 2; }
+  .step.done .badge { background: var(--good); }
+  .step.hard .badge { background: var(--bad); }
+  .step .step-card { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+  .step .step-card h4 { margin: 0 0 6px; font-size: 15.5px; color: var(--text); }
+  .step .step-card .meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
+  .step .step-card .meta .pill { font-size: 10.5px; }
+  .step .step-card ul { margin: 6px 0; }
+  /* demo */
+  .demo-host { margin: 16px 0; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .demo-host h4 { margin: 0 0 4px; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; color: var(--accent-text); }
+  .demo-q { padding: 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 12px 0; }
+  .demo-q .qmeta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; font-size: 12px; }
+  .demo-opt { display: block; width: 100%; text-align: left; padding: 10px 12px; margin: 6px 0; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-soft); color: var(--text); cursor: pointer; font-size: 14px; font-family: inherit; }
+  .demo-opt:hover { border-color: var(--accent); }
+  .demo-opt.correct { background: var(--good-soft); border-color: var(--good); }
+  .demo-opt.wrong { background: var(--bad-soft); border-color: var(--bad); }
+  .demo-bars { margin: 12px 0; }
+  .bar-row { display: flex; align-items: center; gap: 8px; margin: 5px 0; font-size: 12px; }
+  .bar-row .bl { width: 88px; flex: 0 0 88px; color: var(--text-mute); }
+  .bar-track { flex: 1; height: 14px; border-radius: 999px; background: var(--bg-stripe); overflow: hidden; position: relative; }
+  .bar-fill { height: 100%; border-radius: 999px; transition: width .5s, background .3s; }
+  .demo-btn { margin: 8px 6px 0 0; padding: 9px 16px; border: none; border-radius: 9px; background: var(--accent); color: #fff; font-weight: 700; font-size: 13.5px; cursor: pointer; font-family: inherit; }
+  .demo-btn.ghost { background: var(--bg-elevated); color: var(--text-soft); border: 1px solid var(--border); }
+  .theta-display { font-family: ui-monospace, monospace; font-size: 13px; color: var(--text-soft); margin-top: 6px; }
+  .arch-grid { display: grid; gap: 10px; margin: 14px 0; }
+  .arch-box { padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-soft); }
+  .arch-box .ah { font-weight: 700; font-size: 14px; margin-bottom: 4px; color: var(--text); }
+  .arch-box .ad { font-size: 13px; color: var(--text-soft); }
+  .arch-arrow { text-align: center; color: var(--text-mute); font-size: 18px; }
+  @media (max-width: 480px) { .hero { padding: 18px 4px 8px; } .hero h1 { font-size: 21px; } section.chapter > h2 { font-size: 17px; padding: 14px 14px; } .chapter-body { padding: 14px 14px 18px; } h3 { font-size: 16px; } .step { padding-left: 46px; } }
+  .chapter-body { column-count: 1 !important; column-width: auto !important; }
+  .chapter-body > .callout { display: block !important; float: none !important; width: auto !important; clear: both !important; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; font-size: 11px; color: var(--accent-text); font-weight: 700; vertical-align: super; }
+  sup.cite:hover { background: rgba(250, 204, 21, 0.3); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated, #ffffff); color: var(--text, #1a1a23); border: 1px solid var(--border, #e3e6ec); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(15,23,42,.18); font-size: 13px; line-height: 1.55; font-weight: normal; pointer-events: auto; }
+  [data-theme="dark"] .cite-popover { background: #1a1e2a; color: #e6e9f0; border-color: #2a2f3a; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+  .cite-popover a { color: var(--accent, #2563eb); text-decoration: underline; word-break: break-all; }
+  [data-theme="dark"] .cite-popover a { color: #60a5fa; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">半米阅读测试系统蓝图 <span class="tag">L2 · 工程落地 · 无忌</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+  <div class="breadcrumb">
+    <a href="./index.html">← 回研究中心</a>
+    <a href="./lexile-reading-assessment-research.html">关联：Lexile 阅读测评</a>
+    <a href="./eng-assessment-datasets--scoring-engine-blueprint.html">关联：评分引擎蓝图</a>
+  </div>
+  <nav class="anchor-nav">
+    <div class="anchor-list" id="anchorList">
+      <a href="#ch1" data-target="ch1">01 摘要 + 5 结论</a>
+      <a href="#ch2" data-target="ch2">02 诊断·5子系统</a>
+      <a href="#ch3" data-target="ch3">03 诊断·5个P0根因</a>
+      <a href="#ch4" data-target="ch4">04 别人怎么测①CAT+IRT</a>
+      <a href="#ch5" data-target="ch5">05 别人怎么测②机构对标</a>
+      <a href="#ch6" data-target="ch6">06 文本难度≠题目难度</a>
+      <a href="#ch7" data-target="ch7">07 题型设计·cloze黄金</a>
+      <a href="#ch8" data-target="ch8">08 困惑1·数据</a>
+      <a href="#ch9" data-target="ch9">09 困惑2·题目</a>
+      <a href="#ch10" data-target="ch10">10 困惑3·模型</a>
+      <a href="#ch11" data-target="ch11">11 困惑4·方案+架构</a>
+      <a href="#ch12" data-target="ch12">12 拨乱反正路线图</a>
+      <a href="#ch13" data-target="ch13">13 个人开发者校准</a>
+      <a href="#ch14" data-target="ch14">14 ⭐窄切口·最小闭环</a>
+      <a href="#ch15" data-target="ch15">15 mini demo</a>
+      <a href="#ch16" data-target="ch16">16 FAQ</a>
+      <a href="#ch17" data-target="ch17">17 References</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>半米阅读能力测试系统 · 现状诊断 + 别人怎么测 + 清晰解决方案<br><span style="font-size: .5em; font-weight: 600;">5 个各自为政子系统 + 5 个 P0 根因诊断 · CAT + IRT/Rasch 机理 · Lexile/SRI/剑桥/ETS/Duolingo 对标 · 文本难度≠题目难度 · cloze 黄金题型 · 数据/题目/模型/方案 四困惑逐个解 · canonical 尺度 = CEFR-J · 拨乱反正路线图 + 个人开发者务实校准 + ⭐最小自适应闭环窄切口</span></h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-28</span>
+      <span>🛠 整理：无忌</span>
+      <span>🧠 L2 Deep Research · 偏工程落地</span>
+      <span>🔍 30+ WebSearch/Fetch</span>
+      <span>📚 17 章 + 12 FAQ + 30+ Refs</span>
+      <span>🩺 紧贴 banmi 真实代码</span>
+    </div>
+    <div class="hero-deck">
+      <strong>这份是什么</strong>：阿杰原话 —— "我的阅读测试系统<strong>越走越偏</strong>。逻辑想做：设 CEFR 级别（9 级/12 档）+ Lexile 蓝思值 + 对应其他指标 → 用什么题测学生？四个核心困惑：① 用什么<strong>数据</strong>？② 用什么<strong>题目</strong>？③ 用什么<strong>模型</strong>？④ 采用什么<strong>解决方案</strong>？别人到底怎么测阅读能力？" 本报告分三层回答：<strong>① 现状诊断</strong>（你的代码现在长什么样、病根在哪）<strong>② 别人怎么测</strong>（成熟机构 + 学界的真实做法，全部查实引用）<strong>③ 清晰解决方案</strong>（4 困惑逐个答 + 拨乱反正路线 + 最小可跑通窄切口）。<br><br>
+      <strong>一句话结论先给</strong>：<strong>你不是方向错了，是没收口。</strong>「越走越偏」的本质是 —— 你同时摊开了 5 个各自为政的子系统、3 套不互通的难度尺度，但<strong>从没有把任何一条 end-to-end 链路跑通过一次</strong>。别人测阅读能力的核心，不是更牛的文本算法，而是 <strong>用学生真实作答数据把"题目难度"校准出来 + 自适应选题（CAT/MST）</strong> —— 而这恰恰是你 5 个子系统之间断掉的那一环。解药：<strong>选 CEFR-J 12 档当唯一主尺</strong>（Lexile 降级为展示换算）<strong>+ 统一三套题库到你已经写好的 <code>question</code> 表 + 先把一个级别段（A2-B1）端到端跑通</strong>，再谈扩。
+    </div>
+  </div>
+
+  <!-- ============ CH1 摘要 + 5 核心结论 ============ -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">摘要 + 5 条核心结论（每条独立 callout）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>1.1 一段话总结</h3>
+      <p>半米阅读测试系统现在是 <strong>5 个各自为政的子系统</strong>：① <code>banmi-level</code> 文本难度分析器（CVLA 3 + 12 readability 公式 + XGBoost）<sup class="cite" data-refid="18">[20]</sup>、② OneStopQA 题库（B1-C1，Guardian MCQ）<sup class="cite" data-refid="25">[27]</sup>、③ StoryWeaver 题库（A1-A2 绘本人工 cloze）、④ IELTS 真题（手工录入）、⑤ 前端 9 套独立 demo UI。它们之间<strong>没有统一 schema、没有统一难度尺度、算法跟题库不通、后端跟前端断裂、校准从没真跑过</strong>。诊断结论：<strong>系统的"病"不在任何单个子系统（它们各自都不错），在于它们之间缺一根主轴 —— 没有收口。</strong> 而"别人怎么测阅读"给的答案恰好就是那根主轴：<strong>(1)</strong> 用一把 canonical 难度尺度（半米该选 <strong>CEFR-J 12 档</strong>，理由见结论 #3）；<strong>(2)</strong> 题目难度<strong>必须靠学生作答数据用 IRT/Rasch 校准</strong>，文本难度算法只能当冷启动先验<sup class="cite" data-refid="4">[4]</sup><sup class="cite" data-refid="13">[14]</sup>；<strong>(3)</strong> 用 <strong>自适应（CAT / 多阶段 MST）</strong>动态选题逼近学生真实能力 θ<sup class="cite" data-refid="1">[1]</sup>。本报告把这三件事焊到你已有的代码资产上，给一条从碎片到可生产的路线，外加一个"先跑通一个级别"的最小闭环。</p>
+
+      <h3>1.2 全局速览（先扫数字）</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">5 + 5</div><div class="l">5 个各自为政子系统 / 5 个 P0 根因</div></div>
+        <div class="metric"><div class="v">0 条</div><div class="l"><code>question</code> 表实际数据（schema 完整，从没灌过）</div></div>
+        <div class="metric"><div class="v">9 套</div><div class="l">前端独立 UI（p1/p2/p3 × cefr/lexile/diagnostic）</div></div>
+        <div class="metric"><div class="v">100-200</div><div class="l">Rasch 校准一道题所需作答人数（量级）<sup class="cite" data-refid="2">[2]</sup></div></div>
+        <div class="metric"><div class="v">~3 位</div><div class="l">专家判断可达 ≈50 人统计校准的效果<sup class="cite" data-refid="12">[13]</sup></div></div>
+        <div class="metric"><div class="v">CEFR-J</div><div class="l">建议的 canonical 主尺（12 档 Pre-A1→C2）<sup class="cite" data-refid="20">[22]</sup></div></div>
+      </div>
+
+      <h3>1.3 5 条核心结论</h3>
+
+      <div class="callout warn">
+        <p><strong>🟡 结论 #1 —— 「越走越偏」的根因一句话：你做了 5 个各自为政的子系统 + 3 套不互通的尺度，但从没把一条链路端到端跑通过</strong></p>
+        <p>这不是技术能力问题，是<strong>收口问题</strong>。你的每个子系统单独看都不差：<code>banmi-level</code> 是认真复刻的 CVLA 3 算法<sup class="cite" data-refid="18">[20]</sup>、<code>question</code> 表 schema 甚至已经预留了完整的 IRT 字段（<code>item_difficulty_b</code> / <code>discrimination_a</code> / <code>guessing_c</code> / <code>calibration_status</code> 生命周期枚举）—— 这是<strong>一个懂行的人才写得出的 schema</strong>。问题是：算法的输出进不了题库、题库的题进不了前端、前端是 9 套各自 hardcoded 的 demo、IRT 字段全是 NULL、校准从没跑过。<strong>「偏」的感觉来自于：每个方向都在往前推，但没有一条贯穿首尾的线。</strong> 解药不是推翻重做，是<strong>选一条最短的链路（一个级别段）先打通，证明 end-to-end 能跑，再把别的接上去。</strong></p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>🔴 结论 #2 —— 别人测阅读能力的核心，不是文本难度算法，是「用学生作答数据校准题目难度 + 自适应选题」。这正是你缺的那一环</strong></p>
+        <p>这是全报告最重要的一句。Lexile/SRI、剑桥 Linguaskill、ETS、Duolingo —— 所有成熟机构测的<strong>不是文本难度，是学生能力</strong>，机理都是 <strong>IRT（项目反应理论）+ CAT（自适应测试）</strong>：先用大量学生作答数据把每道题的"难度参数 b"校准出来，再让算法根据学生答对/答错动态选下一题（永远选一道学生约 50% 概率答对的题），用尽量少的题逼近学生真实能力 θ<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="13">[14]</sup>。<strong>关键认知</strong>：一道题"有多难"<strong>不是文本算法能算出来的</strong> —— 同一篇文章配不同的题、不同的干扰项，难度天差地别（第 6 章实证）<sup class="cite" data-refid="15">[16]</sup>。<code>banmi-level</code> 算的是"<strong>文本难度</strong>"，能当题目难度的<strong>冷启动先验</strong>（省掉从零猜），但<strong>不能当最终答案</strong>。你的系统现在卡在"用文本难度当题目难度"这个根本性错位上。</p>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>🟣 结论 #3 —— canonical 主尺该选 CEFR-J 12 档，不是 Lexile。三个硬理由</strong></p>
+        <p>你现在 3 套尺度并存（CEFR-J 12 档 / Lexile 6 档 <code>ability_band</code> / Custom），没有 canonical 源 —— 这是混乱之源。<strong>必须钦定一把主尺，其余都是它的换算视图。</strong> 建议钉 <strong>CEFR-J 12 档（Pre-A1 到 C2，Tono 2019）</strong><sup class="cite" data-refid="20">[22]</sup>，三个理由：<strong>(1) 你已经在算它</strong> —— <code>banmi-level</code> 的 CVLA 3 直接输出 CEFR-J 12 档，零额外成本；<strong>(2) Lexile 低端不可靠</strong> —— 你的姐妹报告已查实：A1 在 Lexile 上是 <535L 的"大开口桶"，且 <strong>CEFR↔Lexile 没有通用映射，每个映射都是某个特定测验跑出来的、机构间还互相打架</strong>（EIKEN 判 A1 的学生 ≈ TOEFL Primary 判 A2）<sup class="cite" data-refid="21">[23]</sup>；<strong>(3) 你的客户是 K12 ESL</strong>，CEFR-J 本来就是为 EFL/ESL 学习者细化的尺度，比给英语母语者设计的 Lexile 更贴。<strong>Lexile 降级为"展示用换算"</strong>（家长熟悉，留着报告里展示），不作内部主轴。这跟 <a href="./lexile-reading-assessment-research.html">Lexile 报告</a>口径完全一致。</p>
+      </div>
+
+      <div class="callout info">
+        <p><strong>🔵 结论 #4 —— 四困惑的核心答案：数据=统一题库到 question 表 + 攒作答日志；题目=分档配题型（低端 cloze/图文、中高 MCQ/matching/TFNG）；模型=分三步（CVLA 当先验→Rasch 校准→MST 选题）；方案=收口三套尺度 + 打通前后端</strong></p>
+        <p>逐个给（第 8-11 章详解）：<strong>① 数据</strong> —— 把 OneStopQA / StoryWeaver / IELTS 三套题<strong>全部 ETL 进你已写好的 <code>question</code> 表</strong>（schema 早就为此设计了 <code>source</code> 字段），同时<strong>从第一天就记 <code>event_log</code> 作答日志</strong>（这是未来校准的唯一弹药）；可补公开题库 RACE/CLOTH（含中国学生英语考题）<sup class="cite" data-refid="26">[28]</sup>。<strong>② 题目</strong> —— 按 CEFR-J 档配题型：Pre-A1/A1 用<strong>图文匹配 / 词识别 / tick-cross</strong>（剑桥 Starters 同款）<sup class="cite" data-refid="23">[25]</sup>，A2-B1 用 <strong>cloze（嵌入式完形，黄金题型）+ MCQ</strong>，B2+ 用 <strong>MCQ/matching/TFNG/summary</strong>。<strong>③ 模型</strong> —— 难度标注用 <code>banmi-level</code>(CVLA+XGBoost) 当<strong>冷启动先验</strong>、LLM 辅助预标，能力估计用 <strong>Rasch(1PL)</strong>（你样本小，别上 3PL —— 那要 500+ 人）<sup class="cite" data-refid="24">[26]</sup>，选题用 <strong>MST 多阶段</strong>（比逐题 CAT 更适合阅读的 testlet 结构）<sup class="cite" data-refid="27">[29]</sup>。<strong>④ 方案</strong> —— 见结论 #3 + 第 11/12 章架构与路线图。</p>
+      </div>
+
+      <div class="callout good">
+        <p><strong>🟢 结论 #5 —— 最该先跑通的窄切口：选 A2-B1 一个级别段，cloze 一种题型，一套参数化 UI，一个题库 API，LLM 预标难度 + 少量专家锚定，端到端跑一个学生闭环</strong></p>
+        <p>别再一步到位贪全。<strong>最小自适应闭环（第 14 章详解）</strong> = 选 <strong>A2-B1 一个段</strong>（你题库最有基础：StoryWeaver A2 尾 + OneStopQA B1 头）+ <strong>cloze 一种题型</strong>（最易 auto-score、最 IRT 友好）+ <strong>合并成 1 套参数化 UI</strong>（消灭 9 套 demo 的 3×3 冗余）+ <strong>1 个题库 API</strong>（<code>GET /questions?band=</code> + <code>POST /answers</code>）+ <strong>前端读真 <code>question</code> 表</strong>（不再 hardcode）+ <strong>难度用 LLM 预标 + 你和 Joy 的老师网络做少量专家锚定</strong>（3 位专家 ≈ 50 人统计校准<sup class="cite" data-refid="12">[13]</sup>，你完全做得到）。先证明"<strong>一个 A2-B1 学生进来、答 8-12 道 cloze、系统给出一个 CEFR-J 档位 + 置信度</strong>"能跑通，再扩级别、扩题型。这一步预计单人 <strong>2-3 周</strong>能见到 demo。</p>
+      </div>
+
+      <div class="callout purple">
+        <p>🪆 <strong>本报告与姐妹报告的分工</strong>：<a href="./lexile-reading-assessment-research.html">Lexile 报告</a>讲清"为什么 Lexile 低端不可靠、该锚 CEFR-J"（本报告直接采用其结论作主尺依据）；<a href="./eng-assessment-datasets-research.html">评分数据集报告</a>讲"有哪些可用数据集 + license"；<a href="./eng-assessment-datasets--scoring-engine-blueprint.html">评分引擎蓝图</a>讲"校准>架构、分阶段、QWK/IRT、人工兜底"（本报告把同一套校准哲学搬到<strong>阅读测评</strong>）；<a href="./banmi-grammar-system--cefrj-9levels-roadmap.html">CEFR-J 9 级路线</a>给分级框架；<a href="./banmi-cvla-audit-research.html">CVLA 审计</a>讲 <code>banmi-level</code> 工具状态 + Octanove license 问题。本报告<strong>不重复</strong>这些，只交叉引用。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH2 现状诊断:5个子系统 ============ -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">现状诊断 ①：5 个各自为政的子系统</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>先把"系统"拆开看。半米阅读测评现在不是一个系统，是 <strong>5 块各自能跑、但互不连通的拼图</strong>。下面逐块给代码证据（基于对 <code>/Users/jay/Projects/banmi/</code> 的实地核对）。</p>
+
+      <div class="callout info"><p>📌 <strong>诊断口径声明</strong>：本章是<strong>诊断事实</strong>（来自真实代码），不是外部研究。外部查实结论在第 4-7 章，对半米的推演建议在第 8-14 章 —— 三者本报告刻意分开标。</p></div>
+
+      <h3>2.1 子系统 ①：banmi-level —— 文本难度分析器（不是题目难度）</h3>
+      <p><code>tools/banmi-level/leveler.py</code>：复刻 CVLA 3 算法（Uchida &amp; Negishi 2025）<sup class="cite" data-refid="18">[20]</sup>，8 个 metrics → CEFR-J 12 档，外加 12+ 个 readability 公式（Flesch-Kincaid / SMOG / Gunning Fog / Dale-Chall / ATOS / EFLAW …）+ Lexile 估值（FK 经验映射 ±200L）+ 一个 XGBoost v1.4 模型（自报 78.8% exact / 99.3% adjacent）。</p>
+      <div class="callout bad"><p>🔴 <strong>病在哪</strong>：它算的是<strong>「这段文本有多难读」</strong>，不是<strong>「这道题有多难答」</strong>。输出的 CEFR-J 档位<strong>下游无处可去</strong> —— 没有任何代码把它写进 <code>question</code> 表。它是个孤立的、做得很认真的算命工具。（第 6 章会讲：文本难度 ≠ 题目难度，这是根本性错位。）</p></div>
+
+      <h3>2.2 子系统 ②：OneStopQA 题库 —— B1-C1，按整篇文章分档</h3>
+      <p><code>etl/from_onestopqa.py</code>：Guardian 文章的 MCQ 阅读题，来自 OneStopQA 数据集（STARC 标注方案，每篇 3 个难度级 Elementary/Intermediate/Advanced，每段 3 道 MCQ）<sup class="cite" data-refid="25">[27]</sup>。</p>
+      <div class="callout warn"><p>🟡 <strong>病在哪</strong>：<strong>(1)</strong> 按"整篇文章难度"分档 —— 但同一篇文章里不同题的难度天差地别（第 6 章实证）；<strong>(2)</strong> 已知 <code>banmi-level</code> 对它<strong>偏高 +1 档但从没校准过</strong>；<strong>(3)</strong> 干扰项是数据集自带的、质量未审 —— 而<strong>干扰项质量直接决定题目难度和区分度</strong>（第 7 章实证）<sup class="cite" data-refid="16">[17]</sup>。</p></div>
+
+      <h3>2.3 子系统 ③：StoryWeaver 题库 —— A1-A2，人工标注，旁路算法</h3>
+      <p><code>etl/from_storyweaver.py</code> + <code>cloze_items.json</code> + <code>sw_questions.json</code>：Pratham 绘本（CC BY 4.0，license 干净），<strong>人工标注 + 手写 cloze/MCQ</strong>，完全<strong>旁路</strong>了 <code>banmi-level</code> 算法。</p>
+      <div class="callout warn"><p>🟡 <strong>病在哪</strong>：人工出题质量在线，但<strong>难度标注全靠手感，没有任何客观锚定</strong>；cloze 是手写的简单挖空，不是按 IRT 友好原则设计的（第 7 章讲怎么把 cloze 做成黄金题型）。它和 OneStopQA 用的是<strong>两套完全不同的难度逻辑</strong>，互不可比。</p></div>
+
+      <h3>2.4 子系统 ④：IELTS 真题 —— B1-C2，手工录入，无难度估计</h3>
+      <p><code>tools/render-ielts-reading.py</code>：剑桥 19/20 真题手工视读录入 PDF，7 种题型（MCQ / TFNG / matching / summary completion …），<strong>没有任何难度估计</strong> —— 只假设"雅思难度是权威的"。</p>
+      <div class="callout warn"><p>🟡 <strong>病在哪</strong>："雅思权威"是对的，但<strong>一整套雅思真题阅读的难度跨度很大</strong>（B1-C2 混在一起），不做题级难度估计就没法和别的题库放进同一个自适应池子。题型多样反而是<strong>资产</strong>（B2+ 该用这些），但现在它是个孤岛。</p></div>
+
+      <h3>2.5 子系统 ⑤：前端 —— 9 套完全独立的 demo UI</h3>
+      <p><code>docs/prototypes/banmi-claude/exam/student/</code>：<strong>p1（封面）/ p2（答题）/ p3（报告）各有 cefr / lexile / diagnostic 三个版本 = 9 个 HTML</strong>，三套难度体系之间<strong>没有转换规则</strong>，全是 hardcoded demo 数据（另有 s1-s5 一套考试 flow）。</p>
+      <div class="callout bad"><p>🔴 <strong>病在哪</strong>：9 套 UI = 3 个流程阶段 × 3 套尺度的<strong>笛卡尔积冗余</strong>。每改一处要改 9 个文件。而且它<strong>不读后端、不读题库</strong> —— 是纯静态演示。这是"3 套尺度并存无 canonical 源"在前端的直接后果。<strong>合并成 1 套主 flow + 尺度参数化 = 9→1，是最容易见效的收口动作。</strong></p></div>
+
+      <h3>2.6 一张图看清"各自为政"</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>子系统</th><th>难度尺度</th><th>难度怎么来</th><th>题型</th><th>进 question 表了吗</th><th>前端读它吗</th></tr></thead>
+          <tbody>
+            <tr><td>① banmi-level</td><td>CEFR-J 12 + Lexile 估</td><td>CVLA 算法（文本）</td><td>—（不是题库）</td><td>🔴 否（输出无处可去）</td><td>🔴 否</td></tr>
+            <tr><td>② OneStopQA</td><td>按整篇文章分档</td><td>数据集自带 + 算法偏高 +1</td><td>MCQ</td><td>🔴 否（ETL 产出没灌库）</td><td>🔴 否</td></tr>
+            <tr><td>③ StoryWeaver</td><td>A1-A2 人工</td><td>人工手感</td><td>cloze / MCQ</td><td>🔴 否</td><td>🔴 否</td></tr>
+            <tr><td>④ IELTS 真题</td><td>B1-C2（假设权威）</td><td>无估计</td><td>7 种题型</td><td>🔴 否</td><td>🔴 否</td></tr>
+            <tr><td>⑤ 前端 9 套 UI</td><td>CEFR / Lexile / Custom 各一套</td><td>hardcode</td><td>demo</td><td>—</td><td>🔴 读 hardcode 不读库</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout accent"><p>🎯 <strong>这张表就是"越走越偏"的全貌</strong>：5 个子系统，<strong>"进 question 表了吗"一列全红</strong>。你写了一张设计精良的 <code>question</code> 表（含完整 IRT 字段），却<strong>从来没往里灌过一条数据</strong> —— 所有题库还散在各自的 JSON / ETL 产物里，前端读的是写死的假数据。<strong>收口 = 把这一列全部变绿。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ============ CH3 现状诊断:5个P0根因 ============ -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">现状诊断 ②：5 个 P0 根因（每个独立 callout）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>第 2 章是现象，本章是病根。<strong>5 个 P0 根因</strong>，每个都是"越走越偏"的一条独立成因。注意：它们都是<strong>"断裂/缺失"型</strong>问题，不是"做错了"型 —— 这印证了"病在没收口不在方向错"。</p>
+
+      <div class="callout bad">
+        <p><strong>🔴 P0-1 —— 三套题库孤立，无统一 schema；question 表 0 条数据；ETL 产物前端从未读取</strong></p>
+        <p>schema 文件 <code>supabase/migrations/0001_unified_schema_v0.sql</code> 第 313 行有一张设计得相当好的 <code>question</code> 表（下面会夸它），但它<strong>是空的</strong>。三套题库各自停在 <code>cloze_items.json</code> / <code>sw_questions.json</code> / OneStopQA ETL 产物 / IELTS 渲染脚本里，<strong>没有任何代码把它们写进这张统一表</strong>。<code>etl/build_band_pools.py</code> 产出的 <code>band_pools.json</code> 前端<strong>从未读取</strong>。结果：你有题、有表、有 ETL，但<strong>题和表从未相遇</strong>。这是最核心的断裂。</p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>🔴 P0-2 —— 三套难度体系并存，没有 canonical 源</strong></p>
+        <p>CEFR-J 12 档（banmi-level 输出）/ Lexile 6 档 <code>ability_band</code>（<code>question.difficulty_band</code> 实际用的是 <code>BR_250L / L250_450 / L450_650 / L650_850 / L850_1050 / L1050_PLUS</code> 这套 Lexile-like 桶）/ Custom（前端 diagnostic 版）—— <strong>三套尺度同时存在，没有哪一套是"真理来源"，彼此之间也没有转换规则</strong>。一道题到底属于哪档，取决于你问哪个子系统。<strong>这是混乱的总根源</strong>，也是为什么前端会分裂成 9 套 UI。解药见结论 #3：钦定 CEFR-J 当主尺。</p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>🔴 P0-3 —— 算法与题库脱钩：banmi-level 的输出进不了题库；题库难度靠人工或源数据</strong></p>
+        <p><code>banmi-level</code> 能算文本 CEFR-J 档，但<strong>没有任何 pipeline 把这个档位写到 <code>question.difficulty_cefr</code> / <code>difficulty_band</code></strong>。OneStopQA 用数据集自带分档，StoryWeaver 用人工手感，IELTS 干脆不估。结果：<strong>你最大的技术资产（CVLA+XGBoost 算法）跟你的题库完全没接上线</strong>。本该是"算法预标难度 → 进题库 → 作答数据校准"的流水线，现在断在第一步。</p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>🔴 P0-4 —— 后端与前端断裂：schema/ETL 完整，但后端只有 /health + /bootstrap，没有题库 API；前端全是静态 demo</strong></p>
+        <p>后端没有 <code>GET /questions</code>、没有 <code>POST /answers</code>、没有 ability 估计端点 —— 只有 <code>/health</code> 和 <code>/bootstrap</code>。前端 9 套 UI 全部读 hardcoded demo 数据，<strong>从不调后端、不读题库</strong>。所以即便你明天把 <code>question</code> 表灌满，<strong>前端也看不到它</strong>。这条断裂让"系统"始终停在"演示"状态，无法变成真能测学生的东西。</p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>🔴 P0-5 —— 校准虚设：Rasch IRT 校准 / Lexile cutoff -0.5 修正 / smoke test 写进文档 3 个月没跑过，难度标注很可能是错的</strong></p>
+        <p>你的文档里写了 Rasch IRT 校准计划、Lexile cutoff -0.5 修正、smoke test —— 但这些<strong>3 个月来一次都没真跑过</strong>。<code>question</code> 表的 <code>item_difficulty_b</code> / <code>discrimination_a</code> / <code>calibration_status</code> 字段全是 NULL / 'draft'。这意味着：<strong>所有题目的难度标注都还是"猜的"（算法先验 or 人工手感），从没被任何真实作答数据验证过 —— 很可能是错的。</strong> 而"用作答数据校准题目难度"恰恰是别人测阅读的核心（第 4 章）。这是从"看起来有方法论"到"方法论真的在跑"之间的鸿沟。</p>
+      </div>
+
+      <h3>3.1 但是 —— 你的 schema 其实写得很好（必须先肯定资产）</h3>
+      <p>诊断不是为了否定。<code>question</code> 表（schema 第 313-364 行）<strong>已经预留了做对这件事所需的全部字段</strong>，这是个懂行的人才写得出的设计：</p>
+      <pre><code>create table question (
+  ...
+  difficulty_cefr          text,              -- CEFR 难度
+  difficulty_band          text check (...),  -- 6 档 Lexile-like 桶
+  source  text ... check (source in ('manual_jay','manual_teacher',
+           'ai_generated','ielts','ket','pet','newsela','toefl','sat',...)),
+  ai_calibrated            boolean default false,   -- ★ 难度来源标记
+  teacher_validated        boolean default false,   -- ★ 专家校准标记
+  -- IRT 字段 (第一阶段 NULL 可空, 第二阶段填)
+  item_difficulty_b        numeric,    -- ★ IRT 难度 b
+  discrimination_a         numeric,    -- ★ IRT 区分度 a
+  guessing_c               numeric,    -- ★ IRT 猜测 c
+  distractor_quality_score numeric,    -- ★ 干扰项质量
+  calibration_status  text default 'draft' check (calibration_status in
+     ('draft','expert_reviewed','pilot','calibrated','operational','retired')),
+  exposure_count           int default 0,    -- ★ 曝光次数(防过曝)
+  drift_flag               boolean default false,
+  is_placement_anchor      boolean default false,  -- ★ 锚题标记
+  placement_difficulty_anchor text check (...'low','mid','high'),
+  ...
+);</code></pre>
+      <div class="callout good"><p>✅ <strong>这是好消息</strong>：你<strong>不需要重新设计 schema</strong>。IRT 三参数字段、校准状态生命周期（draft→expert_reviewed→pilot→calibrated→operational→retired，这正是 IRT 题目从冷启动到运营的标准流程<sup class="cite" data-refid="11">[11]</sup>）、锚题标记、干扰项质量、防过曝计数 —— 全有了。<strong>问题纯粹是这些字段从没被填过、这张表从没被灌过。</strong> 你离"对"只差"把已经设计好的东西真的跑起来"。这就是为什么本报告反复说：<strong>病根是没收口，不是方向错。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ============ CH4 别人怎么测①CAT+IRT ============ -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">别人怎么测 ①：CAT + IRT/Rasch 机理（为什么必须用作答数据校准）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="callout info"><p>📌 本章起为<strong>外部查实</strong>内容，全部 inline 引用。这是阿杰系统最缺的一块认知。</p></div>
+
+      <h3>4.1 CAT（计算机自适应测试）怎么工作 —— 像一场会调难度的口试</h3>
+      <p>CAT 的本质：<strong>从一个已校准的题库里，根据学生每道题的答对/答错，动态选出下一道最优的题</strong>。可以类比成一场口试 —— 但考官换成了算法，它会根据你的回答即时调整下一题的难度<sup class="cite" data-refid="1">[1]</sup>。流程：</p>
+      <ol>
+        <li><strong>给一道中等难度题</strong>（或用先验起点，如学生年级）；</li>
+        <li><strong>学生作答 → 更新能力估计 θ</strong>（theta，潜在阅读能力值）；算法基于"目前为止所有题的难度 + 所有作答"重新估 θ<sup class="cite" data-refid="1">[1]</sup>；</li>
+        <li><strong>选下一题</strong>：用"<strong>最大信息量准则</strong>"—— 选在当前 θ 估计处信息函数最大的那道题，通常就是学生<strong>约 50% 概率答对</strong>的题（这样每道题信息量最大）<sup class="cite" data-refid="1">[1]</sup>；</li>
+        <li><strong>循环</strong>：每答一题，θ 估计就更精确一点（标准误 SE 缩小）；</li>
+        <li><strong>停止规则</strong>：当 θ 的标准误降到阈值（常用 <strong>SE &lt; 0.3</strong>）或达到题数上限就停 —— 例如 PROMIS CAT 用 <strong>最少 4 题、最多 12 题、SE&lt;0.3</strong> 三条规则<sup class="cite" data-refid="6">[6]</sup>。</li>
+      </ol>
+      <div class="callout good"><p>✅ <strong>CAT 的价值</strong>：用<strong>尽量少的题</strong>（常 8-15 题 vs 固定卷 40+ 题）达到同等测量精度，且每个学生答到的都是"对他刚好有挑战"的题 —— 不会让强者刷一堆送分题、弱者被难哭。<strong>这正是半米想要的"测出学生在哪个 CEFR-J 档"的最优手段。</strong></p></div>
+
+      <h3>4.2 IRT / Rasch —— 把"题目难度"和"学生能力"放进同一把尺</h3>
+      <p>CAT 的地基是 <strong>IRT（项目反应理论）</strong>。核心思想：一个学生答对一道题的概率，由<strong>学生能力 θ</strong> 和<strong>题目参数</strong>共同决定。题目参数有三个（按模型复杂度）<sup class="cite" data-refid="24">[26]</sup>：</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>模型</th><th>参数</th><th>含义</th><th>需要多少作答数据</th><th>适合谁</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1PL / Rasch</strong></td><td>只有 b（难度）</td><td>所有题区分度假设相同、无猜测</td><td>🟢 <strong>~100-200 人/题</strong><sup class="cite" data-refid="2">[2]</sup></td><td><strong>小样本首选（半米）</strong></td></tr>
+            <tr><td><strong>2PL</strong></td><td>b（难度）+ a（区分度）</td><td>不同题区分能力不同</td><td>🟡 比 Rasch 多</td><td>中等样本</td></tr>
+            <tr><td><strong>3PL</strong></td><td>b + a + c（猜测）</td><td>加上选择题蒙对的概率</td><td>🔴 <strong>500+ 人 + 先验</strong><sup class="cite" data-refid="24">[26]</sup></td><td>大规模高利害（半米别碰）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li><strong>item difficulty b（难度）</strong>：题在能力尺上的位置。b 高 = 难。CAT 选题就是要选 b 接近当前 θ 的题。</li>
+        <li><strong>discrimination a（区分度）</strong>：题区分高/低能力学生的能力。a 高 = 这道题在它的难度点上能很干脆地把"会的"和"不会的"分开。</li>
+        <li><strong>ability θ（能力）</strong>：学生的潜在阅读能力，和题目 b 在<strong>同一把尺上</strong> —— 这是 IRT 最妙的地方：<strong>学生能力和题目难度可比、可换算成 CEFR-J 档。</strong></li>
+      </ul>
+      <div class="callout accent"><p>🎯 <strong>对半米的含义</strong>：Rasch（1PL）只估一个难度参数 b，所以 <strong>~100-200 个作答就能校准一道题</strong>，对小样本最友好<sup class="cite" data-refid="2">[2]</sup><sup class="cite" data-refid="9">[9]</sup>。<strong>别上 3PL</strong>（要 500+ 人，你没这个量）。你的 schema 同时留了 b/a/c 三个字段是对的（未来可升级），但<strong>第一版只填 b、走 Rasch</strong>。</p></div>
+
+      <h3>4.3 为什么"题目难度"必须靠学生作答数据校准（直击阿杰痛点）</h3>
+      <p>这是全报告对阿杰最重要的认知纠偏。<strong>文本难度算法（CVLA / Lexile / readability）能告诉你"这段文字读起来多难"，但告诉不了你"这道题答起来多难"</strong>，原因：</p>
+      <ol>
+        <li><strong>同一篇文章，配不同的题、不同的干扰项，难度天差地别</strong>（第 6、7 章实证）<sup class="cite" data-refid="15">[16]</sup><sup class="cite" data-refid="16">[17]</sup>；</li>
+        <li><strong>题目难度还取决于"问什么"</strong> —— 问细节 vs 问推理 vs 问主旨，认知负荷完全不同，文本算法看不到这一层<sup class="cite" data-refid="14">[15]</sup>；</li>
+        <li><strong>真实难度是"学生群体实际答对率"决定的经验事实</strong>，不是任何公式能先验算准的。IRT 校准做的就是：拿一堆学生的真实作答，反推每道题的 b。</li>
+      </ol>
+      <div class="callout bad"><p>🔴 <strong>所以 P0-5「校准虚设」是致命的</strong>：半米现在所有题的难度标注都没经过作答数据验证，等于<strong>用"文本难度"冒充"题目难度"</strong>。这会导致 CAT 选题选错、给学生定档定错。<strong>文本难度只能当冷启动先验，校准是必经之路。</strong> 好消息：你的 schema 早就为校准留好了字段，缺的只是"开始记作答 + 定期跑校准"这个动作（第 13 章给个人开发者的务实校准路线）。</p></div>
+
+      <h3>4.4 多少作答数据才够校准一道题？（量化）</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">100-200</div><div class="l">Rasch 校准一道题的作答人数（合理精度）<sup class="cite" data-refid="2">[2]</sup></div></div>
+        <div class="metric"><div class="v">≥150</div><div class="l">中等难度锚题做 linking 的最低人数<sup class="cite" data-refid="2">[2]</sup></div></div>
+        <div class="metric"><div class="v">≥20%</div><div class="l">题库 linking 时锚题应占的比例<sup class="cite" data-refid="9">[9]</sup></div></div>
+        <div class="metric"><div class="v">数百</div><div class="l">高利害测验每题传统要求的作答量<sup class="cite" data-refid="10">[10]</sup></div></div>
+      </div>
+      <p>传统 IRT 要求每题<strong>数百个作答</strong>才能上高利害测验<sup class="cite" data-refid="10">[10]</sup>。但 Rasch 在小到中等样本下是"够用"的稀疏选择<sup class="cite" data-refid="2">[2]</sup>，且有专门的小样本方法（第 13 章：AutoIRT、1-bit 矩阵补全、专家校准）能把门槛进一步降到半米能承受的范围。<strong>关键是：从第一天就开始记作答日志，数据是慢慢攒出来的。</strong></p>
+    </div>
+  </section>
+
+  <!-- ============ CH5 别人怎么测②机构对标 ============ -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">别人怎么测 ②：Lexile/SRI、剑桥、ETS、Duolingo 对标</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>知道了机理，看成熟机构具体怎么落地。重点关注<strong>个人/小团队最值得学的现代范式（Duolingo）</strong>。</p>
+
+      <h3>5.1 Lexile / SRI / MetaMetrics —— 用嵌入式 cloze 给学生一个 Lexile 测量值</h3>
+      <p>Lexile 的核心：把<strong>读者能力</strong>和<strong>文本复杂度</strong>放在同一把尺上（<0L 到 2000L+），匹配时学生对该文本约有 <strong>75% 理解率</strong>，推荐选 <strong>-100L 到 +50L</strong> 区间的文本<sup class="cite" data-refid="3">[3]</sup>。怎么<strong>测学生</strong>（不只是文本）？经典产品 <strong>SRI（Scholastic Reading Inventory）</strong> 是计算机自适应：</p>
+      <ul>
+        <li><strong>题型 = 嵌入式 fill-in-the-blank（本质是 cloze）</strong>：给一段真实文章，挖一个空，4 个选项<strong>单看都能填进空里</strong>，但只有读懂全文才知道哪个对 —— 这逼着学生真正理解上下文<sup class="cite" data-refid="4">[4]</sup>；</li>
+        <li><strong>自适应</strong>：答对下一题更难、答错更易，直到对能力的确定性足够高就停，给出 Lexile 分<sup class="cite" data-refid="4">[4]</sup>；</li>
+        <li>测的能力维度：复述信息 / 逻辑推断 / 找支持细节 / 概括<sup class="cite" data-refid="4">[4]</sup>。</li>
+      </ul>
+      <div class="callout warn"><p>🟡 <strong>对半米的取舍</strong>：SRI 的<strong>嵌入式 cloze + 自适应</strong>是值得直接学的（第 7 章把 cloze 列为黄金题型）。但 <strong>Lexile 当主尺不行</strong> —— CEFR↔Lexile <strong>没有通用映射</strong>（每个映射都是某个测验单独跑的），低端 A1 是大开口桶，且对中文母语者的语言特定因素看不到（<a href="./lexile-reading-assessment-research.html">Lexile 报告</a>已详查）<sup class="cite" data-refid="21">[23]</sup>。<strong>学它的题型和机理，不学它的尺度。</strong></p></div>
+
+      <h3>5.2 剑桥 —— YLE（低龄替代题型）+ Linguaskill（自适应）</h3>
+      <ul>
+        <li><strong>YLE（Pre-A1 Starters / A1 Movers / A2 Flyers）</strong>：低龄阅读用<strong>大量非 MCQ 题型</strong> —— 图文匹配（"This is a…" 配图打勾/打叉）、词识别（看图拼单词、乱序字母重排）、yes/no、读句填一词<sup class="cite" data-refid="23">[25]</sup>。<strong>这正是 Pre-A1/A1 该用的替代题型</strong>（呼应 Lexile 报告）。</li>
+        <li><strong>Linguaskill</strong>：阅读模块<strong>自适应</strong>，题数不固定，每题帮系统更精确定位能力，够了就停；分数落在 Cambridge English Scale（82-180）+ 对应 CEFR 档<sup class="cite" data-refid="22">[24]</sup>。这是"自适应 + 锚 CEFR"的工业级范例 —— <strong>跟半米想做的几乎一模一样，只是半米锚 CEFR-J（更细）。</strong></li>
+      </ul>
+
+      <h3>5.3 ETS —— TOEFL Primary 阅读，IRT + 双锚 CEFR & Lexile</h3>
+      <p>TOEFL Primary（针对低龄）阅读分数<strong>映射到 CEFR A1-B2</strong>，同时<strong>也匹配 Lexile</strong> 以推荐读物<sup class="cite" data-refid="19">[21]</sup>。ETS 定期做和 CEFR 的相关性研究保证映射稳定<sup class="cite" data-refid="19">[21]</sup>。启示：<strong>"内部主尺 + 多个对外展示换算"是工业标准做法</strong> —— 半米完全可以内部用 CEFR-J、对外同时展示 CEFR / Lexile / 学校刻度（呼应结论 #3：Lexile 作展示换算）。</p>
+
+      <h3>5.4 ⭐ Duolingo English Test —— 个人/小团队最该学的现代范式</h3>
+      <p>DET 是<strong>计算机自适应 + AI 出题 + ML 估难度</strong>的标杆，且<strong>它的方法恰好是"没有大规模 pilot 也能 bootstrap 题库"的范本</strong> —— 这对一个人开发的半米价值最大：</p>
+      <ul>
+        <li><strong>自适应</strong>：答对变难、答错变易，用 IRT 让不同学生答不同题但分数可比<sup class="cite" data-refid="5">[5]</sup>；</li>
+        <li><strong>AI 出题（AIG）+ human-in-the-loop</strong>：用 GPT 系列批量生成题（如 fill-in-the-blank、interactive reading），人工 filter/edit/review<sup class="cite" data-refid="7">[7]</sup>；</li>
+        <li><strong>★ 用 ML/NLP 直接估题目难度，省掉昂贵的真人 pilot</strong>：这是关键创新 —— 不靠先拿几百人答题来定 b，而是<strong>用题目内容特征（文本特征 + BERT 嵌入）预测难度</strong><sup class="cite" data-refid="5">[5]</sup>；</li>
+        <li><strong>★ AutoIRT（2024 上线）</strong>：用 AutoML（随机森林/LightGBM/XGBoost 集成）从题目特征 + 稀疏作答联合估 IRT 参数，解决"冷启动"（新题没作答数据）。DET 实测：Y/N 词汇题重测信度从 0.495 提到 0.572（+15.5%）；仅 20 个作答时相关 0.936（优于纯 BERT-IRT 的 0.901）<sup class="cite" data-refid="8">[8]</sup>。</li>
+      </ul>
+      <div class="callout good"><p>✅ <strong>这就是半米的模板</strong>：Duolingo 证明了一条<strong>不需要大规模 pilot 的题库 bootstrap 路线</strong> —— <strong>(1)</strong> AI 生成题 + 人审；<strong>(2)</strong> 用题目内容特征（你已有 <code>banmi-level</code> 的 CVLA 特征 + XGBoost！）预估难度当冷启动；<strong>(3)</strong> 上线后用 AutoIRT 这类工具，把<strong>慢慢攒到的稀疏作答</strong>逐步校准成真难度。<strong>你的 <code>banmi-level</code> 不是孤儿 —— 它本该扮演 Duolingo 这套里"内容特征估难度"的角色，只是你还没把它接到题库上（P0-3）。</strong></p></div>
+
+      <h3>5.5 四家机构对标速查</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>机构</th><th>测学生的题型</th><th>是否自适应</th><th>难度怎么定</th><th>锚什么尺</th><th>半米可借</th></tr></thead>
+          <tbody>
+            <tr><td>Lexile / SRI</td><td>嵌入式 cloze（填空 MCQ）</td><td>🟢 CAT</td><td>IRT 校准</td><td>Lexile</td><td>题型 + 机理（不借尺度）</td></tr>
+            <tr><td>剑桥 YLE</td><td>图文匹配/词识别/打勾叉</td><td>🔴 固定卷</td><td>专家 + IRT</td><td>CEFR Pre-A1~A2</td><td>🟢 低端替代题型</td></tr>
+            <tr><td>剑桥 Linguaskill</td><td>阅读 MCQ/匹配</td><td>🟢 CAT</td><td>IRT 校准</td><td>CEFR（Cambridge Scale）</td><td>🟢 自适应+锚CEFR范例</td></tr>
+            <tr><td>ETS TOEFL Primary</td><td>阅读理解 MCQ</td><td>🟡 部分</td><td>IRT</td><td>CEFR A1-B2 + Lexile</td><td>🟢 双锚展示思路</td></tr>
+            <tr><td><strong>Duolingo DET</strong></td><td>fill-in-blank/c-test/interactive</td><td>🟢 CAT</td><td><strong>ML 估难度 + AutoIRT</strong></td><td>CEFR / DET 10-160</td><td>🟢🟢 <strong>整套范式</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH6 文本难度≠题目难度 ============ -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">文本难度 ≠ 题目难度（阿杰的核心 gap）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是半米最深的认知 gap，单独成章。<strong>banmi-level 算的"文本难度"和题库需要的"题目难度"是两回事</strong> —— 用前者冒充后者，是 P0-3 + P0-5 的认知根源。</p>
+
+      <h3>6.1 差在哪：题目难度 = 文本难度 + 问题难度 + 干扰项难度</h3>
+      <p>学界实证（Gates-MacGinitie 192 道阅读题分析）：<strong>题目难度由"文本特征"和"问题/题目本身特征"共同决定，且二者是相对独立的来源</strong><sup class="cite" data-refid="15">[16]</sup>。更精细的发现 —— <strong>难度的来源还随年级变化</strong>：</p>
+      <div class="callout accent"><p>🎯 <strong>关键实证</strong>：<strong>7-9 年级</strong>的题目难度<strong>主要被文本特征（尤其词汇难度）驱动</strong>；但<strong>10-12 年级</strong>，难度"不再系统性受文本特征影响"，<strong>问题本身的特征（抽象度、需要的推理深度）变得更重要</strong><sup class="cite" data-refid="15">[16]</sup>。换句话说：<strong>对低龄/低级别，文本难度还算个不错的近似；对高级别，光看文本难度会严重失真。</strong></p></div>
+      <p>另一项专门研究（注释化题目仓库）量化了这点：用文本特征预测题目难度，相关约 <strong>0.75</strong>；加上问题特征（是否高亮文本、是否含原文摘录、题序等）后，全模型 RMSE 0.59（基线 0.92）、相关 0.77 —— <strong>问题特征贡献了文本特征之外的独立信号</strong><sup class="cite" data-refid="14">[15]</sup>。</p>
+
+      <h3>6.2 三个让"文本难度 ≠ 题目难度"的具体机制</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>机制</th><th>同一篇 B1 文章可以…</th><th>文本算法看得到吗</th></tr></thead>
+          <tbody>
+            <tr><td><strong>问什么</strong></td><td>问"文中提到的颜色"（A2 难度）vs 问"作者隐含的态度"（C1 难度）</td><td>🔴 完全看不到</td></tr>
+            <tr><td><strong>干扰项设计</strong></td><td>放 3 个明显错的选项（送分）vs 放 3 个"读一半会上当"的选项（很难）</td><td>🔴 完全看不到</td></tr>
+            <tr><td><strong>答案定位</strong></td><td>答案是原文直接抄（易）vs 需要跨段整合 + 推理（难）</td><td>🔴 看不到</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>6.3 对半米的精确含义</h3>
+      <div class="callout bad"><p>🔴 <strong>OneStopQA「按整篇文章分档」是错的颗粒度</strong>（P0 子系统②）：同一篇 Guardian 文章下的 3 道题难度可能横跨 A2-C1，但你现在按文章给它们打同一个档。<strong>难度必须打到"题"这一级，不是"文章"这一级。</strong></p></div>
+      <div class="callout good"><p>✅ <strong>但 banmi-level 不是废物 —— 它是冷启动先验</strong>：文本难度对低级别（你主战场 K12 低龄）相关性还不错（7-9 年级主要看文本<sup class="cite" data-refid="15">[16]</sup>），所以 <code>banmi-level</code> 的 CEFR-J 文本档<strong>可以当一道题的"初始难度猜测"</strong>（写进 <code>question.difficulty_cefr</code>，并把 <code>ai_calibrated=false</code>），让题目从一个合理起点出发，再靠作答数据校准到真值。<strong>这正是 Duolingo 用 ML 内容特征估难度的思路 —— 你已经有这个算法了，缺的是把它接到题库（修 P0-3）。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ============ CH7 题型设计 ============ -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">题型设计：不同 CEFR 级别配什么题（cloze 黄金题型 + distractor 质量）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>7.1 cloze（嵌入式完形）—— 为什么是阅读测评的黄金题型</h3>
+      <p>多个理由让 cloze 成为自适应阅读测评的首选题型：</p>
+      <ul>
+        <li><strong>易 auto-score</strong>：MCQ 式 cloze（4 选 1 填空）机器秒判，无需 NLP 评分 —— 对一个人开发的半米极友好；</li>
+        <li><strong>IRT 友好</strong>：每个空就是一道独立可校准的 item，颗粒度刚好；</li>
+        <li><strong>SRI/Lexile 在用</strong>：嵌入式 fill-in-the-blank 正是 SRI 测学生的核心题型<sup class="cite" data-refid="4">[4]</sup>；</li>
+        <li><strong>效度有据</strong>：配置得当的 cloze 信效度可媲美甚至超过标准化阅读测验 —— 一项研究中 10 分钟 cloze 与 30 分钟问答测验相关 r=0.84<sup class="cite" data-refid="17">[18]</sup>；HyTeC-cloze 的信效度"匹配甚至超过标准化阅读测验"<sup class="cite" data-refid="17">[18]</sup>。</li>
+      </ul>
+      <div class="callout warn"><p>🟡 <strong>关键设计要点（半米现在的 cloze 没做到）</strong>：<strong>(1)</strong> 用<strong>语义评分</strong>（接受语义正确的同义答案）面效度高于只认原词的精确评分<sup class="cite" data-refid="17">[18]</sup> —— 但 MCQ 式 cloze 用 4 选 1 就回避了这个问题；<strong>(2)</strong> cloze 的<strong>选项必须"单看都能填进空"</strong>，只有读懂上下文才能选对（SRI 同款设计）—— 这才测的是理解不是语法<sup class="cite" data-refid="4">[4]</sup>。半米 StoryWeaver 的手写 cloze 要按这两条重做。</p></div>
+
+      <h3>7.2 MCQ 干扰项质量 —— 为什么直接决定题目难度（OneStopQA 痛点）</h3>
+      <p>实证：<strong>干扰项质量直接关联题目的难度和区分度</strong>。有效干扰项（功能性强、能吸引"半懂"的学生）让题目更难、区分度更高；<strong>非功能性干扰项（没人选的废选项）会降低 MCQ 的区分能力</strong><sup class="cite" data-refid="16">[17]</sup>。好干扰项要"似是而非"—— 体现一个真实的误解，逼学生多想<sup class="cite" data-refid="16">[17]</sup>。</p>
+      <div class="callout bad"><p>🔴 <strong>OneStopQA 痛点</strong>：它的干扰项是数据集自带、质量未审。如果里面有大量"非功能性废选项"，那些题会<strong>区分度极低（测不出学生水平）</strong>，还会污染 IRT 校准。<strong>修法</strong>：进库时用 <code>distractor_quality_score</code> 字段（schema 已留！）标注，校准后看每个选项的<strong>实际被选率</strong> —— 没人选的干扰项要替换。</p></div>
+
+      <h3>7.3 各题型的 auto-scoring 难度 + IRT 适配性</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>题型</th><th>auto-score</th><th>IRT 适配</th><th>适合 CEFR-J 档</th><th>半米已有</th></tr></thead>
+          <tbody>
+            <tr><td><strong>图文匹配 / tick-cross</strong></td><td>🟢 极易</td><td>🟢 好</td><td>Pre-A1 / A1</td><td>🔴 需补</td></tr>
+            <tr><td><strong>词识别 / 乱序拼词</strong></td><td>🟢 易</td><td>🟢 好</td><td>Pre-A1 / A1</td><td>🔴 需补</td></tr>
+            <tr><td><strong>cloze（4选1填空）★</strong></td><td>🟢 极易</td><td>🟢🟢 最佳</td><td>A1-B2 全段</td><td>🟡 有手写需重做</td></tr>
+            <tr><td><strong>MCQ（理解题）</strong></td><td>🟢 易</td><td>🟢 好（看干扰项）</td><td>A2-C2</td><td>🟢 OneStopQA</td></tr>
+            <tr><td><strong>TFNG（判断对/错/未提及）</strong></td><td>🟢 易</td><td>🟡 中（3选猜对率高）</td><td>B1-C1</td><td>🟢 IELTS</td></tr>
+            <tr><td><strong>matching（标题/信息匹配）</strong></td><td>🟢 易</td><td>🟢 好</td><td>B1-C2</td><td>🟢 IELTS</td></tr>
+            <tr><td><strong>summary completion</strong></td><td>🟡 中（需词库匹配）</td><td>🟡 中</td><td>B2-C2</td><td>🟢 IELTS</td></tr>
+            <tr><td>short answer（开放）</td><td>🔴 难（要 LLM 评）</td><td>🔴 差</td><td>B2+</td><td>—（暂不用）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>7.4 半米分档配题建议（一句话版）</h3>
+      <div class="arch-grid">
+        <div class="arch-box"><div class="ah">Pre-A1 / A1（低端）</div><div class="ad">图文匹配 + 词识别 + tick-cross + 简单 cloze。<strong>不要用纯文字 MCQ</strong>（剑桥 Starters 同款）<sup class="cite" data-refid="23">[25]</sup>。承接 Lexile 报告"低端用替代题型"。</div></div>
+        <div class="arch-box"><div class="ah">A2 / B1（中端 ⭐主战场）</div><div class="ad"><strong>cloze（黄金题型）为主</strong> + 理解 MCQ。题库基础最好（StoryWeaver 尾 + OneStopQA 头），<strong>窄切口先做这段</strong>。</div></div>
+        <div class="arch-box"><div class="ah">B2 / C1 / C2（高端）</div><div class="ad">MCQ + matching + TFNG + summary completion（IELTS 题型全用上）。高级别难度更靠"问什么"，题型要多样<sup class="cite" data-refid="15">[16]</sup>。</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH8 困惑1 数据 ============ -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">困惑 1 解答：用什么数据？</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="callout accent"><p>🎯 <strong>一句话</strong>：你需要<strong>三类数据</strong> —— ①<strong>题库数据</strong>（把三套题统一进 <code>question</code> 表 + 选择性补公开题库）②<strong>校准数据</strong>（从第一天就记 <code>event_log</code> 作答日志，这是未来 IRT 校准的唯一弹药）③<strong>文本数据</strong>（RAZ/ORT/StoryWeaver/OneStopQA/IELTS 全部归一到 CEFR-J）。</p></div>
+
+      <h3>8.1 题库数据：统一三套 + 选择性补公开题库</h3>
+      <p><strong>第一优先 = 把你已有的三套题全部 ETL 进 <code>question</code> 表</strong>（修 P0-1）。schema 的 <code>source</code> 字段早就枚举了 <code>ielts/ket/pet/newsela/toefl/sat/manual_jay/manual_teacher/ai_generated</code> —— 它本来就是为统一多来源题库设计的。可补的公开题库：</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>题库</th><th>内容</th><th>题型</th><th>license / 注意</th><th>对半米</th></tr></thead>
+          <tbody>
+            <tr><td><strong>RACE</strong></td><td>~28k 篇 + ~100k 题，<strong>中国初高中英语考题</strong><sup class="cite" data-refid="26">[28]</sup></td><td>MCQ</td><td>🟡 研究用，商用查 license</td><td>🟢🟢 贴中国学生</td></tr>
+            <tr><td><strong>CLOTH</strong></td><td>教师设计的大规模 cloze，干扰项刻意刁钻<sup class="cite" data-refid="26">[28]</sup></td><td>cloze</td><td>🟡 同上</td><td>🟢 cloze 弹药</td></tr>
+            <tr><td>OneStopQA（已有）</td><td>Guardian B1-C1</td><td>MCQ（STARC）</td><td>🟢 可用</td><td>🟢 B1-C1 段</td></tr>
+            <tr><td>StoryWeaver（已有）</td><td>Pratham 绘本 A1-A2</td><td>cloze/MCQ</td><td>🟢 CC BY 4.0</td><td>🟢 低端段</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout warn"><p>⚠️ RACE/CLOTH 是<strong>研究数据集</strong>，商用前务必查 license（参考 <a href="./eng-assessment-datasets-research.html">数据集报告</a>的 license 方法论）。RACE 来自中国学生英语考题，对半米贴合度高，但<strong>难度仍要在你自己学生群体上重新校准</strong>（别人考场的难度 ≠ 你学生的难度）。</p></div>
+
+      <h3>8.2 校准数据：从第一天就记作答日志（最被忽视、最重要）</h3>
+      <div class="callout bad"><p>🔴 <strong>这是阿杰最该立刻动手的一件事</strong>：IRT 校准的唯一原料是<strong>学生真实作答记录</strong>（谁、答了哪道题、对错、用时）。你的 schema 已经有 <code>event_log</code>（含 <code>answer_submit</code> 事件 + <code>question_id</code>）和 <code>ability_estimate</code> 表 —— <strong>但前端不调后端（P0-4），所以一条作答都没记下来。</strong> 校准数据<strong>攒不出来不是因为没学生，是因为链路没通、没在记。</strong> 哪怕现在题目难度还是猜的，<strong>只要开始记作答，3-6 个月后你就有了校准的弹药。</strong></p></div>
+
+      <h3>8.3 文本数据：全部归一到 CEFR-J（一把尺）</h3>
+      <p>RAZ（Reading A-Z）/ ORT（Oxford Reading Tree）/ StoryWeaver / OneStopQA / IELTS 的文本，<strong>全部用 <code>banmi-level</code> 跑一遍 CEFR-J 12 档</strong>，写进 <code>text_difficulty_estimate</code> 表（schema 已有这张表！第 242 行，含 <code>cefr_reference</code> + <code>lexile_like_min/max</code>）。这样所有文本落在<strong>同一把 CEFR-J 尺</strong>上，Lexile 作为换算列一并存（展示用）。<strong>归一 = 收口的第一块。</strong></p>
+    </div>
+  </section>
+
+  <!-- ============ CH9 困惑2 题目 ============ -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">困惑 2 解答：用什么题目？</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="callout accent"><p>🎯 <strong>一句话</strong>：按 CEFR-J 档配题型（第 7 章那张表）—— <strong>低端 cloze/图文匹配/词识别，中端 cloze（黄金）+ MCQ，高端 MCQ/matching/TFNG/summary</strong>；每道题的难度<strong>先用算法+LLM 预标当先验，再靠作答数据校准</strong>，状态走 <code>calibration_status</code> 生命周期。</p></div>
+
+      <h3>9.1 题型选择 = 第 7 章已答</h3>
+      <p>不重复。核心三条：<strong>(1)</strong> cloze 是黄金题型（易判、IRT 友好、SRI 在用），中端主用；<strong>(2)</strong> 低端必须用非文字题型（图文匹配等），别用纯 MCQ；<strong>(3)</strong> 高端用 IELTS 的多样题型（你已有）。</p>
+
+      <h3>9.2 题型怎么标难度（核心操作）</h3>
+      <p>每道题进库时走这套<strong>难度三段式</strong>（对应 schema 的 <code>calibration_status</code>）：</p>
+      <div class="timeline">
+        <div class="step"><div class="badge">1</div><div class="step-card"><h4>预标（draft）—— 算法 + LLM 给冷启动难度</h4><div class="meta"><span class="pill accent">CVLA 文本特征</span><span class="pill purple">LLM 预估</span></div><p><code>banmi-level</code> 给文本 CEFR-J 档当起点，LLM 再据"问什么/干扰项"微调。写进 <code>difficulty_cefr</code>，<code>ai_calibrated=false</code>。<strong>诚实标注：这是猜的。</strong></p></div></div>
+        <div class="step"><div class="badge">2</div><div class="step-card"><h4>专家审（expert_reviewed）—— 你 + Joy 老师网络锚定</h4><div class="meta"><span class="pill good">3 位专家 ≈ 50 人统计校准<sup class="cite" data-refid="12">[13]</sup></span></div><p>少量真人专家判定难度档，<code>teacher_validated=true</code>。学界实证：<strong>3 位专家的判断可达 ≈50 人统计校准的效果</strong><sup class="cite" data-refid="12">[13]</sup> —— 你和 Joy 的教师网络完全做得到。</p></div></div>
+        <div class="step done"><div class="badge">3</div><div class="step-card"><h4>校准（pilot→calibrated）—— 作答数据跑 Rasch</h4><div class="meta"><span class="pill info">~100-200 作答/题<sup class="cite" data-refid="2">[2]</sup></span></div><p>攒够作答后跑 Rasch，填 <code>item_difficulty_b</code>，状态升 <code>calibrated</code>→<code>operational</code>。这才是"真难度"。<strong>这一步现在完全没跑（P0-5）。</strong></p></div></div>
+      </div>
+      <div class="callout good"><p>✅ <strong>schema 已经为这套三段式设计好了</strong>：<code>calibration_status</code> 的 6 个状态（draft→expert_reviewed→pilot→calibrated→operational→retired）+ <code>ai_calibrated</code> + <code>teacher_validated</code> 两个布尔标记，正好对应"难度从猜到真"的三段。<strong>你只需把这套流程真的跑起来。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ============ CH10 困惑3 模型 ============ -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">困惑 3 解答：用什么模型？（难度标注/能力估计/自适应选题/LLM 边界）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="callout accent"><p>🎯 <strong>一句话（哪步用什么）</strong>：<strong>难度标注</strong>= banmi-level(CVLA+XGBoost) 当冷启动先验 + LLM 辅助预标；<strong>能力估计</strong>= Rasch(1PL)（别上 3PL）；<strong>自适应选题</strong>= MST 多阶段（比逐题 CAT 更适合阅读 testlet）；<strong>LLM</strong>= 出题草稿 + 预估难度 + 干扰项生成，但<strong>必须人审、且别信它在难度两端的判断</strong>。</p></div>
+
+      <h3>10.1 难度标注模型：banmi-level 当先验够不够？</h3>
+      <p><strong>当冷启动先验够，当最终答案不够。</strong> CVLA+XGBoost 算的是文本难度，对低级别相关性不错（7-9 年级主要看文本<sup class="cite" data-refid="15">[16]</sup>），可以省掉"从零猜难度"。但它看不到"问什么/干扰项"，所以<strong>必须靠作答数据校准修正</strong>。这正是 Duolingo 的做法 —— 用内容特征估难度做冷启动，再用 AutoIRT 校准<sup class="cite" data-refid="8">[8]</sup>。<strong>你的 banmi-level = Duolingo 那套里"内容特征模型"的角色。</strong></p>
+
+      <h3>10.2 能力估计模型：Rasch（1PL），不是 3PL</h3>
+      <p>用 <strong>Rasch（1PL）</strong>估学生能力 θ 并校准题目难度 b。理由：<strong>(1)</strong> 小样本友好（~100-200 人/题<sup class="cite" data-refid="2">[2]</sup>）；<strong>(2)</strong> 3PL 要 500+ 人 + 先验，半米没这个量<sup class="cite" data-refid="24">[26]</sup>；<strong>(3)</strong> Rasch 在小到中样本下精度是"够用"的稀疏选择<sup class="cite" data-refid="2">[2]</sup>。等数据多了再考虑升 2PL。工具：R 的 <code>catR</code>/<code>mstR</code>、Python 的 <code>py-irt</code>，或 Duolingo 开源思路的 AutoIRT<sup class="cite" data-refid="8">[8]</sup>。</p>
+
+      <h3>10.3 自适应选题模型：MST 优先于逐题 CAT（关键架构选择）</h3>
+      <div class="callout bad"><p>🔴 <strong>逐题 CAT 不适合阅读 —— 这是个常见误区</strong>：纯逐题 CAT（每答一题立刻选下一题）<strong>不适合天然成 testlet 的阅读题</strong>（一篇文章配多道题，不可能每答一道就换一篇）<sup class="cite" data-refid="27">[29]</sup>。</p></div>
+      <div class="callout good"><p>✅ <strong>用 MST（多阶段测试）</strong>：把题<strong>预先组装成不同难度的 module/panel</strong>，学生做完一个 stage 后<strong>整组路由</strong>到下一难度的 module<sup class="cite" data-refid="27">[29]</sup>。优点：<strong>(1)</strong> 适合"一篇文章配几道题"的阅读结构；<strong>(2)</strong> 内容/曝光更可控；<strong>(3)</strong> <strong>对小题库更友好、更容易搭</strong>（半米题库小，这点关键）。代价是适应性略低于逐题 CAT，但对半米完全值得。<strong>半米第一版甚至可以更简单 —— 做个"分流测试（routing test）"：先几道中等题定大致档，再给该档的一组题。</strong></p></div>
+
+      <h3>10.4 LLM 辅助的诚实边界（呼应 competence paradox）</h3>
+      <p>LLM 能帮很多，但<strong>边界必须诚实</strong>（呼应 <a href="./banmi-mirofish-application-research.html">mirofish 报告</a>的 competence paradox + <a href="./eng-assessment-datasets--scoring-engine-blueprint.html">评分引擎</a>的"校准>架构"）：</p>
+      <div class="callout warn">
+        <p><strong>🟡 LLM 出题：可以，但 ~53% 的干扰项才算高质量，必须人审</strong></p>
+        <p>实测：LLM 生成的干扰项平均只有 <strong>~53% 被老师评为高质量</strong>，且 LLM <strong>不了解真实学生的常见误解</strong>，难生成"似是而非"的好干扰项<sup class="cite" data-refid="28">[30]</sup>。所以 LLM 出题必须 human-in-the-loop（Duolingo 同款<sup class="cite" data-refid="7">[7]</sup>）。</p>
+      </div>
+      <div class="callout warn">
+        <p><strong>🟡 LLM 预估难度：相关 ~0.77 还行，但它在难度两端会"压缩"、判不准极端值</strong></p>
+        <p>用 LLM/特征模型预估题目难度，相关可达 <strong>0.77</strong>（RMSE 0.59）<sup class="cite" data-refid="14">[15]</sup>。但 2025 研究发现：<strong>GPT-4o/o1 的难度估计"聚在一个窄带里、系统性低估两端的极端值"</strong> —— 即<strong>它分不清"真的很难"和"中等难"，也分不清"真的很简单"</strong><sup class="cite" data-refid="13">[14]</sup>。含义：LLM 预标难度<strong>能当先验排个大致序，但极端难/极端易的题它判不准，必须靠作答数据校准兜底。</strong></p>
+      </div>
+      <div class="callout bad">
+        <p><strong>🔴 LLM 答题验证答案：当心"参数知识干扰"</strong></p>
+        <p>LLM 常<strong>不忠于上下文，用自己的世界知识答题而非只读文本</strong><sup class="cite" data-refid="29">[31]</sup>。后果：用 LLM 验证"这道阅读题答案对不对"时，它可能凭背景知识答对一道<strong>其实脱离文本也能猜的烂题</strong> —— 反而掩盖了"这道题没真正测阅读"的问题。设计"必须读文本才能答"的好题，是<strong>出了名的难</strong><sup class="cite" data-refid="28">[30]</sup>，这件事 LLM 替不了人。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH11 困惑4 方案+架构 ============ -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">困惑 4 解答：用什么解决方案？（canonical 尺度 + 统一架构）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="callout accent"><p>🎯 <strong>一句话</strong>：<strong>选 CEFR-J 12 档当唯一 canonical 主尺</strong>（Lexile/学校刻度降级为展示换算）+ <strong>统一三套题库到 <code>question</code> 表</strong>（含 IRT 占位 + 来源标记 + license 标记）+ <strong>打通后端 API + 前端读真库</strong> + <strong>9 套 UI 合并成 1 套参数化</strong> + <strong>校准从口头承诺变成定期跑的流程</strong>。</p></div>
+
+      <h3>11.1 第一决策：钦定 CEFR-J 为 canonical 主尺</h3>
+      <p>理由已在结论 #3 给（你已在算 + Lexile 低端不可靠且无通用映射 + 客户是 K12 ESL）。落地：</p>
+      <ul>
+        <li><strong>内部一切难度/能力都用 CEFR-J 12 档表示</strong>（Pre-A1 / A1.1 / A1.2 / A1.3 / A2.1 / A2.2 / B1.1 / B1.2 / B2.1 / B2.2 / C1 / C2）<sup class="cite" data-refid="20">[22]</sup>；</li>
+        <li><strong>Lexile = 展示换算列</strong>（家长熟悉，报告里展示，存 <code>lexile_like_min/max</code>），但<strong>不参与选题/定档逻辑</strong>；</li>
+        <li><strong>学校刻度 / IELTS band / 百分制 = 输出映射层</strong>（一张映射表，呼应 ETS 双锚、评分引擎的 mapping layer 思路）；</li>
+        <li><strong>schema 调整</strong>：<code>question.difficulty_band</code> 现在用的是 Lexile-like 6 桶（<code>BR_250L</code>…），建议<strong>改/加一列 CEFR-J 12 档作主</strong>，Lexile 桶退为换算。</li>
+      </ul>
+
+      <h3>11.2 整体架构（收口后该长什么样）</h3>
+      <div class="arch-grid">
+        <div class="arch-box"><div class="ah">① 内容层 · 文本 + 题库</div><div class="ad">所有文本 → <code>banmi-level</code> → CEFR-J 档 → <code>text_difficulty_estimate</code>。三套题 + 公开题库 → ETL → <strong>统一 <code>question</code> 表</strong>（含 source/license/IRT 占位）。</div></div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-box"><div class="ah">② 难度层 · 预标 + 校准</div><div class="ad">CVLA+LLM 预标（draft）→ 专家锚定（expert_reviewed）→ 作答数据跑 Rasch（calibrated）。填 <code>item_difficulty_b</code>。</div></div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-box"><div class="ah">③ 测评层 · MST 选题 + θ 估计</div><div class="ad">后端 API：<code>GET /questions?band=</code> 取题、<code>POST /answers</code> 收作答、Rasch 更新 θ、MST 路由下一组、给 CEFR-J 档 + 置信度。</div></div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-box"><div class="ah">④ 展示层 · 1 套参数化 UI</div><div class="ad">合并 9 套为 1 套主 flow（封面→答题→报告），<strong>尺度参数化</strong>。报告同时展示 CEFR-J（主）+ Lexile（换算）+ 学校刻度。</div></div>
+        <div class="arch-arrow">↓ (闭环)</div>
+        <div class="arch-box"><div class="ah">⑤ 校准回流 · event_log</div><div class="ad">每次作答写 <code>event_log</code> → 定期批量跑 Rasch 校准 → 更新题目 b → 题库越用越准。<strong>这是闭环的关键，现在断着。</strong></div></div>
+      </div>
+
+      <h3>11.3 五个收口动作（对应五个 P0）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>P0 根因</th><th>收口动作</th><th>产出</th></tr></thead>
+          <tbody>
+            <tr><td>P0-1 题库孤立</td><td>三套题 ETL 进 <code>question</code> 表</td><td>表里有真数据（一列变绿）</td></tr>
+            <tr><td>P0-2 尺度并存</td><td>钦定 CEFR-J 主尺，Lexile 降展示</td><td>唯一 canonical 源</td></tr>
+            <tr><td>P0-3 算法脱钩</td><td>banmi-level 输出写进题目难度先验</td><td>算法接上题库</td></tr>
+            <tr><td>P0-4 前后端断裂</td><td>加题库 API + 前端读真库</td><td>系统从 demo 变能测学生</td></tr>
+            <tr><td>P0-5 校准虚设</td><td>记 event_log + 定期跑 Rasch</td><td>难度从猜变真</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH12 拨乱反正路线图 ============ -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">拨乱反正路线图（从碎片 → 可生产）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="callout info"><p>📌 这是<strong>对半米的推演建议</strong>（非外部查实）。工时是单人粗估 ⚠️，按你实际节奏调。原则：<strong>每一步都要能独立验证、能见到东西，不憋大招。</strong></p></div>
+      <div class="timeline">
+        <div class="step"><div class="badge">0</div><div class="step-card"><h4>阶段 0 · 钉主尺 + 立规矩（~2 天）</h4><div class="meta"><span class="pill accent">决策</span><span class="pill">无代码</span></div><p>写一份《半米阅读测评 canonical 规范》：<strong>CEFR-J 12 档为主尺，Lexile 为展示换算，映射表一张</strong>。这是所有后续工作的宪法。<strong>验证</strong>：文档评审通过，团队（你+Joy）认同。</p></div></div>
+        <div class="step"><div class="badge">1</div><div class="step-card"><h4>阶段 1 · 统一题库到 question 表（~1 周）</h4><div class="meta"><span class="pill">ETL</span><span class="pill warn">修 P0-1/P0-3</span></div><p>写 ETL 把三套题灌进 <code>question</code> 表，<code>banmi-level</code> 跑文本难度当 <code>difficulty_cefr</code> 先验（<code>ai_calibrated=false</code>），标 <code>source</code> + license。<strong>验证</strong>：<code>SELECT count(*) FROM question</code> > 0，且能按 CEFR-J 档查出题。</p></div></div>
+        <div class="step"><div class="badge">2</div><div class="step-card"><h4>阶段 2 · 后端题库 API + 作答记录（~1 周）</h4><div class="meta"><span class="pill">FastAPI</span><span class="pill bad">修 P0-4</span></div><p>加 <code>GET /questions?band=</code>、<code>POST /answers</code>（写 <code>event_log</code>）、<code>GET /ability</code>。<strong>验证</strong>：curl 能取到真题、提交作答能落库到 <code>event_log</code>。<strong>从这一步起开始攒校准弹药。</strong></p></div></div>
+        <div class="step"><div class="badge">3</div><div class="step-card"><h4>阶段 3 · 合并 9 套 UI 为 1 套参数化（~1.5 周）</h4><div class="meta"><span class="pill">前端</span><span class="pill bad">修 P0-2/P0-4 前端侧</span></div><p>1 套主 flow（封面→答题→报告），尺度参数化，<strong>读真 API 不再 hardcode</strong>。报告展示 CEFR-J 主 + Lexile 换算。<strong>验证</strong>：一个学生能在真 UI 上答真题、看到真报告。9→1。</p></div></div>
+        <div class="step done"><div class="badge">4</div><div class="step-card"><h4>阶段 4 · 最小自适应（MST 路由）（~1 周）</h4><div class="meta"><span class="pill good">MST/routing</span></div><p>先做简单分流：几道中等题定大致档 → 给该档一组题 → 出 CEFR-J 档 + 置信度。<strong>验证</strong>：不同水平的测试者进来，被分到不同档、答到不同题。（详见第 14 章窄切口）</p></div></div>
+        <div class="step done"><div class="badge">5</div><div class="step-card"><h4>阶段 5 · 校准流程落地（持续，攒够数据后）</h4><div class="meta"><span class="pill info">Rasch</span><span class="pill bad">修 P0-5</span></div><p>攒够 ~100-200 作答/题后，定期批量跑 Rasch，更新 <code>item_difficulty_b</code>，状态升 <code>calibrated</code>。<strong>从口头承诺变成 cron job。</strong><strong>验证</strong>：题目 b 值有数、和预标先验对比、明显偏的题被 flag。</p></div></div>
+        <div class="step"><div class="badge">6</div><div class="step-card"><h4>阶段 6 · 扩级别 + 扩题型（迭代）</h4><div class="meta"><span class="pill purple">扩展</span></div><p>A2-B1 跑通后，往低端（Pre-A1/A1 图文题）和高端（B2+ IELTS 题型）扩。<strong>每扩一段都重复"预标→专家锚→校准"。</strong></p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH13 个人开发者校准 ============ -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">个人开发者 / 小团队的务实校准路线</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="callout good"><p>✅ <strong>核心安慰</strong>：你<strong>做不了也不需要</strong>大规模 IRT 校准（那是 ETS/剑桥几千人的活）。学界和工业界有一整套<strong>小样本/冷启动的务实替代</strong>，专门给你这种情况。</p></div>
+
+      <h3>13.1 五条务实替代（从最省力到最重）</h3>
+      <div class="callout teal">
+        <p><strong>① 专家校准 —— 3 位专家 ≈ 50 人统计校准（最适合半米起步）</strong></p>
+        <p>实证：<strong>仅需 3 位专家的判断，就能得到一个校准题库，其参数与"engaging 50+ 人统计校准"的结果在统计上无显著差异</strong><sup class="cite" data-refid="12">[13]</sup>。对半米：<strong>你 + Joy 的教师网络给每道题判个 CEFR-J 档，就是一次有效的低成本校准。</strong> 这是冷启动期最现实的路。</p>
+      </div>
+      <div class="callout teal">
+        <p><strong>② 内容特征模型估难度（你已有！）—— Duolingo 同款</strong></p>
+        <p>用题目内容特征（文本 readability + 嵌入 + 你的 CVLA 特征）训个模型预估难度 b。<strong>banmi-level 的 XGBoost 就是干这个的 —— 你已经有了，只是没接到题库。</strong> Duolingo 正是用这招省掉真人 pilot<sup class="cite" data-refid="5">[5]</sup>。</p>
+      </div>
+      <div class="callout teal">
+        <p><strong>③ AutoIRT —— 自动 ML 校准，无需调参，冷启动友好</strong></p>
+        <p>Duolingo 2024 上线的 AutoIRT：用 AutoML 从<strong>题目特征 + 稀疏作答</strong>联合估 IRT 参数，<strong>无需超参调优</strong>，仅 20 个作答时相关就达 0.936<sup class="cite" data-refid="8">[8]</sup>。对半米：<strong>这是"作答数据还很少时"的理想工具</strong> —— 不用等攒够几百人。</p>
+      </div>
+      <div class="callout teal">
+        <p><strong>④ 锚题 + linking —— 把不同来源的题放进同一把尺</strong></p>
+        <p>设少量<strong>锚题（anchor items）</strong>（每个学生都答、跨题组共用），用它把 OneStopQA / StoryWeaver / IELTS 的题<strong>linking 到同一个 CEFR-J 尺度</strong>上<sup class="cite" data-refid="9">[9]</sup>。schema 已有 <code>is_placement_anchor</code> + <code>placement_difficulty_anchor</code> 字段。注意：有模型失配时<strong>锚题应占 ≥20%</strong><sup class="cite" data-refid="9">[9]</sup>。</p>
+      </div>
+      <div class="callout teal">
+        <p><strong>⑤ 借已校准的公开题库 —— 站在巨人肩上</strong></p>
+        <p>RACE/CLOTH 等公开题库已有大量真实作答（虽不是你的学生群体），可<strong>当难度先验的参考 + linking 的锚</strong><sup class="cite" data-refid="26">[28]</sup>。但<strong>最终仍要在你自己学生群体上校准</strong>（难度因人群而异）。</p>
+      </div>
+
+      <h3>13.2 半米的务实校准节奏（推演建议 ⚠️）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>时期</th><th>难度来源</th><th>校准方法</th><th>题目状态</th></tr></thead>
+          <tbody>
+            <tr><td>第 0-1 月（冷启动）</td><td>banmi-level + LLM 预标</td><td>① 专家校准（你+Joy）</td><td>draft → expert_reviewed</td></tr>
+            <tr><td>第 1-3 月（小样本）</td><td>+ 内容特征模型</td><td>③ AutoIRT（稀疏作答）</td><td>→ pilot</td></tr>
+            <tr><td>第 3-6 月+（攒够）</td><td>作答数据为主</td><td>① Rasch 正式校准 + ④ 锚题 linking</td><td>→ calibrated → operational</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout warn"><p>⚠️ <strong>诚实提醒</strong>：所有这些都建立在"<strong>你真的开始记作答</strong>"之上（修 P0-4）。没有作答数据，再好的校准方法都是空中楼阁。<strong>所以本报告反复强调：今天就把作答记录这条链路打通，比任何别的都重要。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ============ CH14 窄切口 ============ -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">⭐ 最该先跑通的窄切口（最小自适应闭环）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="callout accent"><p>🎯 <strong>呼应阿杰焦虑</strong>：别再一步到位贪全。证明"<strong>端到端能跑通一个级别</strong>"比"架构很完整"重要一百倍。下面是一个<strong>2-3 周单人能见到 demo</strong> 的最小自适应闭环。</p></div>
+
+      <h3>14.1 窄切口的边界（刻意砍掉的）</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">A2-B1</div><div class="l">只做一个级别段（题库最有基础）</div></div>
+        <div class="metric"><div class="v">cloze</div><div class="l">只做一种题型（最易判、最 IRT 友好）</div></div>
+        <div class="metric"><div class="v">1 套</div><div class="l">只留一套参数化 UI（不是 9 套）</div></div>
+        <div class="metric"><div class="v">routing</div><div class="l">最简分流自适应（不是完整 CAT）</div></div>
+        <div class="metric"><div class="v">专家+LLM</div><div class="l">难度先靠预标+少量锚定（不等大数据）</div></div>
+        <div class="metric"><div class="v">1 档+SE</div><div class="l">输出 1 个 CEFR-J 档 + 置信度</div></div>
+      </div>
+
+      <h3>14.2 最小闭环的 6 个组件 + 验证标准</h3>
+      <div class="timeline">
+        <div class="step"><div class="badge">1</div><div class="step-card"><h4>组件 1 · A2-B1 cloze 题库（~40-60 题进 question 表）</h4><div class="meta"><span class="pill">数据</span></div><p><strong>产出</strong>：StoryWeaver A2 尾 + OneStopQA B1 头的文章，做成 4 选 1 cloze，灌进 <code>question</code> 表，<code>banmi-level</code> 预标 CEFR-J。<strong>验证</strong>：<code>SELECT * FROM question WHERE skill_tag='cloze' AND difficulty_cefr IN ('A2','B1')</code> 有 40+ 行。</p></div></div>
+        <div class="step"><div class="badge">2</div><div class="step-card"><h4>组件 2 · 专家锚定难度（你 + Joy 给档）</h4><div class="meta"><span class="pill good">3 专家≈50人<sup class="cite" data-refid="12">[13]</sup></span></div><p><strong>产出</strong>：每题人工判 A2/B1 子档，<code>teacher_validated=true</code>。<strong>验证</strong>：每题有专家档，和算法预标对比，明显冲突的复核。</p></div></div>
+        <div class="step"><div class="badge">3</div><div class="step-card"><h4>组件 3 · 题库 API</h4><div class="meta"><span class="pill">FastAPI</span></div><p><strong>产出</strong>：<code>GET /questions?band=A2|B1&type=cloze</code>、<code>POST /answers</code>（写 event_log）。<strong>验证</strong>：curl 取题成功、提交作答落库。</p></div></div>
+        <div class="step"><div class="badge">4</div><div class="step-card"><h4>组件 4 · 1 套参数化 UI（读真库）</h4><div class="meta"><span class="pill">前端</span></div><p><strong>产出</strong>：封面→答题（cloze 渲染）→报告，读 API。<strong>验证</strong>：学生在浏览器答 8-12 道真题，不是 demo。</p></div></div>
+        <div class="step done"><div class="badge">5</div><div class="step-card"><h4>组件 5 · 最简自适应（routing）+ θ 估计</h4><div class="meta"><span class="pill good">Rasch θ</span></div><p><strong>产出</strong>：先给 2-3 道 A2/B1 边界题定大致位置 → 路由到偏 A2 或偏 B1 的一组 → 答完用 Rasch 估 θ → 映射 CEFR-J 档 + SE。<strong>验证</strong>：故意答得好 → 判 B1；故意答差 → 判 A2。</p></div></div>
+        <div class="step done"><div class="badge">6</div><div class="step-card"><h4>组件 6 · 报告输出 1 档 + 置信度</h4><div class="meta"><span class="pill accent">CEFR-J + Lexile换算</span></div><p><strong>产出</strong>：报告页给"你的阅读水平 ≈ B1.1（置信度中）"+ Lexile 换算展示 + 推荐读物。<strong>验证</strong>：一个完整学生闭环跑通，可给真学生试。</p></div></div>
+      </div>
+
+      <div class="callout good"><p>✅ <strong>跑通后你就有了</strong>：① 三套尺度收口成一套（CEFR-J）的证明 ② 题库→API→前端打通的证明 ③ 算法预标→专家锚定→Rasch 估计的最小校准闭环 ④ 一个能给真学生测 A2-B1 的真系统。<strong>从这里往两端扩级别、往多题型扩，就是顺水推舟 —— 因为最难的"端到端贯通"已经被证明了。</strong> 这一步直接消解"越走越偏"的焦虑：<strong>偏，是因为从没通；通一次，方向感就回来了。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ============ CH15 mini demo ============ -->
+  <section class="chapter" id="ch15">
+    <h2><span class="num">15</span><span class="title-text">mini demo：自适应测评 / CAT 概念可玩演示</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>下面是一个<strong>可玩的 CAT / Rasch 概念演示</strong>（纯前端模拟，非真实题库）：模拟一个学生答 cloze 题 → 每答一题，<strong>能力估计 θ 动态更新</strong> → 系统<strong>自适应选下一题的难度</strong>（永远逼近"你约 50% 会对"的题）。答几道后看 θ 收敛到一个 CEFR-J 档。这就是第 4 章 CAT 机理的直观版。</p>
+
+      <div class="demo-host">
+        <h4>🎮 CAT 自适应测评模拟器</h4>
+        <div id="demo-status" style="font-size:13px;color:var(--text-mute);margin-bottom:6px;">点"开始测评"，系统从中等难度题起步。每题答对→下题更难，答错→下题更易。θ（能力）和它的标准误 SE 实时更新。</div>
+        <div class="demo-bars">
+          <div class="bar-row"><span class="bl">能力估计 θ</span><div class="bar-track"><div class="bar-fill" id="bar-theta" style="width:50%;background:linear-gradient(90deg,var(--accent),var(--purple));"></div></div></div>
+          <div class="bar-row"><span class="bl">当前题难度 b</span><div class="bar-track"><div class="bar-fill" id="bar-b" style="width:50%;background:var(--teal);"></div></div></div>
+          <div class="bar-row"><span class="bl">置信度(1-SE)</span><div class="bar-track"><div class="bar-fill" id="bar-se" style="width:10%;background:var(--good);"></div></div></div>
+        </div>
+        <div class="theta-display" id="demo-theta">θ = 0.00 | SE = 1.00 | 估计档位：— | 已答 0 题</div>
+        <div class="demo-q" id="demo-qbox" style="display:none;">
+          <div class="qmeta" id="demo-qmeta"></div>
+          <div id="demo-prompt" style="font-size:15px;margin-bottom:6px;"></div>
+          <div id="demo-opts"></div>
+        </div>
+        <button class="demo-btn" id="demo-start">▶ 开始测评</button>
+        <button class="demo-btn ghost" id="demo-reset" style="display:none;">↻ 重置</button>
+        <div id="demo-result" style="display:none;margin-top:12px;padding:12px;border-radius:10px;background:var(--good-soft);border:1px solid var(--good);font-size:14px;"></div>
+      </div>
+
+      <div class="callout info"><p>📌 <strong>这个 demo 演示的关键点</strong>：<strong>(1)</strong> θ 从 0（不知道）开始，每答一题就更新；<strong>(2)</strong> 答对 → 下一题 b 升高（更难），答错 → 下一题 b 降低（更易）—— 这就是"选你约 50% 会对的题"；<strong>(3)</strong> SE 随题数下降（置信度上升），降到阈值就能停 —— 这就是为什么 CAT 只要 8-15 题就够；<strong>(4)</strong> 最后 θ 映射成一个 CEFR-J 档。<strong>真实系统里，每道题的 b 是用学生作答数据 Rasch 校准出来的（不是这里写死的）—— 那一步才是半米最缺的。</strong></p></div>
+
+      <h3>15.1 架构交互图（统一前后的对比）</h3>
+      <div class="demo-host">
+        <h4>🔀 收口前 vs 收口后</h4>
+        <div class="demo-row" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="demo-chip active" data-arch="before">❌ 现在（各自为政）</button>
+          <button class="demo-chip" data-arch="after">✅ 收口后（一根主轴）</button>
+        </div>
+        <div id="arch-out" class="demo-output" style="font-size:13.5px;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH16 FAQ ============ -->
+  <section class="chapter" id="ch16">
+    <h2><span class="num">16</span><span class="title-text">FAQ（12 条）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">我没几千个学生，根本跑不了 IRT 校准，这套是不是对我没用？</span><span class="toggle">+</span></div><div class="faq-a"><p>恰恰相反。你不需要大规模 IRT —— 第 13 章给了五条小样本替代：<strong>3 位专家判断 ≈ 50 人统计校准</strong><sup class="cite" data-refid="12">[13]</sup>、内容特征模型（你的 XGBoost 已是）、AutoIRT（20 个作答相关就 0.936）<sup class="cite" data-refid="8">[8]</sup>、锚题 linking、借公开题库。Rasch 本身就是为小样本设计的（100-200 人/题）<sup class="cite" data-refid="2">[2]</sup>。关键不是"有没有几千人"，是"<strong>有没有从今天开始记作答</strong>"。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">banmi-level 我花了好多功夫，难道白做了？</span><span class="toggle">+</span></div><div class="faq-a"><p>完全没白做。它是你<strong>难度冷启动的核心资产</strong> —— 扮演 Duolingo 那套里"用内容特征估难度"的角色<sup class="cite" data-refid="5">[5]</sup>。问题只是它现在<strong>没接到题库</strong>（P0-3）。接上后，它给每道新题一个合理的初始难度，省掉"从零猜"。它算的是文本难度（不是题目难度的最终答案），但作为先验非常有用，尤其对低级别（7-9 年级难度主要看文本<sup class="cite" data-refid="15">[16]</sup>）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">为什么一定要选 CEFR-J 当主尺，Lexile 家长更熟啊？</span><span class="toggle">+</span></div><div class="faq-a"><p>三个硬理由（结论 #3）：① 你 banmi-level 已经在算 CEFR-J，零成本；② Lexile 低端是大开口桶，且 CEFR↔Lexile 没有通用映射、机构间互相打架<sup class="cite" data-refid="21">[23]</sup>；③ CEFR-J 本就是为 ESL/EFL 学习者设计，比给母语者的 Lexile 更贴你的 K12 客户。<strong>但 Lexile 不丢</strong> —— 作"展示换算"留着（ETS TOEFL Primary 也是 CEFR + Lexile 双锚<sup class="cite" data-refid="19">[21]</sup>）。内部一把主尺，对外多个展示，是工业标准。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">文本难度和题目难度到底差多少？我用文本难度凑合不行吗？</span><span class="toggle">+</span></div><div class="faq-a"><p>低级别凑合还行，高级别会严重失真。实证：7-9 年级题目难度主要由文本驱动，但 10-12 年级"问什么/推理深度"等问题特征变得更重要、文本特征不再系统影响难度<sup class="cite" data-refid="15">[16]</sup>。同一篇文章配不同题、不同干扰项，难度天差地别<sup class="cite" data-refid="16">[17]</sup>。所以：文本难度当先验 OK，当最终答案不行 —— 必须靠作答校准（第 6 章）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">为什么 cloze 是黄金题型？我现在的简单挖空算 cloze 吗？</span><span class="toggle">+</span></div><div class="faq-a"><p>cloze 黄金是因为：易 auto-score、IRT 友好（每空一 item）、SRI/Lexile 在用、信效度有据（10 分钟 cloze 与 30 分钟问答相关 r=0.84）<sup class="cite" data-refid="17">[18]</sup>。但你 StoryWeaver 的手写挖空要按两条重做：① 用 4 选 1（回避语义评分难题）② <strong>选项必须单看都能填进空，只有读懂上下文才知哪个对</strong>（SRI 同款）<sup class="cite" data-refid="4">[4]</sup> —— 这才测理解不测语法。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">我能不能让 LLM 直接出题 + 标难度，省掉这一堆事？</span><span class="toggle">+</span></div><div class="faq-a"><p>能帮但有边界（第 10.4 节）：LLM 出题 ~53% 干扰项才算高质量、不懂真实学生误解，必须人审<sup class="cite" data-refid="28">[30]</sup>；LLM 估难度相关 0.77 还行但<strong>系统性低估两端极端值、判不准最难/最易的题</strong><sup class="cite" data-refid="13">[14]</sup>；LLM 还会用世界知识答题而非读文本（参数知识干扰）<sup class="cite" data-refid="29">[31]</sup>。结论：LLM 当草稿工 + 先验排序工，<strong>人审 + 作答校准兜底</strong>。这呼应"校准>架构"。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">CAT 和 MST 有啥区别？我该用哪个？</span><span class="toggle">+</span></div><div class="faq-a"><p>逐题 CAT 每答一题立刻选下一题；MST 把题预组成不同难度的 module，做完一组整组路由<sup class="cite" data-refid="27">[29]</sup>。<strong>阅读用 MST 更好</strong>：阅读题天然成 testlet（一篇文章配几道题），不可能每答一题就换文章；MST 内容/曝光可控、对小题库友好<sup class="cite" data-refid="27">[29]</sup>。半米第一版可以更简单 —— 做"分流测试"：几道题定档→给该档一组题。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">我该用 1PL、2PL 还是 3PL？</span><span class="toggle">+</span></div><div class="faq-a"><p><strong>用 1PL（Rasch）</strong>。3PL（加猜测参数）要 500+ 人 + 先验<sup class="cite" data-refid="24">[26]</sup>，你没这个量。Rasch 只估一个难度参数，100-200 人/题就够<sup class="cite" data-refid="2">[2]</sup>，小样本最稳。等数据多了、发现题目区分度差异大，再升 2PL。你的 schema 留了 b/a/c 三字段是对的（未来可升），但<strong>第一版只填 b</strong>。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">9 套 UI 合并成 1 套，会不会丢掉 cefr/lexile/diagnostic 三种展示需求？</span><span class="toggle">+</span></div><div class="faq-a"><p>不会。三种"展示"是<strong>同一份数据的不同呈现</strong>，不该是三套代码。合并后用<strong>尺度参数化</strong>：内部 CEFR-J 一份数据，报告页根据参数切换展示成 CEFR-J / Lexile 换算 / 诊断视图。这正是 ETS 双锚的思路<sup class="cite" data-refid="19">[21]</sup>。9 套 = 3 阶段 × 3 尺度的冗余，合并后每改一处改 1 个文件不是 9 个。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">我现在最该先做哪一件事？</span><span class="toggle">+</span></div><div class="faq-a"><p>两件事按顺序：<strong>(1) 钉主尺</strong> —— 一份《canonical 规范》写死 CEFR-J 为主、Lexile 为展示（2 天，无代码，但解决 P0-2 的认知根）；<strong>(2) 打通作答记录链路</strong> —— 哪怕题库还没统一，先让前端能 <code>POST /answers</code> 写 <code>event_log</code>（修 P0-4 的最关键一截）。因为<strong>校准数据是攒出来的，越早记越早有弹药</strong>。然后按第 14 章窄切口推。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">RACE/CLOTH 这些公开题库我能直接用吗？</span><span class="toggle">+</span></div><div class="faq-a"><p>能当弹药但要小心两点：① <strong>license</strong> —— 它们是研究数据集，商用前查授权（参考数据集报告的 license 方法论）；② <strong>难度要重新校准</strong> —— 别人考场的难度 ≠ 你学生的难度，公开数据的难度只能当先验/linking 锚，最终要在你自己学生群体上跑 Rasch<sup class="cite" data-refid="26">[28]</sup>。好处：RACE 来自中国学生英语考题，对半米贴合度高。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q12</span><span class="qtext">我是不是方向从一开始就错了，要推翻重做？</span><span class="toggle">+</span></div><div class="faq-a"><p><strong>绝对不是。</strong> 方向是对的，资产是真的：banmi-level 是认真的 CVLA 复刻、<code>question</code> 表 schema 写得很专业（IRT 字段 + 校准生命周期全有）、三套题库各有价值、前端 flow 也成型。<strong>病根是"没收口" —— 5 个子系统从没被一根主轴串起来、没有一条链路端到端跑通过。</strong> 解药是收口和跑通一个窄切口，不是推翻。你离对只差"把已经设计好的东西真的跑起来"。</p></div></div>
+    </div>
+  </section>
+
+  <!-- ============ CH17 References ============ -->
+  <section class="chapter" id="ch17">
+    <h2><span class="num">17</span><span class="title-text">References</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13px;color:var(--text-mute);">外部查实来源（hover [N] 看详情，点链接新 tab 打开）。诊断事实来自对 <code>/Users/jay/Projects/banmi/</code> 真实代码的核对，非外部来源。访问日期均为 2026-05-28。</p>
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://en.wikipedia.org/wiki/Computerized_adaptive_testing" target="_blank" rel="noopener">Computerized adaptive testing — Wikipedia（CAT 机理、最大信息量准则、~50% 答对率、停止规则）</a><span class="ref-meta">· 2026-05-28 · 引用 5 次</span></li>
+        <li id="ref-2"><a href="https://www.rasch.org/rmt/rmt74m.htm" target="_blank" rel="noopener">Linacre, Sample Size and Item Calibration Stability — Rasch Measurement Transactions（Rasch ~100-200 人/题、linking 锚题 ≥150）</a><span class="ref-meta">· 2026-05-28 · 引用 6 次</span></li>
+        <li id="ref-3"><a href="http://cdn.lexile.com/m/resources/materials/Stenner_Burdick_Sanford__Burdick-_The_LFR_Technical_Report.pdf" target="_blank" rel="noopener">Stenner et al., The Lexile Framework for Reading Technical Report（Lexile 75% 理解率、-100L~+50L 区间、Lexile Analyzer）</a><span class="ref-meta">· 2026-05-28 · 引用 1 次</span></li>
+        <li id="ref-4"><a href="https://teacher.scholastic.com/products/sri_reading_assessment/pdfs/SRI_ProfPaper_ImprovePerformance.pdf" target="_blank" rel="noopener">Scholastic Reading Inventory (SRI) — 嵌入式 fill-in-blank cloze 题型、CAT 机理、测的能力维度</a><span class="ref-meta">· 2026-05-28 · 引用 4 次</span></li>
+        <li id="ref-5"><a href="https://direct.mit.edu/tacl/article/doi/10.1162/tacl_a_00310/96485/Machine-Learning-Driven-Language-Assessment" target="_blank" rel="noopener">Settles et al., Machine Learning–Driven Language Assessment (Duolingo English Test) — TACL（CAT + ML 估难度省 pilot）</a><span class="ref-meta">· 2026-05-28 · 引用 4 次</span></li>
+        <li id="ref-6"><a href="https://www.healthmeasures.net/forum-healthmeasures/promis/21-stopping-rule-for-computer-adaptive-tests" target="_blank" rel="noopener">PROMIS CAT 停止规则（最少 4、最多 12 题、SE&lt;0.3）— HealthMeasures</a><span class="ref-meta">· 2026-05-28 · 引用 2 次</span></li>
+        <li id="ref-7"><a href="https://blog.duolingo.com/test-creation-machine-learning/" target="_blank" rel="noopener">How the Duolingo English Test Uses OpenAI and Machine Learning（GPT 生成 fill-in-blank + interactive reading + human-in-the-loop）</a><span class="ref-meta">· 2026-05-28 · 引用 2 次</span></li>
+        <li id="ref-8"><a href="https://arxiv.org/html/2409.08823v1" target="_blank" rel="noopener">AutoIRT: Calibrating IRT Models with Automated Machine Learning（Duolingo 2024 上线、冷启动、20 作答相关 0.936、信度 +15.5%）</a><span class="ref-meta">· 2026-05-28 · 引用 4 次</span></li>
+        <li id="ref-9"><a href="https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2021.633896/full" target="_blank" rel="noopener">Linking of Rasch-Scaled Tests: Consequences of Limited Item Pools and Model Misfit — Frontiers（锚题 ≥20%、小样本 Rasch、linking 方法）</a><span class="ref-meta">· 2026-05-28 · 引用 3 次</span></li>
+        <li id="ref-10"><a href="https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.12340" target="_blank" rel="noopener">Shen et al., 1-bit matrix completion for small-scale CAT item calibration — British J. Math. Stat. Psychology（稀疏作答小样本校准、高利害每题数百作答）</a><span class="ref-meta">· 2026-05-28 · 引用 2 次</span></li>
+        <li id="ref-11"><a href="https://assess.com/multistage-testing/" target="_blank" rel="noopener">Assessment Systems — IRT 题目校准生命周期 / calibration status（draft→pilot→calibrated→operational）</a><span class="ref-meta">· 2026-05-28 · 引用 1 次</span></li>
+        <li id="ref-12"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5749388/" target="_blank" rel="noopener">专家校准 item bank 研究 — 3 位专家判断与 50+ 人统计校准在统计上无显著差异 — PMC</a><span class="ref-meta">· 2026-05-28 · 引用 4 次</span></li>
+        <li id="ref-13"><a href="https://arxiv.org/html/2502.17785v1" target="_blank" rel="noopener">Exploring LLMs for Estimating Reading Comprehension Question Difficulty（GPT-4o/o1 难度估计聚窄带、低估两端极端值、SARA 数据集）</a><span class="ref-meta">· 2026-05-28 · 引用 2 次</span></li>
+        <li id="ref-14"><a href="https://arxiv.org/html/2502.20663" target="_blank" rel="noopener">Prediction of Item Difficulty for Reading Comprehension Items by Annotated Item Repository（RMSE 0.59 vs 0.92、相关 0.77、文本特征 0.75、问题特征独立信号）</a><span class="ref-meta">· 2026-05-28 · 引用 3 次</span></li>
+        <li id="ref-15"><a href="https://link.springer.com/article/10.3758/BRM.40.4.1001" target="_blank" rel="noopener">Where's the Difficulty in Standardized Reading Tests: The Passage or the Question? — Behavior Research Methods（7-9 年级看文本、10-12 年级看问题特征）</a><span class="ref-meta">· 2026-05-28 · 引用 5 次</span></li>
+        <li id="ref-16"><a href="https://link.springer.com/article/10.1186/s12909-024-05433-y" target="_blank" rel="noopener">Item analysis: impact of distractor efficiency on difficulty and discrimination — BMC Medical Education（干扰项质量决定难度+区分度、非功能干扰项降区分）</a><span class="ref-meta">· 2026-05-28 · 引用 2 次</span></li>
+        <li id="ref-17"><a href="https://journals.sagepub.com/doi/pdf/10.1177/0265532219840382" target="_blank" rel="noopener">HyTeC-cloze: Cloze Testing for Comprehension Assessment — Language Testing（cloze 信效度匹配/超过标准化测验、10min cloze 与 30min 问答 r=0.84、语义评分）</a><span class="ref-meta">· 2026-05-28 · 引用 4 次</span></li>
+        <li id="ref-18"><a href="https://cvla.langedu.jp/" target="_blank" rel="noopener">CVLA3.1: CEFR-based Vocabulary Level Analyzer（Uchida & Negishi，CVLA 3 算法、8 特征、min/max 排除取 6 特征）— banmi-level 复刻来源</a><span class="ref-meta">· 2026-05-28 · 引用 2 次</span></li>
+        <li id="ref-19"><a href="https://www.etsglobal.org/pf/en/help-center/score-usage/are-toefl-primary-test-scores-mapped-to-the-cefr" target="_blank" rel="noopener">Mapping of the TOEFL Primary tests — ETS Global（阅读映射 CEFR A1-B2 + Lexile 双锚、定期 CEFR 相关性研究）</a><span class="ref-meta">· 2026-05-28 · 引用 3 次</span></li>
+        <li id="ref-20"><a href="https://www.sciencedirect.com/science/article/pii/S2772766125000205" target="_blank" rel="noopener">CEFR-J framework（Tono 2019）12 levels Pre-A1→C2 — Assigning CEFR-J Levels（ScienceDirect）</a><span class="ref-meta">· 2026-05-28 · 引用 2 次</span></li>
+        <li id="ref-21"><a href="https://metametricsinc.com/wp-content/uploads/2018/07/Aligning-the-Lexile-Framework-to-the-CEFR.pdf" target="_blank" rel="noopener">Aligning the Lexile Framework to the CEFR — MetaMetrics（CEFR↔Lexile 无通用映射、机构间 CEFR 映射不一致 EIKEN A1≈TOEFL Primary A2）</a><span class="ref-meta">· 2026-05-28 · 引用 2 次</span></li>
+        <li id="ref-22"><a href="https://www.ef.com/wwen/english-tests/cambridge-exams/linguaskill/" target="_blank" rel="noopener">Linguaskill — Cambridge（阅读自适应、题数不固定、Cambridge English Scale 82-180 + CEFR）</a><span class="ref-meta">· 2026-05-28 · 引用 1 次</span></li>
+        <li id="ref-23"><a href="https://www.cambridgeenglish.org/Images/young-learners-sample-papers-2018-vol1.pdf" target="_blank" rel="noopener">Cambridge YLE Starters/Movers/Flyers Sample Papers（Pre-A1/A1 图文匹配、词识别乱序拼词、tick-cross、yes/no 替代题型）</a><span class="ref-meta">· 2026-05-28 · 引用 2 次</span></li>
+        <li id="ref-24"><a href="https://assess.com/three-parameter-irt-3pl-model/" target="_blank" rel="noopener">Assessment Systems — 1PL/2PL/3PL 选型（3PL 需 500+ 人 + 先验、小样本用 1PL/2PL）</a><span class="ref-meta">· 2026-05-28 · 引用 2 次</span></li>
+        <li id="ref-25"><a href="https://github.com/berzak/onestop-qa" target="_blank" rel="noopener">OneStopQA — STARC 标注、Guardian 文章 3 难度级（Elementary/Intermediate/Advanced）每段 3 道 MCQ、SAT-like</a><span class="ref-meta">· 2026-05-28 · 引用 2 次</span></li>
+        <li id="ref-26"><a href="https://www.semanticscholar.org/paper/RACE:-Large-scale-ReAding-Comprehension-Dataset-Lai-Xie/636a79420d838eabe4af7fb25d6437de45ab64e8" target="_blank" rel="noopener">RACE: Large-scale ReAding Comprehension Dataset From Examinations（28k 篇/100k 题中国初高中英语考题）+ CLOTH 教师设计 cloze</a><span class="ref-meta">· 2026-05-28 · 引用 3 次</span></li>
+        <li id="ref-27"><a href="https://assess.com/multistage-testing/" target="_blank" rel="noopener">Multistage Testing (MST) vs item-level CAT — Assessment Systems（阅读 testlet 不适合逐题 CAT、MST 预组 panel 整组路由、小题库友好）</a><span class="ref-meta">· 2026-05-28 · 引用 3 次</span></li>
+        <li id="ref-28"><a href="https://arxiv.org/html/2404.07720v1" target="_blank" rel="noopener">Automatic Generation and Evaluation of Reading Comprehension Test Items with LLMs（LLM 干扰项 ~53% 高质量、不懂学生误解、好阅读题设计"出了名的难"）</a><span class="ref-meta">· 2026-05-28 · 引用 3 次</span></li>
+        <li id="ref-29"><a href="https://arxiv.org/abs/2404.06283" target="_blank" rel="noopener">LLMs' Reading Comprehension Is Affected by Parametric Knowledge（LLM 用世界知识答题而非读文本、不忠于上下文）</a><span class="ref-meta">· 2026-05-28 · 引用 2 次</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <footer>
+    <p>半米阅读能力测试系统 · 现状诊断 + 别人怎么测 + 清晰解决方案 · L2 Deep Research · 整理：无忌 · 2026-05-28</p>
+    <p>诊断基于 <code>/Users/jay/Projects/banmi/</code> 真实代码 · 外部方法全部 inline 引用 · 区分诊断事实 / 外部查实 / 对半米推演</p>
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+<script>
+// 主题切换
+(function(){
+  var saved = localStorage.getItem('banmi-theme');
+  if (saved) document.body.setAttribute('data-theme', saved);
+  var btn = document.getElementById('themeToggle');
+  function sync(){ btn.textContent = document.body.getAttribute('data-theme')==='dark' ? '☀️' : '🌙'; }
+  sync();
+  btn.addEventListener('click', function(){
+    var t = document.body.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', t);
+    localStorage.setItem('banmi-theme', t); sync();
+  });
+})();
+// 进度条
+window.addEventListener('scroll', function(){
+  var h = document.documentElement;
+  var pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+  document.getElementById('backToTop').classList.toggle('show', h.scrollTop > 600);
+});
+document.getElementById('backToTop').addEventListener('click', function(){ window.scrollTo({top:0,behavior:'smooth'}); });
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click', function(){ h.parentElement.classList.toggle('collapsed'); });
+});
+// FAQ 折叠
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click', function(){ q.parentElement.classList.toggle('open'); });
+});
+// 锚点高亮
+(function(){
+  var links = document.querySelectorAll('.anchor-list a');
+  var secs = Array.prototype.map.call(links, function(a){ return document.getElementById(a.dataset.target); });
+  function onScroll(){
+    var pos = window.scrollY + 120, idx = 0;
+    secs.forEach(function(s,i){ if (s && s.offsetTop <= pos) idx = i; });
+    links.forEach(function(a){ a.classList.remove('active'); });
+    if (links[idx]) { links[idx].classList.add('active'); links[idx].scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}); }
+  }
+  window.addEventListener('scroll', onScroll); onScroll();
+})();
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(tr){
+  tr.addEventListener('click', function(){ tr.style.background = tr.style.background ? '' : 'var(--accent-soft)'; });
+});
+
+// ===== CAT mini demo =====
+(function(){
+  // 模拟题库：每题有难度 b（CEFR-J 尺，A1=-2, A2=-1, B1=0, B2=1, C1=2 量级），简化 cloze
+  var BANK = [
+    {b:-1.5, cefr:'A2.1', prompt:'The cat sat on the ___ and looked at the bird.', opts:['mat','run','blue','quickly'], ans:0},
+    {b:-0.8, cefr:'A2.3', prompt:'She was tired, ___ she went to bed early.', opts:['so','but','or','if'], ans:0},
+    {b:-0.2, cefr:'B1.1', prompt:'The experiment failed ___ the team had prepared carefully.', opts:['although','because','so','unless'], ans:0},
+    {b:0.3,  cefr:'B1.2', prompt:'His argument was ___ ; nobody could find a flaw in it.', opts:['compelling','boring','wet','loud'], ans:0},
+    {b:0.9,  cefr:'B2.1', prompt:'The policy was implemented ___ widespread public opposition.', opts:['in spite of','because of','instead of','thanks to'], ans:0},
+    {b:1.4,  cefr:'B2.2', prompt:'Her ___ remarks revealed a deep skepticism toward the proposal.', opts:['acerbic','cheerful','simple','green'], ans:0}
+  ];
+  var theta=0, se=1, n=0, asked=[], curIdx=-1, done=false;
+  var statusEl=document.getElementById('demo-status'), thetaEl=document.getElementById('demo-theta');
+  var qbox=document.getElementById('demo-qbox'), qmeta=document.getElementById('demo-qmeta'), promptEl=document.getElementById('demo-prompt'), optsEl=document.getElementById('demo-opts');
+  var startBtn=document.getElementById('demo-start'), resetBtn=document.getElementById('demo-reset'), resultEl=document.getElementById('demo-result');
+  function cefrOf(t){ if(t<-1.2)return'A1/A2.1'; if(t<-0.5)return'A2'; if(t<0.2)return'B1.1'; if(t<0.8)return'B1.2'; if(t<1.3)return'B2.1'; return'B2.2+'; }
+  function pct(v,min,max){ return Math.max(2,Math.min(100,(v-min)/(max-min)*100)); }
+  function render(){
+    document.getElementById('bar-theta').style.width = pct(theta,-2,2)+'%';
+    var cb = curIdx>=0?BANK[curIdx].b:0;
+    document.getElementById('bar-b').style.width = pct(cb,-2,2)+'%';
+    document.getElementById('bar-se').style.width = pct(1-se,0,0.9)+'%';
+    thetaEl.textContent='θ = '+theta.toFixed(2)+' | SE = '+se.toFixed(2)+' | 估计档位：'+(n>0?cefrOf(theta):'—')+' | 已答 '+n+' 题';
+  }
+  function pickNext(){
+    // 选 b 最接近当前 θ 且没答过的题（最大信息量近似）
+    var best=-1, bestD=1e9;
+    BANK.forEach(function(q,i){ if(asked.indexOf(i)>=0)return; var d=Math.abs(q.b-theta); if(d<bestD){bestD=d;best=i;} });
+    return best;
+  }
+  function showQ(){
+    if(done) return;
+    if(se<0.55 && n>=3 || n>=BANK.length){ finish(); return; }
+    curIdx=pickNext();
+    if(curIdx<0){ finish(); return; }
+    var q=BANK[curIdx];
+    qmeta.innerHTML='<span class="pill accent">cloze</span><span class="pill">题目难度 b='+q.b.toFixed(1)+'</span><span class="pill info">≈'+q.cefr+'</span>';
+    promptEl.textContent=q.prompt;
+    optsEl.innerHTML='';
+    q.opts.forEach(function(o,oi){
+      var btn=document.createElement('button'); btn.className='demo-opt'; btn.textContent=String.fromCharCode(65+oi)+'. '+o;
+      btn.addEventListener('click',function(){ answer(oi,btn,q); });
+      optsEl.appendChild(btn);
+    });
+    qbox.style.display='block'; render();
+    statusEl.textContent='系统选了一道 b='+q.b.toFixed(1)+' 的题（最接近你当前 θ='+theta.toFixed(2)+'，让你约 50% 会对）。';
+  }
+  function answer(oi,btn,q){
+    var correct = oi===q.ans;
+    Array.prototype.forEach.call(optsEl.children,function(b){ b.disabled=true; });
+    btn.classList.add(correct?'correct':'wrong');
+    if(!correct) optsEl.children[q.ans].classList.add('correct');
+    asked.push(curIdx); n++;
+    // 简化 Rasch 更新：朝题目难度方向调 θ，步长随 n 缩小
+    var step=0.8/Math.sqrt(n);
+    theta += correct ? step : -step;
+    theta = Math.max(-2.2,Math.min(2.2,theta));
+    se = Math.max(0.3, 1/Math.sqrt(n+1));
+    render();
+    statusEl.textContent = correct ? '✅ 答对！θ 上调 → 下一题更难。' : '❌ 答错。θ 下调 → 下一题更易。';
+    setTimeout(showQ, 1100);
+  }
+  function finish(){
+    done=true; qbox.style.display='none';
+    resultEl.style.display='block';
+    resultEl.innerHTML='🎯 <strong>测评完成（'+n+' 题）</strong>：能力估计 θ = '+theta.toFixed(2)+'，SE = '+se.toFixed(2)+'（置信度足够）→ <strong>估计 CEFR-J 档位 ≈ '+cefrOf(theta)+'</strong>。<br><span style="font-size:12px;color:var(--text-mute);">真实系统里每道题的 b 是用学生作答数据 Rasch 校准的（不是写死）—— 那一步是半米最缺的环节。</span>';
+    statusEl.textContent='CAT 用 '+n+' 题就把你定位到一个档（固定卷可能要 40+ 题）。点重置再玩。';
+    startBtn.style.display='none'; resetBtn.style.display='inline-block';
+  }
+  startBtn.addEventListener('click',function(){
+    theta=0;se=1;n=0;asked=[];done=false;
+    startBtn.style.display='none'; resetBtn.style.display='inline-block'; resultEl.style.display='none';
+    showQ();
+  });
+  resetBtn.addEventListener('click',function(){
+    theta=0;se=1;n=0;asked=[];curIdx=-1;done=false;
+    qbox.style.display='none'; resultEl.style.display='none';
+    startBtn.style.display='inline-block'; resetBtn.style.display='none';
+    statusEl.textContent='点"开始测评"，系统从中等难度题起步。每题答对→下题更难，答错→下题更易。θ（能力）和它的标准误 SE 实时更新。';
+    render();
+  });
+  render();
+})();
+
+// ===== 架构对比 demo =====
+(function(){
+  var out=document.getElementById('arch-out');
+  var data={
+    before:'<div style="line-height:1.9;"><strong style="color:var(--bad);">❌ 现在：5 个子系统各连各的，中间断了</strong><br>'+
+      'banmi-level → <span style="color:var(--bad);">✗（输出无处去）</span><br>'+
+      'OneStopQA → <span style="color:var(--bad);">✗（ETL 产物没灌库）</span><br>'+
+      'StoryWeaver → <span style="color:var(--bad);">✗（旁路算法）</span><br>'+
+      'IELTS → <span style="color:var(--bad);">✗（无难度估计）</span><br>'+
+      'question 表 <span style="color:var(--bad);">【0 条】</span> ⟶ 后端只有 /health ⟶ 前端 <span style="color:var(--bad);">9 套 hardcode demo</span><br>'+
+      '<span style="color:var(--text-mute);font-size:12px;">3 套尺度并存 · 校准从没跑过 · 没有一条链路通到底</span></div>',
+    after:'<div style="line-height:1.9;"><strong style="color:var(--good);">✅ 收口后：一根 CEFR-J 主轴串起来</strong><br>'+
+      '所有文本 → banmi-level → <span style="color:var(--good);">CEFR-J 档（先验）</span><br>'+
+      '三套题 + RACE/CLOTH → ETL → <span style="color:var(--good);">统一 question 表【有数据】</span><br>'+
+      '预标 → 专家锚定 → <span style="color:var(--good);">Rasch 校准 b</span><br>'+
+      'API（/questions /answers /ability）⟶ <span style="color:var(--good);">1 套参数化 UI（读真库）</span><br>'+
+      'event_log ⟶ <span style="color:var(--good);">定期 Rasch 校准（闭环）</span><br>'+
+      '<span style="color:var(--text-mute);font-size:12px;">CEFR-J 主尺 · Lexile 展示换算 · 题库越用越准</span></div>'
+  };
+  function show(k){ out.innerHTML=data[k]; }
+  document.querySelectorAll('[data-arch]').forEach(function(c){
+    c.addEventListener('click',function(){
+      document.querySelectorAll('[data-arch]').forEach(function(x){x.classList.remove('active');});
+      c.classList.add('active'); show(c.dataset.arch);
+    });
+  });
+  show('before');
+})();
+
+// ===== popover references =====
+(function() {
+  let activePopover = null, activeTrigger = null, hideTimer = null;
+  function getRefContent(refid) {
+    const el = document.getElementById('ref-' + refid);
+    return el ? el.innerHTML : null;
+  }
+  function positionPopover(pop, trigger) {
+    const r = trigger.getBoundingClientRect();
+    const popW = pop.offsetWidth, popH = pop.offsetHeight;
+    let left = r.left + window.scrollX;
+    if (left + popW > window.innerWidth - 12) left = window.innerWidth - popW - 12;
+    if (left < 12) left = 12;
+    let top = r.bottom + window.scrollY + 6;
+    if (r.bottom + popH > window.innerHeight - 12 && r.top > popH + 12) {
+      top = r.top + window.scrollY - popH - 6;
+    }
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+  }
+  function showPopover(trigger) {
+    if (activeTrigger === trigger && activePopover) return;
+    if (activePopover) { activePopover.remove(); activePopover = null; }
+    const content = getRefContent(trigger.getAttribute('data-refid'));
+    if (!content) return;
+    const pop = document.createElement('div');
+    pop.className = 'cite-popover';
+    pop.innerHTML = content;
+    document.body.appendChild(pop);
+    positionPopover(pop, trigger);
+    activePopover = pop; activeTrigger = trigger;
+    pop.addEventListener('mouseenter', () => { if (hideTimer) clearTimeout(hideTimer); });
+    pop.addEventListener('mouseleave', scheduleHide);
+  }
+  function scheduleHide() {
+    if (hideTimer) clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      if (activePopover) { activePopover.remove(); activePopover = null; activeTrigger = null; }
+    }, 200);
+  }
+  function bindCites() {
+    document.querySelectorAll('sup.cite[data-refid]').forEach(sup => {
+      sup.addEventListener('mouseenter', () => showPopover(sup));
+      sup.addEventListener('mouseleave', scheduleHide);
+      sup.addEventListener('click', e => {
+        e.preventDefault(); e.stopPropagation();
+        if (activeTrigger === sup && activePopover) {
+          activePopover.remove(); activePopover = null; activeTrigger = null;
+        } else { showPopover(sup); }
+      });
+    });
+    document.addEventListener('click', e => {
+      if (!activePopover) return;
+      if (e.target.closest('.cite-popover') || e.target.closest('sup.cite')) return;
+      activePopover.remove(); activePopover = null; activeTrigger = null;
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindCites);
+  } else { bindCites(); }
+})();
+</script>
+</body>
+</html>

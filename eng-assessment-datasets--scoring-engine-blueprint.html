@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>半米 AI 作文评分系统 · 可落地技术方案 + step-by-step 开发步骤 · IELTS/TOEFL/通用 rubric 拆解 / 分阶段 hybrid / 校准>架构 / QWK 验证 / 评分流水线架构 / rubric prompt 模板 / 成本估算 · 2026-05-28</title>
+<style>
+  :root {
+    --bg: #ffffff; --bg-soft: #f7f8fa; --bg-elevated: #ffffff; --bg-stripe: #f5f7fa;
+    --text: #1a1d23; --text-soft: #4a5160; --text-mute: #7c8493;
+    --border: #e3e6ec; --border-strong: #cdd2da;
+    --accent: #2563eb; --accent-soft: #dbeafe; --accent-text: #1d4ed8;
+    --good: #15803d; --good-soft: #dcfce7;
+    --warn: #b45309; --warn-soft: #fef3c7;
+    --bad: #b91c1c; --bad-soft: #fee2e2;
+    --info: #0891b2; --info-soft: #cffafe;
+    --code-bg: #f1f3f7;
+    --purple: #7c3aed; --purple-soft: #ede9fe;
+    --pink: #db2777; --pink-soft: #fce7f3;
+    --teal: #0d9488; --teal-soft: #ccfbf1;
+    --shadow: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+    --shadow-lg: 0 10px 25px rgba(15,23,42,.08), 0 4px 10px rgba(15,23,42,.04);
+    --radius: 10px; --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117; --bg-soft: #161922; --bg-elevated: #1c2030; --bg-stripe: #1a1e2a;
+    --text: #e6e9f0; --text-soft: #b6bcc9; --text-mute: #8a92a3;
+    --border: #2a2f3d; --border-strong: #3a4154;
+    --accent: #60a5fa; --accent-soft: #1e3a8a55; --accent-text: #93c5fd;
+    --good: #4ade80; --good-soft: #14532d55;
+    --warn: #fbbf24; --warn-soft: #78350f55;
+    --bad: #f87171; --bad-soft: #7f1d1d55;
+    --info: #22d3ee; --info-soft: #155e7555;
+    --code-bg: #0a0d14;
+    --purple: #a78bfa; --purple-soft: #4c1d9555;
+    --pink: #f472b6; --pink-soft: #831a4955;
+    --teal: #2dd4bf; --teal-soft: #134e4a55;
+    --shadow: 0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,.5), 0 4px 10px rgba(0,0,0,.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body { margin: 0; font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif; font-size: 16px; line-height: 1.7; color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; padding-bottom: 60px; transition: background-color .25s, color .25s; }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-weight: 700; font-size: 15px; color: var(--text); }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; }
+  .breadcrumb { max-width: 980px; margin: 0 auto; padding: 8px 16px 0; font-size: 13px; }
+  .breadcrumb a { color: var(--accent-text); text-decoration: none; padding: 3px 8px; border-radius: 6px; background: var(--accent-soft); margin-right: 6px; display: inline-block; }
+  nav.anchor-nav { overflow-x: auto; overflow-y: hidden; border-top: 1px solid var(--border); background: var(--bg); scrollbar-width: none; }
+  nav.anchor-nav::-webkit-scrollbar { display: none; }
+  .anchor-list { display: flex; gap: 4px; padding: 8px 16px; max-width: 980px; margin: 0 auto; white-space: nowrap; }
+  .anchor-list a { flex: 0 0 auto; min-height: 36px; padding: 7px 12px; border-radius: 999px; font-size: 13px; line-height: 1.3; color: var(--text-soft); text-decoration: none; border: 1px solid transparent; background: var(--bg-soft); }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); font-weight: 600; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 27px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); min-height: 56px; }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout.pink { background: var(--pink-soft); border-color: var(--pink); }
+  .callout.teal { background: var(--teal-soft); border-color: var(--teal); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 9px 11px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; }
+  tbody td { padding: 8px 11px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 5000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  /* step timeline */
+  .timeline { position: relative; margin: 18px 0 8px; padding-left: 4px; }
+  .step { position: relative; padding: 0 0 6px 52px; margin-bottom: 18px; }
+  .step::before { content: ""; position: absolute; left: 19px; top: 36px; bottom: -18px; width: 2px; background: var(--border-strong); }
+  .step:last-child::before { display: none; }
+  .step .badge { position: absolute; left: 0; top: 0; width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; box-shadow: var(--shadow); z-index: 2; }
+  .step.done .badge { background: var(--good); }
+  .step.hard .badge { background: var(--bad); }
+  .step .step-card { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+  .step .step-card h4 { margin: 0 0 6px; font-size: 15.5px; color: var(--text); }
+  .step .step-card .meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
+  .step .step-card .meta .pill { font-size: 10.5px; }
+  .step .step-card ul { margin: 6px 0; }
+  .verdict-tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+  .verdict-tag.borrow { background: var(--accent-soft); color: var(--accent-text); }
+  /* demo */
+  .demo-host { margin: 16px 0; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .demo-host h4 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; color: var(--accent-text); }
+  .demo-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 14px; align-items: center; }
+  .demo-chip { padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-elevated); color: var(--text-soft); font-size: 12.5px; cursor: pointer; }
+  .demo-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .demo-output { padding: 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin-top: 8px; }
+  .demo textarea { width: 100%; min-height: 90px; border-radius: 10px; border: 1px solid var(--border); padding: 10px; font-size: 14px; font-family: inherit; background: var(--bg-elevated); color: var(--text); resize: vertical; }
+  .demo button.run { margin-top: 10px; padding: 10px 18px; border: none; border-radius: 10px; background: var(--accent); color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; }
+  .rubric-bar { margin: 8px 0; }
+  .rubric-bar .rb-head { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 3px; }
+  .rubric-bar .rb-track { height: 12px; border-radius: 999px; background: var(--bg-stripe); overflow: hidden; }
+  .rubric-bar .rb-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--purple)); transition: width .5s; }
+  @media (max-width: 480px) { .hero { padding: 18px 4px 8px; } .hero h1 { font-size: 21px; } section.chapter > h2 { font-size: 17px; padding: 14px 14px; } .chapter-body { padding: 14px 14px 18px; } h3 { font-size: 16px; } .step { padding-left: 46px; } }
+  .chapter-body { column-count: 1 !important; column-width: auto !important; }
+  .chapter-body > .callout { display: block !important; float: none !important; width: auto !important; clear: both !important; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; font-size: 11px; color: var(--accent-text); font-weight: 700; vertical-align: super; }
+  sup.cite:hover { background: rgba(250, 204, 21, 0.3); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated, #ffffff); color: var(--text, #1a1a23); border: 1px solid var(--border, #e3e6ec); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(15,23,42,.18); font-size: 13px; line-height: 1.55; font-weight: normal; pointer-events: auto; }
+  [data-theme="dark"] .cite-popover { background: #1a1e2a; color: #e6e9f0; border-color: #2a2f3a; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+  .cite-popover a { color: var(--accent, #2563eb); text-decoration: underline; word-break: break-all; }
+  [data-theme="dark"] .cite-popover a { color: #60a5fa; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">半米 AI 作文评分系统落地方案 <span class="tag">L2 · 工程落地 · 无忌</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+  <div class="breadcrumb">
+    <a href="./eng-assessment-datasets-research.html">← 回父报告：AI 英语评分系统数据集研究</a>
+    <a href="./index.html">← 回研究中心</a>
+  </div>
+  <nav class="anchor-nav">
+    <div class="anchor-list" id="anchorList">
+      <a href="#ch1" data-target="ch1">01 摘要 + 5 结论</a>
+      <a href="#ch2" data-target="ch2">02 评分目标拆解</a>
+      <a href="#ch3" data-target="ch3">03 技术路线 + QWK</a>
+      <a href="#ch4" data-target="ch4">04 校准>架构 ★</a>
+      <a href="#ch5" data-target="ch5">05 数据 + license</a>
+      <a href="#ch6" data-target="ch6">06 流水线架构 + 技术栈</a>
+      <a href="#ch7" data-target="ch7">07 rubric prompt 模板</a>
+      <a href="#ch8" data-target="ch8">08 反馈生成</a>
+      <a href="#ch9" data-target="ch9">09 多模型复评分歧</a>
+      <a href="#ch10" data-target="ch10">10 可靠性 + 真实坑</a>
+      <a href="#ch11" data-target="ch11">11 中国学生 + 护城河</a>
+      <a href="#ch12" data-target="ch12">12 ⭐ step-by-step</a>
+      <a href="#ch13" data-target="ch13">13 成本估算</a>
+      <a href="#ch14" data-target="ch14">14 mini demo</a>
+      <a href="#ch15" data-target="ch15">15 FAQ</a>
+      <a href="#ch16" data-target="ch16">16 References</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>半米 AI 作文评分系统 · 可落地技术方案<br><span style="font-size: .52em; font-weight: 600;">IELTS / TOEFL / 通用作文 rubric 拆解 · 分阶段 hybrid 选型 · 校准&gt;架构 + few-shot 锚定 + QWK 验证 · 评分流水线架构 + rubric prompt 模板 + 反馈生成 · 多模型复评分歧检测 · AES 真实坑 critic · ⭐ step-by-step 开发步骤 + 成本估算 + 中国学生护城河</span></h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-28</span>
+      <span>🛠 整理：无忌</span>
+      <span>🧠 L2 Deep Research · 偏工程落地</span>
+      <span>🔍 45+ WebSearch/Fetch</span>
+      <span>📚 16 章 + 12 FAQ + 40+ Refs</span>
+      <span>🪆 评分数据集报告子文档</span>
+    </div>
+    <div class="hero-deck">
+      <strong>这份是什么</strong>：阿杰原话 — "我现在用半米系统做 AI 评分，评雅思、托福、还有平时各种作文。给我一个<strong>具体的、能直接用的技术解决方案，一步一步的开发步骤</strong>。" → 本报告就是那份<strong>能照着做的工程实施蓝图</strong>：给具体技术栈、rubric prompt 模板、分阶段开发步骤（含工时/产出物/验证标准）、QWK 验证方法、防 gaming、人工兜底、成本估算。<br><br>
+      <strong>承接已有研究（不重复）</strong>：① <a href="./eng-assessment-datasets-research.html">父报告·评分数据集</a>已讲清"有哪些可用数据集 + 6 条技术路线对比 + Assessment Engine 架构 + MVP 建议"，本报告承接它讲<strong>"具体怎么搭、一步步开发"</strong>；② <a href="./banmi-mirofish-application-research.html">mirofish 多 agent 报告</a>的铁律（不同模型家族 / 独立打分别辩论 / 校准&gt;架构）直接落地到第 9 章；③ <a href="./lexile-reading-assessment-research.html">lexile 报告</a>的"校准&gt;架构 + 真人锚定"在第 4 章再次印证；④ <a href="./banmi-cvla-audit-research.html">cvla 审查</a>的现有工具状态（Octanove license 阻断商用）决定了哪些要复用、哪些要替换。<br><br>
+      <strong>一句话结论</strong>：<strong>别一上来全套</strong>。分 3 阶段 — 阶段 1 用 <strong>LLM 分项 rubric + few-shot 真人锚定（每档 2 例 ≈ +26% QWK）</strong>最快上线；阶段 2 加<strong>第二个不同家族模型复评 + 分歧检测 + 人工兜底</strong>；阶段 3 上 <strong>NLP features + XGBoost/isotonic 校准层 + 自建中国学生锚定集</strong>做壁垒。<strong>决定成败的是校准不是模型选型</strong>。
+    </div>
+  </div>
+
+  <!-- ============ CH1 摘要 + 5 核心结论 ============ -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">摘要 + 5 条核心结论（每条独立 callout）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>1.1 一段话总结</h3>
+      <p>这份是父报告《评分数据集研究》的<strong>工程落地子报告</strong>。父报告回答了"用什么数据、走哪条路线、架构长什么样"；本报告回答<strong>"阿杰一个人，从今天起，怎么一步步把它做出来、每步怎么验证、花多少钱"</strong>。核心判断：<strong>(1)</strong> 推荐<strong>分阶段 hybrid</strong>，第一版就是 <strong>LLM 分项 rubric 评分</strong>，不需要训模型；<strong>(2)</strong> 真正拉开准度的是 <strong>few-shot 真人锚定校准</strong>（每个 band 放 2 个真人评分锚例进 prompt，学界实测 QWK +26% / 0.306→0.531）<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>，而不是换更贵的模型；<strong>(3)</strong> 验证标准是 <strong>QWK 对真人</strong>，目标 <strong>0.70-0.80</strong>（IELTS 真考官之间 G 系数才 0.81-0.92，这是天花板）<sup class="cite" data-refid="3">[3]</sup><sup class="cite" data-refid="4">[4]</sup>；<strong>(4)</strong> 最危险的坑是<strong>偏题/离题</strong>（能让分数从 3.11 砸到 1.69）和 <strong>LLM 对语法/拼写 LOC 维度系统性偏严</strong>（约 -1.0 分）<sup class="cite" data-refid="5">[5]</sup><sup class="cite" data-refid="6">[6]</sup>，必须靠校准 + 人工兜底兜住。</p>
+
+      <h3>1.2 全局速览（先扫数字）</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">+26%</div><div class="l">few-shot 锚定带来的 QWK 增益（每档 2 例）</div></div>
+        <div class="metric"><div class="v">0.811</div><div class="l">GPT-4 IELTS Task 2 vs 官方考官 QWK</div></div>
+        <div class="metric"><div class="v">0.81-0.92</div><div class="l">IELTS 真考官之间 reliability（天花板）</div></div>
+        <div class="metric"><div class="v">0.70-0.80</div><div class="l">半米可定的 QWK 上线门槛</div></div>
+        <div class="metric"><div class="v">3 阶段</div><div class="l">MVP→提稳→壁垒，每阶段可独立上线</div></div>
+        <div class="metric"><div class="v">≈$0.001</div><div class="l">单篇 4 项 rubric + 反馈成本（Gemini Flash 估）</div></div>
+      </div>
+
+      <h3>1.3 5 条核心结论</h3>
+
+      <div class="callout good">
+        <p><strong>🟢 结论 #1 — 第一版别训模型：LLM 分项 rubric 评分就是 MVP，几天能跑通</strong></p>
+        <p>2026 年的现实是：<strong>不微调、纯 prompt 的 GPT-4 级模型在 IELTS Task 2 上对官方考官已达 QWK 0.811</strong>（用 56 篇 Cambridge 官方范文测）<sup class="cite" data-refid="3">[3]</sup>，跟官方 reliability 0.92 已经"competing"。这意味着半米<strong>第一版完全不需要 ELLIPSE 训 DeBERTa、不需要 XGBoost</strong>——那是阶段 3 的壁垒工程。MVP = 一个 FastAPI 端点 + 一个 LLM + 一份带<strong>官方 band descriptors + few-shot 锚例</strong>的 prompt。父报告 §11 把"NLP+XGBoost"列为"MVP 性价比最高"是从<strong>自建可控/可解释</strong>角度说的，本报告从<strong>最快上线</strong>角度修正：<strong>纯 LLM 上线最快，XGBoost 作阶段 3 的校准/集成层更值</strong>（两者不矛盾，是阶段问题）。</p>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>🟣 结论 #2 — 校准 &gt; 架构，这是本报告最重要的一句话（三份姐妹报告同构印证）</strong></p>
+        <p>同一篇作文评分研究反复证明：<strong>每个分数档只给 2 个 few-shot 例子做锚定，QWK 就提升约 26%，对单模型和多 agent 都有效</strong><sup class="cite" data-refid="1">[1]</sup>；另一篇 "Anchor is the key" 实测 zero-shot QWK 0.306 → six-shot 0.531<sup class="cite" data-refid="2">[2]</sup>；Reflect-and-Revise 这种 <strong>让模型迭代精修 rubric</strong> 的方法 QWK 增益高达 +0.47<sup class="cite" data-refid="7">[7]</sup>。<a href="./banmi-mirofish-application-research.html">mirofish 报告</a>的 critic #1、<a href="./lexile-reading-assessment-research.html">lexile 报告</a>的低端真人锚定、<a href="./banmi-cvla-audit-research.html">cvla 审查</a>的"先 SetFit 微调再说架构"全是同一结论。<strong>含义</strong>：半米评分不准时，<strong>第一优先级永远是搞校准数据 + 精修 rubric + 锚例，不是堆 agent / 换旗舰模型 / 上微调</strong>。本报告第 4 章专章讲怎么做校准。</p>
+      </div>
+
+      <div class="callout info">
+        <p><strong>🔵 结论 #3 — 分项 rubric 评分要"先反馈后打分 + 每项单独打 + 结构化抽证据"，不是丢一篇要 4 个数字</strong></p>
+        <p>三个落地细节都有实证：<strong>(a) 先生成反馈/解释再打分</strong>（feedback→scoring）比先打分后解释 QWK 高（.533 vs .517）——因为先打分会让模型"为已给的错分编理由"<sup class="cite" data-refid="8">[8]</sup>；<strong>(b)</strong> 分析型 rubric 下，<strong>简洁关键词 prompt 反而比塞一大段详细描述符好</strong>（详细描述符会"contextual interference"），但每项<strong>分开打分</strong>仍优于一次要 4 个分<sup class="cite" data-refid="6">[6]</sup>；<strong>(c)</strong> AutoSCORE 这种<strong>先让一个 agent 抽出 rubric 对齐的结构化证据（JSON）、再让另一个 agent 据此打分</strong>的"extract-then-score"模式，在 essay 集上把 QWK 从 0.251 拉到 0.344（+37%）<sup class="cite" data-refid="9">[9]</sup>。第 7 章给可直接用的 prompt 模板。</p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>🔴 结论 #4 — 最大的坑：离题侦测 + LOC 维度系统性偏严 + 高分作文判不准，必须人工兜底</strong></p>
+        <p>诚实讲边界：<strong>(1) 离题最危险</strong>——同能力但答错题，分数从 3.11 掉到 2.38；完全离题掉到 1.69（d=-1.33），35% 离题样本被直接判最低分<sup class="cite" data-refid="5">[5]</sup>，所以<strong>必须有独立的离题/语种/长度预检</strong>；<strong>(2) LLM 对 Lower-Order Concerns（语法、拼写、conventions）系统性偏严约 -1.0 分</strong>，只需 ~5 篇就能测出这个偏差<sup class="cite" data-refid="6">[6]</sup>——这跟 cvla 审查里"GPT 给 grammar/conventions 系统性打低"完全一致，要靠 per-trait 校准修正；<strong>(3)</strong> AES 在<strong>高分段和极端样本</strong>最不准（few-shot 增益主要在中高分段）<sup class="cite" data-refid="1">[1]</sup>。解法：用 <strong>conformal prediction 的 prediction-set 大小当置信度</strong>，多标签（不确定）的样本路由人工，可在同等错误率下少 20% 人工量<sup class="cite" data-refid="10">[10]</sup>。第 10 章详解。</p>
+      </div>
+
+      <div class="callout purple">
+        <p><strong>🟪 结论 #5 — 半米的护城河不在评分模型，在"中国学生真人评分锚定集 + CEFR↔CSE 双轨"</strong></p>
+        <p>评分能力本身正在<strong>商品化</strong>（任何人调个 GPT-4 级 API 都能到 QWK 0.8）。真正别人买不到的是：<strong>中国学生作文的母语负迁移（冠词缺失、时态错乱、介词误用、主谓不一致、中式语序直译）的典型样本 + 真人评分锚定</strong><sup class="cite" data-refid="11">[11]</sup>。通用模型对这些<strong>母语特定难点</strong>的识别有系统盲区（lexile 报告已指出 Lexile 对中文母语者的语言特定因素完全看不到）。半米从<strong>国际学校 K12 真人评分作文</strong>起步自建这个锚定集，既是 few-shot 校准的弹药，也是阶段 3 训自有模型的合法数据，更是 Cambridge/ETS/Pearson 没有的东西。第 11 章讲怎么建。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH2 评分目标拆解 ============ -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">评分目标拆解：IELTS / TOEFL / 通用作文 rubric</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>第一件工程事不是写代码，是<strong>把每种考试的评分目标拆成可计算的 rubric</strong>。半米要评三类：IELTS / TOEFL / 平时作文。下面逐一拆，并给出"官方 rubric 公开到什么程度、能不能直接当 prompt 锚定"的实查结论。</p>
+
+      <h3>2.1 IELTS Writing —— 4 项 rubric，官方 public 描述符可直接用</h3>
+      <p>IELTS Writing 分 <strong>Task 1</strong>（学术：图表描述 / 培训：书信）和 <strong>Task 2</strong>（议论文，占比更重）。<strong>4 项分析型 rubric，每项 0-9 band（0.5 步进）</strong>，最终 band 是四项均值再按规则四舍五入<sup class="cite" data-refid="12">[12]</sup>：</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>rubric 项</th><th>Task 2 评什么</th><th>Task 1 对应</th><th>权重</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Task Response (TR)</strong></td><td>是否完整回应所有 part、立场是否清晰且全程一致、论点是否有相关例证支撑</td><td>Task 1 叫 Task Achievement（是否覆盖关键数据/趋势、是否 overview）</td><td>25%</td></tr>
+            <tr><td><strong>Coherence &amp; Cohesion (CC)</strong></td><td>逻辑推进是否顺、衔接词是否自然多样、分段是否合理</td><td>同</td><td>25%</td></tr>
+            <tr><td><strong>Lexical Resource (LR)</strong></td><td>词汇范围与精度、是否会用 less common 词与搭配、错误是否影响理解</td><td>同</td><td>25%</td></tr>
+            <tr><td><strong>Grammatical Range &amp; Accuracy (GRA)</strong></td><td>句式多样性（复杂句）、错误频率与是否影响理解、标点</td><td>同</td><td>25%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout good">
+        <p><strong>✅ 官方 public band descriptors 是公开的、可直接当 prompt 锚定</strong>。British Council / IDP 发布了 "Writing Band Descriptors (public version)" PDF（Task 1 + Task 2，2023-05 更新）<sup class="cite" data-refid="13">[13]</sup>，逐 band 写明每项标准。例如 Task Response：<strong>Band 9</strong> "fully addresses all parts of the task; position consistently held and logically supported"；<strong>Band 7</strong> "addresses all parts but some more fully than others; position clear but conclusions may be inconsistent"；<strong>Band 6</strong> "addresses task but main ideas may be unclear/repetitive; position may be unclear"<sup class="cite" data-refid="12">[12]</sup>。<strong>这些就是直接塞进 rubric prompt 的锚定文本</strong>（第 7 章用）。但注意 <strong>结论 #3 的 caveat</strong>：分析型评分时，把整段长描述符塞 prompt 反而可能因 "contextual interference" 降准，要测"关键词版 vs 全文版"哪个 QWK 高<sup class="cite" data-refid="6">[6]</sup>。</p>
+      </div>
+
+      <h3>2.2 TOEFL Writing —— Independent + Integrated，0-5 scale</h3>
+      <p>TOEFL iBT Writing 两类任务，<strong>各自独立 rubric，均 0-5 分（整数 + ETS 内部小数）</strong><sup class="cite" data-refid="14">[14]</sup>：</p>
+      <ul>
+        <li><strong>Integrated Writing</strong>（综合写作）：读一段 + 听一段 lecture，写两者关系。rubric 核心是 <strong>"是否准确选出 lecture 的关键信息并与 reading 正确关联 + 组织是否清晰"</strong>——本质考<strong>信息抓取与综合</strong>，不是观点表达。新版 TOEFL 还有 "Writing for an Academic Discussion"（写论坛回帖，0-5）。</li>
+        <li><strong>Independent Writing</strong>（独立写作，老版）：给观点写议论文，评 <strong>elaboration &amp; relevance（是否充分回应）+ syntax &amp; vocabulary（句式词汇范围）+ social/discourse conventions（格式语气）</strong>。</li>
+      </ul>
+      <div class="callout info">
+        <p><strong>🔵 ETS 官方 rubric PDF 公开</strong>（ets.org 上有 toefl-ibt-writing-rubrics.pdf）<sup class="cite" data-refid="14">[14]</sup>，可当 prompt 锚定。<strong>工程含义</strong>：Integrated 任务需要把 <strong>reading 原文 + lecture 转写</strong>一起喂进去当上下文，评分逻辑跟 IELTS 完全不同（考"抓没抓到点"而非"写得好不好"）——这是<strong>半米要单独建一个 rubric 模板的任务类型</strong>。</p>
+      </div>
+
+      <h3>2.3 通用作文 —— 用 CEFR / 三维分析型 rubric 统一框架兼容</h3>
+      <p>平时作文没有官方 rubric。最务实的做法是<strong>用一套统一的分析型 rubric 兼容</strong>，让所有作文都落在同一个内部坐标系，再映射到不同输出（CEFR / IELTS band / 学校 rubric）。学界已有现成可借鉴的三维分析型 rubric：</p>
+      <ul>
+        <li><strong>DREsS rubric</strong>（EFL 写作专用，2024）：<strong>Content / Organization / Language</strong> 三维，每维 1-5（0.5 步进）<sup class="cite" data-refid="15">[15]</sup>。Content + Organization 是 Higher-Order Concerns（HOC），Language 是 Lower-Order Concern（LOC）。<strong>这套对中国学生平时作文最合适</strong>——比 IELTS 4 项更通用，又比单一 holistic 分更可教学。</li>
+        <li><strong>ELLIPSE 6 维</strong>（父报告 Top 1 数据集）：cohesion / syntax / vocabulary / phraseology / grammar / conventions——粒度最细，适合做<strong>诊断式反馈</strong>，但维度太多对 prompt 评分不友好（结论 #3 的"维度越多越要分开打"）。</li>
+      </ul>
+      <div class="callout accent">
+        <p><strong>🎯 半米的统一框架建议</strong>：内部主用 <strong>4-6 维分析型分数（连续 0-100 或 0-9）</strong>作"母语坐标"，所有作文都打这套；输出层再用<strong>映射表</strong>转成学员想要的刻度（IELTS band / CEFR / TOEFL 0-5 / 学校百分制）。这呼应父报告 §12 的 KG mapping layer——<strong>评分和刻度解耦</strong>是关键架构决策（第 6 章展开）。HOC/LOC 分层很重要，因为 <strong>LLM 在 LOC 上系统性偏严</strong>，需要对 LOC 单独校准（第 4 章）。</p>
+      </div>
+
+      <h3>2.4 三类考试 rubric 对照速查</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>考试</th><th>任务</th><th>维度数</th><th>刻度</th><th>官方 rubric 公开?</th><th>能直接当 prompt 锚定?</th></tr></thead>
+          <tbody>
+            <tr><td>IELTS Writing</td><td>Task 1 + Task 2</td><td>4</td><td>0-9 / 0.5 步</td><td>🟢 public band descriptors PDF</td><td>🟢 可，但测关键词版 vs 全文版</td></tr>
+            <tr><td>TOEFL iBT Writing</td><td>Integrated + Independent/Discussion</td><td>3-4</td><td>0-5</td><td>🟢 ETS rubrics PDF</td><td>🟢 可（Integrated 需喂 reading+lecture）</td></tr>
+            <tr><td>通用 / 平时作文</td><td>不限</td><td>3（DREsS）或 6（ELLIPSE）</td><td>1-5 / 自定义</td><td>🟡 借学界 rubric</td><td>🟢 自定义 + 真人锚定</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH3 技术路线选型 + QWK ============ -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">技术路线选型 + 真实 QWK 对比 + 分阶段推荐</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>父报告 §11 已做了 6 条路线的横向对比。本章<strong>不重复</strong>，而是聚焦"<strong>哪条先做、为什么、各自真实 QWK 是多少</strong>"，给出明确的分阶段推荐。</p>
+
+      <h3>3.1 各路线真实 QWK（公开基准实测，全部带来源）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>路线</th><th>代表方法</th><th>真实 QWK</th><th>基准/来源</th><th>训练数据需求</th><th>可解释</th><th>上线速度</th></tr></thead>
+          <tbody>
+            <tr><td><strong>纯 LLM zero-shot</strong></td><td>GPT-4 直接打分</td><td>0.30-0.60</td><td>ASAP 0.306 zero-shot<sup class="cite" data-refid="2">[2]</sup> / 综述 0.30-0.80<sup class="cite" data-refid="6">[6]</sup></td><td>无</td><td>🟢 高（有解释）</td><td>🟢 最快（小时级）</td></tr>
+            <tr><td><strong>纯 LLM few-shot 锚定</strong></td><td>GPT-4 + 每档 2 例</td><td>0.53-0.81</td><td>ASAP 0.531 6-shot<sup class="cite" data-refid="2">[2]</sup> / IELTS T2 0.811<sup class="cite" data-refid="3">[3]</sup></td><td>少量锚例（每档 2）</td><td>🟢 高</td><td>🟢 快（天级）</td></tr>
+            <tr><td><strong>NLP feat + 树模型</strong></td><td>textstat + XGBoost/RF</td><td>0.60-0.75</td><td>cvla 复刻 65.7% exact<sup class="cite" data-refid="16">[16]</sup></td><td>需标注训练集</td><td>🟢 高（feature importance）</td><td>🟡 中（要数据）</td></tr>
+            <tr><td><strong>微调 encoder</strong></td><td>DeBERTa-v3 + AWP</td><td>0.80-0.85</td><td>Feedback Prize ELL 0.85+<sup class="cite" data-refid="17">[17]</sup> / ASAP DeBERTa 0.834<sup class="cite" data-refid="18">[18]</sup></td><td>需大标注集</td><td>🔴 低（黑箱）</td><td>🔴 慢（训+调）</td></tr>
+            <tr><td><strong>Hybrid（LLM 特征+树模型校准）</strong></td><td>GPT 嵌入 + shallow feat + RF</td><td>0.83</td><td>hybrid 0.83 vs GPT-3 0.71<sup class="cite" data-refid="19">[19]</sup></td><td>需标注训练集</td><td>🟢 较高</td><td>🟡 中</td></tr>
+            <tr><td><strong>多模型 jury（PoLL）</strong></td><td>不同家族模型独立打分聚合</td><td>+几个点（在好单模型之上）</td><td>mirofish 报告：边际增益<sup class="cite" data-refid="20">[20]</sup></td><td>无（用锚例校准）</td><td>🟢 高</td><td>🟡 中（多调用）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ 读这张表的关键</strong>：<strong>(1)</strong> 微调 DeBERTa 的 0.85 看起来最高，但它<strong>黑箱、要大标注集、要训练工程、还吃 ELLIPSE 的 NC license（衍生模型不能商用）</strong>——这是阶段 3 才值得的投入，不是 MVP。<strong>(2)</strong> few-shot LLM 的 0.53-0.81 跨度大，<strong>跨度本身就是"校准做没做好"的差距</strong>——做好锚定就奔 0.8，不做就在 0.5 徘徊。<strong>(3)</strong> 多 agent jury 在<strong>已有好单模型之上只加几个点</strong>，不是从零起步的捷径（mirofish 铁律）。</p>
+      </div>
+
+      <h3>3.2 holistic vs analytic 的反直觉发现（影响 prompt 设计）</h3>
+      <div class="callout bad">
+        <p><strong>🔴 一个必须知道的坑</strong>：原始 LLM 打分时，<strong>holistic（整体一个分）的 QWK（约 0.60）远高于 analytic（分项打分）的 QWK（约 0.32）</strong><sup class="cite" data-refid="6">[6]</sup>。在 ELLIPSE 上分析型只有 QWK 0.32，DREsS 也只有 0.41，而 ASAP holistic 能到 0.60。<strong>含义</strong>：半米要的是 IELTS 4 项分项分（analytic），但<strong>分项分天然更难准</strong>——这正是<strong>为什么校准对 analytic 尤其关键</strong>，也是为什么要<strong>每项单独打分 + per-trait 锚定 + per-trait 校准</strong>（第 4、7 章）。直接丢一篇要 4 个数字，准度会很差。</p>
+      </div>
+
+      <h3>3.3 明确推荐：分阶段路线（每阶段为什么）</h3>
+      <div class="timeline">
+        <div class="step">
+          <div class="badge">1</div>
+          <div class="step-card">
+            <h4>阶段 1 · MVP — 纯 LLM 分项 rubric + few-shot 真人锚定</h4>
+            <div class="meta"><span class="pill good">最快上线</span><span class="pill accent">目标 QWK 0.70+</span><span class="pill">0 训练</span></div>
+            <p><strong>为什么先做这个</strong>：上线最快（天级），准度已能到 0.7-0.8，<strong>校准（锚例）就是这一阶段的全部胜负手</strong>。不训任何模型，没有 license 包袱。先把"评一项 IELTS Task 2 + 拿 50 篇真人评分算 QWK"跑通。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="badge">2</div>
+          <div class="step-card">
+            <h4>阶段 2 · 提稳 — 第二个不同家族模型复评 + 分歧检测 + 人工兜底</h4>
+            <div class="meta"><span class="pill accent">降方差/偏差</span><span class="pill warn">分歧→人工</span></div>
+            <p><strong>为什么第二</strong>：单模型有自我不一致 + 系统性偏差。加<strong>一个不同家族</strong>的模型（如 Qwen + Claude，<a href="./banmi-mirofish-application-research.html">mirofish 铁律</a>：避免伪多样性）独立复评，<strong>两者分歧大的样本路由人工</strong>。这是 1-2 天能加的、最贴半米现状的提稳步。<strong>注意：独立打分别辩论</strong>（辩论放大偏差）。</p>
+          </div>
+        </div>
+        <div class="step hard">
+          <div class="badge">3</div>
+          <div class="step-card">
+            <h4>阶段 3 · 壁垒 — NLP features + XGBoost/isotonic 校准层 + 自建中国学生锚定集</h4>
+            <div class="meta"><span class="pill bad">工程重</span><span class="pill purple">护城河</span><span class="pill">解锁商用</span></div>
+            <p><strong>为什么最后</strong>：这是把准度从 0.8 往天花板推、并建立别人买不到的资产的阶段。<strong>XGBoost/isotonic 做校准映射层</strong>（修正 LLM 系统性偏差、把连续分映射到 band），<strong>NLP features 提供可解释+稳定信号</strong>（复用 cvla 已有的 14 textstat），<strong>自建中国学生真人评分锚定集</strong>替换 NC-license 数据、解锁商用、成为 few-shot 弹药。工程最重，但 ROI 最高。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH4 校准>架构 ============ -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">校准是成败关键 ★（few-shot 锚定 + QWK 验证，校准&gt;架构）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>这是整份报告的<strong>核心章</strong>。如果阿杰只读一章，读这章。所有姐妹报告都指向同一句话：<strong>校准 &gt; 架构</strong>。下面给可操作的校准方法。</p>
+
+      <h3>4.1 few-shot 真人锚定 —— 怎么做（最实操）</h3>
+      <p><strong>原理</strong>：在评分 prompt 里，针对每个分数档，放进 1-2 篇<strong>真人评分过的锚定样例</strong>（anchor essay）+ 它的真人分数 + 简短理由，让模型"看着标尺打分"而不是凭空判。实测每档 2 例带来 ~26% QWK 提升，6-shot 把 ASAP QWK 从 0.306 拉到 0.531<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>。</p>
+      <div class="callout good">
+        <p><strong>✅ 锚例怎么选（实证规则）</strong>：</p>
+        <ul>
+          <li><strong>覆盖所有分数档</strong>：每个 band（或每 0.5-1 档）至少 1-2 例，"2 per score level"是验证过的甜点<sup class="cite" data-refid="1">[1]</sup>。不要全选中间分。</li>
+          <li><strong>per-trait 各选各的</strong>：IELTS 4 项，每项要有自己的锚例集（一篇作文可能 TR 高但 GRA 低，要按维度选）。</li>
+          <li><strong>检索最相似的（进阶）</strong>：dense retrieval 选跟当前作文最相似的锚例，比随机选更准（Contriever 检索法 QWK 0.70-0.79）<sup class="cite" data-refid="21">[21]</sup>。MVP 阶段固定锚例即可，量大了再上检索。</li>
+          <li><strong>增益主要在中高分段</strong>：few-shot 让 score-4 准度从 42.7% 升到 61.2%<sup class="cite" data-refid="2">[2]</sup>——高分段是 AES 最难的，锚例帮最大。</li>
+        </ul>
+      </div>
+
+      <h3>4.2 rubric 迭代精修 —— Reflect-and-Revise（让模型自己改 rubric）</h3>
+      <p>除了锚例，<strong>rubric 措辞本身</strong>也能校准。Reflect-and-Revise 方法：让模型在一批样例上打分→对比真人分→反思差异→改写 rubric→只在 QWK 提升时保留。10 轮迭代，ASAP 上 QWK 增益高达 +0.47，TOEFL11 +0.19；<strong>即使从一句话的简陋 rubric 起步，精修后也能超过人写的详细 rubric</strong><sup class="cite" data-refid="7">[7]</sup>。<a href="./lexile-reading-assessment-research.html">lexile 报告</a>引用的 rubric 精修 QWK 增益 0.19-0.47 就是这个来源。</p>
+      <pre><code># Reflect-and-Revise 校准循环（伪代码，半米可直接照搬）
+best_rubric, best_qwk = initial_rubric, eval_qwk(initial_rubric, val_set)
+for i in range(10):
+    batch = sample(train_set, n=10)                 # 取一小批真人评分样例
+    preds = [llm_score(e, best_rubric) for e in batch]  # 当前 rubric 打分+理由
+    discrepancies = collect(preds, human_scores)    # 对比真人分、收集差异+理由
+    new_rubric = llm_refine(best_rubric, discrepancies)  # 让模型据差异改写 rubric
+    new_qwk = eval_qwk(new_rubric, val_set)
+    if new_qwk &gt; best_qwk:                           # 只在变好时保留
+        best_rubric, best_qwk = new_rubric, new_qwk</code></pre>
+
+      <h3>4.3 校准映射层 —— 把"连续分"对齐到"band"（修系统性偏差）</h3>
+      <p>LLM/模型输出的连续分往往跟真人 band <strong>有系统性偏移</strong>（尤其 LOC 偏严 ~-1.0 分）。<strong>isotonic regression（保序回归）</strong>是修这个的正确工具：拟合一个<strong>单调非降</strong>的分段函数，把模型分映射到真人分——它能灵活吃掉偏移、保留序关系、不强加线性假设<sup class="cite" data-refid="22">[22]</sup>。每个 trait 单独拟合一条。这就是阶段 3"校准层"的核心，几十行 <code>sklearn.isotonic.IsotonicRegression</code>。</p>
+      <div class="callout info">
+        <p><strong>🔵 三层校准叠加（从便宜到工程重）</strong>：① <strong>prompt 层</strong>（few-shot 锚例 + 精修 rubric）→ 几乎免费、阶段 1 就做；② <strong>per-trait 偏移修正</strong>（对每维加一个学到的 offset/scaling）→ 阶段 2；③ <strong>isotonic/XGBoost 映射层</strong>（用真人评分集学一条映射曲线）→ 阶段 3。<strong>顺序很重要：先把便宜的 ① 做到头，再上后面的</strong>。</p>
+      </div>
+
+      <h3>4.4 QWK 怎么算、目标定多少（验证标准）</h3>
+      <p><strong>QWK（Quadratic Weighted Kappa）</strong>是 AES 行业标准指标，衡量预测分与真人分的"加权一致性"（越接近 1 越好，错得越远惩罚越重，平方加权）。<code>sklearn.metrics.cohen_kappa_score(y_true, y_pred, weights='quadratic')</code> 一行算出。</p>
+      <div class="callout accent">
+        <p><strong>🎯 目标值怎么定（有据，不拍脑袋）</strong>：</p>
+        <ul>
+          <li><strong>天花板 = 真考官之间的一致性</strong>。IELTS 真考官 G 系数 0.81-0.92<sup class="cite" data-refid="4">[4]</sup>；AES 不可能超过<strong>√(评分标签可靠度)</strong>这个理论上限——ASAP 上限 ≈0.926，ELLIPSE 仅 ≈0.816<sup class="cite" data-refid="23">[23]</sup>。</li>
+          <li><strong>"人类水平"基准</strong>：人-人 QWK 在 ASAP 是 <strong>0.754</strong>、在 ELLIPSE 只有 <strong>0.501</strong>（说明 ELLIPSE 标注本身就更"噪")<sup class="cite" data-refid="23">[23]</sup>。现代 BERT 系统在 ASAP 已达 0.752（约等于人-人），在 ELLIPSE 达 0.538（已超过人-人）。</li>
+          <li><strong>半米可用门槛</strong>：MVP <strong>QWK ≥ 0.70</strong> 即可上线（接近单考官水平）；提稳目标 <strong>0.75-0.80</strong>；别追 0.9+，那超过了人-人一致性，往往是过拟合或测试集泄漏的信号。</li>
+        </ul>
+      </div>
+
+      <h3>4.5 验证集怎么搭</h3>
+      <ul>
+        <li><strong>最小验证集</strong>：50-100 篇<strong>真人评分</strong>的作文（IELTS 用 Cambridge 官方范文 + 已知 band；平时作文用国际学校老师评的）。QWK 在 50 篇上已能给出可用信号（IELTS T2 0.811 那篇就只用了 56 篇<sup class="cite" data-refid="3">[3]</sup>）。</li>
+        <li><strong>校准集与验证集分开</strong>：锚例（校准）和算 QWK 的样本（验证）<strong>不能重叠</strong>，否则 QWK 虚高。conformal prediction 也要求独立 calibration set<sup class="cite" data-refid="10">[10]</sup>。</li>
+        <li><strong>定期重标</strong>：模型版本变了、prompt 改了，都要在固定验证集上重跑 QWK（第 10 章 drift 监控）。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ CH5 数据 + license ============ -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">数据：用哪个集校准验证（承接父报告 + license）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>父报告已对 30+ 数据集做了 16 维 due diligence，<strong>本章不重复清单</strong>，只回答"<strong>做 few-shot 锚定 + QWK 验证，具体拿哪个、license 能不能用</strong>"。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>数据集</th><th>用途</th><th>真人评分</th><th>license</th><th>能用在哪一步</th></tr></thead>
+          <tbody>
+            <tr><td><strong>ELLIPSE</strong> (6,500, 6 维)</td><td>锚例 + 验证 + 阶段 3 训练</td><td>🟢 2 trained raters</td><td>🔴 CC BY-NC-SA 4.0<sup class="cite" data-refid="24">[24]</sup></td><td>内部训练/校准可用；<strong>模型 weights 派生品不能商用</strong>（viral copyleft）</td></tr>
+            <tr><td><strong>ASAP / ASAP++</strong></td><td>QWK baseline + 锚例</td><td>🟢 expert graders</td><td>🟡 比赛 license</td><td>方法学 benchmark，US K12 母语有 domain gap</td></tr>
+            <tr><td><strong>DREsS</strong> (48.9K, 3 维 EFL)</td><td>EFL 平时作文锚例/验证</td><td>🟢 英语教育专家</td><td>🟡 学术（查 release 条款）</td><td>EFL 写作最贴半米平时作文场景<sup class="cite" data-refid="15">[15]</sup></td></tr>
+            <tr><td><strong>Cambridge 官方 IELTS 范文</strong></td><td>IELTS QWK 验证金标准</td><td>🟢 certified examiner</td><td>🟡 出版物（小样引用）</td><td>IELTS T2 0.811 验证就用这个（56 篇）<sup class="cite" data-refid="3">[3]</sup></td></tr>
+            <tr><td><strong>自建中国学生锚定集</strong></td><td>校准 + 商用训练 + 护城河</td><td>🟢 国际学校老师/examiner</td><td>🟢 自有（可商用）</td><td>阶段 3 替换 NC 数据、解锁商用（第 11 章）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>🔴 license 关键判断（承接父报告 + cvla 审查）</strong>：高质量真人评分数据（ELLIPSE / PERSUADE / Write&amp;Improve）<strong>几乎全是 CC BY-NC-SA</strong>（禁商 + viral copyleft）。这意味着：<strong>(1)</strong> 阶段 1-2 用它们做<strong>few-shot 锚例 + 算 QWK 验证</strong>，是"内部参考/评估"用途，风险低；<strong>(2)</strong> 但<strong>拿它们训出来的模型 weights 做商业产品</strong>，会被 ShareAlike 传染——这跟 <a href="./banmi-cvla-audit-research.html">cvla 审查</a>发现的 "Octanove CC BY-SA 4.0 阻断商用" 是同一个雷。<strong>解法</strong>：商用前用<strong>自建中国学生锚定集</strong>完全替换 NC 数据来源（第 11 章 + 第 12 章 Step 4）。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>⚠️ 别用 LLM 自评数据训自己（污染闭环）</strong>：父报告反复警告 Kaggle/HF 上大量 IELTS 数据是 ChatGPT 生成的伪标签——<strong>用 GPT 评的分训新模型，准度天花板就是 GPT 本身</strong>，且会继承 LLM 的系统性偏差（LOC 偏严）。半米的锚例和验证集<strong>必须是真人评分</strong>，否则 QWK 数字是自欺欺人。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH6 流水线架构 + 技术栈 ============ -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">评分流水线架构 + 技术栈（单人可维护）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>父报告 §12 给了一张大架构图（含 speech / KG / 多 scorer）。本章给<strong>聚焦 writing 评分、单人开发可维护的精简流水线</strong>——先把 writing 跑通，speech 是后话。</p>
+
+      <h3>6.1 评分流水线（每一格都是一个可独立测的函数）</h3>
+      <pre><code>输入作文 (text + 选定 task: IELTS-T2 / TOEFL-Int / 通用)
+   │
+   ▼
+┌─────────────────────────────────────────────┐
+│ ① 预处理 / 守门（gatekeeper，便宜快）         │
+│   • 语种检测（非英语 → 拒）                   │
+│   • 长度检测（&lt;某阈值 → 标记，不硬判 0）       │
+│   • 离题检测（vs prompt 语义相似度，低 → flag）│  ← 结论#4 最危险的坑
+│   • 作弊/重复检测（n-gram 自重复、模板套用）   │
+└─────────────────────────────────────────────┘
+   │ 通过
+   ▼
+┌─────────────────────────────────────────────┐
+│ ② 分项 rubric 评分（LLM，每项独立 prompt）    │
+│   for trait in [TR, CC, LR, GRA]:             │
+│     先生成该项诊断（feedback-first）          │  ← 结论#3：先反馈后打分
+│     再据诊断给该项 band + 引用证据            │
+│   （阶段2：第二个不同家族模型并行复评）        │
+└─────────────────────────────────────────────┘
+   │ 每项原始分 + 理由 + 证据
+   ▼
+┌─────────────────────────────────────────────┐
+│ ③ 校准映射层                                  │
+│   • per-trait offset 修正（LOC 偏严 +1.0）    │
+│   • isotonic 映射：连续分 → band（0.5 步）    │  ← 第4章
+└─────────────────────────────────────────────┘
+   │
+   ▼
+┌─────────────────────────────────────────────┐
+│ ④ 聚合 + 多刻度输出                            │
+│   • 4 项 → overall band（IELTS 规则四舍五入） │
+│   • 映射到 CEFR / TOEFL 0-5 / 学校百分制      │  ← 评分与刻度解耦
+└─────────────────────────────────────────────┘
+   │
+   ▼
+┌─────────────────────────────────────────────┐
+│ ⑤ 反馈生成（actionable，可与②合并产出）       │  ← 第8章
+│   优点 / 缺点 / 逐项改进建议 / 同水平范例      │
+└─────────────────────────────────────────────┘
+   │
+   ▼
+┌─────────────────────────────────────────────┐
+│ ⑥ 一致性检查 / 分歧检测 / 置信度              │  ← 第9、10章
+│   • 双模型分歧 &gt; 1 band → 人工队列            │
+│   • conformal prediction-set 多标签 → 人工    │
+└─────────────────────────────────────────────┘
+   │
+   ▼
+评分结果 + 反馈 + 置信度（+ 人工兜底标记）</code></pre>
+
+      <h3>6.2 技术栈（单人开发，每个都成熟可维护）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>层</th><th>选型</th><th>为什么</th></tr></thead>
+          <tbody>
+            <tr><td>API 框架</td><td><strong>FastAPI</strong>（Python）</td><td>async、自动 OpenAPI 文档、跟现有 banmi-cvla（Python）同栈；社区有现成 AES API 范例可参考<sup class="cite" data-refid="25">[25]</sup></td></tr>
+            <tr><td>LLM 调用</td><td>OpenAI/Anthropic/DeepSeek/Qwen SDK + <strong>统一 wrapper</strong></td><td>抽象一层方便切模型、做双模型复评、记 model version（drift 监控用）</td></tr>
+            <tr><td>NLP features（阶段3）</td><td><strong>spaCy + textstat</strong>（复用 cvla 已有 14 公式）</td><td>cvla 已实现，直接复用；提供可解释+稳定信号</td></tr>
+            <tr><td>校准/集成（阶段3）</td><td><strong>scikit-learn</strong>（IsotonicRegression / XGBoost）</td><td>几十行；isotonic 修偏移、XGBoost 做特征集成</td></tr>
+            <tr><td>离题/相似度检测</td><td><strong>sentence-transformers</strong> 嵌入余弦相似</td><td>作文 vs prompt 语义相似度，低于阈值 flag 离题</td></tr>
+            <tr><td>语法/拼写信号</td><td><strong>LanguageTool</strong>（开源，自托管）</td><td>给 LOC 维度提供客观错误计数，辅助校准（别全信 LLM 的 LOC 判断）</td></tr>
+            <tr><td>存储</td><td><strong>PostgreSQL</strong>（作文/分数/反馈/真人复核）</td><td>关系数据 + 后续自建锚定集就长在这；JSONB 存 LLM 原始输出</td></tr>
+            <tr><td>缓存</td><td><strong>Redis</strong> 或 LLM provider 的 prompt caching</td><td>同一篇重复评分命中缓存省钱；rubric/锚例做 prefix cache</td></tr>
+            <tr><td>人工队列</td><td>PG 表 + 简单后台（标 needs_review）</td><td>分歧/低置信样本进队列，老师复核后回写当锚例</td></tr>
+            <tr><td>监控</td><td>固定验证集定时跑 QWK + 记 model version</td><td>drift 监控（第 10 章）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout good">
+        <p><strong>✅ 关键架构决策：评分与刻度解耦</strong>。内部只产出一套<strong>连续的分项分</strong>（母语坐标），刻度（IELTS band / CEFR / TOEFL / 学校制）全在 ④ mapping 层转。好处：换考试只改映射表不改评分核心；自建锚定集时也是统一坐标。这跟父报告 §12 的 KG mapping layer 一致，本报告把它<strong>提到 MVP 就该有的级别</strong>。</p>
+      </div>
+      <div class="callout info">
+        <p><strong>🔵 复用 vs 新建（衔接 cvla）</strong>：<strong>复用</strong> banmi-cvla 的 14 textstat + spaCy 管线（阶段 3 当 features）；<strong>替换</strong> cvla 里的 Octanove C1/C2 词表（CC BY-SA 阻断商用，cvla 审查已点名）；<strong>新建</strong> 评分核心（②）、校准层（③）、反馈层（⑤）、人工队列（⑥）。cvla 是<strong>文本难度评估</strong>，评分引擎是<strong>学员产出评分</strong>，两者共享 EVP/EGP/CEFR-J 词法语法信号。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH7 rubric prompt 模板 ============ -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">分项 rubric 评分 prompt 模板（说明性示例）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout warn">
+        <p><strong>⚠️ 说明</strong>：下面是<strong>说明性 prompt 模板</strong>，体现第 3、4 章的实证原则（per-trait 分开打 / feedback-first / extract-then-score / few-shot 锚定 / 官方描述符）。半米要按自己的真人锚例和验证集迭代调（Reflect-and-Revise）。<strong>这不是替阿杰写完整生产代码</strong>，是给一个能照着改的骨架。</p>
+      </div>
+
+      <h3>7.1 单项 rubric 评分模板（以 IELTS Task 2 · Grammatical Range &amp; Accuracy 为例）</h3>
+      <pre><code>SYSTEM:
+You are a certified IELTS examiner. Score ONLY the criterion
+"Grammatical Range and Accuracy (GRA)" of the essay below.
+Do NOT score other criteria. Output band 0-9 in 0.5 steps.
+
+# Official public band descriptors for GRA (anchor your judgment):
+Band 9: full range of structures used naturally and accurately;
+        rare minor errors as slips only.
+Band 7: good variety of complex structures; errors occur but
+        rarely impede communication; frequent error-free sentences.
+Band 6: mix of simple and complex structures; some errors in
+        complex forms; punctuation sometimes faulty.
+Band 5: limited range; complex sentences less accurate than
+        simple ones; errors may cause difficulty for the reader.
+# (band 8/6.5/... 略)
+
+# Few-shot anchors (real human-rated, 2 per band — calibration):
+<example band=7> ...真人评分锚例全文... → GRA=7.0
+   (rater note: 复杂句多但偶有时态错，不影响理解) </example>
+<example band=5> ...锚例全文... → GRA=5.0
+   (rater note: 主谓不一致+冠词缺失反复出现，影响流畅) </example>
+# ...每个 band 2 例...
+
+USER:
+PROMPT: {作文题目}
+ESSAY:  {学员作文}
+
+# 步骤（feedback-first，再打分）：
+1. evidence: 引用 essay 里 3-5 处具体句子，标出复杂句/错误。
+2. analysis: 对照上面描述符，这些证据落在哪个 band。
+3. band: 给最终 GRA band（数字）。
+返回 JSON: {"evidence":[...], "analysis":"...", "band":n.n}</code></pre>
+      <div class="callout accent">
+        <p><strong>🎯 这个模板焊进了 4 条实证</strong>：① <strong>只评一项</strong>（analytic 分开打，避免一次要 4 个数字的低准度）；② <strong>官方 public 描述符当锚</strong>（§2.1）；③ <strong>每 band 2 个真人锚例</strong>（§4.1，~+26% QWK）；④ <strong>先 evidence/analysis 后 band</strong>（feedback-first，QWK 0.533 vs 0.517）。<strong>记得 A/B 测</strong>：分析型评分时"精简描述符 vs 全文描述符"哪个 QWK 高（§3.2 的反直觉）。</p>
+      </div>
+
+      <h3>7.2 extract-then-score 进阶模板（AutoSCORE 模式）</h3>
+      <p>对长作文/复杂 rubric，先用一个 agent 把 rubric 对齐的证据抽成结构化 JSON，再用另一个 agent 据此打分，QWK 可再涨 +16~37%<sup class="cite" data-refid="9">[9]</sup>：</p>
+      <pre><code># Agent A（抽证据）：
+"对每条 rubric 子标准，从 essay 中抽出支持/反对证据，
+ 输出 JSON：{TR:{evidence:[],coverage:?}, CC:{...}, LR:{...}, GRA:{...}}"
+# Agent B（打分）：
+"给定 essay + 上面的结构化证据 JSON + 官方描述符 + 锚例，
+ 对每项给 band。" → 比直接打分更稳、更可解释</code></pre>
+
+      <h3>7.3 防 gaming 要在 prompt + 守门双层做（不能只靠 prompt）</h3>
+      <div class="callout bad">
+        <p><strong>🔴 重要纠偏</strong>：2026 的实测发现，<strong>现代 LLM 评分对"纯堆长度/复读段落"反而会扣分</strong>（doubling length → d=-0.24），不像老 AES 那样奖励长度<sup class="cite" data-refid="5">[5]</sup>——这是好消息。但<strong>离题</strong>仍是大坑（d=-1.33 但需要守门层先 flag），且对"插入权威腔套话"有小幅正偏（d=0.16）。所以防 gaming = <strong>prompt 里明确"离题/答非所问直接低分" + 守门层独立做离题检测 + 自重复检测</strong>，不能指望 prompt 一层兜住。详见第 10 章。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH8 反馈生成 ============ -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">反馈生成（actionable）— 评分与反馈同时产出</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>半米给学员的价值不只是一个数字，是<strong>能照着改的反馈</strong>。好消息：<strong>反馈生成和评分可以同时做，而且反馈先行还能提升评分准度</strong>。</p>
+
+      <h3>8.1 先反馈后打分 —— 一举两得（实证）</h3>
+      <div class="callout good">
+        <p><strong>✅ 实测：feedback→scoring 比 scoring→feedback 的 QWK 更高（0.533 vs 0.517）</strong><sup class="cite" data-refid="8">[8]</sup>。原因很直觉：先打分会让模型"为已经给出的（可能错的）分数编理由"；先生成诊断反馈，再据反馈打分，相当于<strong>把 Chain-of-Thought 当评分的中间推理</strong>。所以<strong>反馈不是评分之后的附加品，是评分流程的一部分</strong>。第 7 章模板的"evidence→analysis→band"就是这个结构。</p>
+      </div>
+
+      <h3>8.2 actionable 反馈的结构（四件套）</h3>
+      <ul>
+        <li><strong>优点</strong>（具体到句，不空泛"写得不错"）：引用做得好的地方 + 为什么好。</li>
+        <li><strong>缺点 / 失分点</strong>：对照 rubric，指出哪一项拖了后腿，引用具体证据。</li>
+        <li><strong>逐项改进建议</strong>：每个失分维度给 1-2 条<strong>可执行</strong>的改法（"把第 2 段这句被动改主动"，不是"提高语法准确度"）。</li>
+        <li><strong>同水平 / 高一档范例</strong>：给一个 band+1 的改写示例片段，让学员看到"好一点长什么样"。</li>
+      </ul>
+
+      <h3>8.3 评分准 vs 反馈好，是两件事（诚实边界）</h3>
+      <div class="callout warn">
+        <p><strong>⚠️ 别混淆</strong>：同一篇研究发现，虽然 joint scoring-feedback 提升了<strong>评分</strong>指标，但<strong>评分指令对反馈质量的提升很有限</strong>——反馈好不好主要看反馈那部分的 prompt 设计，不是靠"也让它打分"带出来<sup class="cite" data-refid="8">[8]</sup>。学界另一发现：<strong>偏好优化（DPO/RLHF）的模型反馈更"像考官"、更连贯，但对精确打分不如 criterion-specific 监督</strong><sup class="cite" data-refid="26">[26]</sup>。<strong>含义</strong>：半米可以<strong>评分用一套严格 rubric prompt，反馈用更口语化/鼓励性的 persona prompt</strong>，两者拆开调。persona 实测有效（"Educational Researcher"/"Teacher's Assistant" persona 的 QWK 和反馈 helpfulness 都更高）<sup class="cite" data-refid="8">[8]</sup>。</p>
+      </div>
+
+      <h3>8.4 中英双语反馈（半米场景）</h3>
+      <p>半米用户在国内，反馈宜<strong>中英双语</strong>：评分理由/证据用英文（贴 rubric），改进建议给中文（学生看得懂），范例给英文。用便宜模型（DeepSeek/Qwen）生成反馈，贵模型只用在评分/复评——反馈量大但容错高，评分量小但要准（成本分配见第 13 章）。</p>
+    </div>
+  </section>
+
+  <!-- ============ CH9 多模型复评 + 分歧检测 ============ -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">多模型复评 + 分歧检测（mirofish 结论落地）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>这章把 <a href="./banmi-mirofish-application-research.html">mirofish 报告</a>的多 agent 评分铁律<strong>落地成具体工程</strong>。先重申铁律，再给实现。</p>
+
+      <div class="callout accent">
+        <p><strong>🎯 mirofish 三条铁律（直接套用，别推翻）</strong>：</p>
+        <ol>
+          <li><strong>校准 &gt; 架构</strong>：多 agent 是"已有好单模型之上的增强项"，不是从零起步的捷径。先把单模型 + few-shot 校准做到 QWK 0.7+，再上第二个模型<sup class="cite" data-refid="20">[20]</sup>。</li>
+          <li><strong>必须不同模型家族</strong>（disjoint families）：用同一个 LLM 不同 prompt 生成"一堆 agent"是<strong>伪多样性</strong>——5 个都偏低的评委投票结果还是偏低。要 Qwen + Claude + Gemini 这种真不同家族<sup class="cite" data-refid="20">[20]</sup>。</li>
+          <li><strong>独立打分别辩论</strong>：让 agent 互相辩论会在第一轮后<strong>放大偏差</strong>。陪审团必须<strong>各自独立打分（互不可见）再聚合</strong><sup class="cite" data-refid="20">[20]</sup>。</li>
+        </ol>
+      </div>
+
+      <h3>9.1 阶段 2 的最小实现：双模型复评 + 分歧检测</h3>
+      <p>不要一上来三五个模型。最贴半米现状的第一步是<strong>加第二个不同家族模型独立复评</strong>：</p>
+      <pre><code>for trait in traits:
+    score_A = model_A.score(essay, trait)   # 如 Qwen3.5
+    score_B = model_B.score(essay, trait)   # 如 Claude（不同家族）
+    if abs(score_A - score_B) &lt;= 0.5:        # 一致
+        final[trait] = mean(score_A, score_B)
+        confidence[trait] = "high"
+    else:                                     # 分歧大
+        final[trait] = None
+        confidence[trait] = "low"
+        queue_for_human_review(essay, trait, score_A, score_B)</code></pre>
+      <div class="callout info">
+        <p><strong>🔵 为什么"分歧大→人工"是黄金信号</strong>：两个独立的不同家族模型都同意 → 大概率对（高置信，自动出分）；它们分歧大 → 这篇大概率是<strong>难判的边界/极端样本</strong>（AES 最不准的地方，结论 #4），正好该人工。这让<strong>人工只花在最需要的样本上</strong>，不是全量复核。</p>
+      </div>
+
+      <h3>9.2 聚合方法（量大之后）</h3>
+      <ul>
+        <li><strong>中位数 / 去极值平均</strong>：3+ 模型时取中位数（抗单模型离群）。</li>
+        <li><strong>PoLL（Panel of LLMs）</strong>：用一组<strong>便宜的小模型</strong>（Qwen Flash + Gemini Flash + DeepSeek Flash）组队，mirofish 报告引用 PoLL 实测<strong>比单个 GPT-4 judge 更准、还便宜 7 倍</strong>——前提是别全用旗舰<sup class="cite" data-refid="20">[20]</sup>。这对半米要批量评几千份作文很关键（第 13 章成本）。</li>
+        <li><strong>加权</strong>：哪个模型在验证集 QWK 高就给更高权重（用真人验证集学权重）。</li>
+      </ul>
+
+      <h3>9.3 什么时候才值得上多模型</h3>
+      <div class="callout warn">
+        <p><strong>⚠️ 别过早</strong>：多 agent 在好单模型之上<strong>只加几个点</strong>，且主要体现在"识别弱作文"上<sup class="cite" data-refid="20">[20]</sup>。如果半米单模型 + 校准还没到 QWK 0.7，<strong>先回去做校准</strong>（第 4 章），别用多模型掩盖校准没做好。多模型的<strong>真正价值在"分歧检测→人工兜底"这个置信度信号</strong>，不在那几个点的准度。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH10 可靠性 + 真实坑 ============ -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">可靠性验证 + AES 真实坑（诚实边界 · critic）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>阿杰要"能直接用"，所以更要诚实讲<strong>哪里会翻车、什么情况必须人工</strong>。下面每个坑独立 callout（按严重程度配色）。</p>
+
+      <div class="callout bad">
+        <p><strong>🔴 坑 #1 — 离题 / 答非所问是最危险的失分点</strong></p>
+        <p>实测：同能力但答错 item，分数从 3.11 掉到 2.38（d=-0.62）；完全离题掉到 1.69（d=-1.33），35% 离题样本被判最低分<sup class="cite" data-refid="5">[5]</sup>。问题是 LLM 评分时<strong>未必稳定识别离题</strong>，所以<strong>必须有独立守门层</strong>：作文 vs prompt 的语义相似度低于阈值 → 先 flag 再评。不能指望评分 prompt 自己抓离题。</p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>🔴 坑 #2 — LLM 对语法/拼写（LOC）维度系统性偏严约 -1.0 分</strong></p>
+        <p>多项研究一致发现：LLM 对 Lower-Order Concerns（grammar / conventions / language）<strong>系统性打低约 1.0 分</strong>（5 分制），且只需 ~5 篇就能测出这个偏差<sup class="cite" data-refid="6">[6]</sup>。这跟 <a href="./banmi-cvla-audit-research.html">cvla 审查</a>里"GPT 给 grammar/conventions 系统性偏低"完全一致，也跟父报告 §12.3"避免 LLM bias"呼应。<strong>解法</strong>：per-trait offset 校准（第 4.3）+ 用 LanguageTool 的客观错误计数交叉验证 LOC，别全信 LLM 的语法判断。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>🟠 坑 #3 — 高分段 + 极端样本最不准</strong></p>
+        <p>AES 在<strong>高分作文和分布极端</strong>处误差最大（few-shot 增益主要在中高分段，说明那里本来最弱）<sup class="cite" data-refid="2">[2]</sup>。ELLIPSE 这种"标注本身就噪"的数据，人-人 QWK 才 0.501，AES 天花板 √ρ≈0.816<sup class="cite" data-refid="23">[23]</sup>——<strong>不是模型不行，是高分段连真人都难一致</strong>。所以高分作文（如 IELTS 8+）应优先进人工复核。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>🟠 坑 #4 — 模型版本漂移（drift）</strong></p>
+        <p>调 API 评分的最大隐患：<strong>provider 静默换了模型版本，分数就漂了</strong>。必须：① 每次评分<strong>记录 model version + temperature</strong>；② <strong>固定一个验证集，定时（每日/每周）重跑 QWK</strong>，跌破阈值告警<sup class="cite" data-refid="27">[27]</sup>；③ 用一个更强的 reference 模型当 LLM-as-judge 抽查生产输出<sup class="cite" data-refid="27">[27]</sup>；④ <strong>温度设 0</strong>降低自我不一致。换模型/改 prompt 必须重测 QWK 才能上线。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>🟠 坑 #5 — 过度自信 + 中国学生母语负迁移识别盲区</strong></p>
+        <p>LLM 倾向给出<strong>看起来很确定的分数和理由</strong>，但 IELTS 真考官之间 reliability 才 0.81-0.92<sup class="cite" data-refid="4">[4]</sup>——<strong>给学员单一确定分数是误导</strong>，应给 band + 置信区间/不确定提示。另外，通用模型对<strong>中文母语特定难点</strong>（冠词、时态、语序）的识别有系统盲区（lexile 报告指出 Lexile 完全看不到中文母语者的语言特定因素）<sup class="cite" data-refid="28">[28]</sup>——这要靠自建中国学生锚定集补（第 11 章）。</p>
+      </div>
+
+      <h3>10.1 置信度 + 人工兜底（conformal prediction）</h3>
+      <div class="callout good">
+        <p><strong>✅ 用 prediction-set 大小当置信度信号</strong>：conformal prediction 是分布无关的包装器，给任何评分器<strong>形式化的覆盖保证</strong>（如 90%——真分落在预测集外的概率 ≤10%）<sup class="cite" data-refid="10">[10]</sup>。机制：<strong>预测集只有 1 个标签 = 高置信（自动出分）；多个标签 = 不确定（路由人工）</strong>。实测能在同等错误率下<strong>少 20% 人工量</strong><sup class="cite" data-refid="10">[10]</sup>。半米的人工兜底信号 = <strong>双模型分歧大（第 9 章） OR conformal 预测集多标签 OR 离题 flag OR 高分段</strong>，命中任一进人工队列。</p>
+      </div>
+
+      <h3>10.2 什么情况必须人工兜底（清单）</h3>
+      <ul>
+        <li>离题 / 语种异常 / 长度异常（守门层 flag）。</li>
+        <li>双模型分歧 &gt; 1 band。</li>
+        <li>conformal 预测集多标签（低置信）。</li>
+        <li>高 stakes 高分段（IELTS 7.5+，错一档影响大）。</li>
+        <li>学员申诉 / 抽审（定期抽 X% 全量人工复核校准）。</li>
+      </ul>
+
+      <h3>10.3 验证机制汇总</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>机制</th><th>查什么</th><th>频率</th></tr></thead>
+          <tbody>
+            <tr><td>QWK 对真人</td><td>整体准度（目标 0.70-0.80）</td><td>每次改 prompt/模型 + 定期</td></tr>
+            <tr><td>双模型分歧率</td><td>哪些样本不稳</td><td>实时（每篇）</td></tr>
+            <tr><td>conformal 覆盖率</td><td>置信度校准是否还成立</td><td>定期重算 calibration set</td></tr>
+            <tr><td>per-trait 偏移监控</td><td>LOC 偏严有没有变</td><td>定期（small sample 即可测）</td></tr>
+            <tr><td>人工抽审</td><td>真实一致性 + 收集新锚例</td><td>定期抽 X%</td></tr>
+            <tr><td>model version 日志</td><td>drift 溯源</td><td>每次调用</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH11 中国学生 + 护城河 ============ -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">中国学生场景适配 + 护城河</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>11.1 中国学生作文常见问题（AI 怎么识别）</h3>
+      <p>中式英语 = 一种 interlanguage，表现为<strong>中文句法 + 英文词</strong>，由母语负迁移（L1 transfer）造成<sup class="cite" data-refid="11">[11]</sup>。实证最高频的错误类型：</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>错误类型</th><th>为什么（L1 负迁移）</th><th>AI 识别难度</th><th>怎么帮 AI</th></tr></thead>
+          <tbody>
+            <tr><td><strong>冠词 (a/an/the) 缺失或误用</strong></td><td>中文无冠词系统</td><td>🟡 通用模型常忽略</td><td>LanguageTool 规则 + 锚例标注</td></tr>
+            <tr><td><strong>时态错乱</strong></td><td>中文无屈折变化、靠时间词</td><td>🟡 中</td><td>per-trait GRA 锚例覆盖</td></tr>
+            <tr><td><strong>介词误用</strong></td><td>中英介词不对应</td><td>🟡 中</td><td>搭配检查 + 锚例</td></tr>
+            <tr><td><strong>主谓一致</strong></td><td>中文无数的一致</td><td>🟢 LLM 较易抓</td><td>LanguageTool</td></tr>
+            <tr><td><strong>中式语序 / 直译</strong> (Chinglish)</td><td>套中文句子结构、词义多义直译</td><td>🔴 最难（语法对但"不地道"）</td><td><strong>必须中国学生锚例</strong>——通用模型对"语法正确但中式"识别最弱</td></tr>
+            <tr><td><strong>搭配 / 多词单位错误</strong></td><td>词汇 L1 polysemy</td><td>🔴 难</td><td>锚例 + LR 维度专门标注</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout info">
+        <p><strong>🔵 关键洞察</strong>：纯语法错误（主谓、明显时态）通用模型 + LanguageTool 能抓；但<strong>"语法正确但中式直译"</strong>（Chinglish 的核心）是通用模型最大盲区——它们用母语者数据训，对"中文母语者读着别扭"没感觉。<strong>这正是半米锚例最该覆盖的</strong>，也是护城河所在。</p>
+      </div>
+
+      <h3>11.2 为什么自建中国学生锚定集是护城河</h3>
+      <div class="callout purple">
+        <p><strong>🟪 三层护城河（按价值排序）</strong>：</p>
+        <ol>
+          <li><strong>中国学生真人评分锚定集</strong>：国际学校 K12 学生作文 + 老师/examiner 真人评分 + L1 负迁移典型样本标注。这是 ① few-shot 校准的弹药（校准&gt;架构，第 4 章）② 阶段 3 训自有模型的<strong>可商用合法数据</strong>（替换 NC-license 数据，解锁商用）③ 别人买不到——Cambridge/ETS/Pearson 没有中国学生数据，国内只有流利说有但不公开（父报告 §1.3 结论 #5）。</li>
+          <li><strong>CEFR ↔ CSE（中国英语能力等级量表）↔ GSE 双轨/三轨映射</strong>：国外公司不做、国内公司没评分能力。半米的输出能同时给"国际刻度 + 中国国家标准刻度"——父报告 §12.4 已列为最值钱资产之一。</li>
+          <li><strong>中式英语诊断库</strong>：把"语法对但中式"的典型 pattern 沉淀成可复用的诊断规则 + 范例，给学员"这句中国人爱这么写，地道说法是…"的反馈——这是教学价值，也是数据飞轮。</li>
+        </ol>
+      </div>
+
+      <h3>11.3 锚定集怎么建（务实路径）</h3>
+      <ul>
+        <li><strong>起点小</strong>：先攒 50-100 篇国际学校学生作文 + 1-2 个老师真人评分（够做 MVP 校准 + 验证，呼应 lexile 报告"真人锚定 30-50 篇"）。</li>
+        <li><strong>数据飞轮</strong>：人工兜底队列（第 10 章）里老师复核过的样本，<strong>自动回流成新锚例</strong>——评得越多，锚例越丰富，校准越准。</li>
+        <li><strong>标注 L1 负迁移</strong>：每篇额外标"这里是冠词/时态/中式语序"，沉淀成中式英语诊断库。</li>
+        <li><strong>合规</strong>：自有数据 + 明确授权，从源头避开 NC-license 雷（cvla 审查的教训）。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ CH12 step-by-step ============ -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">⭐ step-by-step 开发步骤（阿杰最想要 · 最详细）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>从 0 到可用的<strong>具体路线图</strong>。每步给：<strong>做什么 / 产出物 / 技术要点 / 验证标准 / 工时（单人）</strong>。每步<strong>可独立验证、可上线</strong>。工时是 ⚠️ 单人开发估算（含调试），实际看熟练度浮动。</p>
+
+      <div class="timeline">
+        <div class="step">
+          <div class="badge">0</div>
+          <div class="step-card">
+            <h4>Step 0 · 搭最小评分 API 骨架</h4>
+            <div class="meta"><span class="pill accent">阶段1</span><span class="pill">⚠️ 0.5-1 天</span></div>
+            <p><strong>做什么</strong>：FastAPI 起一个 <code>POST /score</code> 端点，接收 {essay, task}，内部调一个 LLM（先用 DeepSeek/Qwen 便宜的），返回一个分。统一 LLM wrapper（记 model version）。<br>
+            <strong>产出物</strong>：能跑的 API + Postgres 建表（essays / scores / raw_llm_output JSONB）。<br>
+            <strong>技术要点</strong>：温度设 0；wrapper 抽象方便切模型。<br>
+            <strong>验证</strong>：curl 发一篇作文能拿到分。</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="badge">1</div>
+          <div class="step-card">
+            <h4>Step 1 · IELTS Task 2 单项 rubric few-shot 评分跑通 + 50 篇算 QWK</h4>
+            <div class="meta"><span class="pill accent">阶段1</span><span class="pill good">校准是胜负手</span><span class="pill">⚠️ 2-3 天</span></div>
+            <p><strong>做什么</strong>：先只做 <strong>GRA 一项</strong>（第 7 章模板）：官方描述符 + 每 band 2 个真人锚例 + feedback-first。拿 <strong>50 篇 Cambridge 官方范文（已知 band）</strong>算 QWK。<br>
+            <strong>产出物</strong>：单项评分 + QWK 报告。<br>
+            <strong>技术要点</strong>：A/B 测"关键词版 vs 全文描述符"（§3.2 反直觉）；锚例覆盖所有 band。<br>
+            <strong>验证标准</strong>：<strong>单项 QWK ≥ 0.65</strong>（接近就继续，差太多回去调锚例/rubric，别急着加维度）。<br>
+            <strong>这步是整个项目的"是否走得通"试金石。</strong></p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="badge">2</div>
+          <div class="step-card">
+            <h4>Step 2 · 扩到 4 项 rubric + 反馈生成 + 守门层</h4>
+            <div class="meta"><span class="pill accent">阶段1</span><span class="pill">⚠️ 3-5 天</span></div>
+            <p><strong>做什么</strong>：① TR/CC/LR/GRA 各一个独立 prompt（分开打，§3.2）；② 聚合成 overall band（IELTS 四舍五入规则）；③ 反馈四件套（优点/缺点/逐项改进/范例，§8）；④ <strong>守门层</strong>：语种 + 长度 + 离题（sentence-transformers 相似度）+ 自重复检测。<br>
+            <strong>产出物</strong>：完整 IELTS Task 2 评分 + 中英双语反馈 + 守门。<br>
+            <strong>技术要点</strong>：评分 prompt 严格、反馈 prompt 用 persona（§8.3）；离题先 flag 再评。<br>
+            <strong>验证标准</strong>：<strong>overall QWK ≥ 0.70</strong> + 离题测试集能 flag 出 ≥90% 离题样本。<br>
+            <strong>到这里 MVP 可上线给真学生用了。</strong></p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="badge">3</div>
+          <div class="step-card">
+            <h4>Step 3 · 第二个不同家族模型复评 + 分歧检测 + 人工队列</h4>
+            <div class="meta"><span class="pill purple">阶段2</span><span class="pill warn">分歧→人工</span><span class="pill">⚠️ 2-3 天</span></div>
+            <p><strong>做什么</strong>：加第二个<strong>不同家族</strong>模型（如阶段1用 Qwen，这里加 Claude）独立复评（§9，别辩论）。分歧 &gt; 0.5-1 band 的 trait 路由人工队列（PG 表 + 简单后台）。<br>
+            <strong>产出物</strong>：双模型 + 分歧检测 + 人工复核后台。<br>
+            <strong>技术要点</strong>：两模型互不可见各自打分；老师复核结果回写当新锚例（数据飞轮起点）。<br>
+            <strong>验证标准</strong>：分歧样本人工复核后，<strong>QWK 提升到 0.73-0.78</strong>；人工量 &lt; 总量的 15-20%。</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="badge">4</div>
+          <div class="step-card">
+            <h4>Step 4 · 校准层（isotonic）+ per-trait 偏移修正 + 中国学生锚定集</h4>
+            <div class="meta"><span class="pill purple">阶段2→3</span><span class="pill bad">解锁商用</span><span class="pill">⚠️ 1-2 周</span></div>
+            <p><strong>做什么</strong>：① 攒 50-100 篇<strong>国际学校学生真人评分作文</strong>（中国学生锚定集起点，§11.3）；② per-trait offset 修 LOC 偏严（§4.3）；③ isotonic 把连续分映射到 band；④ 用自建锚例替换部分 NC-license 数据（解锁商用方向）。<br>
+            <strong>产出物</strong>：校准映射层 + 中国学生锚定集 v1 + 数据飞轮（人工队列回流）。<br>
+            <strong>技术要点</strong>：sklearn IsotonicRegression 每 trait 一条；锚定集标 L1 负迁移类型。<br>
+            <strong>验证标准</strong>：中国学生作文上 <strong>QWK ≥ 0.75</strong>；LOC 维度偏移修正后 &lt; 0.5 分。</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="badge">5</div>
+          <div class="step-card">
+            <h4>Step 5 · 防 gaming + conformal 置信度 + drift 监控 + 多刻度输出</h4>
+            <div class="meta"><span class="pill purple">阶段3</span><span class="pill">⚠️ 1 周</span></div>
+            <p><strong>做什么</strong>：① conformal prediction 给置信度（预测集多标签→人工，§10.1）；② 防 gaming 收尾（prompt 明确离题低分 + 守门层自重复/模板检测，§7.3）；③ drift 监控（固定验证集定时跑 QWK + 记 model version，§10）；④ 多刻度 mapping（CEFR/CSE/TOEFL/学校制，§6.1 ④）。<br>
+            <strong>产出物</strong>：置信度 + 监控 + 多刻度 + 防 gaming 完整版。<br>
+            <strong>验证标准</strong>：gaming 测试集（堆长度/复读/套模板）不被骗高分；drift 告警跑通。</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="badge">6</div>
+          <div class="step-card">
+            <h4>Step 6 · 扩到 TOEFL + 通用作文 + (远期) speech</h4>
+            <div class="meta"><span class="pill teal">阶段3+</span><span class="pill">持续</span></div>
+            <p><strong>做什么</strong>：复用同一评分核心，加 TOEFL（Integrated 要喂 reading+lecture，§2.2）和通用作文（DREsS 三维 rubric）的 prompt 模板 + 锚例。Speech 评分是另一条工程线（Whisper + GOP + speechocean762，父报告 §4/§12，工程最重，最后做）。<br>
+            <strong>验证标准</strong>：每个新 task 独立算 QWK ≥ 0.70 才上线。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout good">
+        <p><strong>✅ 路线图心法</strong>：<strong>Step 0-2 是 MVP（约 1-2 周能上线）</strong>，重点全在 Step 1 的校准；Step 3-4 提稳 + 起护城河；Step 5-6 是工程化和扩张。<strong>每步都能独立验证、独立上线</strong>，不用等全做完。如果某步 QWK 上不去，<strong>回去做校准（第 4 章），不是往后堆架构</strong>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH13 成本估算 ============ -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">成本估算（单篇 + 月度 + 自建 vs API）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>13.1 单篇作文评分的 token 量（估算）</h3>
+      <p>⚠️ 以下是<strong>估算</strong>，按 IELTS 4 项 rubric + few-shot 锚例 + 反馈测算。单篇典型 token：</p>
+      <ul>
+        <li><strong>输入</strong>：作文 ~350 词 (~500 token) + 4 项 rubric 描述符+锚例 (~3000-5000 token，可缓存) + 系统 prompt。用 prompt caching 把 rubric+锚例做 prefix cache，重复部分近乎免费。</li>
+        <li><strong>输出</strong>：每项 evidence+analysis+band ≈ 300-500 token × 4 项 + 反馈 ~800 token ≈ <strong>2000-3000 output token</strong>。</li>
+        <li><strong>保守单篇估算</strong>：≈ 6K input + 3K output（不算 cache 折扣）。</li>
+      </ul>
+
+      <h3>13.2 各模型单篇成本（按 2026-05 定价，6K in + 3K out）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>模型</th><th>input $/M</th><th>output $/M</th><th>单篇 ≈成本</th><th>定位</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Qwen3.5 Flash</strong></td><td>$0.10</td><td>$0.40</td><td>≈ <strong>$0.0018</strong></td><td>最便宜，PoLL 成员<sup class="cite" data-refid="29">[29]</sup></td></tr>
+            <tr><td><strong>DeepSeek V4 Flash</strong></td><td>$0.14</td><td>$0.28</td><td>≈ <strong>$0.0017</strong></td><td>最便宜，反馈<sup class="cite" data-refid="29">[29]</sup></td></tr>
+            <tr><td><strong>Gemini 2.5 Flash</strong></td><td>$0.30</td><td>$2.50</td><td>≈ <strong>$0.0093</strong></td><td>反馈/便宜复评<sup class="cite" data-refid="29">[29]</sup></td></tr>
+            <tr><td><strong>Qwen3.5 Plus</strong></td><td>$0.40</td><td>$2.40</td><td>≈ <strong>$0.0096</strong></td><td>主评分（性价比）<sup class="cite" data-refid="29">[29]</sup></td></tr>
+            <tr><td><strong>Gemini 2.5 Pro</strong></td><td>$1.25</td><td>$10.00</td><td>≈ <strong>$0.0375</strong></td><td>主评分（准）<sup class="cite" data-refid="29">[29]</sup></td></tr>
+            <tr><td><strong>GPT-5.4</strong></td><td>$2.50</td><td>$15.00</td><td>≈ <strong>$0.060</strong></td><td>高 stakes 复评<sup class="cite" data-refid="29">[29]</sup></td></tr>
+            <tr><td><strong>Claude Sonnet 4.6</strong></td><td>$3.00</td><td>$15.00</td><td>≈ <strong>$0.063</strong></td><td>不同家族复评<sup class="cite" data-refid="29">[29]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout good">
+        <p><strong>✅ 成本心法（呼应 mirofish PoLL 便宜 7 倍）</strong>：单篇评分成本<strong>低到几乎可忽略</strong>（便宜模型 &lt; $0.002/篇）。<strong>成本分配策略</strong>：① 主评分用性价比模型（Qwen Plus / Gemini Flash，~$0.001-0.01/篇）；② 反馈用最便宜的（DeepSeek/Qwen Flash）；③ <strong>贵的旗舰只用在"双模型复评的第二票"和"高 stakes/分歧样本"上</strong>，不全量用。这样月度成本主要由量决定，不是模型档次。</p>
+      </div>
+
+      <h3>13.3 月度成本（估算，主评分 + 反馈，不含旗舰复评）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>月评作文量</th><th>便宜组合 (~$0.003/篇)</th><th>性价比组合 (~$0.012/篇)</th><th>含旗舰复评 (~$0.07/篇)</th></tr></thead>
+          <tbody>
+            <tr><td>1,000 篇</td><td>~$3</td><td>~$12</td><td>~$70</td></tr>
+            <tr><td>10,000 篇</td><td>~$30</td><td>~$120</td><td>~$700</td></tr>
+            <tr><td>100,000 篇</td><td>~$300</td><td>~$1,200</td><td>~$7,000</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;color:var(--text-mute);">⚠️ 估算，未含 prompt caching 折扣（实际可再降 30-70%）、人工兜底成本（~15-20% 样本的老师工时）、基础设施（API 服务器/DB，单人小规模可忽略）。</p>
+
+      <h3>13.4 自建（训模型/自托管）vs 调 API</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>维度</th><th>调 API（阶段1-2）</th><th>自建/自托管（阶段3）</th></tr></thead>
+          <tbody>
+            <tr><td>上线速度</td><td>🟢 天级</td><td>🔴 周-月级（训+部署）</td></tr>
+            <tr><td>单篇成本</td><td>🟡 $0.001-0.07</td><td>🟢 摊薄后极低（但有 GPU 固定成本）</td></tr>
+            <tr><td>准度</td><td>🟢 QWK 0.7-0.81 现成</td><td>🟢 微调可 0.85（但要数据）</td></tr>
+            <tr><td>可控/隐私</td><td>🔴 数据出境 + 版本漂移</td><td>🟢 全可控、无 drift</td></tr>
+            <tr><td>license/商用</td><td>🟢 (用真人锚例)</td><td>🔴 若用 NC 数据训会传染（要自建数据替换）</td></tr>
+            <tr><td>维护（单人）</td><td>🟢 低</td><td>🔴 高（GPU/训练/部署）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout accent">
+        <p><strong>🎯 推荐</strong>：<strong>阶段 1-2 全调 API</strong>（最快、最省心、准度够）；<strong>阶段 3 才考虑自托管/微调</strong>——而且触发条件应该是"量大到 API 成本痛了 / 数据隐私合规要求 / 要用自建中国学生数据训壁垒模型"，不是为了那几个 QWK 点。对单人开发，<strong>API 优先永远是对的默认</strong>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH14 mini demo ============ -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">mini demo：作文评分器（可玩）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="callout warn">
+        <p><strong>⚠️ 这是概念演示，不是真评分模型</strong>。下面的 band 和反馈是<strong>前端写死的启发式</strong>（按长度/连接词/句式简单估），目的是<strong>直观演示"输入作文 → 4 项 rubric band + actionable 反馈 + 校准过程"长什么样</strong>，不代表真实准度。真实系统按第 4、7 章建。</p>
+      </div>
+
+      <div class="demo-host demo">
+        <h4>📝 IELTS Task 2 评分器演示</h4>
+        <div class="demo-row">
+          <span style="font-size:13px;color:var(--text-mute);">选一个示例，或自己粘一段：</span>
+        </div>
+        <div class="demo-row">
+          <span class="demo-chip active" data-sample="0">示例·中等(中式)</span>
+          <span class="demo-chip" data-sample="1">示例·高分</span>
+          <span class="demo-chip" data-sample="2">示例·离题</span>
+        </div>
+        <textarea id="demoEssay">Nowadays, many people think technology make our life more convenient. I very agree this opinion. Firstly, we can use phone do many thing, such as shopping, chat with friend. Secondly, the internet give us a lot information. However, some people addicted to phone and forget real life. In my country, many student play game all day. In conclusion, technology is good but we should use it correct way.</textarea>
+        <button class="run" id="demoRun">评分 + 生成反馈 →</button>
+        <div class="demo-output" id="demoOut" style="display:none;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH15 FAQ ============ -->
+  <section class="chapter" id="ch15">
+    <h2><span class="num">15</span><span class="title-text">FAQ 12 条</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">如果只做一件事，阿杰今天该先做什么？</span><span class="toggle">+</span></div><div class="faq-a"><strong>Step 1</strong>：搭一个最小 FastAPI <code>/score</code> 端点，做 <strong>IELTS Task 2 的 GRA 一项</strong>评分——官方描述符 + 每 band 2 个真人锚例 + feedback-first，拿 <strong>50 篇 Cambridge 官方范文算 QWK</strong>。这一步验证整个项目走不走得通（目标单项 QWK ≥ 0.65），且全程不训模型、不到一周。校准（锚例）是这步的全部胜负手。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">第一版到底要不要训模型？</span><span class="toggle">+</span></div><div class="faq-a"><strong>不要。</strong>2026 的纯 prompt GPT-4 级模型在 IELTS Task 2 上对官方考官已达 QWK 0.811<sup class="cite" data-refid="3">[3]</sup>。训 DeBERTa（QWK 0.85）是阶段 3 的壁垒工程，要大标注集 + 训练工程 + 吃 NC license。MVP = LLM + 好 prompt + 真人锚例，几天能跑通。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">QWK 目标定多少算"能用"？</span><span class="toggle">+</span></div><div class="faq-a">MVP <strong>≥ 0.70</strong>（接近单考官水平），提稳目标 <strong>0.75-0.80</strong>。天花板是真考官之间一致性：IELTS 考官 G 系数 0.81-0.92<sup class="cite" data-refid="4">[4]</sup>，理论上限 √(标签可靠度)（ASAP ≈0.926，ELLIPSE ≈0.816）<sup class="cite" data-refid="23">[23]</sup>。<strong>别追 0.9+</strong>——超过人-人一致性往往是过拟合或测试集泄漏。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">few-shot 锚定具体怎么做？</span><span class="toggle">+</span></div><div class="faq-a">每个分数档放 <strong>1-2 篇真人评分过的锚例</strong> + 真人分 + 简短理由进 prompt。覆盖所有 band（别全选中间分），per-trait 各选各的（一篇可能 TR 高 GRA 低）。实测每档 2 例 ~+26% QWK<sup class="cite" data-refid="1">[1]</sup>，6-shot 把 ASAP 从 0.306 拉到 0.531<sup class="cite" data-refid="2">[2]</sup>。量大后可上 dense retrieval 选最相似锚例。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">4 项 rubric 是一个 prompt 一起打，还是分开打？</span><span class="toggle">+</span></div><div class="faq-a"><strong>分开打。</strong>analytic（分项）评分本身比 holistic 难（ELLIPSE analytic QWK 0.32 vs ASAP holistic 0.60）<sup class="cite" data-refid="6">[6]</sup>，一次要 4 个数字会更差。每项独立 prompt + 各自锚例 + 先反馈后打分（feedback→scoring QWK 0.533 vs 0.517）<sup class="cite" data-refid="8">[8]</sup>。长作文可先用一个 agent 抽结构化证据再打分（AutoSCORE，+16-37% QWK）<sup class="cite" data-refid="9">[9]</sup>。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">详细的 rubric 描述符塞 prompt 里越多越好吗？</span><span class="toggle">+</span></div><div class="faq-a"><strong>反直觉：不一定。</strong>分析型评分时，<strong>简洁关键词 prompt 反而常比塞一大段详细描述符好</strong>（长描述符会"contextual interference"，同时引入太多约束降一致性）<sup class="cite" data-refid="6">[6]</sup>；holistic 则相反，详细描述符有帮助。所以一定要 <strong>A/B 测</strong>"关键词版 vs 全文版"哪个 QWK 高。还可以用 Reflect-and-Revise 让模型自己精修 rubric（QWK +0.47）<sup class="cite" data-refid="7">[7]</sup>。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">多模型陪审团到底要不要做？什么时候做？</span><span class="toggle">+</span></div><div class="faq-a">要，但<strong>不是第一步</strong>。先把单模型 + 校准做到 QWK 0.7+，再加<strong>第二个不同家族模型</strong>独立复评（<a href="./banmi-mirofish-application-research.html">mirofish 铁律</a>：避免伪多样性 + 别辩论）。多 agent 在好单模型之上<strong>只加几个点</strong>，真正价值在"分歧检测→人工兜底"的置信度信号<sup class="cite" data-refid="20">[20]</sup>。PoLL（一组小模型）可比单 GPT-4 更准还便宜 7 倍。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">学生会不会用堆长度/复读/套模板骗高分？</span><span class="toggle">+</span></div><div class="faq-a">2026 的好消息：<strong>现代 LLM 对纯堆长度/复读段落反而扣分</strong>（doubling length → d=-0.24）<sup class="cite" data-refid="5">[5]</sup>，不像老 AES。但<strong>离题</strong>仍是大坑（要靠守门层独立检测），"插权威腔套话"有小幅正偏。防 gaming = prompt 明确"离题低分" + 守门层做离题/自重复/模板检测，双层兜（§7.3）。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">什么样的作文必须转人工？怎么自动判断？</span><span class="toggle">+</span></div><div class="faq-a">命中任一转人工：① 离题/语种/长度异常（守门 flag）；② <strong>双模型分歧 &gt; 1 band</strong>；③ <strong>conformal 预测集多标签</strong>（低置信，能在同等错误率下少 20% 人工量<sup class="cite" data-refid="10">[10]</sup>）；④ 高分段（IELTS 7.5+）；⑤ 申诉/抽审。目标人工量 &lt; 总量 15-20%。老师复核结果回写当新锚例 = 数据飞轮。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">LLM 评分有什么系统性偏差要小心？</span><span class="toggle">+</span></div><div class="faq-a">最确定的是 <strong>对语法/拼写/conventions（LOC）系统性偏严约 -1.0 分</strong>，只需 ~5 篇就能测出<sup class="cite" data-refid="6">[6]</sup>（跟 cvla 审查发现一致）。还有高分段最不准、过度自信、对中文母语负迁移（尤其"语法对但中式"）有盲区。解法：per-trait offset 校准 + LanguageTool 交叉验证 LOC + 中国学生锚例。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">单篇评分多少钱？月度大概多少？</span><span class="toggle">+</span></div><div class="faq-a">单篇低到几乎可忽略：便宜模型（Qwen/DeepSeek Flash）&lt; <strong>$0.002/篇</strong>，性价比组合 ~$0.012/篇，含旗舰复评 ~$0.07/篇<sup class="cite" data-refid="29">[29]</sup>。月 1 万篇便宜组合 ~$30，性价比 ~$120。成本主要由量和"用不用旗舰复评"决定。策略：主评分用性价比模型，反馈用最便宜，旗舰只用在复评第二票和高 stakes 样本（§13.2）。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q12</span><span class="qtext">半米的护城河到底是什么？评分模型吗？</span><span class="toggle">+</span></div><div class="faq-a"><strong>不是评分模型</strong>（那正在商品化，谁都能调 API 到 QWK 0.8）。护城河是 <strong>① 中国学生真人评分锚定集</strong>（few-shot 弹药 + 可商用训练数据 + 别人买不到）；<strong>② CEFR↔CSE↔GSE 多轨映射</strong>；<strong>③ 中式英语诊断库</strong>（"语法对但中式"是通用模型最大盲区）。从国际学校 K12 真人评分起步，人工兜底队列回流成数据飞轮（§11）。</div></div>
+    </div>
+  </section>
+
+  <!-- ============ CH16 References ============ -->
+  <section class="chapter" id="ch16">
+    <h2><span class="num">16</span><span class="title-text">References</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13px;color:var(--text-mute);">访问日期均为 2026-05-28。🟢 多源验证 / 🟡 单源 / 🔴 估算或推演已在正文标注。QWK/成本数字均带来源；标"估算"的为我的推演。</p>
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://arxiv.org/pdf/2601.22386" target="_blank" rel="noopener">Specialists or Generalists? Multi-Agent and Single-Agent LLMs for Essay Grading (arXiv 2601.22386)</a><span class="ref-meta">· few-shot 每档 2 例 +26% QWK，单 agent 提升 26.5%，中高分段增益最大 · 引用 6 次</span></li>
+        <li id="ref-2"><a href="https://www.sciencedirect.com/science/article/pii/S1075293526000413" target="_blank" rel="noopener">Anchor is the key: Toward accessible automated essay scoring with LLM through prompting (ScienceDirect)</a><span class="ref-meta">· zero-shot QWK 0.306 → 6-shot 0.531；score-4 准度 42.7%→61.2% · 引用 4 次</span></li>
+        <li id="ref-3"><a href="https://files.eric.ed.gov/fulltext/EJ1457168.pdf" target="_blank" rel="noopener">The Reliability of ChatGPT in Grading IELTS Writing Task 2 (ERIC EJ1457168)</a><span class="ref-meta">· GPT/ChatGPT 对官方考官 QWK 0.811（56 篇 Cambridge 范文），官方 reliability 0.92 · 引用 5 次</span></li>
+        <li id="ref-4"><a href="https://ielts.org/researchers/our-research/test-statistics" target="_blank" rel="noopener">IELTS Test Statistics — examiner inter-rater reliability (ielts.org)</a><span class="ref-meta">· Writing 考官 G 系数 0.81-0.89，jagged re-rating reliability 0.92 · 引用 4 次</span></li>
+        <li id="ref-5"><a href="https://arxiv.org/html/2603.25674" target="_blank" rel="noopener">Measuring What Matters: Robustness of LLM-Based Scoring to Construct-Irrelevant Factors (arXiv 2603.25674)</a><span class="ref-meta">· 离题 d=-1.33（3.11→1.69），堆长度 d=-0.24（现代 LLM 反而扣分），套话 d=0.16 · 引用 3 次</span></li>
+        <li id="ref-6"><a href="https://arxiv.org/html/2604.00259" target="_blank" rel="noopener">LLM Essay Scoring Under Holistic and Analytic Rubrics: Prompt Effects and Bias (arXiv 2604.00259)</a><span class="ref-meta">· holistic 0.60 vs analytic 0.32；LOC 偏严 -1.0 分（~5 篇可测）；analytic 关键词版优于详细描述符 · 引用 6 次</span></li>
+        <li id="ref-7"><a href="https://arxiv.org/html/2510.09030" target="_blank" rel="noopener">Automated Refinement of Essay Scoring Rubrics via Reflect-and-Revise (arXiv 2510.09030)</a><span class="ref-meta">· rubric 迭代精修 QWK +0.47 (ASAP) / +0.19 (TOEFL11)，精修后超人写 rubric · 引用 3 次</span></li>
+        <li id="ref-8"><a href="https://arxiv.org/html/2404.15845v1" target="_blank" rel="noopener">Exploring LLM Prompting Strategies for Joint Essay Scoring and Feedback Generation (arXiv 2404.15845)</a><span class="ref-meta">· feedback→scoring QWK 0.533 vs scoring-first 0.517；persona prompt 提升准度+反馈质量 · 引用 3 次</span></li>
+        <li id="ref-9"><a href="https://arxiv.org/html/2509.21910v1" target="_blank" rel="noopener">AutoSCORE: Multi-Agent LLM Scoring via Structured Component Recognition (arXiv 2509.21910)</a><span class="ref-meta">· extract-then-score：英语集 QWK +16.48%，essay 集 +37.05%，小模型增益更大 · 引用 2 次</span></li>
+        <li id="ref-10"><a href="https://arxiv.org/html/2509.15926v1" target="_blank" rel="noopener">Beyond the Score: Uncertainty-Calibrated LLMs for Automated Essay Assessment (arXiv 2509.15926)</a><span class="ref-meta">· conformal prediction 90% 覆盖保证，预测集大小当置信度，同等错误率少 20% 人工 · 引用 3 次</span></li>
+        <li id="ref-11"><a href="https://www.academypublication.com/issues2/jltr/vol10/03/05.pdf" target="_blank" rel="noopener">Exploring Language Transfer Errors in Chinese Writing (JLTR)</a><span class="ref-meta">· 中式英语 = 中文句法+英文词；冠词/时态/介词/主谓/中式语序为高频 L1 负迁移错误 · 引用 2 次</span></li>
+        <li id="ref-12"><a href="https://resources.cathoven.com/ielts-writing-task-2/band-descriptors" target="_blank" rel="noopener">IELTS Writing Task 2 Band Descriptors — 4 criteria (Cathoven)</a><span class="ref-meta">· TR/CC/LR/GRA 各 band 描述符文本 · 引用 2 次</span></li>
+        <li id="ref-13"><a href="https://takeielts.britishcouncil.org/sites/default/files/ielts_writing_band_descriptors.pdf" target="_blank" rel="noopener">IELTS Writing Band Descriptors (public version), British Council PDF, 2023-05</a><span class="ref-meta">· 官方 public 描述符 Task 1+2，可直接当 prompt 锚定 · 引用 1 次</span></li>
+        <li id="ref-14"><a href="https://www.ets.org/pdfs/toefl/toefl-ibt-writing-rubrics.pdf" target="_blank" rel="noopener">TOEFL iBT Writing Rubrics (Integrated + Independent), ETS PDF</a><span class="ref-meta">· 官方 0-5 rubric，Integrated 评信息抓取与综合 · 引用 1 次</span></li>
+        <li id="ref-15"><a href="https://arxiv.org/abs/2402.16733" target="_blank" rel="noopener">DREsS: Dataset for Rubric-based Essay Scoring on EFL Writing (arXiv 2402.16733)</a><span class="ref-meta">· 48.9K EFL 样本，Content/Organization/Language 三维 1-5，HOC/LOC 分层 · 引用 2 次</span></li>
+        <li id="ref-16"><a href="./banmi-cvla-audit-research.html" target="_blank" rel="noopener">banmi-cvla 工具 SOTA 审查（姐妹报告）</a><span class="ref-meta">· cvla 复刻 CVLA3 ≈65.7% exact；Octanove CC BY-SA 阻断商用；GPT 给 LOC 系统性偏低 · 引用 2 次</span></li>
+        <li id="ref-17"><a href="https://www.kaggle.com/competitions/feedback-prize-english-language-learning" target="_blank" rel="noopener">Feedback Prize ELL (Kaggle) — DeBERTa-v3 + AWP winner QWK 0.85+</a><span class="ref-meta">· ELLIPSE 子集，微调 encoder SOTA · 引用 1 次</span></li>
+        <li id="ref-18"><a href="https://arxiv.org/html/2509.10417" target="_blank" rel="noopener">Long Context Automated Essay Scoring with Language Models (arXiv 2509.10417)</a><span class="ref-meta">· DeBERTa ASAP QWK 0.834；ASAP2.0 Longformer 0.798；GPT-4o 0.78（未超微调） · 引用 1 次</span></li>
+        <li id="ref-19"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12032364/" target="_blank" rel="noopener">An LLM-based hybrid approach for enhanced automated essay scoring (PMC12032364)</a><span class="ref-meta">· hybrid (GPT 嵌入+shallow feat+RF) QWK 0.83 vs GPT-3 only 0.71 · 引用 1 次</span></li>
+        <li id="ref-20"><a href="./banmi-mirofish-application-research.html" target="_blank" rel="noopener">半米 MiroFish 多 agent 评分应用研究（姐妹报告）</a><span class="ref-meta">· 校准>架构、PoLL 不同家族便宜 7 倍、独立打分别辩论、多 agent 只加几个点 · 引用 6 次</span></li>
+        <li id="ref-21"><a href="https://arxiv.org/html/2405.05200" target="_blank" rel="noopener">Graded Relevance Scoring of Written Essays with Dense Retrieval (arXiv 2405.05200)</a><span class="ref-meta">· Contriever4GR 检索锚例 QWK 0.704-0.785 · 引用 1 次</span></li>
+        <li id="ref-22"><a href="https://latitude.so/blog/5-methods-for-calibrating-llm-confidence-scores" target="_blank" rel="noopener">5 Methods for Calibrating LLM Confidence Scores — Isotonic Regression (Latitude)</a><span class="ref-meta">· isotonic 保序回归修系统性偏移、保留序关系、不强加线性 · 引用 1 次</span></li>
+        <li id="ref-23"><a href="https://arxiv.org/html/2604.19131" target="_blank" rel="noopener">Has AES Reached Sufficient Accuracy? Achievable QWK Ceilings from Classical Test Theory (arXiv 2604.19131)</a><span class="ref-meta">· 理论上限 √ρ：ASAP 0.926/ELLIPSE 0.816；人-人 QWK ASAP 0.754/ELLIPSE 0.501 · 引用 3 次</span></li>
+        <li id="ref-24"><a href="https://github.com/scrosseye/ELLIPSE-Corpus/blob/main/README.md" target="_blank" rel="noopener">ELLIPSE Corpus README (GitHub scrosseye) — CC BY-NC-SA 4.0, 6 analytic measures, 2 trained raters</a><span class="ref-meta">· 6,500 ELL essays，2 trained raters，6 维 · 引用 1 次</span></li>
+        <li id="ref-25"><a href="https://github.com/Pog-Frog/Automated-Essay-Grading-API" target="_blank" rel="noopener">Automated-Essay-Grading-API (GitHub) — FastAPI + BERT AES 参考实现</a><span class="ref-meta">· FastAPI AES 端点范例 · 引用 1 次</span></li>
+        <li id="ref-26"><a href="https://arxiv.org/html/2603.06424" target="_blank" rel="noopener">From Prompting to Preference Optimization: Comparative Study of LLM-based AES (arXiv 2603.06424)</a><span class="ref-meta">· criterion-specific 监督利于精确打分，偏好优化(DPO)利于"像考官"的反馈 · 引用 1 次</span></li>
+        <li id="ref-27"><a href="https://stackpulsar.com/blog/llm-model-drift-detection/" target="_blank" rel="noopener">LLM Model Drift Detection 2026 (Stack Pulsar)</a><span class="ref-meta">· 固定验证集定时跑指标 + 记 model version + LLM-as-judge 抽查 · 引用 1 次</span></li>
+        <li id="ref-28"><a href="./lexile-reading-assessment-research.html" target="_blank" rel="noopener">Lexile 阅读测评研究（姐妹报告）</a><span class="ref-meta">· 校准>架构、真人锚定 30-50 篇、Lexile 看不到中文母语者语言特定因素 · 引用 2 次</span></li>
+        <li id="ref-29"><a href="https://benchlm.ai/llm-pricing" target="_blank" rel="noopener">LLM API Pricing Comparison 2026 (BenchLM.ai)</a><span class="ref-meta">· 2026-05 各模型 $/M 定价：Gemini Flash $0.30/$2.50、Qwen Flash $0.10/$0.40、Claude Sonnet $3/$15 等 · 引用 4 次</span></li>
+        <li id="ref-30"><a href="./eng-assessment-datasets-research.html" target="_blank" rel="noopener">AI 英语评分系统数据集深度调研（父报告）</a><span class="ref-meta">· 30+ 数据集 16 维 due diligence、6 路线对比、Assessment Engine 架构、MVP 建议 · 引用 5 次</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <footer>
+    无忌 · 半米研究中心 · L2 Deep Research（偏工程落地）· 2026-05-28<br>
+    本报告承接父报告《AI 英语评分系统数据集研究》+ 姐妹报告 mirofish / lexile / cvla 的结论，不重复推翻。<br>
+    所有 QWK / 成本 / 准度数字均带来源，估算与推演已明标 ⚠️。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+<script>
+(function() {
+  // 主题
+  var root = document.body, toggle = document.getElementById('themeToggle');
+  var saved = localStorage.getItem('banmi-theme');
+  if (saved) root.setAttribute('data-theme', saved);
+  function syncIcon() { toggle.textContent = root.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙'; }
+  syncIcon();
+  toggle.addEventListener('click', function() {
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next); localStorage.setItem('banmi-theme', next); syncIcon();
+  });
+
+  // 进度条
+  var progress = document.getElementById('progress');
+  function onScroll() {
+    var h = document.documentElement;
+    var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    progress.style.width = scrolled + '%';
+    document.getElementById('backToTop').classList.toggle('show', h.scrollTop > 600);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+  // 章节折叠
+  document.querySelectorAll('section.chapter > h2').forEach(function(h2) {
+    h2.addEventListener('click', function() { h2.parentElement.classList.toggle('collapsed'); });
+  });
+
+  // FAQ
+  document.querySelectorAll('.faq-q').forEach(function(q) {
+    q.addEventListener('click', function() { q.parentElement.classList.toggle('open'); });
+  });
+
+  // 回顶
+  document.getElementById('backToTop').addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // 锚点高亮
+  var anchorLinks = Array.prototype.slice.call(document.querySelectorAll('.anchor-list a'));
+  var sections = anchorLinks.map(function(a) { return document.getElementById(a.getAttribute('data-target')); });
+  function highlight() {
+    var pos = window.scrollY + 90, idx = 0;
+    for (var i = 0; i < sections.length; i++) { if (sections[i] && sections[i].offsetTop <= pos) idx = i; }
+    anchorLinks.forEach(function(a, i) {
+      var on = i === idx; a.classList.toggle('active', on);
+      if (on) { var nav = a.parentElement; var target = a.offsetLeft - nav.clientWidth / 2 + a.clientWidth / 2; nav.scrollTo({ left: target, behavior: 'smooth' }); }
+    });
+  }
+  window.addEventListener('scroll', highlight, { passive: true }); highlight();
+
+  // ===== mini demo: 启发式评分器（前端写死，仅演示）=====
+  var samples = [
+    "Nowadays, many people think technology make our life more convenient. I very agree this opinion. Firstly, we can use phone do many thing, such as shopping, chat with friend. Secondly, the internet give us a lot information. However, some people addicted to phone and forget real life. In my country, many student play game all day. In conclusion, technology is good but we should use it correct way.",
+    "It is often argued that technological advancement has fundamentally reshaped the way we live. While I acknowledge that excessive reliance on devices carries certain risks, I firmly believe the benefits outweigh the drawbacks. To begin with, digital tools have dramatically enhanced productivity; tasks that once consumed hours can now be completed within minutes. Furthermore, instant access to information has democratised education, enabling learners in remote regions to pursue knowledge previously beyond their reach. Critics nonetheless contend that overdependence breeds isolation. Although this concern is legitimate, it stems from misuse rather than the technology itself. In conclusion, technology, when harnessed responsibly, serves as an indispensable catalyst for progress.",
+    "My favourite food is hotpot. I like to eat hotpot with my family on weekend. We put many vegetable and meat in the soup. It is very delicious and spicy. Last week we went to a famous hotpot restaurant. The waiter is very kind. I think everyone should try Chinese hotpot because it is the best food in the world."
+  ];
+  var demoEssay = document.getElementById('demoEssay');
+  var demoOut = document.getElementById('demoOut');
+  document.querySelectorAll('.demo-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      document.querySelectorAll('.demo-chip').forEach(function(c){c.classList.remove('active');});
+      chip.classList.add('active');
+      demoEssay.value = samples[+chip.getAttribute('data-sample')];
+      demoOut.style.display = 'none';
+    });
+  });
+
+  function bar(label, en, band) {
+    var pct = Math.round(band / 9 * 100);
+    return '<div class="rubric-bar"><div class="rb-head"><span>' + label + ' <span style="color:var(--text-mute)">' + en + '</span></span><strong>' + band.toFixed(1) + '</strong></div><div class="rb-track"><div class="rb-fill" style="width:' + pct + '%"></div></div></div>';
+  }
+
+  document.getElementById('demoRun').addEventListener('click', function() {
+    var txt = demoEssay.value.trim();
+    var words = txt ? txt.split(/\s+/).length : 0;
+    var connectors = (txt.match(/\b(however|furthermore|moreover|nonetheless|although|in conclusion|firstly|secondly|to begin with|whereas)\b/gi) || []).length;
+    var complexHint = (txt.match(/\b(which|that|because|while|whereas|although)\b/gi) || []).length;
+    var lower = txt.toLowerCase();
+    var onTopic = /(technolog|phone|internet|device|digital)/.test(lower);
+    // 启发式 band（仅演示）
+    var base = Math.min(9, 4 + words / 90 + connectors * 0.35 + complexHint * 0.2);
+    var TR = onTopic ? base : Math.max(3, base - 3.5);   // 离题重罚（演示坑#1）
+    var CC = Math.min(9, 4.5 + connectors * 0.4);
+    var LR = Math.min(9, 4 + words / 110 + (/(catalyst|democratis|indispensable|harness|advancement)/.test(lower) ? 1.5 : 0));
+    var GRA = Math.min(9, 4 + complexHint * 0.3 - (/(make our|very agree|do many thing|a lot information|use it correct)/.test(lower) ? 1.2 : 0)); // 中式错误扣分
+    function r(x){ return Math.round(x*2)/2; }
+    TR=r(TR);CC=r(CC);LR=r(LR);GRA=r(GRA);
+    var overall = r((TR+CC+LR+GRA)/4);
+    var fb = [];
+    if (!onTopic) fb.push('🔴 <strong>离题警告</strong>：作文似乎没回应题目（守门层会先 flag，TR 重罚）—— 这是 §10 坑#1 的演示。');
+    if (/(make our|very agree|do many thing|a lot information|use it correct|student play)/.test(lower)) fb.push('🟠 <strong>中式英语 / L1 负迁移</strong>：检测到冠词缺失 / 动词搭配 / 主谓问题（如 "technology make"、"a lot information"）—— GRA 扣分。地道写法见 §11。');
+    if (connectors < 2) fb.push('🟡 <strong>衔接</strong>：连接词偏少，逻辑推进不够明显（影响 CC）。建议加 however / furthermore 等。');
+    if (words < 150) fb.push('🟡 <strong>长度</strong>：偏短（' + words + ' 词），IELTS Task 2 建议 250+ 词。注意：现代 LLM 不会因堆长度给高分（§7.3）。');
+    if (fb.length === 0) fb.push('🟢 整体结构清晰、论点有支撑、句式多样。可在 LR 上再追求更精确的搭配。');
+    var html = '<div style="font-size:13px;color:var(--accent-text);font-weight:700;margin-bottom:8px;">校准过程演示：原始启发式分 → （真实系统这里走 few-shot 锚定 + per-trait offset + isotonic 映射）→ band</div>';
+    html += bar('Task Response', 'TR', TR) + bar('Coherence & Cohesion', 'CC', CC) + bar('Lexical Resource', 'LR', LR) + bar('Grammatical Range & Accuracy', 'GRA', GRA);
+    html += '<div style="margin:12px 0;padding:10px 12px;background:var(--accent-soft);border-radius:8px;"><strong>Overall Band ≈ ' + overall.toFixed(1) + '</strong> <span style="font-size:12px;color:var(--text-mute);">（4 项均值，演示用，真实需校准对锚 + 置信度）</span></div>';
+    html += '<div style="font-size:13.5px;"><strong>Actionable 反馈（演示）：</strong><ul style="margin:6px 0 0;">' + fb.map(function(f){return '<li>'+f+'</li>';}).join('') + '</ul></div>';
+    html += '<div style="margin-top:10px;font-size:12px;color:var(--text-mute);">⚠️ 以上 band 由前端启发式估算，仅演示交互形态，不代表真实评分准度。</div>';
+    demoOut.innerHTML = html;
+    demoOut.style.display = 'block';
+  });
+})();
+</script>
+
+<script>
+(function() {
+  let activePopover = null, activeTrigger = null, hideTimer = null;
+  function getRefContent(refid) {
+    const el = document.getElementById('ref-' + refid);
+    return el ? el.innerHTML : null;
+  }
+  function positionPopover(pop, trigger) {
+    const r = trigger.getBoundingClientRect();
+    const popW = pop.offsetWidth, popH = pop.offsetHeight;
+    let left = r.left + window.scrollX;
+    if (left + popW > window.innerWidth - 12) left = window.innerWidth - popW - 12;
+    if (left < 12) left = 12;
+    let top = r.bottom + window.scrollY + 6;
+    if (r.bottom + popH > window.innerHeight - 12 && r.top > popH + 12) {
+      top = r.top + window.scrollY - popH - 6;
+    }
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+  }
+  function showPopover(trigger) {
+    if (activeTrigger === trigger && activePopover) return;
+    if (activePopover) { activePopover.remove(); activePopover = null; }
+    const content = getRefContent(trigger.getAttribute('data-refid'));
+    if (!content) return;
+    const pop = document.createElement('div');
+    pop.className = 'cite-popover';
+    pop.innerHTML = content;
+    document.body.appendChild(pop);
+    positionPopover(pop, trigger);
+    activePopover = pop; activeTrigger = trigger;
+    pop.addEventListener('mouseenter', () => { if (hideTimer) clearTimeout(hideTimer); });
+    pop.addEventListener('mouseleave', scheduleHide);
+  }
+  function scheduleHide() {
+    if (hideTimer) clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      if (activePopover) { activePopover.remove(); activePopover = null; activeTrigger = null; }
+    }, 200);
+  }
+  function bindCites() {
+    document.querySelectorAll('sup.cite[data-refid]').forEach(sup => {
+      sup.addEventListener('mouseenter', () => showPopover(sup));
+      sup.addEventListener('mouseleave', scheduleHide);
+      sup.addEventListener('click', e => {
+        e.preventDefault(); e.stopPropagation();
+        if (activeTrigger === sup && activePopover) {
+          activePopover.remove(); activePopover = null; activeTrigger = null;
+        } else { showPopover(sup); }
+      });
+    });
+    document.addEventListener('click', e => {
+      if (!activePopover) return;
+      if (e.target.closest('.cite-popover') || e.target.closest('sup.cite')) return;
+      activePopover.remove(); activePopover = null; activeTrigger = null;
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindCites);
+  } else { bindCites(); }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>XGBoost + Polymarket BTC 短线方向预测系统深度工程研究 · 概率套利 / 微观结构 feature / 生产级架构 / MVP 路线 / 失败陷阱 · 2026-05-28</title>
+<style>
+  :root {
+    --bg: #ffffff; --bg-soft: #f7f8fa; --bg-elevated: #ffffff; --bg-stripe: #f5f7fa;
+    --text: #1a1d23; --text-soft: #4a5160; --text-mute: #7c8493;
+    --border: #e3e6ec; --border-strong: #cdd2da;
+    --accent: #2563eb; --accent-soft: #dbeafe; --accent-text: #1d4ed8;
+    --good: #15803d; --good-soft: #dcfce7;
+    --warn: #b45309; --warn-soft: #fef3c7;
+    --bad: #b91c1c; --bad-soft: #fee2e2;
+    --info: #0891b2; --info-soft: #cffafe;
+    --code-bg: #f1f3f7;
+    --purple: #7c3aed; --purple-soft: #ede9fe;
+    --pink: #db2777; --pink-soft: #fce7f3;
+    --teal: #0d9488; --teal-soft: #ccfbf1;
+    --shadow: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+    --shadow-lg: 0 10px 25px rgba(15,23,42,.08), 0 4px 10px rgba(15,23,42,.04);
+    --radius: 10px; --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117; --bg-soft: #161922; --bg-elevated: #1c2030; --bg-stripe: #1a1e2a;
+    --text: #e6e9f0; --text-soft: #b6bcc9; --text-mute: #8a92a3;
+    --border: #2a2f3d; --border-strong: #3a4154;
+    --accent: #60a5fa; --accent-soft: #1e3a8a55; --accent-text: #93c5fd;
+    --good: #4ade80; --good-soft: #14532d55;
+    --warn: #fbbf24; --warn-soft: #78350f55;
+    --bad: #f87171; --bad-soft: #7f1d1d55;
+    --info: #22d3ee; --info-soft: #155e7555;
+    --code-bg: #0a0d14;
+    --purple: #a78bfa; --purple-soft: #4c1d9555;
+    --pink: #f472b6; --pink-soft: #831a4955;
+    --teal: #2dd4bf; --teal-soft: #134e4a55;
+    --shadow: 0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,.5), 0 4px 10px rgba(0,0,0,.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body { margin: 0; font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif; font-size: 16px; line-height: 1.7; color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; padding-bottom: 60px; transition: background-color .25s, color .25s; }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-weight: 700; font-size: 15px; color: var(--text); }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; }
+  nav.anchor-nav { overflow-x: auto; overflow-y: hidden; border-top: 1px solid var(--border); background: var(--bg); scrollbar-width: none; }
+  nav.anchor-nav::-webkit-scrollbar { display: none; }
+  .anchor-list { display: flex; gap: 4px; padding: 8px 16px; max-width: 980px; margin: 0 auto; white-space: nowrap; }
+  .anchor-list a { flex: 0 0 auto; min-height: 36px; padding: 7px 12px; border-radius: 999px; font-size: 13px; line-height: 1.3; color: var(--text-soft); text-decoration: none; border: 1px solid transparent; background: var(--bg-soft); }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); font-weight: 600; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 28px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); min-height: 56px; }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout.pink { background: var(--pink-soft); border-color: var(--pink); }
+  .callout.teal { background: var(--teal-soft); border-color: var(--teal); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 9px 11px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; }
+  tbody td { padding: 8px 11px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 5000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  .demo-host { margin: 16px 0; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .demo-host h4 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; color: var(--accent-text); }
+  .demo-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 14px; align-items: center; }
+  .demo-field { display: flex; flex-direction: column; gap: 4px; }
+  .demo-field label { font-size: 12px; color: var(--text-mute); }
+  .demo-field input[type=range] { width: 220px; }
+  .demo-field .val { font-family: ui-monospace, monospace; font-weight: 700; color: var(--accent-text); }
+  .demo-output { padding: 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin-top: 8px; font-size: 14px; }
+  .demo-verdict { font-size: 17px; font-weight: 700; margin: 6px 0; }
+  .arch-flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 14px 0; font-size: 13px; }
+  .arch-box { padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-soft); color: var(--text); font-weight: 600; }
+  .arch-arrow { color: var(--text-mute); font-weight: 700; }
+  @media (max-width: 480px) { .hero { padding: 18px 4px 8px; } .hero h1 { font-size: 22px; } section.chapter > h2 { font-size: 17px; padding: 14px 14px; } .chapter-body { padding: 14px 14px 18px; } h3 { font-size: 16px; } .demo-field input[type=range] { width: 100%; } }
+  .chapter-body { column-count: 1 !important; column-width: auto !important; }
+  .chapter-body > .callout { display: block !important; float: none !important; width: auto !important; clear: both !important; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; font-size: 11px; color: var(--accent-text); font-weight: 700; vertical-align: super; }
+  sup.cite:hover { background: rgba(250, 204, 21, 0.3); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated, #ffffff); color: var(--text, #1a1a23); border: 1px solid var(--border, #e3e6ec); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(15,23,42,.18); font-size: 13px; line-height: 1.55; font-weight: normal; pointer-events: auto; }
+  [data-theme="dark"] .cite-popover { background: #1a1e2a; color: #e6e9f0; border-color: #2a2f3a; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+  .cite-popover a { color: var(--accent, #2563eb); text-decoration: underline; word-break: break-all; }
+  [data-theme="dark"] .cite-popover a { color: #60a5fa; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">XGBoost × Polymarket BTC 短线预测系统 <span class="tag">L2 + Critic · 偏工程 · 无忌</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+  <nav class="anchor-nav">
+    <div class="anchor-list" id="anchorList">
+      <a href="#ch1" data-target="ch1">01 摘要 + 5 结论 + 残酷预警</a>
+      <a href="#ch2" data-target="ch2">02 问题定义 · 哪类 ML</a>
+      <a href="#ch3" data-target="ch3">03 行情数据 5 交易所</a>
+      <a href="#ch4" data-target="ch4">04 Polymarket API + 结构 ★</a>
+      <a href="#ch5" data-target="ch5">05 新闻/NLP 数据源</a>
+      <a href="#ch6" data-target="ch6">06 Feature · 技术指标</a>
+      <a href="#ch7" data-target="ch7">07 Feature · 微观结构 ★★</a>
+      <a href="#ch8" data-target="ch8">08 Feature · NLP 特征</a>
+      <a href="#ch9" data-target="ch9">09 生产级架构 ★</a>
+      <a href="#ch10" data-target="ch10">10 回测 + 泄漏陷阱 ⚠</a>
+      <a href="#ch11" data-target="ch11">11 Polymarket Edge ★★</a>
+      <a href="#ch12" data-target="ch12">12 LLM+XGBoost vs Transformer</a>
+      <a href="#ch13" data-target="ch13">13 MVP + 技术栈 + 部署 ★★</a>
+      <a href="#ch14" data-target="ch14">14 真实难点 · 泼冷水 🔴</a>
+      <a href="#ch15" data-target="ch15">15 高级方向</a>
+      <a href="#ch16" data-target="ch16">16 个人开发者理性建议 ★</a>
+      <a href="#ch17" data-target="ch17">17 mini demo · Edge 计算器</a>
+      <a href="#ch18" data-target="ch18">18 推荐资源 / repo</a>
+      <a href="#ch19" data-target="ch19">19 FAQ</a>
+      <a href="#ch20" data-target="ch20">20 References</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>XGBoost + 实时市场数据 + NLP + Polymarket 短线 Crypto 方向预测系统<br><span style="font-size: .5em; font-weight: 600;">不是"预测币价"，是 probability forecasting + Polymarket 错误定价套利 · 微观结构 feature / 生产级架构 / 回测陷阱 / MVP 落地路线 / 个人开发者残酷现实</span></h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-28</span>
+      <span>🛠 整理：无忌</span>
+      <span>🧠 L2 Deep Research + Critic 强化 · 偏工程落地</span>
+      <span>🔍 33+ WebSearch · 多 WebFetch</span>
+      <span>📚 20 章 + 12 FAQ + 60 Refs</span>
+      <span>🔴 critic 泼冷水章</span>
+    </div>
+    <div class="hero-deck">
+      <strong>这份是什么</strong>：阿杰想做一个系统 — 用 <strong>XGBoost</strong> 预测未来短窗口（5m/15m/1h）BTC 涨跌<strong>概率</strong>，再跟 <strong>Polymarket</strong> 同窗口 YES/NO 价格比较，找 <strong>probability edge（错误定价套利）</strong>。例：Polymarket YES=0.47、模型预测上涨=0.56 → 有 9 个点的 edge。<br><br>
+      <strong>核心 framing（必须先想清楚）</strong>：这<strong>不是</strong>"预测币价涨跌赢钱"，是 <strong>probability forecasting + 市场 mispricing 套利</strong>。"预测正确" ≠ "赚钱" — 你赚的是你的概率估计比市场共识更准的那部分 edge，扣掉手续费 / 滑点 / 流动性后剩下的才是钱。<br><br>
+      <strong>残酷开场白</strong>：Dune 数据显示 <strong>84% 的 Polymarket 钱包亏钱</strong>，profit 高度集中在极少数 bot 手里<sup class="cite" data-refid="1">[1]</sup>。学术研究里短线 crypto 预测能稳定超过 50% 随机基线但<strong>幅度很小</strong>，且很多模型扣掉交易成本后跑不赢 buy-and-hold<sup class="cite" data-refid="2">[2]</sup>。本报告偏工程落地，<strong>会给你真实可跑的 MVP 路线</strong>，但<strong>不会给你虚假希望</strong> — 第 14 章专门泼冷水。
+    </div>
+  </div>
+
+  <!-- ============ CH1 摘要 + 5 核心结论 ============ -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">摘要 + 5 条核心结论（独立 callout）+ 残酷现实预警</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>1.1 一段话总结</h3>
+      <p>这个系统在工程上<strong>完全可由一个人搭起来</strong> — 数据源（Binance WebSocket + Polymarket CLOB API）全免费且公开<sup class="cite" data-refid="3">[3]</sup><sup class="cite" data-refid="4">[4]</sup>，XGBoost / LightGBM 推理只要个位数毫秒<sup class="cite" data-refid="5">[5]</sup>，技术栈成熟（ccxt 41.9k star<sup class="cite" data-refid="6">[6]</sup>、freqtrade 25k+ star 自带 FreqAI 机器学习<sup class="cite" data-refid="7">[7]</sup>）。<strong>真正的难点不在"能不能搭"，而在"搭出来能不能赚钱"</strong> — 而后者的答案在 2026 年初变得更难了：Polymarket 在 2025 年初<strong>从零手续费改成按概率收 taker 费，crypto 类目高达 1.80%</strong><sup class="cite" data-refid="8">[8]</sup>，这一刀直接砍掉了大部分散户的理论 edge。本报告的结论是：<strong>把它当成一个严肃的工程 + 概率校准学习项目去做（极有价值），但不要指望它稳定生钱（极难）</strong>。</p>
+
+      <h3>1.2 一图看懂系统</h3>
+      <div class="arch-flow">
+        <span class="arch-box">Binance WS<br>盘口/成交/funding</span>
+        <span class="arch-arrow">→</span>
+        <span class="arch-box">Feature Engine<br>微观结构+技术指标</span>
+        <span class="arch-arrow">→</span>
+        <span class="arch-box">XGBoost<br>predict_proba()</span>
+        <span class="arch-arrow">→</span>
+        <span class="arch-box">P(up)=0.56</span>
+        <span class="arch-arrow">VS</span>
+        <span class="arch-box">Polymarket<br>YES=0.47</span>
+        <span class="arch-arrow">→</span>
+        <span class="arch-box">Edge=+9pt<br>EV / Kelly</span>
+      </div>
+
+      <h3>1.3 5 条核心结论（每条独立 callout）</h3>
+
+      <div class="callout good">
+        <p><strong>🟢 结论 #1 — 工程可行性：个人开发者 100% 能搭起来，全免费数据 + 成熟开源栈</strong></p>
+        <p>Binance 现货/合约 WebSocket 免费推 orderbook / trades / liquidation 实时流<sup class="cite" data-refid="3">[3]</sup>；Polymarket 的 Gamma API（市场元数据/价格）和 CLOB API（盘口/midpoint/spread）<strong>完全公开、无需 API key、无需钱包即可读</strong><sup class="cite" data-refid="4">[4]</sup>，还有 <code>wss://ws-subscriptions-clob.polymarket.com/ws/market</code> 实时盘口流<sup class="cite" data-refid="9">[9]</sup>。Python 栈成熟：<code>ccxt</code>（41.9k star，108 交易所统一 API）<sup class="cite" data-refid="6">[6]</sup> + <code>py-clob-client</code>（Polymarket 官方）<sup class="cite" data-refid="10">[10]</sup> + LightGBM/XGBoost（推理 5–19ms）<sup class="cite" data-refid="5">[5]</sup>。<strong>一台 $30/月 的东京 VPS（贴近 Binance AWS ap-northeast-1）就够 MVP 跑</strong><sup class="cite" data-refid="11">[11]</sup>。</p>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>🔵 结论 #2 — 问题定性：这是"二分类概率预测 + 市场微观结构 alpha"问题，不是时间序列回归</strong></p>
+        <p>把它建模成<strong>预测币价数值（regression）是错的方向</strong>。正确建模是<strong>binary classification with calibrated probability</strong>（P(close_T ≥ close_0)），因为 (a) Polymarket 市场本身就是二元结果（涨/跌），(b) 你需要的是<strong>校准良好的概率</strong>而不是点估计 — 概率才能直接跟 Polymarket 价格比 edge。短线（5m/15m）之所以比长线可行，是因为<strong>5m/15m 内价格主要由订单流不平衡（OFI）驱动而非基本面</strong> — Cont-Kukanov-Stoikov 经典论文证明 OFI 与短期价格变动近似<strong>线性关系</strong><sup class="cite" data-refid="12">[12]</sup>，这个信号在几十秒到几分钟尺度最强<sup class="cite" data-refid="13">[13]</sup>。</p>
+      </div>
+
+      <div class="callout purple">
+        <p><strong>🟣 结论 #3 — Feature 比模型重要 10 倍：微观结构 feature 是 5m/15m 唯一真 alpha 来源</strong></p>
+        <p>2025 年 arxiv 微观结构研究的标题直接点破：<strong>"Better Inputs Matter More Than Stacking Another Hidden Layer"</strong>（更好的输入比多堆一层网络更重要）<sup class="cite" data-refid="14">[14]</sup>。对 5m/15m 窗口，真正有预测力的 feature 是<strong>盘口失衡（order book imbalance）/ 订单流失衡（OFI）/ 成交流不平衡 / 清算级联 / OI 变化 / funding rate / 大单（whale）</strong>。纯技术指标（RSI/MACD）在短线<strong>滞后且噪音大</strong>，单独用几乎无 alpha — RSI 在强趋势里会长时间钝化、MACD 在横盘里给假信号<sup class="cite" data-refid="15">[15]</sup>。<strong>新闻 NLP 对 5m 几乎无用（消息已被秒级 priced in），第一版应该完全不做</strong>。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>🟠 结论 #4 — "预测正确 ≠ 赚钱"：Polymarket 1.8% taker 费 + 滑点是最大杀手，edge 必须够大才扛得住</strong></p>
+        <p>这是整个项目<strong>最容易被忽视、也最致命</strong>的一点。2025 年 Polymarket 改制后 crypto 市场 taker 费 1.80%<sup class="cite" data-refid="8">[8]</sup>，意味着你<strong>每笔吃单交易先亏 1.8 个点</strong>。学术界铁律：<strong>扣掉交易成本后 Sharpe < 1 的策略直接丢弃</strong><sup class="cite" data-refid="16">[16]</sup>。要赚钱，你模型概率必须比市场<strong>持续偏离够大（edge &gt; 费用 + 滑点 + 你的概率估计误差）</strong>。Kelly 公式告诉你下多少注，但 <strong>87% Polymarket 钱包亏钱的真正原因不是预测错，而是下注规模错（over-betting）</strong><sup class="cite" data-refid="17">[17]</sup>。用 fractional Kelly（1/4 Kelly）保命。</p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>🔴 结论 #5 — 残酷现实：个人稳定盈利成功率极低，profit 被职业 bot 垄断，这是 adaptive adversarial 战场</strong></p>
+        <p>Dune 数据：<strong>约 84% Polymarket 钱包净亏损</strong>，盈利者中大头被<strong>少数自动化 bot 拿走</strong>，散户整体亏 1.31 亿美元<sup class="cite" data-refid="1">[1]</sup>；只有 0.033%（约 840 个地址）赚过 10 万美元以上<sup class="cite" data-refid="1">[1]</sup>。Polymarket 5m BTC 市场用 Chainlink 高频预言机即时结算<sup class="cite" data-refid="18">[18]</sup>，这种市场<strong>已经挤满了跟你用同样数据、同样模型、但延迟更低的 HFT bot</strong><sup class="cite" data-refid="19">[19]</sup>。金融市场是 <strong>adaptive adversarial system</strong>：你发现的任何 alpha 都会被对手交易掉、alpha decay 持续发生<sup class="cite" data-refid="20">[20]</sup>。<strong>诚实判断：把这当成赚钱机器，大概率亏钱 + 浪费几个月；把这当成学微观结构 + 概率校准 + 生产级 ML 工程的项目，价值巨大。</strong></p>
+      </div>
+
+      <h3>1.4 给阿杰的一句话下一步</h3>
+      <div class="callout info">
+        <p>第一版<strong>别碰新闻、别碰真钱、别碰多交易所</strong>。fork <strong>freqtrade + FreqAI</strong><sup class="cite" data-refid="7">[7]</sup> 当骨架 → 只接 <strong>Binance BTC WebSocket</strong> 一个数据源 → 做 <strong>5 个微观结构 feature</strong>（OFI / book imbalance / trade flow / funding / OI 变化）→ 训一个 <strong>LightGBM 二分类器</strong>预测 5m 涨跌概率 → <strong>用 Polymarket 历史价格 paper trade（纸上模拟）跑 4 周</strong>，记录"模型概率 vs Polymarket 价格"的 edge 分布和扣费后 EV。<strong>这一步不花一分钱、不冒一分险，但能告诉你 90% 的答案：你到底有没有 edge。</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH2 问题定义 ============ -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">问题定义 — 这属于哪类 ML？为什么短线可行？</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>2.1 明确定性：Binary Classification + Calibrated Probability + Market Microstructure Alpha</h3>
+      <p>很多人一上来就把"预测 BTC 价格"做成 <strong>time-series regression</strong>（LSTM 预测下一根 K 线收盘价），<strong>这对本任务是错的方向</strong>。我们要做的事，准确归类是这几类的<strong>交集</strong>：</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>候选类别</th><th>是否本质</th><th>理由</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Binary Classification（二分类）</strong></td><td>✅ <strong>主体</strong></td><td>Polymarket 市场结果是二元的（T 时刻 close ≥ 起始价 → "up"）<sup class="cite" data-refid="18">[18]</sup>。我们要预测的就是 P(up)，天然二分类。</td></tr>
+            <tr><td><strong>Probability Calibration（概率校准）</strong></td><td>✅ <strong>核心</strong></td><td>我们不要 0/1 标签，要<strong>校准良好的概率</strong>。模型说 0.56 就得真的 56% 会涨，否则没法跟 Polymarket 价比 edge。这是和"普通分类"最大的区别。</td></tr>
+            <tr><td><strong>Market Microstructure（市场微观结构）</strong></td><td>✅ <strong>alpha 来源</strong></td><td>5m/15m 的预测力几乎全部来自盘口/订单流微观结构，不是宏观或技术指标<sup class="cite" data-refid="14">[14]</sup>。</td></tr>
+            <tr><td><strong>Event Prediction（事件预测）</strong></td><td>🟡 部分</td><td>每个 Polymarket 窗口是一个独立"事件"，但底层信号是连续的微观结构流。</td></tr>
+            <tr><td>Time Series Regression（时序回归）</td><td>🔴 不是</td><td>预测精确价格数值既难又无用 — 你不需要知道 BTC 是 67,432 还是 67,438，只需要知道涨跌方向的概率。</td></tr>
+            <tr><td>Reinforcement Learning（强化学习）</td><td>🔴 第一版不用</td><td>RL 在交易里 sample efficiency 差、sim-to-real gap 大、绝大多数仍停留在仿真阶段<sup class="cite" data-refid="21">[21]</sup>。属于高级方向（第 15 章），不是 MVP。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout accent">
+        <p><strong>一句话定性</strong>：这是一个<strong>「基于市场微观结构特征的、校准良好的二分类概率预测」问题</strong>，下游接一个<strong>概率套利（probability arbitrage）决策层</strong>跟 Polymarket 价格比 edge。XGBoost / LightGBM 对这类<strong>结构化表格特征 + 需要概率输出（predict_proba）</strong>的任务是<strong>最佳工具之一</strong>，且推理快、好解释、不需 GPU。</p>
+      </div>
+
+      <h3>2.2 为什么短线（5m/15m）比长线（天/周）可行？</h3>
+      <p>这是反直觉的关键点：<strong>越短的窗口，越有可预测的结构性信号</strong>。理由：</p>
+      <ul>
+        <li><strong>信噪比反转</strong>：长线（天/周）由宏观、情绪、突发新闻主导，这些<strong>本质不可预测（接近随机游走）</strong>；短线（秒/分）由<strong>订单流动力学主导</strong>，而订单流有可测量的惯性和失衡。</li>
+        <li><strong>微观结构信号有物理因果</strong>：Cont-Kukanov-Stoikov 证明 OFI 和短期价格变动是<strong>近似线性关系</strong>（斜率与市场深度成反比）<sup class="cite" data-refid="12">[12]</sup>。买盘挂单远多于卖盘 → 价格大概率往上走几个 tick，这不是玄学，是供需的直接表现。这个关系在<strong>几十秒到几分钟内最强</strong><sup class="cite" data-refid="13">[13]</sup>。</li>
+        <li><strong>清算级联的可观测性</strong>：5–15% 的剧烈短线波动往往是<strong>清算级联</strong>（多头被强平→砸盘→更多强平）<sup class="cite" data-refid="22">[22]</sup>。funding rate &gt; 0.05%/小时 是清算级联的早期预警<sup class="cite" data-refid="22">[22]</sup>。这些是<strong>可以提前几分钟从衍生品数据看到的</strong>。</li>
+        <li><strong>均值回归（mean reversion）</strong>：短线尺度上，过度的盘口失衡常常会回补，VAMP（成交量调整中间价）对短期方向预测优于普通中间价<sup class="cite" data-refid="13">[13]</sup>。</li>
+      </ul>
+      <div class="callout warn">
+        <p><strong>⚠️ 但别被"可行"骗了</strong>：可行 ≠ 容易赚。短线信号衰减极快（几十秒），意味着你需要<strong>极低延迟</strong>才抓得住；而 Polymarket 5m 市场恰恰是 HFT bot 密度最高的地方<sup class="cite" data-refid="19">[19]</sup>。对个人开发者，<strong>15m / 1h 窗口比 5m 更现实</strong>（信号衰减慢一点，对延迟容忍度高）。详见第 14、16 章。</p>
+      </div>
+
+      <h3>2.3 标签（label）怎么定义？这步比选模型重要</h3>
+      <p>label 设计直接决定你和 Polymarket 对齐与否：</p>
+      <ul>
+        <li><strong>对齐 Polymarket 定义</strong>：Polymarket "BTC Up/Down" 的 up = 窗口结束价 <strong>≥</strong> 起始价<sup class="cite" data-refid="18">[18]</sup>。你的 label 必须<strong>完全一致</strong>（用同一个起始时间戳、同一个价格源 — Polymarket 用 Chainlink 喂价<sup class="cite" data-refid="18">[18]</sup>，你最好也对齐到接近的指数价而不是单一交易所成交价）。</li>
+        <li><strong>三分类 vs 二分类</strong>：有研究做 Down/Sideway/Up 三分类<sup class="cite" data-refid="23">[23]</sup>，但 Polymarket 是严格二元（平局算 up），所以<strong>二分类更对齐</strong>。</li>
+        <li><strong>label 的 timestamp 对齐是 data leakage 高发区</strong>：feature 必须只用窗口<strong>开始之前</strong>的数据，label 用窗口结束的结果。差一秒就泄漏。详见第 10 章。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ CH3 行情数据 ============ -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">数据源 A — 行情数据（5 交易所对比 + 哪些最重要）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>3.1 五大交易所数据能力对比</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>交易所</th><th>REST</th><th>WebSocket</th><th>orderbook</th><th>trades</th><th>funding</th><th>OI</th><th>liquidation</th><th>免费</th><th>适合实时</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Binance</strong></td><td>✅</td><td>✅ 全</td><td>✅ depth 流</td><td>✅</td><td>🟡 REST/轮询<sup class="cite" data-refid="24">[24]</sup></td><td>🟡 REST 轮询<sup class="cite" data-refid="24">[24]</sup></td><td>✅ forceOrder 流<sup class="cite" data-refid="3">[3]</sup></td><td>🟢 是</td><td>🟢 最佳·流动性最深</td></tr>
+            <tr><td><strong>Bybit</strong></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>🟢 是</td><td>🟢 衍生品强</td></tr>
+            <tr><td><strong>Coinbase</strong></td><td>✅</td><td>✅</td><td>✅ L2/L3</td><td>✅</td><td>🔴 无永续</td><td>🔴</td><td>🔴</td><td>🟢 是</td><td>🟡 现货为主·合规</td></tr>
+            <tr><td><strong>Hyperliquid</strong></td><td>✅</td><td>✅ L2/L4<sup class="cite" data-refid="25">[25]</sup></td><td>✅ 链上 CLOB</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>🟢 是</td><td>🟡 新·去中心化</td></tr>
+            <tr><td><strong>Deribit</strong></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>🟢 是</td><td>🟡 期权/IV 强项</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout good">
+        <p><strong>🟢 MVP 选 Binance 一家就够</strong>：流动性最深（价格发现的主场）、WebSocket 文档最全、ccxt 支持最成熟。Binance WebSocket API 2025-02-25 上线<sup class="cite" data-refid="3">[3]</sup>，<strong>orderbook / trades / liquidation 都有实时流</strong>。注意：<strong>funding rate 和 open interest 没有 WebSocket 实时流，要靠 REST 轮询</strong>（OI 用 <code>GET /fapi/v1/openInterest</code>、funding 用 <code>GET /fapi/v1/fundingRate</code>）<sup class="cite" data-refid="24">[24]</sup>，按分钟轮询足够。</p>
+      </div>
+
+      <h3>3.2 各类数据的延迟 / 重要性排序（对 5m/15m）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>数据类型</th><th>对短线重要性</th><th>WebSocket?</th><th>延迟</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Orderbook (L2 depth)</strong></td><td>⭐⭐⭐⭐⭐</td><td>✅</td><td>毫秒</td><td>盘口失衡是 5m 第一信号<sup class="cite" data-refid="13">[13]</sup>。但有隐藏单/冰山单，可见失衡 ≠ 全部信息<sup class="cite" data-refid="13">[13]</sup>。</td></tr>
+            <tr><td><strong>Trades (逐笔成交)</strong></td><td>⭐⭐⭐⭐⭐</td><td>✅</td><td>毫秒</td><td>trade flow imbalance（主动买/卖）。盘口 + 成交流的预测力相近<sup class="cite" data-refid="26">[26]</sup>。</td></tr>
+            <tr><td><strong>Liquidation</strong></td><td>⭐⭐⭐⭐</td><td>✅ forceOrder<sup class="cite" data-refid="3">[3]</sup></td><td>毫秒</td><td>清算级联触发 5–15% 急动<sup class="cite" data-refid="22">[22]</sup>。提前看到大额强平 = 提前看到砸盘。</td></tr>
+            <tr><td><strong>Funding rate</strong></td><td>⭐⭐⭐⭐</td><td>🔴 轮询</td><td>分钟级</td><td>&gt;0.05%/h 是清算级联早期预警<sup class="cite" data-refid="22">[22]</sup>。多空成本失衡。</td></tr>
+            <tr><td><strong>Open Interest 变化</strong></td><td>⭐⭐⭐</td><td>🔴 轮询</td><td>分钟级</td><td>OI 突增 + 极端 funding → 杠杆堆积 → 波动放大<sup class="cite" data-refid="22">[22]</sup>。</td></tr>
+            <tr><td><strong>Candles (K线)</strong></td><td>⭐⭐</td><td>✅ kline 流</td><td>秒级</td><td>算技术指标用，但短线 alpha 弱（见第 6 章）。</td></tr>
+            <tr><td>ETF inflow</td><td>⭐</td><td>🔴</td><td>天级</td><td>宏观/日级信号，对 5m 无用。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3.3 数据基础设施现实约束</h3>
+      <ul>
+        <li><strong>Binance rate limit</strong>：现货 REQUEST_WEIGHT 6000/分钟、合约 2400/分钟；WebSocket 单连接最多 1024 个 stream、每 IP 每 5 分钟最多 300 连接、超限 429 / 滥用 IP 封禁 418<sup class="cite" data-refid="27">[27]</sup>。<strong>对 MVP 完全够用</strong>，但提醒：别用 REST 高频轮询盘口，一定走 WebSocket。</li>
+        <li><strong>orderbook 维护</strong>：WebSocket 推的是增量 diff，要本地维护一份全量 book（先 REST 拉 snapshot 再用 diff 更新），这是工程上最容易出 bug 的地方（序列号对不上 = book 错乱）。ccxt Pro / freqtrade 都帮你处理好了。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ CH4 Polymarket ============ -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">数据源 B — Polymarket（Gamma/CLOB API + 市场结构详解）★</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>4.1 Polymarket 市场结构 — 必须先搞懂它怎么运作</h3>
+      <p>Polymarket <strong>不是 AMM（自动做市），是 CLOB（中央限价订单簿）</strong> — 跟 NYSE/NASDAQ 一样，你和别的真实挂单者撮合<sup class="cite" data-refid="28">[28]</sup>。关键机制：</p>
+      <ul>
+        <li><strong>价格 = 隐含概率</strong>：每个结果（YES/NO）是一个 0–1 USDC 的 token，价格就是市场隐含概率。YES=0.20 → 市场认为 20% 概率发生<sup class="cite" data-refid="4">[4]</sup>。YES + NO 价格理论上应 = 1.00。</li>
+        <li><strong>off-chain 撮合 + on-chain 结算</strong>：订单走链下 operator 撮合（求速度），双方 EIP-712 签名后提交 CTF Exchange 合约原子结算（求安全）<sup class="cite" data-refid="28">[28]</sup>。share 是 Gnosis Conditional Token Framework 的 ERC1155 token<sup class="cite" data-refid="28">[28]</sup>。</li>
+        <li><strong>5 分钟 BTC 市场 + Chainlink 即时结算</strong>：Polymarket 上线了 5m / 15m / 1h BTC Up/Down 市场，用 <strong>Chainlink 高频预言机</strong>喂 BTC/USD 价格自动即时结算<sup class="cite" data-refid="18">[18]</sup>。up = 区间结束价 ≥ 起始价<sup class="cite" data-refid="18">[18]</sup>。这正是阿杰要套利的目标市场。</li>
+      </ul>
+
+      <h3>4.2 三套 API（全部公开免费、读取无需 key）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>API</th><th>Base URL</th><th>用途</th><th>关键端点</th><th>认证</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Gamma API</strong></td><td><code>gamma-api.polymarket.com</code></td><td>市场发现/元数据/价格</td><td><code>/events</code> <code>/markets</code> <code>/markets/{id}</code> <code>/public-search</code><sup class="cite" data-refid="4">[4]</sup></td><td>🟢 无</td></tr>
+            <tr><td><strong>CLOB API</strong></td><td>(clob.polymarket.com)</td><td>实时价格/盘口</td><td><code>/price</code> <code>/prices</code> <code>/book</code> <code>/midpoint</code> <code>/spread</code> <code>/prices-history</code><sup class="cite" data-refid="4">[4]</sup></td><td>🟢 读取无需·下单需</td></tr>
+            <tr><td><strong>CLOB WebSocket</strong></td><td><code>ws-subscriptions-clob.polymarket.com/ws/market</code></td><td>实时盘口/价格/成交</td><td>事件：<code>book</code>/<code>price_change</code>/<code>last_trade_price</code>/<code>best_bid_ask</code>/<code>market_resolved</code><sup class="cite" data-refid="9">[9]</sup></td><td>🟢 市场频道无需</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout good">
+        <p><strong>🟢 这是整个项目最大的工程便利</strong>：读 Polymarket 数据<strong>零门槛</strong> — 没有 API key、没有钱包、没有认证就能拉到 YES/NO 价格、bid-ask spread、盘口深度、隐含概率<sup class="cite" data-refid="4">[4]</sup>。官方 Python 客户端 <code>py-clob-client</code><sup class="cite" data-refid="10">[10]</sup>、Rust 客户端 <code>rs-clob-client</code> 都开源。<strong>真要下单（用真钱）才需要钱包 + 签名</strong>。</p>
+      </div>
+
+      <h3>4.3 你需要从 Polymarket 抓哪些字段做 edge 比较？</h3>
+      <ul>
+        <li><strong>YES/NO 价格</strong>（= 市场隐含概率）→ 跟你的 P(up) 直接比，这是 edge 的核心。</li>
+        <li><strong>bid-ask spread</strong> → spread 越宽，你实际成交价越差，吃掉 edge。5m 这种短市场 spread 往往很宽。</li>
+        <li><strong>orderbook imbalance（Polymarket 侧）</strong> → 注意：Polymarket 自己的盘口失衡也是信号，但流动性薄时噪音大。</li>
+        <li><strong>liquidity / volume</strong> → <strong>极其关键</strong>。学术研究发现 Polymarket 市场<strong>跨过 10 万美元成交量才开始变成可靠的定价机制，低于此严重错误定价</strong><sup class="cite" data-refid="29">[29]</sup>。5m BTC 市场单窗口流动性可能很薄 → 你的"edge"可能只是流动性不足的假象。</li>
+        <li><strong>implied probability 一致性</strong> → 同一事件多个市场（5m/15m/1h）之间、YES+NO 之和是否 = 1，本身就是套利信号（见第 11 章）。</li>
+      </ul>
+
+      <h3>4.4 Polymarket 错误定价的真实规模（套利空间存在但在收窄）</h3>
+      <p>学术 + 链上数据给了硬证据：</p>
+      <ul>
+        <li>一份覆盖 Polymarket 的研究发现 <strong>41% 的分析市场存在单市场套利</strong>，中位错误定价是本应 = $1.00 的市场只加总到 $0.60<sup class="cite" data-refid="30">[30]</sup>。</li>
+        <li>2024-04 至 2025-04，套利者用 rebalancing / combinatorial 策略<strong>赚了约 4000 万美元</strong>，top trader 单人从 4049 笔交易赚 200 万美元（均 $496/笔）<sup class="cite" data-refid="30">[30]</sup>。</li>
+        <li>但一份 25 亿美元成交量的 2025 研究里，<strong>Polymarket 原始准确率 67.2%，低于 PredictIt 93.1% 和 Kalshi 78.4%</strong><sup class="cite" data-refid="29">[29]</sup> — 错误定价多 = 套利空间大，但也意味着噪音大、流动性差的市场居多。</li>
+      </ul>
+      <div class="callout warn">
+        <p><strong>⚠️ 注意时间维度</strong>：上述 4000 万套利利润主要是 <strong>2024 年零手续费时代</strong>的事。2025 年初 Polymarket 改成 taker 收费（crypto 1.8%）后<sup class="cite" data-refid="8">[8]</sup>，<strong>很多原本能套的 edge 现在被费用吃掉了</strong>。这是 adaptive system 的典型表现 — 平台看到套利者赚钱就改规则。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH5 新闻/NLP ============ -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">数据源 C — 新闻 + Twitter/X（API vs scraping 成本/延迟/法律对比）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout bad">
+        <p><strong>🔴 先说结论：第一版完全不要碰新闻/NLP</strong>。对 5m/15m 窗口，<strong>能影响价格的消息在你的 NLP pipeline 跑完之前早就被秒级 priced in 了</strong>。新闻 NLP 对<strong>小时级以上、事件驱动型</strong>预测才有边际价值。下面把数据源列全，是为了让你知道<strong>第二版/高级版</strong>该用什么、避哪些坑。</p>
+      </div>
+
+      <h3>5.1 新闻 / 社交数据源对比（成本 / 延迟 / 稳定 / 法律风险）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>数据源</th><th>类型</th><th>价格</th><th>延迟</th><th>稳定性</th><th>法律风险</th><th>适合度</th></tr></thead>
+          <tbody>
+            <tr><td><strong>X/Twitter API（官方）</strong></td><td>社交</td><td>🔴 2026 改 pay-per-use：$0.005/读·封顶 200 万读/月；旧 Basic $200/月、Pro $5000/月仅老用户<sup class="cite" data-refid="31">[31]</sup></td><td>秒级</td><td>🟢 高</td><td>🟢 合规</td><td>🟡 贵</td></tr>
+            <tr><td><strong>LunarCrush API</strong></td><td>社交聚合+情绪</td><td>🟡 订阅制</td><td>分钟</td><td>🟢</td><td>🟢</td><td>🟢 现成情绪</td></tr>
+            <tr><td><strong>CryptoPanic API</strong></td><td>新闻聚合+影响标注</td><td>🟢 有免费档<sup class="cite" data-refid="32">[32]</sup></td><td>分钟</td><td>🟢</td><td>🟢</td><td>🟢 性价比高</td></tr>
+            <tr><td><strong>Crypto News API</strong></td><td>多源新闻+情绪</td><td>🟡 订阅</td><td>分钟</td><td>🟢</td><td>🟢</td><td>🟡</td></tr>
+            <tr><td><strong>CoinDesk / CoinTelegraph RSS</strong></td><td>新闻 RSS</td><td>🟢 免费</td><td>分钟</td><td>🟡</td><td>🟢</td><td>🟢 免费起步</td></tr>
+            <tr><td><strong>Telegram 频道</strong></td><td>社交/抢先消息</td><td>🟢 免费(Bot API)</td><td>秒级</td><td>🟡</td><td>🟡 灰</td><td>🟡 噪音大</td></tr>
+            <tr><td><strong>第三方 scraping</strong></td><td>抓取</td><td>🟢 低</td><td>视实现</td><td>🔴 易封</td><td>🔴 违反 ToS</td><td>🔴 不推荐</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>5.2 官方 API vs 第三方 vs scraping vs AI agent 爬取</h3>
+      <ul>
+        <li><strong>官方 API（X/Twitter）</strong>：2026 年 X 取消免费档、改为 pay-per-use（$0.01/发、$0.005/读、封顶 200 万读/月，超了走 Enterprise $42K/月起）<sup class="cite" data-refid="31">[31]</sup>。<strong>对个人来说，全量监控 crypto Twitter 不现实</strong>，只能定向少量 KOL。</li>
+        <li><strong>第三方聚合（LunarCrush / CryptoPanic）</strong>：<strong>最务实</strong>。它们已经替你聚合 + 打了情绪/影响标签，省掉自建 NLP。专业团队常多源组合（LunarCrush 社交 + 媒体情绪 + 链上）<sup class="cite" data-refid="32">[32]</sup>。</li>
+        <li><strong>scraping</strong>：违反平台 ToS，IP 易封、法律灰区，<strong>商业项目不要碰</strong>。</li>
+        <li><strong>AI agent 爬取</strong>：用 LLM agent 自动浏览+总结新闻是 2025-2026 新趋势，但<strong>延迟（秒到分钟级 LLM 调用）对短线毫无意义</strong>，且成本高。属于小时级/事件级研究工具，不是 5m 信号源。</li>
+      </ul>
+      <div class="callout info">
+        <p><strong>第二版起步建议</strong>：要加新闻就从<strong>免费的 CryptoPanic API + RSS</strong> 起步（它自带"对价格影响"投票标注<sup class="cite" data-refid="32">[32]</sup>），把它当成一个<strong>低频的 regime/风险开关</strong>（有重大负面新闻就降低下注规模或停手），<strong>而不是当成 5m 方向信号</strong>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH6 Feature 技术指标 ============ -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">Feature Engineering（一）— 技术指标（哪些短线有效？）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout purple">
+        <p><strong>🟣 Feature 比模型重要的铁律</strong>：2025 微观结构 arxiv 论文标题直接说 <em>"Better Inputs Matter More Than Stacking Another Hidden Layer"</em><sup class="cite" data-refid="14">[14]</sup>。XGBoost / LightGBM 都是成熟工具，<strong>换模型带来的提升远小于换 feature</strong>。López de Prado 的核心论断也是同理：大多数金融 ML 失败来自<strong>烂数据和烂测试，不是烂模型</strong><sup class="cite" data-refid="33">[33]</sup>。所以把 80% 精力放在 feature + 数据质量 + 防泄漏上。</p>
+      </div>
+
+      <h3>6.1 常见技术指标 & 短线有效性评估</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>指标</th><th>类型</th><th>5m/15m 有效性</th><th>问题</th></tr></thead>
+          <tbody>
+            <tr><td><strong>RSI</strong></td><td>动量/超买超卖</td><td>🟡 中</td><td>强趋势里长期钝化（BTC 2021 牛市 RSI &gt;70 数周）<sup class="cite" data-refid="15">[15]</sup></td></tr>
+            <tr><td><strong>MACD</strong></td><td>趋势/动量</td><td>🟡 弱-中</td><td>基于均线，滞后；横盘给假信号<sup class="cite" data-refid="15">[15]</sup></td></tr>
+            <tr><td><strong>EMA / 均线交叉</strong></td><td>趋势</td><td>🟡 中</td><td>金叉/死叉约 70% 命中趋势反转<sup class="cite" data-refid="15">[15]</sup>，但滞后</td></tr>
+            <tr><td><strong>Bollinger Bands</strong></td><td>波动率</td><td>🟡 中</td><td>突破/回归信号，需配合量能</td></tr>
+            <tr><td><strong>VWAP</strong></td><td>量价</td><td>🟢 较好</td><td>日内基准价，偏离 VWAP 有均值回归倾向</td></tr>
+            <tr><td><strong>Momentum / ROC</strong></td><td>动量</td><td>🟢 较好</td><td>短线动量惯性</td></tr>
+            <tr><td><strong>Realized Volatility</strong></td><td>波动率</td><td>🟢 重要</td><td>当前波动率状态 → regime 特征 + 下注规模调节</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>6.2 诚实评估：纯技术指标在短线 alpha 很弱</h3>
+      <p>研究里把 MACD/RSI/KDJ/Bollinger <strong>组合</strong>能让约 85% 趋势信号一致、误报率降约 45%<sup class="cite" data-refid="15">[15]</sup> —— 但请注意：(1) 这些研究多在<strong>较长时间框架</strong>、(2) "信号一致" ≠ "扣费后能赚钱"、(3) 这些指标全是<strong>价格的滞后变换</strong>，所有人都在用，<strong>没有信息优势</strong>。</p>
+      <div class="callout warn">
+        <p><strong>⚠️ 技术指标的真正用法</strong>：不要指望它给 alpha，要把它当成<strong>给 XGBoost 的辅助上下文特征</strong>（当前 regime 是趋势还是震荡、波动率高低）。真正的 alpha 来自下一章的<strong>微观结构特征</strong>。一个常见的有效组合是：微观结构 feature（核心 alpha）+ 几个技术指标（regime 上下文）+ 波动率（下注规模调节）。</p>
+      </div>
+
+      <h3>6.3 实现：用 pandas-ta / TA-Lib，别自己手写</h3>
+      <p>FreqAI 的特征工程能让你基于简单策略<strong>快速生成 1 万+ feature</strong>（所有 feature 前缀 <code>%</code> 被 FreqAI 识别）<sup class="cite" data-refid="7">[7]</sup>。但<strong>feature 越多越容易过拟合</strong>（第 10/14 章），短线用 20–50 个精选 feature 通常优于盲目堆 1 万个。</p>
+    </div>
+  </section>
+
+  <!-- ============ CH7 Feature 微观结构 ============ -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">Feature Engineering（二）— 市场微观结构（核心 alpha 来源）★★</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p><strong>这一章是整个项目的命门。</strong>5m/15m 窗口的可预测性<strong>几乎全部</strong>来自这里。下面每个 feature 都给出"为什么对短线有效"的因果机制。</p>
+
+      <h3>7.1 七大微观结构特征</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Feature</th><th>怎么算</th><th>为什么短线有效</th><th>权重</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Order Book Imbalance（盘口失衡）</strong></td><td>(bid_vol − ask_vol)/(bid_vol + ask_vol)，取 top N 档</td><td>买盘挂单远多于卖盘 → 价格大概率上行。累积深度失衡常先于中间价变动<sup class="cite" data-refid="13">[13]</sup></td><td>⭐⭐⭐⭐⭐</td></tr>
+            <tr><td><strong>OFI（订单流失衡）</strong></td><td>Cont-Kukanov-Stoikov：统计 best bid/ask 上限价单+市价单+撤单的净流<sup class="cite" data-refid="12">[12]</sup></td><td><strong>与短期价格变动近似线性</strong>，斜率与市场深度成反比 — 微观结构最坚实的实证规律<sup class="cite" data-refid="12">[12]</sup></td><td>⭐⭐⭐⭐⭐</td></tr>
+            <tr><td><strong>Trade Flow Imbalance（成交流不平衡）</strong></td><td>主动买成交量 − 主动卖成交量（按 taker side 分）</td><td>盘口 + 成交流的预测重要性相近，跨不同市值币种稳定<sup class="cite" data-refid="26">[26]</sup></td><td>⭐⭐⭐⭐⭐</td></tr>
+            <tr><td><strong>Liquidation Cascade（清算级联）</strong></td><td>滚动窗口内强平金额/方向（Binance forceOrder 流）<sup class="cite" data-refid="3">[3]</sup></td><td>大额多头强平 → 砸盘 → 触发更多强平。5–15% 急动多由此驱动<sup class="cite" data-refid="22">[22]</sup></td><td>⭐⭐⭐⭐</td></tr>
+            <tr><td><strong>Funding Rate</strong></td><td>当前 funding + 变化率（REST 轮询）<sup class="cite" data-refid="24">[24]</sup></td><td>&gt;0.05%/h = 杠杆过热、清算级联早期预警<sup class="cite" data-refid="22">[22]</sup></td><td>⭐⭐⭐⭐</td></tr>
+            <tr><td><strong>OI Change（持仓量变化）</strong></td><td>ΔOI 滚动（REST 轮询）<sup class="cite" data-refid="24">[24]</sup></td><td>OI 突增 + 极端 funding → 波动放大；价涨但 OI 不涨 = 假突破<sup class="cite" data-refid="22">[22]</sup></td><td>⭐⭐⭐</td></tr>
+            <tr><td><strong>Whale Trades（大单）</strong></td><td>单笔超阈值成交、大额挂单出现/撤销</td><td>大户净空 vs 价格背离常先于反转<sup class="cite" data-refid="22">[22]</sup></td><td>⭐⭐⭐</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>7.2 VAMP — 一个被验证优于普通中间价的衍生特征</h3>
+      <p><strong>Volume-Adjusted Mid-Price（成交量调整中间价）</strong>在短期方向预测和大幅波动预测上<strong>优于</strong>普通中间价和成交量加权中间价<sup class="cite" data-refid="13">[13]</sup>。计算上就是把盘口失衡信息融进中间价的偏移量。这是一个"几乎免费的 alpha"——值得作为核心 feature。</p>
+
+      <h3>7.3 工程实现要点</h3>
+      <pre><code># 伪代码：OFI 与盘口失衡（每个 tick 更新）
+def order_book_imbalance(bids, asks, levels=5):
+    bid_vol = sum(v for _, v in bids[:levels])
+    ask_vol = sum(v for _, v in asks[:levels])
+    return (bid_vol - ask_vol) / (bid_vol + ask_vol + 1e-9)
+
+def ofi(prev_book, curr_book):
+    # Cont-Kukanov-Stoikov: best bid/ask 价格与挂单量变化的净流
+    e_bid = curr_book.bid_vol if curr_book.bid_px >= prev_book.bid_px else -prev_book.bid_vol
+    e_ask = -curr_book.ask_vol if curr_book.ask_px <= prev_book.ask_px else prev_book.ask_vol
+    return e_bid - e_ask  # 正 = 买压, 负 = 卖压</code></pre>
+      <div class="callout bad">
+        <p><strong>🔴 微观结构 feature 的两个致命坑</strong>：<br>
+        <strong>(1) 隐藏单/冰山单</strong>：可见盘口失衡 ≠ 全部信息，做市商会藏单<sup class="cite" data-refid="13">[13]</sup>。你看到的失衡可能是假象（诱多/诱空）。<br>
+        <strong>(2) 信号衰减极快</strong>：OFI 信号在几十秒内最强<sup class="cite" data-refid="13">[13]</sup>，等你算完、下完单，alpha 可能已经消失。这是为什么 5m 市场被低延迟 bot 主导 —— 个人开发者更现实的窗口是 15m/1h。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH8 Feature NLP ============ -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">Feature Engineering（三）— 新闻/NLP 特征（GPT vs FinBERT vs embedding）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout bad">
+        <p><strong>🔴 再强调：5m/15m 第一版不做 NLP。</strong>本章是给第二版/小时级版本看的。NLP 特征对<strong>事件驱动、小时级以上</strong>预测才有价值。</p>
+      </div>
+
+      <h3>8.1 三条 NLP 路线对比（速度 / 成本 / 效果）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>方法</th><th>速度</th><th>成本</th><th>效果</th><th>适合</th></tr></thead>
+          <tbody>
+            <tr><td><strong>传统 NLP（词典/规则）</strong></td><td>🟢 毫秒</td><td>🟢 免费</td><td>🔴 差</td><td>baseline / 关键词触发</td></tr>
+            <tr><td><strong>FinBERT / RoBERTa（金融微调 BERT）</strong></td><td>🟢 几十 ms（本地）</td><td>🟢 低（自托管）</td><td>🟢 结构化情绪分类强<sup class="cite" data-refid="34">[34]</sup></td><td>实时情绪打分（首选）</td></tr>
+            <tr><td><strong>Embedding（向量化 + 下游分类）</strong></td><td>🟢 快</td><td>🟢 低</td><td>🟡 需训下游</td><td>语义相似/聚类</td></tr>
+            <tr><td><strong>LLM（GPT-4o / Claude）</strong></td><td>🔴 秒级 API</td><td>🔴 高（按 token）</td><td>🟢 上下文理解+事件分类最强<sup class="cite" data-refid="34">[34]</sup></td><td>小时级事件理解/feature 提取</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>8.2 实证效果（来自学术）</h3>
+      <ul>
+        <li>双向模型（RoBERTa / FinBERT）擅长<strong>结构化情绪分类</strong>，捕捉行业术语；GPT 类擅长<strong>实时解读 + 生成评论</strong><sup class="cite" data-refid="34">[34]</sup>。</li>
+        <li>一份分析 96.5 万篇美国财经新闻（2010–2023）的研究里，基于 GPT-3 的 OPT 模型预测股市收益准确率 <strong>74.4%</strong>，long-short 策略 Sharpe <strong>3.05</strong><sup class="cite" data-refid="35">[35]</sup> —— <strong>但注意这是股市、日级、且学术 backtest，未必扣足成本</strong>，别直接套到 5m crypto。</li>
+        <li>微调 FinBERT 比原版准确率提升约 5%<sup class="cite" data-refid="34">[34]</sup>。</li>
+      </ul>
+
+      <h3>8.3 NLP 特征怎么喂给 XGBoost</h3>
+      <p>不要把原始文本喂 XGBoost。正确做法：用 FinBERT 把新闻流转成<strong>几个结构化标量特征</strong> —— sentiment score（-1~1）/ fear 指数 / macro risk flag / bullish-bearish ratio / impact score —— 再作为额外列拼进 XGBoost 的表格特征。这样保持了 XGBoost"结构化表格 + 快推理"的优势。</p>
+      <div class="callout warn">
+        <p><strong>⚠️ NLP 的根本难题：消息已被 priced in</strong>。等新闻发出来、你抓到、NLP 跑完，价格早动完了。NLP 的边际价值在<strong>(a) 提前监控未被主流媒体报道的早期信号（如链上异动、KOL 抢先消息），(b) 当 regime 风险开关用</strong>，而不是当短线方向信号。这一点第 14 章会再批判。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH9 系统架构 ============ -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">系统架构（生产级 + 组件选型理由）★</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>9.1 生产级数据流</h3>
+      <div class="arch-flow">
+        <span class="arch-box">Exchange WS<br>(Binance)</span><span class="arch-arrow">→</span>
+        <span class="arch-box">Ingest<br>(asyncio/Go)</span><span class="arch-arrow">→</span>
+        <span class="arch-box">Kafka<br>(可选)</span><span class="arch-arrow">→</span>
+        <span class="arch-box">Feature Engine</span><span class="arch-arrow">→</span>
+        <span class="arch-box">Redis<br>(hot 特征)</span><span class="arch-arrow">→</span>
+        <span class="arch-box">XGBoost<br>predict_proba</span><span class="arch-arrow">→</span>
+        <span class="arch-box">Decision<br>(edge/Kelly)</span>
+      </div>
+      <div class="arch-flow">
+        <span class="arch-box">TimescaleDB / ClickHouse<br>(历史落盘·回测·重训)</span>
+        <span class="arch-arrow">⇄</span>
+        <span class="arch-box">Polymarket WS/REST<br>(YES/NO 价格)</span>
+      </div>
+
+      <h3>9.2 组件选型 — 个人开发者别过度工程</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>组件</th><th>作用</th><th>MVP 是否需要</th><th>理由</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kafka</strong></td><td>持久、可重放的消息骨干<sup class="cite" data-refid="36">[36]</sup></td><td>🔴 不需要</td><td>个人单机单策略，Kafka 是杀鸡用牛刀。规模化/多策略/多人才上。</td></tr>
+            <tr><td><strong>Redis</strong></td><td>内存热特征 / Pub-Sub，sub-100ms 扇出<sup class="cite" data-refid="36">[36]</sup></td><td>🟡 推荐</td><td>存当前盘口状态 + 最新特征，避免反复算。MVP 也可先用进程内 dict。</td></tr>
+            <tr><td><strong>TimescaleDB</strong></td><td>时序落盘、范围查询、降采样<sup class="cite" data-refid="36">[36]</sup></td><td>🟢 需要</td><td>历史 tick/特征落盘做回测 + 重训。PostgreSQL 插件，学习成本低。</td></tr>
+            <tr><td><strong>ClickHouse</strong></td><td>海量 OLAP 分析</td><td>🔴 不需要</td><td>TB 级 tick 分析才上，MVP 用不到。</td></tr>
+            <tr><td><strong>PostgreSQL</strong></td><td>交易记录 / 元数据</td><td>🟢 需要</td><td>存订单、PnL、模型版本。TimescaleDB 本身就是 PG。</td></tr>
+            <tr><td><strong>DuckDB</strong></td><td>本地分析/回测</td><td>🟢 很适合</td><td>个人回测神器：直接查 parquet，零运维，比建数据库快。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout good">
+        <p><strong>🟢 MVP 极简栈</strong>：<code>asyncio + websockets</code> 接数据 → <strong>进程内特征计算</strong> → <code>DuckDB/parquet</code> 落盘历史 → <strong>训好的 LightGBM 直接 <code>predict_proba()</code></strong>。<strong>不要 Kafka、不要 ClickHouse</strong>。等你证明有 edge 了再上重型基础设施。生产级架构（Kafka/Redis/TimescaleDB）是给"已验证有 alpha、要 scale"的阶段用的<sup class="cite" data-refid="36">[36]</sup>。</p>
+      </div>
+
+      <h3>9.3 模型服务层：何时触发预测？</h3>
+      <ul>
+        <li><strong>event-driven 优于定时</strong>：不要每秒/每分钟死板预测。在<strong>盘口/成交有显著变化时</strong>触发预测（事件驱动），既省算力又抓信号。XGBoost/LightGBM 推理 5–19ms<sup class="cite" data-refid="5">[5]</sup>，对 5m/15m 窗口绰绰有余 —— <strong>瓶颈不在推理速度，在特征计算 + 下单延迟</strong>。</li>
+        <li><strong>XGBoost vs LightGBM 服务选型</strong>：超低延迟（&lt;5ms）选 XGBoost（可走 ONNX）；训练快/大数据选 LightGBM<sup class="cite" data-refid="5">[5]</sup>。对本任务两者都行，<strong>MVP 用 LightGBM（训练快 3–10×、省 30% 内存）</strong><sup class="cite" data-refid="5">[5]</sup>。</li>
+      </ul>
+
+      <h3>9.4 模型训练层：XGBoost 适合在线训练吗？</h3>
+      <ul>
+        <li><strong>XGBoost 支持增量训练</strong>：在已有树基础上继续训新树<sup class="cite" data-refid="37">[37]</sup>，不必从头重训，能应对金融时序的<strong>非平稳性</strong><sup class="cite" data-refid="37">[37]</sup>。</li>
+        <li><strong>但不是真正的 online learning</strong>：XGBoost 增量训练有局限（树结构固化）。<strong>更稳的做法是 rolling retraining（滚动重训）</strong> —— 用 walk-forward optimization，每隔固定周期（如每天/每几小时）用最新窗口数据重训整个模型<sup class="cite" data-refid="37">[37]</sup>。FreqAI 内置 self-adaptive retraining，在独立线程重训、不阻塞推理<sup class="cite" data-refid="7">[7]</sup>。</li>
+        <li><strong>推荐</strong>：offline 训好 baseline → 定期 rolling retrain（捕捉 regime 变化）→ 别追求秒级在线更新（过拟合风险 + 工程复杂度爆炸）。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ CH10 回测陷阱 ============ -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">回测系统 + 数据泄漏陷阱（critic ⚠ 为什么金融 AI 容易"假赚钱"）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout bad">
+        <p><strong>🔴 这章可能是全报告最值钱的一章。</strong>个人做量化<strong>失败的头号原因不是模型差，是回测骗了自己</strong>。López de Prado 的核心论断：大多数金融 ML 失败来自<strong>烂数据处理和烂测试，不是烂模型</strong><sup class="cite" data-refid="33">[33]</sup>。一个回测里赚 20% 的策略上线后可能变 -1%<sup class="cite" data-refid="38">[38]</sup>。</p>
+      </div>
+
+      <h3>10.1 四大"假赚钱"陷阱</h3>
+
+      <div class="callout warn">
+        <p><strong>🟠 陷阱 #1 — Lookahead Bias / Data Leakage（前视偏差/数据泄漏）</strong></p>
+        <p>在决策时点用了<strong>当时还拿不到的未来信息</strong>，污染了回测<sup class="cite" data-refid="39">[39]</sup>。短线场景超高发：(a) feature 用了窗口收盘后才知道的值；(b) label 是前视的（未来收益），标准 K-fold 会把未来信息泄进训练集<sup class="cite" data-refid="39">[39]</sup>；(c) 用了未来才发布修订的数据。<strong>解法</strong>：López de Prado 的 <strong>Purged K-Fold Cross-Validation + Embargo</strong> —— purge 掉训练集里与测试集时间重叠/泄漏的样本，embargo 在训练集前再删一段缓冲<sup class="cite" data-refid="39">[39]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>🟠 陷阱 #2 — Timestamp Alignment（时间戳错位）</strong></p>
+        <p>feature 的时间戳和 label 的时间戳<strong>差一秒就泄漏</strong>。你必须保证：feature 只用窗口<strong>开始之前</strong>的数据，label = 窗口结束的真实结果，且<strong>和 Polymarket 用的 Chainlink 喂价/结算时点对齐</strong><sup class="cite" data-refid="18">[18]</sup>。交易所之间、你的本地时钟和服务器时钟之间都可能错位。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>🟠 陷阱 #3 — Survivorship Bias（幸存者偏差）</strong></p>
+        <p>数据集排除了退市/失败的资产，抬高回测收益<sup class="cite" data-refid="39">[39]</sup>。crypto 里尤其严重 —— 你回测 BTC 当然活得好好的，但如果策略涉及山寨币，<strong>那些归零退市的币不在你的历史数据里</strong>，回测会系统性高估。本项目只做 BTC 风险小，但若扩到多币种务必小心。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>🟠 陷阱 #4 — Overfitting / 回测过拟合</strong></p>
+        <p>把策略调到完美贴合历史 = 失去泛化<sup class="cite" data-refid="38">[38]</sup>。一个真实案例：2025 年某策略胜率掉 14 个百分点、Sortino 从 +12.26 崩到 -0.42<sup class="cite" data-refid="38">[38]</sup>。<strong>feature 越多、调参越狠，过拟合越严重</strong>。解法：严格的 in-sample / walk-forward / out-of-sample 协议<sup class="cite" data-refid="40">[40]</sup>、Combinatorial Purged CV、限制 feature 数量、用简单模型先建 baseline。</p>
+      </div>
+
+      <h3>10.2 回测必须包含的真实成本（否则全是假的）</h3>
+      <ul>
+        <li><strong>Polymarket taker 费</strong>：crypto 1.80%<sup class="cite" data-refid="8">[8]</sup>（这一项就能让大部分散户 edge 归零）。maker 单（限价单）免费<sup class="cite" data-refid="8">[8]</sup>。</li>
+        <li><strong>滑点 / spread</strong>：5m 市场流动性薄、spread 宽，你实际成交价 ≠ 中间价。</li>
+        <li><strong>RL 研究里的教训</strong>：很多研究假设固定 10bps 成本、不随交易规模/波动率缩放，导致 agent 高频交易、回测收益虚高<sup class="cite" data-refid="21">[21]</sup>。<strong>你的回测必须让成本随交易规模和流动性变化</strong>。</li>
+      </ul>
+      <div class="callout bad">
+        <p><strong>🔴 铁律</strong>：QuantStart 给的标准 —— <strong>扣完真实交易成本后 Sharpe &lt; 1 的策略直接丢弃</strong><sup class="cite" data-refid="16">[16]</sup>。无数策略扣费前 Sharpe 很高，扣费后变成低 Sharpe 低收益的垃圾<sup class="cite" data-refid="16">[16]</sup>。<strong>你 paper trade 时一定要把 1.8% taker 费 + 滑点算进去</strong>，否则你看到的"edge"是幻觉。</p>
+      </div>
+
+      <h3>10.3 推荐回测工具</h3>
+      <p>开源里 <strong>Jesse 的"零前视偏差回测引擎"被誉为最诚实的开源回测</strong><sup class="cite" data-refid="41">[41]</sup>。freqtrade 也有完整回测 + hyperopt。但<strong>再好的引擎也防不住你自己制造的泄漏</strong> —— 先理解第 10.1 的四个陷阱，再用工具。</p>
+    </div>
+  </section>
+
+  <!-- ============ CH11 Polymarket Edge ============ -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">Polymarket Edge — EV / Kelly / Sharpe（为什么"预测正确"≠"赚钱"）★★</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>11.1 核心 framing：你赚的是"概率差"，不是"猜对涨跌"</h3>
+      <p>假设你模型说 P(up)=0.56，Polymarket YES 价 = 0.47。你的<strong>名义 edge = 0.56 − 0.47 = 0.09（9 个点）</strong>。但这 9 个点要先扛过：</p>
+      <ul>
+        <li><strong>taker 费 1.8%</strong>（≈ 0.018 的成本）<sup class="cite" data-refid="8">[8]</sup></li>
+        <li><strong>bid-ask spread</strong>（你买 YES 实际成交可能在 0.49 而非 0.47）</li>
+        <li><strong>你自己的概率估计误差</strong>（你的 0.56 真的准吗？校准不好的话 0.56 可能实际是 0.50）</li>
+      </ul>
+      <p>真实 edge = 名义 edge − 费 − 滑点 − 估计误差。<strong>9 个点听起来很多，扣完可能只剩 2–3 个点甚至为负。</strong></p>
+
+      <h3>11.2 期望值（EV）公式</h3>
+      <pre><code># 买 YES @ price m, 你的真实上涨概率 p
+# 赢: 拿回 $1, 净赚 (1 - m); 输: 损失 m
+EV_per_dollar = p * (1 - m) - (1 - p) * m - fee
+             = p - m - fee          # 化简
+
+# 例: p=0.56, m=0.47, fee=0.018
+EV = 0.56 - 0.47 - 0.018 = 0.072    # 每 $1 期望赚 7.2 分 (扣费前 9 分)
+# 但还没扣 spread/滑点/估计误差</code></pre>
+      <p>EV &gt; 0 才值得下注。注意 EV 对你的 p 估计极其敏感 —— p 估高 0.05 就可能把正 EV 变负 EV。</p>
+
+      <h3>11.3 Kelly Criterion — 下多少注（87% 亏钱的真正原因在这）</h3>
+      <p>Kelly 公式（1956 年 Bell Labs）算最大化长期资本增长率的最优下注比例<sup class="cite" data-refid="42">[42]</sup>。预测市场版本：买 YES @ 价 m，净赔率 b = (1−m)/m<sup class="cite" data-refid="42">[42]</sup>。</p>
+      <pre><code># Kelly fraction
+b = (1 - m) / m          # 净赔率
+f* = (b * p - (1 - p)) / b   # = p - (1-p)/b
+
+# 例: m=0.47, p=0.56 → b = 0.53/0.47 = 1.128
+f* = 0.56 - 0.44/1.128 = 0.56 - 0.39 = 0.17   # 满 Kelly 下 17%
+# 实战用 1/4 Kelly → 只下 ~4%</code></pre>
+      <div class="callout bad">
+        <p><strong>🔴 关键洞察 — 亏钱不是因为预测错，是下注规模错</strong>。分析 Kalshi 2021-2025 所有交易发现：<strong>亏钱的大多数不是更频繁地猜错结果，而是错在下注多少</strong><sup class="cite" data-refid="17">[17]</sup>。87% Polymarket 钱包亏钱<sup class="cite" data-refid="17">[17]</sup>，over-betting 是头号杀手。<strong>职业玩家只用满 Kelly 的 10–25%（fractional Kelly）</strong>，对冲估计误差、降低回撤<sup class="cite" data-refid="42">[42]</sup>。<strong>你必须用 1/4 Kelly 保命</strong>。</p>
+      </div>
+
+      <h3>11.4 Sharpe ratio — 单笔 edge 微小，靠次数累积</h3>
+      <p>单笔 EV 可能微到 +0.072%/笔，但叠 50 笔独立交易能把期望推到约 +3.6%<sup class="cite" data-refid="17">[17]</sup>。这意味着：<strong>策略靠的是大量小 edge 的统计累积，不是单笔暴富</strong>。而要让这个累积成立，你需要 (a) edge 真的为正（最难）、(b) 交易彼此尽量独立、(c) 严格风控不让单笔大亏毁掉全部累积。<strong>扣费后 Sharpe &lt; 1 直接放弃</strong><sup class="cite" data-refid="16">[16]</sup>。</p>
+
+      <h3>11.5 套利的另一面：纯无风险套利 vs 概率 edge</h3>
+      <ul>
+        <li><strong>纯套利（risk-free）</strong>：当 YES + NO &lt; 1（扣费后）时，同时买两边锁定无风险利润。41% 市场存在这种失衡<sup class="cite" data-refid="30">[30]</sup>，但<strong>这类机会被 bot 秒抢、且改制收费后大幅减少</strong>。</li>
+        <li><strong>概率 edge（本项目）</strong>：你认为市场定价错了，单边下注。<strong>有风险</strong>（你可能才是错的那个）。这正是为什么"预测正确 ≠ 赚钱" —— 你是在赌你的模型比市场共识更准，而市场共识里包含了和你用同样数据的 bot。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ CH12 AI+Quant 组合 ============ -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">AI + Quant 最佳组合（LLM + XGBoost vs End-to-end Transformer）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>12.1 两条路线</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>路线</th><th>怎么组合</th><th>优点</th><th>缺点</th><th>个人开发者</th></tr></thead>
+          <tbody>
+            <tr><td><strong>LLM + XGBoost（混合）</strong></td><td>LLM 做新闻理解/事件分类/feature 提取 → 转成标量特征 → XGBoost 做最终概率预测</td><td>各取所长：LLM 懂语义、XGBoost 懂结构化 + 快 + 可解释 + 不用 GPU</td><td>两套系统要维护；LLM 调用慢</td><td>🟢 <strong>推荐</strong></td></tr>
+            <tr><td><strong>End-to-end Transformer（LOB Transformer）</strong></td><td>直接把原始盘口序列喂 Transformer（DeepLOB / TLOB / LiT）预测方向<sup class="cite" data-refid="43">[43]</sup></td><td>自动学特征；SOTA 微观结构论文表现好<sup class="cite" data-refid="43">[43]</sup></td><td>要 GPU、数据量大、难解释、易过拟合、训练慢</td><td>🔴 不推荐 MVP</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>12.2 为什么个人 MVP 选 LLM+XGBoost 混合（且第一版连 LLM 都不要）</h3>
+      <ul>
+        <li><strong>XGBoost 对结构化微观结构特征是最佳工具</strong>：推理 5–19ms<sup class="cite" data-refid="5">[5]</sup>、不用 GPU、好调试、predict_proba 直接给概率。</li>
+        <li><strong>LLM 的角色是"特征提取器"不是"预测器"</strong>：让 GPT/Claude 把杂乱新闻 → 几个干净标量（情绪/事件类型/影响分），再喂 XGBoost。这是 2025 主流混合范式。</li>
+        <li><strong>End-to-end Transformer（DeepLOB/TLOB/LiT）确实在学术 benchmark 上强</strong><sup class="cite" data-refid="43">[43]</sup>，LiT 在分布漂移下还能 fine-tune 保持表现<sup class="cite" data-refid="43">[43]</sup> —— 但对个人开发者，<strong>GPU 成本 + 数据需求 + 过拟合风险 + 不可解释</strong>都让它不适合 MVP。等你用 XGBoost 证明了有 edge，再考虑升级。</li>
+      </ul>
+      <div class="callout good">
+        <p><strong>🟢 推荐组合（分阶段）</strong>：<strong>v1</strong> = 纯 LightGBM + 微观结构特征（不碰 LLM）。<strong>v2</strong> = 加 FinBERT/LLM 把新闻转标量特征拼进 XGBoost。<strong>v3</strong>（如果 v1/v2 真有 edge）= 试 LOB Transformer 做特征/ensemble。<strong>永远先让简单模型说话</strong>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH13 MVP ============ -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">MVP 设计 + 技术栈 + 数据流 + 部署（最重要）★★</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>13.1 第一版铁律：先不做新闻，只做行情 + Polymarket + XGBoost</h3>
+      <div class="callout accent">
+        <p><strong>为什么砍掉新闻？</strong>(1) 5m/15m 消息已被秒级 priced in，NLP 无用；(2) 砍掉新闻 = 砍掉一整个 NLP pipeline + API 成本 + 法律风险；(3) <strong>先验证最核心假设：你的微观结构模型概率 vs Polymarket 价格到底有没有 edge</strong>。把变量降到最少，才知道信号到底来自哪。<strong>能用 5 个 feature 验证的事，不要用 5000 个 feature 把自己绕晕。</strong></p>
+      </div>
+
+      <h3>13.2 MVP 技术栈（可执行清单，不是"用 XGBoost"这种废话）</h3>
+      <pre><code># 1. 环境
+python -m venv venv &amp;&amp; source venv/bin/activate
+pip install ccxt pandas numpy lightgbm scikit-learn \
+            websockets duckdb pyarrow fastapi uvicorn \
+            py-clob-client python-dotenv
+
+# 2. 数据采集（两个 WebSocket 同时跑）
+#   - Binance: wss 盘口depth + aggTrade + forceOrder
+#   - Polymarket: wss-subscriptions-clob.polymarket.com/ws/market
+#   落盘到 DuckDB / parquet（按窗口对齐时间戳）
+
+# 3. 特征（5 个核心，全是窗口开始前的数据）
+#   ob_imbalance / ofi / trade_flow_imbalance / funding / oi_change
+
+# 4. 标签：窗口结束 close >= 起始 close ? 1 : 0  (对齐 Polymarket 定义)
+
+# 5. 训练：LightGBM 二分类 + Purged K-Fold CV + isotonic 概率校准
+clf = lgb.LGBMClassifier(n_estimators=300, max_depth=5, ...)
+# CalibratedClassifierCV 做概率校准（关键！）
+
+# 6. 推理 + edge：predict_proba → 对比 Polymarket YES 价
+#    edge = p_model - price_yes - 0.018(fee) - spread估计
+#    EV>阈值 → 1/4 Kelly 仓位（纸上记录，先别下真单）
+
+# 7. paper trade 4 周，记录 edge 分布 + 扣费后累积 PnL</code></pre>
+
+      <h3>13.3 MVP 数据流详解</h3>
+      <div class="arch-flow">
+        <span class="arch-box">Binance WS<br>depth+trade+forceOrder</span><span class="arch-arrow">→</span>
+        <span class="arch-box">本地维护 orderbook<br>+ 滚动特征</span><span class="arch-arrow">→</span>
+        <span class="arch-box">DuckDB 落盘<br>(parquet)</span><span class="arch-arrow">→</span>
+        <span class="arch-box">LightGBM<br>predict_proba</span>
+      </div>
+      <div class="arch-flow">
+        <span class="arch-box">Polymarket WS<br>YES/NO 价格</span><span class="arch-arrow">→</span>
+        <span class="arch-box">edge = p − price − fee</span><span class="arch-arrow">→</span>
+        <span class="arch-box">EV/Kelly 决策</span><span class="arch-arrow">→</span>
+        <span class="arch-box">📝 paper trade 日志</span>
+      </div>
+
+      <h3>13.4 部署对比（成本 + 延迟）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>方案</th><th>月成本</th><th>到 Binance 延迟</th><th>适合</th></tr></thead>
+          <tbody>
+            <tr><td><strong>本地（自己电脑）</strong></td><td>🟢 $0</td><td>🔴 高(家宽到东京)</td><td>开发/回测/paper trade</td></tr>
+            <tr><td><strong>东京 VPS（小厂）</strong></td><td>🟢 $10–35<sup class="cite" data-refid="11">[11]</sup></td><td>🟢 单位数 ms<sup class="cite" data-refid="11">[11]</sup></td><td>🟢 <strong>MVP 实盘首选</strong></td></tr>
+            <tr><td><strong>Railway / Fly.io</strong></td><td>🟡 $5–20</td><td>🟡 看 region</td><td>易部署但难选到东京低延迟</td></tr>
+            <tr><td><strong>AWS ap-northeast-1（东京）</strong></td><td>🔴 c6i.2xlarge ~$280<sup class="cite" data-refid="11">[11]</sup></td><td>🟢 5–12ms（同 region 0.6ms）<sup class="cite" data-refid="11">[11]</sup></td><td>规模化/低延迟刚需</td></tr>
+            <tr><td><strong>RunPod</strong></td><td>🟡 按 GPU 时</td><td>—</td><td>只在训 Transformer 时租 GPU</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout good">
+        <p><strong>🟢 MVP 部署路线</strong>：开发 + paper trade 全在<strong>本地</strong>（$0）。要实盘了再上 <strong>$30/月 东京 VPS</strong>（贴近 Binance AWS ap-northeast-1，单位数毫秒延迟）<sup class="cite" data-refid="11">[11]</sup>。<strong>千万别一上来就开 $280/月 AWS</strong> —— 你连有没有 edge 都还不知道。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH14 真实难点 泼冷水 ============ -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">真实世界难点（critic 泼冷水章 🔴 个人成功率真相）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout bad">
+        <p><strong>🔴 本章存在的意义：不给虚假希望。</strong>前面讲了系统怎么搭、edge 怎么算 —— 那是"理论上"。这章讲"现实里为什么大概率赚不到钱"。<strong>读完这章你还想做，就为了学习和挑战去做，而不是为了赚钱。</strong></p>
+      </div>
+
+      <h3>14.1 八条会杀死你策略的现实</h3>
+
+      <div class="callout bad">
+        <p><strong>🔴 #1 — 84% 的人亏钱，profit 被 bot 垄断</strong></p>
+        <p>Dune：约 84% Polymarket 钱包净亏，盈利大头被少数自动化 bot 拿走，散户整体亏 1.31 亿美元<sup class="cite" data-refid="1">[1]</sup>。只有 0.033%（~840 地址）赚过 10 万美元以上<sup class="cite" data-refid="1">[1]</sup>。WSJ 分析也称 70%+ 用户亏钱<sup class="cite" data-refid="44">[44]</sup>。<strong>你要打败的不是"市场"，是已经在那里、比你延迟低、资金厚的职业 bot。</strong></p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>🔴 #2 — 交易成本吞掉 edge（改制后更狠）</strong></p>
+        <p>Polymarket 2025 改制，crypto taker 费 1.80%<sup class="cite" data-refid="8">[8]</sup>。这意味着你每次吃单先亏 1.8 个点 —— 大部分散户能算出来的 edge 还没这么大。<strong>2024 年套利者赚的 4000 万<sup class="cite" data-refid="30">[30]</sup> 是零费时代的事，现在那个窗口大幅收窄了。</strong>平台看谁赚钱就改规则，这是 adaptive system。</p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>🔴 #3 — 回测假赚钱（前面整章讲过）</strong></p>
+        <p>data leakage / lookahead / 过拟合让你的回测收益是幻觉<sup class="cite" data-refid="38">[38]</sup><sup class="cite" data-refid="39">[39]</sup>。一个回测 20% 的策略上线变 -1% 是常态<sup class="cite" data-refid="38">[38]</sup>。<strong>你 99% 会先经历"回测很美 → 实盘打脸"。</strong></p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>🔴 #4 — Regime change / 非平稳 / alpha decay</strong></p>
+        <p>金融市场非平稳，单个 alpha 的有效性随时间剧烈变化<sup class="cite" data-refid="20">[20]</sup>。你今天找到的信号，明天可能就失效（alpha decay）。市场是<strong>对抗性系统：参与者主动寻找并交易掉可预测的模式</strong><sup class="cite" data-refid="20">[20]</sup>。你的模型必须不断重训追 regime，但追得越紧越容易过拟合到噪音。</p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>🔴 #5 — 延迟（你打不过 HFT）</strong></p>
+        <p>微观结构信号几十秒内最强<sup class="cite" data-refid="13">[13]</sup>，5m 市场是低延迟 bot 的主场<sup class="cite" data-refid="19">[19]</sup>。你家宽到东京几十毫秒、特征计算几毫秒、Polymarket 撮合延迟 —— 等你下单，盘口失衡的 alpha 早被吃掉了。<strong>这是为什么个人更该做 15m/1h 而非 5m。</strong></p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>🔴 #6 — 流动性 + 滑点（小市场是陷阱）</strong></p>
+        <p>Polymarket 市场<strong>过 10 万美元成交量才可靠定价，低于此严重错误定价</strong><sup class="cite" data-refid="29">[29]</sup>。5m BTC 单窗口流动性可能很薄 —— 你看到的"edge"可能只是没人挂单的假象，真要下注就把价格推走了（滑点），实际成交远差于你看到的价。</p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>🔴 #7 — 新闻已 priced in + API 不稳定</strong></p>
+        <p>NLP 的根本无力：能动价的消息在你抓到前已反映在价格里。加上交易所/Polymarket API 偶发宕机、WebSocket 断连、限频封 IP（429/418）<sup class="cite" data-refid="27">[27]</sup> —— 实盘里这些"工程意外"会在最关键时刻坑你。</p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>🔴 #8 — 有时 buy-and-hold 就赢了</strong></p>
+        <p>有研究直接发现：<strong>简单 buy-and-hold 优于机器学习模型</strong>，预测模型还不能可靠用于算法交易<sup class="cite" data-refid="2">[2]</sup>。短线 ML 能稳定超过 50% 随机基线，但幅度小<sup class="cite" data-refid="2">[2]</sup> —— 这点小 edge 很容易被成本和执行误差抹平。<strong>你花几个月搭的系统，可能跑不赢"啥也不做拿着 BTC"。</strong></p>
+      </div>
+
+      <h3>14.2 诚实的成功率判断（无来源·基于行业体感的估算 ⚠️）</h3>
+      <div class="callout warn">
+        <p>⚠️ <strong>以下是估算/行业体感，非精确数据</strong>：个人开发者从零做这个系统，<strong>能稳定（连续 6+ 个月扣费后正收益）盈利的概率，我的诚实估计是个位数百分比（&lt;5%）</strong>。而且这极少数成功者，往往是 (a) 有量化/工程背景、(b) 愿意做 15m/1h 而非硬刚 5m、(c) 找到了别人没在用的另类数据或更低延迟、(d) 极度严格的风控和概率校准。<strong>对大多数人，结果是：学到很多、亏一点钱（如果上真钱）、几个月后放弃。</strong>这和 84% 钱包亏钱的链上事实是一致的<sup class="cite" data-refid="1">[1]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH15 高级方向 ============ -->
+  <section class="chapter" id="ch15">
+    <h2><span class="num">15</span><span class="title-text">高级方向（未来升级，证明有 edge 之后再碰）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout warn">
+        <p><strong>⚠️ 先警告</strong>：本章全是"v3+ 才考虑"的东西。<strong>在 v1 还没证明有 edge 之前碰这些 = 用复杂度逃避"我到底有没有 alpha"这个根本问题</strong>。复杂模型不会凭空创造 alpha。</p>
+      </div>
+
+      <h3>15.1 七个方向</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>方向</th><th>是什么</th><th>成熟度 / 现实</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Multi-agent LLM quant</strong></td><td>多个 LLM agent 分工（基本面/情绪/新闻/技术/风控）协作决策，如 TradingAgents（59.9k star）<sup class="cite" data-refid="45">[45]</sup></td><td>🟡 热但多为研究/股票，crypto 短线实战未证</td></tr>
+            <tr><td><strong>AI trading agent（自治）</strong></td><td>端到端自治交易 agent</td><td>🔴 噱头多于实效，慎用真钱</td></tr>
+            <tr><td><strong>Autonomous research agent</strong></td><td>自动找 feature / 测策略的 agent</td><td>🟡 辅助研究有用，别让它直接管钱</td></tr>
+            <tr><td><strong>Multi-model ensemble</strong></td><td>XGBoost + LGBM + NN 投票/stacking</td><td>🟢 务实·常带稳定提升</td></tr>
+            <tr><td><strong>RL trading</strong></td><td>强化学习直接学交易策略</td><td>🔴 sample efficiency 差、sim-to-real gap 大、多停留仿真<sup class="cite" data-refid="21">[21]</sup></td></tr>
+            <tr><td><strong>GNN / order flow transformer</strong></td><td>图神经网络建模交易网络 / LOB Transformer（DeepLOB/TLOB/LiT）<sup class="cite" data-refid="43">[43]</sup><sup class="cite" data-refid="46">[46]</sup></td><td>🟡 SOTA 学术·需 GPU + 大数据 + 防过拟合</td></tr>
+            <tr><td><strong>Multi-modal finance AI</strong></td><td>价格 + 新闻 + 链上 + 社交多模态融合</td><td>🟡 前沿·工程量巨大</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>15.2 最务实的"高级"升级</h3>
+      <p>如果 v1 真的跑出了稳定正 edge，<strong>最该先做的不是 RL/GNN，是这三件低风险高回报的事</strong>：(1) <strong>multi-model ensemble</strong>（XGBoost + LightGBM stacking，稳定提升）；(2) 更好的<strong>概率校准</strong>（isotonic/Platt，直接提升 edge 估计质量）；(3) 加<strong>另类数据</strong>（链上大额转账、稳定币流向 —— 别人没在用的数据才是真 alpha 来源）。RL / GNN / Transformer 放到最后，因为它们<strong>增加复杂度远多于增加 edge</strong>。</p>
+    </div>
+  </section>
+
+  <!-- ============ CH16 最终建议 ============ -->
+  <section class="chapter" id="ch16">
+    <h2><span class="num">16</span><span class="title-text">最终理性建议（个人开发者视角）★</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>16.1 决策树：阿杰该不该做、怎么做</h3>
+      <pre><code>你做这个的目的是什么？
+├─ 「学微观结构 + 概率校准 + 生产级 ML 工程」
+│    → 🟢 强烈推荐做。这是顶级学习项目，价值远超大部分教程。
+│       走 v1 极简路线，paper trade 为主，别上太多真钱。
+│
+├─ 「想稳定赚钱 / 当被动收入」
+│    → 🔴 别抱这个期望。84% 亏钱、bot 垄断 profit、1.8% 费吞 edge。
+│       真要试，先 paper trade 验证 3-6 个月再说。
+│
+└─ 「想做成产品卖给别人」
+     → 🔴🔴 极不推荐。卖"能赚钱的交易系统"= 大概率割韭菜或踩监管红线。
+        若做工具类（数据/回测/edge 可视化）尚可，但别承诺收益。</code></pre>
+
+      <h3>16.2 四个核心问题的直接回答</h3>
+      <div class="callout accent">
+        <p><strong>❓是否可行？</strong> <strong>工程上 100% 可行</strong>（免费数据 + 成熟开源栈，一人可搭）。<strong>盈利上极难</strong>（&lt;5% 个人能稳定盈利 ⚠️估算）。两者要分开看。</p>
+      </div>
+      <div class="callout warn">
+        <p><strong>❓最难是什么？</strong> 不是搭系统，是 <strong>(1) 真的有正 edge（扣完 1.8% 费 + 滑点后）</strong>，<strong>(2) 不被自己的回测骗（防 data leakage / 过拟合）</strong>，<strong>(3) 概率校准准</strong>（不准则 edge 全是假的）。</p>
+      </div>
+      <div class="callout good">
+        <p><strong>❓最该先做什么？</strong> <strong>fork freqtrade + FreqAI<sup class="cite" data-refid="7">[7]</sup> → 只接 Binance BTC WebSocket → 5 个微观结构 feature → LightGBM 二分类 + 概率校准 → 拿 Polymarket 历史价格 paper trade 4 周</strong>，看扣费后 edge 分布。不花钱、不冒险，回答 90% 的问题。</p>
+      </div>
+      <div class="callout bad">
+        <p><strong>❓哪步最容易失败？</strong> <strong>"回测很美→实盘打脸"</strong>这一步几乎必然发生（data leakage / 过拟合 / 没扣真实成本）<sup class="cite" data-refid="38">[38]</sup>。第二容易失败的是 <strong>over-betting</strong>（Kelly 下太重，一次大亏归零）<sup class="cite" data-refid="17">[17]</sup>。第三是 <strong>5m 硬刚 HFT</strong>（延迟打不过，改 15m/1h）。</p>
+      </div>
+
+      <h3>16.3 第一版最推荐怎么做（一句话）</h3>
+      <div class="callout info">
+        <p><strong>15m 窗口（不是 5m）+ Binance 单源 + 5 个微观结构 feature + LightGBM 二分类 + isotonic 概率校准 + Purged K-Fold 防泄漏 + 拿 Polymarket 历史价 paper trade，把"扣 1.8% 费后是否还有正 EV"作为 go/no-go 唯一标准。</strong>有 → 小钱实盘 + 1/4 Kelly；没有 → 当成一次顶级的微观结构 + ML 工程学习，收手，不亏钱。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH17 mini demo ============ -->
+  <section class="chapter" id="ch17">
+    <h2><span class="num">17</span><span class="title-text">mini demo — 可玩「Edge 计算器」（模型概率 + Polymarket 价 → EV + Kelly）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>拖动滑块感受 <strong>edge → EV → Kelly 仓位</strong>的关系。注意 taker 费和滑点怎么吞掉你的 edge，以及为什么"看起来正确"不等于"该重仓"。</p>
+      <div class="demo-host">
+        <h4>⚙️ Polymarket Edge 计算器</h4>
+        <div class="demo-row">
+          <div class="demo-field">
+            <label>你的模型概率 P(up)：<span class="val" id="vP">0.56</span></label>
+            <input type="range" id="inP" min="0.30" max="0.80" step="0.01" value="0.56">
+          </div>
+        </div>
+        <div class="demo-row">
+          <div class="demo-field">
+            <label>Polymarket YES 价格：<span class="val" id="vM">0.47</span></label>
+            <input type="range" id="inM" min="0.20" max="0.80" step="0.01" value="0.47">
+          </div>
+        </div>
+        <div class="demo-row">
+          <div class="demo-field">
+            <label>Taker 费（crypto 默认 1.8%）：<span class="val" id="vF">1.8</span>%</label>
+            <input type="range" id="inF" min="0" max="3" step="0.1" value="1.8">
+          </div>
+          <div class="demo-field">
+            <label>滑点 + spread 估计：<span class="val" id="vS">1.0</span>%</label>
+            <input type="range" id="inS" min="0" max="4" step="0.1" value="1.0">
+          </div>
+        </div>
+        <div class="demo-row">
+          <div class="demo-field">
+            <label>Kelly 分数：<span class="val" id="vK">0.25</span> (1/4 Kelly)</label>
+            <input type="range" id="inK" min="0.1" max="1" step="0.05" value="0.25">
+          </div>
+        </div>
+        <div class="demo-output" id="demoOut"></div>
+      </div>
+      <div class="callout warn">
+        <p>⚠️ <strong>仅教学演示</strong>。真实里你的 P(up) 估计本身有误差（校准不准就全错），且不能假设交易彼此独立。本计算器帮你建立"edge 必须够大才扛得住成本"的直觉，<strong>不构成任何投资建议</strong>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH18 资源 ============ -->
+  <section class="chapter" id="ch18">
+    <h2><span class="num">18</span><span class="title-text">推荐资源（GitHub repo / API / 学术 / 量化案例）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>18.1 GitHub 开源 repo（带 star 数）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>repo</th><th>star</th><th>用途</th><th>对本项目</th></tr></thead>
+          <tbody>
+            <tr><td><strong>freqtrade/freqtrade</strong></td><td>25k+<sup class="cite" data-refid="7">[7]</sup></td><td>Python 交易框架 + FreqAI（XGBoost/LightGBM）</td><td>🟢 MVP 骨架首选</td></tr>
+            <tr><td><strong>ccxt/ccxt</strong></td><td>41.9k<sup class="cite" data-refid="6">[6]</sup></td><td>108 交易所统一 API</td><td>🟢 数据采集必备</td></tr>
+            <tr><td><strong>hummingbot/hummingbot</strong></td><td>6k+<sup class="cite" data-refid="47">[47]</sup></td><td>做市 / 跨所套利</td><td>🟡 做市方向参考</td></tr>
+            <tr><td><strong>jesse-trade/jesse</strong></td><td>5k+<sup class="cite" data-refid="41">[41]</sup></td><td>零前视偏差回测<sup class="cite" data-refid="41">[41]</sup></td><td>🟢 诚实回测引擎</td></tr>
+            <tr><td><strong>Polymarket/py-clob-client</strong></td><td>官方</td><td>Polymarket CLOB Python 客户端<sup class="cite" data-refid="10">[10]</sup></td><td>🟢 Polymarket 交互必备</td></tr>
+            <tr><td><strong>TauricResearch/TradingAgents</strong></td><td>59.9k<sup class="cite" data-refid="45">[45]</sup></td><td>多 agent LLM 交易框架<sup class="cite" data-refid="45">[45]</sup></td><td>🟡 高级方向参考</td></tr>
+            <tr><td><strong>hftbacktest</strong></td><td>—</td><td>HFT 级盘口回测 + 做市 alpha 教程<sup class="cite" data-refid="48">[48]</sup></td><td>🟡 微观结构进阶</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>18.2 API / 数据源</h3>
+      <ul>
+        <li><strong>Binance Futures API</strong>（盘口/成交/funding/OI/liquidation）<sup class="cite" data-refid="3">[3]</sup><sup class="cite" data-refid="24">[24]</sup></li>
+        <li><strong>Polymarket Gamma + CLOB API + WS</strong>（YES/NO 价格/盘口，免认证读）<sup class="cite" data-refid="4">[4]</sup><sup class="cite" data-refid="9">[9]</sup></li>
+        <li><strong>CryptoPanic API</strong>（免费档新闻 + 影响标注）<sup class="cite" data-refid="32">[32]</sup>、<strong>LunarCrush</strong>（社交情绪）<sup class="cite" data-refid="32">[32]</sup></li>
+      </ul>
+
+      <h3>18.3 学术 paper（真正该读的）</h3>
+      <ul>
+        <li><strong>Cont, Kukanov, Stoikov (2014)</strong> "The Price Impact of Order Book Events" —— OFI 与价格变动线性关系，微观结构圣经<sup class="cite" data-refid="12">[12]</sup></li>
+        <li><strong>López de Prado</strong> 《Advances in Financial Machine Learning》—— Purged CV / 防泄漏 / 10 大 ML 基金失败原因<sup class="cite" data-refid="33">[33]</sup></li>
+        <li><strong>Zhang et al.</strong> DeepLOB / TLOB / LiT —— LOB 深度学习预测<sup class="cite" data-refid="43">[43]</sup><sup class="cite" data-refid="46">[46]</sup></li>
+        <li><strong>"Unravelling the Probabilistic Forest"（2025）</strong> —— Polymarket 套利实证<sup class="cite" data-refid="30">[30]</sup></li>
+        <li><strong>"Better Inputs Matter More Than Stacking Another Hidden Layer"（2025）</strong> —— 微观结构 feature &gt; 模型深度<sup class="cite" data-refid="14">[14]</sup></li>
+      </ul>
+
+      <h3>18.4 真实量化案例 / 数据</h3>
+      <ul>
+        <li><strong>Polymarket Dune 看板</strong>（钱包盈亏分布、bot 垄断 profit 的实证）<sup class="cite" data-refid="1">[1]</sup></li>
+        <li><strong>QuantPedia</strong> 预测市场系统性 edge 研究<sup class="cite" data-refid="19">[19]</sup></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ CH19 FAQ ============ -->
+  <section class="chapter" id="ch19">
+    <h2><span class="num">19</span><span class="title-text">FAQ（12 条）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">为什么用 XGBoost 而不是 LSTM / Transformer 预测币价？</span><span class="toggle">+</span></div><div class="faq-a">因为这不是"预测价格数值"任务，是"预测涨跌概率"的二分类任务。XGBoost/LightGBM 对结构化表格特征（微观结构 feature）最优、推理 5–19ms<sup class="cite" data-refid="5">[5]</sup>、不用 GPU、好解释、predict_proba 直接给概率。LSTM 适合需要精确幅度的场景、Transformer（DeepLOB）需 GPU + 大数据 + 易过拟合<sup class="cite" data-refid="43">[43]</sup>，都不适合个人 MVP。</div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">"预测正确"和"赚钱"到底差在哪？</span><span class="toggle">+</span></div><div class="faq-a">你猜对涨跌方向 ≠ 赚钱。你赚的是"你的概率估计比市场（Polymarket 价格）更准"的那部分 edge，且要扣掉 1.8% taker 费<sup class="cite" data-refid="8">[8]</sup> + 滑点 + 你自己的估计误差。名义 edge 9 个点，扣完可能只剩 2–3 点甚至为负。而且 87% 钱包亏钱的真正原因是 over-betting（下注规模错），不是预测错<sup class="cite" data-refid="17">[17]</sup>。</div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">为什么短线（5m）反而比长线（天/周）可预测？</span><span class="toggle">+</span></div><div class="faq-a">长线由宏观/情绪/新闻主导，接近随机游走、不可预测；短线由订单流动力学主导，OFI 与短期价格变动近似线性<sup class="cite" data-refid="12">[12]</sup>，盘口失衡有可测量的物理因果。但短线信号几十秒就衰减<sup class="cite" data-refid="13">[13]</sup>，对延迟要求高，5m 是 HFT 主场，个人更适合 15m/1h。</div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">第一版为什么不做新闻/NLP？</span><span class="toggle">+</span></div><div class="faq-a">5m/15m 内能动价的消息在你 NLP pipeline 跑完前早被秒级 priced in 了。砍掉新闻 = 砍掉一整套 NLP + API 成本（X API 2026 改 pay-per-use<sup class="cite" data-refid="31">[31]</sup>）+ 法律风险，且能聚焦验证最核心假设：微观结构模型 vs Polymarket 价到底有没有 edge。新闻是第二版的 regime 风险开关，不是短线方向信号。</div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">哪个 feature 最重要？</span><span class="toggle">+</span></div><div class="faq-a">微观结构 feature 远胜技术指标。Top 3：OFI（订单流失衡，与价格近似线性<sup class="cite" data-refid="12">[12]</sup>）、order book imbalance（盘口失衡）、trade flow imbalance（成交流不平衡）<sup class="cite" data-refid="26">[26]</sup>。加上 liquidation/funding/OI 做衍生品信号<sup class="cite" data-refid="22">[22]</sup>。RSI/MACD 只当 regime 上下文，单独几乎无 alpha<sup class="cite" data-refid="15">[15]</sup>。</div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">MVP 要不要上 Kafka / TimescaleDB / ClickHouse？</span><span class="toggle">+</span></div><div class="faq-a">不要。个人单策略 MVP 用 asyncio + DuckDB/parquet 就够。Kafka/Redis/TimescaleDB 是给"已验证有 alpha、要 scale 多策略"的阶段<sup class="cite" data-refid="36">[36]</sup>。过早上重型基础设施是用工程复杂度逃避"我有没有 edge"这个根本问题。</div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">XGBoost 能在线训练吗？</span><span class="toggle">+</span></div><div class="faq-a">能增量训练（在已有树上加新树）应对非平稳<sup class="cite" data-refid="37">[37]</sup>，但不是真 online learning。更稳的是 walk-forward rolling retraining（定期用最新窗口重训整模型）<sup class="cite" data-refid="37">[37]</sup>。FreqAI 内置 self-adaptive retraining，独立线程重训不阻塞推理<sup class="cite" data-refid="7">[7]</sup>。别追求秒级在线更新（过拟合 + 复杂度爆炸）。</div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">为什么金融 AI 容易"假赚钱"？</span><span class="toggle">+</span></div><div class="faq-a">回测里的 data leakage / lookahead bias / 过拟合 / 没扣真实成本，让收益是幻觉<sup class="cite" data-refid="39">[39]</sup><sup class="cite" data-refid="38">[38]</sup>。López de Prado：大多数金融 ML 失败来自烂数据和烂测试，不是烂模型<sup class="cite" data-refid="33">[33]</sup>。解法：Purged K-Fold CV + Embargo + walk-forward OOS + 回测必须扣 1.8% 费和滑点<sup class="cite" data-refid="16">[16]</sup>。</div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Polymarket 数据要付费吗？要钱包吗？</span><span class="toggle">+</span></div><div class="faq-a">读数据完全免费、无需 API key、无需钱包 —— Gamma API（市场/价格）和 CLOB API（盘口/midpoint/spread）都公开<sup class="cite" data-refid="4">[4]</sup>，还有免认证的 WebSocket 市场频道<sup class="cite" data-refid="9">[9]</sup>。只有真要下单（用真钱 USDC）才需要 Polygon 钱包 + 签名。</div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Kelly 公式怎么用？为什么用 1/4 Kelly？</span><span class="toggle">+</span></div><div class="faq-a">买 YES @ 价 m，净赔率 b=(1−m)/m，满 Kelly f*=p−(1−p)/b<sup class="cite" data-refid="42">[42]</sup>。但满 Kelly 假设你概率估计完美，现实里估计有误差，所以职业玩家只用 10–25%（fractional Kelly）对冲误差、降回撤<sup class="cite" data-refid="42">[42]</sup>。over-betting 是 87% 钱包亏钱的头号原因<sup class="cite" data-refid="17">[17]</sup>，1/4 Kelly 是保命底线。</div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">个人做这个成功率到底多高？</span><span class="toggle">+</span></div><div class="faq-a">链上事实：约 84% Polymarket 钱包亏钱、profit 被少数 bot 垄断、0.033% 赚过 10 万美元以上<sup class="cite" data-refid="1">[1]</sup>。⚠️估算：个人从零做这个系统能稳定（6+ 月扣费后正收益）盈利的概率，诚实估计 &lt;5%。把它当学习项目（学微观结构 + 概率校准 + 生产级 ML）价值巨大；当赚钱机器大概率失望。</div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">该从哪个 GitHub repo 开始？</span><span class="toggle">+</span></div><div class="faq-a">fork <strong>freqtrade</strong>（25k+ star，自带 FreqAI 跑 XGBoost/LightGBM<sup class="cite" data-refid="7">[7]</sup>）当骨架 + 用 <strong>ccxt</strong>（41.9k star<sup class="cite" data-refid="6">[6]</sup>）接 Binance + 用 <strong>py-clob-client</strong><sup class="cite" data-refid="10">[10]</sup> 接 Polymarket。回测想要零前视偏差用 <strong>Jesse</strong><sup class="cite" data-refid="41">[41]</sup>。先 paper trade 4 周看扣费后 edge，再决定要不要上真钱。</div></div>
+    </div>
+  </section>
+
+  <!-- ============ CH20 References ============ -->
+  <section class="chapter" id="ch20">
+    <h2><span class="num">20</span><span class="title-text">References</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://www.fa-mag.com/news/most-prediction-market-traders-are-losing-money-while-bots-rack-up-gains-86783.html" target="_blank" rel="noopener">Most Prediction Market Traders Are Losing Money While Bots Rack Up Gains (Dune 数据：~84% 钱包亏损 / bot 垄断 profit / 0.033% 赚 10 万+)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-2"><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12571449/" target="_blank" rel="noopener">Evaluating machine learning models for predictive accuracy in cryptocurrency price forecasting (50% 随机基线 / 有时 buy-and-hold 优于 ML)</a><span class="ref-meta">· 访问 2026-05-28</span></li>
+        <li id="ref-3"><a href="https://developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Liquidation-Order-Streams" target="_blank" rel="noopener">Binance — Liquidation Order Streams / WebSocket Market Data (forceOrder 流)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-4"><a href="https://docs.polymarket.com/market-data/overview" target="_blank" rel="noopener">Polymarket Documentation — Market Data Overview (Gamma/CLOB API 端点 / 免认证 / 价格=隐含概率)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-5"><a href="https://markaicode.com/vs/lightgbm-vs-xgboost/" target="_blank" rel="noopener">LightGBM vs XGBoost 2025 Benchmarks (推理 5–19ms / 训练 3–10× / 省 30% 内存)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-6"><a href="https://github.com/ccxt/ccxt" target="_blank" rel="noopener">ccxt/ccxt — A cryptocurrency trading API with 100+ exchanges (41.9k star)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-7"><a href="https://www.freqtrade.io/en/stable/freqai/" target="_blank" rel="noopener">Freqtrade — FreqAI 机器学习集成 (XGBoost/LightGBM / 1 万+ feature / self-adaptive retraining)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-8"><a href="https://docs.polymarket.com/trading/fees" target="_blank" rel="noopener">Polymarket Fees (2025 改制：概率动态费 / crypto taker 1.80% / maker 免费 / 存提免费)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-9"><a href="https://agentbets.ai/guides/polymarket-api-guide/" target="_blank" rel="noopener">Polymarket API Tutorial: Python Authentication, Orders &amp; WebSocket Streaming (ws-subscriptions-clob 市场频道事件类型)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-10"><a href="https://github.com/Polymarket/py-clob-client" target="_blank" rel="noopener">Polymarket/py-clob-client — 官方 Python CLOB 客户端</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-11"><a href="https://medium.com/@laostjen/high-frequency-trading-in-crypto-latency-infrastructure-and-reality-594e994132fd" target="_blank" rel="noopener">High-Frequency Trading in Crypto: Latency, Infrastructure, and Reality (东京 VPS 0.6ms / AWS ap-northeast-1 c6i.2xlarge $280)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-12"><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1712822" target="_blank" rel="noopener">Cont, Kukanov, Stoikov (2014) — The Price Impact of Order Book Events (OFI 与价格变动近似线性 / J. Financial Econometrics 12(1))</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-13"><a href="https://sifx.com/order-book-imbalance/" target="_blank" rel="noopener">Order Book Imbalance &amp; Short-Term Price Pressure (累积深度失衡先于中间价 / VAMP / 隐藏单局限 / 信号几十秒最强)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-14"><a href="https://arxiv.org/html/2506.05764v2" target="_blank" rel="noopener">Exploring Microstructural Dynamics in Crypto LOB: Better Inputs Matter More Than Stacking Another Hidden Layer (2025)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-15"><a href="https://web3.gate.com/crypto-wiki/article/how-to-use-macd-rsi-and-bollinger-bands-for-crypto-trading-success-a-complete-technical-indicators-guide-20260126" target="_blank" rel="noopener">技术指标指南 (MACD/RSI/Bollinger 组合 ~85% 信号一致 / RSI 强趋势钝化 / MACD 横盘假信号)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-16"><a href="https://www.quantstart.com/articles/Sharpe-Ratio-for-Algorithmic-Trading-Performance-Measurement/" target="_blank" rel="noopener">QuantStart — Sharpe Ratio for Algorithmic Trading (扣费后 Sharpe&lt;1 直接弃用)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-17"><a href="https://www.crypticorn.com/position-sizing-on-polymarket-and-kalshi-crypto-up-down-predictions/" target="_blank" rel="noopener">Position Sizing on Polymarket and Kalshi (87% 钱包亏 / 亏在下注规模非预测 / 单笔 +0.072% 叠 50 笔)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-18"><a href="https://coinmarketcap.com/academy/article/polymarket-debuts-5-minute-bitcoin-prediction-markets-with-instant-settlement" target="_blank" rel="noopener">Polymarket Debuts 5-Minute Bitcoin Prediction Markets With Instant Settlement (Chainlink 高频预言机 / up=结束价≥起始价 / 即时结算)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-19"><a href="https://www.quantvps.com/blog/polymarket-hft-traders-use-ai-arbitrage-mispricing" target="_blank" rel="noopener">Polymarket HFT: How Traders Use AI to Identify Arbitrage and Mispricing (HFT bot 实时扫市场)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-20"><a href="https://arxiv.org/html/2509.01393v1" target="_blank" rel="noopener">Adaptive Alpha Weighting with PPO (市场非平稳 / alpha decay / 对抗性系统)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-21"><a href="https://arxiv.org/html/2603.29086" target="_blank" rel="noopener">Realistic Market Impact Modeling for RL Trading Environments (sim-to-real gap / 固定 10bps 假设致回测虚高 / 多停留仿真)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-22"><a href="https://dex.gate.com/crypto-wiki/article/what-are-crypto-derivatives-market-signals-how-futures-open-interest-funding-rates-and-liquidation-data-predict-market-movements-20260204" target="_blank" rel="noopener">Crypto Derivatives Signals: OI / Funding / Liquidation (funding&gt;0.05%/h 预警 / 清算级联 5–15% 急动 / 大户背离)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-23"><a href="https://dl.acm.org/doi/fullHtml/10.1145/3605423.3605462" target="_blank" rel="noopener">XGBoost for Classifying Ethereum Short-term Return (Down/Sideway/Up 三分类 / ROC-AUC 0.66)</a><span class="ref-meta">· 访问 2026-05-28</span></li>
+        <li id="ref-24"><a href="https://developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Get-Funding-Rate-History" target="_blank" rel="noopener">Binance — Funding Rate / Open Interest REST (无 WS 实时流，需轮询)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-25"><a href="https://coinmarketman.com/blog/hyperliquid-data-providers-compared/" target="_blank" rel="noopener">Hyperliquid Data Providers Compared (L2/L4 盘口流 / 免费 vs 付费 $300+)</a><span class="ref-meta">· 访问 2026-05-28</span></li>
+        <li id="ref-26"><a href="https://arxiv.org/html/2602.00776v1" target="_blank" rel="noopener">Explainable Patterns in Cryptocurrency Microstructure (盘口+成交流预测重要性相近 / 跨市值稳定)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-27"><a href="https://developers.binance.com/docs/binance-spot-api-docs/rest-api/limits" target="_blank" rel="noopener">Binance — Rate Limits (现货 6000/分 / 合约 2400/分 / 单连接 1024 流 / 429→418 封 IP)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-28"><a href="https://www.quantvps.com/blog/polymarket-clob-central-limit-order-book" target="_blank" rel="noopener">What Is Polymarket's CLOB (CLOB vs AMM / off-chain 撮合 on-chain 结算 / Gnosis CTF ERC1155)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-29"><a href="https://www.tradetheoutcome.com/polymarket-accuracy-report-data/" target="_blank" rel="noopener">Polymarket Accuracy Report (原始准确率 67.2% vs PredictIt 93.1% / Kalshi 78.4% / 过 10 万美元才可靠定价)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-30"><a href="https://arxiv.org/abs/2508.03474" target="_blank" rel="noopener">Unravelling the Probabilistic Forest: Arbitrage in Prediction Markets (2025) (41% 市场套利 / 中位错定价 $0.60 / 2024-25 套利者赚 ~4000 万)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-31"><a href="https://www.xpoz.ai/blog/guides/understanding-twitter-api-pricing-tiers-and-alternatives/" target="_blank" rel="noopener">Twitter/X API Pricing 2026 (改 pay-per-use $0.005/读·封顶 200 万 / 旧 Basic $200·Pro $5000 仅老用户 / Enterprise $42K 起)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-32"><a href="https://cryptopanic.com/developers/api/plans" target="_blank" rel="noopener">CryptoPanic API Plans (免费档 / 影响标注) + LunarCrush 社交情绪 API</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-33"><a href="https://www.garp.org/hubfs/Whitepapers/a1Z1W0000054x6lUAA.pdf" target="_blank" rel="noopener">López de Prado — The 10 Reasons Most Machine Learning Funds Fail (烂数据/烂测试&gt;烂模型)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-34"><a href="https://www.mdpi.com/2504-2289/8/6/63" target="_blank" rel="noopener">LLMs and NLP Models in Cryptocurrency Sentiment Analysis (FinBERT/RoBERTa 结构化分类 vs GPT 实时解读 / 微调 FinBERT +5%)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-35"><a href="https://arxiv.org/pdf/2412.19245" target="_blank" rel="noopener">Sentiment Trading with Large Language Models (OPT 预测股市 74.4% / long-short Sharpe 3.05 — 股市日级学术)</a><span class="ref-meta">· 访问 2026-05-28</span></li>
+        <li id="ref-36"><a href="https://ashutoshkumars1ngh.medium.com/how-to-design-a-real-time-stock-trading-system-using-kafka-redis-and-timescaledb-2e64ccac64b3" target="_blank" rel="noopener">Real-Time Trading System with Kafka, Redis &amp; TimescaleDB (各组件角色 / Redis sub-100ms 扇出 / 时序落盘)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-37"><a href="https://blog.quantinsti.com/walk-forward-optimization-python-xgboost-stock-prediction/" target="_blank" rel="noopener">Walk-Forward Optimization with XGBoost (增量训练应对非平稳 / 滚动重训 / 模拟真实算法交易)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-38"><a href="https://blog.pickmytrade.trade/algorithmic-trading-overfitting-backtest-failure/" target="_blank" rel="noopener">Algorithmic Trading Overfitting: Why Backtests Fail in Live Markets (回测 20%→实盘 -1% / 胜率掉 14pt / Sortino +12.26→-0.42)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-39"><a href="https://en.wikipedia.org/wiki/Purged_cross-validation" target="_blank" rel="noopener">Purged Cross-Validation (López de Prado 2017 / purging + embargoing / 防 lookahead / survivorship bias)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-40"><a href="https://arxiv.org/pdf/2603.09219" target="_blank" rel="noopener">AlgoXpert Alpha Research Framework — Rigorous IS / WFA / OOS Protocol (减缓过拟合)</a><span class="ref-meta">· 访问 2026-05-28</span></li>
+        <li id="ref-41"><a href="https://jesse.trade/" target="_blank" rel="noopener">Jesse — 开源 Python 交易 bot (零前视偏差回测引擎)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-42"><a href="https://www.predictionhunt.com/blog/prediction-market-position-sizing-kelly-criterion" target="_blank" rel="noopener">Position Sizing in Prediction Markets: Kelly Criterion (b=(1−m)/m / fractional Kelly 10–25%)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-43"><a href="https://arxiv.org/html/2502.15757v1" target="_blank" rel="noopener">TLOB: Transformer with Dual Attention for Stock Price Trend Prediction with LOB Data + LiT (分布漂移下 fine-tune)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-44"><a href="https://beincrypto.com/prediction-market-polymarket-kalshi-users-losing-money-wsj/" target="_blank" rel="noopener">70% of Polymarket Users Lose Money, WSJ Analysis Shows</a><span class="ref-meta">· 访问 2026-05-28</span></li>
+        <li id="ref-45"><a href="https://github.com/TauricResearch/TradingAgents" target="_blank" rel="noopener">TauricResearch/TradingAgents — Multi-Agent LLM Financial Trading Framework (59.9k star / 7 角色)</a><span class="ref-meta">· 访问 2026-05-28 · 引用多次</span></li>
+        <li id="ref-46"><a href="https://arxiv.org/abs/2504.07923" target="_blank" rel="noopener">Trading Graph Neural Network (TGNN — 交易网络图建模资产价格)</a><span class="ref-meta">· 访问 2026-05-28</span></li>
+        <li id="ref-47"><a href="https://github.com/hummingbot/hummingbot" target="_blank" rel="noopener">hummingbot/hummingbot — 开源做市 / 跨所套利框架 (6k+ star)</a><span class="ref-meta">· 访问 2026-05-28</span></li>
+        <li id="ref-48"><a href="https://hftbacktest.readthedocs.io/en/latest/tutorials/Market%20Making%20with%20Alpha%20-%20Order%20Book%20Imbalance.html" target="_blank" rel="noopener">hftbacktest — Market Making with Alpha: Order Book Imbalance (HFT 级盘口回测教程)</a><span class="ref-meta">· 访问 2026-05-28</span></li>
+      </ol>
+    </div>
+  </section>
+
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+<footer>
+  <p>XGBoost + Polymarket BTC 短线方向预测系统深度工程研究 · L2 Deep Research + Critic 强化版 · 偏工程落地</p>
+  <p>整理：无忌 · 2026-05-28 · 半米研究中心第 21 份 · 数据来源见 References（Polymarket/Binance 官方文档 · arXiv · Dune · GitHub）</p>
+  <p>⚠️ 本报告为技术研究，不构成任何投资建议。84% Polymarket 钱包亏钱是链上事实，请理性评估风险。</p>
+</footer>
+
+<script>
+(function() {
+  // 主题切换
+  const root = document.body, toggle = document.getElementById('themeToggle');
+  const saved = localStorage.getItem('cpp-theme');
+  if (saved) root.setAttribute('data-theme', saved);
+  function setIcon() { toggle.textContent = root.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙'; }
+  setIcon();
+  toggle.addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next); localStorage.setItem('cpp-theme', next); setIcon();
+  });
+
+  // 进度条
+  const prog = document.getElementById('progress');
+  function updateProgress() {
+    const h = document.documentElement;
+    const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight);
+    prog.style.width = (scrolled * 100) + '%';
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+
+  // 章节折叠
+  document.querySelectorAll('section.chapter > h2').forEach(h2 => {
+    h2.addEventListener('click', () => h2.parentElement.classList.toggle('collapsed'));
+  });
+
+  // FAQ
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => q.parentElement.classList.toggle('open'));
+  });
+
+  // 锚点导航高亮 + 居中
+  const anchors = Array.from(document.querySelectorAll('.anchor-list a'));
+  const sections = anchors.map(a => document.getElementById(a.dataset.target)).filter(Boolean);
+  function onScroll() {
+    let active = sections[0];
+    const y = window.scrollY + 90;
+    for (const s of sections) { if (s.offsetTop <= y) active = s; }
+    anchors.forEach(a => {
+      const on = a.dataset.target === (active && active.id);
+      a.classList.toggle('active', on);
+      if (on) a.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // 回到顶部
+  const btt = document.getElementById('backToTop');
+  window.addEventListener('scroll', () => btt.classList.toggle('show', window.scrollY > 600), { passive: true });
+  btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  // 表格行高亮
+  document.querySelectorAll('tbody tr').forEach(tr => {
+    tr.addEventListener('click', () => tr.classList.toggle('row-active'));
+  });
+
+  // Edge 计算器 demo
+  const ids = ['inP','inM','inF','inS','inK'];
+  const out = document.getElementById('demoOut');
+  function fmt(x, d) { return (x).toFixed(d === undefined ? 2 : d); }
+  function calc() {
+    const p = parseFloat(document.getElementById('inP').value);
+    const m = parseFloat(document.getElementById('inM').value);
+    const fee = parseFloat(document.getElementById('inF').value) / 100;
+    const slip = parseFloat(document.getElementById('inS').value) / 100;
+    const kfrac = parseFloat(document.getElementById('inK').value);
+    document.getElementById('vP').textContent = fmt(p);
+    document.getElementById('vM').textContent = fmt(m);
+    document.getElementById('vF').textContent = fmt(fee*100, 1);
+    document.getElementById('vS').textContent = fmt(slip*100, 1);
+    document.getElementById('vK').textContent = fmt(kfrac);
+    const nominal = p - m;                       // 名义 edge
+    const ev = p - m - fee - slip;               // 扣费后 EV / $1
+    const b = (1 - m) / m;                        // 净赔率
+    const fullKelly = Math.max(0, p - (1 - p) / b);
+    const usedKelly = fullKelly * kfrac;
+    const verdictColor = ev > 0.02 ? 'var(--good)' : (ev > 0 ? 'var(--warn)' : 'var(--bad)');
+    const verdictText = ev > 0.02 ? '✅ 有 edge — 可考虑下注（小心估计误差）'
+                      : (ev > 0 ? '🟠 边际 edge — 大概率不值得（误差就吃光）'
+                      : '⛔ 负 EV — 不要下注（费用+滑点吃掉了 edge）');
+    out.innerHTML =
+      '<div class="demo-verdict" style="color:'+verdictColor+'">'+verdictText+'</div>' +
+      '<div class="metric-grid">' +
+        '<div class="metric"><div class="v">'+fmt(nominal*100,1)+'pt</div><div class="l">名义 edge (p − price)</div></div>' +
+        '<div class="metric"><div class="v" style="color:'+verdictColor+'">'+fmt(ev*100,1)+'%</div><div class="l">扣费后 EV / $1</div></div>' +
+        '<div class="metric"><div class="v">'+fmt(b,2)+'</div><div class="l">净赔率 b=(1−m)/m</div></div>' +
+        '<div class="metric"><div class="v">'+fmt(fullKelly*100,1)+'%</div><div class="l">满 Kelly 仓位</div></div>' +
+        '<div class="metric"><div class="v">'+fmt(usedKelly*100,1)+'%</div><div class="l">实用 '+fmt(kfrac)+' Kelly 仓位</div></div>' +
+      '</div>' +
+      '<p style="font-size:13px;margin-top:8px;color:var(--text-mute)">解读：名义 edge '+fmt(nominal*100,1)+' 个点，扣掉 '+fmt(fee*100,1)+'% taker 费 + '+fmt(slip*100,1)+'% 滑点后，每 $1 期望'+(ev>=0?'赚':'亏')+' '+fmt(Math.abs(ev)*100,1)+' 分。即使正 EV，也只该用 '+fmt(kfrac)+' Kelly 下 '+fmt(usedKelly*100,1)+'% 仓位防估计误差。</p>';
+  }
+  ids.forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('input', calc); });
+  calc();
+})();
+</script>
+
+<script>
+(function() {
+  let activePopover = null, activeTrigger = null, hideTimer = null;
+  function getRefContent(refid) {
+    const el = document.getElementById('ref-' + refid);
+    return el ? el.innerHTML : null;
+  }
+  function positionPopover(pop, trigger) {
+    const r = trigger.getBoundingClientRect();
+    const popW = pop.offsetWidth, popH = pop.offsetHeight;
+    let left = r.left + window.scrollX;
+    if (left + popW > window.innerWidth - 12) left = window.innerWidth - popW - 12;
+    if (left < 12) left = 12;
+    let top = r.bottom + window.scrollY + 6;
+    if (r.bottom + popH > window.innerHeight - 12 && r.top > popH + 12) {
+      top = r.top + window.scrollY - popH - 6;
+    }
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+  }
+  function showPopover(trigger) {
+    if (activeTrigger === trigger && activePopover) return;
+    if (activePopover) { activePopover.remove(); activePopover = null; }
+    const content = getRefContent(trigger.getAttribute('data-refid'));
+    if (!content) return;
+    const pop = document.createElement('div');
+    pop.className = 'cite-popover';
+    pop.innerHTML = content;
+    document.body.appendChild(pop);
+    positionPopover(pop, trigger);
+    activePopover = pop; activeTrigger = trigger;
+    pop.addEventListener('mouseenter', () => { if (hideTimer) clearTimeout(hideTimer); });
+    pop.addEventListener('mouseleave', scheduleHide);
+  }
+  function scheduleHide() {
+    if (hideTimer) clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      if (activePopover) { activePopover.remove(); activePopover = null; activeTrigger = null; }
+    }, 200);
+  }
+  function bindCites() {
+    document.querySelectorAll('sup.cite[data-refid]').forEach(sup => {
+      sup.addEventListener('mouseenter', () => showPopover(sup));
+      sup.addEventListener('mouseleave', scheduleHide);
+      sup.addEventListener('click', e => {
+        e.preventDefault(); e.stopPropagation();
+        if (activeTrigger === sup && activePopover) {
+          activePopover.remove(); activePopover = null; activeTrigger = null;
+        } else { showPopover(sup); }
+      });
+    });
+    document.addEventListener('click', e => {
+      if (!activePopover) return;
+      if (e.target.closest('.cite-popover') || e.target.closest('sup.cite')) return;
+      activePopover.remove(); activePopover = null; activeTrigger = null;
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindCites);
+  } else { bindCites(); }
+})();
+</script>
+
+</body>
+</html>

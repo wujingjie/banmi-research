@@ -254,6 +254,24 @@
     section.chapter.collapsed .chapter-body { max-height: none !important; padding: 18px 20px 22px !important; }
     section.chapter.collapsed > h2 .caret { display: none; }
   }
+
+  /* ===== 左侧竖向章节导航（批量统一注入，覆盖原顶部横向样式）===== */
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-top: none; border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; max-width: none; margin: 0; white-space: normal; }
+  .anchor-list a { display: block; flex: none; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border: none; border-left: 3px solid transparent; background: transparent; white-space: normal; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); border-color: transparent; font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
 </style>
 </head>
 <body data-theme="light">
@@ -266,7 +284,12 @@
     <div class="topbar-spacer"></div>
     <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
   </div>
-  <nav class="anchor-nav">
+  </header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
     <div class="anchor-list" id="anchorList">
       <a href="#ch1" data-target="ch1">01 摘要</a>
       <a href="#ch2" data-target="ch2">02 三平台对比</a>
@@ -283,7 +306,6 @@
       <a href="#ch13" data-target="ch13">13 FAQ</a>
     </div>
   </nav>
-</header>
 
 <main>
 
@@ -1830,5 +1852,16 @@
   });
 </script>
 
+<script>
+/* 左侧目录抽屉开关（批量统一注入） */
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'); var tog=document.getElementById('navToggle'); var ov=document.getElementById('navOverlay');
+  if(!nav||!tog||!ov) return;
+  function c(){nav.classList.remove('open');ov.classList.remove('show');}
+  tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+  ov.addEventListener('click',c);
+  document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+})();
+</script>
 </body>
 </html>

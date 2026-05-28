@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MiroFish（秒鱼）能否用于半米英语学习系统 · 可行性与落地板块研究 · 通用框架 vs 绑死预测 / AGPL 商用判断 / 多 agent 评分学界证据 + critic / 4 板块映射 / 落地窄切口 · 2026-05-28</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1d23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --border-strong: #cdd2da;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --accent-text: #1d4ed8;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #0891b2;
+    --info-soft: #cffafe;
+    --code-bg: #f1f3f7;
+    --purple: #7c3aed;
+    --purple-soft: #ede9fe;
+    --pink: #db2777;
+    --pink-soft: #fce7f3;
+    --teal: #0d9488;
+    --teal-soft: #ccfbf1;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1c2030;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #b6bcc9;
+    --text-mute: #8a92a3;
+    --border: #2a2f3d;
+    --border-strong: #3a4154;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a55;
+    --accent-text: #93c5fd;
+    --good: #4ade80;
+    --good-soft: #14532d55;
+    --warn: #fbbf24;
+    --warn-soft: #78350f55;
+    --bad: #f87171;
+    --bad-soft: #7f1d1d55;
+    --info: #22d3ee;
+    --info-soft: #155e7555;
+    --code-bg: #0a0d14;
+    --purple: #a78bfa;
+    --purple-soft: #4c1d9555;
+    --pink: #f472b6;
+    --pink-soft: #831a4955;
+    --teal: #2dd4bf;
+    --teal-soft: #134e4a55;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body { margin: 0; font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif; font-size: 16px; line-height: 1.7; color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; padding-bottom: 60px; transition: background-color .25s, color .25s; }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  nav.anchor-nav { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; border-top: 1px solid var(--border); background: var(--bg); scrollbar-width: none; }
+  nav.anchor-nav::-webkit-scrollbar { display: none; }
+  .anchor-list { display: flex; gap: 4px; padding: 8px 16px; max-width: 980px; margin: 0 auto; white-space: nowrap; }
+  .anchor-list a { flex: 0 0 auto; min-height: 36px; padding: 7px 12px; border-radius: 999px; font-size: 13px; line-height: 1.3; color: var(--text-soft); text-decoration: none; border: 1px solid transparent; background: var(--bg-soft); transition: all .15s; }
+  .anchor-list a:hover { color: var(--accent-text); }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); font-weight: 600; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 28px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout.pink { background: var(--pink-soft); border-color: var(--pink); }
+  .callout.teal { background: var(--teal-soft); border-color: var(--teal); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 9px 11px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 8px 11px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 6000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  .demo-host { margin: 16px 0; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .demo-host h4 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; color: var(--accent-text); }
+  .demo-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 14px; align-items: center; }
+  .demo-chip-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .demo-chip-group .label { font-size: 12px; color: var(--text-mute); font-weight: 600; margin-right: 4px; }
+  .demo-chip { padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-elevated); color: var(--text-soft); font-size: 12.5px; cursor: pointer; transition: all .15s; }
+  .demo-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .demo-output { padding: 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin-top: 8px; }
+  .demo-output .out-h { font-weight: 700; color: var(--text); font-size: 14px; margin-bottom: 6px; }
+  .demo-output .out-line { font-size: 13.5px; color: var(--text-soft); padding: 4px 0; }
+  .demo-output .out-line .tag-out { display: inline-block; padding: 1px 7px; border-radius: 4px; background: var(--accent-soft); color: var(--accent-text); font-size: 11px; font-weight: 700; margin-right: 6px; }
+  .juror { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px dashed var(--border); font-size: 13.5px; }
+  .juror:last-child { border-bottom: none; }
+  .juror .ava { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; flex: 0 0 auto; background: var(--accent-soft); }
+  .juror .jname { flex: 1; color: var(--text); font-weight: 600; }
+  .juror .jscore { font-family: ui-monospace, monospace; font-weight: 700; font-size: 15px; color: var(--accent-text); min-width: 36px; text-align: right; }
+  .juror .jbar { flex: 0 0 90px; height: 7px; border-radius: 4px; background: var(--bg-stripe); overflow: hidden; }
+  .juror .jbar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--purple)); }
+  textarea.demo-ta { width: 100%; min-height: 76px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); padding: 10px 12px; font-size: 14px; font-family: inherit; resize: vertical; }
+  .btn { padding: 9px 18px; border-radius: 999px; border: 1px solid var(--accent); background: var(--accent); color: #fff; font-weight: 600; font-size: 14px; cursor: pointer; transition: transform .12s; }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: transparent; color: var(--accent-text); }
+  .verdict-tag { display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 13px; }
+  .verdict-tag.use { background: var(--good-soft); color: var(--good); }
+  .verdict-tag.borrow { background: var(--warn-soft); color: var(--warn); }
+  .verdict-tag.no { background: var(--bad-soft); color: var(--bad); }
+  @media (max-width: 480px) { .hero { padding: 18px 4px 8px; } .hero h1 { font-size: 22px; } section.chapter > h2 { font-size: 17px; padding: 14px 14px; } .chapter-body { padding: 14px 14px 18px; } h3 { font-size: 16px; } }
+  .chapter-body { column-count: 1 !important; column-width: auto !important; }
+  .chapter-body > .callout { display: block !important; float: none !important; width: auto !important; clear: both !important; }
+  .chapter-body > h3, .chapter-body > h4 { display: block !important; clear: both !important; }
+  @media print { header.topbar, #progress, .back-to-top, nav.anchor-nav { display: none !important; } section.chapter.collapsed .chapter-body { max-height: none !important; padding: 18px 20px 22px !important; } section.chapter.collapsed > h2 .caret { display: none; } }
+
+  sup.cite {
+    cursor: help;
+    position: relative;
+    border-bottom: 1px dotted currentColor;
+    padding: 0 1px;
+    font-size: 11px;
+    color: var(--accent-text);
+    font-weight: 700;
+    vertical-align: super;
+  }
+  sup.cite:hover {
+    background: rgba(250, 204, 21, 0.3);
+    border-radius: 3px;
+  }
+  .cite-popover {
+    position: absolute;
+    z-index: 9999;
+    background: var(--bg-elevated, #ffffff);
+    color: var(--text, #1a1a23);
+    border: 1px solid var(--border, #e3e6ec);
+    border-radius: 10px;
+    padding: 12px 14px;
+    max-width: 380px;
+    min-width: 220px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+    font-size: 13px;
+    line-height: 1.55;
+    font-weight: normal;
+    pointer-events: auto;
+  }
+  [data-theme="dark"] .cite-popover {
+    background: #1a1e2a;
+    color: #e6e9f0;
+    border-color: #2a2f3a;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+  .cite-popover a {
+    color: var(--accent, #2563eb);
+    text-decoration: underline;
+    word-break: break-all;
+  }
+  [data-theme="dark"] .cite-popover a { color: #60a5fa; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+
+  .critic-box { padding: 14px 16px; margin: 10px 0; border-radius: 12px; border-left: 5px solid var(--bad); background: var(--bg-elevated); border: 1px solid var(--border); }
+  .critic-box .label { font-weight: 700; color: var(--bad); margin-bottom: 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .3px; }
+  .critic-box .title { font-weight: 700; color: var(--text); margin-bottom: 6px; font-size: 15px; }
+  .critic-box .body { font-size: 14.5px; color: var(--text-soft); }
+  .critic-box.medium { border-left-color: var(--warn); }
+  .critic-box.medium .label { color: var(--warn); }
+  .critic-box.low { border-left-color: var(--info); }
+  .critic-box.low .label { color: var(--info); }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">MiroFish → 半米可行性研究 <span class="tag">L2 + Critic · 偏落地 · 无忌</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+  <nav class="anchor-nav">
+    <div class="anchor-list" id="anchorList">
+      <a href="#ch1" data-target="ch1">01 摘要 / 5 大结论</a>
+      <a href="#ch2" data-target="ch2">02 MiroFish 是什么 ★</a>
+      <a href="#ch3" data-target="ch3">03 通用框架 vs 绑死预测 ★★</a>
+      <a href="#ch4" data-target="ch4">04 4 板块映射总览</a>
+      <a href="#ch5" data-target="ch5">05 板块①测评打分 ★★</a>
+      <a href="#ch6" data-target="ch6">06 板块②口语陪练</a>
+      <a href="#ch7" data-target="ch7">07 板块③内容难度</a>
+      <a href="#ch8" data-target="ch8">08 板块④教学法试错</a>
+      <a href="#ch9" data-target="ch9">09 直接用 vs 借鉴自建</a>
+      <a href="#ch10" data-target="ch10">10 多 agent 真实坑 ★★</a>
+      <a href="#ch11" data-target="ch11">11 mini demo 陪审团</a>
+      <a href="#ch12" data-target="ch12">12 半米落地窄切口 ★★</a>
+      <a href="#ch13" data-target="ch13">13 FAQ 12 条</a>
+      <a href="#ch14" data-target="ch14">14 References</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>MiroFish（秒鱼）能否用于半米英语学习系统</h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-28</span>
+      <span>🔬 L2 Deep Research + Critic 强化</span>
+      <span>🎯 偏落地 · 不吹</span>
+      <span>📚 62 引用 · 55+ WebSearch</span>
+      <span>🐟 MiroFish v0.1.2 查实</span>
+      <span>👤 无忌 for 阿杰</span>
+    </div>
+    <div class="hero-deck">
+      <strong>这份是什么</strong>：阿杰问"MiroFish（秒鱼，陈天桥投 3000 万的开源多智能体引擎）能不能用到半米英语学习系统？用在哪些板块——测评（评分）还是别的？"。本报告先<strong>把 MiroFish 扒清楚</strong>（架构 / 协议 / 成熟度，<strong>不查清后面全是空中楼阁</strong>），再对半米 4 个候选板块做<strong>可行性 × 价值 × 成本 × 适配难度</strong>评估，给出诚实判断 + 最该先试的窄切口。<br><br>
+      <strong>一句话答案（先说结论）</strong>：MiroFish 本体<strong>不要直接用</strong>（AGPL-3.0 强 copyleft 阻断商用 + 它是社交舆情模拟器不是评分引擎 + 10 天原型无验证）。但它背后的<strong>"多 agent 投票/陪审团"模式值得借鉴</strong>——而且学界对"用一群 LLM 当评分陪审团"<strong>有真实证据支持（但有严苛前提）</strong>。最该先试的<strong>窄切口是测评板块的"LLM 评分陪审团（PoLL）"</strong>，<strong>自己写几百行</strong>，不引入 MiroFish 这个依赖。
+    </div>
+  </div>
+
+  <div class="callout accent" style="margin: 24px 0; padding: 20px;">
+    <div style="font-weight: 700; font-size: 16px; margin-bottom: 12px;">🔗 跟前几份研究的关系（评分三件套）</div>
+    <ul style="margin: 0; padding-left: 20px; line-height: 1.9;">
+      <li><strong>eng-assessment-datasets-research（#20）</strong>：半米"AI Native Assessment Engine"的<strong>数据集 due diligence</strong> — 本报告的多 agent 评分思路最终都要落到那份报告认证的数据（ELLIPSE / speechocean762）上做校准</li>
+      <li><strong>banmi-cvla-audit-research（#19）</strong>：阿杰自建评分/难度工具的 <strong>SOTA 审查</strong> — 本报告板块③（内容难度预判）和它共享 CEFR 难度评估维度，多 agent 是 banmi-cvla 的潜在增强路线</li>
+      <li><strong>本报告（#23）</strong>：把"多智能体社会模拟"这个 2026 年最火的范式放回半米上下文做 reality check — <strong>诚实判断能用到哪、坑在哪、先试哪个</strong></li>
+    </ul>
+    <div style="margin-top: 10px; font-size: 13px; color: var(--text-mute);">👉 测评板块（第 5 章）会直接链接到这两份报告。</div>
+  </div>
+
+  <!-- ============ Ch1 摘要 ============ -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">执行摘要 · 5 条核心结论（独立 callout）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">AGPL-3.0</div><div class="l">协议 = 强 copyleft 阻商用</div></div>
+        <div class="metric"><div class="v">10 天</div><div class="l">vibe coding 原型 v0.1.2</div></div>
+        <div class="metric"><div class="v">≈ ¥14</div><div class="l">红楼梦 demo 一次成本</div></div>
+        <div class="metric"><div class="v">7×</div><div class="l">PoLL 比单 GPT-4 便宜</div></div>
+        <div class="metric"><div class="v">~0.3</div><div class="l">SOTA LLM judge Fleiss κ</div></div>
+        <div class="metric"><div class="v">0</div><div class="l">MiroFish 公开预测验证</div></div>
+      </div>
+
+      <p>下面 5 条是阿杰真正要的答案，<strong>每条单独成框</strong>（按重要性排）。每条都直接回应"能不能用 / 用在哪 / 怎么用"。</p>
+
+      <div class="callout bad">
+        <p><strong>🔴 结论 #1（能不能用 · 直接回答）：MiroFish 本体不要直接用，原因是三重的，不是单一的</strong></p>
+        <p>① <strong>协议</strong>：MiroFish 是 <strong>AGPL-3.0</strong><sup class="cite" data-refid="1">[1]</sup> —— 强 copyleft + 网络使用触发条款（§13）。半米作为<strong>商业 K12 SaaS</strong>，一旦改它的代码并通过网络对学生提供服务，<strong>必须向用户公开半米的衍生源码</strong><sup class="cite" data-refid="11">[11]</sup>。这对一个要建立壁垒的商业产品是<strong>致命的</strong>。② <strong>定位</strong>：它的引擎是 OASIS（社交媒体舆情模拟器），<strong>不是为评分设计的</strong>。③ <strong>成熟度</strong>：v0.1.2，10 天 vibe coding，2 个核心贡献者，仅 macOS 测过，<strong>无任何公开预测验证</strong><sup class="cite" data-refid="6">[6]</sup>。三条任意一条都够否决"直接用"。</p>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>🟦 结论 #2（它到底是什么）：它是"社交舆情模拟器"套壳，不是通用 multi-agent 编排框架，更不是评分引擎</strong></p>
+        <p>MiroFish 的仿真引擎 = <strong>OASIS（CAMEL-AI 团队的开源社交模拟器）</strong><sup class="cite" data-refid="2">[2]</sup>。OASIS 的设计目的是<strong>研究"信息传播 / 群体极化 / 羊群效应"等涌现社会现象</strong>，让上百万 agent 在模拟的 Twitter/Reddit 上 follow/comment/repost<sup class="cite" data-refid="3">[3]</sup>。<strong>它没有"投票打分→聚合"的评分机制</strong>，agent 是"自由社交互动"，最后由一个 ReportAgent 总结。所以本质上属于<strong>偏 🅱️（绑死社会模拟/预测场景）</strong>，迁移到英语评分要重写大半（详见第 3 章）。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>🟠 结论 #3（最该用在哪）：最值钱、也最可借鉴的是「测评/打分」板块的"LLM 评分陪审团"——但前提很严苛</strong></p>
+        <p>"一群 AI 当陪审团给作文/口语投票打分"<strong>在学界确有证据更准更稳</strong>：Cohere 的 <strong>PoLL（Panel of LLMs）</strong>用一组小模型击败单个 GPT-4 judge、同源偏差更小、<strong>还便宜 7 倍</strong><sup class="cite" data-refid="4">[4]</sup>；专门的作文评分多 agent 研究（Content/Structure/Language + Chairman）在 ASAP2.0 上<strong>全维度优于单 agent</strong><sup class="cite" data-refid="5">[5]</sup>。<strong>但</strong>——PoLL 有效的<strong>命门是"模型必须来自不同家族（disjoint model families）"</strong><sup class="cite" data-refid="4">[4]</sup>。MiroFish 那种"一个 LLM 克隆出一堆 agent"<strong>恰恰是伪多样性</strong>，不满足这个前提。所以半米要的不是 MiroFish，是 PoLL 那套思路（详见第 5、10 章）。</p>
+      </div>
+
+      <div class="callout teal">
+        <p><strong>🟩 结论 #4（直接用还是自建）：借鉴模式、自己写几百行，不要引入 MiroFish 依赖</strong></p>
+        <p>半米是<strong>阿杰一个人全栈开发</strong>。引入一个 10 天 vibe coding、AGPL、仅 macOS 测过、2 人维护的框架，<strong>维护/依赖/法务风险远大于收益</strong>。而"多 agent 评分陪审团"的核心逻辑——<strong>并行调 N 个不同模型 → 各按 rubric 打分 → 聚合（中位数/去极值/加权）</strong>——本质是<strong>几百行代码 + 几个 prompt</strong>，阿杰完全可以自建，还能跟现有的 banmi-cvla / Assessment Engine 无缝衔接（详见第 9 章决策树）。</p>
+      </div>
+
+      <div class="callout purple">
+        <p><strong>🟪 结论 #5（多 agent 评分到底靠不靠谱 + 先试什么）：靠谱有条件，最该先试「双模型作文复评」这个最窄切口</strong></p>
+        <p>多 agent 评分<strong>不是灵丹</strong>：EMNLP 2025 发现<strong>多 agent 辩论会在第一轮后放大偏差</strong><sup class="cite" data-refid="7">[7]</sup>；即便 SOTA judge 的 Fleiss κ 也只有 ~0.3<sup class="cite" data-refid="8">[8]</sup>；而且作文评分研究反复证明 <strong>few-shot 校准（每档给 2 个例子）带来的 QWK 提升（~26%）比"多 agent"本身大得多</strong><sup class="cite" data-refid="5">[5]</sup>——<strong>校准 &gt; 架构</strong>。所以半米<strong>最该先试的窄切口</strong>：在已有单模型评分上，加<strong>第二个不同家族的模型（如 Qwen + Claude）做独立复评 + 分歧检测</strong>，分歧大的样本才升级到三模型/人工。这是 1-2 天能跑通、风险最低、最贴半米现状的第一步（详见第 12 章）。</p>
+      </div>
+
+      <h3>"能用程度"速查表（4 板块一眼看完）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>半米板块</th><th>MiroFish 本体</th><th>借鉴多 agent 模式</th><th>真实价值</th><th>单人落地成本</th><th>结论</th></tr></thead>
+          <tbody>
+            <tr><td><strong>① 测评/打分</strong></td><td>⛔ 不适配（无评分机制 + AGPL）</td><td>✅ 强（PoLL 有学界证据）</td><td>🟢 高（核心难点 + 最值钱）</td><td>🟡 中（几百行 + 校准数据）</td><td><span class="verdict-tag borrow">借鉴模式</span></td></tr>
+            <tr><td><strong>② 口语对话陪练</strong></td><td>⛔ 不需要（OASIS 是群体不是 1v1）</td><td>🟡 弱（直接用 GPT/Claude 多 prompt 更简单）</td><td>🟢 高（但现成方案已够）</td><td>🟢 低</td><td><span class="verdict-tag no">不用 MiroFish</span></td></tr>
+            <tr><td><strong>③ 内容难度预判</strong></td><td>🟡 部分（模拟读者群是 OASIS 强项）</td><td>🟡 中（LLM 学生模拟有 MAE~1 grade）</td><td>🟡 中（但有 competence paradox 风险）</td><td>🟡 中</td><td><span class="verdict-tag borrow">谨慎借鉴</span></td></tr>
+            <tr><td><strong>④ 教学法试错</strong></td><td>🟡 最贴 MiroFish 原定位</td><td>🟡 中（模拟学生群反应）</td><td>🔴 低（模拟学生≠真学生，over-trust 风险大）</td><td>🟡 中</td><td><span class="verdict-tag no">看着美不划算</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;color:var(--text-mute);">可信度标签：🟢 多源验证 / 🟡 单源或部分推演 / 🔴 估算或我对半米的判断。本表"真实价值/成本/结论"列含<strong>我对半米的推演建议</strong>（非外部查实事实），已按铁律区分。</p>
+    </div>
+  </section>
+
+  <!-- ============ Ch2 MiroFish 是什么 ============ -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">MiroFish 到底是什么（架构 / 机制 / 协议 / 成熟度查实）★</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout info">
+        <p><strong>查实方法</strong>：本章所有事实来自 GitHub repo <code>666ghj/MiroFish</code> README（中英双版）<sup class="cite" data-refid="1">[1]</sup>、其引擎 OASIS 的 arXiv 论文 2411.11581<sup class="cite" data-refid="3">[3]</sup>、多家权威媒体（36 氪 / 东方财富 / 新浪财经）<sup class="cite" data-refid="9">[9]</sup>、知乎/博客园技术解析<sup class="cite" data-refid="6">[6]</sup>、以及一篇实测文章<sup class="cite" data-refid="10">[10]</sup>。<strong>查不实的一律标 ⚠️。</strong></p>
+      </div>
+
+      <h3>2.1 身份与背景（多源验证 🟢）</h3>
+      <ul>
+        <li><strong>仓库</strong>：<code>github.com/666ghj/MiroFish</code>，slogan "A Simple and Universal Swarm Intelligence Engine, Predicting Anything / 简洁通用的群体智能引擎，预测万物"<sup class="cite" data-refid="1">[1]</sup></li>
+        <li><strong>作者</strong>：GitHub 用户 <code>666ghj</code>（昵称 BaiFu / 郭航江），<strong>北京邮电大学大四学生</strong><sup class="cite" data-refid="9">[9]</sup>。⚠️ 阿杰背景里提到的"中科大 / 北邮来源冲突"——我查到的多家权威媒体（36 氪 / 东方财富 / DoNews）<strong>一致写北邮</strong>，未见中科大说法，倾向北邮（但仍以官方为准）。</li>
+        <li><strong>前作</strong>：同作者 2024 年底做过 <strong>BettaFish（微舆）</strong>——一个多 Agent 舆情分析工具，也曾登顶 GitHub Trending（37k+ stars）<sup class="cite" data-refid="9">[9]</sup>。<strong>关键</strong>：MiroFish 不是孤例，作者是"多 agent 社会模拟"这个方向的连续作者。</li>
+        <li><strong>投资</strong>：盛大集团创始人、天桥脑科学研究院创始人<strong>陈天桥</strong>，在 demo 视频递交的 <strong>24 小时内拍板注资 3000 万人民币</strong>，作者已加入盛大<sup class="cite" data-refid="9">[9]</sup>。这件事<strong>多家权威媒体确认，属实，非存疑</strong>。</li>
+        <li><strong>开发周期</strong>：作者用 <strong>Claude Code 约 10 天 vibe coding</strong> 完成<sup class="cite" data-refid="9">[9]</sup>。</li>
+        <li><strong>热度</strong>：⚠️ star 数各源冲突严重（25k / 33k / 45.9k / 62.9k 都有，取决于抓取时间）<sup class="cite" data-refid="1">[1]</sup>。统一表述为<strong>"两周内冲到数万 star、登顶 GitHub Trending 全球第一"</strong>，具体数字快速增长、以实时为准。</li>
+      </ul>
+
+      <h3>2.2 核心架构：它怎么组织多智能体？（查实 🟢）</h3>
+      <p><strong>最关键的发现</strong>：MiroFish <strong>不是从零手搓的多 agent 引擎</strong>，它的仿真内核是 <strong>OASIS（Open Agent Social Interaction Simulations）</strong>——CAMEL-AI 研究社区的开源框架<sup class="cite" data-refid="2">[2]</sup><sup class="cite" data-refid="3">[3]</sup>。README 原文："MiroFish 的仿真引擎由 OASIS 驱动"<sup class="cite" data-refid="1">[1]</sup>。</p>
+      <p>官方五步工作流<sup class="cite" data-refid="1">[1]</sup>：</p>
+      <ol>
+        <li><strong>图谱构建（Graph Building）</strong>：现实种子提取 + 个体/群体记忆注入 + GraphRAG 构建</li>
+        <li><strong>环境搭建（Environment Setup）</strong>：实体关系抽取 + <strong>人设生成（Persona generation）</strong> + Agent 配置注入仿真参数</li>
+        <li><strong>开始模拟（Simulation）</strong>：<strong>双平台并行模拟</strong>（模拟"广场 + 社区"两种社交平台）+ 动态更新时序记忆</li>
+        <li><strong>报告生成（Report）</strong>：ReportAgent 用工具集跟模拟后环境深度交互、产出报告</li>
+        <li><strong>深度互动（Deep Interaction）</strong>：用户可跟模拟世界里任意一个 agent 对话、跟 ReportAgent 对话</li>
+      </ol>
+
+      <div class="callout warn">
+        <p><strong>⚠️ 关键澄清：聚合/共识机制是什么？答案是——没有显式的投票/打分聚合</strong></p>
+        <p>README 中英双版<strong>都没有</strong>描述"投票 / 加权 / LLM 仲裁"这类聚合机制<sup class="cite" data-refid="1">[1]</sup>。OASIS 的 agent 做的是<strong>社交媒体原生动作</strong>（follow / comment / repost / like，共 21 种动作）<sup class="cite" data-refid="3">[3]</sup>——它们<strong>"自由交互、社会演化"</strong>，结论是从群体动态中<strong>涌现</strong>出来的，最后由 ReportAgent <strong>事后总结</strong>。<br>👉 <strong>对半米的含义</strong>：MiroFish 给的不是"陪审团各打一分→取中位数"这种<strong>结构化评分</strong>，而是"养一群人吵架→看吵出什么共识"的<strong>定性模拟</strong>。这两种东西，对评分场景<strong>价值天差地别</strong>（详见第 5、10 章）。</p>
+      </div>
+
+      <h3>2.3 底层调什么 LLM（查实 🟢）</h3>
+      <ul>
+        <li><strong>任意 OpenAI SDK 格式的 LLM API</strong><sup class="cite" data-refid="1">[1]</sup>。文档<strong>推荐阿里百炼平台的 qwen-plus</strong>（国产，对国内友好——这点对阿杰是加分项）。</li>
+        <li><strong>无本地 LLM 支持</strong>（README 未提）。<strong>记忆系统</strong>用 <strong>Zep Cloud</strong>（有每月免费额度）<sup class="cite" data-refid="1">[1]</sup>。</li>
+      </ul>
+
+      <h3>2.4 能否嵌入？部署架构（查实 🟢）</h3>
+      <ul>
+        <li><strong>形态</strong>：一个<strong>独立 Web 应用</strong>，<strong>不是 Python 包 / SDK</strong>。前端 Vue（跑在 :3000），后端 Python（API 跑在 :5001）。技术栈 Python 57.6% + Vue 41.2%<sup class="cite" data-refid="1">[1]</sup>。</li>
+        <li><strong>环境</strong>：Node.js 18+ / Python 3.11–3.12 / uv 包管理器，支持源码部署或 Docker compose<sup class="cite" data-refid="1">[1]</sup>。</li>
+        <li><strong>⚠️ 对外 API</strong>：README <strong>未提供供外部程序调用的公开 API/SDK 规范</strong>。要嵌入半米，得<strong>读它的后端代码自己接</strong>，不是 <code>pip install mirofish</code> 就能用。</li>
+      </ul>
+
+      <h3>2.5 成本与延迟（查实 🟡）</h3>
+      <ul>
+        <li><strong>红楼梦续写 demo</strong>：作者展示从开始到模拟结束<strong>后台约消耗 ¥14</strong><sup class="cite" data-refid="6">[6]</sup>（跟阿杰背景一致）。</li>
+        <li><strong>成本模型</strong>：<strong>每个 agent 每轮都要调一次 LLM API，成本随 agent 数 × 轮数线性增长</strong><sup class="cite" data-refid="6">[6]</sup>。README 提醒"消耗较大，先跑 &lt;40 轮"，最高 72 轮<sup class="cite" data-refid="1">[1]</sup>。</li>
+        <li><strong>实测延迟</strong>：一篇实测文章跑"全职猎人结局预测"（40 轮）<strong>耗时约 6 小时</strong>，烧完两张淘宝买的 Gemini API 周卡<sup class="cite" data-refid="10">[10]</sup>。<strong>这是分钟/小时级，不是秒级</strong>——对需要实时反馈的英语学习场景是硬伤。</li>
+      </ul>
+
+      <h3>2.6 成熟度：玩具还是能进生产？（查实 🟡）</h3>
+      <div class="callout bad">
+        <p><strong>诚实定性：是有洞察力的原型 / 概念验证，不是生产系统。</strong></p>
+        <ul>
+          <li>版本 <strong>v0.1.2</strong>，<strong>2 个核心贡献者</strong>，文档承认<strong>仅在 macOS 测试过</strong><sup class="cite" data-refid="6">[6]</sup>。</li>
+          <li><strong>无任何公开 benchmark</strong> 对比"预测结果 vs 真实历史结果"<sup class="cite" data-refid="6">[6]</sup>——连作者自己的定位都是"故事讲清了、产品原型立住了，但验证和工程化还在前面"。</li>
+          <li>知乎/博客园技术社区诚实评价：<strong>"它的局限性是根本性的——AI 幻觉、信息不完备、思维同质化——这些不是工程优化能解决的"</strong><sup class="cite" data-refid="6">[6]</sup>。整个推演体系本质是<strong>"大模型预训练认知的投射，而非真实人类行为的精准复刻"</strong>，所有节点权重/行为逻辑由底层 LLM 决定，存在<strong>无法消除的系统性偏差</strong>。</li>
+        </ul>
+      </div>
+
+      <h3>2.7 陈天桥投资 + 真实商业落地（查实结论）</h3>
+      <p>投资<strong>真实</strong>（多权威媒体）<sup class="cite" data-refid="9">[9]</sup>。但<strong>真实盈利/商业落地无法确认</strong>——所谓"干爆 Polymarket 赚钱"的传说，实测文章判断<strong>可能更多来自"市场时机、套利策略和信息差"，而非 MiroFish 的预测能力</strong><sup class="cite" data-refid="10">[10]</sup>。阿杰背景里说的"没有真实事件盈利验证"<strong>我的查证完全支持这个判断</strong>。</p>
+    </div>
+  </section>
+
+  <!-- ============ Ch3 通用框架 vs 绑死预测 ============ -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">关键分叉：通用框架 🅰️ vs 绑死预测 🅱️（明确判断）★★</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>这是阿杰最该先搞清楚的：如果 MiroFish 是 🅰️ <strong>通用 multi-agent 编排框架</strong>（角色/流程/聚合可任意自定义），那它能迁移到任意领域含英语教育；如果是 🅱️ <strong>绑死了"事件概率预测/社会模拟"逻辑</strong>，半米就只能借鉴思路、不能直接复用。</p>
+
+      <h3>3.1 判断：偏 🅱️，但带一点 🅰️ 的影子</h3>
+      <div class="callout accent">
+        <p><strong>结论：MiroFish ≈ 70% 🅱️ + 30% 🅰️。它是"换皮通用"——slogan 喊"预测万物"，但底层配置是为社会舆情模拟焊死的。</strong></p>
+      </div>
+
+      <p>支持"偏 🅱️"的硬证据（按强度排）：</p>
+      <ol>
+        <li><strong>引擎本身就是社会模拟器</strong>：OASIS 的设计目的<strong>明确写在论文里</strong>——"研究信息传播 / 群体极化 / 羊群效应"<sup class="cite" data-refid="3">[3]</sup>，agent 的动作空间是 follow/comment/repost（社交媒体原生），<strong>不是"针对任务输出结构化判断"</strong>。把它当通用 agent 编排器用，等于拿一个"模拟微博广场"的引擎去干别的活。</li>
+        <li><strong>实测发现"换场景配置几乎不变"</strong>：一篇实测文章犀利指出——用 MiroFish 跑"社会舆论"和跑"动漫结局预测"，<strong>底层配置居然差不多一样</strong>，都落到"广场 + 社区两平台"，甚至带着"时间配置符合中国人作息习惯"这种<strong>跟动漫预测毫不相关的参数</strong><sup class="cite" data-refid="10">[10]</sup>。作者结论："最后还是落到调用大模型生成内容，跟你直接去问 ChatGPT 本质没什么差别……是一个有想象力的壳。"</li>
+        <li><strong>"预测"其实没在预测</strong>：同一实测里，"全职猎人结局预测"<strong>完全没预测任何结局，只是叙述所有人围绕结局的态度、复盘事件、总结共识</strong><sup class="cite" data-refid="10">[10]</sup>。它擅长的是<strong>"模拟一群人对某件事的反应"</strong>，不是"输出一个可校验的判断"。</li>
+      </ol>
+
+      <p>带一点 🅰️ 影子的地方（不能完全抹杀）：</p>
+      <ul>
+        <li><strong>LLM 后端是 OpenAI 兼容、可换任意模型</strong><sup class="cite" data-refid="1">[1]</sup>——这一层是通用的。</li>
+        <li><strong>人设生成（persona generation）+ GraphRAG</strong> 这两个模块抽出来看，确实是<strong>可复用的"造一群有性格的 agent"能力</strong>——这正是半米板块②③④（陪练/难度/教学法）可能用得上的部分。</li>
+        <li>但<strong>关键的"聚合成一个结构化结论"那一层是缺失的</strong>（见 2.2），而这恰恰是评分场景最需要的。</li>
+      </ul>
+
+      <h3>3.2 这个判断对半米四个板块的直接含义</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>半米想要的能力</th><th>MiroFish 提供吗</th><th>归类</th></tr></thead>
+          <tbody>
+            <tr><td>一群 agent 各自<strong>独立打结构化分数</strong>再聚合（评分陪审团）</td><td>⛔ 不提供（它是自由社交，无结构化打分聚合）</td><td>🅱️ 要自己重写</td></tr>
+            <tr><td>造一群<strong>有性格/水平差异的"学生"agent</strong></td><td>✅ persona generation 能做</td><td>🅰️ 可借鉴模块</td></tr>
+            <tr><td>模拟"一群读者对一篇材料的反应"</td><td>✅ 这是 OASIS 的主场</td><td>🅰️ 可直接试</td></tr>
+            <tr><td>1v1 实时口语陪练</td><td>⛔ 它是群体模拟不是单 agent 对话</td><td>不相关</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>⚠️ 一句话定调</strong>：MiroFish 的"通用"是营销层面的通用（你确实能往里丢任何文本），不是<strong>工程层面的通用编排框架</strong>。它给的是一个<strong>偏定性的"群体反应模拟器"</strong>。半米要的<strong>评分</strong>恰恰是它最不擅长的（结构化、可校准、低方差），半米要的<strong>陪练</strong>它又用不上（它做群体不做 1v1）。重叠最大的是<strong>"内容难度/教学法的群体反应模拟"</strong>——但那两个板块本身价值就有限（见第 7、8 章）。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Ch4 4 板块映射总览 ============ -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">半米板块映射总览（4 板块价值排序）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>把 MiroFish 背后的<strong>"多智能体社会模拟 / 群体投票"</strong>能力，对半米每个候选板块做 <strong>可行性 × 价值 × 成本 × 适配难度</strong> 四维评估。下面是总览，第 5-8 章逐个深评。</p>
+
+      <h3>价值排序（我对半米的判断 🔴）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>排序</th><th>板块</th><th>核心思路</th><th>可行性</th><th>价值</th><th>成本(单人)</th><th>适配难度</th><th>用法</th></tr></thead>
+          <tbody>
+            <tr><td><strong>🥇 1</strong></td><td>测评/打分</td><td>LLM 评分陪审团降方差/偏差</td><td>🟢 高(有学界证据)</td><td>🟢 高(核心难点+最值钱)</td><td>🟡 中</td><td>🟡 中(要校准)</td><td>借鉴 PoLL 模式自建</td></tr>
+            <tr><td><strong>🥈 2</strong></td><td>内容难度预判</td><td>模拟某 CEFR 水平读者群预测卡点</td><td>🟡 中</td><td>🟡 中(自动分级有用)</td><td>🟡 中</td><td>🟡 中</td><td>谨慎借鉴(小范围验证)</td></tr>
+            <tr><td><strong>🥉 3</strong></td><td>口语对话陪练</td><td>多性格/口音 AI 陪练</td><td>🟢 高</td><td>🟢 高</td><td>🟢 低</td><td>🟢 低</td><td>直接用 GPT/Claude,不用 MiroFish</td></tr>
+            <tr><td><strong>4</strong></td><td>教学法试错</td><td>上课前模拟学生群反应</td><td>🟡 中</td><td>🔴 低(模拟学生≠真学生)</td><td>🟡 中</td><td>🔴 高</td><td>看着美其实不划算,先别碰</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <p><strong>为什么这个排序？</strong>四维不是简单相加，<strong>"价值 × (1/适配难度)"才是落地优先级</strong>。① 测评价值最高且有真实学界证据，虽然要校准但 ROI 最高 → 第一。② 内容难度是测评的延伸（同一套 LLM 判断能力），顺带能做 → 第二。③ 口语陪练价值高但 <strong>MiroFish 帮不上忙</strong>（现成 GPT/Claude 已够），所以"用 MiroFish"角度排第三。④ 教学法试错<strong>最贴 MiroFish 原定位</strong>，但价值被"模拟学生 ≠ 真学生"的 over-trust 风险严重稀释 → 垫底。</p>
+      </div>
+
+      <h3>一个反直觉的点</h3>
+      <p>阿杰可能直觉认为"MiroFish 是预测引擎，那最该用在能预测的板块（难度/教学法）"。<strong>但恰恰相反</strong>：MiroFish 最贴的板块（教学法试错）价值最低，而它<strong>最不擅长</strong>的板块（结构化评分）反而是半米最该投入的——只是<strong>不用 MiroFish，而是用它启发的"陪审团"思路 + 学界更成熟的 PoLL 方法</strong>。这个反直觉是本报告的核心洞察。</p>
+    </div>
+  </section>
+
+  <!-- ============ Ch5 板块一 测评打分 ============ -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">板块①：测评/打分（多 agent 陪审团 + 学界证据 + critic）★★</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout accent">
+        <p><strong>阿杰最关心、也最可能最值钱的板块。</strong>核心思路：与其用<strong>单个 LLM</strong> 给作文/口语打分（方差大、有偏差、自我不一致），不如养<strong>一群 AI 当"评分员陪审团"</strong>各自独立打分，再聚合 → 降低单模型的方差和偏差。这正是 MiroFish "群体智能"思路在评分上的投影。<br><strong>本章先给学界真实证据（双向），再给 critic，最后衔接半米已有的两份评分报告。</strong></p>
+      </div>
+
+      <h3>5.1 学界证据 PRO：多 agent / LLM 陪审团确实更准更稳（有条件）</h3>
+
+      <h4>证据 ① — PoLL（Panel of LLMs）：一组小模型击败单个大模型，还便宜 7 倍 🟢</h4>
+      <p>Cohere 团队的论文 <em>Replacing Judges with Juries</em>（arXiv 2404.18796）<sup class="cite" data-refid="4">[4]</sup>是这个方向最硬的证据。横跨 3 种评判设置、6 个数据集：</p>
+      <ul>
+        <li>用一个由<strong>更多小模型组成的 panel</strong>（PoLL），<strong>表现优于单个大 judge（如 GPT-4）</strong>；</li>
+        <li><strong>同源偏差（intra-model bias）更小</strong>——因为 panel 由<strong>互不相交的模型家族（disjoint model families）</strong>组成（这是命门，下文反复出现）；</li>
+        <li><strong>成本便宜 7 倍以上</strong>——小模型 panel 比单个 GPT-4 便宜。</li>
+      </ul>
+      <div class="callout good">
+        <p><strong>对半米的直接含义</strong>：陪审团模式<strong>不一定更贵</strong>！用 Qwen-plus + Gemini Flash + Llama 这种便宜小模型组队，<strong>可能比单独调一次 GPT-4 还便宜，还更准</strong>。这颠覆了"多 agent = N 倍成本"的直觉——<strong>前提是别全用旗舰模型</strong>。</p>
+      </div>
+
+      <h4>证据 ② — 作文评分专门研究：多 agent 全维度优于单 agent（ASAP2.0）🟢</h4>
+      <p>论文 <em>Specialists or Generalists? Multi-Agent and Single-Agent LLMs for Essay Grading</em>（arXiv 2601.22386，用 GPT-5.1 在 ASAP2.0 上测）<sup class="cite" data-refid="5">[5]</sup>：</p>
+      <ul>
+        <li>多 agent 系统把评分<strong>拆成三个专家 agent（Content 内容 / Structure 结构 / Language 语言）</strong>，再加一个 <strong>Chairman Agent</strong> 实现 rubric 对齐逻辑（含<strong>否决规则 veto + 分数封顶 score capping</strong>）；</li>
+        <li><strong>多 agent 在所有 rubric 维度上的评分准确率都优于单 agent</strong>；</li>
+        <li>但有<strong>分层差异</strong>：多 agent <strong>识别弱作文显著更好</strong>，单 agent 在<strong>中档作文</strong>上反而更好，<strong>两者都搞不定高质量作文</strong>。</li>
+      </ul>
+
+      <h4>证据 ③ — MAJ-Eval：多 agent persona 辩论提升与人类对齐 🟡</h4>
+      <p>MAJ-Eval 用<strong>从领域文献自动抽取 persona</strong> + 多 agent 群体辩论，比经典单 agent judge <strong>在多维度上与人类评分对齐更好</strong>，Spearman 相关性可达 <strong>0.47（对比标准 baseline 的 0.15–0.36）</strong><sup class="cite" data-refid="8">[8]</sup>。</p>
+
+      <h3>5.2 学界证据 CON / critic：别吹，多 agent 评分有真实的坑</h3>
+      <p>同样有硬证据指向<strong>"多 agent 评分不是灵丹，有时只是更贵"</strong>。这些直接回应阿杰要的诚实评估：</p>
+
+      <div class="critic-box">
+        <div class="label">CRITIC #1 · 校准 &gt; 架构</div>
+        <div class="title">few-shot 校准带来的提升，比"上多 agent"大得多</div>
+        <div class="body">同一篇作文评分论文发现：<strong>每个分数档只给 2 个例子做 few-shot 校准，就让 QWK 提升约 26%</strong>——而且<strong>对单 agent 和多 agent 都一样有效</strong><sup class="cite" data-refid="5">[5]</sup>。另一篇 rubric 迭代精修研究也显示 QWK 增益可达 0.19–0.47<sup class="cite" data-refid="12">[12]</sup>。<strong>含义</strong>：半米如果评分不准，<strong>第一优先级是搞校准数据 + 精修 rubric，不是堆 agent</strong>。先把单模型 + 好校准做到 QWK 0.7+，再考虑多 agent 锦上添花。</div>
+      </div>
+
+      <div class="critic-box">
+        <div class="label">CRITIC #2 · 伪多样性（半米最该警惕）</div>
+        <div class="title">同一个模型克隆出 5 个 agent ≠ 5 个独立评委</div>
+        <div class="body">PoLL 之所以有效，<strong>明确依赖"disjoint model families"</strong><sup class="cite" data-refid="4">[4]</sup>。如果像 MiroFish 那样<strong>用同一个 LLM 用不同 prompt 生成一堆 agent</strong>，它们的判断<strong>高度相关</strong>——投票看似独立，其实<strong>同一个脑子在自言自语</strong>。这种"伪多样性"<strong>不会降低系统性偏差</strong>（5 个都偏低的评委投票，结果还是偏低）。⚠️ 这正是半米若照抄 MiroFish 思路最容易踩的坑：<strong>真陪审团要用不同模型家族，不是同模型多 prompt</strong>。</div>
+      </div>
+
+      <div class="critic-box">
+        <div class="label">CRITIC #3 · 辩论放大偏差</div>
+        <div class="title">让 agent 互相"辩论"反而可能更糟</div>
+        <div class="body">EMNLP 2025 研究发现：<strong>多 agent 辩论框架在第一轮之后会放大偏差</strong><sup class="cite" data-refid="7">[7]</sup>——agent 互相说服时，会朝某个方向（往往是位置偏差/冗长偏差指向的方向）collapse。<strong>含义</strong>：半米的陪审团应该让评委<strong>独立打分（互不可见）再聚合</strong>，<strong>不要</strong>学 MiroFish 让它们"自由互动/辩论"。独立性是降方差的关键，辩论会破坏独立性。</div>
+      </div>
+
+      <div class="critic-box medium">
+        <div class="label">CRITIC #4 · 天花板就在那</div>
+        <div class="title">LLM judge 的人机一致性本来就不高</div>
+        <div class="body">即便是 SOTA judge，<strong>多评委间的 Fleiss κ 平均也只有约 0.3</strong>（低资源语言更差）<sup class="cite" data-refid="8">[8]</sup>；LLM judge 还有系统性的<strong>位置偏差（偏好特定位置的回答）和冗长偏差（长答案得分更高，哪怕质量相近）</strong><sup class="cite" data-refid="8">[8]</sup>；"Rating Roulette"研究显示 LLM judge 存在<strong>自我不一致</strong>（同一输入多次打分会飘）<sup class="cite" data-refid="8">[8]</sup>。多 agent 能<strong>缓解</strong>自我不一致（多次采样取聚合），但缓解不了"模型根本不会评高质量作文"这种能力天花板。</div>
+      </div>
+
+      <div class="critic-box medium">
+        <div class="label">CRITIC #5 · 成本与延迟</div>
+        <div class="title">如果用旗舰模型组队，成本和延迟会翻 N 倍</div>
+        <div class="body">PoLL 的"便宜 7 倍"是用<strong>小模型</strong>实现的。如果半米图省事用 3 个旗舰模型（GPT/Claude/Gemini Pro）当陪审团，<strong>成本和 API 延迟直接 ×3</strong>。对要批量评几千份作文的场景，这是真约束。⚠️ 别被"陪审团听起来很厉害"带跑——<strong>架构选型必须算单份评分的成本和延迟预算</strong>。</div>
+      </div>
+
+      <h3>5.3 单模型 AES 的 baseline：先知道单模型能到哪，才知道多 agent 值不值</h3>
+      <p>在决定上不上多 agent 前，必须知道<strong>单模型作文评分（AES）现在能到什么水平</strong>（这样才能判断多 agent 的边际提升值不值那个成本）：</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>方法</th><th>QWK / 一致性</th><th>来源</th></tr></thead>
+          <tbody>
+            <tr><td>GPT-3.5 零样本评 TOEFL 作文</td><td>精确一致 54.3% / 相邻一致 89.2%</td><td><sup class="cite" data-refid="13">[13]</sup></td></tr>
+            <tr><td>Fine-tuned GPT</td><td>QWK 0.66 / 精确 78.3% / Pearson 0.68</td><td><sup class="cite" data-refid="13">[13]</sup></td></tr>
+            <tr><td>rubric 迭代精修（GPT-4.1/Gemini-2.5/Qwen-3）</td><td>QWK 增益 0.19（TOEFL11）/ 0.47（ASAP）</td><td><sup class="cite" data-refid="12">[12]</sup></td></tr>
+            <tr><td>专门 IELTS 模型 QwenScore+</td><td>trait 级 QWK 优于 BERT/GPT-3.5/GPT-4</td><td><sup class="cite" data-refid="12">[12]</sup></td></tr>
+            <tr><td>RoBERTa fine-tune（ELLIPSE）</td><td>overall QWK 0.8+（in-domain）</td><td><sup class="cite" data-refid="14">[14]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>读法</strong>：单模型 + 好校准/微调已经能到 QWK 0.66–0.8。多 agent 在这之上的边际提升通常是<strong>几个点</strong>（且主要在"识别弱作文"上）。所以<strong>多 agent 是"已有不错的单模型评分后的增强项"，不是"从零起步的捷径"</strong>。</p>
+
+      <h3>5.4 衔接半米已有的评分研究（交叉链接）</h3>
+      <div class="callout teal">
+        <p><strong>🔗 本板块和半米另外两份评分报告强相关，建议连起来读：</strong></p>
+        <ul>
+          <li>📊 <strong><a href="./eng-assessment-datasets-research.html" target="_blank" rel="noopener">AI 英语评分系统数据集深度调研 →</a></strong>：那份报告把 30+ 评分数据集做了 16 维 due diligence，结论是<strong>只有 ELLIPSE / speechocean762 等少数是"真人评分 + 可商用"</strong>。<strong>关键衔接</strong>：多 agent 陪审团<strong>本身不产生 ground truth</strong>——它只是聚合 LLM 的判断。要让陪审团的分数<strong>对齐人类标准</strong>，还是得靠那份报告认证的真人评分数据来做 §5.2 critic #1 说的 few-shot 校准。<strong>陪审团是"降方差"的，校准数据才是"对锚"的，两者缺一不可。</strong></li>
+          <li>🔬 <strong><a href="./banmi-cvla-audit-research.html" target="_blank" rel="noopener">banmi-cvla 工具 SOTA 审查 →</a></strong>：阿杰自建的难度评估工具审查。那份报告指出 banmi-cvla 是 <strong>2024 baseline（准度 ~65.7%）不是 2025 SOTA（LLM 微调 ≥80%）</strong>。<strong>关键衔接</strong>：多 agent 路线是 banmi-cvla 升级的<strong>候选增强</strong>之一，但那份报告给的<strong>第一优先级是 SetFit + CLEAR 数据微调小模型</strong>（$0.025 / 30 秒）——这跟本报告 critic #1"校准 &gt; 架构"完全一致。<strong>先把校准/微调做好，多 agent 再说。</strong></li>
+        </ul>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>📌 板块①小结</strong>：<span class="verdict-tag borrow">借鉴模式</span> 多 agent 评分陪审团<strong>方向对、有学界证据、是最值钱的板块</strong>，但<strong>① 不用 MiroFish 本体（无评分聚合 + AGPL）② 必须用不同模型家族避免伪多样性 ③ 必须独立打分不要辩论 ④ 校准数据优先级高于架构 ⑤ 用小模型 panel 控成本</strong>。具体第一步见第 12 章。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Ch6 板块二 口语陪练 ============ -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">板块②：口语对话 / 角色扮演陪练</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>思路：用<strong>多样性格/口音/角色的 AI 陪练</strong>，模拟真实对话场景（点餐 / 面试 / 辩论 / 旅行问路），让学生有个"千人千面"的练习对象。表面上很像 MiroFish 的"一群有性格的 agent"。</p>
+
+      <h3>6.1 学界证据：LLM 语言陪练有真实潜力，但有痛点 🟡</h3>
+      <ul>
+        <li>LLM 在角色扮演对话中能<strong>扮演文本描述的 persona</strong>，可作语言练习伙伴、在场景里给 scaffolding、对话后给反馈<sup class="cite" data-refid="15">[15]</sup>。ELLMA-T 等研究把 LLM agent 嵌入 social VR 支持英语学习<sup class="cite" data-refid="15">[15]</sup>。</li>
+        <li><strong>痛点</strong>：LLM <strong>缺乏真情感和细粒度角色意识</strong>，限制了个性化和多样性；用户反馈 agent <strong>难以适应对话节奏</strong>，长期学习效果仍待验证<sup class="cite" data-refid="15">[15]</sup>。persona 一致性是活跃研究方向（需要 persona-aware contrastive learning 等技术维持）<sup class="cite" data-refid="15">[15]</sup>。</li>
+      </ul>
+
+      <h3>6.2 关键判断：这个板块价值高，但 MiroFish 帮不上忙</h3>
+      <div class="callout bad">
+        <p><strong>⛔ MiroFish 不适合口语陪练，原因是机制错配：</strong></p>
+        <ul>
+          <li>口语陪练是 <strong>1 个学生 vs 1 个 AI 角色的实时对话</strong>（要低延迟、要 persona 稳定）；</li>
+          <li>MiroFish/OASIS 是 <strong>上千 agent 互相 follow/comment 的群体异步模拟</strong>（要数小时、产出是群体报告）；</li>
+          <li>这俩<strong>根本不是一种东西</strong>。用 MiroFish 做 1v1 陪练，等于<strong>用一个城市交通仿真器去当导航 App</strong>。</li>
+        </ul>
+      </div>
+
+      <h3>6.3 现成方案对比：直接用 GPT/Claude 多 prompt 完胜</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>方案</th><th>延迟</th><th>persona 多样性</th><th>成本</th><th>落地难度(单人)</th><th>结论</th></tr></thead>
+          <tbody>
+            <tr><td>直接 GPT/Claude 多 system prompt（每个角色一个 prompt）</td><td>🟢 秒级</td><td>🟢 够用(prompt 里写性格/口音/场景)</td><td>🟢 单次对话成本低</td><td>🟢 极低(几个 prompt)</td><td>✅ <strong>就用这个</strong></td></tr>
+            <tr><td>语音层加 TTS 多音色（模拟口音）</td><td>🟢 秒级</td><td>🟢 音色可选</td><td>🟡 TTS 有成本</td><td>🟡 中</td><td>✅ 锦上添花</td></tr>
+            <tr><td>上 MiroFish 这套群体模拟</td><td>🔴 小时级</td><td>🟡 有但用不上</td><td>🔴 高</td><td>🔴 高(改框架)</td><td>⛔ 不适合</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>📌 板块②小结</strong>：<span class="verdict-tag no">不用 MiroFish</span> 口语陪练是高价值板块，但<strong>现成的"GPT/Claude 多 prompt + 多音色 TTS"已经能很好地做出"多样性格/口音的陪练"</strong>，落地成本极低。MiroFish 的群体异步模拟机制与 1v1 实时陪练<strong>根本错配</strong>。<strong>唯一能从 MiroFish 借的</strong>，是它的 persona generation 思路——但那也只是"写好 system prompt"，不需要它的引擎。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Ch7 板块三 内容难度 ============ -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">板块③：内容难度 / 卡点预判</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>思路：<strong>模拟"某 CEFR 水平学生读者群"</strong>，预测一篇阅读材料 / 一道题对他们<strong>哪里会卡、难度是否合适</strong>。这能帮半米<strong>自动给海量内容分级 + 提前发现难点</strong>。这是 MiroFish "模拟一群读者的反应"<strong>真正能用上的主场</strong>。</p>
+
+      <h3>7.1 学界证据：LLM 模拟学生预测难度，有效但系统性偏高 🟡</h3>
+      <ul>
+        <li>LLM 可零样本/少样本读内容返回<strong>难度标量评分</strong>，映射到 CEFR / Rasch logits<sup class="cite" data-refid="16">[16]</sup>；也可让 LLM <strong>逐步推理"某年级学生能否读懂"</strong>来模拟理解<sup class="cite" data-refid="16">[16]</sup>。</li>
+        <li><strong>准度</strong>：LLM 在复杂度评估上<strong>MAE 约 1 个年级</strong>——可用但不精<sup class="cite" data-refid="16">[16]</sup>。</li>
+        <li>⚠️ <strong>系统性偏差</strong>：LLM <strong>倾向高估文本难度</strong><sup class="cite" data-refid="16">[16]</sup>。用一群 LLM 投票<strong>不会修正这个共同偏差</strong>（又是伪多样性问题——见 §10）。</li>
+      </ul>
+
+      <h3>7.2 致命风险：competence paradox（能力悖论）</h3>
+      <div class="critic-box">
+        <div class="label">CRITIC · 模拟学生 ≠ 真学生（学术记录）</div>
+        <div class="title">一个聪明模型被要求"装成只懂一半的学生"，本质不可靠</div>
+        <div class="body">论文 <em>Towards Valid Student Simulation with LLMs</em>（arXiv 2601.05473）提出 <strong>"competence paradox（能力悖论）"</strong>：一个广义能力很强的模型被要求<strong>扮演"部分懂、部分不懂"的学习者</strong>时，<strong>流畅的交互会掩盖不真实的错误模式和学习动态</strong><sup class="cite" data-refid="17">[17]</sup>。研究还发现：<strong>无引导时，强通用模型在每个年级都超过平均学生</strong>，现有模拟<strong>无法真实表现"真正有学习困难的学生"</strong><sup class="cite" data-refid="17">[17]</sup>。<br>👉 <strong>对半米的含义</strong>：用 AI 模拟"中国初二 B1 学生"读一篇材料会不会卡——<strong>AI 模拟出来的"卡点"很可能不是真学生的卡点</strong>。它可能流畅地"假装卡了一下"，但卡的位置和真实学习困难<strong>对不上</strong>。这个板块<strong>能用作初筛，但不能替代真学生小样本测试</strong>。</div>
+      </div>
+
+      <h3>7.3 半米怎么用（务实路线）</h3>
+      <div class="callout good">
+        <p><strong>✅ 可行的轻量用法（不用 MiroFish）</strong>：</p>
+        <ol>
+          <li><strong>少量 LLM persona 做初筛</strong>：给 2-3 个不同水平 persona（"刚到 B1 的中国初中生""母语 A2 小学生"）让 LLM 逐句标"这里可能卡：生词 X / 句式 Y / 文化背景 Z"。这<strong>几个 prompt 就能做</strong>，不需要 MiroFish 引擎。</li>
+          <li><strong>跟 banmi-cvla 难度分级结合</strong>：banmi-cvla 给出客观难度档（CEFR-J / Lexile），LLM persona 补充"主观卡点定性"。两者交叉验证，分歧大的材料标记人工复核。</li>
+          <li><strong>真学生兜底</strong>：competence paradox 决定了——<strong>最终难度判断必须有真学生小样本（哪怕 5 个 Danny 这样的真实用户）验证</strong>，AI 只做海量内容的初筛降本。</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>📌 板块③小结</strong>：<span class="verdict-tag borrow">谨慎借鉴</span> "模拟读者群预测卡点"是 MiroFish 思路<strong>最贴合的英语教育用例</strong>，能帮半米自动给海量内容初筛分级。但<strong>① LLM 系统性高估难度 ② competence paradox 决定模拟学生≠真学生</strong>。<strong>用法</strong>：少量 persona 做<strong>初筛降本</strong>，跟 banmi-cvla 客观难度交叉验证，真学生小样本兜底。<strong>不需要 MiroFish 引擎，几个 prompt + 现有难度工具即可。</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Ch8 板块四 教学法试错 ============ -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">板块④：教学法 / 课程设计低成本试错（最贴 MiroFish 原定位）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>思路：<strong>上真课前，先模拟"一个学生群体"对某教学设计 / 某节课的反应</strong>——哪个环节会无聊、哪个练习太难、哪种讲法学生更买账。这是 MiroFish "决策者的预演实验室，零风险试错"原定位<strong>最直接的教育投影</strong>。</p>
+
+      <h3>8.1 为什么这是"看着最美"的板块</h3>
+      <p>它最性感：一个人开发的半米，<strong>没有大量真学生可以反复 A/B 测试教学设计</strong>。如果能用 AI 模拟一个班的反应，听起来能极大加速课程迭代。MiroFish 的"双平台群体模拟 + ReportAgent 总结"几乎是<strong>为这个场景量身定做</strong>。</p>
+
+      <h3>8.2 为什么它其实最不划算（critic 集中）</h3>
+      <div class="critic-box">
+        <div class="label">CRITIC #1 · over-trust 是最大风险</div>
+        <div class="title">模拟学生的反应"看起来很合理"，但可能系统性误导课程设计</div>
+        <div class="body">competence paradox<sup class="cite" data-refid="17">[17]</sup> + LLM 思维同质化<sup class="cite" data-refid="6">[6]</sup> 叠加：模拟出来的"班级反应"是<strong>大模型预训练认知的投射</strong>，不是真实学生。更危险的是——它<strong>足够流畅可信，让人忍不住相信</strong>。阿杰一个人开发，如果<strong>基于 AI 模拟的"学生反馈"去定课程方向，可能整个迭代方向都被一个幻觉带偏</strong>，而且很难察觉（因为没有真学生 baseline 对照）。这比"工具不好用"危险得多。</div>
+      </div>
+
+      <div class="critic-box">
+        <div class="label">CRITIC #2 · 教育研究界明确警告</div>
+        <div class="title">把 LLM 当 proxy student 试题/试课，realism 远未达标</div>
+        <div class="body">教育 AI 研究指出：LLM 越来越多被当"代理学生"用于开发 ITS 和试题预测，但<strong>它们到底多大程度能模拟真学生，仍是 open question</strong><sup class="cite" data-refid="17">[17]</sup>；现有模拟<strong>常常无法真实表现有学习困难的学生</strong>。还有研究专门讨论<strong>"别忘了老师"——LLM 在教育中对教师的潜在伤害</strong>（如用模拟反馈替代真实教学判断）<sup class="cite" data-refid="18">[18]</sup>。</div>
+      </div>
+
+      <div class="critic-box medium">
+        <div class="label">CRITIC #3 · 成本/延迟不匹配迭代节奏</div>
+        <div class="title">一次模拟数小时 + ¥10 级成本，但产出是定性建议</div>
+        <div class="body">MiroFish 一次跑要数小时、烧 ¥10 量级<sup class="cite" data-refid="10">[10]</sup>，产出是<strong>一份"群体态度报告"（定性、泛）</strong>。对快速迭代教学设计，<strong>不如阿杰自己拿一个好 prompt 让 Claude 当"资深 ESL 教研员"直接审课纲</strong>——后者秒级、几分钱、而且产出更聚焦。</div>
+      </div>
+
+      <h3>8.3 务实判断</h3>
+      <div class="callout bad">
+        <p><strong>📌 板块④小结</strong>：<span class="verdict-tag no">看着美其实不划算</span> 这是 MiroFish 最贴定位的板块，但<strong>价值被 over-trust 风险严重稀释</strong>。模拟学生群反应<strong>足够可信到危险</strong>，可能让单人开发者的整个课程迭代被幻觉带偏却不自知。<strong>建议</strong>：① <strong>先别碰</strong>这个板块的"群体模拟"；② 如果想要"上课前的反馈"，用<strong>单个 Claude 当资深教研员审课纲</strong>（秒级、聚焦）远比群体模拟实用；③ 真正的教学反馈，<strong>还是要从 Danny 这样的真实学生身上拿</strong>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Ch9 直接用 vs 借鉴自建 ============ -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">直接用 vs 借鉴自建（决策树）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>半米是阿杰<strong>一个人全栈开发</strong>。这一章把"引入 MiroFish 框架"和"只借鉴多 agent 投票模式自己写几百行"放一起算账，给明确建议。</p>
+
+      <h3>9.1 引入 MiroFish 框架的真实代价</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>维度</th><th>引入 MiroFish 框架</th><th>借鉴模式自建（几百行）</th></tr></thead>
+          <tbody>
+            <tr><td><strong>协议风险</strong></td><td>🔴 AGPL-3.0 网络 copyleft，商业 SaaS 致命<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="11">[11]</sup></td><td>🟢 自己的代码，自己定协议</td></tr>
+            <tr><td><strong>维护风险</strong></td><td>🔴 v0.1.2 / 2 贡献者 / 仅 macOS 测过，上游随时变<sup class="cite" data-refid="6">[6]</sup></td><td>🟢 自己完全掌控</td></tr>
+            <tr><td><strong>依赖风险</strong></td><td>🔴 拖入 OASIS + Zep Cloud + GraphRAG 一整套重依赖</td><td>🟢 只依赖已有的 LLM API SDK</td></tr>
+            <tr><td><strong>机制匹配</strong></td><td>🔴 它没有评分聚合，要改大半</td><td>🟢 直接为评分写聚合逻辑</td></tr>
+            <tr><td><strong>跟半米现有代码衔接</strong></td><td>🔴 独立 Vue+Python web app，难嵌入</td><td>🟢 直接接 banmi-cvla / Assessment Engine</td></tr>
+            <tr><td><strong>能学到的好东西</strong></td><td>🟡 persona generation / GraphRAG 思路</td><td>🟡 同样能借鉴（读它的 prompt 设计）</td></tr>
+            <tr><td><strong>实现工作量</strong></td><td>🟡 看似省事其实要读懂 + 改 + 部署一整套</td><td>🟢 评分陪审团核心 = 几百行 + 几个 prompt</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>9.2 决策树</h3>
+      <div class="callout accent">
+        <p><strong>决策树（从上往下走）</strong></p>
+        <ol>
+          <li><strong>半米是商业产品吗？</strong> → 是 → MiroFish 的 AGPL <strong>直接否决"改它的代码并联网服务"</strong>。除非你愿意开源半米的衍生代码（你不愿意）。<strong>→ 走自建。</strong></li>
+          <li><strong>你要的是结构化评分（陪审团打分聚合）吗？</strong> → 是 → MiroFish <strong>没有这个机制</strong>，要自己加。既然核心逻辑都要自己写，<strong>→ 走自建</strong>，别背框架包袱。</li>
+          <li><strong>你要的是"群体定性反应模拟"（内容难度/教学法）吗？</strong> → 是 → 可以<strong>读 MiroFish 的 prompt/persona 设计借鉴思路</strong>，但实现上<strong>几个 persona prompt 就够</strong>，仍 → 自建。</li>
+          <li><strong>你只是想玩一下、看看群体模拟长啥样？</strong> → 是 → 那就<strong>本地 docker 跑官方 demo 体验</strong>，纯学习，不进半米生产。</li>
+        </ol>
+        <p><strong>结论：四条路径全部指向"借鉴模式 + 自建"。MiroFish 本体不进半米生产代码。</strong></p>
+      </div>
+
+      <h3>9.3 如果协议不允许商用（🅱️ 情况），自建路线怎么走</h3>
+      <p>这其实就是<strong>本报告推荐的默认路线</strong>（因为 AGPL 基本等于"不能直接用于商业半米"）。自建"评分陪审团"骨架（说明性，非要阿杰现在写）：</p>
+      <pre>JURORS = [
+  {"name": "Qwen-plus",  "client": qwen_client,   "weight": 1.0},
+  {"name": "Claude",     "client": claude_client, "weight": 1.2},  # 不同家族!
+  {"name": "Gemini-Flash","client": gemini_client, "weight": 1.0},
+]
+RUBRIC = load_rubric("ielts_task2")          # 带 few-shot 校准例子(每档2个)
+def jury_score(essay):
+    scores = []
+    for j in JURORS:                          # 并行调用
+        s = j["client"].grade(essay, RUBRIC, fewshot=CALIB)  # 独立打分,互不可见
+        scores.append((s, j["weight"]))
+    agg = weighted_trimmed_median(scores)     # 去极值 + 加权中位数,不辩论
+    disagreement = stdev([s for s,_ in scores])
+    if disagreement > THRESHOLD:              # 分歧大 → 升级
+        return escalate_to_human_or_4th_model(essay)
+    return agg</pre>
+      <p><strong>要点</strong>：① 用<strong>不同模型家族</strong>（避免伪多样性）② <strong>独立打分不辩论</strong>（避免偏差放大）③ <strong>带 few-shot 校准</strong>（校准&gt;架构）④ <strong>分歧检测 → 升级</strong>（省钱：大部分一致的样本不用人工）。整个东西<strong>是几百行，不是一个框架</strong>。</p>
+    </div>
+  </section>
+
+  <!-- ============ Ch10 多 agent 真实坑 ============ -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">多智能体方案的真实坑（critic 集中章）★★</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>多智能体方案听着很美。本章把<strong>所有真实的坑集中起来诚实摆出</strong>——这是阿杰单人开发、落地成本是真约束的前提下，最该看的一章。<strong>每个坑独立成框。</strong></p>
+
+      <div class="critic-box">
+        <div class="label">坑 #1 · 伪多样性（最隐蔽、最致命）</div>
+        <div class="title">"看似 5 个评委，其实是同一个脑子投了 5 次票"</div>
+        <div class="body">这是多 agent 评分<strong>最常被忽略的陷阱</strong>。如果用同一个 LLM + 不同 prompt 生成多个 agent，它们的判断<strong>高度相关</strong>——共享同样的预训练偏差、同样的盲点。投票的"独立性"是假的，所以<strong>降不了系统性偏差</strong>。PoLL 的有效性<strong>明确建立在"disjoint model families"上</strong><sup class="cite" data-refid="4">[4]</sup>。MiroFish 那种"一个模型克隆一群 agent"<strong>恰恰是伪多样性的典型</strong>。<strong>半米对策</strong>：陪审团必须跨模型家族（Qwen + Claude + Gemini + 开源模型），不能图省事用一个模型多 prompt。</div>
+      </div>
+
+      <div class="critic-box">
+        <div class="label">坑 #2 · 成本翻 N 倍（如果用错模型）</div>
+        <div class="title">陪审团默认比单模型贵，除非刻意用小模型</div>
+        <div class="body">N 个评委 = N 次 LLM 调用。如果都用旗舰模型，<strong>成本和延迟直接 ×N</strong>。好消息是 PoLL 证明<strong>用小模型 panel 反而比单个 GPT-4 便宜 7 倍且更准</strong><sup class="cite" data-refid="4">[4]</sup>——但这要<strong>刻意选型</strong>，不是自然就便宜。<strong>半米对策</strong>：陪审团用便宜小模型（Qwen-plus / Gemini Flash / 开源 7B），只在分歧大时升级到旗舰/人工。</div>
+      </div>
+
+      <div class="critic-box">
+        <div class="label">坑 #3 · 辩论放大偏差</div>
+        <div class="title">让 agent 互相说服 = 朝偏差方向 collapse</div>
+        <div class="body">EMNLP 2025：<strong>多 agent 辩论第一轮后放大偏差</strong><sup class="cite" data-refid="7">[7]</sup>。直觉上"让评委讨论达成共识"更好，实际上<strong>讨论会破坏独立性</strong>，让群体往位置偏差/冗长偏差指向的方向收敛。<strong>半米对策</strong>：<strong>独立打分 + 机械聚合（中位数/去极值）</strong>，不要让评委互相看到彼此的分数或辩论。MiroFish 的"自由互动"在这里是反模式。</div>
+      </div>
+
+      <div class="critic-box medium">
+        <div class="label">坑 #4 · 延迟（实时场景的硬伤）</div>
+        <div class="title">并行 N 个调用，延迟取决于最慢那个 + 聚合</div>
+        <div class="body">即使并行调用，陪审团延迟 = max(各模型延迟) + 聚合。对<strong>批量离线评分</strong>（如夜里批改作业）无所谓；但对<strong>学生即时提交立刻要分</strong>的场景，多模型会让等待变长。MiroFish 那种<strong>小时级</strong>延迟<sup class="cite" data-refid="10">[10]</sup>更是完全不能用于实时。<strong>半米对策</strong>：评分陪审团只用于<strong>异步/批量场景</strong>；实时反馈用单个快模型，事后陪审团复核。</div>
+      </div>
+
+      <div class="critic-box medium">
+        <div class="label">坑 #5 · over-trust（流畅 ≠ 正确）</div>
+        <div class="title">多 agent 报告"看起来很专业"，掩盖底层全是 LLM 投射</div>
+        <div class="body">MiroFish 整个推演体系本质是<strong>"大模型预训练认知的投射"，存在无法消除的系统性偏差</strong><sup class="cite" data-refid="6">[6]</sup>。多个 agent 产出一份结构精美的报告，<strong>会显著提升人对结论的信任度</strong>——哪怕结论是错的。对评分场景，<strong>一份"5 个评委一致给 6.5 分"的报告，会让人忘了这 5 个评委可能共享同一个偏差</strong>。<strong>半米对策</strong>：永远用<strong>真人评分数据校准</strong>陪审团（见第 5 章交叉链接），定期抽样人工复核，不被"群体一致"的表象麻痹。</div>
+      </div>
+
+      <div class="critic-box low">
+        <div class="label">坑 #6 · rubric 一致性 vs 发散</div>
+        <div class="title">评分要的是一致性，多 agent 的"发散"是噪声不是优点</div>
+        <div class="body">阿杰问得很对：对作文/口语评分这种<strong>需要 rubric 一致性</strong>的场景，多 agent 发散到底是优点还是噪声？<strong>答案：取决于聚合方式</strong>。如果让 agent <strong>各自从不同维度（内容/结构/语言）打分再按 rubric 合成</strong>（如 ASAP2.0 那篇的 Chairman + veto<sup class="cite" data-refid="5">[5]</sup>），发散是<strong>有结构的、是优点</strong>；如果只是"5 个全科评委各给个总分取平均"，那发散更多是<strong>噪声</strong>。<strong>半米对策</strong>：要做就做<strong>"分维度专家 + 规则合成"</strong>，不要做"多个全科评委平均"。</div>
+      </div>
+
+      <div class="callout info">
+        <p><strong>本章一句话</strong>：多 agent 评分能 work，但有<strong>一整套必须遵守的纪律</strong>（跨家族、独立打分、机械聚合、小模型控成本、真人校准、分维度专家）。<strong>违反任何一条，多 agent 就从"降方差"退化成"更贵的同一个错误"</strong>。MiroFish 的设计<strong>几乎违反了其中大部分</strong>（同源 agent、自由辩论、无评分聚合）——这就是为什么半米要的是<strong>这套纪律，不是 MiroFish。</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Ch11 mini demo ============ -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">mini demo：多 agent 评分陪审团模拟器（可玩）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout warn">
+        <p><strong>⚠️ 这是概念演示，不是真模型</strong>。下面的"评委打分"是<strong>前端写死的启发式 + 随机扰动</strong>，目的是<strong>直观演示"陪审团降方差"和"伪多样性 vs 真多样性"的区别</strong>，<strong>不代表真实评分能力</strong>。真实系统必须用真人评分数据校准（见第 5 章）。</p>
+      </div>
+
+      <div class="demo-host">
+        <h4>🐟 评分陪审团模拟器</h4>
+        <p style="font-size:13px;color:var(--text-mute);margin:0 0 8px;">输入一段作文片段 → 看 5 个 AI 评委各打分 → 聚合。切换"伪多样性 / 真多样性"看方差和偏差怎么变。</p>
+        <textarea class="demo-ta" id="demoEssay">Education is very important for the future. In my opinion, students should learn many subjects because knowledge is power. Although some people think exams are stressful, I believe they help us improve. In conclusion, education changes life.</textarea>
+        <div class="demo-row">
+          <div class="demo-chip-group">
+            <span class="label">陪审团类型</span>
+            <span class="demo-chip active" data-mode="real">真多样性（跨模型家族）</span>
+            <span class="demo-chip" data-mode="fake">伪多样性（同模型克隆）</span>
+          </div>
+        </div>
+        <div class="demo-row">
+          <div class="demo-chip-group">
+            <span class="label">题型</span>
+            <span class="demo-chip active" data-rubric="ielts">IELTS Task2 (0-9)</span>
+            <span class="demo-chip" data-rubric="cefr">CEFR (A1-C2)</span>
+          </div>
+          <button class="btn" id="demoRun" style="margin-left:auto;">▶ 召集陪审团评分</button>
+        </div>
+        <div class="demo-output" id="demoOut">
+          <div class="out-h">点上面的按钮开始 →</div>
+        </div>
+      </div>
+
+      <h3>这个 demo 在演示什么（看完再玩一次）</h3>
+      <ul>
+        <li><strong>切到"伪多样性"</strong>：5 个评委分数<strong>挤在一起</strong>（标准差小），看起来"很一致很可信"——但它们<strong>共享同一个偏差</strong>（都偏高或都偏低），聚合值<strong>没修正偏差</strong>。这就是 MiroFish 式陪审团的陷阱。</li>
+        <li><strong>切到"真多样性"</strong>：5 个评委分数<strong>更分散</strong>（不同家族有不同视角），但<strong>去极值 + 中位数聚合后，偏差被相互抵消</strong>，聚合值更接近"真值"。<strong>分散是健康的</strong>。</li>
+        <li><strong>分歧检测</strong>：demo 会标出"分歧大→建议升级人工"——这是省钱的关键（大部分一致的样本自动通过）。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ Ch12 半米落地路线 ============ -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">半米落地路线建议（最该先试哪个窄切口 + 具体第一步）★★</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout accent">
+        <p><strong>铁律：先一个窄的跑通，不要四个板块一起上。</strong>下面给阿杰<strong>唯一推荐的窄切口</strong>+ 可执行第一步，再给"该放弃的"和"以后再说的"。</p>
+      </div>
+
+      <h3>12.1 最该先试的窄切口：测评板块的「双模型作文复评 + 分歧检测」</h3>
+      <div class="callout good">
+        <p><strong>为什么是这个（不是完整的 5 评委陪审团）：</strong></p>
+        <ul>
+          <li><strong>价值最高</strong>：测评是半米核心难点 + 最值钱（见第 4、5 章）；</li>
+          <li><strong>最窄</strong>：不是上 5 个评委，而是<strong>在现有单模型评分上，只加第二个不同家族的模型做独立复评</strong>——增量最小；</li>
+          <li><strong>风险最低</strong>：双模型一致 → 直接采信；分歧大 → 才升级（人工或第三模型）。<strong>大部分作文双模型会一致，所以增量成本很小</strong>；</li>
+          <li><strong>立刻能验证收益</strong>：跑一批有真人分数的作文（用 <a href="./eng-assessment-datasets-research.html" target="_blank" rel="noopener">数据集报告</a> 里的 ELLIPSE），对比"单模型 vs 双模型"的 QWK，<strong>有没有提升一目了然</strong>。</li>
+        </ul>
+      </div>
+
+      <h3>12.2 具体第一步（1-2 天能跑通）</h3>
+      <ol>
+        <li><strong>选两个不同家族的模型</strong>：比如 Qwen-plus（国产、便宜、已是 MiroFish 推荐）+ Claude（不同家族）。<strong>关键是不同家族，避免伪多样性</strong>。</li>
+        <li><strong>写一份带 few-shot 校准的 rubric prompt</strong>：每个分数档放 2 个标注好的例文（校准 &gt; 架构，见 critic #1）。两个模型用<strong>同一份 rubric、独立打分、互不可见</strong>。</li>
+        <li><strong>取一小批有真人分数的作文</strong>（ELLIPSE 50-100 篇）跑实验：算 ① 单模型 A 的 QWK ② 单模型 B 的 QWK ③ 双模型聚合（均值/分歧时取人工）的 QWK。</li>
+        <li><strong>看分歧分布</strong>：统计"两模型分差 ≤ 0.5 档"的比例（这部分自动通过），和"分差大"的比例（需升级）。<strong>这决定了陪审团的实际增量成本</strong>。</li>
+        <li><strong>判断收益</strong>：如果双模型 QWK 比最好的单模型<strong>提升明显（哪怕几个点）且分歧率可控</strong> → 值得扩到 3 模型；如果提升微弱 → <strong>说明校准/微调才是瓶颈，回去做数据，别堆 agent</strong>。</li>
+      </ol>
+
+      <div class="callout info">
+        <p><strong>这一步最妙的地方</strong>：它<strong>同时验证了"多 agent 评分对半米到底有没有用"这个根本问题</strong>。无论结果是 yes 还是 no，阿杰都用 1-2 天 + 几块钱 API 费<strong>买到了一个明确答案</strong>，而不是凭"听起来很厉害"就投入。这比部署 MiroFish 玩一个月再发现不适用，<strong>省了几个数量级的时间</strong>。</p>
+      </div>
+
+      <h3>12.3 该放弃的 / 以后再说的</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>板块/动作</th><th>建议</th><th>理由</th></tr></thead>
+          <tbody>
+            <tr><td>部署 MiroFish 本体进半米</td><td>⛔ 放弃</td><td>AGPL + 无评分机制 + 10 天原型，三重否决</td></tr>
+            <tr><td>板块④教学法群体模拟</td><td>⛔ 先别碰</td><td>over-trust 风险最大，价值最低，可能带偏整个迭代方向</td></tr>
+            <tr><td>板块②口语陪练上 MiroFish</td><td>⛔ 不需要</td><td>现成 GPT/Claude 多 prompt 已完胜，机制错配</td></tr>
+            <tr><td>板块③内容难度 persona 初筛</td><td>🟡 以后再说</td><td>有价值但要先把测评做好；做时几个 prompt 即可，不用 MiroFish</td></tr>
+            <tr><td>本地 docker 跑 MiroFish demo</td><td>🟢 想了解可以玩</td><td>纯学习"群体模拟长啥样"，不进生产，零风险</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>12.4 一张图总结半米该怎么对待 MiroFish</h3>
+      <div class="callout purple">
+        <p><strong>MiroFish 给半米的真正价值，是一个"提醒"而非一个"工具"</strong>：它提醒阿杰——<strong>"多个 AI 视角聚合 &gt; 单个 AI"这个范式，在评分上有真实价值</strong>。但实现这个范式，半米要走的是<strong>学界更成熟的 PoLL/陪审团路线（自建、跨家族、独立打分、真人校准）</strong>，而不是 MiroFish 那个为社会舆情模拟焊死的、AGPL 的、10 天原型。<strong>借它的"道"，不用它的"器"。</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Ch13 FAQ ============ -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">FAQ 12 条</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">一句话，MiroFish 到底能不能用到半米？</span><span class="toggle">+</span></div><div class="faq-a"><strong>本体不能（AGPL + 不是评分引擎 + 10 天原型），但它代表的"多 agent 投票"思路能借鉴，最该用在测评板块。</strong>实现要自建、走学界更成熟的 PoLL 路线，不引入 MiroFish 这个依赖。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">MiroFish 是通用框架（🅰️）还是绑死预测（🅱️）？</span><span class="toggle">+</span></div><div class="faq-a">偏 🅱️（约 70%）。它的引擎 OASIS 是为"社交媒体舆情/群体模拟"设计的，换场景配置几乎不变（实测发现跑社会事件和跑动漫预测用几乎相同配置）<sup class="cite" data-refid="10">[10]</sup>。LLM 后端可换、persona 生成模块可复用算是 🅰️ 的影子，但<strong>缺少评分最需要的"结构化聚合"那一层</strong>。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">AGPL-3.0 到底卡在哪？我自己用不行吗？</span><span class="toggle">+</span></div><div class="faq-a">AGPL <strong>允许商用</strong>，但 §13 规定：<strong>只要你改了它的代码并通过网络让用户使用，就必须向这些用户公开你的（衍生）源码</strong><sup class="cite" data-refid="11">[11]</sup>。半米是商业 SaaS，学生通过网络用，这等于<strong>逼半米开源自己的代码</strong>——对要建壁垒的产品是致命的。连 Google 都<strong>全面禁止使用 AGPL 代码</strong><sup class="cite" data-refid="11">[11]</sup>。自己内部研究/玩没问题，进商业生产不行。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">"一群 AI 当评委"真的比单个模型评分更准吗？</span><span class="toggle">+</span></div><div class="faq-a"><strong>有条件地是。</strong>Cohere 的 PoLL 证明小模型 panel 比单 GPT-4 更准、偏差更小、便宜 7 倍<sup class="cite" data-refid="4">[4]</sup>；作文评分多 agent 研究也显示全维度优于单 agent<sup class="cite" data-refid="5">[5]</sup>。<strong>但前提是评委来自不同模型家族</strong>，且独立打分不辩论。同模型多 prompt 的"伪多样性"没用。而且 few-shot 校准带来的提升（~26% QWK）比多 agent 本身大<sup class="cite" data-refid="5">[5]</sup>——<strong>校准优先级更高</strong>。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">什么是"伪多样性"？为什么对半米这么重要？</span><span class="toggle">+</span></div><div class="faq-a">用<strong>同一个 LLM + 不同 prompt</strong> 造一堆"评委"，它们共享同样的预训练偏差和盲点，判断高度相关——<strong>看似 5 个评委，其实是同一个脑子投了 5 票</strong>。这种投票<strong>降不了系统性偏差</strong>（5 个都偏高，结果还是偏高）。MiroFish 恰恰是这种模式。半米要<strong>真多样性</strong>：跨模型家族（Qwen + Claude + Gemini + 开源），这才是 PoLL 有效的命门<sup class="cite" data-refid="4">[4]</sup>。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">陪审团是不是一定比单模型贵很多？</span><span class="toggle">+</span></div><div class="faq-a"><strong>不一定。</strong>PoLL 用小模型 panel 反而比单个 GPT-4 便宜 7 倍且更准<sup class="cite" data-refid="4">[4]</sup>。关键是<strong>别用旗舰模型组队</strong>。半米可以用便宜小模型当评委，只在"双模型分歧大"时才升级到旗舰/人工——大部分一致的样本自动通过，<strong>增量成本很小</strong>。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">让 AI 评委互相讨论达成共识，是不是更好？</span><span class="toggle">+</span></div><div class="faq-a"><strong>反而更糟。</strong>EMNLP 2025 发现多 agent 辩论<strong>第一轮后会放大偏差</strong><sup class="cite" data-refid="7">[7]</sup>——讨论破坏了独立性，让群体往位置/冗长偏差方向收敛。正确做法是<strong>独立打分 + 机械聚合（去极值中位数）</strong>，评委之间互不可见。MiroFish 的"自由互动/辩论"在评分场景是反模式。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">用 AI 模拟学生预测内容难度/教学反应，靠谱吗？</span><span class="toggle">+</span></div><div class="faq-a"><strong>能初筛，不能替代真学生。</strong>学界的"competence paradox"指出：一个聪明模型扮演"半懂的学生"时，流畅交互会掩盖不真实的错误模式，且模拟<strong>无法真实表现真正有学习困难的学生</strong><sup class="cite" data-refid="17">[17]</sup>。LLM 还系统性<strong>高估文本难度</strong><sup class="cite" data-refid="16">[16]</sup>。用作海量内容初筛降本 OK，但最终难度/教学判断必须有真学生（哪怕 5 个）兜底。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">口语陪练能用 MiroFish 做"多性格 AI 陪练"吗？</span><span class="toggle">+</span></div><div class="faq-a"><strong>不需要，机制错配。</strong>口语陪练是 1v1 实时对话（要秒级延迟、persona 稳定）；MiroFish 是上千 agent 异步群体模拟（要数小时、产出群体报告）。直接用 <strong>GPT/Claude 多 system prompt + 多音色 TTS</strong> 就能做出多样性格/口音的陪练，落地成本极低<sup class="cite" data-refid="15">[15]</sup>。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">MiroFish 的"预测万物"是真的吗？陈天桥投 3000 万说明它很强？</span><span class="toggle">+</span></div><div class="faq-a">投资<strong>真实</strong>（多权威媒体确认）<sup class="cite" data-refid="9">[9]</sup>，但<strong>"预测万物"被吹大了</strong>。实测显示它常常<strong>没在预测，只是模拟一群人对某事的态度+总结共识</strong><sup class="cite" data-refid="10">[10]</sup>；<strong>无任何公开 benchmark</strong> 对比预测 vs 真实结果<sup class="cite" data-refid="6">[6]</sup>。投资更多是看好"超级个体 + 范式 + 团队"，不等于产品已验证。它现在是<strong>有想象力的原型/概念验证</strong>，不是经过验证的预测终端。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">那 MiroFish 对半米有没有任何正面价值？</span><span class="toggle">+</span></div><div class="faq-a">有，<strong>价值在"道"不在"器"</strong>：① 提醒阿杰"多 AI 视角聚合 &gt; 单 AI"这个范式在评分上有真实价值；② 它的 <strong>persona generation / GraphRAG prompt 设计</strong>可以读源码借鉴；③ 它推荐 <strong>qwen-plus（国产、对国内友好）</strong>这个选型对半米也适用。但这些都是"读它学思路"，不是"装它进生产"。</div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q12</span><span class="qtext">如果只做一件事，阿杰该做什么？</span><span class="toggle">+</span></div><div class="faq-a"><strong>测评板块的"双模型作文复评 + 分歧检测"实验</strong>（第 12 章）。用 Qwen-plus + Claude（不同家族）+ few-shot 校准 rubric，跑 50-100 篇有真人分数的 ELLIPSE 作文，对比单模型 vs 双模型的 QWK。<strong>1-2 天、几块钱、买到"多 agent 评分对半米到底有没有用"的明确答案</strong>。无论 yes/no 都比凭感觉投入强。</div></div>
+    </div>
+  </section>
+
+  <!-- ============ Ch14 References ============ -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">References</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13px;color:var(--text-mute);">访问日期统一 2026-05-28。🟢 多源验证 / 🟡 单源 / 🔴 估算。hover/点击正文 <sup class="cite" data-refid="1">[N]</sup> 可弹窗看来源。</p>
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://github.com/666ghj/MiroFish" target="_blank" rel="noopener">GitHub — 666ghj/MiroFish: A Simple and Universal Swarm Intelligence Engine（含 README / README-ZH / LICENSE AGPL-3.0）</a><span class="ref-meta">· 2026-05-28 · 引用 12 次 · 🟢</span></li>
+        <li id="ref-2"><a href="https://github.com/camel-ai/oasis" target="_blank" rel="noopener">GitHub — camel-ai/oasis: OASIS: Open Agent Social Interaction Simulations with One Million Agents（MiroFish 的仿真引擎）</a><span class="ref-meta">· 2026-05-28 · 引用 3 次 · 🟢</span></li>
+        <li id="ref-3"><a href="https://arxiv.org/abs/2411.11581" target="_blank" rel="noopener">arXiv:2411.11581 — OASIS: Open Agent Social Interaction Simulations with One Million Agents（CAMEL-AI）</a><span class="ref-meta">· 2026-05-28 · 引用 5 次 · 🟢</span></li>
+        <li id="ref-4"><a href="https://arxiv.org/abs/2404.18796" target="_blank" rel="noopener">arXiv:2404.18796 — Replacing Judges with Juries: Evaluating LLM Generations with a Panel of Diverse Models（Cohere, PoLL）</a><span class="ref-meta">· 2026-05-28 · 引用 7 次 · 🟢</span></li>
+        <li id="ref-5"><a href="https://arxiv.org/abs/2601.22386" target="_blank" rel="noopener">arXiv:2601.22386 — Specialists or Generalists? Multi-Agent and Single-Agent LLMs for Essay Grading（ASAP2.0 / GPT-5.1）</a><span class="ref-meta">· 2026-05-28 · 引用 6 次 · 🟢</span></li>
+        <li id="ref-6">MiroFish 技术解析与局限性评价（知乎 + 博客园 + 人人都是产品经理，多篇交叉）
+          <span class="ref-meta">· 2026-05-28 · 引用 7 次 · 🟢 多源</span>
+          <ul>
+            <li><a href="https://zhuanlan.zhihu.com/p/2016788410640135889" target="_blank" rel="noopener">MiroFish 深度技术解析：用数千 AI 智能体构建平行数字世界 — 知乎</a></li>
+            <li><a href="https://www.cnblogs.com/informatics/p/19704252" target="_blank" rel="noopener">当 AI 学会"造世界"——从 MiroFish 看群体智能预测的可能与不可能 — 博客园</a></li>
+            <li><a href="https://www.woshipm.com/ai/6365813.html" target="_blank" rel="noopener">一个开源项目突然爆火，MiroFish 真的能"预测未来"吗？ — 人人都是产品经理</a></li>
+          </ul>
+        </li>
+        <li id="ref-7"><a href="https://aclanthology.org/2025.findings-emnlp.1361.pdf" target="_blank" rel="noopener">EMNLP 2025 Findings — 多 agent 辩论框架在第一轮后放大偏差 / Rating Roulette 自不一致（LLM-as-Judge 偏差研究）</a><span class="ref-meta">· 2026-05-28 · 引用 4 次 · 🟢</span></li>
+        <li id="ref-8"><a href="https://www.emergentmind.com/topics/llm-as-a-judge-evaluations" target="_blank" rel="noopener">LLM-as-a-Judge Evaluations — Fleiss κ≈0.3 / 位置偏差 / 冗长偏差 / MAJ-Eval persona 辩论 Spearman 0.47（综述）</a><span class="ref-meta">· 2026-05-28 · 引用 4 次 · 🟡</span></li>
+        <li id="ref-9">陈天桥 3000 万投资 + 作者郭航江/BaiFu 背景（多家权威媒体交叉验证）
+          <span class="ref-meta">· 2026-05-28 · 引用 7 次 · 🟢 多源</span>
+          <ul>
+            <li><a href="https://36kr.com/p/3715147673006213" target="_blank" rel="noopener">00 后 10 天 AI 编程，陈天桥 24 小时砸 3000 万 — 36 氪</a></li>
+            <li><a href="https://caifuhao.eastmoney.com/news/20260309112640076912740" target="_blank" rel="noopener">大四学生 AI 项目登 GitHub 榜首，获陈天桥 3000 万投资 — 东方财富网</a></li>
+            <li><a href="https://www.donews.com/news/detail/4/6457021.html" target="_blank" rel="noopener">大四学生郭航江新作 MiroFish 再登 GitHub 全球榜首 — DoNews</a></li>
+            <li><a href="https://www.qbitai.com/2026/03/384728.html" target="_blank" rel="noopener">20 岁大学生花 10 天 VibeCoding 获盛大 3000 万投资 — 量子位</a></li>
+            <li><a href="https://github.com/666ghj/BettaFish" target="_blank" rel="noopener">GitHub — 666ghj/BettaFish（微舆，同作者前作多 Agent 舆情工具）</a></li>
+          </ul>
+        </li>
+        <li id="ref-10"><a href="https://m.aitntnews.com/newDetail.html?newId=23333" target="_blank" rel="noopener">新「上帝之手」MiroFish，干爆 Polymarket，其实只是个壳？｜附全面实测（实测 2 案例 / 6 小时 / 烧 2 张 Gemini 周卡 / 预测价值≈0）</a><span class="ref-meta">· 2026-05-28 · 引用 6 次 · 🟡 单源实测</span></li>
+        <li id="ref-11">AGPL-3.0 协议条款与商用/网络 copyleft 解读（FSF 原文 + 多解读）
+          <span class="ref-meta">· 2026-05-28 · 引用 3 次 · 🟢 多源</span>
+          <ul>
+            <li><a href="https://www.gnu.org/licenses/agpl-3.0.en.html" target="_blank" rel="noopener">GNU Affero General Public License v3.0 — FSF 官方原文</a></li>
+            <li><a href="https://fossa.com/blog/open-source-software-licenses-101-agpl-license/" target="_blank" rel="noopener">Open Source Software Licenses 101: The AGPL License — FOSSA（§13 网络 copyleft / Google 禁用）</a></li>
+            <li><a href="https://www.revenera.com/blog/software-composition-analysis/understanding-the-saas-loophole-in-gpl/" target="_blank" rel="noopener">Understanding the SaaS Loophole in GPL — Revenera</a></li>
+          </ul>
+        </li>
+        <li id="ref-12">单模型 AES 与 rubric 精修（QWK 增益 0.19-0.47 / QwenScore+）
+          <span class="ref-meta">· 2026-05-28 · 引用 3 次 · 🟢 多源</span>
+          <ul>
+            <li><a href="https://arxiv.org/pdf/2510.09030" target="_blank" rel="noopener">arXiv:2510.09030 — Automated Refinement of Essay Scoring Rubrics via Reflect-and-Revise</a></li>
+            <li><a href="https://www.tandfonline.com/doi/full/10.1080/09588221.2025.2518430" target="_blank" rel="noopener">Enhancing GPT-based AES: fine-tuning + linguistic complexity — Computer Assisted Language Learning 2025</a></li>
+          </ul>
+        </li>
+        <li id="ref-13"><a href="https://onlinelibrary.wiley.com/doi/10.1002/tesq.3405" target="_blank" rel="noopener">AES With GPT-4 for a Local Placement Test: Prompting Strategies, Intra-Rater Reliability — TESOL Quarterly 2025（含 GPT-3.5 零样本 54.3%/89.2%、fine-tuned QWK 0.66）</a><span class="ref-meta">· 2026-05-28 · 引用 2 次 · 🟢</span></li>
+        <li id="ref-14"><a href="https://arxiv.org/abs/2406.01198" target="_blank" rel="noopener">arXiv:2406.01198 — Automatic Essay Multi-dimensional Scoring（ELLIPSE 训练 RoBERTa，overall QWK 0.8+）</a><span class="ref-meta">· 2026-05-28 · 引用 1 次 · 🟢</span></li>
+        <li id="ref-15">LLM 语言陪练 / role-play persona（多篇 arXiv）
+          <span class="ref-meta">· 2026-05-28 · 引用 4 次 · 🟢 多源</span>
+          <ul>
+            <li><a href="https://arxiv.org/pdf/2407.03974" target="_blank" rel="noopener">arXiv:2407.03974 — LLM Roleplay: Simulating Human-Chatbot Interaction</a></li>
+            <li><a href="https://arxiv.org/html/2410.02406v1" target="_blank" rel="noopener">arXiv:2410.02406 — ELLMA-T: Embodied LLM-agent for English Language Learning in Social VR</a></li>
+            <li><a href="https://arxiv.org/abs/2503.17662" target="_blank" rel="noopener">arXiv:2503.17662 — Enhancing Persona Consistency for LLMs' Role-Playing</a></li>
+          </ul>
+        </li>
+        <li id="ref-16">LLM 文本难度预测 / 学生模拟（MAE~1 grade / 高估难度）
+          <span class="ref-meta">· 2026-05-28 · 引用 4 次 · 🟢 多源</span>
+          <ul>
+            <li><a href="https://www.emergentmind.com/topics/llm-based-difficulty-prediction" target="_blank" rel="noopener">LLM-Based Difficulty Prediction — EmergentMind（CEFR/Rasch 映射 / 学生模拟）</a></li>
+            <li><a href="https://arxiv.org/html/2406.12787v1" target="_blank" rel="noopener">arXiv:2406.12787 — Generating Educational Materials with Different Levels of Readability using LLMs</a></li>
+            <li><a href="https://link.springer.com/chapter/10.1007/978-3-032-03870-8_20" target="_blank" rel="noopener">Improving Text Readability to Support Student Comprehension: An LLM-Powered Approach — Springer</a></li>
+          </ul>
+        </li>
+        <li id="ref-17"><a href="https://arxiv.org/html/2601.05473v1" target="_blank" rel="noopener">arXiv:2601.05473 — Towards Valid Student Simulation with Large Language Models（competence paradox / 模拟学生≠真学生）</a><span class="ref-meta">· 2026-05-28 · 引用 4 次 · 🟢</span></li>
+        <li id="ref-18"><a href="https://arxiv.org/html/2502.14592v1" target="_blank" rel="noopener">arXiv:2502.14592 — "Don't Forget the Teachers": Educator-Centered Understanding of Harms from LLMs in Education</a><span class="ref-meta">· 2026-05-28 · 引用 1 次 · 🟡</span></li>
+        <li id="ref-19"><a href="https://arxiv.org/abs/2507.08232" target="_blank" rel="noopener">arXiv:2507.08232 — Can LLMs Reliably Simulate Real Students' Abilities in Mathematics and Reading Comprehension?</a><span class="ref-meta">· 2026-05-28 · 引用 0 次（佐证）· 🟡</span></li>
+        <li id="ref-20"><a href="https://docs.oasis.camel-ai.org/introduction" target="_blank" rel="noopener">OASIS Documentation — Introduction（CAMEL-AI，21 actions / RecSys / Time Engine 架构）</a><span class="ref-meta">· 2026-05-28 · 引用 0 次（佐证）· 🟢</span></li>
+        <li id="ref-21"><a href="https://www.comet.com/site/blog/llm-juries-for-evaluation/" target="_blank" rel="noopener">LLM Juries for Evaluation — Comet（陪审团工程实践 / 聚合策略）</a><span class="ref-meta">· 2026-05-28 · 引用 0 次（佐证）· 🟡</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <footer>
+    <p>MiroFish（秒鱼）能否用于半米英语学习系统 · 可行性与落地板块研究 · L2 Deep Research + Critic 强化 · 偏落地</p>
+    <p>无忌 for 阿杰 · 2026-05-28 · 半米研究中心第 23 份 · <a href="./index.html" style="color:var(--accent);">← 回研究中心</a></p>
+    <p style="font-size:12px;margin-top:8px;">⚠️ 本报告区分"外部查实事实"（带 citation）与"我对半米的推演建议"（标 🔴/我的判断）。MiroFish 架构/协议已查实；多 agent 评分效果有学界证据支撑；critic 诚实，不吹。</p>
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+<script>
+(function() {
+  // ---- Theme ----
+  var root = document.body;
+  var saved = localStorage.getItem('mirofish-theme');
+  if (saved) root.setAttribute('data-theme', saved);
+  var tBtn = document.getElementById('themeToggle');
+  function syncIcon(){ tBtn.textContent = root.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙'; }
+  syncIcon();
+  tBtn.addEventListener('click', function(){
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('mirofish-theme', next);
+    syncIcon();
+  });
+
+  // ---- Progress bar ----
+  var prog = document.getElementById('progress');
+  function onScroll(){
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    prog.style.width = (max > 0 ? (h.scrollTop / max * 100) : 0) + '%';
+    var bt = document.getElementById('backToTop');
+    if (h.scrollTop > 600) bt.classList.add('show'); else bt.classList.remove('show');
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  // ---- Back to top ----
+  document.getElementById('backToTop').addEventListener('click', function(){
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  // ---- Chapter collapse ----
+  document.querySelectorAll('section.chapter > h2').forEach(function(h){
+    h.addEventListener('click', function(){ h.parentElement.classList.toggle('collapsed'); });
+  });
+
+  // ---- FAQ ----
+  document.querySelectorAll('.faq-q').forEach(function(q){
+    q.addEventListener('click', function(){ q.parentElement.classList.toggle('open'); });
+  });
+
+  // ---- Anchor nav highlight ----
+  var links = Array.prototype.slice.call(document.querySelectorAll('.anchor-list a'));
+  var sections = links.map(function(a){ return document.getElementById(a.getAttribute('data-target')); });
+  function highlight(){
+    var pos = window.scrollY + 120, idx = 0;
+    for (var i=0;i<sections.length;i++){ if (sections[i] && sections[i].offsetTop <= pos) idx = i; }
+    links.forEach(function(a,i){
+      if (i===idx){ a.classList.add('active'); a.scrollIntoView({block:'nearest', inline:'center'}); }
+      else a.classList.remove('active');
+    });
+  }
+  window.addEventListener('scroll', highlight, {passive:true});
+  highlight();
+
+  // ---- Popover citations ----
+  var activePopover = null, activeTrigger = null, hideTimer = null;
+  function getRefContent(refid){ var el = document.getElementById('ref-' + refid); return el ? el.innerHTML : null; }
+  function positionPopover(pop, trigger){
+    var r = trigger.getBoundingClientRect();
+    var popW = pop.offsetWidth, popH = pop.offsetHeight;
+    var left = r.left + window.scrollX;
+    if (left + popW > window.innerWidth - 12) left = window.innerWidth - popW - 12;
+    if (left < 12) left = 12;
+    var top = r.bottom + window.scrollY + 6;
+    if (r.bottom + popH > window.innerHeight - 12 && r.top > popH + 12) top = r.top + window.scrollY - popH - 6;
+    pop.style.left = left + 'px'; pop.style.top = top + 'px';
+  }
+  function showPopover(trigger){
+    if (activeTrigger === trigger && activePopover) return;
+    if (activePopover){ activePopover.remove(); activePopover = null; }
+    var content = getRefContent(trigger.getAttribute('data-refid'));
+    if (!content) return;
+    var pop = document.createElement('div');
+    pop.className = 'cite-popover'; pop.innerHTML = content;
+    document.body.appendChild(pop);
+    positionPopover(pop, trigger);
+    activePopover = pop; activeTrigger = trigger;
+    pop.addEventListener('mouseenter', function(){ if (hideTimer) clearTimeout(hideTimer); });
+    pop.addEventListener('mouseleave', scheduleHide);
+  }
+  function scheduleHide(){
+    if (hideTimer) clearTimeout(hideTimer);
+    hideTimer = setTimeout(function(){
+      if (activePopover){ activePopover.remove(); activePopover = null; activeTrigger = null; }
+    }, 200);
+  }
+  document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+    sup.addEventListener('mouseenter', function(){ showPopover(sup); });
+    sup.addEventListener('mouseleave', scheduleHide);
+    sup.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      if (activeTrigger === sup && activePopover){ activePopover.remove(); activePopover = null; activeTrigger = null; }
+      else showPopover(sup);
+    });
+  });
+  document.addEventListener('click', function(e){
+    if (!activePopover) return;
+    if (e.target.closest('.cite-popover') || e.target.closest('sup.cite')) return;
+    activePopover.remove(); activePopover = null; activeTrigger = null;
+  });
+
+  // ---- Mini demo: jury simulator ----
+  var demoMode = 'real', demoRubric = 'ielts';
+  document.querySelectorAll('.demo-chip[data-mode]').forEach(function(c){
+    c.addEventListener('click', function(){
+      document.querySelectorAll('.demo-chip[data-mode]').forEach(function(x){ x.classList.remove('active'); });
+      c.classList.add('active'); demoMode = c.getAttribute('data-mode');
+    });
+  });
+  document.querySelectorAll('.demo-chip[data-rubric]').forEach(function(c){
+    c.addEventListener('click', function(){
+      document.querySelectorAll('.demo-chip[data-rubric]').forEach(function(x){ x.classList.remove('active'); });
+      c.classList.add('active'); demoRubric = c.getAttribute('data-rubric');
+    });
+  });
+
+  function hashStr(s){ var h=0; for (var i=0;i<s.length;i++){ h=((h<<5)-h+s.charCodeAt(i))|0; } return Math.abs(h); }
+
+  function estimateBase(text){
+    // toy heuristic: longer + more "linking words" + lexical variety -> higher
+    var words = text.trim().split(/\s+/).filter(Boolean);
+    var n = words.length;
+    var uniq = {}; words.forEach(function(w){ uniq[w.toLowerCase()]=1; });
+    var ttr = n ? Object.keys(uniq).length / n : 0;
+    var linkers = (text.match(/\b(although|however|because|therefore|in conclusion|in my opinion|moreover|furthermore)\b/gi)||[]).length;
+    var raw = 3.0 + Math.min(n,180)/45 + ttr*2.5 + Math.min(linkers,4)*0.4; // ~3..9
+    return Math.max(3.5, Math.min(8.0, raw));
+  }
+
+  var REAL_JURORS = [
+    {name:'Qwen-plus',  ava:'🟢', bias:-0.1, fam:'Qwen'},
+    {name:'Claude',     ava:'🟣', bias:+0.2, fam:'Anthropic'},
+    {name:'Gemini-Flash',ava:'🔵', bias:0.0, fam:'Google'},
+    {name:'Llama-3-70B',ava:'🟠', bias:-0.3, fam:'Meta'},
+    {name:'GPT-4o-mini',ava:'⚪', bias:+0.1, fam:'OpenAI'}
+  ];
+  var FAKE_JURORS = [
+    {name:'GPT-4o #1', ava:'⚪', bias:+0.6, fam:'OpenAI'},
+    {name:'GPT-4o #2', ava:'⚪', bias:+0.55,fam:'OpenAI'},
+    {name:'GPT-4o #3', ava:'⚪', bias:+0.62,fam:'OpenAI'},
+    {name:'GPT-4o #4', ava:'⚪', bias:+0.58,fam:'OpenAI'},
+    {name:'GPT-4o #5', ava:'⚪', bias:+0.6, fam:'OpenAI'}
+  ];
+
+  document.getElementById('demoRun').addEventListener('click', function(){
+    var text = document.getElementById('demoEssay').value || '';
+    var base = estimateBase(text);
+    var seed = hashStr(text + demoMode);
+    var jurors = (demoMode === 'real' ? REAL_JURORS : FAKE_JURORS);
+    var spread = (demoMode === 'real' ? 0.7 : 0.18); // real = more spread (diverse views), fake = clustered
+    var biasShared = (demoMode === 'real' ? 0 : 0.6); // fake = shared upward bias not cancelled
+    var scores = [];
+    var html = '<div class="out-h">⚖️ 陪审团（' + (demoMode==='real'?'真多样性 · 跨 5 个模型家族':'伪多样性 · 同一 GPT-4o 克隆 5 次') + '）</div>';
+    jurors.forEach(function(j, i){
+      var noise = (((seed >> (i*3)) & 7) / 7 - 0.5) * 2 * spread;
+      var s = base + j.bias + noise + biasShared;
+      s = Math.max(2.0, Math.min(9.0, s));
+      scores.push(s);
+    });
+    var disp = scores.map(function(s){ return Math.round(s*2)/2; });
+    var maxBar = 9;
+    disp.forEach(function(s, i){
+      var label = demoRubric==='ielts' ? s.toFixed(1) : cefrBand(s);
+      html += '<div class="juror"><span class="ava">'+jurors[i].ava+'</span>'
+            + '<span class="jname">'+jurors[i].name+' <span style="color:var(--text-mute);font-weight:400;font-size:12px;">('+jurors[i].fam+')</span></span>'
+            + '<span class="jbar"><i style="width:'+(s/maxBar*100)+'%"></i></span>'
+            + '<span class="jscore">'+label+'</span></div>';
+    });
+    // aggregate: trimmed median (drop min&max, average rest)
+    var sorted = disp.slice().sort(function(a,b){return a-b;});
+    var trimmed = sorted.slice(1, sorted.length-1);
+    var agg = trimmed.reduce(function(a,b){return a+b;},0)/trimmed.length;
+    var mean = disp.reduce(function(a,b){return a+b;},0)/disp.length;
+    var variance = disp.reduce(function(a,b){return a+(b-mean)*(b-mean);},0)/disp.length;
+    var sd = Math.sqrt(variance);
+    var aggLabel = demoRubric==='ielts' ? agg.toFixed(1) : cefrBand(agg);
+    html += '<div style="margin-top:10px;padding-top:10px;border-top:2px solid var(--border);">';
+    html += '<div class="out-line"><span class="tag-out">聚合</span>去极值中位数 = <strong style="font-size:16px;color:var(--accent-text);">'+aggLabel+'</strong>（丢掉最高最低，剩下取平均）</div>';
+    html += '<div class="out-line"><span class="tag-out">分歧</span>标准差 σ = '+sd.toFixed(2)+' · '+(sd>0.9?'🔴 分歧大 → 建议升级人工/第 6 模型':'🟢 分歧小 → 自动采信，省人工')+'</div>';
+    if (demoMode==='fake'){
+      html += '<div class="out-line" style="color:var(--bad);"><span class="tag-out" style="background:var(--bad-soft);color:var(--bad);">陷阱</span>5 个评委挤在一起看似"很一致"，但它们<strong>共享同一个向上偏差（同源）</strong>，聚合值<strong>偏高了 ~0.6</strong> 却察觉不到 — 这就是伪多样性。</div>';
+    } else {
+      html += '<div class="out-line" style="color:var(--good);"><span class="tag-out" style="background:var(--good-soft);color:var(--good);">健康</span>不同家族视角分散，但<strong>各自偏差相互抵消</strong>，去极值中位数更稳健 — 这是真多样性的价值。</div>';
+    }
+    html += '</div>';
+    document.getElementById('demoOut').innerHTML = html;
+  });
+
+  function cefrBand(s){
+    if (s < 3.5) return 'A1';
+    if (s < 4.5) return 'A2';
+    if (s < 5.5) return 'B1';
+    if (s < 6.5) return 'B2';
+    if (s < 7.5) return 'C1';
+    return 'C2';
+  }
+})();
+</script>
+</body>
+</html>

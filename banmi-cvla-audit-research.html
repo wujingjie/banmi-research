@@ -310,15 +310,36 @@
         <div class="metric"><div class="v">96%</div><div class="l">EvalYaks LLM 微调</div></div>
       </div>
 
+      <h3>5 条核心批评（按严重程度）</h3>
+
       <div class="callout bad">
-        <p><strong>5 条核心批评（按严重程度）</strong>：</p>
-        <ol style="line-height: 1.9;">
-          <li>🔴 <strong>批评 #1（致命 / License）</strong>：banmi-cvla 强制依赖 <code>octanove-vocabulary-profile-c1c2-1.0.csv</code>（C1/C2 词汇）= <strong>CC BY-SA 4.0 强 viral copyleft</strong><sup class="cite" data-refid="20">[20]</sup>。半米作为商业 K12 教育产品，整个 pipeline 输出会被 ShareAlike 拖入相同 license — <strong>当前不可商用</strong>。README "License: 工具代码 MIT / 数据 CC BY-SA 4.0 (Tono / 东京外国语大学)" 还把 license 主体写错（Tono 的 CEFR-J wordlist 实际是<strong>"研究 + 商业可用 需 cite"</strong>无具体 license<sup class="cite" data-refid="21">[21]</sup>，CC BY-SA 4.0 是 Octanove 的）。</li>
-          <li>🔴 <strong>批评 #2（致命 / 算法误导）</strong>：<code>calculate_atos()</code> 自称 "ATOS 2-factor"，实际公式 <code>0.3905 × ASL + 11.813 × ASW − 15.59</code> 跟 <strong>Flesch-Kincaid Grade 公式 <code>0.39 × ASL + 11.8 × ASW − 15.59</code> 完全一致</strong>（除四舍五入精度差 0.0005×ASL + 0.013×ASW，实测两值差 ≤ 0.05）<sup class="cite" data-refid="22">[22]</sup>。报告输出的 <code>main.atos</code> 和 <code>main.us_grade</code> 用户看似两个独立指标，<strong>数学上是同一值</strong>。Renaissance ATOS 实际是 <strong>open standard 公开公式 + 3 因子（句长 / 字符长 / 词难度）</strong><sup class="cite" data-refid="14">[14]</sup>，README 写 "Renaissance 完整 3 因子版未公开" 也是错的。</li>
-          <li>🟠 <strong>批评 #3（严重 / 准度认知）</strong>：banmi-cvla 用 FK Grade 作 <code>us_grade</code> 主指标 + <code>derive_lexile</code> 也是 FK 派生 — 但 AMontgomerie 2021 在 1500 文本 6 档 CEFR 上实测 <strong>Flesch-Kincaid Grade 仅 34.1% 准确率 / Flesch Reading Ease 仅 12.7%（低于随机 16.7%！）</strong><sup class="cite" data-refid="23">[23]</sup>。banmi-cvla 把这俩当主输出 + 1948 年的旧公式（Dale-Chall 1948 / FRE 1948 / Spache 1953）都没标"古董公式仅做 cross-check"<sup class="cite" data-refid="24">[24]</sup>。</li>
-          <li>🟠 <strong>批评 #4（严重 / 性能天花板）</strong>：banmi-cvla 复刻 CVLA 3 论文 = <strong>2024 baseline 准度 65.7% exact / 99% adjacent</strong><sup class="cite" data-refid="25">[25]</sup>。2025 SOTA 已经是 <strong>EvalYaks LLM 微调 96% / Random Forest + 1181 expert texts 62.6% 6-level + 82.6% 3-level / GPT-4 Turbo r=0.76 with human / Ace-CEFR macro-F1 0.80+</strong><sup class="cite" data-refid="26">[26]</sup><sup class="cite" data-refid="27">[27]</sup><sup class="cite" data-refid="28">[28]</sup>。banmi-cvla 目前等价 2-3 年前的方法。</li>
-          <li>🟡 <strong>批评 #5（中等 / 工程缺陷）</strong>：<code>analyze()</code> 阈值 <code>word_count &lt; 10</code> 才报错 — 但业界普遍要求 <strong>≥ 100 words 才统计有效</strong>，SMOG 要 30 句<sup class="cite" data-refid="29">[29]</sup>。10-99 词输入 banmi-cvla 静默给结果但不可靠。同时 <code>compute_confidence</code> 的"7 公式 σ&lt;1.0 = high"机制 — 7 个公式共享 &lt;35% 准度底，离散度低 ≠ accuracy 高，<strong>是"假置信度"</strong>。</li>
-        </ol>
+        <p><strong>🔴 批评 #1（致命 / License）</strong></p>
+        <p>banmi-cvla 强制依赖 <code>octanove-vocabulary-profile-c1c2-1.0.csv</code>（C1/C2 词汇）= <strong>CC BY-SA 4.0 强 viral copyleft</strong><sup class="cite" data-refid="20">[20]</sup>。半米作为商业 K12 教育产品，整个 pipeline 输出会被 ShareAlike 拖入相同 license — <strong>当前不可商用</strong>。</p>
+        <p>README "License: 工具代码 MIT / 数据 CC BY-SA 4.0 (Tono / 东京外国语大学)" 还把 license 主体写错（Tono 的 CEFR-J wordlist 实际是<strong>"研究 + 商业可用 需 cite"</strong>无具体 license<sup class="cite" data-refid="21">[21]</sup>，CC BY-SA 4.0 是 Octanove 的）。</p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>🔴 批评 #2（致命 / 算法误导）</strong></p>
+        <p><code>calculate_atos()</code> 自称 "ATOS 2-factor"，实际公式 <code>0.3905 × ASL + 11.813 × ASW − 15.59</code> 跟 <strong>Flesch-Kincaid Grade 公式 <code>0.39 × ASL + 11.8 × ASW − 15.59</code> 完全一致</strong>（除四舍五入精度差 0.0005×ASL + 0.013×ASW，实测两值差 ≤ 0.05）<sup class="cite" data-refid="22">[22]</sup>。</p>
+        <p>报告输出的 <code>main.atos</code> 和 <code>main.us_grade</code> 用户看似两个独立指标，<strong>数学上是同一值</strong>。Renaissance ATOS 实际是 <strong>open standard 公开公式 + 3 因子（句长 / 字符长 / 词难度）</strong><sup class="cite" data-refid="14">[14]</sup>，README 写 "Renaissance 完整 3 因子版未公开" 也是错的。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>🟠 批评 #3（严重 / 准度认知）</strong></p>
+        <p>banmi-cvla 用 FK Grade 作 <code>us_grade</code> 主指标 + <code>derive_lexile</code> 也是 FK 派生 — 但 AMontgomerie 2021 在 1500 文本 6 档 CEFR 上实测 <strong>Flesch-Kincaid Grade 仅 34.1% 准确率 / Flesch Reading Ease 仅 12.7%（低于随机 16.7%！）</strong><sup class="cite" data-refid="23">[23]</sup>。</p>
+        <p>banmi-cvla 把这俩当主输出 + 1948 年的旧公式（Dale-Chall 1948 / FRE 1948 / Spache 1953）都没标"古董公式仅做 cross-check"<sup class="cite" data-refid="24">[24]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>🟠 批评 #4（严重 / 性能天花板）</strong></p>
+        <p>banmi-cvla 复刻 CVLA 3 论文 = <strong>2024 baseline 准度 65.7% exact / 99% adjacent</strong><sup class="cite" data-refid="25">[25]</sup>。</p>
+        <p>2025 SOTA 已经是 <strong>EvalYaks LLM 微调 96% / Random Forest + 1181 expert texts 62.6% 6-level + 82.6% 3-level / GPT-4 Turbo r=0.76 with human / Ace-CEFR macro-F1 0.80+</strong><sup class="cite" data-refid="26">[26]</sup><sup class="cite" data-refid="27">[27]</sup><sup class="cite" data-refid="28">[28]</sup>。banmi-cvla 目前等价 2-3 年前的方法。</p>
+      </div>
+
+      <div class="callout">
+        <p><strong>🟡 批评 #5（中等 / 工程缺陷）</strong></p>
+        <p><code>analyze()</code> 阈值 <code>word_count &lt; 10</code> 才报错 — 但业界普遍要求 <strong>≥ 100 words 才统计有效</strong>，SMOG 要 30 句<sup class="cite" data-refid="29">[29]</sup>。10-99 词输入 banmi-cvla 静默给结果但不可靠。</p>
+        <p>同时 <code>compute_confidence</code> 的"7 公式 σ&lt;1.0 = high"机制 — 7 个公式共享 &lt;35% 准度底，离散度低 ≠ accuracy 高，<strong>是"假置信度"</strong>。</p>
       </div>
 
       <h3>1.1 结论一句话</h3>

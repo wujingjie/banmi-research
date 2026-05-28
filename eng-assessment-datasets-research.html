@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI 英语评分系统数据集深度调研 · 30+ 数据集 16 维评估 / Top 10 推荐 / 真人 vs AI label 严格甄别 / Assessment Engine 架构 · 2026-05-28</title>
+<style>
+  :root {
+    --bg: #ffffff; --bg-soft: #f7f8fa; --bg-elevated: #ffffff; --bg-stripe: #f5f7fa;
+    --text: #1a1d23; --text-soft: #4a5160; --text-mute: #7c8493;
+    --border: #e3e6ec; --border-strong: #cdd2da;
+    --accent: #2563eb; --accent-soft: #dbeafe; --accent-text: #1d4ed8;
+    --good: #15803d; --good-soft: #dcfce7;
+    --warn: #b45309; --warn-soft: #fef3c7;
+    --bad: #b91c1c; --bad-soft: #fee2e2;
+    --info: #0891b2; --info-soft: #cffafe;
+    --code-bg: #f1f3f7;
+    --purple: #7c3aed; --purple-soft: #ede9fe;
+    --pink: #db2777; --pink-soft: #fce7f3;
+    --teal: #0d9488; --teal-soft: #ccfbf1;
+    --shadow: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+    --shadow-lg: 0 10px 25px rgba(15,23,42,.08), 0 4px 10px rgba(15,23,42,.04);
+    --radius: 10px; --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117; --bg-soft: #161922; --bg-elevated: #1c2030; --bg-stripe: #1a1e2a;
+    --text: #e6e9f0; --text-soft: #b6bcc9; --text-mute: #8a92a3;
+    --border: #2a2f3d; --border-strong: #3a4154;
+    --accent: #60a5fa; --accent-soft: #1e3a8a55; --accent-text: #93c5fd;
+    --good: #4ade80; --good-soft: #14532d55;
+    --warn: #fbbf24; --warn-soft: #78350f55;
+    --bad: #f87171; --bad-soft: #7f1d1d55;
+    --info: #22d3ee; --info-soft: #155e7555;
+    --code-bg: #0a0d14;
+    --purple: #a78bfa; --purple-soft: #4c1d9555;
+    --pink: #f472b6; --pink-soft: #831a4955;
+    --teal: #2dd4bf; --teal-soft: #134e4a55;
+    --shadow: 0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,.5), 0 4px 10px rgba(0,0,0,.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body { margin: 0; font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif; font-size: 16px; line-height: 1.7; color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; padding-bottom: 60px; transition: background-color .25s, color .25s; }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-weight: 700; font-size: 15px; color: var(--text); }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; }
+  nav.anchor-nav { overflow-x: auto; overflow-y: hidden; border-top: 1px solid var(--border); background: var(--bg); scrollbar-width: none; }
+  nav.anchor-nav::-webkit-scrollbar { display: none; }
+  .anchor-list { display: flex; gap: 4px; padding: 8px 16px; max-width: 980px; margin: 0 auto; white-space: nowrap; }
+  .anchor-list a { flex: 0 0 auto; min-height: 36px; padding: 7px 12px; border-radius: 999px; font-size: 13px; line-height: 1.3; color: var(--text-soft); text-decoration: none; border: 1px solid transparent; background: var(--bg-soft); }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); font-weight: 600; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 28px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); min-height: 56px; }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout.pink { background: var(--pink-soft); border-color: var(--pink); }
+  .callout.teal { background: var(--teal-soft); border-color: var(--teal); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 9px 11px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; }
+  tbody td { padding: 8px 11px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 5000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, Menlo, monospace; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  .demo-host { margin: 16px 0; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .demo-host h4 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; color: var(--accent-text); }
+  .demo-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 14px; align-items: center; }
+  .demo-chip { padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-elevated); color: var(--text-soft); font-size: 12.5px; cursor: pointer; }
+  .demo-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .demo-output { padding: 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin-top: 8px; }
+  .dataset-card { padding: 14px 16px; margin: 12px 0; border-radius: 12px; border: 1px solid var(--border); border-left: 5px solid var(--accent); background: var(--bg-elevated); }
+  .dataset-card.good { border-left-color: var(--good); }
+  .dataset-card.warn { border-left-color: var(--warn); }
+  .dataset-card.bad { border-left-color: var(--bad); }
+  .dataset-card .head { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; margin-bottom: 6px; }
+  .dataset-card .head .name { font-weight: 700; color: var(--text); font-size: 15.5px; }
+  .dataset-card .body { font-size: 14px; color: var(--text-soft); }
+  .dataset-card .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  @media (max-width: 480px) { .hero { padding: 18px 4px 8px; } .hero h1 { font-size: 22px; } section.chapter > h2 { font-size: 17px; padding: 14px 14px; } .chapter-body { padding: 14px 14px 18px; } h3 { font-size: 16px; } }
+  .chapter-body { column-count: 1 !important; column-width: auto !important; }
+  .chapter-body > .callout { display: block !important; float: none !important; width: auto !important; clear: both !important; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; font-size: 11px; color: var(--accent-text); font-weight: 700; vertical-align: super; }
+  sup.cite:hover { background: rgba(250, 204, 21, 0.3); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated, #ffffff); color: var(--text, #1a1a23); border: 1px solid var(--border, #e3e6ec); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(15,23,42,.18); font-size: 13px; line-height: 1.55; font-weight: normal; pointer-events: auto; }
+  [data-theme="dark"] .cite-popover { background: #1a1e2a; color: #e6e9f0; border-color: #2a2f3a; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+  .cite-popover a { color: var(--accent, #2563eb); text-decoration: underline; word-break: break-all; }
+  [data-theme="dark"] .cite-popover a { color: #60a5fa; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">AI 英语评分数据集深度调研 <span class="tag">L2 + Critic · 无忌</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+  <nav class="anchor-nav">
+    <div class="anchor-list" id="anchorList">
+      <a href="#ch1" data-target="ch1">01 摘要 + Top 10 + 5 大结论</a>
+      <a href="#ch2" data-target="ch2">02 5 必查线索 ★★</a>
+      <a href="#ch3" data-target="ch3">03 IELTS Writing 数据集</a>
+      <a href="#ch4" data-target="ch4">04 IELTS Speaking</a>
+      <a href="#ch5" data-target="ch5">05 TOEFL/ETS 数据集</a>
+      <a href="#ch6" data-target="ch6">06 CEFR 标注语料</a>
+      <a href="#ch7" data-target="ch7">07 WIDA/DET/AES/ASR</a>
+      <a href="#ch8" data-target="ch8">08 真人 vs AI 污染甄别 ★</a>
+      <a href="#ch9" data-target="ch9">09 16 维评估总表</a>
+      <a href="#ch10" data-target="ch10">10 Top 10 推荐 ★★</a>
+      <a href="#ch11" data-target="ch11">11 6 技术路线对比</a>
+      <a href="#ch12" data-target="ch12">12 Assessment Engine 架构</a>
+      <a href="#ch13" data-target="ch13">13 MVP + 长期壁垒</a>
+      <a href="#ch14" data-target="ch14">14 中国学生机会</a>
+      <a href="#ch15" data-target="ch15">15 License 风险</a>
+      <a href="#ch16" data-target="ch16">16 mini demo</a>
+      <a href="#ch17" data-target="ch17">17 FAQ</a>
+      <a href="#ch18" data-target="ch18">18 References</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>AI 英语评分系统训练数据集深度调研<br><span style="font-size: .55em; font-weight: 600;">IELTS Writing+Speaking / TOEFL / CEFR / WIDA / DET / AES / ASR 全谱 · 30+ 数据集 16 维评估 · Top 10 推荐 · 真人 vs AI label 严格甄别 · Assessment Engine 架构建议</span></h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-28</span>
+      <span>🛠 整理：无忌</span>
+      <span>🧠 L2 Deep Research + Critic 强化版</span>
+      <span>🔍 70+ 次 WebSearch · 16+ WebFetch</span>
+      <span>📚 18 章 + 12 FAQ + 50+ Refs</span>
+      <span>⚠️ 真人 vs AI 铁律</span>
+    </div>
+    <div class="hero-deck">
+      <strong>这份是什么</strong>：阿杰半米正在做 "AI Native English Assessment Engine" — 给学员作文 / 口语自动评 IELTS 等分数。本报告是<strong>数据集 due diligence</strong>，覆盖 IELTS Writing+Speaking + TOEFL + CEFR + WIDA + DET + AES + ASR 全谱，逐一核查 30+ 数据集真伪 / license / 评分来源 / 商用可行性 / 中国学生适配性。<br><br>
+      <strong>核心铁律</strong>：🟢 <strong>真实人类评分</strong>（官方 IELTS examiner / Cambridge / ETS）vs 🟡 <strong>trained rater / crowd</strong> vs 🔴 <strong>AI generated labels / pseudo labels</strong>。Kaggle/HuggingFace 大量数据是 ChatGPT 套壳评分，本报告严格 flag。<br><br>
+      <strong>给阿杰下一步</strong>：本周下载 <strong>ELLIPSE + ASAP++ + speechocean762 + EVP/EGP + CEFR-J</strong>（5 个 MVP 启动包），下个月评估 <strong>PERSUADE 2.0 + Write & Improve 申请</strong> 作壁垒数据。<strong>避坑</strong>：KevSun/IELTS_essay_scoring 实际是 ELLIPSE / chillies HF 数据可能含 AI label / Kaggle mazlumi 评分来源不可确认。
+    </div>
+  </div>
+
+  <!-- ============ CH1 摘要 + Top 10 预览 + 5 大核心结论 ============ -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">摘要 + Top 10 数据集预览 + 5 大核心结论</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>1.1 一段话总结</h3>
+      <p>本报告调研了 <strong>30+ 个英语评分相关数据集</strong>，覆盖写作 / 口语 / CEFR 标注 / 语音三大类。<strong>核心发现</strong>：真正<strong>含官方 IELTS examiner / ETS rater 真人评分</strong>且<strong>免费可商用</strong>的数据集<strong>几乎不存在</strong>。可用资源中最高质量的（ELLIPSE / PERSUADE 2.0 / Speak &amp; Improve / Write &amp; Improve / TOEFL11）全部是 <strong>CC BY-NC-SA</strong> 或类似 non-commercial license<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup><sup class="cite" data-refid="3">[3]</sup>。<strong>真正可商用</strong>的高质量数据只有 <strong>speechocean762</strong>（CC BY 4.0，可商用）<sup class="cite" data-refid="4">[4]</sup>、<strong>L2-ARCTIC</strong>（注册即用）、<strong>CEFR-J wordlist</strong>（可商用）<sup class="cite" data-refid="5">[5]</sup>、<strong>EVP/EGP</strong>（可查询参考）几个。</p>
+
+      <h3>1.2 Top 10 数据集预览（排序见 §10 详解）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>数据集</th><th>规模</th><th>用途</th><th>真人评分</th><th>商用</th><th>MVP 优先级</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>ELLIPSE Corpus</td><td>6,500 essays</td><td>Writing 6 维度</td><td>🟢 trained raters</td><td>🔴 NC</td><td>⭐⭐⭐ 立刻</td></tr>
+            <tr><td>2</td><td>ASAP++ / ASAP 2.0</td><td>13K+25K essays</td><td>Writing trait</td><td>🟢 expert</td><td>🟡 比赛 license</td><td>⭐⭐⭐ 立刻</td></tr>
+            <tr><td>3</td><td>PERSUADE 2.0</td><td>25,996 essays</td><td>Argumentative</td><td>🟢 trained</td><td>🔴 NC</td><td>⭐⭐ 本月</td></tr>
+            <tr><td>4</td><td>speechocean762</td><td>5K 句 / 250 人</td><td>Speaking 发音</td><td>🟢 5 experts</td><td>🟢 CC BY 4.0</td><td>⭐⭐⭐ 立刻</td></tr>
+            <tr><td>5</td><td>Speak &amp; Improve 2025</td><td>315h 语音</td><td>Speaking 整体</td><td>🟢 Cambridge</td><td>🔴 NC</td><td>⭐⭐ 本月</td></tr>
+            <tr><td>6</td><td>Write &amp; Improve 2024</td><td>23K essays</td><td>CEFR + GEC</td><td>🟢 Cambridge cert</td><td>🔴 NC</td><td>⭐⭐ 本月</td></tr>
+            <tr><td>7</td><td>EFCAMDAT (cleaned)</td><td>406K 段</td><td>CEFR 16 档</td><td>🟡 EF 自动</td><td>🟡 academic</td><td>⭐⭐ 本月</td></tr>
+            <tr><td>8</td><td>L2-ARCTIC</td><td>27.1h / 24 人</td><td>发音错误</td><td>🟢 linguist</td><td>🟢 注册可用</td><td>⭐⭐ 本月</td></tr>
+            <tr><td>9</td><td>EVP + EGP + CEFR-J</td><td>1.2K+ items</td><td>CEFR 词法</td><td>🟢 Cambridge</td><td>🟢 Tono 可商用 / EVP 查询免费</td><td>⭐⭐⭐ 立刻</td></tr>
+            <tr><td>10</td><td>CommonLit CLEAR</td><td>2,834 passages</td><td>难度回归</td><td>🟢 5-10 raters/段</td><td>🟡 比赛</td><td>⭐⭐ 本月</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>1.3 5 大核心结论（每条独立 callout）</h3>
+
+      <div class="callout bad">
+        <p><strong>🔴 结论 #1 — 真正含官方 IELTS examiner 评分的 public dataset 实际上不存在</strong></p>
+        <p>所有声称包含 "official IELTS scores" 的 Kaggle / HuggingFace 数据集，<strong>评分来源都无法独立核实</strong>。<strong>mazlumi/IELTS Writing Scored Essays</strong>（Kaggle，2023-07）— 页面只标 "Sample Essays and Scores"，<strong>不写评分人是谁</strong><sup class="cite" data-refid="6">[6]</sup>。<strong>KevSun/IELTS_essay_scoring</strong> HuggingFace — README 自称 "18,000 real IELTS essays with official scores"，但作者同时发的 arxiv 2406.01198 论文里写得很清楚训练数据是 <strong>ELLIPSE (6,500) + 一个未公开 IELTS 数据（14,500 train / 2,000 test）</strong><sup class="cite" data-refid="7">[7]</sup><sup class="cite" data-refid="8">[8]</sup> — 而且<strong>这个 IELTS 数据并未公开发布</strong>，HuggingFace 上的同名 repo 实际是 ELLIPSE 训练的模型。<strong>真正的 IELTS 真人评分语料全部在 Cambridge Learner Corpus / IDP 内部</strong>，CLC 仅对学术合作开放，<strong>non-commercial only</strong><sup class="cite" data-refid="9">[9]</sup>。</p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>🔴 结论 #2 — Kaggle / HuggingFace 上大量 IELTS 数据集疑似含 ChatGPT 生成 label，污染严重</strong></p>
+        <p><strong>chillies/IELTS-writing-task-2-evaluation</strong>（10,324 essays，46.7 MB）— 字段含 prompt / essay / evaluation / band。<strong>evaluation 字段格式高度模板化</strong>（Markdown 结构 + "Task Achievement: [X]" 风格），<strong>极可能是 GPT-3.5/4 生成</strong>。某些 essay 字段含明显乱码（"injkdfzbvjkkjNCJKXNVJK..."），<strong>无 license 信息</strong>，<strong>无评分人说明</strong>。<strong>chillestt/Automated-IELTS-essay-evaluation</strong>（GitHub） — 作者明确说 9,000+ samples 来自<strong>"web scraping + synthetic data generation via Gemini APIs, GPT-3.5-Turbo, and Groq"</strong><sup class="cite" data-refid="10">[10]</sup>。<strong>这类数据用来训练评分器等于用 LLM 自己评的"假成绩"训练新 LLM — 准度天花板就是 GPT-3.5 的水平</strong>，永远赶不上真人 examiner。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>🟠 结论 #3 — 真正可商用的高质量数据集寥寥无几，主要是发音/语音类</strong></p>
+        <p>过去 5 年学术界发布的"明星"评分数据集（ELLIPSE / PERSUADE 1.0 &amp; 2.0 / Write &amp; Improve / Speak &amp; Improve / TOEFL11 / FCE / CLC）<strong>全部</strong>是 <strong>CC BY-NC-SA</strong> 或 LDC academic license。真正<strong>开商用</strong>的只有少数语音类：<strong>speechocean762</strong>（OpenSLR，CC BY 4.0，可商用，5K 句 / 250 名 L2 中文母语者）<sup class="cite" data-refid="4">[4]</sup>、<strong>L2-ARCTIC</strong>（注册即用，27.1h，24 人）<sup class="cite" data-refid="11">[11]</sup>、<strong>NICT JLE Corpus v4.1</strong>（CC BY-SA 3.0，1300 日本学习者 2M 词转写，可商用 + share-alike）<sup class="cite" data-refid="12">[12]</sup>。词法类只有 <strong>CEFR-J wordlist</strong>（Tono Lab 明确允许商用）<sup class="cite" data-refid="13">[13]</sup>。<strong>结论</strong>：半米要做商业产品，<strong>大概率需要自建评分数据</strong>，或者跟 Cambridge / Pearson / ETS 直接谈商业 license。</p>
+      </div>
+
+      <div class="callout good">
+        <p><strong>🟢 结论 #4 — MVP 最佳起点：ELLIPSE + ASAP++ + speechocean762 + EVP/EGP/CEFR-J + LLM 验证</strong></p>
+        <p>对半米 K12 / IELTS 自动评分 MVP，最务实路线：<strong>(a) Writing 维度</strong>用 ELLIPSE（6 维度 trait scoring）+ ASAP++（5 维度 trait scoring）训 RoBERTa / DeBERTa 多 head 回归，能复刻 arxiv 2406.01198 论文 QWK 0.8+ 水平<sup class="cite" data-refid="8">[8]</sup>；<strong>(b) Speaking</strong> 用 speechocean762 训 GOP / wav2vec2 phoneme-level 评分；<strong>(c) CEFR 词法语法</strong>用 EVP + EGP + CEFR-J 三层映射（已被 Text Inspector / Cathoven 验证有效）；<strong>(d) 最终输出</strong>用 GPT-4o / Claude Sonnet 4.6 / DeepSeek V4 做<strong>校验 + 解释生成</strong>（学术验证 QWK 0.6-0.8，对 IELTS Task 2 已达 0.811）<sup class="cite" data-refid="14">[14]</sup><sup class="cite" data-refid="15">[15]</sup>。<strong>关键</strong>：ELLIPSE NC license 在<strong>内部模型训练</strong>阶段不阻断，<strong>但模型 weights 派生品不能商用</strong>（CC BY-NC-SA viral）— 需要后期用自建数据完全替换。</p>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>🟣 结论 #5 — 中国学生机会点：本地化 CEFR 校准 + 中文母语 phoneme 模型是壁垒，缺失但最值钱</strong></p>
+        <p><strong>已有</strong>：ICNALE（2800 亚洲学习者，含中文）<sup class="cite" data-refid="16">[16]</sup>、CLEC（1M 词中国学生写作）、speechocean762（250 名<strong>中文母语</strong>者英语）、Pearson GSE 已对齐 China Standards of English<sup class="cite" data-refid="17">[17]</sup>。<strong>缺失</strong>：<strong>真正国际学校 K12 真人评分作文 + 口语数据完全空白</strong>。<strong>商业护城河</strong>：半米的真正壁垒应该是<strong>自建国际学校 K12 真人评分库</strong>（联合 1-2 个国际学校 / 老师 + 中文母语 phoneme 误差大典型样本库 + 中国课标 CSE-CEFR 双轨映射）。这个数据 Cambridge / ETS / Pearson 不会有，国内只有流利说有部分（70M 用户的中国人讲英语数据库，自称世界最大）<sup class="cite" data-refid="18">[18]</sup>，但<strong>不公开</strong>。半米可以从国际学校开始自建。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH2 5 必查线索逐一核查 ============ -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">5 个必查线索逐一核查 ★★（阿杰最想看）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>阿杰指定的 5 个具体线索，每个单独 WebFetch / 多轮 cross-check + 给 16 维评估。<strong>核心铁律</strong>：评分来源 🟢 真实人类 / 🟡 trained rater / 🔴 AI generated / ❓ 无法核实，必须严格分类。</p>
+
+      <h3>2.1 线索 #1 — Kaggle "IELTS Writing Scored Essays Dataset" (mazlumi)</h3>
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">mazlumi/ielts-writing-scored-essays-dataset</span> <span class="pill warn">评分来源不确定</span> <span class="pill info">Kaggle</span></div>
+        <div class="body">
+          <p><strong>16 维核查结果</strong>：</p>
+          <ul>
+            <li><strong>规模</strong>：约 1,200 essays（Kaggle 描述 "Sample Essays and Scores"），上传 2023-07-20<sup class="cite" data-refid="6">[6]</sup></li>
+            <li><strong>字段</strong>：essay / prompt / band（具体列名页面未展示完整），含 band score</li>
+            <li><strong>Task 1/2</strong>：根据社区 notebook 推测主要是 Task 2 议论文，Task 1 较少</li>
+            <li><strong>评分来源</strong>：🔴 <strong>页面完全没说</strong>评分人是谁。上传者 mazlumi 是个人用户，<strong>无 IELTS 官方背景</strong>。推测来自<strong>网站爬取（学员自己发的范文）</strong>而非 official examiner</li>
+            <li><strong>License</strong>：Kaggle 默认 license（页面未具体注明 CC0 还是其他）</li>
+            <li><strong>商用</strong>：⚠️ 风险高 — 即使 license 允许，<strong>评分来源不可证伪的数据训练商业模型存在 audit risk</strong></li>
+            <li><strong>下载量</strong>：被多个 Kaggle notebook 使用（BERT 评分 / IELTS exam writing task results 等）<sup class="cite" data-refid="19">[19]</sup></li>
+            <li><strong>论文引用</strong>：未在主要 arxiv 论文中作为主数据</li>
+            <li><strong>污染风险</strong>：🔴 <strong>高</strong> — 来源不明 + 数据小 + 时间在 ChatGPT 发布后（2023-07） + 无评分人可追溯</li>
+          </ul>
+          <p><strong>裁定</strong>：🟡 <strong>仅适合做 demo / sanity check</strong>，<strong>绝不</strong>作为 production 评分系统的训练主数据。如果非要用，必须人工抽样 100 条<strong>请认证 IELTS examiner 重评</strong>验证 score 真实性。</p>
+        </div>
+      </div>
+
+      <h3>2.2 线索 #2 — HuggingFace KevSun/IELTS_essay_scoring</h3>
+      <div class="dataset-card bad">
+        <div class="head"><span class="name">KevSun/IELTS_essay_scoring</span> <span class="pill bad">实际是模型不是 IELTS 数据</span> <span class="pill info">HuggingFace</span></div>
+        <div class="body">
+          <p><strong>关键澄清</strong>：这是一个<strong>模型</strong>（RoBERTa fine-tune），<strong>不是数据集</strong>。HuggingFace 401 阻拦 WebFetch，但通过同作者的另一个 repo <code>KevSun/Engessay_grading_ML</code> 和 arxiv 2406.01198 论文交叉验证<sup class="cite" data-refid="7">[7]</sup>：</p>
+          <ul>
+            <li><strong>论文真实数据来源</strong>：<strong>ELLIPSE Corpus（6,500 essays）+ 一个未公开的 IELTS 数据（14,500 train / 2,000 test）</strong>。论文写道 IELTS 数据"sourced from the International English Language Testing System"，但<strong>数据本身并未 release</strong></li>
+            <li><strong>评分维度</strong>：ELLIPSE 是 6 维度（cohesion / syntax / vocabulary / phraseology / grammar / conventions），IELTS 论文部分是 5 维度（task achievement / coherence&amp;cohesion / vocab / grammar / overall）</li>
+            <li><strong>评分来源</strong>：🟢 ELLIPSE 是 trained human raters（state-wide standardized testing）。IELTS 数据 — 论文笼统说 "real-world scoring criteria"，<strong>无法独立核实</strong>是否官方 examiner</li>
+            <li><strong>license</strong>：<strong>模型 MIT</strong>，但训练数据 ELLIPSE 实际是 <strong>CC BY-NC-SA 4.0</strong> — viral copyleft，<strong>模型可能也受 license 传染</strong>（业界尚有争议）</li>
+            <li><strong>下载量</strong>：模型 191 次/月（不高）</li>
+            <li><strong>论文准度</strong>：overall QWK 0.8+（在论文自己的 test set 上）</li>
+          </ul>
+          <p><strong>裁定</strong>：🟡 <strong>"18,000 IELTS essays with official scores" 是误导性宣传</strong>。实际可用的部分只有 ELLIPSE 这 6,500 篇（且 NC license）。IELTS 那部分数据<strong>不公开</strong>，半米拿不到。<strong>不要凭网上截图相信 KevSun/IELTS_essay_scoring 是 IELTS 数据集</strong>。</p>
+        </div>
+      </div>
+
+      <h3>2.3 线索 #3 — GitHub chillestt/Automated-IELTS-essay-evaluation</h3>
+      <div class="dataset-card bad">
+        <div class="head"><span class="name">chillestt/Automated-IELTS-essay-evaluation</span> <span class="pill bad">合成数据 + AI 生成 label</span> <span class="pill info">GitHub</span></div>
+        <div class="body">
+          <p><strong>16 维核查（GitHub README 直接核实）</strong>：</p>
+          <ul>
+            <li><strong>规模</strong>：9,000+ samples（SFT 数据集）+ 768 samples（DPO preference dataset）— <strong>9000+ 数字属实</strong></li>
+            <li><strong>数据来源</strong>：作者明确写 "web scraping of online IELTS essays + <strong>synthetic data generation via Gemini APIs, GPT-3.5-Turbo, and Groq</strong>"<sup class="cite" data-refid="10">[10]</sup></li>
+            <li><strong>评分来源</strong>：🔴 <strong>AI 生成（pseudo labels）</strong>。作者说 essays 来自 "real IELTS tests 2022/2023"，但<strong>没说 scores 是不是真人给的</strong>，结合"synthetic generation"语境，<strong>大概率是 LLM 自己给的伪标签</strong></li>
+            <li><strong>模型架构</strong>：Mistral-7b / Llama-2-7b / Gemma-7b 用 QLoRA + DPO fine-tune</li>
+            <li><strong>license</strong>：未指定（License 字段为空）</li>
+            <li><strong>star 数</strong>：9 stars（小项目，社区影响力低）</li>
+            <li><strong>准度</strong>：README <strong>没给具体 metric</strong>（QWK / accuracy 全无）— 严重 red flag</li>
+            <li><strong>数据下载</strong>：通过 HuggingFace 公开（chillies/IELTS-fighter 系列）</li>
+            <li><strong>污染风险</strong>：🔴 <strong>极高</strong> — synthetic data + 无 metric + 无 license + 个人项目</li>
+          </ul>
+          <p><strong>裁定</strong>：🔴 <strong>不要用</strong>。典型的 "LLM 生成自评数据" 闭环陷阱 — 用 GPT-3.5/Gemini 给 essay 评分，再拿这些分训新模型，准度天花板就是 GPT-3.5 本身（QWK 大约 0.6-0.7）<sup class="cite" data-refid="20">[20]</sup>。商业系统用这种数据训出来的模型可能<strong>系统性偏低</strong>（LOC 维度如 Grammar / Conventions 被 LLM 系统性打低分）<sup class="cite" data-refid="21">[21]</sup>。</p>
+        </div>
+      </div>
+
+      <h3>2.4 线索 #4 — HuggingFace chillies/IELTS-writing-task-2-evaluation</h3>
+      <div class="dataset-card bad">
+        <div class="head"><span class="name">chillies/IELTS-writing-task-2-evaluation</span> <span class="pill bad">高污染风险</span> <span class="pill info">HuggingFace</span></div>
+        <div class="body">
+          <p><strong>16 维核查</strong>（实地 WebFetch）：</p>
+          <ul>
+            <li><strong>规模</strong>：10,324 行 / 46.7 MB / train 9,830 + test 491</li>
+            <li><strong>字段</strong>：prompt (68-493 字符) / essay (6-12.3K 字符) / evaluation (689-9.3K 字符) / band (252 unique values)</li>
+            <li><strong>评分分布</strong>：4.0 / 4.5 / 5.0 / 5.5 / 6.0 / 6.5 / 7.0 / 7.5 / 8.0 / 8.5 — 标准 IELTS 9 档</li>
+            <li><strong>评分来源</strong>：🔴 <strong>"Not explicitly stated"</strong> — 页面不说。<strong>evaluation 字段格式高度标准化</strong>（Markdown + "**Task Achievement: [X]**" 结构），<strong>极可能是 GPT 模板化生成</strong></li>
+            <li><strong>license</strong>：未指定</li>
+            <li><strong>商用</strong>：🔴 不可证伪</li>
+            <li><strong>上传者</strong>：@chillies 个人账号，无 IELTS 官方背景</li>
+            <li><strong>feedback</strong>：evaluation 字段含 feedback，但<strong>feedback 质量差异大</strong>，<strong>有些 essay 字段含明显乱码</strong>（"injkdfzbvjkkjNCJKXNVJKnvjcnvjknxkjnf√jlnzlnhjsvbhbd"），<strong>data hygiene 极差</strong></li>
+            <li><strong>下载量</strong>：963 次/月（中等）</li>
+            <li><strong>污染风险</strong>：🔴 <strong>高到极高</strong> — 与线索 #3 同作者，同样合成数据 pipeline</li>
+          </ul>
+          <p><strong>裁定</strong>：🔴 <strong>不要用作训练数据</strong>。可以用作 <strong>essay prompt 池</strong>（10K 个 IELTS 题目）<strong>从中筛选 prompt 文本</strong>用于内部模拟，<strong>但 band score 和 evaluation 字段全部丢弃</strong>。</p>
+        </div>
+      </div>
+
+      <h3>2.5 线索 #5 — arXiv 2406.01198 "Automatic Essay Multi-dimensional Scoring"</h3>
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">arXiv:2406.01198 (Sun &amp; Wang, 2024)</span> <span class="pill warn">部分数据未公开</span> <span class="pill info">arXiv</span></div>
+        <div class="body">
+          <p><strong>16 维核查</strong>（论文全文 + HF 模型 cross-check）：</p>
+          <ul>
+            <li><strong>用了哪些 dataset</strong>：<strong>ELLIPSE（6 维度）+ IELTS（5 维度）双数据集</strong></li>
+            <li><strong>规模</strong>：IELTS 部分 train 14,500 / test 2,000；ELLIPSE 全集 ~6,500</li>
+            <li><strong>评分来源</strong>：🟢 <strong>ELLIPSE 是 trained human raters</strong>（state-wide standardized annual testing，两位 rater 评每篇）<sup class="cite" data-refid="1">[1]</sup>；🟡 <strong>IELTS 部分论文说 "real-world scoring criteria used in high-stakes language assessments"</strong> — 这话<strong>含糊</strong>，没明说 examiner ID，但作者机构 Tübingen 大学，<strong>不太可能拿到 official IELTS examiner 数据</strong>，很可能是<strong>从某 IELTS 培训网站爬取</strong>的学员真人评分</li>
+            <li><strong>模型架构</strong>：Ro-AEMS (RoBERTa) + Distil-AEMS (DistilBERT)，<strong>contrastive learning + regression head</strong></li>
+            <li><strong>准度</strong>：overall QWK &gt; 0.8（自报 in-domain test）— 论文用了 precision / F1 / QWK 三 metric</li>
+            <li><strong>数据公开</strong>：ELLIPSE 是 freely available（GitHub），<strong>IELTS 部分论文没明确说 release</strong></li>
+            <li><strong>模型公开</strong>：huggingface.co/Kevintu/Engessay_grading_ML（仅 ELLIPSE 训练版）</li>
+            <li><strong>可复现</strong>：ELLIPSE 部分可复现，IELTS 部分<strong>不可复现</strong>（数据不公开）</li>
+            <li><strong>论文 limitations</strong>：reliance on smaller ASAP datasets historically, BERT 而非 specialized classifier</li>
+          </ul>
+          <p><strong>裁定</strong>：🟢 论文方法学有效，<strong>QWK 0.8+ 是真实可靠数字</strong>（多源验证）。但 IELTS 部分数据<strong>不公开 + 来源含糊</strong>是个洞。半米可以<strong>复刻论文方法（ELLIPSE 部分）</strong>，<strong>IELTS 部分必须自己解决数据问题</strong>。</p>
+        </div>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>5 必查线索总结</strong>：</p>
+        <ul>
+          <li>线索 #1 (Kaggle mazlumi) — 🟡 评分来源不确定，仅做 demo</li>
+          <li>线索 #2 (HF KevSun) — 🟡 实际是 ELLIPSE 训练的模型，"18K IELTS official" 是误导性宣传</li>
+          <li>线索 #3 (chillestt GitHub) — 🔴 合成数据 + AI label，不要用</li>
+          <li>线索 #4 (chillies HF 10K) — 🔴 同上，仅 prompt 池可用</li>
+          <li>线索 #5 (arxiv 2406.01198) — 🟢 方法有效 + ELLIPSE 可复现，IELTS 部分不公开</li>
+        </ul>
+        <p><strong>给阿杰</strong>：5 个线索里<strong>只有 ELLIPSE 是真金</strong>。其他 4 个是不同程度的"看起来很多其实质量存疑"的迷雾。这就是为什么本报告 §10 Top 10 把 ELLIPSE 排第 1。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH3 IELTS Writing 数据集大全 ============ -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">IELTS Writing 数据集大全（10+ 候选）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>本章覆盖<strong>专门的 IELTS 写作语料</strong>，以及虽不是 IELTS 但常被替代使用的 EFL 写作语料。<strong>结论先讲</strong>：真正含官方 IELTS examiner 评分的<strong>免费可下载数据集不存在</strong>。Cambridge / IDP 官方持有的全部需要商业 license。</p>
+
+      <h3>3.1 真 IELTS 写作（官方持有，非公开）</h3>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">Cambridge Learner Corpus (CLC)</span> <span class="pill warn">仅学术</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：180,000+ 学员 / 200 国家 / 138 第一语言 / 涵盖 A1-C2 + Cambridge English / CELS / IELTS / ESOL Skills for Life / Business / Legal<sup class="cite" data-refid="9">[9]</sup>。<strong>评分来源</strong>：🟢 Cambridge ESOL examiners 真人。<strong>license</strong>：non-exclusive non-transferable，<strong>research and educational purposes only</strong>，明确<strong>禁止商用</strong>。<strong>access</strong>：需要跟 Cambridge English Language Assessment 直接合作。<strong>关键</strong>：这是<strong>世界上最权威的 ESL writing 评分语料</strong>，但<strong>半米不可能拿到商用授权</strong>。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">CLC FCE Dataset (Yannakoudakis 2011)</span> <span class="pill warn">仅学术</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：1,244 exam scripts / ~531K words，<strong>来自 2000-2001 年 Cambridge ESOL FCE 考试真实考生</strong><sup class="cite" data-refid="22">[22]</sup>。含 original text + marks + error annotation + L1 + age。<strong>评分</strong>：🟢 真 Cambridge examiner。<strong>License</strong>：Cambridge non-commercial research only。<strong>access</strong>：ilexir.co.uk 注册后下载。<strong>引用</strong>：被 BEA-2019 shared task 等数百篇论文使用，事实上的 GEC + AES 学术 benchmark。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">Cambridge English Write &amp; Improve Corpus 2024</span> <span class="pill warn">仅学术</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：5,050 user-prompt sets / 766 L2 学员 / 762K word tokens / 23K essays（含所有版本）<sup class="cite" data-refid="2">[2]</sup>。<strong>评分</strong>：🟢 <strong>certified though non-operational examiners</strong> 给 CEFR 标签。<strong>license</strong>：non-exclusive non-transferable，<strong>研究教育 only</strong>，明确禁止商用（"used for or as part of a product or service which is sold..."）。<strong>access</strong>：Cambridge ELiT 网站申请 + CAPTCHA。<strong>含</strong>：grammatical error annotation + 原始/修改版双轨。</p>
+        </div>
+      </div>
+
+      <h3>3.2 公开但来源存疑的 IELTS 数据</h3>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">Kaggle mazlumi/IELTS Writing Scored Essays</span></div>
+        <div class="body"><p>已在 §2.1 详细核查。🟡 ~1,200 essays / band score / 评分来源不明 / 仅适合 demo。</p></div>
+      </div>
+
+      <div class="dataset-card bad">
+        <div class="head"><span class="name">chillies/IELTS-writing-task-2-evaluation</span></div>
+        <div class="body"><p>已在 §2.4 详细核查。🔴 10,324 essays / 评分疑似 AI 生成 / 数据 hygiene 差。</p></div>
+      </div>
+
+      <div class="dataset-card bad">
+        <div class="head"><span class="name">chillestt/Automated-IELTS-essay-evaluation (9K SFT)</span></div>
+        <div class="body"><p>已在 §2.3 详细核查。🔴 web scraping + Gemini/GPT 合成 / 不要用。</p></div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">123Harr/IELTS-WT2-LLaMa3-1k</span></div>
+        <div class="body"><p>1,000 rows / 从 chillies dataset 派生 / LLaMA3 chat format / 🔴 继承同样污染问题。</p></div>
+      </div>
+
+      <h3>3.3 EFL 写作（非 IELTS 但相关）</h3>
+
+      <div class="dataset-card good">
+        <div class="head"><span class="name">ELLIPSE Corpus (Crossley et al. 2023)</span> <span class="pill good">⭐ Top 1</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：~6,500 ELL essays (final corpus) / 来自 grade 8-12 美国 ELL 学生 / state-wide standardized testing<sup class="cite" data-refid="1">[1]</sup>。<strong>29 个 prompts</strong>，<strong>每篇 2 位 trained human rater 评</strong>。<strong>评分</strong>：🟢 trained human raters。<strong>6 维度 + overall</strong>：cohesion / syntax / vocabulary / phraseology / grammar / conventions。<strong>含 demographic</strong>：economic status / gender / grade level / race/ethnicity。<strong>License</strong>：<strong>CC BY-NC-SA 4.0</strong>（GitHub README 明确）— <strong>禁止商用</strong>。<strong>access</strong>：GitHub scrosseye/ELLIPSE-Corpus 直接 clone。<strong>引用</strong>：被 Kaggle Feedback Prize 3 使用（3,911 essays），被 arxiv 2406.01198 等数十篇论文使用。<strong>关键</strong>：方法学上最严谨的 public 资源，<strong>但 NC license 是商用最大障碍</strong>。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card good">
+        <div class="head"><span class="name">PERSUADE 2.0 (Crossley et al. 2024)</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：25,996 argumentative essays / 6-12 grade US 学生 / 15 prompts / independent + source-based writing<sup class="cite" data-refid="3">[3]</sup>。<strong>评分</strong>：🟢 trained raters，含 holistic + argumentation effectiveness rubric。<strong>License</strong>：<strong>CC BY-NC-SA 4.0</strong>。<strong>access</strong>：Zenodo + Kaggle 公开。<strong>引用</strong>：被引用近 100 次，下载数千次。<strong>Kaggle 比赛</strong>：Feedback Prize 1/2 用 PERSUADE 1.0（12,871 essays），ASAP 2.0 比赛 2024 用 PERSUADE 2.0 子集。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card good">
+        <div class="head"><span class="name">ASAP (Kaggle 2012) + ASAP++</span></div>
+        <div class="body">
+          <p><strong>ASAP</strong>：Hewlett Foundation 2012 比赛 / 8 prompts / ~12,900 essays / 7-10 grade / 150-550 词/篇<sup class="cite" data-refid="23">[23]</sup>。<strong>评分</strong>：🟢 human expert graders（QWK 评估）。<strong>License</strong>：Kaggle 比赛默认（事实上学术界视作公共数据）。<strong>ASAP++</strong>：1,783 essays / 5 trait scores (content / organization / style / fluency / vocabulary)<sup class="cite" data-refid="24">[24]</sup>。<strong>注意</strong>：ASAP 不是 ESL，是 US K12 母语 essay，所以"评 ESL"会有 domain gap。<strong>用法</strong>：仍是 AES 学术 benchmark 标杆，迁移用作 baseline 训练完全可行。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card good">
+        <div class="head"><span class="name">ASAP 2.0 (Crossley et al. 2024)</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：24,278 source-based persuasive essays / 6/8/9/10 grade / 7 prompts / SAT 1-6 量表<sup class="cite" data-refid="25">[25]</sup>。<strong>2024 Kaggle 比赛主数据</strong>。<strong>评分</strong>：🟢 trained。<strong>license</strong>：开源（GitHub scrosseye/ASAP_2.0）— 但 PERSUADE 衍生品默认继承 NC？需要细看 LICENSE 文件。<strong>用法</strong>：long context AES / source-based writing 评估的 SOTA benchmark。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">EFCAMDAT (EF + Cambridge)</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：2nd release 1,180,310 texts / 174,743 学习者 / EF Online School 16 个 proficiency 档对齐 CEFR<sup class="cite" data-refid="26">[26]</sup>。<strong>评分</strong>：🟡 由 EF 教学体系自动评级（不是单独 trained rater 评分），<strong>不严谨</strong>，但量级大。<strong>cleaned 版</strong>（Itamar Shatz）406,062 句段。<strong>license</strong>：academic only / Google Drive 申请。<strong>UniversalCEFR 也含 efcamdat-cleaned</strong>。<strong>用法</strong>：大规模 CEFR 预训练数据，<strong>不适合作 trait scoring 监督主信号</strong>，但适合作 CEFR 6 档分类预训练 + 数据增强。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">Lang-8 / NUCLE</span></div>
+        <div class="body">
+          <p><strong>Lang-8</strong>：在线 peer correction 平台数据，无 proficiency 标签，主要用于 GEC<sup class="cite" data-refid="27">[27]</sup>。<strong>NUCLE</strong>：1,400 篇 NUS 亚洲本科生 essay，专业英语教师做语法纠错。<strong>用法</strong>：GEC 训练（语法自动纠错），<strong>不适合做总体评分</strong>。但 GEC 输出可作为 essay 评分系统的 grammar feature 输入。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">ICNALE (Asian Learners)</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：2,800 学习者 / 10 亚洲国家（含中国大陆 / 台湾 / 香港）/ 2.5M 词议论文 + spoken dialogue<sup class="cite" data-refid="16">[16]</sup>。<strong>CEFR 分档</strong>：A2 / B1_1 / B1_2 / B2+。<strong>评分</strong>：🟢 通过 VST 词汇测验 + TOEFL/TOEIC 自报分数 + 控制写作条件，<strong>非每篇人工评分但分档可信</strong>。<strong>access</strong>：language.sakura.ne.jp/icnale/。<strong>用法</strong>：<strong>对中国学生最相关的 public 学习者语料</strong>，可作 CEFR 分类训练。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">CLEC (Chinese Learner English Corpus)</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：1,000,000 词 / 中学 + 大学非英语 + 英语专业学生 / 5 子库（ST2-ST6）按 proficiency 分<sup class="cite" data-refid="28">[28]</sup>。<strong>评分</strong>：🟡 子库分级而非单篇评分。<strong>access</strong>：BFSU + Guangdong Foreign Studies / 需联系机构。<strong>用法</strong>：中文母语英语学习者权威语料，但分级粗糙，做 CEFR 6 档预训练可。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">Feedback Prize ELL (Kaggle 2022)</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：3,911 essays / 8-12 grade ELL / 6 维度评分（同 ELLIPSE）<sup class="cite" data-refid="29">[29]</sup>。<strong>这是 ELLIPSE 的 Kaggle 比赛版子集</strong>。<strong>评分</strong>：🟢 2 位 normed human raters。<strong>license</strong>：competition rules（衍生模型商用受限）。<strong>winning solution</strong>：DeBERTa + adversarial weights perturbation + metric-specific attention pooling，QWK 0.8+。<strong>已被 Google Gemini 等采用</strong>。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card good">
+        <div class="head"><span class="name">DREsS (Yoo et al. 2024) — Rubric EFL</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：48.9K samples / DREsS_New (2.3K real EFL undergrad / 英语教育专家评) + DREsS_Std + DREsS_CASE (40.1K synthetic augmentation)<sup class="cite" data-refid="30">[30]</sup>。<strong>评分</strong>：🟢 English education experts。<strong>3 rubrics</strong>：content / organization / language，1-5 scale 0.5 step。<strong>access</strong>：haneul-yoo.github.io/dress / ACL 2025 long paper。<strong>用法</strong>：rubric-based AES on EFL writing，比较新（2024）+ 比较小心做了 augmentation 分离。</p>
+        </div>
+      </div>
+
+      <h3>3.4 中国学生 EFL 专项</h3>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">Xiaochr/Chinese-Student-English-Essay (HuggingFace)</span></div>
+        <div class="body"><p>Chinese 高中生 essay 数据 / 13,372 篇 / 含人工评分（论文报告 "manual scoring by professional raters"）<sup class="cite" data-refid="31">[31]</sup>。🟢 真人评分 + 中文场景 + 量大。<strong>但</strong>需核实 license + 评分 rubric 是否对齐 CEFR / IELTS。<strong>潜在 Top 11 候选</strong>。</p></div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">Scored and Error-annotated Chinese EFL/ESL Essay (NLPIR 2021)</span></div>
+        <div class="body"><p>论文报告 large-scale 人工评分中国学生英语 essay 数据，含 error annotation。具体规模和 access 路径需查 NLPIR conf paper。</p></div>
+      </div>
+
+      <div class="callout info">
+        <p><strong>IELTS Writing 数据集 — 5 大 takeaway</strong>：</p>
+        <ol>
+          <li><strong>真 IELTS examiner 评分</strong>全在 CLC / IDP 内部，<strong>不能商用</strong></li>
+          <li><strong>HuggingFace / Kaggle 上的 IELTS 数据 90% 评分来源不明 / AI 生成</strong></li>
+          <li><strong>最干净的 EFL writing 替代</strong>：ELLIPSE (6 维) + PERSUADE 2.0 (argumentation) + ASAP++ (5 trait)</li>
+          <li><strong>License 都是 NC</strong> — 半米只能用作内部训练 baseline，不能作为商用产品的训练主信号</li>
+          <li><strong>中国学生数据</strong>：ICNALE + CLEC + Xiaochr HF 是仅有的几个</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH4 IELTS Speaking 数据集 ============ -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">IELTS Speaking 数据集大全（5+ 候选 + 为啥少）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>4.1 为什么高质量 Speaking dataset 极难获取</h3>
+      <div class="callout bad">
+        <p><strong>3 大结构性障碍</strong>：</p>
+        <ol>
+          <li><strong>NDA + 隐私</strong>：考生口音 / 声纹 / 内容可识别身份，<strong>GDPR / 个人信息保护法</strong>限制 redistribute</li>
+          <li><strong>IP</strong>：speaking prompt 本身是 IELTS / TOEFL / DET 的<strong>核心知识产权</strong>，泄漏会影响 future 考试 fairness</li>
+          <li><strong>标注成本</strong>：单条 30s-2min 语音，<strong>5 个 expert</strong> 各维度评要 10+ 分钟，1 万条 ≈ 8000 人时</li>
+        </ol>
+        <p>结果：真正 IELTS / TOEFL speaking 公开数据集<strong>几乎不存在</strong>。剩下的全是<strong>非 IELTS 的 L2 学习者发音 / 整体口语数据</strong>。</p>
+      </div>
+
+      <h3>4.2 可用 Speaking 数据集逐一</h3>
+
+      <div class="dataset-card good">
+        <div class="head"><span class="name">speechocean762 (OpenSLR)</span> <span class="pill good">⭐ 唯一可商用</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：5,000 句 / 250 名 L2 学习者 / 全部是<strong>中文母语</strong>（!） / 125 成人 + 125 儿童 / 男女平衡<sup class="cite" data-refid="4">[4]</sup>。<strong>标注</strong>：5 位 expert 标注 sentence / word / phoneme 三级评分。<strong>License</strong>：<strong>"可自由用于商业和非商业"</strong>（OpenSLR + Kaldi baseline 公开）。<strong>评分</strong>：🟢 5 experts。<strong>用法</strong>：<strong>对半米最关键的语音评分数据</strong> — 中文母语 + 可商用 + 多粒度。已是 Pronunciation Assessment (APA) 事实 benchmark。<strong>建议本周下载</strong>。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card good">
+        <div class="head"><span class="name">L2-ARCTIC (TAMU + Iowa State)</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：26,867 utterances / 24 非母语者 / 27.1h / L1 = 越南语 / 韩语 / 普通话 / 西班牙语 / 印地语 / 阿拉伯语<sup class="cite" data-refid="11">[11]</sup>。<strong>标注</strong>：phoneme-level alignment + 150 句/人手工 mispronunciation annotation（substitutions / deletions / insertions）。<strong>评分</strong>：🟢 linguist 手工标。<strong>access</strong>：psi.engr.tamu.edu/l2-arctic-corpus/ 注册可下。<strong>License</strong>：academic + 商用可申请。<strong>用法</strong>：发音错误检测 + 重音转换 + CAPT。配合 speechocean762 是发音评分黄金组合。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">Cambridge Speak &amp; Improve Corpus 2025</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：~315h / 950 fully annotated + 2500+ 仅 holistic score / A2-C1 / open speaking task / 4 任务（ASR / SLA / SGEC / SGECF）<sup class="cite" data-refid="32">[32]</sup>。<strong>评分</strong>：🟢 Cambridge English-trained。<strong>scoring</strong>：2.0-6.0 scale 对齐 CEFR + holistic / analytic (pronunciation / fluency / task achievement)。<strong>License</strong>：<strong>non-commercial only</strong>（Cambridge ELiT）<sup class="cite" data-refid="32">[32]</sup>。<strong>access</strong>：申请。<strong>用法</strong>：最权威的开放 L2 口语评分数据，<strong>但商用阻塞</strong>。半米可在<strong>学术合作框架内</strong>用作内部 baseline，<strong>不能直接训商用产品</strong>。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">NICT JLE Corpus</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：1,300 日本英语学习者 / 2M 词转写 / 9 proficiency levels / grammatical + lexical error tagged<sup class="cite" data-refid="12">[12]</sup>。<strong>评分</strong>：🟢 日本学习者口语 proficiency 标注。<strong>License</strong>：<strong>CC BY-SA 3.0</strong>（!） — <strong>允许商用 + share-alike</strong>。<strong>access</strong>：alaginrc.nict.go.jp/nict_jle/ 直接下载 7MB。<strong>用法</strong>：可商用 + 数据量大 + 含错误标注。对中国学生场景<strong>有 transfer risk</strong>（日本和中国 L1 phoneme 模式不同），但作 baseline 训练资源很可用。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">TLT-school (Trentino)</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：意大利北部学校 9-16 岁学生学英语 / 德语 / 2017-2018 录音 / IPRASE 主导<sup class="cite" data-refid="33">[33]</sup>。<strong>评分</strong>：🟢 human expert 按 CEFR 6 档评。<strong>访问</strong>：部分公开。<strong>用法</strong>：<strong>儿童 L2 口语</strong>稀缺资源 — 半米国际学校 K12 场景<strong>有迁移价值</strong>。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">LearnerVoice (Interspeech 2024)</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：50.04h L2 学习者 spontaneous speech / 含 ungrammatical + disfluency<sup class="cite" data-refid="34">[34]</sup>。<strong>评分</strong>：主要做 ASR fine-tune 不是 proficiency 评分。<strong>用法</strong>：Whisper-small.en 在 LearnerVoice 上 fine-tune 后 WER 从 18.3% 降到 10.26%（54.2% 错误源于 L2 特征）。<strong>关键</strong>：半米做 speaking 评分<strong>第一步</strong>是 ASR，必须用 LearnerVoice 类数据 fine-tune Whisper / wav2vec2 base model 才能在 L2 学习者语音上不爆。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">ETS TOEFL Speech Corpus (LDC)</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：2,879 audio files + transcriptions / TOEFL iBT independent + integrated speaking<sup class="cite" data-refid="35">[35]</sup>。<strong>评分</strong>：🟢 ETS-trained rater。<strong>License</strong>：LDC paid。<strong>access</strong>：catalog.ldc.upenn.edu 付费。<strong>用法</strong>：高质量但<strong>不便宜</strong>（典型 LDC 成员制度 $0-$3,000+），适合<strong>大公司</strong>而非 MVP。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">CMU ARCTIC (synthesis baseline)</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：少数 accented native speakers / 主要做 TTS 合成 baseline<sup class="cite" data-refid="36">[36]</sup>。<strong>用法</strong>：<strong>不适合做 ESL 评分</strong>，仅作为 L2-ARCTIC 的 prompt 源（L2-ARCTIC 是从 CMU ARCTIC prompt 派生）。</p>
+        </div>
+      </div>
+
+      <h3>4.3 替代路线：当 dataset 不够用</h3>
+      <div class="callout accent">
+        <p><strong>当真正的 IELTS speaking 评分数据拿不到，替代路线</strong>：</p>
+        <ol>
+          <li><strong>Whisper / Azure Speech 转写</strong> → 转成文本走 Writing pipeline（损失韵律 / pitch / fluency 信号）</li>
+          <li><strong>wav2vec2 / GOP 算法</strong>提取 phoneme-level pronunciation 分数<sup class="cite" data-refid="37">[37]</sup></li>
+          <li><strong>Azure Pronunciation Assessment SDK</strong>：accuracy / fluency / completeness / prosody / vocabulary / grammar / topic 7 维度 + 32 语言 + commercial API<sup class="cite" data-refid="38">[38]</sup>。商用直接调用 $0.0005-0.001/秒</li>
+          <li><strong>speech LLM</strong>（Qwen2-Audio 等）做 holistic CEFR grading — 2025 学术报告超过 baselines<sup class="cite" data-refid="39">[39]</sup></li>
+          <li><strong>自建</strong>：联合 1-2 个国际学校录 1000 名学生 30s × 5 题 = 5000 录音，请 2 位 IELTS examiner 评，预算 $5000-10000</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH5 TOEFL/ETS ============ -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">TOEFL Writing/Speaking 数据集（ETS 系）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">TOEFL11 / ETS Corpus of Non-Native Written English (LDC2014T06)</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：12,100 essays / 11 L1 / 8 prompts / 2006-2007 TOEFL iBT independent writing 真实考生<sup class="cite" data-refid="40">[40]</sup>。<strong>评分</strong>：🟢 ETS-trained raters 0-5 scale → 转成 low / medium / high。<strong>License</strong>：LDC paid（具体价格 login 看，成员 10% 折扣）。<strong>限制</strong>：<strong>只给 3 档（low/medium/high）不给 raw score</strong>，颗粒度粗。<strong>用法</strong>：Native Language Identification (NLI) + AES baseline，引用上千。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">TOEFL Public Writing Dataset (480 essays)</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：480 argumentative essays / 2 prompts / ground truth scores<sup class="cite" data-refid="41">[41]</sup>。<strong>评分</strong>：🟢 ETS。<strong>用法</strong>：finetuned 模型在此 RMSE 0.57 / 84.72% agreement / QWK 0.78。<strong>规模太小</strong>，主要作 evaluation set 不做训练。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">ETS TOEFL Speech Corpus (2,879 utt)</span></div>
+        <div class="body"><p>已在 §4 介绍。LDC paid / 🟢 ETS rater 评。</p></div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">ETS Argument Essay Corpus (7,974 essays)</span></div>
+        <div class="body"><p>ETS 自己收集的 7,974 篇 human-scored argument essay / 10 prompts。学术合作可申请。</p></div>
+      </div>
+
+      <h3>5.1 e-rater (ETS 自家评分引擎)</h3>
+      <div class="callout info">
+        <p>ETS 的 e-rater scoring engine 是 TOEFL iBT 实际 production 系统<sup class="cite" data-refid="42">[42]</sup>。研究显示：</p>
+        <ul>
+          <li>e-rater + 1 human rater 的 contributory scoring 模式在 TOEFL iBT 已 operational</li>
+          <li>6 个 linguistic microfeatures 解释 60% human score variance</li>
+          <li>QWK / Pearson 与 human 接近</li>
+          <li><strong>discrepancy threshold</strong>：independent 1.5 band / integrated 1.0 band — 超过这个 gap 触发第二 human re-score</li>
+        </ul>
+        <p><strong>启示</strong>：半米的 Assessment Engine 不需要 100% 替代人，可以走<strong>"AI 给初评 + 阈值触发人工复评"</strong>的 hybrid 模式。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH6 CEFR 语料 ============ -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">CEFR labeled corpora 大全</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>6.1 CEFR 标注语料（文本侧）</h3>
+
+      <div class="dataset-card good">
+        <div class="head"><span class="name">UniversalCEFR (Imperial et al. 2025, EMNLP)</span> <span class="pill good">⭐ 一站式</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：505,807 CEFR-labeled texts / 13 语言 / 4 scripts / 26 个公开 corpora 整合<sup class="cite" data-refid="43">[43]</sup>。<strong>含</strong>：cambridge-exams / cefr-sp / icle500 / efcamdat-cleaned / caes / merlin (cs/it/de) / kwiziq / readme / cople2 / zaebuc / peapl2 / learn-welsh 等。<strong>License</strong>：多数 CC BY-NC-SA 4.0（"non-commercial research only"），少数 CC0。<strong>access</strong>：HuggingFace UniversalCEFR org + GitHub。<strong>fine-tuned 模型</strong>已发布 ModernBERT-base-cefr-all-classifier + xlm-roberta-base-cefr-all-classifier。<strong>用法</strong>：CEFR 6 档分类预训练首选，多语言 transfer learning 友好。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card good">
+        <div class="head"><span class="name">English Vocabulary Profile (EVP)</span></div>
+        <div class="body">
+          <p>Cambridge University Press + Cambridge English Language Assessment 联合<sup class="cite" data-refid="44">[44]</sup>。<strong>规模</strong>：每个词的每个义项独立分配 CEFR 标签 A1-C2 / British + American。<strong>基础</strong>：Cambridge Learner Corpus 验证学习者实际<strong>知道</strong>什么。<strong>access</strong>：englishprofile.org 免费查询（每查 1 词），<strong>批量下载需申请</strong>。<strong>license</strong>：商用需直接谈授权。<strong>用法</strong>：词法侧 CEFR 评分黄金标准。Text Inspector / Cathoven / banmi-cvla 都基于 EVP。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card good">
+        <div class="head"><span class="name">English Grammar Profile (EGP)</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：1,239 grammatical competence statements / 全 CEFR A1-C2<sup class="cite" data-refid="45">[45]</sup>。<strong>来源</strong>：从 CLC 数据归纳，非规定性。<strong>access</strong>：englishprofile.org 在线查询 / GitHub ninja33/EGP MS Excel 下载。<strong>license</strong>：未明确商用条款，需联系。<strong>用法</strong>：语法侧 CEFR 评分黄金标准。半米 grammar 系统的 SOTA 对照。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card good">
+        <div class="head"><span class="name">CEFR-J Wordlist + Phrase List (Tono Lab)</span> <span class="pill good">可商用</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：7,801 词 A1-B2 4 sublist + 27 语言版本<sup class="cite" data-refid="5">[5]</sup>。<strong>license</strong>：<strong>"can be used for research and commercial purposes with no charge, provided proper citation"</strong>（Tono Lab 明确）<sup class="cite" data-refid="13">[13]</sup>。<strong>access</strong>：cefr-j.org 下载。<strong>用法</strong>：<strong>对半米最关键的可商用 CEFR 词法资源</strong>。配合 EVP 查询（非商用）做内部 cross-check，自家系统对外用 CEFR-J + 自建。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">Octanove Vocabulary Profile C1/C2</span> <span class="pill warn">CC BY-SA viral</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：补 CEFR-J 缺失的 C1/C2 词<sup class="cite" data-refid="46">[46]</sup>。<strong>license</strong>：<strong>CC BY-SA 4.0</strong> — 派生作品<strong>必须同样 share-alike</strong>，<strong>商业产品集成此数据会被传染</strong>（这是半米 banmi-cvla 工具的现有问题，见 banmi-cvla-audit 报告 #19）。<strong>建议</strong>：<strong>移除</strong>，用自建 C1/C2 词表或者直接调 EVP 查询替代。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">CEFR-SP (Arase &amp; Uchida 2022)</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：17,000 英文 sentence + CEFR level 标注（English education professionals 评）<sup class="cite" data-refid="47">[47]</sup>。<strong>来源</strong>：Newsela-Auto / Wiki-Auto / SCoRE。<strong>access</strong>：GitHub yukiar/CEFR-SP。<strong>F1</strong>：83% macro-F1 sentence-level CEFR 分类。<strong>用法</strong>：sentence-level 难度评估 + 文本简化辅助。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">Ace-CEFR (2025)</span></div>
+        <div class="body">
+          <p>对话文本 CEFR 标注 / 由专家语言学家手工评 / 针对 LLM 应用文本难度评估<sup class="cite" data-refid="48">[48]</sup>。规模 + license 见原 paper。</p>
+        </div>
+      </div>
+
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">MERLIN Corpus</span></div>
+        <div class="body">
+          <p>德 / 意 / 捷克 3 语言学习者文本 / 全 CEFR A1-C2 / 含中介语错误标注<sup class="cite" data-refid="43">[43]</sup>。<strong>英文部分</strong>：无（仅其他语言）。<strong>用法</strong>：CEFR 跨语言迁移参考。</p>
+        </div>
+      </div>
+
+      <h3>6.2 中国学生 CEFR Predictor 建库可能性</h3>
+      <div class="callout accent">
+        <p><strong>已有材料 + 半米可以做什么</strong>：</p>
+        <ul>
+          <li><strong>China Standards of English (CSE)</strong> — 2018 教育部发布 / 3000 个 can-do descriptor / 9 档 3 stage<sup class="cite" data-refid="17">[17]</sup>。CSE 跟 CEFR 已有学术 alignment 研究（British Council / Pearson 报告）</li>
+          <li><strong>Pearson GSE</strong> 已对齐 CSE Young Learners 和 College vocabulary<sup class="cite" data-refid="49">[49]</sup>。GSE 10-90 比 CEFR 6 档<strong>细 15 倍</strong>，对中国 K12 场景适配性强</li>
+          <li><strong>方案</strong>：半米可以建<strong>"中国 K12 国际学校英语水平双轨表"</strong> — 一边 CSE 1-9 档 / 一边 CEFR A1-C2 / 中间 GSE 10-90 详细映射 → 这套表本身是<strong>独家壁垒资产</strong></li>
+          <li>训练数据：用 ICNALE（含中国）+ CLEC + ELLIPSE（迁移学习）+ 自建 1000 篇国际学校真人评分 → 训中文母语 CEFR predictor</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH7 WIDA / DET / AES / ASR ============ -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">WIDA + DET + AES + ASR 行业研究</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>7.1 WIDA ACCESS (美国 K12 ELL 标准)</h3>
+      <div class="callout warn">
+        <p><strong>WIDA ACCESS</strong>：美国 K-12 ELL 学生年度英语水平测试，覆盖 Listening / Reading / Speaking / Writing 4 域<sup class="cite" data-refid="50">[50]</sup>。<strong>结构</strong>：ACCESS Online (1-12 grade computer adaptive) + Alternate ACCESS (有 cognitive disability)。<strong>access</strong>：测试材料只在 WIDA Secure Portal 给会员州。<strong>没有公开 corpus</strong>。<strong>用法</strong>：作为<strong>评估 rubric / proficiency level descriptor 参考</strong>，半米的 K12 国际学校场景跟 WIDA 高度类似（ELL K12），rubric 可借鉴。</p>
+      </div>
+
+      <h3>7.2 Duolingo English Test (DET)</h3>
+      <div class="callout warn">
+        <p><strong>DET</strong>：2 项 writing tasks + 多项 speaking tasks / professional rater double-marking + intra/inter-rater reliability monitoring<sup class="cite" data-refid="51">[51]</sup>。Duolingo 研究自报 concurrent validity 跟 TOEFL iBT / IELTS 已验证。<strong>公开数据</strong>：<strong>无</strong>。Duolingo whitepapers 公开方法但<strong>不释放训练数据</strong>。<strong>用法</strong>：行业对标参考，技术方法论可看 LaFlair et al. 2023 + Attali et al. 2025 whitepapers。</p>
+      </div>
+
+      <h3>7.3 AES 学术 SOTA 2024-2025 概览</h3>
+      <div class="callout info">
+        <p><strong>主流模型</strong>（按 chronology）<sup class="cite" data-refid="52">[52]</sup>：</p>
+        <ul>
+          <li><strong>BERT baseline</strong>：QWK 0.79 / F1 0.97（vs LR baseline 0.30 / 0.91）</li>
+          <li><strong>Electra-small / Mobile-BERT</strong>：QWK ≈ 0.82 / &lt; 25M 参数（边缘部署友好）</li>
+          <li><strong>DeBERTa-v3 + AWP + Metric-specific AttentionPool</strong>：Feedback Prize ELL winner，QWK 0.85+<sup class="cite" data-refid="53">[53]</sup></li>
+          <li><strong>SBERT + LSTM + Attention</strong>：sentence-level 替代 token-level，长文本好</li>
+          <li><strong>Mamba / TransGAT</strong>：linear complexity / GNN for multi-dim AES<sup class="cite" data-refid="54">[54]</sup></li>
+          <li><strong>LLM (GPT-4 / Claude / Gemini)</strong>：zero-shot QWK 0.6-0.8 / fine-tune QWK 0.7-0.85 / 对 IELTS Task 2 QWK 0.811<sup class="cite" data-refid="14">[14]</sup></li>
+          <li><strong>Hybrid LLM + linguistic feature</strong>：DeBERTa + 14 textstat + LSTM fusion，最稳<sup class="cite" data-refid="55">[55]</sup></li>
+        </ul>
+      </div>
+
+      <h3>7.4 ASR for L2 (语音识别)</h3>
+      <ul>
+        <li><strong>Whisper</strong>：OpenAI / 多语言强 / 但对儿童 SSD 50% PER<sup class="cite" data-refid="56">[56]</sup> / L2 spontaneous 18.3% WER（fine-tune 后 10.26%）</li>
+        <li><strong>wav2vec2</strong>：Facebook / phoneme-level MDD SOTA / GOP 算法基础<sup class="cite" data-refid="37">[37]</sup></li>
+        <li><strong>Azure Speech SDK</strong>：commercial / 32 语言 / accuracy + fluency + completeness + prosody + topic 7 维度 / 短音频 ≤ 30s<sup class="cite" data-refid="38">[38]</sup></li>
+        <li><strong>OpenAI Realtime / Gemini Live</strong>：interactive speaking practice 但不专门评分</li>
+      </ul>
+
+      <h3>7.5 CommonLit CLEAR (reading 难度回归)</h3>
+      <div class="dataset-card warn">
+        <div class="head"><span class="name">CommonLit Readability Prize (Kaggle 2021)</span></div>
+        <div class="body">
+          <p><strong>规模</strong>：2,834 段 / ~256 tokens/段 / score = 5-10 raters 平均<sup class="cite" data-refid="57">[57]</sup>。<strong>评分</strong>：🟢 multi-rater 平均（高 reliability）。<strong>用法</strong>：reading 难度回归 SOTA benchmark / banmi-cvla 已使用 CLEAR 作训练集。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH8 真人 vs AI 污染甄别 ============ -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">真人 vs AI 评分污染甄别 ★（关键警示章节）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout bad">
+        <p><strong>核心问题</strong>：很多 Kaggle / HuggingFace "IELTS 评分数据集" 实际是 <strong>ChatGPT 套壳给出的伪标签</strong>。用这种数据训出来的模型 = 学了 GPT-3.5 的局限性，<strong>商业系统准度天花板被锁死</strong>。</p>
+      </div>
+
+      <h3>8.1 5 个污染信号（如何识别）</h3>
+
+      <div class="callout warn">
+        <p><strong>信号 #1：评分人未注明</strong> — 数据集 README / dataset card 没说"评分人是谁 / 几位 rater / 评分流程"。<strong>真</strong>数据集（ELLIPSE / PERSUADE / Write&amp;Improve / Speak&amp;Improve）<strong>都明确写</strong> "2 trained human raters" / "certified examiners"。<strong>没写就是没有</strong>。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>信号 #2：feedback 格式高度模板化</strong> — evaluation / feedback 字段呈 "Task Achievement: [X] - 解释" 的 Markdown 标准化模板。真人不会写出这么规整的标准报告。GPT 一秒 1 篇出来都是这个格式。<strong>chillies HF dataset</strong> 就是典型。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>信号 #3：分数过度均匀分布在 0.5 步长</strong> — 比如 4.5 / 5.0 / 5.5 / 6.0 / 6.5 全有，<strong>且每档样本数差不多平均</strong>。真 IELTS 考生分布是<strong>正态偏右</strong>，5.5-6.5 占大多数，&lt; 4.5 和 &gt; 8.0 极少。<strong>过度均匀 = 合成数据 / pseudo label</strong>。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>信号 #4：上传者是个人 / 上传日期在 2023 年 ChatGPT 发布之后</strong> — 2022 年底 ChatGPT 火之后，Kaggle / HF 上"自动评分数据集"数量爆炸。一个个人账号 (@chillies, @KevSun, @123Harr, ...) 在几个月内发了几个 10K 量级"评分数据集"，<strong>99% 是 GPT 跑出来的</strong>。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>信号 #5：缺乏 inter-rater reliability 报告</strong> — 真评分数据集会报告 Cohen's kappa / QWK 之间 raters 的一致性（0.7+ 才算 acceptable）。<strong>没报 IRR = 没真人 rater 评分</strong>，单一 LLM 评分自然 IRR = 1.0 不需要报。</p>
+      </div>
+
+      <h3>8.2 业界已知问题</h3>
+      <div class="callout info">
+        <p><strong>LLM scoring bias 学术报告</strong><sup class="cite" data-refid="21">[21]</sup>：</p>
+        <ul>
+          <li>LLM 对 holistic score 有 QWK ≈ 0.6 moderate agreement</li>
+          <li>但对 <strong>analytic trait scoring</strong> 有<strong>系统性 negative bias on LOC (Lower-Order Concerns) traits</strong>，主要是 Grammar / Conventions 维度</li>
+          <li>LLM 倾向把 grammar 评得比人更严厉</li>
+          <li>2025 综述 65 篇 LLM-human agreement 论文：moderate to good agreement 0.30-0.80<sup class="cite" data-refid="58">[58]</sup></li>
+        </ul>
+      </div>
+
+      <h3>8.3 半米决策树</h3>
+      <pre>面对新发现的"评分数据集" →
+
+是否明确写评分人？
+├─ 是 (官方 examiner / Cambridge / ETS / trained rater)
+│   └─ ✅ 进入候选池
+└─ 否
+    └─ 评分分布是正态还是过度均匀？
+        ├─ 正态偏右
+        │   └─ 评分时间早于 2023? 上传者机构背景?
+        │       ├─ 全部成立 → 🟡 谨慎用，要 cross-check
+        │       └─ 否 → 🔴 排除
+        └─ 过度均匀 → 🔴 排除
+</pre>
+
+      <h3>8.4 已确认的"干净"数据集白名单</h3>
+      <div class="callout good">
+        <p>🟢 评分来源真人 + 来源可证伪 + 学术界长期使用：</p>
+        <ul>
+          <li><strong>ELLIPSE</strong> — 2 trained raters / state testing / scrosseye GitHub repo</li>
+          <li><strong>PERSUADE 2.0</strong> — trained raters / Vanderbilt / Crossley lab</li>
+          <li><strong>ASAP + ASAP++ + ASAP 2.0</strong> — human expert grader / Hewlett / Crossley</li>
+          <li><strong>FCE / CLC</strong> — Cambridge ESOL examiner</li>
+          <li><strong>Write &amp; Improve</strong> — certified non-operational examiner</li>
+          <li><strong>Speak &amp; Improve</strong> — Cambridge English-trained</li>
+          <li><strong>speechocean762</strong> — 5 expert raters</li>
+          <li><strong>L2-ARCTIC</strong> — linguist 手工 phoneme annotation</li>
+          <li><strong>NICT JLE</strong> — 9 proficiency level 标注</li>
+          <li><strong>Feedback Prize ELL</strong> — 2 normed human raters（ELLIPSE 子集）</li>
+          <li><strong>CommonLit CLEAR</strong> — 5-10 raters 平均</li>
+          <li><strong>TLT-school</strong> — human expert CEFR 评</li>
+          <li><strong>TOEFL11</strong> — ETS-trained rater</li>
+          <li><strong>DREsS_New</strong> — English education expert（虽 augmented 部分是 synthetic 但 New 子集是真）</li>
+        </ul>
+      </div>
+
+      <div class="callout bad">
+        <p>🔴 已确认 / 高度怀疑污染（不要用）：</p>
+        <ul>
+          <li><strong>chillies/IELTS-writing-task-2-evaluation</strong> — 模板化 feedback + 乱码 essay + 无 license</li>
+          <li><strong>chillestt/Automated-IELTS-essay-evaluation (SFT 9K)</strong> — 作者明说 Gemini + GPT 合成</li>
+          <li><strong>chillies/IELTS-fighter</strong> — 同作者派生</li>
+          <li><strong>123Harr/IELTS-WT2-LLaMa3-1k</strong> — chillies dataset 派生</li>
+          <li><strong>L0CHINBEK/my-IELTS-assistant-dataset</strong> — 个人发布无评分人说明</li>
+        </ul>
+      </div>
+
+      <div class="callout warn">
+        <p>🟡 灰色区（评分来源不可证伪但有大量社区使用）：</p>
+        <ul>
+          <li><strong>mazlumi/IELTS Writing Scored Essays</strong> (Kaggle)</li>
+          <li><strong>KevSun/IELTS_essay_scoring</strong> (HF 模型，标了 IELTS 但实际是 ELLIPSE 训练)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH9 16 维评估总表 ============ -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">数据集 × 16 维评估完整表（30+ 数据集）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>所有 30+ 数据集 × 16 维评估字段。<strong>简称</strong>：📝=writing / 🎤=speech / 📚=text/vocab / Rate 列 🟢真人 🟡半真 🔴AI / Comm 列 🟢可商 🟡受限 🔴禁商 / MVP 列 ⭐⭐⭐立刻 ⭐⭐本月 ⭐月后。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>#</th><th>名称</th><th>类型</th><th>规模</th><th>Rate</th><th>Comm</th><th>License</th><th>来源</th><th>MVP</th><th>污染</th>
+          </tr></thead>
+          <tbody>
+            <tr><td>1</td><td>ELLIPSE</td><td>📝 EFL</td><td>6.5K</td><td>🟢</td><td>🔴</td><td>CC BY-NC-SA</td><td>state K12</td><td>⭐⭐⭐</td><td>🟢</td></tr>
+            <tr><td>2</td><td>PERSUADE 2.0</td><td>📝 K12</td><td>26K</td><td>🟢</td><td>🔴</td><td>CC BY-NC-SA</td><td>US 6-12</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>3</td><td>PERSUADE 1.0</td><td>📝 K12</td><td>13K</td><td>🟢</td><td>🟡</td><td>Kaggle 比赛</td><td>US 6-12</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>4</td><td>ASAP (Hewlett 2012)</td><td>📝 K12</td><td>13K</td><td>🟢</td><td>🟡</td><td>Kaggle</td><td>US 7-10</td><td>⭐⭐⭐</td><td>🟢</td></tr>
+            <tr><td>5</td><td>ASAP++</td><td>📝 trait</td><td>1.8K</td><td>🟢</td><td>🟡</td><td>research</td><td>ASAP 子</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>6</td><td>ASAP 2.0</td><td>📝 src-based</td><td>24K</td><td>🟢</td><td>🟡</td><td>open</td><td>US 6-10</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>7</td><td>Feedback Prize ELL</td><td>📝 ELL</td><td>4K</td><td>🟢</td><td>🟡</td><td>Kaggle</td><td>ELLIPSE 子</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>8</td><td>DREsS (New 子集)</td><td>📝 EFL</td><td>2.3K</td><td>🟢</td><td>🟡</td><td>research</td><td>EFL 本科</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>9</td><td>FCE / CLC</td><td>📝 Cambridge</td><td>1.2K</td><td>🟢</td><td>🔴</td><td>Cambridge NC</td><td>FCE 真考</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>10</td><td>Cambridge Learner Corpus (CLC)</td><td>📝 Cambridge</td><td>180K 学员</td><td>🟢</td><td>🔴</td><td>Cambridge NC</td><td>真 exam</td><td>—</td><td>🟢</td></tr>
+            <tr><td>11</td><td>Write &amp; Improve 2024</td><td>📝 GEC+CEFR</td><td>23K</td><td>🟢</td><td>🔴</td><td>Cambridge NC</td><td>L2 学员</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>12</td><td>EFCAMDAT (cleaned)</td><td>📝 大规模</td><td>406K 段</td><td>🟡</td><td>🟡</td><td>academic</td><td>EF 在线校</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>13</td><td>ICNALE Written</td><td>📝 亚洲</td><td>2.5M 词</td><td>🟢</td><td>🟡</td><td>research</td><td>10 亚洲</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>14</td><td>CLEC (BFSU)</td><td>📝 中国</td><td>1M 词</td><td>🟡</td><td>🟡</td><td>research</td><td>中国学生</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>15</td><td>Lang-8 (GEC)</td><td>📝 错误</td><td>大量</td><td>🟡</td><td>🟡</td><td>Lang-8 ToS</td><td>peer correct</td><td>⭐</td><td>🟢</td></tr>
+            <tr><td>16</td><td>NUCLE</td><td>📝 GEC</td><td>1.4K</td><td>🟢</td><td>🔴</td><td>NUS NC</td><td>NUS 本科</td><td>⭐</td><td>🟢</td></tr>
+            <tr><td>17</td><td>TOEFL11 (LDC2014T06)</td><td>📝 TOEFL</td><td>12K</td><td>🟢</td><td>🟡</td><td>LDC paid</td><td>ETS 真考</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>18</td><td>TOEFL Public Writing</td><td>📝 TOEFL</td><td>480</td><td>🟢</td><td>🟡</td><td>ETS</td><td>ETS</td><td>⭐</td><td>🟢</td></tr>
+            <tr><td>19</td><td>ETS Argument Essay</td><td>📝 TOEFL</td><td>8K</td><td>🟢</td><td>🔴</td><td>ETS</td><td>ETS</td><td>—</td><td>🟢</td></tr>
+            <tr><td>20</td><td>Xiaochr Chinese EFL HF</td><td>📝 中国</td><td>13K</td><td>🟢</td><td>❓</td><td>未注</td><td>中国高中</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>21</td><td>Mazlumi IELTS Kaggle</td><td>📝 IELTS</td><td>1.2K</td><td>❓</td><td>🟡</td><td>Kaggle</td><td>不明</td><td>⭐</td><td>🟡</td></tr>
+            <tr><td>22</td><td>KevSun IELTS HF (model)</td><td>📝 model</td><td>n/a</td><td>🟢→ELLIPSE</td><td>🟡</td><td>MIT (模型)</td><td>误标 IELTS</td><td>⭐</td><td>🟡</td></tr>
+            <tr><td>23</td><td>chillies IELTS T2 HF</td><td>📝 IELTS</td><td>10K</td><td>🔴</td><td>❓</td><td>未注</td><td>scrape+AI</td><td>—</td><td>🔴</td></tr>
+            <tr><td>24</td><td>chillestt SFT 9K</td><td>📝 IELTS</td><td>9K</td><td>🔴</td><td>❓</td><td>未注</td><td>Gemini/GPT</td><td>—</td><td>🔴</td></tr>
+            <tr><td>25</td><td>speechocean762</td><td>🎤 中文</td><td>5K 句</td><td>🟢</td><td>🟢</td><td>CC BY 4.0</td><td>OpenSLR</td><td>⭐⭐⭐</td><td>🟢</td></tr>
+            <tr><td>26</td><td>L2-ARCTIC</td><td>🎤 L2 多 L1</td><td>27.1h</td><td>🟢</td><td>🟢</td><td>注册</td><td>TAMU + ISU</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>27</td><td>NICT JLE</td><td>🎤 日本</td><td>2M 词转写</td><td>🟢</td><td>🟢</td><td>CC BY-SA 3.0</td><td>NICT</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>28</td><td>Speak &amp; Improve 2025</td><td>🎤 L2</td><td>315h</td><td>🟢</td><td>🔴</td><td>Cambridge NC</td><td>L2 platform</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>29</td><td>TLT-school</td><td>🎤 儿童</td><td>2017-18 录</td><td>🟢</td><td>🟡</td><td>research</td><td>意大利校</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>30</td><td>LearnerVoice</td><td>🎤 ASR L2</td><td>50.04h</td><td>🟡</td><td>🟡</td><td>research</td><td>L2 自发</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>31</td><td>ETS TOEFL Speech</td><td>🎤 TOEFL</td><td>2.9K utt</td><td>🟢</td><td>🟡</td><td>LDC paid</td><td>ETS</td><td>⭐</td><td>🟢</td></tr>
+            <tr><td>32</td><td>UniversalCEFR (26 corpora)</td><td>📚 CEFR</td><td>505K texts</td><td>🟢+🟡</td><td>🔴 (多 NC)</td><td>CC BY-NC-SA</td><td>26 整合</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>33</td><td>CEFR-SP</td><td>📚 sentence</td><td>17K</td><td>🟢</td><td>🟡</td><td>research</td><td>Newsela 等</td><td>⭐</td><td>🟢</td></tr>
+            <tr><td>34</td><td>EVP</td><td>📚 词法</td><td>每词每义</td><td>🟢</td><td>🔴</td><td>Cambridge</td><td>EngProfile</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>35</td><td>EGP</td><td>📚 语法</td><td>1.2K item</td><td>🟢</td><td>🟡</td><td>Cambridge</td><td>EngProfile</td><td>⭐⭐</td><td>🟢</td></tr>
+            <tr><td>36</td><td>CEFR-J Wordlist</td><td>📚 词法</td><td>7.8K 词</td><td>🟢</td><td>🟢</td><td>Tono OK 商</td><td>Tono Lab</td><td>⭐⭐⭐</td><td>🟢</td></tr>
+            <tr><td>37</td><td>Octanove C1/C2</td><td>📚 词法</td><td>C1/C2 补</td><td>🟢</td><td>🟡 viral</td><td>CC BY-SA</td><td>Octanove</td><td>⛔ 避</td><td>🟢</td></tr>
+            <tr><td>38</td><td>CommonLit CLEAR</td><td>📚 readability</td><td>2.8K</td><td>🟢</td><td>🟡</td><td>Kaggle</td><td>CommonLit</td><td>⭐⭐</td><td>🟢</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <p><strong>表格关键观察</strong>：</p>
+        <ul>
+          <li><strong>🟢真人评分 + 🟢可商用</strong> 的交集只有 <strong>speechocean762 / L2-ARCTIC / NICT JLE / CEFR-J Wordlist</strong> 4 个</li>
+          <li><strong>🟢真人评分 + 🟡半商用（比赛 license / 注册）</strong>：ASAP / ASAP++ / Feedback Prize ELL / TOEFL Public Writing / CLEAR / EGP</li>
+          <li><strong>🟢真人评分 + 🔴禁商</strong>：ELLIPSE / PERSUADE / Write&amp;Improve / Speak&amp;Improve / CLC / FCE / EVP / UniversalCEFR</li>
+          <li><strong>🔴 AI label / 严重污染</strong>：chillies + chillestt 系列</li>
+          <li><strong>🟡 评分来源不可证伪</strong>：mazlumi Kaggle / KevSun HF "IELTS"</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH10 Top 10 推荐 ============ -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">⭐ Top 10 数据集推荐（最长章节 · 阿杰最想看）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>排序依据：<strong>(评分质量 × 0.30) + (可商用性 × 0.20) + (MVP 适配性 × 0.20) + (规模 × 0.15) + (中国学生场景适配 × 0.15)</strong>。</p>
+
+      <h3>🥇 #1 ELLIPSE Corpus</h3>
+      <div class="dataset-card good">
+        <div class="body">
+          <p><strong>推荐理由</strong>：方法学最严谨的 public EFL writing 评分数据 — 6,500 篇 grade 8-12 ELL essay / 6 维 trait scoring / 2 名 trained rater / state-wide standardized test 来源 / 含 demographic。是 arxiv 2406.01198 论文 QWK 0.8+ 结果的实际数据 backbone。<strong>立刻下载</strong>训 baseline。<strong>避坑</strong>：CC BY-NC-SA 4.0，<strong>商业产品上线前必须用自建数据替换或者跟 Crossley lab 谈商业 license</strong>。</p>
+        </div>
+      </div>
+
+      <h3>🥈 #2 ASAP / ASAP++ / ASAP 2.0 三件套</h3>
+      <div class="dataset-card good">
+        <div class="body">
+          <p><strong>推荐理由</strong>：AES 学术界事实上的 benchmark 三套数据。ASAP (2012) 1.3 万篇 8 prompts holistic / ASAP++ 1.8K 篇 5 trait / ASAP 2.0 (2024) 2.4 万 source-based。<strong>跨年代 + 跨任务 + 跨 grade</strong>，提供从 baseline 到 long-context 全套训练材料。<strong>关键</strong>：US K12 母语 essay，不是 ESL，跟半米国际学校 ELL 学生有 domain gap，但作 pretrain + transfer 起步合适。Kaggle 比赛 license 模糊但十几年学界通用。</p>
+        </div>
+      </div>
+
+      <h3>🥉 #3 speechocean762</h3>
+      <div class="dataset-card good">
+        <div class="body">
+          <p><strong>推荐理由</strong>：<strong>对半米最关键的一个</strong>。250 名<strong>中文母语</strong>学习者 / 5,000 句 / 5 位 expert 评分 / sentence + word + phoneme 三级 / <strong>CC BY 4.0 完全可商用</strong>。OpenSLR 直接下载 + Kaldi baseline 公开。<strong>这是半米做 speaking 评分</strong>的<strong>第一块拼图</strong>。<strong>建议本周下</strong>。</p>
+        </div>
+      </div>
+
+      <h3>#4 PERSUADE 2.0</h3>
+      <div class="dataset-card good">
+        <div class="body">
+          <p><strong>推荐理由</strong>：迄今为止规模最大 argumentative essay 数据集，26K 篇 / 6-12 grade / 15 prompts / 含 argumentation effectiveness 细粒度 rubric / Crossley lab 出品质量保证。<strong>对 IELTS Task 2 议论文场景特别相关</strong>。NC license 同 ELLIPSE，<strong>商用同坑</strong>。但在自建之前是<strong>论文型评分 (argumentative)</strong>最好的训练材料。</p>
+        </div>
+      </div>
+
+      <h3>#5 EVP + EGP + CEFR-J 词法语法三件套</h3>
+      <div class="dataset-card good">
+        <div class="body">
+          <p><strong>推荐理由</strong>：评分系统的<strong>词法 / 语法可解释 feature</strong>主干。EVP 每词每义 CEFR 标签（查询免费 / 批量需谈）+ EGP 1,239 grammatical competence statement (Excel 下载) + CEFR-J 7,801 词<strong>明确可商用</strong>。配合可以做 CEFR 词法 + 语法两个 axis 的 explainable 评分。半米已在 banmi-cvla 用过 CEFR-J + Octanove（建议把 Octanove 换掉），<strong>核心评分系统继续用 CEFR-J 主线</strong>。</p>
+        </div>
+      </div>
+
+      <h3>#6 Cambridge Speak &amp; Improve Corpus 2025</h3>
+      <div class="dataset-card good">
+        <div class="body">
+          <p><strong>推荐理由</strong>：<strong>2025 最新发布</strong>的 L2 口语评分语料，315h 真人 / Cambridge 评分 / 含 ASR + SLA + SGEC + SGECF 4 任务 baseline。是<strong>Speak &amp; Improve Challenge 2025</strong> 的官方数据。NC 限制商用，但作为<strong>学术合作框架</strong>内训内部 baseline 完全可行。<strong>建议</strong>：申请 access 用于内部 R&amp;D，<strong>商业产品最终上线用自建数据</strong>。</p>
+        </div>
+      </div>
+
+      <h3>#7 Cambridge Write &amp; Improve Corpus 2024</h3>
+      <div class="dataset-card good">
+        <div class="body">
+          <p><strong>推荐理由</strong>：Speak&amp;Improve 的写作姊妹篇。23K essays / 766 L2 学员 / certified examiner CEFR 标签 / 含 GEC error annotation + 修改前后 parallel text。<strong>跟 §11 grammar system 报告关联</strong> — EGP 验证 + Write&amp;Improve 实战数据。NC 限制同上。</p>
+        </div>
+      </div>
+
+      <h3>#8 L2-ARCTIC</h3>
+      <div class="dataset-card good">
+        <div class="body">
+          <p><strong>推荐理由</strong>：26,867 utterance / 27.1h / 6 个 L1（普通话在内）/ 手工 phoneme-level mispronunciation annotation。<strong>跟 speechocean762 互补</strong> — speechocean762 全是中文母语，L2-ARCTIC 涵盖 6 个 L1，<strong>对国际学校多元学生场景关键</strong>。注册即用，商用可申请。</p>
+        </div>
+      </div>
+
+      <h3>#9 ICNALE (Asian Learners)</h3>
+      <div class="dataset-card good">
+        <div class="body">
+          <p><strong>推荐理由</strong>：<strong>对中国学生场景最相关的 public 学习者语料</strong> — 2,800 学员 / 10 亚洲国家（含中国）/ 2.5M 词 / written + spoken / 严格控制写作条件 / 4 档 CEFR (A2 / B1_1 / B1_2 / B2+)。半米国际学校 K12 / 大陆英语 K12 用户分布跟 ICNALE 高度相似。<strong>建议用作 transfer baseline</strong>。</p>
+        </div>
+      </div>
+
+      <h3>#10 NICT JLE Corpus + CommonLit CLEAR (并列)</h3>
+      <div class="dataset-card good">
+        <div class="body">
+          <p><strong>NICT JLE</strong>：<strong>CC BY-SA 3.0 可商用</strong> — 1,300 日本学习者 / 2M 词口语转写 + error tag。对中国学生 phoneme pattern 有 transfer gap，但作 baseline 训练 + share-alike 完全友好。<strong>CommonLit CLEAR</strong>：2,834 reading passage / 5-10 raters 平均 / reading 难度回归 SOTA。<strong>banmi-cvla 已使用</strong>。</p>
+        </div>
+      </div>
+
+      <h3>10.1 排名外但值得提</h3>
+      <ul>
+        <li><strong>Feedback Prize ELL (Kaggle 2022)</strong> — ELLIPSE 子集 4K + DeBERTa winning solution 公开</li>
+        <li><strong>DREsS_New (2.3K)</strong> — 比较新（2024）+ 严格分离 synthetic 部分</li>
+        <li><strong>FCE / CLC FCE Dataset</strong> — Cambridge 真考但 NC</li>
+        <li><strong>Xiaochr Chinese-Student-English-Essay (HF)</strong> — 13K 中国高中生真人评分 — 需要验证 license</li>
+        <li><strong>UniversalCEFR</strong> — 26 corpora 整合包，作 CEFR 多语言 transfer 起点</li>
+        <li><strong>TOEFL11</strong> — ETS rater 评分但 LDC paid + 只给 3 档</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ CH11 6 路线对比 ============ -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">6 技术路线对比（LLM / XGBoost / Hybrid / Rules / Speech / E2E）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>11.1 6 路线横向对比表</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>路线</th><th>核心</th><th>典型准度</th><th>稳定性</th><th>成本</th><th>可解释性</th><th>商业可行</th><th>中国适配</th></tr></thead>
+          <tbody>
+            <tr><td>1 纯 LLM scoring</td><td>GPT-4o / Claude 4.6 / DeepSeek V4 prompt</td><td>QWK 0.6-0.81<sup class="cite" data-refid="14">[14]</sup></td><td>🟡 prompt 敏感</td><td>$$$ 推理</td><td>🟢 自然语言</td><td>🟢 立即可用</td><td>🟢 + DeepSeek 国产</td></tr>
+            <tr><td>2 NLP feature + XGBoost</td><td>textstat + lexical + syntactic + XGBoost regression</td><td>QWK 0.6-0.75<sup class="cite" data-refid="59">[59]</sup></td><td>🟢 deterministic</td><td>$ 训练 + $ 推理</td><td>🟢 feature importance</td><td>🟢 全自家</td><td>🟡 中文 feature 库</td></tr>
+            <tr><td>3 Hybrid (LLM + ML)</td><td>DeBERTa + 14 textstat + LSTM fusion</td><td>QWK 0.80-0.85+<sup class="cite" data-refid="55">[55]</sup></td><td>🟢 互补</td><td>$$ 训练 + $$ 推理</td><td>🟡 部分可解</td><td>🟢</td><td>🟢</td></tr>
+            <tr><td>4 Rule-based + ML</td><td>EGP 规则 + EVP 词法 + XGBoost final</td><td>QWK 0.55-0.70</td><td>🟢 透明</td><td>$ 训练 / $ 推理</td><td>🟢 规则明文</td><td>🟢 banmi-cvla 路线</td><td>🟡 需中文 rule 库</td></tr>
+            <tr><td>5 Speech feature + ML</td><td>wav2vec2 GOP + prosody + ML head</td><td>Pearson 0.7+ (词级)</td><td>🟡 audio quality 敏感</td><td>$$ 训练 + $$$ 推理</td><td>🟡 phoneme score</td><td>🟢</td><td>🟢 speechocean762 中文 baseline</td></tr>
+            <tr><td>6 E2E neural (BERT/DeBERTa)</td><td>RoBERTa/DeBERTa 直接 fine-tune</td><td>QWK 0.79-0.85<sup class="cite" data-refid="52">[52]</sup></td><td>🟢 SOTA</td><td>$$ 训练 / $ 推理</td><td>🔴 黑箱</td><td>🟢</td><td>🟡 中文样本不足</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>11.2 关键 finding</h3>
+      <div class="callout info">
+        <p><strong>Hybrid (路线 3) 是 SOTA</strong> — Adversarial Weights Perturbation + Metric-specific AttentionPool 的 Feedback Prize 3 winner 是 DeBERTa fine-tune + linguistic feature fusion，QWK 0.85+。Multi-Agent LLM 也开始流行（AutoSCORE）。</p>
+        <p><strong>纯 LLM (路线 1) 已经接近顶</strong> — GPT-4 zero-shot 在 IELTS Task 2 QWK 0.811<sup class="cite" data-refid="14">[14]</sup>。但有<strong>系统性 LOC bias</strong>（语法 / convention 维度偏低）。</p>
+        <p><strong>NLP feature + XGBoost (路线 2) 是 MVP 性价比最高</strong> — 训练快、推理便宜、feature importance 可解释，准度足够 MVP（QWK 0.6-0.75）。半米 banmi-cvla 已部分走这条路。</p>
+        <p><strong>Speech (路线 5) 是中国学生最大机会</strong> — speechocean762 + L2-ARCTIC + wav2vec2 GOP + 自建中文母语数据 → 中国学生 phoneme-level 发音评分壁垒。Azure SDK 已 commercial 化但贵且封闭。</p>
+      </div>
+
+      <h3>11.3 实际准度数据（学术 cite）</h3>
+      <ul>
+        <li>GPT-4 IELTS Task 2 QWK = 0.811 (vs official examiner)<sup class="cite" data-refid="14">[14]</sup></li>
+        <li>fine-tune GPT QWK = 0.66, Pearson = 0.68, 78.3% exact agreement<sup class="cite" data-refid="14">[14]</sup></li>
+        <li>2025 综述 65 paper LLM-human 0.30-0.80 范围<sup class="cite" data-refid="58">[58]</sup></li>
+        <li>arxiv 2406.01198 RoBERTa fine-tune QWK > 0.8 overall<sup class="cite" data-refid="8">[8]</sup></li>
+        <li>IELTS examiner inter-rater 自身 G coefficient = 0.81-0.89 (writing)<sup class="cite" data-refid="60">[60]</sup> — <strong>这是天花板</strong></li>
+        <li>e-rater + 1 human 在 TOEFL iBT 已 operational<sup class="cite" data-refid="42">[42]</sup></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ CH12 Assessment Engine 架构 ============ -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">AI Native English Assessment Engine 建议架构</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>12.1 完整架构图（ASCII）</h3>
+      <pre>┌────────────────────────────────────────────────────────────────┐
+│                  半米 AI Native Assessment Engine v1.0          │
+└────────────────────────────────────────────────────────────────┘
+
+学员输入                                              评分输出
+─────────                                            ─────────
+
+📝 Writing  ─┐                                  ┌─→ IELTS 0-9 band
+🎤 Speaking ─┤    ┌──────────────────────┐      │  (Task Achiev.
+            ├─→   │  Pre-processing      │      │   Coher&Cohes.
+            │    │  - Whisper ASR (L2)   │      │   Lex. Resource
+            │    │  - Tokenization       │      │   Gramm. Range)
+            │    │  - Sentence split     │      │
+            │    └──────────────────────┘      ├─→ CEFR A1-C2
+            │              │                    │
+            │    ┌─────────┴──────────┐         ├─→ GSE 10-90
+            │    │                    │         │
+            │    ▼                    ▼         ├─→ CSE 1-9
+            │  ┌────────────────┐  ┌──────────┐│   (中国国家标准)
+            │  │ NLP Features   │  │ Speech   ││
+            │  │ ─────────────  │  │ Features ││── feedback (LLM 生成)
+            │  │ • 14 textstat  │  │ ────────  ││   - 优点
+            │  │ • Lex profile  │  │ • GOP    ││   - 缺点
+            │  │ • Syntax depth │  │ • Prosody││   - 改进建议
+            │  │ • Cohesion     │  │ • Pitch  ││   - 同水平范例
+            │  │ • Error count  │  │ • Rhythm ││
+            │  └────────┬───────┘  └────┬─────┘│
+            │           │                │      │
+            │           ▼                ▼      │
+            │     ┌─────────────────────────┐  │
+            │     │   Rules Engine          │  │
+            │     │   ────────────          │  │
+            │     │   • EGP 1239 grammar    │  │
+            │     │   • EVP 词法 CEFR       │  │
+            │     │   • CEFR-J 7801 词      │  │
+            │     │   • LangTool grammar    │  │
+            │     └──────────┬──────────────┘  │
+            │                ▼                  │
+            │     ┌──────────────────────┐     │
+            │     │  Knowledge Graph     │     │
+            │     │  ─────────────       │     │
+            │     │  • CEFR↔GSE↔CSE      │     │
+            │     │  • Lexile↔CEFR       │     │
+            │     │  • Topic ontology    │     │
+            │     │  • Rubric library    │     │
+            │     └──────────┬───────────┘     │
+            │                ▼                  │
+            │     ┌──────────────────────┐     │
+            │     │  Assessment Core     │     │
+            │     │  ─────────────       │     │
+            │     │  ① XGBoost trait     │     │
+            │     │    (5 head: IELTS)   │     │
+            │     │  ② DeBERTa fine-tune │     │
+            │     │    (ELLIPSE/PERS.)   │     │
+            │     │  ③ LLM verifier      │     │
+            │     │    (GPT-4o/Claude)   │     │
+            │     │  ④ Ensemble vote     │     │
+            │     └──────────┬───────────┘     │
+            │                ▼                  │
+            │     ┌──────────────────────┐     │
+            └────→│  Mapping Layer       │─────┘
+                  │  ─────────────       │
+                  │  • CEFR mapping      │
+                  │  • Lexile mapping    │
+                  │  • IELTS band        │
+                  │  • CSE 9 档          │
+                  └──────────────────────┘
+</pre>
+
+      <h3>12.2 数据流</h3>
+      <ol>
+        <li><strong>输入</strong>：学员写作 (text) / 口语 (audio) / 选定 task (IELTS T2 / TOEFL Integrated / etc.)</li>
+        <li><strong>Pre-process</strong>：audio → Whisper L2-fine-tune → text；text → tokenize + sentence split</li>
+        <li><strong>并行</strong>：NLP features + Speech features 抽取（毫秒级）</li>
+        <li><strong>Rules</strong>：EGP / EVP / CEFR-J 规则匹配 → 词法 + 语法 CEFR 分布</li>
+        <li><strong>KG</strong>：根据 task / 学员目标 (IELTS / CSE / 国际学校) 选择对应 rubric library</li>
+        <li><strong>Assessment Core</strong>：3 个 scorer 并行 → ensemble 投票</li>
+        <li><strong>Mapping</strong>：内部 0-1 score → IELTS 9 档 + CEFR + GSE + CSE 多 axis 输出</li>
+        <li><strong>LLM feedback</strong>：用 GPT-4o / Claude 拿 raw scores + essay → 生成自然语言反馈</li>
+      </ol>
+
+      <h3>12.3 哪些部分最难</h3>
+      <div class="callout bad">
+        <p><strong>3 个最难的</strong>：</p>
+        <ol>
+          <li><strong>Speech 评分 pipeline</strong>（无现成 SDK 替代）— Whisper L2 fine-tune + GOP 算法 + speechocean762 训练 + 多 L1 适配。需要工程 + 数据双重投入</li>
+          <li><strong>Knowledge Graph 构建</strong> — CEFR↔GSE↔CSE↔Lexile 多 axis 映射没现成的，需要自建并维护。Rubric library 每个 task 都要写一遍</li>
+          <li><strong>避免 LLM bias</strong> — GPT-4 在 grammar / conventions 评分系统性偏低 — 需要做 calibration（reference 答案多源 anchor + scaling）</li>
+        </ol>
+      </div>
+
+      <h3>12.4 哪些部分最值钱（壁垒）</h3>
+      <div class="callout good">
+        <p><strong>3 个最值钱的</strong>：</p>
+        <ol>
+          <li><strong>CEFR ↔ CSE ↔ GSE 三轨映射表 + 中国 K12 国际学校 rubric 本地化</strong> — 国外公司不会做，国内公司没数据</li>
+          <li><strong>自建中国学生真人评分库</strong>（1000-5000 篇学生作品 + 国际学校老师评 + IELTS examiner 校准）— 这是商业模型训练的合法数据</li>
+          <li><strong>Rubric reverse engineering library</strong> — 给一段学员写作，反查 IELTS / TOEFL / 国际学校期末 / GAOKAO 多种 rubric 下的分数预测能力</li>
+        </ol>
+      </div>
+
+      <h3>12.5 哪些部分最适合 MVP</h3>
+      <div class="callout info">
+        <p><strong>MVP 最快路径（2-4 周）</strong>：</p>
+        <ol>
+          <li><strong>Week 1</strong>：speechocean762 + L2-ARCTIC + EVP + EGP + CEFR-J + ELLIPSE + ASAP 下载完成</li>
+          <li><strong>Week 2</strong>：复刻 arxiv 2406.01198 — RoBERTa fine-tune on ELLIPSE 6 维 + ASAP++ 5 trait，跑通 QWK 0.7+ baseline</li>
+          <li><strong>Week 3</strong>：加 NLP feature (banmi-cvla 已有 14 textstat) + XGBoost ensemble head，QWK 提升到 0.75-0.80</li>
+          <li><strong>Week 4</strong>：接 LLM feedback layer（DeepSeek V4 Pro，$0.003/M cached），生成结构化中英文 feedback</li>
+        </ol>
+      </div>
+
+      <h3>12.6 跟 banmi-cvla 现有工具的衔接</h3>
+      <div class="callout accent">
+        <p><strong>banmi-cvla</strong> (从 #19 banmi-cvla-audit 报告看) 已经实现：</p>
+        <ul>
+          <li>✅ 14 个 textstat 公式 + ATOS + Lexile + FK 等 readability 信号</li>
+          <li>✅ CEFR-J 12 档输出（注意 Octanove license 需移除）</li>
+          <li>✅ CommonLit CLEAR 训练数据 baseline</li>
+        </ul>
+        <p><strong>Assessment Engine 在 banmi-cvla 之上新增</strong>：</p>
+        <ul>
+          <li>📝 essay 5 维度 trait scoring head（new — ELLIPSE / ASAP++ 训练）</li>
+          <li>🎤 speech pipeline（new — speechocean762 / L2-ARCTIC / wav2vec2）</li>
+          <li>📊 IELTS / CSE / GSE multi-axis mapping（new — KG）</li>
+          <li>💬 LLM feedback layer（new — DeepSeek / Claude）</li>
+        </ul>
+        <p>banmi-cvla 是文本难度评估 (CVLA) 工具；Assessment Engine 是学员产出评分 (AES + ASA) 工具。<strong>两者共享 EVP / EGP / CEFR-J 词法语法</strong>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH13 MVP + 长期壁垒 ============ -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">MVP 路线 + 长期壁垒</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>13.1 MVP 4 周路线（具体动作）</h3>
+      <ol>
+        <li><strong>Week 1 数据准备</strong>
+          <ul>
+            <li>下载 speechocean762 (OpenSLR) + L2-ARCTIC (注册) + CEFR-J Wordlist (cefr-j.org) + ELLIPSE GitHub clone + ASAP/ASAP++ Kaggle</li>
+            <li>EVP 在线查询 API 接入（如付费），或本地 cache</li>
+            <li>EGP Excel 下载（ninja33/EGP repo）</li>
+            <li>跟 Crossley lab / Cambridge ELiT 申请 PERSUADE / Write&amp;Improve / Speak&amp;Improve（学术 license，作内部 baseline）</li>
+          </ul>
+        </li>
+        <li><strong>Week 2 baseline</strong>
+          <ul>
+            <li>复刻 arxiv 2406.01198 — Ro-AEMS (RoBERTa + regression head) 在 ELLIPSE 跑训，目标 6 维 QWK > 0.7</li>
+            <li>同时跑 ASAP++ 5 trait，验证 trait-level 准度</li>
+            <li>训 wav2vec2-large-960h-lv60 + speechocean762 fine-tune，sentence-level Pearson > 0.7</li>
+          </ul>
+        </li>
+        <li><strong>Week 3 集成 + feature ensemble</strong>
+          <ul>
+            <li>引入 banmi-cvla 14 textstat 作 NLP feature</li>
+            <li>XGBoost ensemble RoBERTa output + textstat + EVP/EGP 规则匹配密度</li>
+            <li>把所有 head 拼接成 5 维 IELTS 输出 (Task Achievement + Coherence + Lexical + Grammatical + Overall)</li>
+          </ul>
+        </li>
+        <li><strong>Week 4 LLM feedback + UI</strong>
+          <ul>
+            <li>结构化 prompt: 给 LLM "raw scores + 学员 essay" → 生成中英文 feedback</li>
+            <li>模型选型：DeepSeek V4 Pro $0.003/M cached（从 #18 cheap-models-pipeline 看是最经济）</li>
+            <li>简单 web 前端：学员上传 → 输出 5 维 + CEFR + feedback</li>
+          </ul>
+        </li>
+      </ol>
+
+      <h3>13.2 长期壁垒方向（6-12 个月）</h3>
+      <div class="callout good">
+        <p><strong>3 个壁垒</strong>：</p>
+        <ol>
+          <li><strong>自建国际学校真人评分库</strong>：联合 3-5 个国际学校 + 北京 IELTS 培训机构，每月收 200 篇学生写作 + 100 段口语，请 2 位认证 examiner 评，1 年 = 2400 写作 + 1200 口语 真人数据。<strong>预算 $20K-30K，是商业模型的合法数据基础</strong>。</li>
+          <li><strong>CEFR ↔ CSE ↔ GSE ↔ Lexile multi-axis 映射</strong>：从已有学术对齐研究出发，自己 calibrate 一套，作为产品差异化核心</li>
+          <li><strong>中文母语 phoneme 误差专项库</strong>：speechocean762 + L2-ARCTIC 之外，自建 1000 名中国学生英语录音 + 高频中式发音错误标注（如 /θ/ → /s/, /v/ → /w/, /l/ vs /n/, 重读音节 vs 轻读, sentence intonation）</li>
+        </ol>
+      </div>
+
+      <h3>13.3 短期不要做的事</h3>
+      <ul>
+        <li>❌ 用 chillies / chillestt 的 HF 数据训商业模型（污染）</li>
+        <li>❌ 用 ELLIPSE / PERSUADE 训的模型直接商业上线（CC BY-NC-SA viral）</li>
+        <li>❌ 用 Azure / 流利说 完全替代自建 — 失去差异化</li>
+        <li>❌ 试图同时做 IELTS + TOEFL + CSE + 国际学校 4 个 axis 的产品 — 先选一个突破</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ CH14 中国学生场景 ============ -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">中国学生场景最大机会点</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>14.1 现状盘点</h3>
+      <ul>
+        <li><strong>商业玩家</strong>：流利说（70M 用户中文讲英语数据库，世界最大）<sup class="cite" data-refid="18">[18]</sup> / 批改网 pigai.org（1000+ 高校用，作文 192 维 corpus 比对）<sup class="cite" data-refid="61">[61]</sup> / 各种 IELTS AI Coach（IELTS AI Prep / Cathoven / IELTS Champ / Deep IELTS）</li>
+        <li><strong>国家标准</strong>：CSE 2018 / 9 档 / 3 阶段 / 3000 can-do<sup class="cite" data-refid="17">[17]</sup></li>
+        <li><strong>Pearson GSE</strong> 已对齐 CSE Young Learners 和 College vocabulary<sup class="cite" data-refid="49">[49]</sup></li>
+        <li><strong>British Council</strong> 已发 "linking CSE to UK exams"</li>
+      </ul>
+
+      <h3>14.2 半米的 3 大机会点</h3>
+
+      <div class="callout good">
+        <p><strong>机会 #1：国际学校 K12 评分（蓝海）</strong></p>
+        <p>中国国际学校 / 双语学校 K12 阶段（小学高中段），用 IB / IGCSE / AP / A-Level 等课程，但学生 L1 是中文，写作和口语<strong>水平跟 native peer 有典型 ESL gap</strong>。<strong>现有 AI 评分工具</strong>：海外的 ETS e-rater / Grammarly 不适配中文母语；国内的 pigai / iWrite 偏向 CET 风格不符合国际学校 IB 风格；流利说太通用。<strong>半米机会</strong>：专门做"国际学校 K12 中英双语学生 ESL 评分" — 用 IB/IGCSE 风格 rubric + 适配中文母语 phoneme + IB 7 档 / IELTS 9 档 / CEFR 6 档多 axis 输出。</p>
+      </div>
+
+      <div class="callout good">
+        <p><strong>机会 #2：CSE-CEFR-IELTS 三轨翻译器（合规）</strong></p>
+        <p>家长最常问的问题："我孩子 IELTS 6.0 是 CEFR 什么水平？相当于 CSE 几档？高考英语能考多少分？"。<strong>现有工具</strong>：散落在 Pearson / Cambridge / 各种留学机构，<strong>没有一个整合的、可信的 official cross-walk 工具</strong>。<strong>半米机会</strong>：自家学员从评分结果上一键查"IELTS 等价 / CSE 等价 / CEFR 等价 / 高考英语预估 / TOEFL 预估"。这是<strong>家长会反复用</strong>的产品功能，<strong>数据 + UI 双层壁垒</strong>。</p>
+      </div>
+
+      <div class="callout good">
+        <p><strong>机会 #3：中文母语典型 phoneme 错误数据库</strong></p>
+        <p>中国学生英语发音<strong>系统性错误模式</strong>：/θ/ vs /s/、/v/ vs /w/、/l/ vs /n/（南方）、final consonant deletion、syllable-timed vs stress-timed rhythm、tone 干扰。<strong>现有数据</strong>：speechocean762 (250 人 / 5K 句) + L2-ARCTIC 普通话部分 (2 人) — <strong>远远不够</strong>。<strong>半米机会</strong>：通过国际学校 + 在线平台收 1000-5000 名中国学生英语录音 + 专业 phoneme 标注，建<strong>"中国学生英语发音偏误库"</strong> — 这个数据可以反向授权给国内 AI 教育公司、做学术合作论文、作产品 moat 三重收益。</p>
+      </div>
+
+      <h3>14.3 决策树</h3>
+      <pre>半米资源分配如何？
+├─ 团队规模 < 5 + 预算 < $50K
+│   └─ 选机会 #2 (CSE 三轨翻译器) — UI + 数据整合，量级合适
+├─ 团队规模 5-15 + 预算 $50K-200K
+│   └─ 选机会 #1 (国际学校 K12) — 1-2 个国际学校合作起步
+└─ 团队规模 15+ + 预算 $200K+
+    └─ 同时启动 #1 + #3 (国际学校 + 自建发音库) — 双轮驱动
+</pre>
+    </div>
+  </section>
+
+  <!-- ============ CH15 License 风险汇总 ============ -->
+  <section class="chapter" id="ch15">
+    <h2><span class="num">15</span><span class="title-text">License 风险汇总 🔴</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <h3>15.1 License 分级</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>License 类型</th><th>商用</th><th>派生作品</th><th>典型数据集</th><th>对半米</th></tr></thead>
+          <tbody>
+            <tr><td>CC0 / Public Domain</td><td>🟢</td><td>🟢 任意</td><td>少数 EngProfile 老版本</td><td>✅ 安全</td></tr>
+            <tr><td>CC BY 4.0</td><td>🟢</td><td>🟢 + 必须 attribution</td><td>speechocean762</td><td>✅ 安全</td></tr>
+            <tr><td>CC BY-SA 4.0</td><td>🟡</td><td>🔴 viral — 派生必须同 license</td><td>NICT JLE 3.0 / Octanove C1C2</td><td>⚠️ 商业模型 weights 可能被传染</td></tr>
+            <tr><td>MIT / Apache</td><td>🟢</td><td>🟢</td><td>大多代码 + 少数数据</td><td>✅ 安全</td></tr>
+            <tr><td>CC BY-NC-SA 4.0</td><td>🔴</td><td>🔴 viral NC</td><td>ELLIPSE / PERSUADE 2.0 / Speak&amp;Improve / Write&amp;Improve / CLC / UniversalCEFR (多数)</td><td>🔴 只能内部 R&amp;D，商业不行</td></tr>
+            <tr><td>LDC paid</td><td>🟡 需购买</td><td>视具体 agreement</td><td>TOEFL11 / ETS Speech / Global TIMIT</td><td>⚠️ 贵但合法</td></tr>
+            <tr><td>Cambridge research-only</td><td>🔴</td><td>🔴</td><td>CLC / FCE / Write&amp;Improve</td><td>🔴 商业必须谈授权</td></tr>
+            <tr><td>Kaggle 比赛 license</td><td>🟡</td><td>🟡 视具体</td><td>ASAP / Feedback Prize / ASAP 2.0</td><td>⚠️ 灰色但学界长期商用</td></tr>
+            <tr><td>未注明</td><td>❓</td><td>❓</td><td>chillies / mazlumi / 大部分个人 HF</td><td>🔴 audit 风险高</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>15.2 关键风险点</h3>
+
+      <div class="callout bad">
+        <p><strong>风险 #1：ELLIPSE + PERSUADE + Write/Speak Improve 全是 CC BY-NC-SA 4.0</strong> — 高质量学术 EFL 评分数据<strong>全部不可直接商用</strong>。viral copyleft 意味着<strong>用这些数据训出的模型 weights 也受 NC 限制</strong>（业界尚有争议但保守解释如此）。<strong>建议</strong>：仅用作内部 R&amp;D baseline，<strong>商业产品上线前必须用自建数据完全替换</strong>。</p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>风险 #2：Octanove C1C2 CC BY-SA 4.0</strong> — banmi-cvla 工具已使用，<strong>派生作品必须 share-alike</strong>。商业半米产品集成此数据会被传染。<strong>建议</strong>：替换为 EVP 在线查询 / 自建 C1C2 词表 / CEFR-J 自家扩展（CEFR-J 本身可商用）。</p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>风险 #3：未注明 license 数据（chillies / mazlumi / KevSun）</strong> — 即使下载无阻拦，<strong>商业 audit 时无 license 文件 = 高风险</strong>。<strong>建议</strong>：从训练 pipeline 完全移除，需要时用 Cambridge 官方申请或自建。</p>
+      </div>
+
+      <h3>15.3 安全 + 可商用清单（白名单）</h3>
+      <div class="callout good">
+        <p><strong>半米可以直接商用训练的数据</strong>：</p>
+        <ol>
+          <li>speechocean762 (CC BY 4.0) — speaking 发音评分</li>
+          <li>L2-ARCTIC (注册可商用) — speaking phoneme</li>
+          <li>NICT JLE (CC BY-SA 3.0) — speaking 转写 (share-alike 注意)</li>
+          <li>CEFR-J Wordlist (Tono OK commercial) — 词法 CEFR</li>
+          <li>CLEC / ICNALE — 需 case-by-case 跟原机构确认</li>
+          <li>自建数据 (国际学校 + IELTS examiner) — 100% 自主</li>
+          <li>LDC 付费数据（ETS TOEFL11 等）— 一次性买断</li>
+          <li>Cambridge 商业授权（CLC / EGP / EVP）— 谈一次性 license</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH16 mini demo ============ -->
+  <section class="chapter" id="ch16">
+    <h2><span class="num">16</span><span class="title-text">mini demo — 数据集筛选器（按维度筛 Top 10）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <p>按你的需求一键筛选最适合的数据集（基于 §9 16 维表）。</p>
+
+      <div class="demo-host">
+        <h4>📊 数据集筛选器</h4>
+        <div class="demo-row">
+          <span class="demo-chip-group"><span class="label" style="font-size:12px;color:var(--text-mute);font-weight:600;margin-right:4px;">用途：</span>
+            <span class="demo-chip active" data-filter-type="all">全部</span>
+            <span class="demo-chip" data-filter-type="writing">📝 Writing</span>
+            <span class="demo-chip" data-filter-type="speech">🎤 Speaking</span>
+            <span class="demo-chip" data-filter-type="text">📚 CEFR/词法</span>
+          </span>
+        </div>
+        <div class="demo-row">
+          <span class="demo-chip-group"><span class="label" style="font-size:12px;color:var(--text-mute);font-weight:600;margin-right:4px;">优先级：</span>
+            <span class="demo-chip active" data-filter-mvp="all">全部</span>
+            <span class="demo-chip" data-filter-mvp="now">⭐⭐⭐ 立刻</span>
+            <span class="demo-chip" data-filter-mvp="month">⭐⭐ 本月</span>
+          </span>
+        </div>
+        <div class="demo-row">
+          <span class="demo-chip-group"><span class="label" style="font-size:12px;color:var(--text-mute);font-weight:600;margin-right:4px;">商用：</span>
+            <span class="demo-chip active" data-filter-comm="all">全部</span>
+            <span class="demo-chip" data-filter-comm="ok">🟢 可商</span>
+            <span class="demo-chip" data-filter-comm="restricted">🟡 受限</span>
+            <span class="demo-chip" data-filter-comm="no">🔴 禁商</span>
+          </span>
+        </div>
+        <div class="demo-row">
+          <span class="demo-chip-group"><span class="label" style="font-size:12px;color:var(--text-mute);font-weight:600;margin-right:4px;">评分：</span>
+            <span class="demo-chip active" data-filter-rate="all">全部</span>
+            <span class="demo-chip" data-filter-rate="human">🟢 真人</span>
+            <span class="demo-chip" data-filter-rate="ai">🔴 AI</span>
+          </span>
+        </div>
+
+        <div class="demo-output" id="demoOutput">
+          <div class="out-h">📋 筛选结果（默认显示 Top 10）</div>
+          <div id="demoList" style="font-size:13.5px;line-height:1.8;"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CH17 FAQ ============ -->
+  <section class="chapter" id="ch17">
+    <h2><span class="num">17</span><span class="title-text">FAQ 12 条</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">为什么不能直接用 GPT-4 给学员评分就完事了？</span><span class="toggle">＋</span></div><div class="faq-a"><p>可以但有 3 个问题：1) 成本 — 单次评分 ~$0.01-0.05，1000 学员每天评一次月成本 $300-1500；2) <strong>系统性 bias</strong> — GPT-4 对 grammar / conventions 系统性偏低（学术验证）<sup class="cite" data-refid="21">[21]</sup>；3) 不可解释 — 给学员反馈"为什么是 6.5 不是 7.0"很难追溯到 rubric 哪条。<strong>正确路径</strong>：GPT-4 作 LLM verifier + 解释生成，主评由 fine-tune 模型 + XGBoost ensemble 做。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">真的有"真人 IELTS examiner 评分"的公开数据集吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p><strong>基本上没有</strong>。Cambridge Learner Corpus (CLC) 含 IELTS exam scripts，但 non-commercial only + 需要跟 Cambridge English Assessment 合作。CLC FCE Dataset 是 1244 篇 FCE 真考（非 IELTS），可学术下载但仍 NC。所有 Kaggle/HF 上自称"IELTS official scores"的都<strong>无法独立核实</strong>。<strong>结论</strong>：商业半米要做 IELTS 评分，要么走 Cambridge 商业 license，要么自建 — 没有 free lunch。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">用 ELLIPSE 训的模型能商业上线吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>这是法律灰色地带。CC BY-NC-SA 4.0 的 "NC" 条款明确禁止商业用途。"用 NC 数据训出的模型 weights 是不是派生作品" 业界尚无定论 — 保守解释是<strong>受传染</strong>。<strong>建议</strong>：内部 R&amp;D 用 ELLIPSE 跑通 baseline；商业产品上线时用自建 + 可商用数据完全替换并重训。或者跟 Crossley lab 联系商业 license。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">speechocean762 250 名都是中文母语，这是不是 cherry-pick？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不是 cherry-pick，是<strong>对半米最大的 stroke of luck</strong>。speechocean762 是 SpeechOcean 公司（中国语音数据供应商）发布在 OpenSLR 的，专门收集了 250 名中文母语 L2 英语学习者（125 成人 + 125 儿童），5 位 expert 多粒度标注。CC BY 4.0 可完全商用。对中国学生发音评分场景<strong>这是金矿</strong>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">XGBoost feature 路线已经过时了吗？现在都用 LLM？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不过时 — Hybrid LLM + linguistic feature 是 SOTA<sup class="cite" data-refid="55">[55]</sup>。<strong>XGBoost on textstat / lexical / syntactic features</strong> 的优势在 MVP 阶段无可替代：训练快（分钟级）/ 推理便宜（毫秒级）/ feature importance 可解释 / 低 hallucination。SOTA 系统是 DeBERTa + textstat + XGBoost ensemble。半米 banmi-cvla 已经在这条路上。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">Speak &amp; Improve Corpus 2025 这么新，能用吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能用但有限制。<strong>规模</strong>：315h L2 English 口语 / Cambridge 评分 / A2-C1 / 含 ASR / SLA / SGEC / SGECF 4 任务。<strong>license</strong>：non-commercial only。<strong>用法</strong>：在 Speak &amp; Improve Challenge 2025 框架内提交方案，作内部 R&amp;D；商业产品训练数据必须替换。这跟 ELLIPSE / Write &amp; Improve 是一个套路 — Cambridge 把高质量评分数据放出来，但只允许学术研究。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">流利说 70M 中文用户讲英语数据，半米能合作吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>商业上不太可能。流利说<strong>这个数据是核心壁垒</strong>，不会授权给同业。但学术合作 + 部分匿名化数据合作可能。<strong>替代</strong>：半米可以从国际学校自建数据切入，规模虽小但<strong>领域 fit 更好</strong>（国际学校 vs 流利说的成人 ESL 自学者完全不同 segment）。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">CSE 中国国家英语标准跟 CEFR 怎么映射？</span><span class="toggle">＋</span></div><div class="faq-a"><p>CSE 9 档对应 CEFR 6 档的大致映射（Pearson / British Council 学术研究）：CSE 1-2 ≈ Pre-A1 / A1；CSE 3-4 ≈ A2；CSE 5-6 ≈ B1；CSE 7 ≈ B2；CSE 8 ≈ C1；CSE 9 ≈ C2。但是 CSE 含 interpretation + translation 模块（CEFR 无），不完全对齐。<strong>商业产品做映射展示</strong>是合规的、有用的、有差异化的功能。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">Lexile 跟 CEFR 怎么对齐？</span><span class="toggle">＋</span></div><div class="faq-a"><p>MetaMetrics 2018 报告 — Lexile-CEFR alignment 72% 一致性，基于 9 个 CEFR benchmarking studies / 34,477 学生<sup class="cite" data-refid="62">[62]</sup>。Lexile 是 reading scale 不是 writing/speaking，所以只对应 receptive skills 一半。Lexile 200L 约 ≈ A1；500L ≈ A2；800L ≈ B1；1100L ≈ B2；1400L ≈ C1。半米 KG 可以做这个 cross-walk 表给学员看。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">Pigai (批改网) 国内已经做得很好了，半米还有机会吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>Pigai 偏向 CET-4/6/大学英语应试场景，1000+ 高校 ToB 渠道。<strong>半米差异化</strong>：1) K12 国际学校 / 双语学校（Pigai 没覆盖）；2) IELTS / TOEFL / SAT 出国考试（Pigai 不专门）；3) ToC 家长 + 学生 app（Pigai 是机构卖给学校），不同 segment。还有 4) AI native experience — Pigai 192 维 corpus 比对是 2010 年代技术，半米可以做 LLM + feedback + multimodal。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">自建 1000 篇真人评分作文要多少钱？</span><span class="toggle">＋</span></div><div class="faq-a"><p>认证 IELTS examiner 评一篇 essay 大约 $5-15（视市场和资历）。1000 篇 × 2 位 rater (IRR 要求) = 2000 评分次数 × $10 = $20,000。加上学生写作 incentive ($5/篇 × 1000 = $5,000) 总成本 $25,000-30,000。<strong>分批做</strong>：先 200 篇 cross-check，跑通流程再扩到 1000。1 年累计可到 5000 篇 + 这是合法的商业训练数据。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q12</span><span class="qtext">最重要的 1 步是什么？</span><span class="toggle">＋</span></div><div class="faq-a"><p><strong>本周下载并跑通 ELLIPSE 数据 + 复刻 arxiv 2406.01198 RoBERTa baseline</strong>。这是验证半米团队能不能复现学术 SOTA 的最小可执行步骤。如果 1 周能跑出 6 维 trait scoring QWK 0.7+，证明数据 + 工程 + 模型链路通了，可以往下加 speechocean762 / XGBoost ensemble / LLM feedback。如果跑不出来，先解决数据预处理 + RoBERTa fine-tune 工程问题，再谈 Assessment Engine 架构。</p></div></div>
+    </div>
+  </section>
+
+  <!-- ============ CH18 References ============ -->
+  <section class="chapter" id="ch18">
+    <h2><span class="num">18</span><span class="title-text">References</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>70+ 次 WebSearch + 16+ WebFetch / 所有 inline cite 链回此处。hover [N] 看 popover。</p>
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://github.com/scrosseye/ELLIPSE-Corpus" target="_blank" rel="noopener">ELLIPSE Corpus GitHub (Crossley et al. 2023)</a><span class="ref-meta">· 6,500 essays / 2 trained raters / state K12 / CC BY-NC-SA 4.0 · 访问 2026-05-28 · 引用 5 次</span></li>
+        <li id="ref-2"><a href="https://researchdatasets.cambridge.org/datasets/write-and-improve-corpus-2024" target="_blank" rel="noopener">Cambridge Write &amp; Improve Corpus 2024 — ELiT</a><span class="ref-meta">· 23K essays / certified examiner / NC license · 访问 2026-05-28 · 引用 3 次</span></li>
+        <li id="ref-3"><a href="https://zenodo.org/records/8221504" target="_blank" rel="noopener">PERSUADE 2.0 Corpus (Crossley et al. 2024) — Zenodo</a><span class="ref-meta">· 25,996 essays / 6-12 grade / CC BY-NC-SA · 引用 3 次</span></li>
+        <li id="ref-4"><a href="https://arxiv.org/abs/2104.01378" target="_blank" rel="noopener">speechocean762: An Open-Source Non-native English Speech Corpus (2021)</a><span class="ref-meta">· 5K 句 / 250 中文母语 / 5 experts / OpenSLR commercial OK · 引用 5 次</span></li>
+        <li id="ref-5"><a href="https://www.cefr-j.org/download.html" target="_blank" rel="noopener">CEFR-J Wordlist (Tono Lab, TUFS)</a><span class="ref-meta">· 7,801 词 / A1-B2 / commercial use OK with citation · 引用 4 次</span></li>
+        <li id="ref-6"><a href="https://www.kaggle.com/datasets/mazlumi/ielts-writing-scored-essays-dataset" target="_blank" rel="noopener">Kaggle mazlumi IELTS Writing Scored Essays Dataset</a><span class="ref-meta">· 1.2K essays / 评分来源不明 / 2023-07-20 · 引用 3 次</span></li>
+        <li id="ref-7"><a href="https://huggingface.co/KevSun/Engessay_grading_ML" target="_blank" rel="noopener">KevSun/Engessay_grading_ML — HuggingFace 模型</a><span class="ref-meta">· RoBERTa fine-tune on ELLIPSE / 实际不是 IELTS · 引用 3 次</span></li>
+        <li id="ref-8"><a href="https://arxiv.org/abs/2406.01198" target="_blank" rel="noopener">Sun &amp; Wang (2024) — Automatic Essay Multi-dimensional Scoring</a><span class="ref-meta">· ELLIPSE + IELTS / RoBERTa + DistilBERT / QWK 0.8+ · 引用 4 次</span></li>
+        <li id="ref-9"><a href="https://www.cambridge.org/elt/corpus/learner_corpus.htm" target="_blank" rel="noopener">Cambridge Learner Corpus (CLC) — Cambridge University Press</a><span class="ref-meta">· 180K+ 学员 / NC research only · 引用 4 次</span></li>
+        <li id="ref-10"><a href="https://github.com/chillestt/Automated-IELTS-essay-evaluation" target="_blank" rel="noopener">chillestt/Automated-IELTS-essay-evaluation GitHub</a><span class="ref-meta">· 9K SFT + 768 DPO / Gemini/GPT-3.5 合成 · 引用 2 次</span></li>
+        <li id="ref-11"><a href="https://psi.engr.tamu.edu/l2-arctic-corpus/" target="_blank" rel="noopener">L2-ARCTIC Corpus — TAMU PSI Lab</a><span class="ref-meta">· 26,867 utt / 24 人 / 27.1h / 6 L1 / linguist 手工 · 引用 4 次</span></li>
+        <li id="ref-12"><a href="https://alaginrc.nict.go.jp/nict_jle/index_E.html" target="_blank" rel="noopener">NICT JLE (Japanese Learner English) Corpus v4.1</a><span class="ref-meta">· 1,300 学习者 / 2M 词 / 9 levels / CC BY-SA 3.0 · 引用 2 次</span></li>
+        <li id="ref-13"><a href="https://github.com/openlanguageprofiles/olp-en-cefrj" target="_blank" rel="noopener">Open Language Profiles — CEFR-J English (GitHub)</a><span class="ref-meta">· wordlist + grammar profile / commercial OK / Octanove C1C2 CC BY-SA · 引用 3 次</span></li>
+        <li id="ref-14"><a href="https://www.researchgate.net/publication/383240183_The_Intersection_of_AI_and_Language_Assessment" target="_blank" rel="noopener">ChatGPT IELTS Writing Task 2 — QWK 0.811 vs examiner</a><span class="ref-meta">· 56 samples / certified IELTS examiner · 引用 4 次</span></li>
+        <li id="ref-15"><a href="https://arxiv.org/abs/2505.18486" target="_blank" rel="noopener">Comparing Human and AI Rater Effects Using MFRM (2025)</a><span class="ref-meta">· 10 LLM / GPT-4o + Gemini 1.5 Pro + Claude 3.5 Sonnet 最佳 · 引用 2 次</span></li>
+        <li id="ref-16"><a href="https://language.sakura.ne.jp/icnale/" target="_blank" rel="noopener">ICNALE — International Corpus of Asian Learners of English</a><span class="ref-meta">· 2,800 学员 / 10 国 / 2.5M 词 / 4 CEFR 档 · 引用 3 次</span></li>
+        <li id="ref-17"><a href="https://cse.neea.edu.cn/" target="_blank" rel="noopener">China's Standards of English Language Ability (CSE) 官方</a><span class="ref-meta">· 9 levels / 3 stages / 3000 can-do / 2018 教育部 · 引用 3 次</span></li>
+        <li id="ref-18"><a href="https://medium.com/syncedreview/liulishuos-ai-app-is-teaching-english-to-70-million-people-31d4fb38a799" target="_blank" rel="noopener">Liulishuo AI App — 70M Users (SyncedReview)</a><span class="ref-meta">· 世界最大中文讲英语数据库 / IELTS Liulishuo · 引用 2 次</span></li>
+        <li id="ref-19"><a href="https://www.kaggle.com/code/logisx/ielts-grading-with-bert" target="_blank" rel="noopener">IELTS Grading with BERT — Kaggle Notebook</a><span class="ref-meta">· 社区使用案例 · 引用 1 次</span></li>
+        <li id="ref-20"><a href="https://arxiv.org/html/2603.06424" target="_blank" rel="noopener">From Prompting to Preference Optimization (LLM AES Survey)</a><span class="ref-meta">· GPT-4 / IELTS / TOEFL 0.7 correlation · 引用 1 次</span></li>
+        <li id="ref-21"><a href="https://arxiv.org/abs/2604.00259" target="_blank" rel="noopener">LLM Essay Scoring Under Holistic and Analytic Rubrics: Bias</a><span class="ref-meta">· 系统性 LOC negative bias 报告 · 引用 3 次</span></li>
+        <li id="ref-22"><a href="https://ilexir.co.uk/datasets/index.html" target="_blank" rel="noopener">CLC FCE Dataset — Yannakoudakis Briscoe Medlock 2011</a><span class="ref-meta">· 1,244 FCE 真考 / 88 error types · 引用 2 次</span></li>
+        <li id="ref-23"><a href="https://www.kaggle.com/competitions/asap-aes" target="_blank" rel="noopener">ASAP-AES — Hewlett Foundation 2012 Kaggle</a><span class="ref-meta">· 12,900 essays / 8 prompts / human expert · 引用 3 次</span></li>
+        <li id="ref-24"><a href="https://lwsam.github.io/ASAP++/lrec2018.html" target="_blank" rel="noopener">ASAP++ — Mathias &amp; Bhattacharyya 2018 LREC</a><span class="ref-meta">· 1,783 essays / 5 trait scores · 引用 2 次</span></li>
+        <li id="ref-25"><a href="https://github.com/scrosseye/ASAP_2.0" target="_blank" rel="noopener">ASAP 2.0 Corpus — Crossley et al. 2024 GitHub</a><span class="ref-meta">· 24,278 source-based essays / 2024 Kaggle 比赛 · 引用 2 次</span></li>
+        <li id="ref-26"><a href="https://corpus.mml.cam.ac.uk/" target="_blank" rel="noopener">EFCAMDAT — EF Cambridge Open Language Database</a><span class="ref-meta">· 1.18M texts / 174K 学员 / 16 levels · 引用 3 次</span></li>
+        <li id="ref-27"><a href="https://www.cl.cam.ac.uk/research/nl/bea2019st/" target="_blank" rel="noopener">BEA-2019 Shared Task — Grammatical Error Correction</a><span class="ref-meta">· FCE + Lang-8 + NUCLE + W&amp;I + LOCNESS · 引用 2 次</span></li>
+        <li id="ref-28"><a href="https://www.cambridge.org/core/journals/studies-in-second-language-acquisition/article/introducing-the-chinese-learner-english-corpus-clec/859CBA31798105430C424631799F6339" target="_blank" rel="noopener">CLEC — Chinese Learner English Corpus (Gui &amp; Yang)</a><span class="ref-meta">· 1M 词 / BFSU / ST2-ST6 · 引用 2 次</span></li>
+        <li id="ref-29"><a href="https://www.kaggle.com/competitions/feedback-prize-english-language-learning" target="_blank" rel="noopener">Feedback Prize ELL — Kaggle 2022</a><span class="ref-meta">· 3,911 essays / 6 维 / 2 normed raters · 引用 3 次</span></li>
+        <li id="ref-30"><a href="https://arxiv.org/abs/2402.16733" target="_blank" rel="noopener">DREsS — Dataset for Rubric-based Essay Scoring (Yoo 2024)</a><span class="ref-meta">· 48.9K total / DREsS_New 2.3K real · 引用 2 次</span></li>
+        <li id="ref-31"><a href="https://huggingface.co/datasets/Xiaochr/Chinese-Student-English-Essay" target="_blank" rel="noopener">Xiaochr Chinese-Student-English-Essay (HuggingFace)</a><span class="ref-meta">· 13K 中国高中生 / 人工评分 · 引用 1 次</span></li>
+        <li id="ref-32"><a href="https://researchdatasets.cambridge.org/datasets/speak-and-improve-corpus-2025" target="_blank" rel="noopener">Cambridge Speak &amp; Improve Corpus 2025 — ELiT</a><span class="ref-meta">· 315h / A2-C1 / Cambridge 评 / NC · 引用 4 次</span></li>
+        <li id="ref-33"><a href="https://arxiv.org/abs/2001.08051" target="_blank" rel="noopener">TLT-school: Corpus of Non-Native Children Speech (LREC 2020)</a><span class="ref-meta">· 意大利 9-16 岁 / CEFR / IPRASE · 引用 2 次</span></li>
+        <li id="ref-34"><a href="https://arxiv.org/abs/2407.04280" target="_blank" rel="noopener">LearnerVoice — L2 English Spontaneous Speech (Interspeech 2024)</a><span class="ref-meta">· 50.04h / Whisper fine-tune WER 18.3% → 10.26% · 引用 2 次</span></li>
+        <li id="ref-35"><a href="https://onlinelibrary.wiley.com/doi/full/10.1002/ets2.12233" target="_blank" rel="noopener">ETS TOEFL iBT Speaking Corpus — 2,879 utterances</a><span class="ref-meta">· ETS-trained raters · 引用 2 次</span></li>
+        <li id="ref-36"><a href="http://festvox.org/cmu_arctic/cmu_arctic_report.pdf" target="_blank" rel="noopener">CMU ARCTIC Speech Synthesis Database (Kominek &amp; Black)</a><span class="ref-meta">· TTS synthesis baseline / L2-ARCTIC 派生 · 引用 1 次</span></li>
+        <li id="ref-37"><a href="https://ar5iv.labs.arxiv.org/html/2311.07037" target="_blank" rel="noopener">Phonological wav2vec2 MDD (2023)</a><span class="ref-meta">· wav2vec2 + GOP / phoneme-level / SOTA · 引用 2 次</span></li>
+        <li id="ref-38"><a href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-pronunciation-assessment" target="_blank" rel="noopener">Azure Pronunciation Assessment — Microsoft Speech SDK</a><span class="ref-meta">· 32 语言 / 7 维度 commercial API · 引用 2 次</span></li>
+        <li id="ref-39"><a href="https://arxiv.org/abs/2505.21148" target="_blank" rel="noopener">L2 Oral Proficiency using Speech LLM (Qwen2-Audio 2025)</a><span class="ref-meta">· Speak&amp;Improve baseline 超越 · 引用 1 次</span></li>
+        <li id="ref-40"><a href="https://catalog.ldc.upenn.edu/LDC2014T06" target="_blank" rel="noopener">ETS Corpus of Non-Native Written English (TOEFL11) — LDC</a><span class="ref-meta">· 12,100 essays / 11 L1 / low/med/high · 引用 3 次</span></li>
+        <li id="ref-41"><a href="https://arxiv.org/pdf/2402.16733" target="_blank" rel="noopener">TOEFL Public Writing — 480 essays / ETS</a><span class="ref-meta">· QWK 0.78 / RMSE 0.57 · 引用 1 次</span></li>
+        <li id="ref-42"><a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/j.2333-8504.2007.tb02063.x" target="_blank" rel="noopener">e-rater Construct Validity for TOEFL — Attali 2007 ETS RR</a><span class="ref-meta">· 60% variance / contributory scoring threshold 1.5/1.0 · 引用 2 次</span></li>
+        <li id="ref-43"><a href="https://aclanthology.org/2025.emnlp-main.491/" target="_blank" rel="noopener">UniversalCEFR — Imperial et al. EMNLP 2025</a><span class="ref-meta">· 505,807 texts / 26 corpora / 13 languages · 引用 3 次</span></li>
+        <li id="ref-44"><a href="https://englishprofile.org/?menu=english-vocabulary-profile" target="_blank" rel="noopener">English Vocabulary Profile (EVP) — Cambridge English Profile</a><span class="ref-meta">· 每词每义 CEFR / Cambridge · 引用 3 次</span></li>
+        <li id="ref-45"><a href="https://www.englishprofile.org/english-grammar-profile" target="_blank" rel="noopener">English Grammar Profile (EGP) — Cambridge English Profile</a><span class="ref-meta">· 1,239 grammatical competence statements · 引用 3 次</span></li>
+        <li id="ref-46"><a href="https://github.com/openlanguageprofiles/olp-en-cefrj/blob/master/octanove-vocabulary-profile-c1c2-1.0.csv" target="_blank" rel="noopener">Octanove Vocabulary Profile C1/C2 — Open Language Profiles</a><span class="ref-meta">· CC BY-SA 4.0 viral · 引用 2 次</span></li>
+        <li id="ref-47"><a href="https://github.com/yukiar/CEFR-SP" target="_blank" rel="noopener">CEFR-SP Corpus — Arase &amp; Uchida 2022</a><span class="ref-meta">· 17K sentences / English education professional · 引用 2 次</span></li>
+        <li id="ref-48"><a href="https://arxiv.org/html/2506.14046v1" target="_blank" rel="noopener">Ace-CEFR — Conversational Text Difficulty 2025</a><span class="ref-meta">· LLM application 难度评估 · 引用 1 次</span></li>
+        <li id="ref-49"><a href="https://www.pearson.com/content/dam/one-dot-com/one-dot-com/pearson-languages/en-gb/pdfs/gse/gse-resources/aligning-chinese-learning-objectives-to-the-gsl.pdf" target="_blank" rel="noopener">GSE-CSE Alignment — Pearson Research Report</a><span class="ref-meta">· Young Learners + College vocabulary alignment · 引用 2 次</span></li>
+        <li id="ref-50"><a href="https://wida.wisc.edu/assess/access" target="_blank" rel="noopener">WIDA ACCESS — UW Madison</a><span class="ref-meta">· US K-12 ELL 年度测试 / 4 domains · 引用 1 次</span></li>
+        <li id="ref-51"><a href="http://duolingo-testcenter.s3.amazonaws.com/media/resources/speaking-whitepaper.pdf" target="_blank" rel="noopener">Assessing Speaking on the Duolingo English Test — Whitepaper</a><span class="ref-meta">· LaFlair / Attali · 引用 2 次</span></li>
+        <li id="ref-52"><a href="https://link.springer.com/article/10.1007/s10462-024-11017-5" target="_blank" rel="noopener">Survey on Deep Learning AES (Springer 2024)</a><span class="ref-meta">· BERT QWK 0.79 / Electra QWK 0.82 / DeBERTa SOTA · 引用 2 次</span></li>
+        <li id="ref-53"><a href="https://arxiv.org/abs/2401.05433" target="_blank" rel="noopener">DeBERTa AWP + Metric-specific AttentionPool</a><span class="ref-meta">· Feedback Prize 3 winner / QWK 0.85+ · 引用 2 次</span></li>
+        <li id="ref-54"><a href="https://arxiv.org/html/2509.01640" target="_blank" rel="noopener">TransGAT — Transformer Graph NN for Multi-dim AES (2025)</a><span class="ref-meta">· GNN essay scoring · 引用 1 次</span></li>
+        <li id="ref-55"><a href="https://www.nature.com/articles/s41598-025-87862-3" target="_blank" rel="noopener">Hybrid LLM-based AES — Scientific Reports 2025</a><span class="ref-meta">· DeBERTa + textstat + LSTM fusion SOTA · 引用 2 次</span></li>
+        <li id="ref-56"><a href="https://arxiv.org/html/2505.19671" target="_blank" rel="noopener">Children's Speech Fluency Eval — Interspeech 2025</a><span class="ref-meta">· Whisper 50% PER on SSD · 引用 1 次</span></li>
+        <li id="ref-57"><a href="https://www.kaggle.com/c/commonlitreadabilityprize/" target="_blank" rel="noopener">CommonLit Readability Prize — Kaggle 2021</a><span class="ref-meta">· 2,834 段 / 5-10 raters / RMSE 评估 · 引用 2 次</span></li>
+        <li id="ref-58"><a href="https://arxiv.org/pdf/2512.14561" target="_blank" rel="noopener">LLM-Human Essay Scoring Agreement Synthesis (2025)</a><span class="ref-meta">· 65 paper / 0.30-0.80 agreement · 引用 2 次</span></li>
+        <li id="ref-59"><a href="https://arxiv.org/pdf/1612.00729" target="_blank" rel="noopener">Automated Assessment of Non-Native Learner Essays</a><span class="ref-meta">· lexical+syntactic+discourse feature · 引用 1 次</span></li>
+        <li id="ref-60"><a href="https://www.researchgate.net/publication/267709928_A_Review_on_IELTS_Writing_Test_Its_Test_Results_and_Inter_Rater_Reliability" target="_blank" rel="noopener">IELTS Writing Inter-Rater Reliability Review</a><span class="ref-meta">· G coefficient 0.81-0.89 / 0.91 local vs senior · 引用 1 次</span></li>
+        <li id="ref-61"><a href="https://www.pigai.org/" target="_blank" rel="noopener">Pigai (批改网) — Chinese 大学英语 essay 批改</a><span class="ref-meta">· 1000+ 高校 / 192 维 corpus 比对 · 引用 1 次</span></li>
+        <li id="ref-62"><a href="https://www.metametrics.com/resources/aligning-the-lexile-framework-for-reading-to-the-common-european-framework-of-reference/" target="_blank" rel="noopener">Lexile-CEFR Alignment — MetaMetrics</a><span class="ref-meta">· 72% consistency / 34,477 students / 9 benchmarking studies · 引用 1 次</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <footer>
+    报告由 <strong>无忌</strong> 整理 · 2026-05-28 · L2 Deep Research + Critic 强化版 · 70+ WebSearch / 16+ WebFetch / 18 章 / 12 FAQ / 62 引用 · 半米研究中心第 20 份
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回顶">↑</button>
+
+
+<script>
+  document.getElementById('themeToggle').addEventListener('click', function() {
+    const cur = document.body.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', next);
+    this.textContent = next === 'dark' ? '☀️' : '🌙';
+    try { localStorage.setItem('theme', next); } catch(e) {}
+  });
+  try { const saved = localStorage.getItem('theme'); if (saved) { document.body.setAttribute('data-theme', saved); document.getElementById('themeToggle').textContent = saved === 'dark' ? '☀️' : '🌙'; } } catch(e) {}
+
+  // 章节折叠
+  document.querySelectorAll('section.chapter > h2').forEach(h2 => {
+    h2.addEventListener('click', () => h2.parentElement.classList.toggle('collapsed'));
+  });
+
+  // 进度条 + back to top
+  const progressEl = document.getElementById('progress');
+  const backTopEl = document.getElementById('backToTop');
+  function updateProgress() {
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const ratio = docHeight > 0 ? window.scrollY / docHeight : 0;
+    progressEl.style.width = (ratio * 100) + '%';
+    backTopEl.classList.toggle('show', window.scrollY > 400);
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+  backTopEl.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  // 锚点高亮 + 居中
+  const anchorLinks = document.querySelectorAll('#anchorList a');
+  const sections = Array.from(anchorLinks).map(a => document.getElementById(a.dataset.target)).filter(Boolean);
+  function highlightAnchor() {
+    const offset = 120; let current = null;
+    for (const sec of sections) { if (sec.getBoundingClientRect().top - offset <= 0) current = sec.id; }
+    anchorLinks.forEach(a => a.classList.toggle('active', a.dataset.target === current));
+    const activeLink = document.querySelector('#anchorList a.active');
+    if (activeLink) {
+      const navWrap = document.querySelector('.anchor-list');
+      const navRect = navWrap.parentElement.getBoundingClientRect();
+      navWrap.parentElement.scrollTo({ left: activeLink.offsetLeft - navRect.width / 2 + activeLink.getBoundingClientRect().width / 2, behavior: 'smooth' });
+    }
+  }
+  window.addEventListener('scroll', highlightAnchor, { passive: true });
+  highlightAnchor();
+  anchorLinks.forEach(a => a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.getElementById(a.dataset.target);
+    if (target) { target.classList.remove('collapsed'); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  }));
+
+  // FAQ
+  document.querySelectorAll('.faq-q').forEach(q => q.addEventListener('click', () => q.parentElement.classList.toggle('open')));
+
+  // 数据集筛选器 demo
+  (function() {
+    const list = document.getElementById('demoList');
+    if (!list) return;
+    const data = [
+      { n: 'ELLIPSE', type: 'writing', mvp: 'now', comm: 'no', rate: 'human', d: '6.5K essays / 6 维 trait / 2 trained raters / CC BY-NC-SA' },
+      { n: 'ASAP + ASAP++', type: 'writing', mvp: 'now', comm: 'restricted', rate: 'human', d: '13K+1.8K / holistic+5 trait / human expert / Kaggle' },
+      { n: 'PERSUADE 2.0', type: 'writing', mvp: 'month', comm: 'no', rate: 'human', d: '26K argumentative / trained / CC BY-NC-SA' },
+      { n: 'speechocean762', type: 'speech', mvp: 'now', comm: 'ok', rate: 'human', d: '5K 句 / 250 中文母语 / 5 experts / CC BY 4.0 ★可商' },
+      { n: 'Speak & Improve 2025', type: 'speech', mvp: 'month', comm: 'no', rate: 'human', d: '315h / Cambridge 评 / A2-C1 / NC' },
+      { n: 'Write & Improve 2024', type: 'writing', mvp: 'month', comm: 'no', rate: 'human', d: '23K / certified examiner / GEC+CEFR / NC' },
+      { n: 'EFCAMDAT (cleaned)', type: 'text', mvp: 'month', comm: 'restricted', rate: 'human', d: '406K 段 / EF 自动分级 / CEFR 16 档 / academic' },
+      { n: 'L2-ARCTIC', type: 'speech', mvp: 'month', comm: 'ok', rate: 'human', d: '27.1h / 24 人 / 6 L1 / phoneme 标注 / 注册可商' },
+      { n: 'EVP+EGP+CEFR-J', type: 'text', mvp: 'now', comm: 'ok', rate: 'human', d: '词法语法 CEFR / CEFR-J 可商 / EVP 查询' },
+      { n: 'CommonLit CLEAR', type: 'text', mvp: 'month', comm: 'restricted', rate: 'human', d: '2.8K passage / 5-10 raters / readability' },
+      { n: 'NICT JLE', type: 'speech', mvp: 'month', comm: 'ok', rate: 'human', d: '1.3K 日本学习者 / 2M 词 / CC BY-SA 3.0 可商' },
+      { n: 'ICNALE', type: 'writing', mvp: 'month', comm: 'restricted', rate: 'human', d: '2.8K 亚洲(含中国) / 4 CEFR 档' },
+      { n: 'TOEFL11 (LDC)', type: 'writing', mvp: 'month', comm: 'restricted', rate: 'human', d: '12K / ETS rater / LDC paid / 只 3 档' },
+      { n: 'UniversalCEFR', type: 'text', mvp: 'month', comm: 'no', rate: 'human', d: '505K texts / 26 corpora / 多 NC' },
+      { n: 'chillies IELTS T2', type: 'writing', mvp: 'no', comm: 'no', rate: 'ai', d: '🔴 10K / 疑似 GPT 生成 / 不要用' },
+      { n: 'chillestt SFT 9K', type: 'writing', mvp: 'no', comm: 'no', rate: 'ai', d: '🔴 Gemini/GPT 合成 / 不要用' },
+      { n: 'mazlumi Kaggle IELTS', type: 'writing', mvp: 'no', comm: 'restricted', rate: 'ai', d: '🟡 1.2K / 评分来源不明 / 仅 demo' }
+    ];
+    let ft = 'all', fm = 'all', fc = 'all', fr = 'all';
+    function render() {
+      const r = data.filter(x =>
+        (ft === 'all' || x.type === ft) &&
+        (fm === 'all' || x.mvp === fm) &&
+        (fc === 'all' || x.comm === fc) &&
+        (fr === 'all' || x.rate === fr));
+      if (!r.length) { list.innerHTML = '<div style="color:var(--text-mute);padding:8px;">无匹配数据集 — 放宽筛选条件</div>'; return; }
+      list.innerHTML = r.map(x => {
+        const cm = x.comm === 'ok' ? '🟢' : x.comm === 'restricted' ? '🟡' : '🔴';
+        const rt = x.rate === 'human' ? '🟢真人' : '🔴AI';
+        return `<div style="padding:6px 0;border-bottom:1px dashed var(--border);"><strong>${x.n}</strong> <span class="pill ${x.comm==='ok'?'good':x.comm==='restricted'?'warn':'bad'}">${cm}商用</span> <span class="pill ${x.rate==='human'?'good':'bad'}">${rt}</span><br><span style="font-size:13px;color:var(--text-mute);">${x.d}</span></div>`;
+      }).join('');
+    }
+    document.querySelectorAll('.demo-host .demo-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        let grp, val;
+        if (chip.dataset.filterType !== undefined) { grp = 'filterType'; val = chip.dataset.filterType; ft = val; }
+        else if (chip.dataset.filterMvp !== undefined) { grp = 'filterMvp'; val = chip.dataset.filterMvp; fm = val; }
+        else if (chip.dataset.filterComm !== undefined) { grp = 'filterComm'; val = chip.dataset.filterComm; fc = val; }
+        else if (chip.dataset.filterRate !== undefined) { grp = 'filterRate'; val = chip.dataset.filterRate; fr = val; }
+        document.querySelectorAll('.demo-host .demo-chip').forEach(c => { if (c.dataset[grp] !== undefined) c.classList.remove('active'); });
+        chip.classList.add('active');
+        render();
+      });
+    });
+    render();
+  })();
+
+  // Popover references
+  (function() {
+    let activePopover = null, activeTrigger = null, hideTimer = null;
+    function getRefContent(refid) { const el = document.getElementById('ref-' + refid); return el ? el.innerHTML : null; }
+    function positionPopover(pop, trigger) {
+      const r = trigger.getBoundingClientRect();
+      const popW = pop.offsetWidth, popH = pop.offsetHeight;
+      let left = r.left + window.scrollX;
+      if (left + popW > window.innerWidth - 12) left = window.innerWidth - popW - 12;
+      if (left < 12) left = 12;
+      let top = r.bottom + window.scrollY + 6;
+      if (r.bottom + popH > window.innerHeight - 12 && r.top > popH + 12) top = r.top + window.scrollY - popH - 6;
+      pop.style.left = left + 'px'; pop.style.top = top + 'px';
+    }
+    function showPopover(trigger) {
+      if (activeTrigger === trigger && activePopover) return;
+      if (activePopover) { activePopover.remove(); activePopover = null; }
+      const content = getRefContent(trigger.getAttribute('data-refid'));
+      if (!content) return;
+      const pop = document.createElement('div');
+      pop.className = 'cite-popover'; pop.innerHTML = content;
+      document.body.appendChild(pop); positionPopover(pop, trigger);
+      activePopover = pop; activeTrigger = trigger;
+      pop.addEventListener('mouseenter', () => { if (hideTimer) clearTimeout(hideTimer); });
+      pop.addEventListener('mouseleave', scheduleHide);
+    }
+    function scheduleHide() {
+      if (hideTimer) clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => { if (activePopover) { activePopover.remove(); activePopover = null; activeTrigger = null; } }, 200);
+    }
+    function bindCites() {
+      document.querySelectorAll('sup.cite[data-refid]').forEach(sup => {
+        sup.addEventListener('mouseenter', () => showPopover(sup));
+        sup.addEventListener('mouseleave', scheduleHide);
+        sup.addEventListener('click', e => {
+          e.preventDefault(); e.stopPropagation();
+          if (activeTrigger === sup && activePopover) { activePopover.remove(); activePopover = null; activeTrigger = null; }
+          else showPopover(sup);
+        });
+      });
+      document.addEventListener('click', e => {
+        if (!activePopover) return;
+        if (e.target.closest('.cite-popover') || e.target.closest('sup.cite')) return;
+        activePopover.remove(); activePopover = null; activeTrigger = null;
+      });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindCites);
+    else bindCites();
+  })();
+</script>
+</body>
+</html>

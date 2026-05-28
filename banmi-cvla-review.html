@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>banmi-cvla 阅读难度评估方案审查报告</title>
+  <style>
+    :root {
+      --ink: #17212b;
+      --muted: #607080;
+      --line: #d8e0e7;
+      --bg: #f7f9fb;
+      --panel: #ffffff;
+      --accent: #0b6b8f;
+      --accent-2: #8a4b17;
+      --risk: #a5332a;
+      --ok: #246b42;
+      --warn: #8a5b00;
+      --code: #10202b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+      line-height: 1.58;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 34px 24px 56px;
+    }
+    header {
+      padding: 18px 0 24px;
+      border-bottom: 3px solid var(--ink);
+      margin-bottom: 24px;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.18;
+      letter-spacing: 0;
+    }
+    h2 {
+      margin: 34px 0 12px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+      font-size: 23px;
+      letter-spacing: 0;
+    }
+    h3 {
+      margin: 24px 0 8px;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+    p { margin: 8px 0; }
+    .meta {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0 8px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .card strong {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+    .card .big {
+      font-size: 24px;
+      font-weight: 760;
+      line-height: 1.2;
+    }
+    .verdict {
+      background: #fff;
+      border-left: 5px solid var(--risk);
+      padding: 14px 18px;
+      margin: 16px 0;
+      border-radius: 6px;
+      box-shadow: 0 1px 0 rgba(20, 40, 60, 0.04);
+    }
+    .verdict.ok { border-left-color: var(--ok); }
+    .verdict.warn { border-left-color: var(--warn); }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-right: 6px;
+      color: #fff;
+      background: var(--accent);
+      white-space: nowrap;
+    }
+    .tag.risk { background: var(--risk); }
+    .tag.warn { background: var(--warn); }
+    .tag.ok { background: var(--ok); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 9px 10px;
+      vertical-align: top;
+      text-align: left;
+      font-size: 14px;
+    }
+    th {
+      background: #edf3f7;
+      font-weight: 750;
+    }
+    tr:last-child td { border-bottom: 0; }
+    ul, ol { padding-left: 22px; }
+    li { margin: 5px 0; }
+    code {
+      color: var(--code);
+      background: #e9eef3;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+    .note {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .source-list li {
+      margin-bottom: 8px;
+      word-break: break-word;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 820px) {
+      .page { padding: 22px 14px 44px; }
+      h1 { font-size: 28px; }
+      .grid, .two-col { grid-template-columns: 1fr; }
+      table { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>banmi-cvla 阅读难度评估方案审查报告</h1>
+      <div class="meta">生成日期：2026-05-28 · 审查对象：GitHub <code>wujingjie/banmi</code> commit <code>d0f4e64</code> · 范围：算法、竞品、SOTA、商业风险、改进路线</div>
+    </header>
+
+    <section>
+      <h2>一页结论</h2>
+      <div class="grid">
+        <div class="card">
+          <strong>总体判断</strong>
+          <div class="big">方向对，当前实现不能直接当生产级主评分</div>
+        </div>
+        <div class="card">
+          <strong>最大问题</strong>
+          <div class="big">不是完整复刻 CVLA3</div>
+        </div>
+        <div class="card">
+          <strong>推荐路线</strong>
+          <div class="big">CVLA3 修正 + 本地校准 + LLM/ML ensemble</div>
+        </div>
+      </div>
+      <div class="verdict">
+        <p><span class="tag risk">核心发现</span><code>cvla.py</code> 声称“100% 复刻 CVLA3”，但至少 <code>CVV1</code>、<code>AvrFreqRank</code>、<code>POStypes</code>、<code>LenNP</code> 的实现和 Uchida &amp; Negishi 2025 论文定义不一致。现有 self-test 只验证回归系数和 cutoff，不验证从真实文本抽取 8 个 raw metrics 的正确性。因此“Table 1 均值喂入通过”不能证明算法复刻成功。</p>
+      </div>
+      <div class="verdict warn">
+        <p><span class="tag warn">产品风险</span>ATOS 和 Lexile 的展示话术需要降级。当前 ATOS 是 2 因子近似，不是 Renaissance 官方 ATOS；Lexile = FK × 100 + 200 不是 MetaMetrics Lexile Analyzer，误差不能只写 ±100L。对外报告应改成“ATOS-like / Lexile-like proxy”，或接官方服务。</p>
+      </div>
+      <div class="verdict ok">
+        <p><span class="tag ok">可保留</span>CVLA3 作为可解释 ESL 文本难度基线是合理选择。CEFR 6 档适合家长和学生主报告；CEFR-J 12 档适合老师材料筛选，但必须显示为“估计 + 相邻档可接受”，不能当高精度标签。</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>A. 业界 SOTA</h2>
+      <h3>1. 2024-2026 阅读难度评估 SOTA 是什么？</h3>
+      <p>业界落地产品仍以“可解释特征 + 专有词表/语法库 + 人工校准”为主，例如 CVLA、Text Inspector、Pearson GSE、Lexile、ATOS。研究前沿正在转向两条线：一是细粒度 CEFR 数据集和 transformer/fine-tuned LLM，二是直接用 GPT-4/4o 类模型做 few-shot CEFR 评级。</p>
+      <p>当前证据显示，LLM 在通用可读性和 CEFR text leveling 上已经超过传统公式的潜力很强：2024 TSAR 论文在 CLEAR 4,724 篇英文文本上报告 GPT-4 Turbo/GPT-4o mini 零样本可读性估计与人工判断相关性约 <code>r=0.76/0.74</code>；2026 L2 English CEFR text leveling 研究报告 ChatGPT-4o 六样例 prompt 在 6 档 CEFR 分类上平均准确率超过 91%。但 LLM 结果依赖数据、prompt 和模型版本，不能未经本地验证直接替代 CVLA。</p>
+      <h3>2. CVLA3 算先进还是中等？</h3>
+      <p>CVLA3 对 CEFR-J 场景算“先进的可解释基线”，不是全球 SOTA。它的优点是用 EFL 教材训练、面向 CEFR-J、指标透明、2025 论文报告 6 档 CEFR exact 65.74%、adjacent 99.07%。缺点是验证集只有 108 篇，训练/验证没有 C2 金标，且论文承认没有预标 CEFR-J 语料，所以 12 档不是强验证目标。</p>
+      <h3>3. 有没有比 CVLA3 更新或更准的 CEFR-J 算法？</h3>
+      <p>未发现公开、专门面向 CEFR-J 12 档、验证更充分且可复现的替代算法。CVLA 网站已在 2026-03-25 更新到 CVLA 3.1，增加 reading/listening selector 和 listening-specific conversion adjustment。若只问 CEFR 6 档文本难度，UniversalCEFR、CEFR-SP、ChatGPT-4o few-shot、fine-tuned RoBERTa/ModernBERT 是更前沿的研究路线；若问 CEFR-J 12 档，CVLA3/3.1 仍是最直接公开基线。</p>
+    </section>
+
+    <section>
+      <h2>B. 对手分析</h2>
+      <h3>4. Top 5 readability / CEFR 工具</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>工具</th>
+            <th>算法/数据</th>
+            <th>输出</th>
+            <th>公开准度</th>
+            <th>License/价格</th>
+            <th>优势/劣势</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>CVLA 3.1</td>
+            <td>8 textual features + CEFR-J Wordlist + regression + 去 min/max 聚合；spaCy 3.7.2 + textstat ARI。</td>
+            <td>CEFR-J 12 档、连续 CEFR score、metric scores。</td>
+            <td>CVLA3 论文：108 篇上 CEFR 6 档 exact 65.74%，adjacent 99.07%；CVLA2 vs CVLA3 的 CEFR-J 12 档一致率 50.93%。</td>
+            <td>免费 web；公开论文；无正式商业 API。</td>
+            <td>最贴近 CEFR-J；透明。弱点是小验证集、C2 不足、12 档精度有限。</td>
+          </tr>
+          <tr>
+            <td>Cathoven CEFR Text Analyzer</td>
+            <td>专有 AI + CEFR word database；宣称分析 sentence structure 和 verb tenses。</td>
+            <td>CEFR，每个 CEFR level 内 10 个 sub-level；另有 Catile、readability、IELTS APIs。</td>
+            <td>CEFR analyzer 未见公开严谨 benchmark；IELTS API 宣称 examiner-level accuracy。</td>
+            <td>商业 API，CEFR Text Analyzer 标价 $0.08/call；IELTS checker $1.50/call。</td>
+            <td>API 化强、ESL 产品感强。弱点是闭源、不可审计、成本和供应商锁定。</td>
+          </tr>
+          <tr>
+            <td>Text Inspector / English Vocabulary Profile</td>
+            <td>Cambridge EVP、AWL、BNC/COCA、POS tagging、lexical diversity/readability metrics。</td>
+            <td>CEFR word-level profile、Scorecard、readability、lexical metrics、AWL/BNC/COCA。</td>
+            <td>未见公开 text-level exact accuracy；Cambridge EVP 的强项是 sense/phrase-level vocabulary profile。</td>
+            <td>免费限制 250 words；组织版页面显示订阅价格；EVP access 属商业服务。</td>
+            <td>Cambridge 背书强、词义级词汇证据好。弱点是 text-level 总分验证透明度不足。</td>
+          </tr>
+          <tr>
+            <td>Pearson GSE Text Analyzer</td>
+            <td>GSE 10-90 scale、GSE learning objectives、grammar/vocabulary database；闭源。</td>
+            <td>GSE level、CEFR alignment、词汇/语法高于文本等级项、学习目标建议。</td>
+            <td>Text Analyzer 准度未公开；GSE 框架来自全球教师/专家研究。</td>
+            <td>Teacher Toolkit 免费；商业使用 GSE 需联系 Pearson。</td>
+            <td>从测评到课程目标的链路完整。弱点是闭源，且不是 CEFR-J。</td>
+          </tr>
+          <tr>
+            <td>MetaMetrics Lexile Analyzer / Renaissance ATOS</td>
+            <td>Lexile：句长 + 词频，官方 corpus；2026 Lexile Analyzer 更新到 3.8B-word corpus。ATOS：平均词长、word grade level、句长、book length，并有 100k+ graded vocabulary list。</td>
+            <td>Lexile measure/range、MSL、MLF、word count；ATOS grade.month。</td>
+            <td>Lexile 官方称 60L 相当于一个 SEM；2026 corpus update 中 92%+ 历史文本变化小于 30L。ATOS 有官方 research report。</td>
+            <td>Lexile 商业认证/Content Creator 需订阅；ATOS analyzer 可用但商标/官方性要谨慎。</td>
+            <td>美国母语阅读体系强。弱点是非 ESL、非 CEFR，不能直接映射中国学生英语能力。</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>Readable、Hemingway、textstat 更像通用 readability/formula 工具，适合做辅助特征和可解释面板，不适合作为 banmi 的主 CEFR 评分器。EF SET 是学生能力测验，不是文本难度分析器；可借鉴其 0-100 + CEFR 的报告方式，但不能拿来评文本。</p>
+      <h3>5. 业界通用 ESL 评估怎么做？</h3>
+      <p>ESL/EFL 工具通常不会只看 native grade formula，而会结合词汇 profile、语法结构、句法复杂度、任务要求和学习者实测表现。Cambridge EVP 强调 word sense、phrases、phrasal verbs 和 learner corpus；Pearson GSE 把 vocabulary/grammar/learning objectives 对齐到更细 scale；CVLA3 明确用 EFL textbooks 训练。banmi 如果面向中国学生，应把“文本复杂度”与“中国学生能否读懂”分开建模。</p>
+    </section>
+
+    <section>
+      <h2>C. banmi-cvla 方案审查</h2>
+      <h3>6. CVLA3 + 12 个 textstat 公式这个思路对不对？</h3>
+      <p>对，但现在应定位为“解释型 feature set”，不是多个独立真值。CVLA3 可以作为主 CEFR/CEFR-J 基线；textstat 公式适合给老师看 native readability 的横向对照。不要把 12 个传统公式平均或以离散度直接推断 CEFR 置信度，因为这些公式高度共享句长、词长、音节数等变量，独立性不成立。</p>
+      <h3>7. 去 min/max 聚合策略合理吗？</h3>
+      <p>在 CVLA3 内部合理，因为这是官方 CVLA3 论文使用的稳定化策略。但它不是行业通用最优。更好的生产策略是：先修正 CVLA raw metrics，再用校准数据训练 ordinal regression / gradient boosting / stacking ensemble，并输出经过校准的等级概率和 adjacent probability。IRT/Rasch 适合有题目/被试反应数据时建模；仅靠文本指标时，weighted ensemble 或 ordinal model 更现实。</p>
+      <h3>8. ATOS 2-factor 简化公式是否足够？</h3>
+      <p>不足以称为 ATOS。Renaissance 官方说明 ATOS 考虑 average word length、average word grade level、average sentence length、book length；其研究报告还提到扩展到 100k+ graded vocabulary list 和短文本优化。当前代码用 <code>ASL</code> + syllables per word 的 2 因子公式，不能宣称“Renaissance 官方公式独立计算”。对外建议改名为 <code>ATOS-like estimate</code>，或调用官方 ATOS Analyzer/授权服务。</p>
+      <h3>9. Lexile = FK × 100 + 200 误差多大？</h3>
+      <p>不能稳定估成 ±100L。官方 Lexile Analyzer 使用 Mean Sentence Length 与 Mean Log Word Frequency，结果四舍五入到 10L；educator text analyzer 只给非认证 200L range，商业精确 measure 需 Content Creator/官方流程。FK × 100 + 200 对短句高词汇、对话体、技术文本、儿童故事、专名密集文本可能错数百 L。banmi 可以显示“native readability proxy”，但不能叫 Lexile measure。</p>
+      <h3>10. CEFR-J 12 档 vs CEFR 6 档怎么取舍？</h3>
+      <p>主报告用 CEFR 6 档；老师 dashboard 才显示 CEFR-J 12 档。原因是 CVLA3 论文的 gold validation 实际是 CEFR 6 档，且由于没有预标 CEFR-J corpus，12 档验证只能间接做版本间对照。对学生/家长给 12 档会制造虚假精度；对老师筛材料，12 档的相对排序有用。</p>
+      <h3>11. 三国年级对照 + 中国 ESL 等价是否准确？</h3>
+      <p>美国 native grade 年龄对照可保留；“中国 ESL 等价学习时长 / 中考 / 高考 / IELTS”当前缺少可引用数据支持。中国 CSE、IELTS、TOEFL 的公开 alignment 是能力测验映射，不是把美国母语年级阅读难度映射到中国学习年限。建议把这些标签降级为“banmi heuristic”，并用真实中国学生测评数据重新标定。</p>
+      <h3>12. McAlpine EFLAW 是否仍是 ESL SOTA？</h3>
+      <p>不是。EFLAW 是一个有价值的 ESL readability 老公式，textstat 文档也说其关注 miniwords 和句长，并推荐目标分数 ≤25。但它不是 CEFR 模型，也没有证据支持代码里的 A1-C2 映射。它应该保留为辅助解释指标，不能单独突出成“最贴合中国学生场景”的主证据。</p>
+      <h3>13. 多公式离散度 → 置信度合理吗？</h3>
+      <p>作为“formula agreement”合理，作为“CEFR confidence”不充分。当前阈值 <code>std &lt; 1</code>、<code>1-2</code>、<code>&gt;2</code> 是人工规则，没有校准。应在金标集上拟合：当公式离散度、CVLA 指标离散度、文本长度、unknown coverage、LLM disagreement 等特征给定时，实际 exact/adjacent 准确率是多少。</p>
+
+      <h3>代码级问题</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>严重度</th>
+            <th>位置</th>
+            <th>问题</th>
+            <th>影响</th>
+            <th>建议</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag risk">P0</span></td>
+            <td><a href="https://github.com/wujingjie/banmi/blob/d0f4e6441294f01d4182e3224f0657c994139a30/tools/banmi-cvla/cvla.py#L109-L129">cvla.py:109-129</a></td>
+            <td><code>CVV1</code>、<code>AvrFreqRank</code>、<code>POStypes</code> 与论文定义不一致。CVV1 应围绕 verb use 且排除 be-verbs；AvrFreqRank 应使用 COCA rank、全词、cap/drop outliers；POStypes 应为每句 distinct POS 平均。</td>
+            <td>主 CEFR score 直接偏移；self-test 无法发现。</td>
+            <td>重写 metric extractor；用官方 CVLA web/desktop 结果做 golden tests。</td>
+          </tr>
+          <tr>
+            <td><span class="tag risk">P0</span></td>
+            <td><a href="https://github.com/wujingjie/banmi/blob/d0f4e6441294f01d4182e3224f0657c994139a30/tools/banmi-cvla/selftest.py">selftest.py</a></td>
+            <td>测试把论文 Table 1 的均值直接喂进 regression equation，只测系数/cutoff。</td>
+            <td>会给“复刻成功”的错觉。</td>
+            <td>新增 raw-text fixture：同一文本对比 CVLA3/3.1 官方输出的 8 raw metrics、metric scores、final score。</td>
+          </tr>
+          <tr>
+            <td><span class="tag risk">P0</span></td>
+            <td><a href="https://github.com/wujingjie/banmi/blob/d0f4e6441294f01d4182e3224f0657c994139a30/tools/banmi-cvla/cvla.py#L202-L223">cvla.py:202-223</a></td>
+            <td>ATOS 近似实现被文案标成官方/独立 ATOS。</td>
+            <td>商业误导和商标风险。</td>
+            <td>改名或接官方；报告中明确“非 Renaissance ATOS”。</td>
+          </tr>
+          <tr>
+            <td><span class="tag warn">P1</span></td>
+            <td><a href="https://github.com/wujingjie/banmi/blob/d0f4e6441294f01d4182e3224f0657c994139a30/tools/banmi-cvla/cvla.py#L228-L241">cvla.py:228-241</a></td>
+            <td>Lexile 经验映射过度简化。</td>
+            <td>在某些文本上可能大幅错估。</td>
+            <td>改为“Lexile-like range”；若面向商业报告，使用官方 Lexile Analyzer/API。</td>
+          </tr>
+          <tr>
+            <td><span class="tag warn">P1</span></td>
+            <td><a href="https://github.com/wujingjie/banmi/blob/d0f4e6441294f01d4182e3224f0657c994139a30/tools/banmi-cvla/cvla.py#L61-L70">cvla.py:61-70</a></td>
+            <td>词表缺失只 warning，仍继续评分。</td>
+            <td>部署环境缺数据时会输出看似正常但不可用的 CEFR。</td>
+            <td>主评分 fail closed；仅在明确 degraded mode 下输出公式面板。</td>
+          </tr>
+          <tr>
+            <td><span class="tag warn">P1</span></td>
+            <td><a href="https://github.com/wujingjie/banmi/blob/d0f4e6441294f01d4182e3224f0657c994139a30/tools/banmi-cvla/cvla.py#L287-L300">cvla.py:287-300</a></td>
+            <td>中国 ESL 等价表未标来源，也未校准。</td>
+            <td>家长报告最容易被误解为官方年级/考试对应。</td>
+            <td>先隐藏或降级为 heuristic；用 banmi 学生数据校准。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>D. 改进建议</h2>
+      <h3>14. 5-10 个 actionable 改进点</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>优先级</th>
+            <th>改进</th>
+            <th>Impact</th>
+            <th>Effort</th>
+            <th>验收标准</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>按论文重写 CVLA raw metrics，尤其 CVV1、AvrFreqRank、POStypes、LenNP。</td>
+            <td>极高</td>
+            <td>中</td>
+            <td>20-50 个 fixture 与 CVLA3/3.1 官方输出差异在可解释容差内。</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>词表和模型资源版本化；缺词表 fail closed；输出包含资源 hash。</td>
+            <td>高</td>
+            <td>低</td>
+            <td>无 CEFR-J 词表时不输出 CEFR 主评分。</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>重命名 ATOS/Lexile 近似；加入商标和非官方 disclaimer。</td>
+            <td>高</td>
+            <td>低</td>
+            <td>报告中不出现“official Lexile/ATOS”暗示；术语法务可接受。</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>建立中国 ESL 校准集：教材、考试、分级读物、YouTube 字幕、学生理解率。</td>
+            <td>极高</td>
+            <td>高</td>
+            <td>每档至少数百篇/片段；有教师标签和学生 outcome。</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>训练校准 ensemble：CVLA metrics + lexical coverage + formulas + LLM judge + text type。</td>
+            <td>高</td>
+            <td>中</td>
+            <td>本地 test set 上 exact/adjacent、MAE、calibration curve 均优于单 CVLA。</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td>把“置信度”改成经验证的概率：exact probability、adjacent probability、低可信原因。</td>
+            <td>高</td>
+            <td>中</td>
+            <td>置信度分桶后实际准确率单调上升。</td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td>加入 LLM 评分作为 ensemble member，不作为单点真值。</td>
+            <td>中高</td>
+            <td>中</td>
+            <td>固定 prompt、固定 few-shot、JSON schema；每次模型升级跑 regression suite。</td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td>拆分两个维度：native readability 与 Chinese ESL difficulty。</td>
+            <td>中</td>
+            <td>低</td>
+            <td>UI/CSV 中不再把 US Grade 等同于中国学生年级。</td>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td>补 license notices、数据来源 attribution、商业输出 disclaimer。</td>
+            <td>高</td>
+            <td>低</td>
+            <td>发布包和报告页都有 CEFR-J/Octanove/textstat/spaCy/wordfreq notices。</td>
+          </tr>
+          <tr>
+            <td>10</td>
+            <td>加入 API、批量任务、审计日志和样本回流。</td>
+            <td>中</td>
+            <td>中</td>
+            <td>每个评分可追溯模型版本、词表版本、prompt 版本、输入类型。</td>
+          </tr>
+        </tbody>
+      </table>
+      <h3>15. 是否加入 LLM？</h3>
+      <p>应该加入，但只作为 ensemble member。建议 prompt 让模型分别判断 vocabulary、syntax、discourse、cultural load、task demand，并输出 CEFR distribution，而不是一个硬标签。用中国 ESL 金标集决定它的权重。LLM 对短文本、对话、文化背景、隐含任务需求可能比公式强；但模型漂移、成本、数据合规和解释一致性要治理。</p>
+      <h3>16. 现有方案是否充分校准中国 ESL？</h3>
+      <p>不充分。CVLA3 是 EFL 教材基线，不是中国学生 outcome 模型；textstat/ATOS/Lexile 是 native readability；EFLAW 太旧且弱。banmi 真正的护城河应该是“中国 ESL 学生读这类材料时的理解率、错词、查词、复述、做题表现”与文本特征之间的校准。</p>
+      <h3>17. 如果重新设计</h3>
+      <ol>
+        <li>保留 CVLA3 修正版作为 transparent baseline。</li>
+        <li>引入官方/严谨的 native readability proxy，但不混同 CEFR。</li>
+        <li>用本地语料训练 ordinal difficulty model，输出 CEFR 6、CEFR-J estimate、China ESL readiness score。</li>
+        <li>LLM 给 second opinion 和解释，重点识别 cultural load、抽象度、隐喻、背景知识。</li>
+        <li>报告主指标只给一个主等级 + 相邻等级概率；细节面板显示证据，而不是堆 14 个分数。</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>E. License / 商业风险</h2>
+      <h3>18. CEFR-J Wordlist 商业化问题</h3>
+      <p>Open Language Profiles README 写明 CEFR-J vocabulary/grammar profile 可免费用于 research and commercial purposes，前提是正确引用；版权属于 Tono Laboratory at TUFS。Octanove C1/C2 vocabulary profile 是 CC BY-SA 4.0，商业使用允许，但若分发改编后的词表或派生数据，需要遵守署名和 ShareAlike。内部使用风险低；对外 SaaS/API 输出如果包含大量词表派生内容，需要法务确认 attribution 与 share-alike 边界。</p>
+      <h3>19. textstat / spaCy / wordfreq 商业 OK 吗？</h3>
+      <p>textstat 和 spaCy 是 MIT；wordfreq 当前仓库/包需要按其 Apache 2.0 与数据 attribution 要求处理。商业使用一般可行，但发布包应带 NOTICE/LICENSE，且 spaCy 模型包本身也要确认版本 license。</p>
+      <h3>20. ATOS 公式复刻风险</h3>
+      <p>最大风险不是“计算一个近似公式”，而是把近似输出标成 ATOS 或暗示 Renaissance 官方。ATOS 是 Renaissance 体系和商标；官方说明 ATOS 公式因素与当前代码不一致。对外应避免“ATOS 官方测算”，使用“ATOS-like readability estimate”，或走官方 analyzer/授权。Lexile 同理，必须避免“Lexile measure”官方暗示。</p>
+    </section>
+
+    <section>
+      <h2>参考资料</h2>
+      <ol class="source-list">
+        <li>CVLA3.1 官方网站：<a href="https://cvla.langedu.jp/">https://cvla.langedu.jp/</a></li>
+        <li>Uchida &amp; Negishi 2025, <em>Estimating the CEFR-J Level of English Reading Passages: Development and Accuracy of CVLA3</em>：<a href="https://www.jstage.jst.go.jp/article/ecs/32/0/32_165/_article/-char/ja">J-STAGE</a>；作者稿 PDF：<a href="https://cvla.langedu.jp/static/Uchida_Negishi_2025.pdf">PDF</a></li>
+        <li>Open Language Profiles CEFR-J / Octanove 数据与 terms：<a href="https://github.com/openlanguageprofiles/olp-en-cefrj">https://github.com/openlanguageprofiles/olp-en-cefrj</a></li>
+        <li>Cathoven Enterprise APIs：<a href="https://www.cathoven.com/cathoven-ai-tools-apis/">https://www.cathoven.com/cathoven-ai-tools-apis/</a></li>
+        <li>Text Inspector：<a href="https://textinspector.com">https://textinspector.com</a>；功能说明：<a href="https://textinspector.com/analyse-a-text-in-english-with-text-inspector/">How to Analyse a Text</a></li>
+        <li>English Profile booklet / Cambridge EVP：<a href="https://www.englishprofile.org/images/pdf/theenglishprofilebooklet.pdf">https://www.englishprofile.org/images/pdf/theenglishprofilebooklet.pdf</a></li>
+        <li>Pearson Global Scale of English：<a href="https://www.pearson.com/languages/why-pearson/the-global-scale-of-english.html">GSE overview</a>；Teacher Toolkit PDF：<a href="https://www.pearson.com/content/dam/one-dot-com/one-dot-com/pearson-languages/en-gb/pdfs/gse/gse-resources/introduction-to-the-global-scale-of-english-teacher-toolkit-new.pdf">Toolkit introduction</a></li>
+        <li>MetaMetrics Lexile Text Analyzer 2026 update：<a href="https://www.metametrics.com/resources/lexile-text-analyzer-2026-update/">https://www.metametrics.com/resources/lexile-text-analyzer-2026-update/</a>；Lexile Analyzer help：<a href="https://la-tools.lexile.com/help/">https://la-tools.lexile.com/help/</a>；Hub Text Analyzer guide：<a href="https://hub.lexile.com/text-analyzer-user-guide/">https://hub.lexile.com/text-analyzer-user-guide/</a></li>
+        <li>Renaissance ATOS：<a href="https://www.renaissance.com/edword/atos/">https://www.renaissance.com/edword/atos/</a>；ATOS research：<a href="https://research.renaissance.com/research/334">https://research.renaissance.com/research/334</a></li>
+        <li>Readable：<a href="https://app.readable.com/text/">https://app.readable.com/text/</a>；API docs：<a href="https://app.readable.com/api/docs/">https://app.readable.com/api/docs/</a></li>
+        <li>Hemingway readability docs：<a href="https://hemingwayapp.com/help/docs/readability">https://hemingwayapp.com/help/docs/readability</a></li>
+        <li>textstat GitHub：<a href="https://github.com/textstat/textstat">https://github.com/textstat/textstat</a></li>
+        <li>AMontgomerie CEFR English Level Predictor：<a href="https://github.com/AMontgomerie/CEFR-English-Level-Predictor">https://github.com/AMontgomerie/CEFR-English-Level-Predictor</a></li>
+        <li>rj-pal CEFR text classification：<a href="https://github.com/rj-pal/CEFR-text-classification">https://github.com/rj-pal/CEFR-text-classification</a></li>
+        <li>Hugging Face CEFR RoBERTa model card：<a href="https://huggingface.co/theluantran/cefr-bert-classifier">https://huggingface.co/theluantran/cefr-bert-classifier</a></li>
+        <li>UniversalCEFR, EMNLP 2025：<a href="https://arxiv.org/abs/2506.01419">https://arxiv.org/abs/2506.01419</a></li>
+        <li>CEFR-SP sentence difficulty, EMNLP 2022：<a href="https://arxiv.org/abs/2210.11766">https://arxiv.org/abs/2210.11766</a></li>
+        <li>Measuring and Modifying the Readability of English Texts with GPT-4, TSAR 2024：<a href="https://arxiv.org/abs/2410.14028">https://arxiv.org/abs/2410.14028</a></li>
+        <li>Automated text leveling for L2 English learners with CEFR, 2026：<a href="https://www.tandfonline.com/doi/abs/10.1080/17501229.2026.2635083">https://www.tandfonline.com/doi/abs/10.1080/17501229.2026.2635083</a></li>
+        <li>China's Standards of English Language Ability：<a href="https://cse.neea.edu.cn/html1/report/18112/9627-1.htm">CSE overview</a>；British Council CSE alignment：<a href="https://www.britishcouncil.org/exam/english/aptis/research/publications/validation/china-standards-english-cse-linking-uk-exams-cse">British Council report page</a>；ETS TOEFL-CSE mapping：<a href="https://www.cn.ets.org/research/policy_research_reports/publications/report/2019/kble.html">ETS report page</a></li>
+        <li>China primary English policy background：<a href="https://multilingual-education.springeropen.com/articles/10.1186/s13616-016-0026-0">SpringerOpen article</a></li>
+        <li>spaCy GitHub/license：<a href="https://github.com/explosion/spaCy">https://github.com/explosion/spaCy</a>；wordfreq GitHub：<a href="https://github.com/rspeer/wordfreq">https://github.com/rspeer/wordfreq</a></li>
+      </ol>
+    </section>
+  </main>
+</body>
+</html>

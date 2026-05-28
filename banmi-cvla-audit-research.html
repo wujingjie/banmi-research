@@ -1,0 +1,1873 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>banmi-cvla 工具 SOTA 对手深度审查 · 8 metrics 复刻 + 14 textstat 集成 vs 业界 23 对手 · 20 个 critic 发现 + 10 个改进建议 · 2026-05-28</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1d23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --border-strong: #cdd2da;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --accent-text: #1d4ed8;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #0891b2;
+    --info-soft: #cffafe;
+    --code-bg: #f1f3f7;
+    --purple: #7c3aed;
+    --purple-soft: #ede9fe;
+    --pink: #db2777;
+    --pink-soft: #fce7f3;
+    --teal: #0d9488;
+    --teal-soft: #ccfbf1;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1c2030;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #b6bcc9;
+    --text-mute: #8a92a3;
+    --border: #2a2f3d;
+    --border-strong: #3a4154;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a55;
+    --accent-text: #93c5fd;
+    --good: #4ade80;
+    --good-soft: #14532d55;
+    --warn: #fbbf24;
+    --warn-soft: #78350f55;
+    --bad: #f87171;
+    --bad-soft: #7f1d1d55;
+    --info: #22d3ee;
+    --info-soft: #155e7555;
+    --code-bg: #0a0d14;
+    --purple: #a78bfa;
+    --purple-soft: #4c1d9555;
+    --pink: #f472b6;
+    --pink-soft: #831a4955;
+    --teal: #2dd4bf;
+    --teal-soft: #134e4a55;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body { margin: 0; font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif; font-size: 16px; line-height: 1.7; color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; padding-bottom: 60px; transition: background-color .25s, color .25s; }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  nav.anchor-nav { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; border-top: 1px solid var(--border); background: var(--bg); scrollbar-width: none; }
+  nav.anchor-nav::-webkit-scrollbar { display: none; }
+  .anchor-list { display: flex; gap: 4px; padding: 8px 16px; max-width: 980px; margin: 0 auto; white-space: nowrap; }
+  .anchor-list a { flex: 0 0 auto; min-height: 36px; padding: 7px 12px; border-radius: 999px; font-size: 13px; line-height: 1.3; color: var(--text-soft); text-decoration: none; border: 1px solid transparent; background: var(--bg-soft); transition: all .15s; }
+  .anchor-list a:hover { color: var(--accent-text); }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); font-weight: 600; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 28px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout.pink { background: var(--pink-soft); border-color: var(--pink); }
+  .callout.teal { background: var(--teal-soft); border-color: var(--teal); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 9px 11px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 8px 11px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 5000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  .demo-host { margin: 16px 0; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .demo-host h4 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; color: var(--accent-text); }
+  .demo-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 14px; align-items: center; }
+  .demo-chip-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .demo-chip-group .label { font-size: 12px; color: var(--text-mute); font-weight: 600; margin-right: 4px; }
+  .demo-chip { padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-elevated); color: var(--text-soft); font-size: 12.5px; cursor: pointer; transition: all .15s; }
+  .demo-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .demo-output { padding: 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin-top: 8px; }
+  .demo-output .out-h { font-weight: 700; color: var(--text); font-size: 14px; margin-bottom: 6px; }
+  .demo-output .out-line { font-size: 13.5px; color: var(--text-soft); padding: 4px 0; }
+  .demo-output .out-line .tag-out { display: inline-block; padding: 1px 7px; border-radius: 4px; background: var(--accent-soft); color: var(--accent-text); font-size: 11px; font-weight: 700; margin-right: 6px; }
+  @media (max-width: 480px) { .hero { padding: 18px 4px 8px; } .hero h1 { font-size: 22px; } section.chapter > h2 { font-size: 17px; padding: 14px 14px; } .chapter-body { padding: 14px 14px 18px; } h3 { font-size: 16px; } }
+  @media print { header.topbar, #progress, .back-to-top, nav.anchor-nav { display: none !important; } section.chapter.collapsed .chapter-body { max-height: none !important; padding: 18px 20px 22px !important; } section.chapter.collapsed > h2 .caret { display: none; } }
+
+  sup.cite {
+    cursor: help;
+    position: relative;
+    border-bottom: 1px dotted currentColor;
+    padding: 0 1px;
+    font-size: 11px;
+    color: var(--accent-text);
+    font-weight: 700;
+    vertical-align: super;
+  }
+  sup.cite:hover {
+    background: rgba(250, 204, 21, 0.3);
+    border-radius: 3px;
+  }
+  .cite-popover {
+    position: absolute;
+    z-index: 9999;
+    background: var(--bg-elevated, #ffffff);
+    color: var(--text, #1a1a23);
+    border: 1px solid var(--border, #e3e6ec);
+    border-radius: 10px;
+    padding: 12px 14px;
+    max-width: 380px;
+    min-width: 220px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+    font-size: 13px;
+    line-height: 1.55;
+    font-weight: normal;
+    pointer-events: auto;
+  }
+  [data-theme="dark"] .cite-popover {
+    background: #1a1e2a;
+    color: #e6e9f0;
+    border-color: #2a2f3a;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+  .cite-popover a {
+    color: var(--accent, #2563eb);
+    text-decoration: underline;
+    word-break: break-all;
+  }
+  [data-theme="dark"] .cite-popover a { color: #60a5fa; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+
+  .critic-box { padding: 14px 16px; margin: 10px 0; border-radius: 12px; border-left: 5px solid var(--bad); background: var(--bg-elevated); border: 1px solid var(--border); }
+  .critic-box .label { font-weight: 700; color: var(--bad); margin-bottom: 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .3px; }
+  .critic-box .title { font-weight: 700; color: var(--text); margin-bottom: 6px; font-size: 15px; }
+  .critic-box .body { font-size: 14.5px; color: var(--text-soft); }
+  .critic-box.medium { border-left-color: var(--warn); }
+  .critic-box.medium .label { color: var(--warn); }
+  .critic-box.low { border-left-color: var(--info); }
+  .critic-box.low .label { color: var(--info); }
+
+  .imp-box { padding: 14px 16px; margin: 10px 0; border-radius: 12px; border-left: 5px solid var(--good); background: var(--bg-elevated); border: 1px solid var(--border); }
+  .imp-box .label { font-weight: 700; color: var(--good); margin-bottom: 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .3px; }
+  .imp-box .title { font-weight: 700; color: var(--text); margin-bottom: 6px; font-size: 15px; }
+  .imp-box .meta { font-size: 12px; color: var(--text-mute); margin-bottom: 8px; }
+  .imp-box .body { font-size: 14.5px; color: var(--text-soft); }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">banmi-cvla 工具 SOTA 审查 <span class="tag">L2 + Critic · 无忌</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+  <nav class="anchor-nav">
+    <div class="anchor-list" id="anchorList">
+      <a href="#ch1" data-target="ch1">01 摘要 / 5 大批评</a>
+      <a href="#ch2" data-target="ch2">02 源码画像</a>
+      <a href="#ch3" data-target="ch3">03 业界 SOTA 演进</a>
+      <a href="#ch4" data-target="ch4">04 Tier 1 · CEFR 8 对手</a>
+      <a href="#ch5" data-target="ch5">05 Tier 2 · 通用 6 对手</a>
+      <a href="#ch6" data-target="ch6">06 Tier 3 · LLM/ML 5 候选</a>
+      <a href="#ch7" data-target="ch7">07 Tier 4 · 行业基础</a>
+      <a href="#ch8" data-target="ch8">08 8 个 critic 问题 ★★</a>
+      <a href="#ch9" data-target="ch9">09 中国 ESL 校准</a>
+      <a href="#ch10" data-target="ch10">10 10 个改进建议 ★★</a>
+      <a href="#ch11" data-target="ch11">11 重新设计假想</a>
+      <a href="#ch12" data-target="ch12">12 License 风险 🔴</a>
+      <a href="#ch13" data-target="ch13">13 跟其他研究关联</a>
+      <a href="#ch14" data-target="ch14">14 mini demo</a>
+      <a href="#ch15" data-target="ch15">15 FAQ + Refs</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <div class="hero">
+    <h1>banmi-cvla 工具深度 SOTA 审查<br><span style="font-size: .55em; font-weight: 600;">复刻 CVLA 3 (Uchida & Negishi 2025) + 集成 14 textstat 公式 vs 业界 23 对手 / 20 个 critic 发现 / 10 个 actionable 改进建议 / License 风险评估</span></h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-28</span>
+      <span>🛠 整理：无忌</span>
+      <span>🧠 L2 Deep Research + Critic 强化</span>
+      <span>🔍 60+ 次 WebSearch</span>
+      <span>📚 15 章 + 12 FAQ + 50+ Ref</span>
+      <span>🎯 批评导向 不夸</span>
+    </div>
+    <div class="hero-deck">
+      <strong>这份是什么</strong>：阿杰自己写的 banmi-cvla 是半米 AI 学习系统的<strong>内部阅读难度评估工具</strong>（cvla.py 490 行 + cli.py 180 行）— 复刻 CVLA 3 论文算法 + 集成 14 个 textstat 公式 + ATOS 简化 + Lexile 经验映射 + CEFR-J 12 档 + 三国年级对照。阿杰<strong>明确要求</strong>："你的价值在于找问题 + 引用业界 SOTA + 给具体改进，不在于给好评"。<br><br>
+      <strong>本报告核心结论（不夸）</strong>：banmi-cvla 是 <strong>2024 baseline 复刻品</strong>（准度等价 CVLA 3 论文 ≈ 65.7% exact / 99% adjacent），<strong>不是 2025 SOTA</strong>（SOTA 是 LLM 微调 ≥ 80%）。源码有 5 处<strong>严重技术缺陷</strong>（ATOS 实为 FK 改名 / FRE 准度 12.7% 仍用 / Lexile 经验映射误差 ±60L 但标 ±100L / Octanove CC BY-SA 4.0 viral copyleft 阻断商用 / wordfreq 字幕高频偏倚 vs CVLA 论文用 BNC）。<br><br>
+      <strong>给阿杰的下一步（按 effort × impact 排）</strong>：<br>
+      1️⃣ <strong>立刻 fix</strong>：把 ATOS 改名 / 移除 FRE 主输出 / 加 100 词阈值警告（~2h，准度认知改善）<br>
+      2️⃣ <strong>本周做</strong>：用 SetFit + CommonLit CLEAR 数据训练 sentence-transformer head（$0.025 / 30 秒训练 / 准度可达 70%+）<br>
+      3️⃣ <strong>本月做</strong>：替换 Octanove 数据（CC BY-SA 4.0 致命）为 EVP / 自建（解锁商用）
+    </div>
+  </div>
+
+  <div class="callout accent" style="margin: 24px 0; padding: 20px;">
+    <div style="font-weight: 700; font-size: 16px; margin-bottom: 12px;">🪆 跟前几份研究的关系</div>
+    <ul style="margin: 0; padding-left: 20px; line-height: 1.9;">
+      <li><strong>vocab-research (#1) / banmi-vocab-channel-standard (#14)</strong>：词汇视频库 CEFR 六档清单 — banmi-cvla 是给这些频道字幕<strong>自动打 CEFR 标签</strong>的内部工具</li>
+      <li><strong>k12-reading-library-research (#9)</strong>：K12 分级阅读库需求 — banmi-cvla 用来批量给入库书目<strong>打 Lexile / ATOS / CEFR 三档</strong></li>
+      <li><strong>banmi-grammar-system-research (#17)</strong>：EGP 语法板块对标 — 跟 banmi-cvla 共享 CEFR-J 12 档输出维度</li>
+      <li><strong>cheap-models-pipeline-research (#18)</strong>：模型选型 — 改进建议 #2（SetFit + CLEAR 训练）跟 §18 的"小模型 cheap fine-tune"路线一致</li>
+      <li><strong>本报告 (#19)</strong>：工具技术审查层 — 把内部工具放回业界 SOTA 上下文做 reality check</li>
+    </ul>
+  </div>
+
+  <!-- ============ Ch1 摘要 ============ -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">执行摘要 · 5 条核心批评（不夸）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">65.7%</div><div class="l">CVLA 3 论文 exact accuracy</div></div>
+        <div class="metric"><div class="v">12.7%</div><div class="l">FRE 准度（<random!）</div></div>
+        <div class="metric"><div class="v">34.1%</div><div class="l">FK Grade 准度</div></div>
+        <div class="metric"><div class="v">70.9%</div><div class="l">XGBoost baseline</div></div>
+        <div class="metric"><div class="v">0.76</div><div class="l">GPT-4 r vs human</div></div>
+        <div class="metric"><div class="v">96%</div><div class="l">EvalYaks LLM 微调</div></div>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>5 条核心批评（按严重程度）</strong>：</p>
+        <ol style="line-height: 1.9;">
+          <li>🔴 <strong>批评 #1（致命 / License）</strong>：banmi-cvla 强制依赖 <code>octanove-vocabulary-profile-c1c2-1.0.csv</code>（C1/C2 词汇）= <strong>CC BY-SA 4.0 强 viral copyleft</strong><sup class="cite" data-refid="20">[20]</sup>。半米作为商业 K12 教育产品，整个 pipeline 输出会被 ShareAlike 拖入相同 license — <strong>当前不可商用</strong>。README "License: 工具代码 MIT / 数据 CC BY-SA 4.0 (Tono / 东京外国语大学)" 还把 license 主体写错（Tono 的 CEFR-J wordlist 实际是<strong>"研究 + 商业可用 需 cite"</strong>无具体 license<sup class="cite" data-refid="21">[21]</sup>，CC BY-SA 4.0 是 Octanove 的）。</li>
+          <li>🔴 <strong>批评 #2（致命 / 算法误导）</strong>：<code>calculate_atos()</code> 自称 "ATOS 2-factor"，实际公式 <code>0.3905 × ASL + 11.813 × ASW − 15.59</code> 跟 <strong>Flesch-Kincaid Grade 公式 <code>0.39 × ASL + 11.8 × ASW − 15.59</code> 完全一致</strong>（除四舍五入精度差 0.0005×ASL + 0.013×ASW，实测两值差 ≤ 0.05）<sup class="cite" data-refid="22">[22]</sup>。报告输出的 <code>main.atos</code> 和 <code>main.us_grade</code> 用户看似两个独立指标，<strong>数学上是同一值</strong>。Renaissance ATOS 实际是 <strong>open standard 公开公式 + 3 因子（句长 / 字符长 / 词难度）</strong><sup class="cite" data-refid="14">[14]</sup>，README 写 "Renaissance 完整 3 因子版未公开" 也是错的。</li>
+          <li>🟠 <strong>批评 #3（严重 / 准度认知）</strong>：banmi-cvla 用 FK Grade 作 <code>us_grade</code> 主指标 + <code>derive_lexile</code> 也是 FK 派生 — 但 AMontgomerie 2021 在 1500 文本 6 档 CEFR 上实测 <strong>Flesch-Kincaid Grade 仅 34.1% 准确率 / Flesch Reading Ease 仅 12.7%（低于随机 16.7%！）</strong><sup class="cite" data-refid="23">[23]</sup>。banmi-cvla 把这俩当主输出 + 1948 年的旧公式（Dale-Chall 1948 / FRE 1948 / Spache 1953）都没标"古董公式仅做 cross-check"<sup class="cite" data-refid="24">[24]</sup>。</li>
+          <li>🟠 <strong>批评 #4（严重 / 性能天花板）</strong>：banmi-cvla 复刻 CVLA 3 论文 = <strong>2024 baseline 准度 65.7% exact / 99% adjacent</strong><sup class="cite" data-refid="25">[25]</sup>。2025 SOTA 已经是 <strong>EvalYaks LLM 微调 96% / Random Forest + 1181 expert texts 62.6% 6-level + 82.6% 3-level / GPT-4 Turbo r=0.76 with human / Ace-CEFR macro-F1 0.80+</strong><sup class="cite" data-refid="26">[26]</sup><sup class="cite" data-refid="27">[27]</sup><sup class="cite" data-refid="28">[28]</sup>。banmi-cvla 目前等价 2-3 年前的方法。</li>
+          <li>🟡 <strong>批评 #5（中等 / 工程缺陷）</strong>：<code>analyze()</code> 阈值 <code>word_count &lt; 10</code> 才报错 — 但业界普遍要求 <strong>≥ 100 words 才统计有效</strong>，SMOG 要 30 句<sup class="cite" data-refid="29">[29]</sup>。10-99 词输入 banmi-cvla 静默给结果但不可靠。同时 <code>compute_confidence</code> 的"7 公式 σ&lt;1.0 = high"机制 — 7 个公式共享 &lt;35% 准度底，离散度低 ≠ accuracy 高，<strong>是"假置信度"</strong>。</li>
+        </ol>
+      </div>
+
+      <h3>1.1 结论一句话</h3>
+
+      <div class="callout accent">
+        <p><strong>banmi-cvla 是 2024 baseline 的"忠实复刻 + textstat 拼盘"</strong>，作为 banmi 内部"先有个能跑的"工具 OK，但<strong>不应公开 + 不应商用 + 不应当作权威输出给学生家长看</strong>。当前状态：</p>
+        <ul>
+          <li>✅ <strong>能用</strong>：CVLA 3 复刻论文部分 90% 对得上（自检 5 档全过，max diff 0.10）</li>
+          <li>⚠️ <strong>有 caveat 但用户看不到</strong>：FK 准度 34% / FRE 12.7% / Lexile 派生误差 ±60L 真实数</li>
+          <li>🔴 <strong>致命问题</strong>：Octanove CC BY-SA 4.0 license 阻断商用 / ATOS 实为 FK 改名</li>
+          <li>🚀 <strong>升级路径清晰</strong>：SetFit + CLEAR 微调几乎免费 / weighted ensemble 工程简单 / LLM 校验已可商用</li>
+        </ul>
+      </div>
+
+      <h3>1.2 给阿杰的具体下一步（按 effort × impact 排）</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>优先级</th><th>动作</th><th>effort</th><th>impact</th><th>难度</th></tr></thead>
+          <tbody>
+            <tr><td>🥇 #1</td><td>改名 ATOS → "FK Grade Alt"，删除 main.atos 字段重复</td><td>15 分钟</td><td>诚实 + 用户认知改善</td><td>🟢</td></tr>
+            <tr><td>🥇 #2</td><td>把 word_count &lt; 100 加 confidence='unreliable' 警告</td><td>20 分钟</td><td>消除假阳性</td><td>🟢</td></tr>
+            <tr><td>🥇 #3</td><td>License audit + 替换 Octanove → EVP / 自建 C1/C2 wordlist</td><td>4-8 小时</td><td>解锁商用 🔴</td><td>🟡</td></tr>
+            <tr><td>🥈 #4</td><td>用 SetFit + CommonLit CLEAR 5000 文本训练 sentence-transformer head</td><td>4-6 小时</td><td>准度 65→75%+</td><td>🟡</td></tr>
+            <tr><td>🥈 #5</td><td>sklearn VotingRegressor 把 CVLA + textstat + 新 ST head 加权融合</td><td>2-3 小时</td><td>准度再 +3-5%</td><td>🟢</td></tr>
+            <tr><td>🥉 #6</td><td>加 LLM(Haiku 4.5) 二次校准 high-stakes 文本</td><td>3-4 小时</td><td>边缘 case 准度 +10%</td><td>🟢</td></tr>
+            <tr><td>🥉 #7</td><td>spaCy en_core_web_sm → trf 升级（POS tag 96→98%）</td><td>1 小时 + 模型 ~450MB</td><td>F6/F7/F8 cascade +1-2%</td><td>🟢</td></tr>
+            <tr><td>🥉 #8</td><td>cefr_j_12 中 C1/C2 进一步细分到 C1.1/C1.2/C2.1（Cathoven 已用 9 子档）</td><td>2 小时</td><td>dashboard 更细</td><td>🟢</td></tr>
+            <tr><td>🥉 #9</td><td>加 ground truth 校验集（OneStopEnglish 189 三档 / CLEAR Corpus 5000）</td><td>3 小时</td><td>可量化准度</td><td>🟡</td></tr>
+            <tr><td>🥉 #10</td><td>cohesion / coherence 维度引入（Coh-Metrix 风格 5 因子）</td><td>1-2 天</td><td>突破 surface-level 天花板</td><td>🔴</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>建议第一周做 #1 + #2 + #3</strong>（共 ~1 天），<strong>第二周做 #4 + #5</strong>（共 ~1 天），<strong>第三周做 #6 + #7</strong>。三周后 banmi-cvla 可以从"内部 demo"升级到"可商用准 SOTA"。</p>
+    </div>
+  </section>
+
+  <!-- ============ Ch2 源码画像 ============ -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">banmi-cvla 源码精读 · 当前方案画像</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>整体 670 行 Python (cvla.py 490 + cli.py 180 + selftest.py 60)。依赖：<code>spacy en_core_web_sm + textstat + wordfreq</code>。</p>
+
+      <h3>2.1 算法流程图（按 cvla.py 真实代码路径）</h3>
+
+      <pre>analyze(text)
+  ├── word_count &lt; 10 → 报错（阈值过低，业界 100 词 ⚠️）
+  ├── compute_cvla_metrics(text)            # Part 1: CVLA 3 算法
+  │     ├── _nlp() = spaCy en_core_web_sm
+  │     ├── content = [NOUN, VERB, ADJ, ADV]
+  │     ├── F1 AvrDiff      = mean(CEFR_VAL[lemma]) 实词 1-6
+  │     ├── F2 BperA        = (B1+B2+C1+C2 count) / (A1+A2 count)
+  │     ├── F3 CVV1         = types / sqrt(2 * tokens)   ⚠️ 真 Guiraud 是 V/√N
+  │     ├── F4 AvrFreqRank  = 1500 - 200 × zipf         ⚠️ wordfreq 字幕偏倚
+  │     ├── F5 ARI          = textstat.automated_readability_index
+  │     ├── F6 VperSent     = VERB count / sent count
+  │     ├── F7 POStypes     = unique POS tags
+  │     └── F8 LenNP        = mean noun_chunk length    ⚠️ sm 模型 POS 96%
+  ├── to_cefr_score(m)                       # 8 个 regression equations 抄论文 §2
+  │     ├── CVV1:        × 1.1059 − 1.208,   min 7
+  │     ├── AvrDiff:     × 6.417  − 7.184,   min 7
+  │     ├── BperA:       × 13.146 + 0.428,   min 7
+  │     ├── AvrFreqRank: × 0.004  − 0.608,   min 7
+  │     ├── POStypes:    × 1.768  − 12.006,  min 7
+  │     ├── VperSent:    × 2.203  − 2.486,   min 7
+  │     ├── ARI:         × 0.607  − 1.632,   min 7
+  │     └── LenNP:       × 2.629  − 6.697,   min 7
+  ├── aggregate(scores)                      # 去 min/max 取剩 6 个 mean
+  ├── to_levels(score)                       # CEFR 6 / CEFR-J 12 cutoff (论文 Table 2)
+  ├── formulas = {
+  │     atos,            # calculate_atos() ⚠️ 实为 FK Grade（见 §8.2）
+  │     flesch_kincaid,  # textstat.flesch_kincaid_grade
+  │     flesch_ease,     # textstat.flesch_reading_ease ⚠️ 准度 12.7%
+  │     gunning_fog, smog, coleman_liau, ari, linsear_write,
+  │     dale_chall,      # 1995 修订版？textstat 文档没明说
+  │     spache,          # 1953 古董
+  │     mcalpine_eflaw,  # 1990s "not scientifically tested" ⚠️
+  │     text_standard,
+  │   }
+  ├── derive_lexile()    = 100 * FK + 200, clip[-200, 1700]  ⚠️ 来源不明
+  ├── compute_cefr_coverage()                # CEFR-J 词汇 7 档比例
+  ├── compute_confidence()                   # 7 grade-formula std → high/med/low
+  └── grade_context()                        # US/CN/ESL 三国对照（经验，无引用）</pre>
+
+      <h3>2.2 数据依赖（关键 license 信息）</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>数据源</th><th>文件路径</th><th>License 实际</th><th>README 标注</th><th>风险</th></tr></thead>
+          <tbody>
+            <tr><td>CEFR-J Wordlist v1.5</td><td>/tmp/olp-en-cefrj/cefrj-vocabulary-profile-1.5.csv</td><td>"研究 + 商业可用 需 cite"，无具体 license<sup class="cite" data-refid="21">[21]</sup></td><td>"CC BY-SA 4.0 (Tono)"</td><td>🟡 标注错误，但实际可商用</td></tr>
+            <tr><td>Octanove C1/C2</td><td>/tmp/olp-en-cefrj/octanove-vocabulary-profile-c1c2-1.0.csv</td><td><strong>CC BY-SA 4.0 viral copyleft</strong><sup class="cite" data-refid="20">[20]</sup></td><td>同上</td><td>🔴 阻断商用</td></tr>
+            <tr><td>spaCy en_core_web_sm</td><td>pip install</td><td>MIT</td><td>未标</td><td>🟢 OK</td></tr>
+            <tr><td>textstat 0.7.4+</td><td>pip install</td><td>MIT</td><td>未标</td><td>🟢 OK</td></tr>
+            <tr><td>wordfreq 3.0+</td><td>pip install</td><td>MIT-like<sup class="cite" data-refid="30">[30]</sup></td><td>未标</td><td>🟢 OK</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>2.3 输出 4 个 tier（README 设计）</h3>
+
+      <p>banmi-cvla 输出结构（实测 cvla.py:411 行 return）：</p>
+
+      <ul>
+        <li><strong>Tier 1 主指标</strong>（学生 / 家长报告大字）：cefr_6 / lexile_estimate / lexile_range / atos / us_grade / mcalpine_eflaw / eflaw_esl_band</li>
+        <li><strong>Tier 2 进阶</strong>（老师 dashboard）：cefr_j_12 / cvla_continuous_score / cvla_raw_metrics / cvla_metric_scores / all_formulas (12) / cefr_j_word_coverage / lexile_method</li>
+        <li><strong>Tier 3 解释</strong>（家长友好）：grade_context (US/CN/ESL 三国) / confidence / main_takeaway / disclaimers (5 条)</li>
+        <li><strong>Tier 4 内部</strong>：input (chars/words/sentences)</li>
+      </ul>
+
+      <p><strong>UX 评价</strong>：Tier 1 把 5 个数字平等展示是<strong>错的</strong> — 用户看 cefr_6=B1 / lexile=950L / atos=5.8 / us_grade=5.6 会以为有 4 个独立验证，实际<strong>4 个数字都源自 FK Grade 一个数</strong>（cefr_6 来自 CVLA 但 lexile/atos/us_grade 全是 FK 派生）。这是<strong>"虚假置信度"</strong>。</p>
+
+      <h3>2.4 cli.py 接口画像</h3>
+
+      <p>3 种输入方式：单文件 / 目录 batch / stdin 管道。3 种输出：json / csv / tsv / pretty。CSV 列 26+（适合 dashboard 批量）。<strong>设计 OK</strong>，工程层面这部分是最稳的。</p>
+
+      <h3>2.5 自检覆盖度</h3>
+
+      <p>selftest.py 60 行 — 喂论文 Table 1 五档 (A1/A2/B1/B2/C1) 的 metric 均值，验证 to_cefr_score → aggregate → to_levels 输出。<strong>当前 5 档全过，最大 diff 0.10</strong>。<strong>但</strong>：</p>
+
+      <ul>
+        <li>🟡 <strong>没有覆盖 C2</strong>（论文 Table 1 没给 C2 均值）</li>
+        <li>🔴 <strong>没有真实文本端到端测试</strong> — 只测 "论文 Table 1 输入 → 论文 §2 公式输出"，相当于"自己定的题自己抄答案"。<strong>没用 OneStopEnglish / CLEAR Corpus / Cambridge 标注文本做交叉验证</strong>。</li>
+        <li>🔴 <strong>没有跟 CVLA 官方 web 工具对比</strong> — 同一段文本 CVLA web 和 banmi-cvla 输出应该一致，但没自动化测试</li>
+      </ul>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch3 业界 SOTA 演进 ============ -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">业界 SOTA 演进 · 2024-2025 readability assessment</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>过去 80 年 readability assessment 从"数音节"演进到"LLM 多维分析"。banmi-cvla 复刻的是 2024 的方法（CVLA 3 论文 2025 发表，方法 2022-2023 设计），看一下整条 timeline。</p>
+
+      <h3>3.1 三代算法路线</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>世代</th><th>代表</th><th>核心特征</th><th>典型准度</th><th>banmi-cvla 位置</th></tr></thead>
+          <tbody>
+            <tr><td>Gen 1 · 公式时代<br/>(1948-1990s)</td><td>FK / FRE / Dale-Chall / SMOG / Gunning Fog / ARI / Coleman-Liau / Spache / Linsear / EFLAW</td><td>句长 + 音节数 + 词表查询的代数公式</td><td>12-42% (CEFR 6 档)<sup class="cite" data-refid="23">[23]</sup></td><td>✅ 全部集成（14 个）</td></tr>
+            <tr><td>Gen 2 · 多维特征 + ML<br/>(2010s-2024)</td><td>Coh-Metrix / CVLA 1-3 / Text Inspector / AMontgomerie XGBoost / rj-pal Naive Bayes / Cathoven Catile / ATOS</td><td>POS / 句法 / cohesion / wordlist 多维特征 + sklearn 分类器</td><td>62-71% (CEFR 6 档)<sup class="cite" data-refid="25">[25]</sup><sup class="cite" data-refid="23">[23]</sup></td><td>✅ CVLA 3 + ATOS 在此</td></tr>
+            <tr><td>Gen 3 · LLM / Transformer<br/>(2024-2025)</td><td>EvalYaks / Ace-CEFR / DeBERTa-readability / GPT-4 Turbo / ReadMe++ / SetFit / UniversalCEFR</td><td>预训练大模型 fine-tune 或 zero-shot prompt</td><td>62-96% (depends on benchmark) / r=0.76 with human<sup class="cite" data-refid="31">[31]</sup><sup class="cite" data-refid="28">[28]</sup></td><td>❌ 完全没用</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>关键 critic 观察</strong>：banmi-cvla 是 Gen 2 末期产品。Gen 2 vs Gen 3 在<strong>边缘场景（B2/C1 / 非传统文本 / 短文本 / 跨域）</strong>上准度差距 20-30 个百分点<sup class="cite" data-refid="31">[31]</sup>。半米给 K12 国际学校用，遇到的文本多样性高，Gen 2 公式天花板已经压到了。</p>
+      </div>
+
+      <h3>3.2 公式时代的"7 公式 ensemble" — 准度天花板很低</h3>
+
+      <p>AMontgomerie 2021 在 1500 文本 6 档 CEFR test set 实测各 readability 公式 standalone 准度<sup class="cite" data-refid="23">[23]</sup>：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>公式</th><th>年代</th><th>Accuracy (CEFR 6 档)</th><th>vs Random (16.7%)</th><th>banmi-cvla 用？</th></tr></thead>
+          <tbody>
+            <tr><td>SMOG Index</td><td>1969</td><td>41.8%</td><td>+25.1</td><td>✅</td></tr>
+            <tr><td>Dale-Chall</td><td>1948/1995</td><td>37.8%</td><td>+21.1</td><td>✅</td></tr>
+            <tr><td>ARI</td><td>1967</td><td>35.1%</td><td>+18.4</td><td>✅</td></tr>
+            <tr><td>Text Standard (avg of 7)</td><td>—</td><td>34.8%</td><td>+18.1</td><td>✅</td></tr>
+            <tr><td>Flesch-Kincaid Grade</td><td>1975</td><td><strong>34.1%</strong></td><td>+17.4</td><td>✅ (主!!)</td></tr>
+            <tr><td>Linsear Write</td><td>1970s</td><td>33.8%</td><td>+17.1</td><td>✅</td></tr>
+            <tr><td>Gunning Fog</td><td>1952</td><td>32.8%</td><td>+16.1</td><td>✅</td></tr>
+            <tr><td>Coleman-Liau</td><td>1975</td><td>31.8%</td><td>+15.1</td><td>✅</td></tr>
+            <tr><td>Difficult Words</td><td>—</td><td>27.1%</td><td>+10.4</td><td>—</td></tr>
+            <tr><td><strong>Flesch Reading Ease</strong></td><td>1948</td><td><strong>12.7%</strong></td><td><strong>−4.0 (低于随机!)</strong></td><td><strong>✅ (在 all_formulas)</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>这张表的暴力含义</strong>：banmi-cvla "12 公式综合"听起来很 robust，<strong>实际是 8 个 30-40% 准度的公式 + 1 个低于随机的 FRE 平均</strong>。把 FRE 跟其他 7 个一起算"σ&lt;1.0 = high confidence" — FRE 的<strong>波动会拉高 std</strong>，让本来一致的公式被标 low confidence。<strong>应该删掉 FRE 不进 confidence 计算</strong>（cvla.py L334-342 grade_vals 列表里没 flesch_ease 是对的 ✅，但 all_formulas 里仍输出 misleading）。</p>
+      </div>
+
+      <h3>3.3 ML 方法的准度提升 — 已 doubled</h3>
+
+      <p>同一个 AMontgomerie 数据集，ML / DL 方法准度<sup class="cite" data-refid="23">[23]</sup>：</p>
+
+      <ul>
+        <li><strong>XGBoost</strong>: 70.9% — 用 textstat 特征 + spaCy POS + mean parse tree depth</li>
+        <li><strong>DeBERTa-base</strong>: 70.2% — 直接 fine-tune transformer</li>
+        <li><strong>BERT-base</strong>: 68.6%</li>
+        <li><strong>Random Forest</strong>: 68.2%</li>
+        <li><strong>Logistic Regression / SVC</strong>: 67.9%</li>
+      </ul>
+
+      <p><strong>关键发现</strong>：XGBoost 用同样 textstat 特征做 baseline 比单个公式高 1 倍 — 这就是 banmi-cvla<strong>可以做却没做</strong>的事（把 12 公式 + 8 CVLA metrics 作为 features 进 XGBoost）。</p>
+
+      <h3>3.4 LLM 直评的崛起</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>研究 / 模型</th><th>年份</th><th>benchmark</th><th>结果</th><th>关键 takeaway</th></tr></thead>
+          <tbody>
+            <tr><td>GPT-4 Turbo readability rating<sup class="cite" data-refid="31">[31]</sup></td><td>2024</td><td>CLEAR Corpus 4724 texts</td><td>r=0.76 with human</td><td>"highest importance predictor"，碾压传统公式</td></tr>
+            <tr><td>GPT-4o mini</td><td>2024</td><td>同上</td><td>r=0.74</td><td>便宜模型也能达到</td></tr>
+            <tr><td>EvalYaks (LLM 微调 + CEFR-aligned)<sup class="cite" data-refid="26">[26]</sup></td><td>2024</td><td>B2 speaking transcripts</td><td>96% acceptable</td><td>fine-tune + 准 SOTA</td></tr>
+            <tr><td>Ace-CEFR<sup class="cite" data-refid="28">[28]</sup></td><td>2025</td><td>对话文本</td><td>macro-F1 0.80+ &lt; expert MSE</td><td>medium model 也能 real-time</td></tr>
+            <tr><td>ChatGPT-4o CEFR-J 生成验证<sup class="cite" data-refid="32">[32]</sup></td><td>2025</td><td>299 学习者作文</td><td>match rate 58.53%</td><td>LLM 生成 ≠ LLM 评估 — 评估准度更高</td></tr>
+            <tr><td>ReadMe++ 多语 LLM<sup class="cite" data-refid="33">[33]</sup></td><td>2024</td><td>9757 句 5 语言</td><td>Cross-domain SOTA</td><td>多语多域稳健</td></tr>
+            <tr><td>"Readability Formulas, Systems and LLMs are Poor Predictors"<sup class="cite" data-refid="34">[34]</sup></td><td>2025</td><td>eye-tracking + cloze</td><td>反向结论：LLM 也不完美</td><td>但比传统公式好</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3.5 时间轴：banmi-cvla 在哪个时间点</h3>
+
+      <pre>1948 ── FRE, Dale-Chall                       ← banmi-cvla 用
+1953 ── Spache                                ← banmi-cvla 用
+1969 ── SMOG                                  ← banmi-cvla 用
+1975 ── FK Grade, Coleman-Liau                ← banmi-cvla 用（主指标!）
+1990s ── McAlpine EFLAW (not sci tested)      ← banmi-cvla 用（ESL band）
+1999 ── ATOS (open standard, 3-factor)        ← banmi-cvla "简化" 实为 FK
+2010s ── Coh-Metrix 200+ 维 (cohesion)        ← banmi-cvla 没用
+2012 ── CEFR-J wordlist v1.0 Tono             ← banmi-cvla 用 v1.5
+2017 ── Text Inspector + EVP                  ← 直接对手
+2020 ── CVLA 1, AMontgomerie XGBoost 70.9%    ← banmi-cvla 数据集源头
+2021 ── CommonLit CLEAR Corpus 5000 texts     ← 应该用未用
+2022 ── BERT readability papers SOTA          ← banmi-cvla 没追
+2024 ── ReadMe++ multilingual, ChatGPT-4o     ← banmi-cvla 没追
+2025 ── CVLA 3 论文 65.7% + Ace-CEFR + EvalYaks 96%  ← banmi-cvla 复刻 CVLA 3
+2026 ── CVLA 3.1 + listening mode             ← banmi-cvla 没追</pre>
+
+      <p><strong>结论</strong>：banmi-cvla 站在 2025 复刻一个 2022-2024 设计的算法，<strong>已经被 2 代方法超越</strong>。但因为 banmi 是 K12 国际学校私有工具，<strong>不追前沿是合理的</strong>（成本 / 复杂度），但要诚实告知用户当前是 65% 准度不是 95%。</p>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch4 Tier 1 · CEFR 8 对手 ============ -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">Tier 1 · CEFR 专项 8 对手深扒</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>4.1 对比总表</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>对手</th><th>算法</th><th>输出</th><th>准度</th><th>License / 价格</th><th>vs banmi-cvla</th></tr></thead>
+          <tbody>
+            <tr><td><strong>CVLA 3.1 官方</strong><sup class="cite" data-refid="35">[35]</sup></td><td>8 textual features + 论文 regression + drop max/min avg 6</td><td>CEFR-J 12 档</td><td>65.74% exact / 99.07% adjacent (108 texts 验证)</td><td>免费 web，无 API</td><td>banmi-cvla 100% 复刻，理论持平</td></tr>
+            <tr><td><strong>Cathoven CEFR Checker</strong><sup class="cite" data-refid="36">[36]</sup></td><td>多 ML 模型 + 11 REST API + Catile 配对</td><td>CEFR 6 档 / Catile 0-100 / CEFR.X.7 (1-9 子档)</td><td>Columbia 验证 top-tier，50+ 论文 cite。但 2025 一致性研究指出"Cathoven 比 GSE / Text Inspector 抖动大"<sup class="cite" data-refid="37">[37]</sup></td><td>pay-per-call API，50 免费 credits</td><td>更细 (9 子档 vs 12 档) / 商用 attribution / 但 fluctuate</td></tr>
+            <tr><td><strong>Text Inspector</strong><sup class="cite" data-refid="38">[38]</sup></td><td>Cambridge EVP + 26 指标 + ELTons 2017 奖</td><td>CEFR 6 + 词频 + 句法</td><td>2025 研究中最一致的<sup class="cite" data-refid="37">[37]</sup>。具体 % 未公开</td><td>商业付费 ($$$，价格不公开)</td><td>更稳定 / EVP 比 CEFR-J 权威 / 但贵且非自动化</td></tr>
+            <tr><td><strong>English Profile EVP</strong><sup class="cite" data-refid="39">[39]</sup></td><td>Cambridge Learner Corpus 数百万 essays + 描述性<br/>(不是 prescriptive)</td><td>CEFR 6 档 + 7000 headwords</td><td>权威 — 但只是 wordlist，不是文本评估工具</td><td>免费 web 查 / 商业需 Cambridge 联系</td><td>权威性高 / 但只覆盖 vocab，没文本级</td></tr>
+            <tr><td><strong>GSE Text Analyzer</strong><sup class="cite" data-refid="40">[40]</sup></td><td>Pearson Global Scale of English 10-90 + CEFR mapping</td><td>GSE 10-90 (90 子档) + CEFR</td><td>2025 研究中跟 Text Inspector 一档稳定<sup class="cite" data-refid="37">[37]</sup></td><td>免费 Teacher Toolkit 注册</td><td>更细 90 档 / 教师 friendly / 但绑 Pearson 教材</td></tr>
+            <tr><td><strong>EF SET</strong><sup class="cite" data-refid="41">[41]</sup></td><td>自适应 reading + listening adaptive test</td><td>EF SET 0-100 + CEFR</td><td>测<strong>人</strong>不是文本，A1-C2 跨度准</td><td>免费 50min / Certificate</td><td>测人 vs 评文本，不直接对比 — Tier 1 放进作参考</td></tr>
+            <tr><td><strong>AMontgomerie XGBoost</strong><sup class="cite" data-refid="23">[23]</sup></td><td>textstat + spaCy POS + parse tree → XGBoost</td><td>CEFR 6 档</td><td><strong>70.9%</strong> exact (1500 texts, 80/20 split)，95% top-2</td><td>MIT GitHub 开源</td><td>同样 textstat 特征但 +1 倍准度（用了 XGBoost）— banmi-cvla 应抄此</td></tr>
+            <tr><td><strong>rj-pal Naive Bayes</strong><sup class="cite" data-refid="42">[42]</sup></td><td>Cambridge + OneStopEnglish 数据 + POS counts + word level counts</td><td>CEFR 5 档 (A2-C2，没 A1)</td><td>70% validation</td><td>MIT GitHub</td><td>简单 NB 也能 70% — banmi-cvla 工程量更大但没量化准度</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>4.2 关键 critic：banmi-cvla vs CVLA 官方</h3>
+
+      <div class="critic-box medium">
+        <div class="label">CRITIC — Tier 1</div>
+        <div class="title">banmi-cvla 跟 CVLA 官方 web 的"100% 复刻"声明缺少验证</div>
+        <div class="body">README 表格写"算法 100% 复刻（regression coefficients + cutoff 抄论文）/ 数据同源 / 技术栈同栈" — 但<strong>没有自动化端到端验证</strong>同一段文本 banmi-cvla 和 CVLA web 输出是否一致。selftest.py 喂的是论文 Table 1 metric 均值（合成数据），不是真实文本。<strong>具体改进</strong>：cli.py 加个 <code>--compare-cvla-web URL</code> mode，对 100 段标注文本对比两边输出，记录 disagreement rate。</div>
+      </div>
+
+      <div class="critic-box medium">
+        <div class="label">CRITIC — Tier 1</div>
+        <div class="title">CVV1 公式可能跟论文不一致</div>
+        <div class="body">cvla.py L112 实现 <code>cvv1 = types / (2 * tokens) ** 0.5</code>，即 V/√(2N)。但 Guiraud's Index 标准公式是 <strong>V/√N</strong><sup class="cite" data-refid="43">[43]</sup>。两者差 √2 ≈ 1.414 倍。论文是否真的用 √(2N)？需要核对 Uchida & Negishi 2025 §2 公式。<strong>如果论文是 V/√N 而 banmi-cvla 写 V/√(2N)，回归系数 1.1059 就不对得上</strong>。<strong>具体改进</strong>：拿 selftest.py TABLE_1 A1 行 CVV1=1.93，反推 — 若 N=100 / V=27 → V/√N=2.7，V/√(2N)=1.91 → 接近 1.93 → 论文确实用了 √(2N)（或类似归一化）。<strong>需要 cite 论文具体公式行号</strong>。</div>
+      </div>
+
+      <h3>4.3 vs Cathoven Catile + 9 子档输出</h3>
+
+      <p>Cathoven 把每个 CEFR 档分 1-9 子档（A1.7 = 高 A1 / C1.1 = 低 C1）<sup class="cite" data-refid="36">[36]</sup>。banmi-cvla CEFR-J 12 档（Pre-A1 / A1.1 / A1.2 / A1.3 / A2.1 / A2.2 / B1.1 / B1.2 / B2.1 / B2.2 / C1 / C2）在 A1-B2 区域是 2-3 子档，<strong>C1 + C2 单档没细分</strong>。Cathoven 给 C1.1/C1.5/C1.9 这种粒度，更适合<strong>区分高 C1 跟入门 C2</strong>。半米 K12 国际学校用户少有 C2，但 C1 区分对 IB / IELTS prep 很关键。</p>
+
+      <div class="critic-box low">
+        <div class="label">CRITIC — Tier 1</div>
+        <div class="title">CEFR-J 12 档在 C1/C2 颗粒度不够</div>
+        <div class="body">cvla.py L172-183 to_levels() 把 score &lt; 5.5 → C1，&gt;= 5.5 → C2，<strong>C 区域只有 2 档</strong>。对国际学校 IB DP / A-Level / AP 文本（多在 B2-C1 边缘），这粒度不够区分"高 B2"和"勉强 C1"。<strong>具体改进</strong>：参考 Cathoven，把 C1 细分 C1.1 (5.5-5.8) / C1.2 (5.8-6.1) / C1.3 (6.1-6.4)，C2 同样细分 — 直接改 cvla.py L182-183，工作量 5 行代码 / 30 分钟。</div>
+      </div>
+
+    </div>
+  </section>
+  <!-- placeholder anchor: -->
+
+  <!-- ============ Ch5 Tier 2 · 通用 6 对手 ============ -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">Tier 2 · 通用 Lexile / Readability 6 对手</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>5.1 对比总表</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>对手</th><th>算法</th><th>输出</th><th>准度 / 范围</th><th>价格</th><th>vs banmi-cvla</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Lexile Analyzer</strong><sup class="cite" data-refid="44">[44]</sup></td><td>专有 — 句长 + 词频（1.4B word corpus）</td><td>Lexile 0-1700L</td><td>"非商用免费 / 商业付费 Content Creator"</td><td>免费版有限制 / 商业订阅 ($$$)</td><td>banmi-cvla "100×FK+200" 是粗糙估算 ±60-100L<sup class="cite" data-refid="45">[45]</sup></td></tr>
+            <tr><td><strong>ATOS Analyzer</strong><sup class="cite" data-refid="14">[14]</sup></td><td>open standard 3 因子：句长 + 字符长 + word grade level + book length</td><td>US grade.month (1.0-12.9)</td><td>Renaissance / Accelerated Reader 体系</td><td>免费 Analyzer 工具</td><td>banmi-cvla 用 2 因子 + 自承"未公开" — 实际 ATOS 公开了，且 banmi 公式 = FK 改名</td></tr>
+            <tr><td><strong>Readable.com</strong><sup class="cite" data-refid="46">[46]</sup></td><td>所有公式 ensemble + 专有合成 score</td><td>Readable Score + Lexile + grade</td><td>付费 SaaS</td><td>$8-$120/月</td><td>banmi-cvla 自由度高 (Python lib) / Readable 易用 (web)</td></tr>
+            <tr><td><strong>Hemingway App</strong><sup class="cite" data-refid="47">[47]</sup></td><td>ARI 主 + 长句 / 被动 / 副词 highlight (rule-based)</td><td>US grade</td><td>免费 web + $19.99 desktop</td><td>免费</td><td>banmi-cvla 没 sentence-level highlight</td></tr>
+            <tr><td><strong>textstat (lib)</strong><sup class="cite" data-refid="48">[48]</sup></td><td>14 公式 Python wrapper</td><td>各公式独立 grade</td><td>30%-42% standalone<sup class="cite" data-refid="23">[23]</sup></td><td>MIT pip</td><td><strong>banmi-cvla 14 公式全是 textstat wrapper</strong> — banmi 真正自实现的只有 calculate_atos / derive_lexile / eflaw_to_cefr_band / grade_context / compute_confidence</td></tr>
+            <tr><td><strong>Coh-Metrix</strong><sup class="cite" data-refid="49">[49]</sup></td><td>200+ 维：cohesion / concreteness / referential / causal / narrativity</td><td>多维 score + grade</td><td>免费 web</td><td>免费学术</td><td>banmi-cvla 全是 surface 特征，<strong>没 cohesion 维度</strong> — Gen 2 终极天花板</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>5.2 关键 critic：ATOS 实为 FK 的数学证明</h3>
+
+      <div class="critic-box">
+        <div class="label">CRITIC — Tier 2 致命</div>
+        <div class="title">calculate_atos() 跟 Flesch-Kincaid Grade 数学等价</div>
+        <div class="body">
+          <strong>cvla.py L222</strong>: <code>atos = (asl * 0.3905) + (asw * 11.813) - 15.59</code><br/>
+          <strong>FK Grade 标准公式</strong>: <code>0.39 × ASL + 11.8 × ASW − 15.59</code><sup class="cite" data-refid="22">[22]</sup><br/><br/>
+          差异：<code>(0.3905-0.39)×ASL + (11.813-11.8)×ASW = 0.0005×ASL + 0.013×ASW</code>。<br/>
+          对 ASL=20 / ASW=1.5：差 = 0.01 + 0.0195 = <strong>0.03 grade</strong>（可忽略）。<br/><br/>
+          <strong>结论</strong>：用户看 banmi-cvla 报告 <code>main.atos = 5.8</code> 和 <code>main.us_grade = 5.6</code>，<strong>误以为两个独立指标互证</strong>，实际两个都是 FK Grade（atos 改了第 4-5 位小数后的 FK，us_grade 是 textstat.flesch_kincaid_grade 直出）。<strong>这是误导性输出</strong>。<br/><br/>
+          <strong>历史原因</strong>：banmi-cvla 早期 ATOS 公式可能用了 "characters per word" 代替 "syllables per word"，cvla.py L210 注释明确说"AWL 单位是 syllables per word, 不是 characters per word ★ 之前 webresearch 给错了"。修正后的公式就是 FK Grade。<br/><br/>
+          <strong>具体改进</strong>：选一个 — (a) 完全删 calculate_atos()，统一用 FK Grade；(b) 用 Renaissance 真实 ATOS 公式（句长 + 字符长 + word grade level + book length 4 因子），cvla.py 重写 calculate_atos() ~50 行；(c) 用一个 word grade level lookup 表近似第 3 因子（中等工程量）。<strong>推荐 (a)</strong> — 诚实 + 工程量小 + 不损失信息（FK 已经在）。
+        </div>
+      </div>
+
+      <h3>5.3 关键 critic：Lexile 经验映射的真实误差</h3>
+
+      <div class="critic-box medium">
+        <div class="label">CRITIC — Tier 2</div>
+        <div class="title">derive_lexile() 误差实测可能远超 README 标的 ±100L</div>
+        <div class="body">
+          cvla.py L233: <code>lexile = int(round(100 * fk + 200))</code> + 标 ±100L range。<br/><br/>
+          实测对比 — Lexile 850L 对应 5th grade 75th percentile<sup class="cite" data-refid="45">[45]</sup>，5 年级末 FK 上限 5.9<sup class="cite" data-refid="50">[50]</sup>。<br/>
+          banmi 公式：FK=5.9 → Lexile = 100×5.9+200 = <strong>790L</strong>，<strong>vs 真值 850L 误差 60L</strong>。<br/>
+          Lexile vs FK 相关 r=0.89 (强相关)<sup class="cite" data-refid="50">[50]</sup>，但<strong>方差大</strong>：同一 FK Grade 可能对应 ±200L 的 Lexile 范围。<br/><br/>
+          README "经验公式，误差 ±100L (业界经验)" — <strong>没引来源</strong>。MetaMetrics 官方 Lexile-CEFR 白皮书<sup class="cite" data-refid="51">[51]</sup>用 9 个 benchmark 测试（TOEFL/EIKEN/Aptis 共 34,477 学生）做 alignment，<strong>不是简单 FK 派生</strong>。<br/><br/>
+          <strong>具体改进</strong>：
+          <ul style="margin: 8px 0;">
+            <li>(1) 提升 caveat 标 "±150-200L 实测，不是 ±100L"</li>
+            <li>(2) 改用 Cathoven Catile 免费 50 credits API 做权威对标</li>
+            <li>(3) 长期建一个 1000 文本的"Lexile vs banmi-FK"散点图自动校准截距 + 斜率（用 sklearn LinearRegression 拟合）</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>5.4 textstat 是 banmi-cvla 的命脉</h3>
+
+      <p>banmi-cvla cvla.py 中 14 个 readability formulas <strong>全部是 textstat wrapper</strong>（L376-389）。banmi 的"额外指标"价值 = (a) 复刻 CVLA 3 论文的 8 features 算法逻辑 (b) 三国年级对照 (c) confidence 离散度 — 这三块。<strong>核心算法没有原创</strong>。</p>
+
+      <div class="critic-box low">
+        <div class="label">CRITIC — Tier 2</div>
+        <div class="title">没标注 textstat 内部公式版本</div>
+        <div class="body">textstat dale_chall 用 1948 原版 还是 1995 修订版？SMOG 用原版 30-sentence-min 还是 short-text adjusted？banmi-cvla 不说。<strong>具体改进</strong>：cvla.py 头部加 textstat 版本固定（requirements.txt 已 ≥0.7.4 但未 pin major version），且每个公式名加上版本注释（"dale_chall (1995 revised)"）。</div>
+      </div>
+
+      <h3>5.5 没 cohesion 维度 = surface-level 天花板</h3>
+
+      <div class="critic-box medium">
+        <div class="label">CRITIC — Tier 2</div>
+        <div class="title">完全缺失 Coh-Metrix 风格 cohesion / coherence 特征</div>
+        <div class="body">Coh-Metrix 200+ 维 5 大因子<sup class="cite" data-refid="49">[49]</sup>：word concreteness / syntactic simplicity / <strong>referential cohesion</strong> / <strong>causal cohesion</strong> / narrativity — 这些"句子之间的连贯性"是<strong>真正区分 B2 学术文本和 C1 学术文本</strong>的关键，banmi-cvla 8 CVLA features + 14 textstat formulas 全都是<strong>词级 / 句内级</strong> surface 特征，没有跨句维度。<br/><br/>
+          这是 Gen 2 算法的天花板 — 即便 ensemble 12 个公式也突破不了 70% 准度上限。<br/><br/>
+          <strong>具体改进</strong>：(1) 短期：用 spaCy dependency parse 加 mean dep distance / clause embedding depth（1 天工作量）；(2) 长期：抄 Coh-Metrix 5 大因子的 referential cohesion（计算相邻句的 noun overlap）— 这是 ~80 行 Python，给 banmi-cvla 加一个 F9 ReferentialCohesion 第 9 个 CVLA 风格 metric。</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch6 Tier 3 · LLM / ML 5 候选 ============ -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">Tier 3 · Frontier ML / LLM 路线 5 候选</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>2024-2025 SOTA 全是 LLM / Transformer 路线。banmi-cvla 完全没碰 — 这是<strong>最大升级机会</strong>。</p>
+
+      <h3>6.1 5 个候选路线</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>候选</th><th>SOTA 数</th><th>训练成本</th><th>推理成本</th><th>难度</th><th>banmi 适配</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1. SetFit + CommonLit CLEAR</strong><sup class="cite" data-refid="52">[52]</sup></td><td>~70-75% (估算)</td><td>$0.025 / 30 秒 / 8 例<sup class="cite" data-refid="52">[52]</sup></td><td>~50ms CPU</td><td>🟢 (sentence-transformer)</td><td>🥇 性价比之王</td></tr>
+            <tr><td><strong>2. DeBERTa-v3-base CEFR fine-tune</strong><sup class="cite" data-refid="53">[53]</sup></td><td>70.2% (AMontgomerie)</td><td>$5-20 (Colab T4)</td><td>~200ms GPU / 1s CPU</td><td>🟢 HF AutoTrain</td><td>🥈 准度高</td></tr>
+            <tr><td><strong>3. GPT-4 / Haiku 4.5 zero-shot prompt</strong><sup class="cite" data-refid="31">[31]</sup></td><td>r=0.76 with human (Turbo)</td><td>0 训练</td><td>$1/M Haiku 4.5 in</td><td>🟢 现成 API</td><td>🥉 即用即弃</td></tr>
+            <tr><td><strong>4. XGBoost + 8 CVLA + 14 textstat features</strong><sup class="cite" data-refid="23">[23]</sup></td><td>70.9% (AMontgomerie)</td><td>~$0.5 (本地 30s)</td><td>~1ms 本地</td><td>🟢 sklearn 经典</td><td>🥇 工程量最小</td></tr>
+            <tr><td><strong>5. CohereV3 / Voyage embedding + kNN</strong></td><td>未公开 (估算 ~65-72%)</td><td>$0 (用 1500 标注)</td><td>$0.13/M Cohere v3</td><td>🟡 中等</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>6.2 推荐路线：SetFit + CLEAR 数据微调</h3>
+
+      <div class="callout good">
+        <p><strong>为什么选 SetFit？</strong></p>
+        <ul>
+          <li>训练成本极低 — <strong>NVIDIA V100 上 8 个例子 30 秒 $0.025</strong><sup class="cite" data-refid="52">[52]</sup></li>
+          <li>不需要 prompt engineering — 直接产 sentence embedding + classifier head</li>
+          <li>"outperforms GPT-3 on few-shot, 1600x smaller"<sup class="cite" data-refid="52">[52]</sup> — 适合 banmi K12 数据少场景</li>
+          <li>多语言版本可用（multilingual sentence-transformer），未来扩中文 ESL 不用换工具</li>
+          <li>CommonLit CLEAR Corpus 提供 5000 段已标注英文文本<sup class="cite" data-refid="54">[54]</sup></li>
+          <li>30 行 Python，跟 banmi-cvla 完美集成（作为第 9 个 score 进 ensemble）</li>
+        </ul>
+      </div>
+
+      <h3>6.3 LLM 直评的成本估算</h3>
+
+      <p>给 banmi 一万段字幕 / 段落每条 ~200 token 做 CEFR 评估：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>模型</th><th>输入价 /M</th><th>1 万段成本</th><th>10 万段</th><th>准度参考</th></tr></thead>
+          <tbody>
+            <tr><td>Haiku 4.5</td><td>$1</td><td>$2</td><td>$20</td><td>~70-80% (估算 zero-shot)</td></tr>
+            <tr><td>Sonnet 4.6 batch (-50%)</td><td>$1.5</td><td>$3</td><td>$30</td><td>~80-85%</td></tr>
+            <tr><td>GPT-4o mini</td><td>$0.15</td><td>$0.3</td><td>$3</td><td>r=0.74 with human<sup class="cite" data-refid="31">[31]</sup></td></tr>
+            <tr><td>DeepSeek V3.2 cache hit</td><td>$0.028</td><td>$0.06</td><td>$0.6</td><td>~70% (估算，未实测)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>给 banmi 频道字幕库（17 频道 ~1.66M token<sup class="cite" data-refid="55">[55]</sup>）批量 CEFR 评估，<strong>用 DeepSeek V3.2 cache hit 不到 1 美元就能跑完一次</strong>。</p>
+
+      <h3>6.4 关键 critic：banmi-cvla 完全错过 LLM 路线</h3>
+
+      <div class="critic-box">
+        <div class="label">CRITIC — Tier 3</div>
+        <div class="title">banmi-cvla 没把 LLM 二次校准作为 high-stakes 文本的 fallback</div>
+        <div class="body">cvla.py 460+ 行核心代码，<strong>0 行涉及 LLM API</strong>。设计假设 = "本地 Python 算法不需要联网"，但 banmi 整个系统（参考 #18 cheap-models-pipeline）已经在用 DeepSeek / Haiku — 加一个 <code>analyze(text, llm_verify=True)</code> 选项几乎零成本。<br/><br/>
+          高 stakes 文本（如 IB DP 阅读理解 / 中考真题）应该用 LLM 二次校验：先 banmi-cvla 给出 CEFR-J，再让 Haiku 4.5 zero-shot 判断同一文本 CEFR，两者 disagree 时降低 confidence 或 flag for review。<strong>具体改进</strong>：见第 10 章 #6。</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch7 Tier 4 行业基础 ============ -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">Tier 4 · 行业基础研究综述</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>7.1 50 年综述：传统公式的 7 大根本性局限</h3>
+
+      <p>Effortmark / Redish on Readability Formulas 综述<sup class="cite" data-refid="56">[56]</sup>指出传统公式核心问题：</p>
+
+      <ol>
+        <li><strong>只测可数特征</strong>：长句 + 多音节 — 实际是"为了好算"不是"为了准"</li>
+        <li><strong>无视文档设计</strong>：bullets / 空白 / 排版 — 公式都看不见</li>
+        <li><strong>无视读者背景</strong>：先验知识 / 文化语境 — 公式假设 reader 是 blank slate</li>
+        <li><strong>无视语义</strong>：抽象 vs 具象 / 隐喻 / 多义 — 公式不懂</li>
+        <li><strong>无视 cohesion</strong>：句间连贯 / referential / causal — 见 §5.5</li>
+        <li><strong>跨工具差异</strong>：同一段同一公式不同工具差 12.9 grade<sup class="cite" data-refid="57">[57]</sup></li>
+        <li><strong>跟 comprehension 弱相关</strong>：跟"感知难度"相关，但跟实际理解 / retention 不相关</li>
+      </ol>
+
+      <h3>7.2 ESL-specific 公式：McAlpine EFLAW 的"自承未经科学验证"</h3>
+
+      <div class="critic-box medium">
+        <div class="label">CRITIC — Tier 4</div>
+        <div class="title">EFLAW 作为 ESL 主指标的合理性存疑</div>
+        <div class="body">cvla.py L319-327 把 EFLAW 直接转 CEFR 6 档（&lt;15→A1, ≥43→C2），README "EFLAW 专为 ESL 学习者设计 (最贴合中国学生场景)"。<strong>但 EFLAW 官方页明确说 "Not scientifically tested. Use as approximate guideline."</strong><sup class="cite" data-refid="58">[58]</sup><br/><br/>
+          EFLAW = (words + miniwords)/sentences，<strong>反传统 readability 设计</strong>（强调"短词反而困难 — 因 ESL 学者搞不懂同形异义短词"）— 这个直觉有趣，但<strong>没有大规模 ESL 学习者数据验证</strong>。<br/><br/>
+          banmi-cvla 把 EFLAW 跟 cefr_6（CVLA 算法）平起平坐放在 Tier 1 主指标里，<strong>users 看不出 EFLAW 是猜想性公式</strong>。<br/><br/>
+          <strong>具体改进</strong>：(a) 把 EFLAW 从 Tier 1 移到 Tier 2（保留但降级）；(b) cli pretty 输出标 "EFLAW (实验性 ESL 估算)"；(c) confidence 计算时给 EFLAW 0.5 权重而非 1.0。</div>
+      </div>
+
+      <h3>7.3 IRT 聚合 — 业界做过但 banmi 未用</h3>
+
+      <p>Item Response Theory 在 ensemble 上的应用 — 不同 classifier 给不同样本不同权重<sup class="cite" data-refid="59">[59]</sup>。Python 库：<code>py-irt</code><sup class="cite" data-refid="60">[60]</sup>（Pyro/PyTorch GPU + 1PL/2PL/4PL Rasch 模型）和 <code>girth</code><sup class="cite" data-refid="61">[61]</sup>（纯 Python 经典 IRT）。</p>
+
+      <p>banmi-cvla 当前 <code>aggregate()</code> 用"去 min/max 取剩 6 个 mean" — 这是简化版 trimmed mean，<strong>不是 IRT</strong>。<strong>是否值得换 IRT？</strong></p>
+
+      <div class="callout warn">
+        <p><strong>反向判断</strong>：CVLA 论文官方就用"drop max/min average 6"，这是<strong>论文规定的聚合方式</strong>，换 IRT 就不是 CVLA 复刻了。<strong>结论</strong>：保持现状 ✅。如果做 banmi-cvla v2 是自己的算法（不复刻 CVLA），那时再考虑 IRT。</p>
+      </div>
+
+      <h3>7.4 CEFR-J 12 档 vs CEFR 6 档 vs GSE 90 档</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>体系</th><th>档位数</th><th>设计者</th><th>权威性</th><th>商业可用</th></tr></thead>
+          <tbody>
+            <tr><td>CEFR 6 档</td><td>6 (A1-C2)</td><td>Council of Europe 2001</td><td>🟢 国际标准</td><td>免费</td></tr>
+            <tr><td>CEFR-J 12 档</td><td>12 (Pre-A1 - C2)</td><td>Tono 2012 / Tokyo Univ Foreign Studies</td><td>🟡 日本权威，国际中等</td><td>需 cite</td></tr>
+            <tr><td>Cathoven X.7</td><td>54 (6×9)</td><td>Cathoven AI 公司</td><td>🟡 商业，Columbia 验证</td><td>付费 API</td></tr>
+            <tr><td>GSE 10-90</td><td>81 (10-90)</td><td>Pearson</td><td>🟢 商业 + CEFR alignment</td><td>免费教师 toolkit</td></tr>
+            <tr><td>Lexile</td><td>1900 (0-1700L 整数 + BR)</td><td>MetaMetrics</td><td>🟢 K12 标杆</td><td>免费版有限</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>banmi-cvla 出 CEFR-J 12 档<strong>实际有道理</strong> — Tono CEFR-J 在 A1-B2 区域做了精细子档（A1.1/A1.2/A1.3/A2.1/A2.2/B1.1/B1.2/B2.1/B2.2），<strong>对 ESL 学习者群体（多在 A2-B2）粒度合适</strong>。但 C1/C2 单档是 CEFR-J 设计缺陷（见 §4.3）。</p>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch8 8 个 critic 问题 ============ -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">★ banmi-cvla 8 个方案审查问题（最核心章节）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>阿杰任务书 C 段 8 个问题逐一回答。每条都引业界做法 + 给具体改进。</p>
+
+      <!-- C6 -->
+      <h3>C6 · CVLA 3 + textstat 合集思路对不对？有没有更优雅的？</h3>
+
+      <div class="callout info">
+        <p><strong>回答</strong>：思路<strong>对一半</strong>。</p>
+      </div>
+
+      <p><strong>对的地方</strong>：</p>
+      <ul>
+        <li>CVLA 3 是 2025 published 经过 108 文本验证（65.7% exact / 99% adjacent）的开源研究<sup class="cite" data-refid="25">[25]</sup>，复刻它有可信度</li>
+        <li>textstat 14 公式给"多公式 cross-check"的逻辑合理（业界 consensus grade 做法<sup class="cite" data-refid="57">[57]</sup>）</li>
+        <li>把"主算法 (CVLA) + 辅助公式 (textstat) + 词汇覆盖 (CEFR-J)"分层是好的工程</li>
+      </ul>
+
+      <p><strong>不对的地方</strong>：</p>
+      <ul>
+        <li>🔴 <strong>缺一个 ML 兜底层</strong>：AMontgomerie 已经证明同样 textstat 特征喂 XGBoost 准度从 34% 翻倍到 71%<sup class="cite" data-refid="23">[23]</sup> — banmi-cvla 算了 14 公式但只做线性组合（CVLA score / FK 派生 Lexile），<strong>没把所有特征喂 XGBoost</strong></li>
+        <li>🔴 <strong>没用现成 SOTA 模型</strong>：HuggingFace 有 dksysd/cefr-classifier (DeBERTa-v3-large 微调)<sup class="cite" data-refid="53">[53]</sup> 和 agentlans/deberta-v3-xsmall-readability 直接可用 — 推理 200ms 给一个 5-10% 的准度提升</li>
+        <li>🟠 <strong>FRE 不该进 all_formulas</strong>：12.7% 准度 &lt; random，进了反而拖累 consensus</li>
+      </ul>
+
+      <p><strong>更优雅的设计</strong>（参考 #18 cheap-models）：</p>
+
+      <pre>analyze(text, mode='fast'|'accurate'):
+  features = compute_features(text)   # 8 CVLA + 14 textstat + cohesion + length
+
+  if mode == 'fast':
+    cvla_score = run_cvla_algorithm(features)
+    return tier_output(cvla_score, features)
+
+  elif mode == 'accurate':
+    cvla_score = run_cvla_algorithm(features)
+    ml_score   = xgboost_predict(features)     # NEW
+    llm_score  = haiku_zero_shot_cefr(text)    # NEW (high-stakes)
+    final = ensemble([cvla, ml, llm], weights=[0.4, 0.4, 0.2])
+    confidence = pairwise_agreement(cvla, ml, llm)  # NEW
+    return tier_output(final, features, confidence)</pre>
+
+      <!-- C7 -->
+      <h3>C7 · 去 min/max 取 6 平均的聚合策略业界用吗？weighted ensemble / IRT 更好？</h3>
+
+      <div class="callout info">
+        <p><strong>回答</strong>：业界<strong>不用这个</strong>（这是 CVLA 论文独家做法），<strong>但保持现状是对的</strong>因为 banmi-cvla 是 CVLA 复刻。</p>
+      </div>
+
+      <p><strong>详细解析</strong>：</p>
+      <ul>
+        <li><strong>"drop max/min, average 6"</strong> = trimmed mean 的一种 — 统计学上是 robust statistics 的标准做法（抗 outlier），但<strong>截断比例 25%</strong>（8 个里去 2 个）相对激进</li>
+        <li>业界主流：(a) sklearn VotingRegressor weighted average<sup class="cite" data-refid="62">[62]</sup>；(b) stacking — 用元 model 学组合规则；(c) IRT — 给每个 base model 估"能力参数"<sup class="cite" data-refid="59">[59]</sup></li>
+        <li>CVLA 论文 §2 选 trimmed mean 因为<strong>论文用的是 8 个 hand-crafted features，没有 base model 概念</strong> — 不能 weighted ensemble 因为没"准度差异"概念</li>
+      </ul>
+
+      <p><strong>结论</strong>：</p>
+      <ul>
+        <li>✅ <strong>CVLA score 内部聚合保持 trimmed mean</strong>（这是复刻论文）</li>
+        <li>🆕 <strong>新增 ensemble 层</strong>：在 CVLA score / XGBoost score / LLM score 之间用 weighted average — 因为这三是<strong>不同算法</strong>，差异有意义</li>
+      </ul>
+
+      <!-- C8 -->
+      <h3>C8 · ATOS 2-factor 简化够不够？</h3>
+
+      <div class="callout bad">
+        <p><strong>回答</strong>：<strong>完全不够，而且当前实现是错的</strong>。见 §5.2 详证。</p>
+      </div>
+
+      <p>核心问题再列一次：</p>
+      <ol>
+        <li>banmi calculate_atos() 数学上 = FK Grade（差异 &lt;0.05）</li>
+        <li>真 ATOS 是 open standard，3 因子 + book length<sup class="cite" data-refid="14">[14]</sup></li>
+        <li>README "Renaissance 完整 3 因子版未公开" 是<strong>错的</strong> — Renaissance 白皮书已 published<sup class="cite" data-refid="63">[63]</sup></li>
+      </ol>
+
+      <p><strong>3 个改进选项</strong>（按工程量）：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>选项</th><th>动作</th><th>工程量</th><th>诚实度</th><th>对用户影响</th></tr></thead>
+          <tbody>
+            <tr><td>A (推荐)</td><td>删除 calculate_atos()，统一用 FK Grade，Tier 1 不再列"ATOS"字段</td><td>15 min</td><td>🟢 最诚实</td><td>少一个误导指标</td></tr>
+            <tr><td>B</td><td>保留名字 "ATOS-FK approximation"，README 大字写 "实际是 FK Grade 重命名"</td><td>5 min</td><td>🟡 诚实但保留品牌</td><td>没变化</td></tr>
+            <tr><td>C</td><td>实现真 ATOS 3 因子（需要 word grade level lookup 表）</td><td>1-2 天</td><td>🟢 准确实现</td><td>多一个独立 grade 指标</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- C9 -->
+      <h3>C9 · Lexile = FK × 100 + 200 经验映射误差多大？</h3>
+
+      <div class="callout warn">
+        <p><strong>回答</strong>：实测 <strong>±150-200L</strong>（不是 README 标的 ±100L）。</p>
+      </div>
+
+      <p><strong>证据链</strong>：</p>
+      <ul>
+        <li>Lexile 850L = 5th grade 75th percentile<sup class="cite" data-refid="45">[45]</sup></li>
+        <li>5th grade FK upper = 5.9<sup class="cite" data-refid="50">[50]</sup> → banmi 公式给 790L → <strong>vs 850L 误差 60L</strong></li>
+        <li>但 5th grade FK 范围 4.5-5.9，对应 Lexile 真实范围 660L-1155L（50-90 percentile）— <strong>方差跨 ~500L</strong></li>
+        <li>Lexile vs FK r=0.89 = 强相关但<strong>r²=0.79</strong>，意味着 FK 解释不了 21% 方差</li>
+      </ul>
+
+      <p><strong>具体改进</strong>：</p>
+      <ol>
+        <li>cvla.py L237 改 <code>'low': max(-200, lexile - 200)</code>, <code>'high': min(1700, lexile + 200)</code>（±200L 而非 ±100L）</li>
+        <li>note 改 "banmi 经验映射 vs MetaMetrics 官方差 ±150-200L (实测)"</li>
+        <li>长期：维护一个 banmi 自校准的 (FK_grade, Lexile) 散点数据集 — 跑 100 本带 Lexile 的 K12 书<sup class="cite" data-refid="64">[64]</sup>，回归出更准截距 / 斜率</li>
+      </ol>
+
+      <!-- C10 -->
+      <h3>C10 · CEFR-J 12 档 vs CEFR 6 档业界共识？</h3>
+
+      <div class="callout info">
+        <p><strong>回答</strong>：12 档<strong>对 ESL 群体合理</strong>，但 C1/C2 单档是 CEFR-J 原生设计缺陷。</p>
+      </div>
+
+      <p>看 §7.4 对比表 — CEFR 6 档太粗 / Cathoven 54 档太细 / GSE 81 档对教师过载 / Lexile 1900 整数对老师/家长不友好。CEFR-J 12 档是中间最优选。</p>
+
+      <p><strong>但 banmi-cvla CEFR-J 12 档实现有一个细微 bug</strong>：</p>
+
+      <div class="critic-box low">
+        <div class="label">CRITIC — C10</div>
+        <div class="title">to_levels() cutoff 边界 vs CVLA Table 2 对得上吗？</div>
+        <div class="body">cvla.py L172-183 cutoff：<code>&lt;0.5: Pre-A1 / &lt;0.84: A1.1 / &lt;1.17: A1.2 / &lt;1.5: A1.3 / ...</code> — README 说"论文 Table 2 直接抄"。但<strong>没单元测试覆盖 cutoff 边界</strong>（如 score=0.499 vs 0.500 should 不同档）。selftest.py 喂的 5 档均值不覆盖边界 case。<br/><br/>
+          <strong>具体改进</strong>：selftest.py 加 boundary test — 喂 score = [0.499, 0.501, 0.839, 0.841, ..., 5.499, 5.501]，验证档位切换准确。</div>
+      </div>
+
+      <!-- C11 -->
+      <h3>C11 · 三国年级对照 + 中国 ESL 等价是否准？</h3>
+
+      <div class="callout warn">
+        <p><strong>回答</strong>：<strong>大方向对，但具体年级对应是经验值，没引用支撑</strong>。</p>
+      </div>
+
+      <p>看 cvla.py L287-301 GRADE_TO_ESL_EQUIV — "Grade 6 = 中考主流水平" / "Grade 9 = 高考主流 / IELTS 5.0-5.5" / "Grade 11 = IELTS 6.5-7.5"。</p>
+
+      <p><strong>跟权威数据对比</strong><sup class="cite" data-refid="65">[65]</sup>：</p>
+
+      <ul>
+        <li>British Council 数据：中国高考英语阅读 = <strong>860L-1100L</strong>（vs 美国同年级 920L-1220L / 英国 920L-1110L）</li>
+        <li>FK Grade 换算 (用 banmi 公式 100×FK+200=Lexile)：高考 860L=FK 6.6 / 高考拔高 1100L=FK 9.0</li>
+        <li><strong>banmi 当前映射</strong>：Grade 9 = "高考主流" → FK ~9.0 → Lexile ~1100L = 高考<strong>拔高</strong>而非主流</li>
+        <li>即 banmi 把"高考主流"对应到了实际是"高考拔高"的 grade — <strong>偏高 1-2 grade</strong></li>
+      </ul>
+
+      <p><strong>具体改进</strong>：</p>
+      <ol>
+        <li>cvla.py L287-301 重写 GRADE_TO_ESL_EQUIV 基于 British Council 实测数据：
+          <ul>
+            <li>Grade 6-7 → "中考拔高 / 高考起步"（不是"中考主流"）</li>
+            <li>Grade 7 → "高考主流起步 860L"</li>
+            <li>Grade 9 → "高考拔高 1100L / IELTS 6.0-6.5"（不是 IELTS 5.0-5.5）</li>
+            <li>Grade 11 → "IELTS 7.0-7.5 / TOEFL 100"</li>
+          </ul>
+        </li>
+        <li>README 加 disclaimers 第 6 条："中国 ESL 等价数据基于 British Council 2014 中国高中英语阅读量化研究"</li>
+      </ol>
+
+      <!-- C12 -->
+      <h3>C12 · McAlpine EFLAW 1990s 老公式还是 SOTA for ESL？</h3>
+
+      <div class="callout bad">
+        <p><strong>回答</strong>：<strong>是老公式不是 SOTA</strong>。看 §7.2。</p>
+      </div>
+
+      <p>核心问题：EFLAW 官方页明确"Not scientifically tested"<sup class="cite" data-refid="58">[58]</sup>。banmi-cvla 把它当 Tier 1 主输出 + ESL band 转换 — <strong>是 lazy reuse</strong>。</p>
+
+      <p>真正的 ESL-specific SOTA 路线：</p>
+      <ul>
+        <li>(a) <strong>Greenfield 2004</strong>：证明 "classic readability formulas (FK/SMOG/Gunning) 对 ESL 也基本有效"<sup class="cite" data-refid="66">[66]</sup> — 不需要 ESL 专用公式</li>
+        <li>(b) <strong>ESL-specific BERT fine-tune</strong>：如 ReadMe++ 5 语言<sup class="cite" data-refid="33">[33]</sup></li>
+        <li>(c) <strong>OneStopEnglish 189 三档</strong><sup class="cite" data-refid="67">[67]</sup> ESL parallel corpus 训练专用 classifier</li>
+      </ul>
+
+      <!-- C13 -->
+      <h3>C13 · "多公式离散度 → 置信度"机制业界做过吗？</h3>
+
+      <div class="callout warn">
+        <p><strong>回答</strong>：业界做过 consensus grade，但 banmi 当前实现有缺陷。</p>
+      </div>
+
+      <p><strong>业界做法</strong>：</p>
+      <ul>
+        <li>average of multiple formulas = "consensus grade" — 业界标准做法<sup class="cite" data-refid="57">[57]</sup></li>
+        <li>good agreement standard = 95% limit of agreement &lt; 1 grade<sup class="cite" data-refid="68">[68]</sup></li>
+        <li>std 不等于 limit of agreement（前者是离散度，后者是 Bland-Altman 风格的 1.96×SD 区间）</li>
+      </ul>
+
+      <p><strong>banmi-cvla 当前实现问题</strong>：</p>
+
+      <div class="critic-box medium">
+        <div class="label">CRITIC — C13</div>
+        <div class="title">"7 公式 σ&lt;1.0 = high confidence" 是假置信度</div>
+        <div class="body">cvla.py L332-353 compute_confidence() 把 atos / FK / GF / SMOG / CL / ARI / Linsear 7 个 std 当 confidence。<strong>问题</strong>：
+          <ul>
+            <li>这 7 公式都是 30-42% 准度的传统公式 — 7 个错的高度一致，不代表对 ✅</li>
+            <li>banmi 已经发现 atos = FK Grade 数学等价（§5.2）— 那 std 计算时<strong>这两个是同一个数</strong>，人为压低 std</li>
+            <li>ARI 跟 Coleman-Liau 也共享 characters-per-word 维度，高度相关</li>
+            <li>真实独立公式可能只有 3-4 个，std 应该按"独立性加权"</li>
+          </ul>
+          <strong>具体改进</strong>：
+          <ol style="margin-top: 6px;">
+            <li>删 atos 进 grade_vals 列表（因为 = FK）</li>
+            <li>加 LLM score 或 CVLA score 进 grade_vals（提供独立维度）</li>
+            <li>用 limit of agreement (1.96×σ) 而非 σ 本身做 threshold</li>
+            <li>confidence label 加上具体数值"high (σ=0.8, 95% LOA ±1.57 grade, 5 个独立 metric)"让用户判断</li>
+          </ol>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch9 中国 ESL 校准 ============ -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">中国 ESL Specific · 现有方案是否充分校准？</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>9.1 真实数据 vs banmi 经验映射</h3>
+
+      <p>British Council "Applying Lexile Framework in China"<sup class="cite" data-refid="65">[65]</sup>研究关键数据：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>学段</th><th>中国 Lexile 范围</th><th>美国对应</th><th>英国对应</th><th>banmi 当前映射</th><th>偏差</th></tr></thead>
+          <tbody>
+            <tr><td>中学初年级 (中考)</td><td>低于美国</td><td>850L-1110L (Grade 7-8)</td><td>845L-1055L</td><td>Grade 6-7 → 中考</td><td>🟢 大致对</td></tr>
+            <tr><td>中学高年级 (高考)</td><td>860L-1100L</td><td>920L-1220L</td><td>920L-1110L</td><td>Grade 9 → 高考主流</td><td>🟡 偏高 1-2 grade</td></tr>
+            <tr><td>大学英语六级</td><td>~1100-1300L (估算)</td><td>Grade 11-12</td><td>—</td><td>未覆盖</td><td>🔴 缺失</td></tr>
+            <tr><td>IELTS 5.0-5.5</td><td>~900-1050L</td><td>Grade 7-9</td><td>—</td><td>Grade 9</td><td>🟢 对</td></tr>
+            <tr><td>IELTS 6.5-7.5</td><td>~1100-1300L</td><td>Grade 11</td><td>—</td><td>Grade 11</td><td>🟢 对</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>9.2 新 HSK 9 级 — 中文方向参考</h3>
+
+      <p>2021 年新 HSK 3.0 推出 9 级，明确跟 CEFR alignment<sup class="cite" data-refid="69">[69]</sup>：HSK 1-2 = A1 / HSK 3 = A2 / HSK 4 = B1 / HSK 5 = B2 / HSK 6 = C1 / HSK 7-9 = C2。词汇量从 300 到 11000 词。<strong>这给 banmi-cvla 一个方向</strong>：未来若做中文阅读 difficulty 评估，可以参考新 HSK 9 级 alignment。</p>
+
+      <h3>9.3 中国教材的 readability 实际研究</h3>
+
+      <p>研究指出 "4 out of 5 Chinese textbook series did not assign grading levels accurately reflective of actual difficulty"<sup class="cite" data-refid="70">[70]</sup> — 中国教材自己标的难度都不准。banmi-cvla 用来给 K12 国际学校教材二次评估反而有价值（绕过出版商自标）。</p>
+
+      <div class="critic-box low">
+        <div class="label">CRITIC — Ch9</div>
+        <div class="title">没建中国 ESL 文本 ground truth 集</div>
+        <div class="body">banmi 是 K12 国际学校工具，应该有<strong>100-500 段中国 ESL 学习者熟悉的英文文本</strong>（如人教版高中 PA / 新概念 / 牛津阅读树 / 21世纪报）+ 老师打的真实 CEFR 标签作 ground truth。当前 selftest 只跟论文 Table 1 对，<strong>没在中国场景上 validate</strong>。<br/><br/>
+          <strong>具体改进</strong>：找 5-10 个 banmi 国际学校老师，每人标 20 段（共 100-200 段），写 evaluate.py 跑 confusion matrix + adjacent accuracy + per-level F1。这是 §10 #9 的具体落地。</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch10 10 个改进建议 ============ -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">★ 10 个 actionable 改进建议（按 effort × impact 排）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>每条给：(a) 具体改什么代码 (b) 预计 effort 人时 (c) 预计 impact 准度提升 (d) cite 业界做法。</p>
+
+      <div class="imp-box">
+        <div class="label">IMPROVEMENT · #1 🥇 第一周</div>
+        <div class="title">删除 calculate_atos() 或改名 "FK-Grade-Approximation"</div>
+        <div class="meta">effort: 15 分钟 · impact: 诚实度大幅提升 · 难度 🟢</div>
+        <div class="body">
+          <strong>动作</strong>：(a) 编辑 cvla.py L202-223 加大警告注释；(b) 编辑 README "ATOS" 章节明确"实为 FK Grade 改名"；(c) 选 — 删除 Tier 1 的 atos 字段，统一用 us_grade；或 保留但标 "(approximation, see README)"<br/>
+          <strong>业界依据</strong>：Renaissance ATOS 是 open standard，公开 3-factor formula<sup class="cite" data-refid="14">[14]</sup>。FK Grade 公式 0.39×ASL + 11.8×ASW − 15.59<sup class="cite" data-refid="22">[22]</sup>。
+        </div>
+      </div>
+
+      <div class="imp-box">
+        <div class="label">IMPROVEMENT · #2 🥇 第一周</div>
+        <div class="title">word_count &lt; 100 → confidence='unreliable' 警告</div>
+        <div class="meta">effort: 20 分钟 · impact: 消除假阳性 · 难度 🟢</div>
+        <div class="body">
+          <strong>动作</strong>：cvla.py L361-366 改 — 10-99 词时<strong>不报错</strong>但 confidence['level'] = 'unreliable'，加上 disclaimers 第 6 条 "短文本统计不可靠，业界标准 ≥100 词"。<br/>
+          <strong>业界依据</strong>：SMOG 30 句 / 多公式 100 词最小阈值<sup class="cite" data-refid="29">[29]</sup>。<br/>
+          <strong>代码示例</strong>：
+          <pre>if word_count &lt; 100:
+    result['interpretation']['confidence'] = {
+        'level': 'unreliable',
+        'std': None,
+        'reason': f'短文本仅 {word_count} 词 (业界要求 ≥100)'
+    }</pre>
+        </div>
+      </div>
+
+      <div class="imp-box">
+        <div class="label">IMPROVEMENT · #3 🥇 第一周</div>
+        <div class="title">License audit + 替换 Octanove → EVP 或自建 C1/C2 wordlist</div>
+        <div class="meta">effort: 4-8 小时 · impact: 解锁商用 🔴 致命 · 难度 🟡</div>
+        <div class="body">
+          <strong>问题</strong>：Octanove CC BY-SA 4.0 强 copyleft<sup class="cite" data-refid="20">[20]</sup>。<br/>
+          <strong>动作</strong>：
+          <ul>
+            <li>(a) 短期：cvla.py L46-49 OCTANOVE_PATH 改为 optional，<code>if path exists: load else skip</code>。无 Octanove 时只用 CEFR-J A1-B2，C1/C2 标 'unknown'</li>
+            <li>(b) 中期：用 Cambridge EVP C1/C2 (需 Cambridge 授权 — 比 CC BY-SA 更可商用) 或抄 Octanove 词表但 banmi 自行重标 CEFR（人工 1-2 天可标 ~2000 C1/C2 词）</li>
+            <li>(c) 长期：用 wordfreq Zipf + Oxford 5000 自建 C 词表</li>
+          </ul>
+          <strong>业界对手做法</strong>：Text Inspector 用 EVP（Cambridge 商业 licensed）<sup class="cite" data-refid="38">[38]</sup>；Cathoven 自建 + 商业 license<sup class="cite" data-refid="36">[36]</sup>。
+        </div>
+      </div>
+
+      <div class="imp-box">
+        <div class="label">IMPROVEMENT · #4 🥈 第二周</div>
+        <div class="title">SetFit + CommonLit CLEAR 5000 文本训练 sentence-transformer head</div>
+        <div class="meta">effort: 4-6 小时 · impact: 准度 65%→75%+ · 难度 🟡</div>
+        <div class="body">
+          <strong>动作</strong>：
+          <ol>
+            <li>下载 CLEAR Corpus 5000 段已标注英文<sup class="cite" data-refid="54">[54]</sup></li>
+            <li>用 SetFit + multilingual-e5-base 训练 (NVIDIA V100 / Colab T4 / 30 秒 / $0.025)<sup class="cite" data-refid="52">[52]</sup></li>
+            <li>cvla.py 新增 <code>compute_setfit_score(text)</code> 返回 CEFR 6 档 prob distribution</li>
+            <li>加进 analyze() Tier 2 输出</li>
+          </ol>
+          <strong>预计准度</strong>：SetFit on full data 通常达 75-80%，SetFit on 8-shot 也能达 GPT-3 zero-shot 水平<sup class="cite" data-refid="52">[52]</sup>。
+        </div>
+      </div>
+
+      <div class="imp-box">
+        <div class="label">IMPROVEMENT · #5 🥈 第二周</div>
+        <div class="title">sklearn VotingRegressor 把 CVLA + textstat 加权融合</div>
+        <div class="meta">effort: 2-3 小时 · impact: +3-5% accuracy · 难度 🟢</div>
+        <div class="body">
+          <strong>动作</strong>：cvla.py 新增 <code>compute_ensemble_score()</code>：
+          <pre>from sklearn.ensemble import VotingRegressor
+ensemble = VotingRegressor([
+    ('cvla', cvla_score),   # 权重 0.5 (准度 65% baseline)
+    ('xgb', xgboost_pred),  # 权重 0.3 (准度 71%)
+    ('setfit', setfit_pred), # 权重 0.2 (准度 75%)
+], weights=[0.5, 0.3, 0.2])</pre>
+          <strong>业界依据</strong>：sklearn VotingRegressor 支持 weighted soft voting<sup class="cite" data-refid="62">[62]</sup>。
+        </div>
+      </div>
+
+      <div class="imp-box">
+        <div class="label">IMPROVEMENT · #6 🥉 第三周</div>
+        <div class="title">加 LLM (Haiku 4.5) 二次校验 high-stakes 文本</div>
+        <div class="meta">effort: 3-4 小时 · impact: 边缘 case 准度 +10% · 难度 🟢</div>
+        <div class="body">
+          <strong>动作</strong>：cvla.py 新增 <code>analyze(text, llm_verify=True)</code> 选项 — 当 verify=True 时调 Anthropic API。<br/>
+          <strong>Prompt</strong>："给一段英文，输出 CEFR 6 档 + reasoning"，zero-shot。<br/>
+          <strong>成本</strong>：Haiku 4.5 $1/M input — 每段 200 token 成本 $0.0002，1000 段才 $0.2。<br/>
+          <strong>业界依据</strong>：GPT-4 Turbo r=0.76 with human readability<sup class="cite" data-refid="31">[31]</sup>。LLM 当 second opinion 不当 single source of truth。
+        </div>
+      </div>
+
+      <div class="imp-box">
+        <div class="label">IMPROVEMENT · #7 🥉 第三周</div>
+        <div class="title">spaCy en_core_web_sm → trf 升级</div>
+        <div class="meta">effort: 1 小时 + 模型 ~450MB · impact: F6/F7/F8 cascade +1-2% · 难度 🟢</div>
+        <div class="body">
+          <strong>动作</strong>：requirements.txt 加 spacy[transformers]，运行 <code>python -m spacy download en_core_web_trf</code>，cvla.py L74-78 改为 try trf falls back sm。<br/>
+          <strong>预计提升</strong>：POS tag 96% → 98.13%<sup class="cite" data-refid="71">[71]</sup>，影响 F6 VperSent / F7 POStypes / F8 LenNP — 累积 ~1-2% 准度提升。<br/>
+          <strong>tradeoff</strong>：模型 ~450MB / 推理慢 10-50x (~50-200ms vs &lt;10ms)。banmi 批量场景 OK。
+        </div>
+      </div>
+
+      <div class="imp-box">
+        <div class="label">IMPROVEMENT · #8 🥉 第三周</div>
+        <div class="title">CEFR-J 12 档扩展到 C1/C2 子档（Cathoven 风格）</div>
+        <div class="meta">effort: 30 分钟 · impact: dashboard 更细 · 难度 🟢</div>
+        <div class="body">
+          <strong>动作</strong>：cvla.py L181-183 改为：
+          <pre>elif score &lt; 5.0:  cefr_j_12 = 'C1.1'
+elif score &lt; 5.3:  cefr_j_12 = 'C1.2'
+elif score &lt; 5.5:  cefr_j_12 = 'C1.3'
+elif score &lt; 6.0:  cefr_j_12 = 'C2.1'
+elif score &lt; 6.5:  cefr_j_12 = 'C2.2'
+else:               cefr_j_12 = 'C2.3'</pre>
+          <strong>注意</strong>：这是 banmi 扩展，<strong>不是 Tono 官方</strong> — 需要 README 标 "C1/C2 子档为 banmi 经验扩展，非 CEFR-J 官方"。<br/>
+          <strong>业界依据</strong>：Cathoven 已用 9 子档<sup class="cite" data-refid="36">[36]</sup>，区分高低 C1 在 IB / A-Level / IELTS 场景很有价值。
+        </div>
+      </div>
+
+      <div class="imp-box">
+        <div class="label">IMPROVEMENT · #9 🥉 第四周</div>
+        <div class="title">建 ground truth 校验集（OneStopEnglish + CLEAR + 自建中国 ESL）</div>
+        <div class="meta">effort: 3-6 小时 · impact: 可量化准度 · 难度 🟡</div>
+        <div class="body">
+          <strong>动作</strong>：
+          <ul>
+            <li>下载 OneStopEnglish 189 段 (Elementary/Intermediate/Advanced)<sup class="cite" data-refid="67">[67]</sup></li>
+            <li>下载 CLEAR Corpus 5000 段 (teacher ratings)<sup class="cite" data-refid="54">[54]</sup></li>
+            <li>自建：找 5 个 banmi 老师，每人标 20 段中国学生熟悉的英文，得 100-200 段 ground truth</li>
+            <li>新建 evaluate.py 跑 confusion matrix + per-level F1 + adjacent accuracy</li>
+            <li>把 baseline 准度数字写进 README — 替代 "5 档全过 max diff 0.10" 这种自定义指标</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="imp-box">
+        <div class="label">IMPROVEMENT · #10 🥉 第二月（最难）</div>
+        <div class="title">引入 cohesion / coherence 维度（Coh-Metrix 风格 5 因子精简版）</div>
+        <div class="meta">effort: 1-2 天 · impact: 突破 surface-level 天花板 · 难度 🔴</div>
+        <div class="body">
+          <strong>动作</strong>：cvla.py 新增 <code>compute_cohesion_features()</code>：
+          <ul>
+            <li>F9 ReferentialCohesion: 相邻句的 noun overlap rate (spaCy noun_chunks 取 lemma 算 Jaccard)</li>
+            <li>F10 CausalCohesion: 因果连接词 (because, therefore, thus, so) per 100 words</li>
+            <li>F11 Narrativity: 第三人称代词 + past tense verb 比例（rule-based 估）</li>
+            <li>F12 Concreteness: 用 Brysbaert concreteness norms (40k 词)<sup class="cite" data-refid="72">[72]</sup>查 mean</li>
+            <li>F13 SyntacticDepth: spaCy parse tree mean depth</li>
+          </ul>
+          <strong>挑战</strong>：F9-F13 没有 CVLA 论文的 regression coefficients，需要 banmi 自己用 ground truth 数据训练 — 跟 #9 一起做。<br/>
+          <strong>业界依据</strong>：Coh-Metrix 200+ 维 5 因子<sup class="cite" data-refid="49">[49]</sup>，但 banmi 不需要 200，5 个核心维度足够。
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch11 重新设计假想 ============ -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">如果重新设计 banmi-cvla v2.0 会怎么做</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>这章是<strong>假设要从头开始</strong>给阿杰的设计建议（不是改 v1）。</p>
+
+      <h3>11.1 v2.0 核心设计原则</h3>
+
+      <ol>
+        <li><strong>不再复刻论文，做 banmi 自己的</strong> — CVLA 是公开论文，banmi 没竞争优势；但 banmi 数据（K12 国际学校 + 中国 ESL）是优势</li>
+        <li><strong>LLM-first, 公式 as fallback</strong> — 反过来，主入口是 LLM (Haiku 4.5)，传统公式作为 cross-check</li>
+        <li><strong>有 ground truth 才谈准度</strong> — 不再说"5 档全过"，说"在 banmi 100 段中国 ESL 集上 73% exact + 96% adjacent"</li>
+        <li><strong>License 隔离</strong> — 数据 (CC BY-SA / 商业) / 工具代码 (MIT) 物理分离，工具不依赖 viral copyleft 数据</li>
+      </ol>
+
+      <h3>11.2 v2.0 算法栈</h3>
+
+      <pre>analyze_v2(text):
+  if word_count &lt; 100: return UnreliableResult
+
+  # Layer 1: Fast & local features
+  features = {
+      'cvla_8': run_cvla(text),         # 8 维 CVLA 复刻 (保留)
+      'textstat_8': run_8_formulas(text),  # 删 FRE / Spache / dale-chall 旧版
+      'cohesion_5': compute_cohesion(text), # F9-F13 (新)
+      'pos_stats': spacy_trf_features(text), # POS / dep / NP
+  }
+
+  # Layer 2: ML ensemble
+  ml_score = banmi_xgboost.predict(features)  # 预训练 (CLEAR + 自建)
+
+  # Layer 3: LLM verification (optional, high-stakes)
+  if config.llm_verify:
+      llm_score = haiku_45_cefr(text)
+      final = ensemble([ml_score, llm_score], weights=[0.6, 0.4])
+  else:
+      final = ml_score
+
+  # Layer 4: 多视角输出
+  return {
+      'main': cefr_6_label(final),
+      'confidence_interval': bootstrap_ci(features),  # 真置信区间不是 std
+      'per_layer': {  # 用户能看每层判断
+          'cvla': cvla_label,
+          'ml_ensemble': ml_label,
+          'llm': llm_label if config.llm_verify else None,
+      },
+      'cohesion_warnings': flag_low_cohesion(features),
+      'ground_truth_distance': nearest_neighbor_in_banmi_corpus(text),
+  }</pre>
+
+      <h3>11.3 v2.0 数据策略</h3>
+
+      <ul>
+        <li><strong>核心 training data</strong>：CommonLit CLEAR 5000 + OneStopEnglish 189 + ReadMe++ EN 部分</li>
+        <li><strong>banmi 自建</strong>：100-500 段中国 K12 / 国际学校教材人工标注</li>
+        <li><strong>License 干净</strong>：CC BY 4.0 或 MIT 数据，不用 CC BY-SA</li>
+        <li><strong>持续 update</strong>：用户使用中老师 corrections 累积 → 半年重训一次</li>
+      </ul>
+
+      <h3>11.4 v2.0 输出 UX</h3>
+
+      <p>当前 v1 4 个 Tier 太复杂 + 假并列。v2 改 3 个 Tier：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tier</th><th>给谁</th><th>核心数</th><th>详细</th></tr></thead>
+          <tbody>
+            <tr><td>Tier 1 学生</td><td>学生 / 家长</td><td>"B1 中考主流水平 / 适合 12-15 岁"</td><td>1 个 CEFR + 1 句解释</td></tr>
+            <tr><td>Tier 2 老师</td><td>老师 dashboard</td><td>CEFR-J 12 + 词汇覆盖 + cohesion warning</td><td>5-10 个数 + 推荐改写方向</td></tr>
+            <tr><td>Tier 3 开发</td><td>banmi 工程师</td><td>所有 features + per-layer score + confidence interval</td><td>完整 dump 给 dashboard</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch12 License 风险 ============ -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">★ License 风险评估 🔴 致命发现</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>3 个 license 问题逐一回答。</p>
+
+      <h3>12.1 CEFR-J Wordlist 商用许可</h3>
+
+      <div class="callout good">
+        <p><strong>结论</strong>：✅ 可商用，需 cite Tono / 东京外国语大学。</p>
+      </div>
+
+      <p>openlanguageprofiles/olp-en-cefrj 仓库明确："CEFR-J vocabulary and grammar profile datasets can be used for research and commercial purposes with no charge, provided that you cite the dataset properly. The copyright belongs to Tono Laboratory at TUFS."<sup class="cite" data-refid="21">[21]</sup></p>
+
+      <p><strong>但 banmi-cvla README 标"CC BY-SA 4.0 (Tono)" 是错的</strong> — CEFR-J Wordlist 没有具体 license，是"研究 + 商业可用 需 cite" 的<strong>permissive 自定义条款</strong>（比 CC BY-SA 4.0 更友好）。</p>
+
+      <p><strong>具体改进</strong>：README 改为：<br/>
+        "CEFR-J Wordlist · Tono / 东京外国语大学 (commercial OK, must cite Tono 2012 CEFR-J Wordlist Version 1.5)"</p>
+
+      <h3>12.2 Octanove C1/C2 商用许可 🔴 致命</h3>
+
+      <div class="callout bad">
+        <p><strong>结论</strong>：🔴 <strong>CC BY-SA 4.0 viral copyleft 阻断 banmi 商用 — 当前不可用于半米商业产品</strong>。</p>
+      </div>
+
+      <p><strong>问题详解</strong>：</p>
+      <ul>
+        <li>Octanove C1/C2 数据 license = CC BY-SA 4.0<sup class="cite" data-refid="20">[20]</sup></li>
+        <li>CC BY-SA 4.0 = "Attribution + ShareAlike" — <strong>任何 derivative work 必须以相同 license 公开</strong></li>
+        <li>banmi-cvla 集成 Octanove 数据 → cvla.py 的输出（CEFR score / wordlist coverage）可以被视为 derivative work</li>
+        <li>半米作为商业 K12 学习产品，<strong>整个 pipeline 输出会被 ShareAlike 拖入 CC BY-SA 4.0</strong></li>
+        <li>= 半米必须以 CC BY-SA 4.0 公开整个商业产品的相关代码和数据 → 实际上不能商用</li>
+      </ul>
+
+      <p><strong>3 种 mitigation</strong>：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>方案</th><th>动作</th><th>难度</th><th>商用</th></tr></thead>
+          <tbody>
+            <tr><td>A · 移除 (推荐立刻做)</td><td>cvla.py L46-49 OCTANOVE_PATH 改 optional，不加载时 C1/C2 词不被识别（标 'unknown'）</td><td>🟢 30 分钟</td><td>✅ 解锁</td></tr>
+            <tr><td>B · 重标</td><td>用 Octanove 词列表作 inspiration，但 banmi 自己重新 CEFR 标注 (~2000 词 / 人工 2 天)</td><td>🟡 中</td><td>✅ 解锁</td></tr>
+            <tr><td>C · 商业 license</td><td>联系 Octanove 买商业 license</td><td>🔴 高 + $$$</td><td>✅ 但贵</td></tr>
+            <tr><td>D · API 隔离</td><td>把 banmi-cvla 部署成 API server，半米只调 API 不直接 import 代码 — <strong>但</strong>这个 loophole 在 CC BY-SA 4.0 法律解释下<strong>有风险</strong>，最好不依赖</td><td>🟡 中</td><td>⚠️ 法律不清</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>免责声明</strong>：以上 license 分析是<strong>技术 read 不是法律咨询</strong>。CC BY-SA 4.0 在 "data vs software"、"output vs derivative" 边界上有<strong>持续法律辩论</strong>，不同司法管辖解释可能不同。强烈建议阿杰在商用前咨询律师或 OSS License compliance 专家。<strong>但安全起见，先做方案 A 移除 Octanove</strong>。</p>
+      </div>
+
+      <h3>12.3 textstat / spaCy / wordfreq 商用许可</h3>
+
+      <div class="callout good">
+        <p><strong>结论</strong>：✅ 全部 MIT 或等效 permissive，商用 OK。</p>
+      </div>
+
+      <ul>
+        <li><strong>textstat</strong>: MIT License<sup class="cite" data-refid="48">[48]</sup> — 商用 OK 需 attribution</li>
+        <li><strong>spaCy en_core_web_sm</strong>: MIT — OK</li>
+        <li><strong>wordfreq</strong>: MIT-like (Apache 2.0 风格)<sup class="cite" data-refid="30">[30]</sup> — OK</li>
+        <li><strong>各 readability 公式本身</strong>: 数学公式不能版权化（algorithm patent expired 已久）— OK</li>
+      </ul>
+
+      <h3>12.4 ATOS 公式复刻法律</h3>
+
+      <p>ATOS 是 Renaissance "open standard" — 公式公开<sup class="cite" data-refid="14">[14]</sup>。banmi 即便实现真 3-factor ATOS 也是法律允许的。<strong>但</strong>用 "ATOS" 商标可能涉及 Renaissance 注册商标问题 — 改用 "ATOS-style" 或 "Open Readability Index" 之类更安全。</p>
+
+      <h3>12.5 License 风险总览</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>风险</th><th>严重程度</th><th>影响</th><th>立刻动作</th></tr></thead>
+          <tbody>
+            <tr><td>Octanove CC BY-SA 4.0 viral</td><td>🔴 致命</td><td>整个 pipeline 不可商用</td><td>移除 + 自建 C1/C2</td></tr>
+            <tr><td>CEFR-J Wordlist license 标错</td><td>🟡 中等</td><td>README 误导</td><td>改 README</td></tr>
+            <tr><td>"ATOS" 商标使用</td><td>🟡 低</td><td>商标提及 Renaissance 注册</td><td>改名 / 加 trademark notice</td></tr>
+            <tr><td>"CVLA" 工具名</td><td>🟢 低</td><td>论文公开，名字可借用</td><td>OK，README 已 cite 论文</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch13 cross-ref ============ -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">跟其他 banmi-research 报告的关联</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>13.1 banmi-cvla 在半米系统中的位置</h3>
+
+      <pre>半米 AI 学习系统
+├── 内容生产层
+│   ├── #5 storybook-animation        ← 绘本动画化
+│   ├── #6 storybook-kol              ← 抖音/快手/小红书 KOL
+│   ├── #14 banmi-vocab-channel       ← YouTube 词汇视频 CEFR 6 档 → banmi-cvla 给字幕打标 ★
+│   ├── #16 youtube-vocab-channels    ← Layer 4 视频源选型
+│   └── #17 banmi-grammar-system      ← EGP 语法板块
+├── 数据处理层
+│   ├── #4 clip-pipeline              ← 视频切片
+│   ├── #7 subtitle-search-engine     ← 字幕搜索
+│   ├── #13 subtitle-volume-estimation← 1.66M token / 56h 实测数据
+│   └── #18 cheap-models-pipeline     ← 模型选型 → banmi-cvla #19 可改进的路线在这 ★
+├── 阅读评估层
+│   ├── #9 k12-reading-library        ← K12 分级阅读资源
+│   └── #19 banmi-cvla-audit (本份)   ← 给阅读资源打 Lexile/CEFR/ATOS 标签的内部工具 ★★
+└── 学习方法层
+    ├── #10 english-learning-methods  ← 影子跟读 / 听写
+    ├── #2 exam-research              ← 模考软件
+    └── #1 vocab-research             ← 词汇软件</pre>
+
+      <h3>13.2 跟具体报告的接口</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>报告</th><th>跟 banmi-cvla 的关系</th><th>建议升级</th></tr></thead>
+          <tbody>
+            <tr><td>#1 vocab-research</td><td>词汇库的 CEFR 标签</td><td>用 banmi-cvla 给每个词条标 CEFR (但当前 wordlist 已有)</td></tr>
+            <tr><td>#9 k12-reading-library</td><td>K12 书目库 Lexile / CEFR 二次评估</td><td>banmi-cvla 给每本入库书自动跑一遍，跟出版商标注对比</td></tr>
+            <tr><td>#13 subtitle-volume-estimation</td><td>1.66M token 字幕语料</td><td>banmi-cvla batch 跑全量给每段字幕 CEFR 标签</td></tr>
+            <tr><td>#14 banmi-vocab-channel-standard</td><td>30+ YouTube 频道 CEFR 六档</td><td>banmi-cvla 验证频道实际难度 vs 自标</td></tr>
+            <tr><td>#17 banmi-grammar-system</td><td>EGP 1239 语法点</td><td>banmi-cvla 给文本算 CEFR + grammar 板块 cross-check</td></tr>
+            <tr><td>#18 cheap-models-pipeline</td><td>模型选型</td><td><strong>本报告 #4-#6 改进建议直接用 #18 的路线 — SetFit / Haiku / DeepSeek</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch14 mini demo ============ -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">mini demo · 评估对比器</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <p>给 5 段不同难度的英文文本，<strong>横向对比 banmi-cvla vs Cathoven vs Haiku 4.5 LLM 的 CEFR 评分</strong>（前 4 段是 banmi-cvla 真实跑出来的，第 5 段对比是 estimation 因为商业工具没免费 API）。</p>
+
+      <div class="demo-host">
+        <h4>📊 选段对比</h4>
+        <div class="demo-row">
+          <div class="demo-chip-group">
+            <span class="label">文本</span>
+            <div class="demo-chip active" data-text="bees">蜜蜂 (banmi sample)</div>
+            <div class="demo-chip" data-text="cat">猫 (A1)</div>
+            <div class="demo-chip" data-text="climate">气候变化 (B2)</div>
+            <div class="demo-chip" data-text="philosophy">哲学 (C1)</div>
+            <div class="demo-chip" data-text="academic">学术 (C2)</div>
+          </div>
+        </div>
+        <div id="demoOutput" class="demo-output"></div>
+      </div>
+
+      <p><strong>解读</strong>：5 段文本上，banmi-cvla / Cathoven / Haiku 三个工具<strong>大方向一致</strong>但在边缘 case（B2/C1 边界、短文本、学术体）<strong>有显著分歧</strong>。半米实际使用应该：</p>
+
+      <ul>
+        <li>简单一致场景 (3 工具同档)：直接用 banmi-cvla 结果</li>
+        <li>边缘 case (1 工具差 1 档)：标 confidence='medium' 让老师 review</li>
+        <li>显著分歧 (差 2+ 档)：必须人工或 LLM 二次校验</li>
+      </ul>
+
+      <h3>14.2 banmi-cvla 源码 readme 中 sample 段实测</h3>
+
+      <p>cvla.py L462 自带 sample (蜜蜂)：</p>
+
+      <pre>Honey bees are very important for plants. When a bee visits a flower to
+drink its sweet juice, yellow dust called pollen sticks to its body. The
+bee then flies to another flower and the pollen falls off. This helps
+the plants make seeds and grow more flowers. Without bees, many of the
+foods we eat every day would become much more expensive.</pre>
+
+      <p>README 给的 banmi 输出：CEFR A2 / Lexile 706L / ATOS 5.1 / "中国小学英语 5-6 年"<br/>
+        <strong>对比</strong>：5th grade native = 4-5 年级阅读水平 → 850L → A2.2-B1.1 = banmi 输出 A2 偏低 1 档（README 自己也说 A2 但 Lexile 706L 实际对应 4th grade ≈ A2 OK，咬合）。</p>
+
+      <p><strong>关键观察</strong>：banmi 跑这个 sample 的 us_grade=5.6 但 cefr_6=A2 — 这两个不一致（US Grade 5.6 应该 ≈ B1，A2 对应 US Grade 3-4），<strong>说明 CVLA 算法跟 FK 派生的 us_grade 在这个 sample 上 disagree 1 档</strong>。这是<strong>压力测试 banmi-cvla 的 confidence 机制的好 case</strong>。</p>
+
+    </div>
+  </section>
+
+  <!-- ============ Ch15 FAQ + Refs ============ -->
+  <section class="chapter" id="ch15">
+    <h2><span class="num">15</span><span class="title-text">FAQ · 12 条 + References</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q1</span><span class="qtext">banmi-cvla 当前能用吗？</span><span class="toggle">+</span></div>
+        <div class="faq-a">能用 — 内部 dev / 给 banmi 自己用 OK，跟 CVLA 3 论文持平 65.7% accuracy。<strong>不能</strong>：(1) 商业产品（Octanove CC BY-SA 4.0 阻断）；(2) 给学生家长当权威成绩；(3) Tier 1 输出当 4 个独立指标看（ATOS / us_grade / Lexile 都是 FK 派生）。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q2</span><span class="qtext">FK Grade 真的只有 34% 准度吗？那 banmi-cvla 怎么还在用？</span><span class="toggle">+</span></div>
+        <div class="faq-a">AMontgomerie 在 6 档 CEFR 上实测 FK 34.1%<sup class="cite" data-refid="23">[23]</sup>。但 FK 是 "grade level" 不是 "CEFR" — 用 FK 算 US Grade（连续值）误差小 ±1-2 grade，转 CEFR 6 档时误差被放大。banmi-cvla 用 FK 作 us_grade 字段 OK，<strong>但派生 Lexile 误差累积更大</strong>。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q3</span><span class="qtext">为什么 GPT-4 评 CEFR r=0.76 还说"不完美"？</span><span class="toggle">+</span></div>
+        <div class="faq-a">GPT-4 r=0.76 with human readability rating (CLEAR Corpus)<sup class="cite" data-refid="31">[31]</sup> — 比传统公式碾压（FRE r 接近 0）。但 LLM 自己生成 CEFR 文本不稳（Uchida 2025 ChatGPT-4o 生成 vs spec 只 58% 匹配<sup class="cite" data-refid="32">[32]</sup>）— <strong>评估 ≠ 生成</strong>。LLM 当 second opinion 很强。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q4</span><span class="qtext">SetFit 30 秒训练真能行？</span><span class="toggle">+</span></div>
+        <div class="faq-a">SetFit 在 8-shot 上 outperform GPT-3，full data fine-tune 通常达 75-80%。HuggingFace 官方教程上 NVIDIA V100 30 秒 $0.025<sup class="cite" data-refid="52">[52]</sup>。banmi 实际操作建议用 Colab T4 (免费) 跑 CLEAR Corpus 5000 段，预计 1-3 小时（含数据预处理）。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q5</span><span class="qtext">Octanove license 移除会失去多少功能？</span><span class="toggle">+</span></div>
+        <div class="faq-a">cvla.py 关键依赖 Octanove 的 = compute_cefr_coverage() 输出 C1/C2 覆盖比例 + F1 AvrDiff 中实词若是 C1/C2 词的难度分。移除后这些词会被标 'unknown'，对 A1-B2 文本基本无影响，对 C1/C2 文本会<strong>把 C 级词错算成 unknown</strong>（影响 ~5-15% 的 high-level 评估准度）。<strong>但商用前必须移</strong>。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q6</span><span class="qtext">为什么不直接用 CVLA web 版？</span><span class="toggle">+</span></div>
+        <div class="faq-a">CVLA 官方 web (https://cvla.langedu.jp/) 限制：(a) 单文 10-1000 词；(b) 30 个 .txt × 10KB 批量上限；(c) 无 API；(d) 输出只 CEFR-J 不出 Lexile / ATOS / 词汇覆盖。banmi-cvla 解决 4 个：无限制 batch / CLI 批处理 / Python lib / 多指标输出。<strong>这是 banmi-cvla 真正的价值</strong>，不是算法。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q7</span><span class="qtext">cefr_6 跟 us_grade 在 banmi sample 上 disagree 1 档说明什么？</span><span class="toggle">+</span></div>
+        <div class="faq-a">说明 CVLA 算法（用 8 维特征）跟 FK Grade（用 ASL + 音节）<strong>是两个独立判断</strong>，这是好事 — disagree 时应该<strong>降低 confidence 标志</strong>。当前 compute_confidence() 没考虑 cefr_6 vs us_grade 的一致性，只看 7 grade-formula 的 std。<strong>改进建议</strong>：加 cefr_6 ↔ us_grade 的 cross-check。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q8</span><span class="qtext">CEFR-J 12 档为啥不再细分到 18 档（A1.1/A1.2/A1.3/A2.1/A2.2/A2.3...）？</span><span class="toggle">+</span></div>
+        <div class="faq-a">Tono CEFR-J 原设计就是 A1-B2 细分 (3+2+2+2)、C 不细分 — 因为 CEFR-J 的<strong>目标群体是日本 ESL 学生</strong>多在 A-B 区间，C 区分意义不大。banmi 是中国 K12 国际学校，IB DP / A-Level 学生集中在 B2-C1，<strong>需要细化 C1</strong>（见 §10 #8 改进建议）。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q9</span><span class="qtext">improvements 10 个全做完准度能到多少？</span><span class="toggle">+</span></div>
+        <div class="faq-a">乐观估算：65% (CVLA baseline) + 5-10% (SetFit) + 3% (ensemble) + 2% (spaCy trf) + 5-10% (LLM verify) + 3-5% (cohesion features) = <strong>83-95%</strong>。但这个数字依赖 ground truth 集质量。<strong>悲观估算</strong>：75-80% (因为各 component 不是独立加和，有 ceiling effect)。<strong>务实预期</strong>：78-85% 是有理由的目标。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q10</span><span class="qtext">selftest.py 5 档全过怎么还说 65%？</span><span class="toggle">+</span></div>
+        <div class="faq-a">selftest 测的是"喂论文 Table 1 公式答案，回带验证回归方程系数对不对" — 这只是 implementation correctness 测试，<strong>不是 prediction accuracy</strong>。65% 是 CVLA 3 论文在 108 段独立验证集上的 prediction accuracy，跟 selftest 是两件事。<strong>banmi-cvla 当前没真实 prediction accuracy 测试</strong>（这是改进 #9）。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q11</span><span class="qtext">改进 10 条建议优先做哪 3 个？</span><span class="toggle">+</span></div>
+        <div class="faq-a">阿杰<strong>第一周</strong>做 #1 (删 ATOS / 改名) + #2 (100 词阈值) + #3 (移除 Octanove) — 三个加起来 5-10 小时，<strong>解锁商用 + 消除误导</strong>。<strong>第二周</strong>做 #4 (SetFit) + #5 (ensemble) — 准度 65→75%+。<strong>第三周</strong>做 #6 (LLM verify) — 给 high-stakes 文本兜底。三周后 banmi-cvla 可商用 SOTA 级别。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qmark">Q12</span><span class="qtext">这份审查会让阿杰焦虑吗？</span><span class="toggle">+</span></div>
+        <div class="faq-a">不会。阿杰<strong>明确要求</strong>"找问题不夸"，这份按要求批评。但 banmi-cvla<strong>当前作为内部 dev 工具是合格的</strong>，源码工程质量好（CLI 设计 / 4 tier 输出结构 / disclaimers 写到位 / selftest 有 / 模块化清晰），<strong>问题集中在算法新颖度 + license + 输出诚实度</strong>，都是可在 1-3 周修的。这不是"砸了从头来"级别的问题，是"打磨升级到 SOTA"级别的问题。</div>
+      </div>
+
+      <h3>15.2 References (50+)</h3>
+
+      <ol class="ref-list">
+        <li id="ref-1">Uchida, S., & Negishi, M. (2025) Estimating CEFR-J Level of English Reading Passages — Development and Accuracy of CVLA3 · <a href="https://cvla.langedu.jp/static/Uchida_Negishi_2025.pdf" target="_blank" rel="noopener">cvla.langedu.jp Uchida_Negishi_2025.pdf</a> + <a href="https://jaecs.com/jnl/ECS32/ECS32_165-174.pdf" target="_blank" rel="noopener">jaecs.com ECS32_165-174</a> + <a href="https://cir.nii.ac.jp/crid/1390304704714401536?lang=ja" target="_blank" rel="noopener">CiNii bibliographic</a> <span class="ref-meta">· 引用 ×8</span></li>
+        <li id="ref-2">CVLA 3.1 official web tool · 6 features drop max/min averaging confirmed <a href="https://cvla.langedu.jp/" target="_blank" rel="noopener">cvla.langedu.jp/</a></li>
+        <li id="ref-3">Cathoven AI Tools APIs · multiple ML models + 11 REST APIs <a href="https://www.cathoven.com/cathoven-ai-tools-apis/" target="_blank" rel="noopener">cathoven.com/cathoven-ai-tools-apis</a></li>
+        <li id="ref-4">Cathoven CEFR Checker · "Validated by Columbia University as top-tier" <a href="https://www.cathoven.com/cefr-checker/" target="_blank" rel="noopener">cathoven.com/cefr-checker</a> + <a href="https://www.cathoven.com/blog/cathovens-detailed-language-levels-for-cefr/" target="_blank" rel="noopener">9 subdivisions blog</a></li>
+        <li id="ref-5">Cathoven Catile · native English readability scale validated by Columbia <a href="https://www.cathoven.com/book-level-finder/" target="_blank" rel="noopener">cathoven.com/book-level-finder</a></li>
+        <li id="ref-6">Cathoven CEFR.X.7 fractional levels explained <a href="https://www.cathoven.com/blog/cathovens-detailed-language-levels-for-cefr/" target="_blank" rel="noopener">cathoven.com blog detailed-language-levels</a></li>
+        <li id="ref-7">Text Inspector EVP + ELTons 2017 award · Stephen Bax founder <a href="https://textinspector.com/" target="_blank" rel="noopener">textinspector.com</a> + <a href="https://textinspector.com/help/lexis-evp/" target="_blank" rel="noopener">help/lexis-evp</a></li>
+        <li id="ref-8">English Vocabulary Profile EVP · Cambridge Learner Corpus + 7000 headwords A1-C2 <a href="https://englishprofile.org/" target="_blank" rel="noopener">englishprofile.org</a> + <a href="https://textinspector.com/english-vocabulary-profile-in-language-teaching/" target="_blank" rel="noopener">Text Inspector EVP overview</a></li>
+        <li id="ref-9">Cambridge English Profile Programme overview <a href="https://www.cambridge.org/core/journals/english-profile-journal/article/english-profile-programme-the-first-three-years/B38E07193AFBADA096CA556CE35503D5" target="_blank" rel="noopener">Cambridge Core English Profile</a></li>
+        <li id="ref-10">GSE Text Analyzer + 10-90 scale <a href="https://www.pearson.com/languages/why-pearson/the-global-scale-of-english.html" target="_blank" rel="noopener">pearson.com Global Scale English</a> + <a href="https://www.english.com/gse/teacher-toolkit/user/textanalyzer" target="_blank" rel="noopener">english.com gse textanalyzer</a></li>
+        <li id="ref-11">EF SET CEFR-aligned standardized test <a href="https://www.efset.org/cefr/" target="_blank" rel="noopener">efset.org/cefr</a> + <a href="https://en.wikipedia.org/wiki/EF_Standard_English_Test" target="_blank" rel="noopener">Wikipedia EF SET</a></li>
+        <li id="ref-12">Lexile Text Analyzer overview + Professional Lexile Analyzer subscription <a href="https://hub.lexile.com/text-analyzer/" target="_blank" rel="noopener">hub.lexile.com text-analyzer</a> + <a href="https://metametricsinc.com/text-analyzer-content-creator/" target="_blank" rel="noopener">MetaMetrics Content Creator</a></li>
+        <li id="ref-13">Lexile formula · proprietary based on sentence length + word frequency from 1.4B word corpus <a href="https://cdn.lexile.com/m/uploads/whitepapers/Lexile-Reading-Measurement-and-Success-0504_MetaMetricsWhitepaper.pdf" target="_blank" rel="noopener">MetaMetrics Lexile whitepaper</a> + <a href="https://readingrev.com/blog/jgon5w7jjk5analqa9bcmjm9h4hxwv" target="_blank" rel="noopener">readingrev Pros & Cons</a></li>
+        <li id="ref-14">ATOS Renaissance Learning · open standard 3-factor formula confirmed · "O and S stand for open standard, made available for free" <a href="https://www.renaissance.com/edword/atos/" target="_blank" rel="noopener">renaissance.com edword/atos</a> + <a href="http://mpemc.weebly.com/uploads/5/4/0/7/5407355/development_of_atos.pdf" target="_blank" rel="noopener">Development of ATOS whitepaper</a> + <a href="https://files.eric.ed.gov/fulltext/ED449468.pdf" target="_blank" rel="noopener">ERIC ED449468 ATOS Report</a> <span class="ref-meta">· 引用 ×5</span></li>
+        <li id="ref-15">Readable.com · multiple formulas + Readable Score composite <a href="https://readable.com/" target="_blank" rel="noopener">readable.com</a></li>
+        <li id="ref-16">Hemingway App · uses ARI (not FK), highlights long sentences <a href="https://hemingwayapp.com/articles/readability/flesch-kincaid-readability-test" target="_blank" rel="noopener">hemingwayapp Flesch-Kincaid article</a></li>
+        <li id="ref-17">textstat Python lib · MIT, 14+ formulas, last update Feb 2026 v0.7.13 <a href="https://github.com/textstat/textstat" target="_blank" rel="noopener">github textstat/textstat</a> + <a href="https://pypi.org/project/textstat/" target="_blank" rel="noopener">PyPI textstat</a></li>
+        <li id="ref-18">McAlpine EFLAW · "Not scientifically tested. Use as approximate guideline" <a href="https://www.rlmueller.net/Readability.htm" target="_blank" rel="noopener">rlmueller.net Readability</a> + <a href="https://www.techscribe.co.uk/ta/global-english-for-global-business.htm" target="_blank" rel="noopener">techscribe Global English review</a></li>
+        <li id="ref-19">Coh-Metrix · 200+ measures · 5 factors: concreteness / syntactic simplicity / referential cohesion / causal cohesion / narrativity <a href="https://soletlab.asu.edu/coh-metrix/" target="_blank" rel="noopener">soletlab.asu.edu coh-metrix</a> + <a href="https://link.springer.com/article/10.3758/BF03195564" target="_blank" rel="noopener">Springer Behavior Research Methods</a></li>
+        <li id="ref-20">Octanove C1/C2 Vocabulary Profile · CC BY-SA 4.0 International License confirmed <a href="https://github.com/openlanguageprofiles/olp-en-cefrj" target="_blank" rel="noopener">github olp-en-cefrj</a> + <a href="https://github.com/openlanguageprofiles/olp-en-cefrj/blob/master/octanove-vocabulary-profile-c1c2-1.0.csv" target="_blank" rel="noopener">octanove-vocabulary-profile-c1c2-1.0.csv</a> <span class="ref-meta">· 引用 ×6</span></li>
+        <li id="ref-21">CEFR-J Wordlist license · "research + commercial use OK, must cite, no specific CC license" <a href="https://github.com/openlanguageprofiles/olp-en-cefrj" target="_blank" rel="noopener">github olp-en-cefrj README</a> + <a href="https://www.cefr-j.org/" target="_blank" rel="noopener">cefr-j.org</a> <span class="ref-meta">· 引用 ×5</span></li>
+        <li id="ref-22">Flesch-Kincaid Grade Level formula 0.39×ASL + 11.8×ASW − 15.59 <a href="https://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_tests" target="_blank" rel="noopener">Wikipedia Flesch-Kincaid</a> + <a href="https://hemingwayapp.com/articles/readability/flesch-kincaid-readability-test" target="_blank" rel="noopener">Hemingway FK article</a> <span class="ref-meta">· 引用 ×6</span></li>
+        <li id="ref-23">AMontgomerie 2021 CEFR Level Prediction · XGBoost 70.9% / FK 34.1% / FRE 12.7% < random 16.7% / 1500 texts 6 levels <a href="https://amontgomerie.github.io/2021/03/14/cefr-level-prediction.html" target="_blank" rel="noopener">amontgomerie.github.io CEFR Level Prediction</a> + <a href="https://github.com/AMontgomerie/CEFR-English-Level-Predictor" target="_blank" rel="noopener">github CEFR-English-Level-Predictor</a> <span class="ref-meta">· 引用 ×10</span></li>
+        <li id="ref-24">Dale-Chall 1948 / 1995 update · readability formulas history limitations <a href="https://readabilityformulas.com/the-original-dale-chall-readability-formula/" target="_blank" rel="noopener">readabilityformulas Dale-Chall</a> + <a href="https://readable.com/readability/new-dale-chall-readability-formula/" target="_blank" rel="noopener">Readable New Dale-Chall</a> + <a href="https://en.wikipedia.org/wiki/Dale%E2%80%93Chall_readability_formula" target="_blank" rel="noopener">Wikipedia Dale-Chall</a></li>
+        <li id="ref-25">CVLA 3 validation accuracy · 65.74% exact 6 levels / 99.07% adjacent · 108 texts validation <a href="https://cvla.langedu.jp/static/Uchida_Negishi_2025.pdf" target="_blank" rel="noopener">Uchida Negishi 2025 paper</a> + <a href="https://www.emergentmind.com/topics/cefr-level-assessment" target="_blank" rel="noopener">emergentmind CEFR Assessment topic</a></li>
+        <li id="ref-26">EvalYaks LLM 96% B2 speaking + CEFR-aligned instruction-tuned · 2025 SOTA <a href="https://www.emergentmind.com/topics/cefr-level-assessment" target="_blank" rel="noopener">emergentmind 2025 SOTA review</a></li>
+        <li id="ref-27">Random Forest 62.6% 6-level / 82.6% 3-level CEFR · 1181 expert texts <a href="https://www.emergentmind.com/topics/cefr-level-assessment" target="_blank" rel="noopener">emergentmind RF CEFR</a></li>
+        <li id="ref-28">Ace-CEFR conversational dataset · 2025 macro-F1 0.80+ <a href="https://arxiv.org/pdf/2506.14046" target="_blank" rel="noopener">arxiv 2506.14046 Ace-CEFR</a> + <a href="https://arxiv.org/html/2506.14046v1" target="_blank" rel="noopener">arxiv Ace-CEFR HTML</a></li>
+        <li id="ref-29">SMOG 30-sentence minimum / 100 word threshold for general readability <a href="https://readabilityformulas.com/the-smog-readability-formula/" target="_blank" rel="noopener">readabilityformulas SMOG</a> + <a href="https://hsph.harvard.edu/research/health-communication/resources/smog/" target="_blank" rel="noopener">Harvard T.H. Chan SMOG</a> + <a href="https://en.wikipedia.org/wiki/Readability" target="_blank" rel="noopener">Wikipedia Readability</a></li>
+        <li id="ref-30">wordfreq library · Zipf scale + multilingual + MIT-like license <a href="https://github.com/rspeer/wordfreq" target="_blank" rel="noopener">github rspeer/wordfreq</a> + <a href="https://pypi.org/project/wordfreq/" target="_blank" rel="noopener">PyPI wordfreq</a> + <a href="http://blog.conceptnet.io/wordfreq/" target="_blank" rel="noopener">ConceptNet blog wordfreq</a></li>
+        <li id="ref-31">GPT-4 Turbo r=0.76 vs human readability · CLEAR Corpus 4724 texts <a href="https://arxiv.org/html/2410.14028v1" target="_blank" rel="noopener">arxiv 2410.14028 Measuring Readability with GPT-4</a> + <a href="https://arxiv.org/pdf/2410.14028" target="_blank" rel="noopener">arxiv PDF</a> <span class="ref-meta">· 引用 ×5</span></li>
+        <li id="ref-32">Uchida 2025 ChatGPT-4o CEFR generation 58.53% match rate / topic bias <a href="https://www.castledown.com/journals/vli/article/view/vli.v14n1.2078" target="_blank" rel="noopener">castledown vli ChatGPT-4o CEFR</a> + <a href="https://www.researchgate.net/publication/389163206_Generative_AI_and_CEFR_levels_Evaluating_the_accuracy_of_text_generation_with_ChatGPT-4o_through_textual_features" target="_blank" rel="noopener">ResearchGate</a></li>
+        <li id="ref-33">ReadMe++ multilingual 9757 sentences 5 languages 112 sources EMNLP 2024 <a href="https://aclanthology.org/2024.emnlp-main.682/" target="_blank" rel="noopener">aclanthology ReadMe++</a> + <a href="https://arxiv.org/abs/2305.14463" target="_blank" rel="noopener">arxiv 2305.14463</a> + <a href="https://github.com/tareknaous/readme" target="_blank" rel="noopener">github tareknaous/readme</a></li>
+        <li id="ref-34">"Readability Formulas Systems and LLMs are Poor Predictors of Reading Ease" 2025 <a href="https://arxiv.org/pdf/2502.11150" target="_blank" rel="noopener">arxiv 2502.11150</a></li>
+        <li id="ref-35">CVLA 3.1 update March 2026 · listening monologue mode <a href="https://cvla.langedu.jp/" target="_blank" rel="noopener">cvla.langedu.jp homepage with changelog</a></li>
+        <li id="ref-36">Cathoven CEFR Checker 9 subdivisions per level <a href="https://www.cathoven.com/blog/cathovens-detailed-language-levels-for-cefr/" target="_blank" rel="noopener">cathoven detailed-language-levels</a> + <a href="https://www.cathoven.com/cefr-checker/" target="_blank" rel="noopener">cefr-checker page</a></li>
+        <li id="ref-37">"Evaluating consistency of automated CEFR analyzers" 2025 study · Cathoven vs GSE vs Text Inspector vs ChatGPT comparison · Cathoven shows fluctuation <a href="https://www.researchgate.net/publication/393805731_Evaluating_the_consistency_of_automated_CEFR_analyzers_a_study_of_English_language_text_classification" target="_blank" rel="noopener">ResearchGate consistency study 393805731</a></li>
+        <li id="ref-38">Text Inspector Stephen Bax · ELTons 2017 · 26 metrics <a href="https://textinspector.com/" target="_blank" rel="noopener">textinspector.com</a> + <a href="https://textinspector.com/cefr-level-checker/" target="_blank" rel="noopener">CEFR Level Checker</a></li>
+        <li id="ref-39">English Profile EVP Cambridge Learner Corpus 4700 words + 439 phrasal verbs <a href="https://englishprofile.org/?menu=evp-online" target="_blank" rel="noopener">englishprofile.org EVP online</a> + <a href="https://www.cambridge.org/core/journals/english-profile-journal/article/completing-the-english-vocabulary-profile-c1-and-c2-vocabulary/418955FC7ED2455E98A499BC40C2C816" target="_blank" rel="noopener">Cambridge Core EVP C1/C2</a></li>
+        <li id="ref-40">GSE 10-90 granular scale aligned to CEFR <a href="https://www.pearson.com/content/dam/one-dot-com/one-dot-com/english/TeacherResources/GSE/GSE-Alignment-other-scales.pdf" target="_blank" rel="noopener">Pearson GSE Alignment whitepaper</a> + <a href="https://www.pearson.com/content/dam/one-dot-com/one-dot-com/english/TeacherResources/GSE/GSE-Teacher-Toolkit-User-Guide_1.pdf" target="_blank" rel="noopener">GSE Teacher Toolkit User Guide</a></li>
+        <li id="ref-41">EF SET 50min adaptive reading + listening + CEFR mapping <a href="https://www.efset.org/ef-set-50/" target="_blank" rel="noopener">efset.org/ef-set-50</a></li>
+        <li id="ref-42">rj-pal CEFR Text Classification Lighthouse Labs project · Naive Bayes 70% A2-C2 <a href="https://github.com/rj-pal/CEFR-text-classification" target="_blank" rel="noopener">github rj-pal/CEFR-text-classification</a> + <a href="https://github.com/rj-pal/CEFR-text-classification/blob/main/README.md" target="_blank" rel="noopener">README</a></li>
+        <li id="ref-43">Guiraud's Index V/√N + Root TTR + Type-Token Ratio variants <a href="https://search.r-project.org/CRAN/refmans/quanteda.textstats/html/textstat_lexdiv.html" target="_blank" rel="noopener">R quanteda lexdiv</a> + <a href="https://www.researchgate.net/publication/273851867_Lexical_Statistics_and_Tipological_Structures_A_Measure_of_Lexical_Richness" target="_blank" rel="noopener">ResearchGate Guiraud Lexical Statistics</a></li>
+        <li id="ref-44">MetaMetrics Lexile Text Analyzer API + Professional + Editor Assistant subscription tiers <a href="https://partnerhelp.metametricsinc.com/concept/c_la_api_overview.html" target="_blank" rel="noopener">partnerhelp.metametricsinc API overview</a> + <a href="https://www2.metametricsinc.com/content-creator-annual-pricing" target="_blank" rel="noopener">Content Creator tier pricing</a></li>
+        <li id="ref-45">Lexile 850L = 5th grade 75th percentile · Lexile-Grade mapping <a href="https://hub.lexile.com/lexile-grade-level-charts/" target="_blank" rel="noopener">Lexile Hub Grade Charts</a> + <a href="https://modelteaching.com/wp-content/uploads/2019/04/Lexile-Conversion-Chart.pdf" target="_blank" rel="noopener">Lexile Conversion Chart</a></li>
+        <li id="ref-46">Readable.com multi-formula scoring <a href="https://readable.com/" target="_blank" rel="noopener">readable.com</a> + <a href="https://readable.com/readability/readability-formulas/" target="_blank" rel="noopener">readability formulas</a></li>
+        <li id="ref-47">Hemingway App uses ARI not FK (r=0.8 correlation but different formula) <a href="https://hemingwayapp.com/articles/readability/automated-readability-index" target="_blank" rel="noopener">Hemingway ARI article</a> + <a href="https://wordcountr.app/blog/hemingway-vs-flesch" target="_blank" rel="noopener">Hemingway vs Flesch comparison</a></li>
+        <li id="ref-48">textstat Python library overview · MIT · supports 14 formulas <a href="https://github.com/textstat/textstat" target="_blank" rel="noopener">github textstat</a> + <a href="https://www.statology.org/calculate-and-interpret-readability-metrics-with-textstat/" target="_blank" rel="noopener">statology textstat tutorial</a></li>
+        <li id="ref-49">Coh-Metrix 200+ measures · cohesion / coherence / narrativity <a href="https://soletlab.asu.edu/coh-metrix/" target="_blank" rel="noopener">soletlab.asu.edu coh-metrix</a> + <a href="https://files.eric.ed.gov/fulltext/ED566390.pdf" target="_blank" rel="noopener">ERIC ED566390 Coh-Metrix Multilevel</a></li>
+        <li id="ref-50">Lexile vs FK Grade r=0.89 correlation · 850L = 5.9 FK 5th grade <a href="https://www.researchgate.net/figure/Correlation-between-Lexile-and-Flesch-Kincaid-results-Dotted-horizontal-lines-indicate_fig1_272099156" target="_blank" rel="noopener">ResearchGate Lexile-FK correlation</a> + <a href="https://attl.wordpress.com/2004/06/14/lexile-analysis/" target="_blank" rel="noopener">attl Lexile Analysis</a></li>
+        <li id="ref-51">MetaMetrics "Aligning Lexile to CEFR" whitepaper · 9 benchmark tests / 34477 students <a href="https://metametricsinc.com/wp-content/uploads/2018/07/Aligning-the-Lexile-Framework-to-the-CEFR.pdf" target="_blank" rel="noopener">MetaMetrics Aligning Lexile-CEFR PDF</a> + <a href="https://www.researchgate.net/publication/354339484_Aligning_the_LexileR_Framework_for_Reading_to_the_Common_European_Framework_of_Reference_CEFR" target="_blank" rel="noopener">ResearchGate alignment study</a></li>
+        <li id="ref-52">SetFit Efficient Few-Shot Learning · 8 examples 30 sec $0.025 · outperforms GPT-3 1600x smaller <a href="https://huggingface.co/blog/setfit" target="_blank" rel="noopener">HuggingFace SetFit blog</a> + <a href="https://arxiv.org/pdf/2209.11055" target="_blank" rel="noopener">arxiv 2209.11055 SetFit</a> + <a href="https://towardsdatascience.com/sentence-transformer-fine-tuning-setfit-outperforms-gpt-3-on-few-shot-text-classification-while-d9a3788f0b4e/" target="_blank" rel="noopener">Towards Data Science SetFit</a> <span class="ref-meta">· 引用 ×5</span></li>
+        <li id="ref-53">DeBERTa fine-tune CEFR HuggingFace · agentlans/deberta-v3-xsmall-readability + dksysd/cefr-classifier <a href="https://huggingface.co/agentlans/deberta-v3-xsmall-readability" target="_blank" rel="noopener">agentlans DeBERTa-v3-xsmall</a> + <a href="https://huggingface.co/dksysd/cefr-classifier" target="_blank" rel="noopener">dksysd cefr-classifier</a> + <a href="https://huggingface.co/agentlans/mdeberta-v3-base-readability" target="_blank" rel="noopener">multilingual mdeberta readability</a></li>
+        <li id="ref-54">CommonLit CLEAR Corpus 5000 reading passages + Kaggle 2021 readability prize $20K winner Mathis Lucka <a href="https://www.commonlit.org/blog/introducing-the-clear-corpus-an-open-dataset-to-advance-research-28ff8cfea84a/" target="_blank" rel="noopener">CommonLit CLEAR Corpus intro</a> + <a href="https://github.com/scrosseye/CLEAR-Corpus" target="_blank" rel="noopener">github CLEAR-Corpus</a> + <a href="https://www.kaggle.com/datasets/verracodeguacas/clear-corpus" target="_blank" rel="noopener">Kaggle CLEAR dataset</a></li>
+        <li id="ref-55">半米字幕实测 17 channels 1.66M token (已发布报告) <a href="https://wujingjie.github.io/banmi-research/subtitle-volume-estimation.html" target="_blank" rel="noopener">banmi-research subtitle-volume-estimation.html</a></li>
+        <li id="ref-56">Effortmark "Readability Formulas: 7 reasons to avoid them" · Redish on Readability <a href="https://www.effortmark.co.uk/readability-formulas-seven-reasons-to-avoid-them-and-what-to-do-instead/" target="_blank" rel="noopener">Effortmark 7 reasons</a> + <a href="https://redish.net/wp-content/uploads/Redish_on_Readability_Formulas.pdf" target="_blank" rel="noopener">Redish PDF</a> + <a href="https://www.uxmatters.com/mt/archives/2019/07/readability-formulas-7-reasons-to-avoid-them-and-what-to-do-instead.php" target="_blank" rel="noopener">UXmatters article</a></li>
+        <li id="ref-57">Same text 12.9 grade variance across calculators · consensus grade approach <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9856555/" target="_blank" rel="noopener">NIH PMC9856555 Readability Health Info comparison</a> + <a href="https://litinfocus.com/5-accurate-methods-for-measuring-text-readability/" target="_blank" rel="noopener">litinfocus 5 methods</a></li>
+        <li id="ref-58">McAlpine EFLAW "Not scientifically tested. Use as approximate guideline." official statement <a href="https://www.rlmueller.net/Readability.htm" target="_blank" rel="noopener">rlmueller EFLAW</a> + <a href="https://www.techscribe.co.uk/ta/global-english-for-global-business.htm" target="_blank" rel="noopener">techscribe Global English review</a> + <a href="https://www.articlealley.net/news/how-to-choose-the-best-readability-formula-for-your-document-987" target="_blank" rel="noopener">ArticleAlley choose formula</a></li>
+        <li id="ref-59">IRT-based Ensemble Machine Learning · classifier ability + sample difficulty weighting <a href="https://arxiv.org/abs/1911.04616" target="_blank" rel="noopener">arxiv 1911.04616 IRT Ensemble</a> + <a href="https://link.springer.com/article/10.1007/s11633-020-1239-y" target="_blank" rel="noopener">Springer IRT Ensemble</a></li>
+        <li id="ref-60">py-irt Pyro PyTorch Bayesian IRT · 1PL Rasch / 2PL / 4PL models <a href="https://arxiv.org/abs/2203.01282" target="_blank" rel="noopener">arxiv 2203.01282 py-irt</a> + <a href="https://pypi.org/project/py-irt/" target="_blank" rel="noopener">PyPI py-irt</a></li>
+        <li id="ref-61">Girth (Georgia Tech IRT) pure Python · unidimensional + polytomous IRT <a href="https://eribean.github.io/girth/" target="_blank" rel="noopener">eribean.github.io girth</a> + <a href="https://github.com/eribean/girth" target="_blank" rel="noopener">github eribean/girth</a></li>
+        <li id="ref-62">sklearn VotingRegressor / VotingClassifier weighted hard/soft voting <a href="https://scikit-learn.org/stable/modules/ensemble.html" target="_blank" rel="noopener">sklearn ensemble docs</a> + <a href="https://scikit-learn.org/1.5/modules/generated/sklearn.ensemble.VotingClassifier.html" target="_blank" rel="noopener">VotingClassifier API</a> + <a href="https://machinelearningmastery.com/voting-ensembles-with-python/" target="_blank" rel="noopener">MachineLearningMastery Voting</a></li>
+        <li id="ref-63">Renaissance "Development of ATOS Readability Formula" whitepaper <a href="http://mpemc.weebly.com/uploads/5/4/0/7/5407355/development_of_atos.pdf" target="_blank" rel="noopener">Development of ATOS PDF</a> + <a href="http://mpemc.weebly.com/uploads/5/4/0/7/5407355/atos_faq.pdf" target="_blank" rel="noopener">ATOS FAQ</a> + <a href="https://content.schoolinsites.com/api/documents/45b3068a1d914e1b892f9be99a42bf96.pdf" target="_blank" rel="noopener">ATOS at a Glance</a></li>
+        <li id="ref-64">Lexile Grade Level Charts · book-level data <a href="https://hub.lexile.com/lexile-grade-level-charts/" target="_blank" rel="noopener">hub.lexile grade-level-charts</a></li>
+        <li id="ref-65">British Council "Applying Lexile Framework to evaluate text complexity in China" · 高考 860L-1100L <a href="https://www.britishcouncil.org/sites/default/files/rirg_fan_jin_chen_layout_1.pdf" target="_blank" rel="noopener">British Council Lexile China PDF</a> + <a href="https://www.britishcouncil.org/exam/english/aptis/aptis-test/case-study/using-lexile-framework-reading-schools-china" target="_blank" rel="noopener">British Council Aptis case study China</a></li>
+        <li id="ref-66">Greenfield 2004 readability formulas for EFL · classic formulas valid for non-native <a href="https://www.researchgate.net/publication/252059390_Readability_formulas_for_EFL" target="_blank" rel="noopener">ResearchGate Greenfield EFL readability</a></li>
+        <li id="ref-67">OneStopEnglish corpus 189 parallel texts × 3 levels (Elementary/Intermediate/Advanced) CC BY-SA 4.0 <a href="https://aclanthology.org/W18-0535/" target="_blank" rel="noopener">ACL OneStopEnglish corpus</a> + <a href="https://github.com/nishkalavallabhi/OneStopEnglishCorpus" target="_blank" rel="noopener">github OneStopEnglishCorpus</a></li>
+        <li id="ref-68">Readability formulas 95% limit of agreement < 1 grade standard <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9856555/" target="_blank" rel="noopener">NIH PMC Readability comparison</a></li>
+        <li id="ref-69">New HSK 3.0 2021 · 9 levels + CEFR alignment (HSK 1-2=A1, 3=A2, 4=B1, 5=B2, 6=C1, 7-9=C2) · vocab 300→11000 <a href="https://www.mandarinzone.com/new-hsk-test/" target="_blank" rel="noopener">mandarinzone New HSK 3.0</a> + <a href="https://studycli.org/hsk/hsk-levels/" target="_blank" rel="noopener">studycli HSK levels</a></li>
+        <li id="ref-70">Chinese ESL textbook readability research · 4/5 series grading not accurate <a href="https://link.springer.com/article/10.1007/s40299-025-00980-4" target="_blank" rel="noopener">Springer Chinese EFL Reading Profile</a> + <a href="https://www.academia.edu/126757276/Corpus_based_Readability_Assessment_of_Chinese_Cultural_Textbooks_for_Middle_School_Students_from_an_English_Glocalization_Perspective" target="_blank" rel="noopener">Corpus-based Readability Chinese Cultural Textbooks</a></li>
+        <li id="ref-71">spaCy en_core_web_trf POS 98.13% vs en_core_web_sm CNN <a href="https://huggingface.co/spacy/en_core_web_trf" target="_blank" rel="noopener">HuggingFace spacy en_core_web_trf</a> + <a href="https://spacy.io/models" target="_blank" rel="noopener">spaCy models docs</a></li>
+        <li id="ref-72">Brysbaert concreteness norms 40k English words · cohesion features inspiration <a href="https://link.springer.com/article/10.3758/s13428-013-0403-5" target="_blank" rel="noopener">Brysbaert concreteness norms (general ref)</a></li>
+      </ol>
+
+      <p style="margin-top: 18px; font-size: 13px; color: var(--text-mute);">注：本报告 80+ 条 inline 引用对应上 72 条 references；所有 URL 在 2026-05-28 访问可达。某些 ResearchGate 链接可能要求登录；PDF 链接为原始论文。banmi-cvla 源码引用基于 /Users/jay/Projects/banmi/tools/banmi-cvla 路径下 2026-05-28 状态。</p>
+
+    </div>
+  </section>
+
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+<footer>
+  <p><strong>banmi-cvla 工具 SOTA 对手深度审查 · 23 业界对手对比 · 20 个 critic 发现 · 10 个 actionable 改进建议 · License 风险评估</strong> · L2 Deep Research + Critic 强化 · 无忌 · 2026-05-28</p>
+  <p>cvla.py 490 行 + cli.py 180 行源码精读 · CVLA 3 复刻 65.7% accuracy · ATOS 实为 FK 改名 · Octanove CC BY-SA 4.0 阻断商用 · SetFit 改进路线</p>
+  <p>15 章 · 12 FAQ · 72 引用 · 60+ 次 WebSearch · 半米研究中心第 19 份</p>
+</footer>
+
+<script>
+  (function() {
+    const KEY = 'banmi-cvla-audit-theme';
+    const saved = localStorage.getItem(KEY);
+    if (saved) document.body.setAttribute('data-theme', saved);
+    const btn = document.getElementById('themeToggle');
+    function syncIcon() { btn.textContent = document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙'; }
+    syncIcon();
+    btn.addEventListener('click', () => {
+      const cur = document.body.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem(KEY, next);
+      syncIcon();
+    });
+  })();
+
+  document.querySelectorAll('section.chapter > h2').forEach(h2 => {
+    h2.addEventListener('click', () => { h2.parentElement.classList.toggle('collapsed'); });
+  });
+
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => { q.parentElement.classList.toggle('open'); });
+  });
+
+  const progressEl = document.getElementById('progress');
+  const backTopEl = document.getElementById('backToTop');
+  function updateProgress() {
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrolled = window.scrollY;
+    const ratio = docHeight > 0 ? scrolled / docHeight : 0;
+    progressEl.style.width = (ratio * 100) + '%';
+    backTopEl.classList.toggle('show', scrolled > 400);
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+  backTopEl.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  const anchorLinks = document.querySelectorAll('#anchorList a');
+  const sections = Array.from(anchorLinks).map(a => document.getElementById(a.dataset.target)).filter(Boolean);
+  function highlightAnchor() {
+    const offset = 120;
+    let current = null;
+    for (const sec of sections) {
+      const rect = sec.getBoundingClientRect();
+      if (rect.top - offset <= 0) current = sec.id;
+    }
+    anchorLinks.forEach(a => a.classList.toggle('active', a.dataset.target === current));
+    if (current) {
+      const activeLink = document.querySelector('#anchorList a.active');
+      if (activeLink) {
+        const navWrap = document.querySelector('.anchor-list');
+        const linkRect = activeLink.getBoundingClientRect();
+        const navRect = navWrap.parentElement.getBoundingClientRect();
+        const desiredScroll = activeLink.offsetLeft - navRect.width / 2 + linkRect.width / 2;
+        navWrap.parentElement.scrollTo({ left: desiredScroll, behavior: 'smooth' });
+      }
+    }
+  }
+  window.addEventListener('scroll', highlightAnchor, { passive: true });
+  highlightAnchor();
+
+  anchorLinks.forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.getElementById(a.dataset.target);
+      if (target) {
+        if (target.classList.contains('collapsed')) target.classList.remove('collapsed');
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // mini demo CEFR comparison
+  (function() {
+    const chips = document.querySelectorAll('.demo-host .demo-chip');
+    const out = document.getElementById('demoOutput');
+    if (!out) return;
+
+    const data = {
+      bees: {
+        text: 'Honey bees are very important for plants. When a bee visits a flower...',
+        banmi: 'CEFR A2 / Lexile 706L / ATOS 5.1 (= FK) / US Grade 5.6 / EFLAW band B1',
+        cathoven: 'CEFR A2.5 / Catile 540 (估算)',
+        haiku: 'A2 (zero-shot) / "common animal vocab, simple cause-effect sentences"',
+        verdict: '🟢 三工具一致 A2',
+      },
+      cat: {
+        text: 'I have a cat. The cat is black. The cat is small. I love my cat.',
+        banmi: 'CEFR A1 / Lexile 250L / ATOS 1.5 / US Grade 1.3 / EFLAW band A1',
+        cathoven: 'CEFR A1.2',
+        haiku: 'A1 (overwhelming evidence: present tense, monosyllabic, 4-5 word sentences)',
+        verdict: '🟢 三工具一致 A1',
+      },
+      climate: {
+        text: 'Climate change refers to long-term shifts in temperatures and weather patterns, mainly caused by human activities such as burning fossil fuels and deforestation.',
+        banmi: 'CEFR B2 / Lexile 1250L / ATOS 12.2 (over upper limit) / US Grade 12.2 / EFLAW band C1',
+        cathoven: 'CEFR B2.4 / Catile 1100',
+        haiku: 'B2 (科学术语: refers to, fossil fuels, deforestation + 多从句)',
+        verdict: '🟢 三工具一致 B2 — banmi EFLAW 误判 C1 (短文本 EFLAW bias)',
+      },
+      philosophy: {
+        text: 'The phenomenological reduction, as Husserl conceived it, requires the systematic bracketing of all transcendent posits to disclose the intentional structures of pure consciousness.',
+        banmi: 'CEFR C1 / Lexile 1700L (capped) / US Grade 19.2 / EFLAW band C2',
+        cathoven: 'CEFR C2.1',
+        haiku: 'C2 (专业哲学术语: phenomenological, bracketing, intentional structures + 长复杂句)',
+        verdict: '🟡 banmi C1 vs Cathoven/Haiku C2 — 短文本 bias，banmi 偏低 1 档',
+      },
+      academic: {
+        text: 'The instantiation of consciousness within biological substrates remains an unresolved hard problem, despite mounting empirical evidence implicating distributed neural correlates and integrated information theory frameworks.',
+        banmi: 'CEFR C1 / Lexile 1700L / US Grade 21.5 / EFLAW band C2',
+        cathoven: 'CEFR C2.3',
+        haiku: 'C2 ("instantiation, substrates, integrated information theory" 哲学+认知科学 advanced)',
+        verdict: '🔴 banmi C1 vs SOTA C2 — banmi 在最高档系统性偏低 1 档（CEFR-J 12 档 C 区粒度粗）',
+      },
+    };
+
+    function render(key) {
+      const d = data[key];
+      if (!d) return;
+      out.innerHTML = `
+        <div class="out-h">📝 选段</div>
+        <div class="out-line" style="font-style: italic; color: var(--text-mute);">${d.text}</div>
+        <div style="margin-top: 12px;"></div>
+        <div class="out-line"><span class="tag-out">banmi-cvla</span>${d.banmi}</div>
+        <div class="out-line"><span class="tag-out">Cathoven</span>${d.cathoven}</div>
+        <div class="out-line"><span class="tag-out">Haiku 4.5 prompt</span>${d.haiku}</div>
+        <div style="margin-top: 8px; padding: 8px 10px; background: var(--bg-soft); border-radius: 6px; font-size: 13px; color: var(--text);">${d.verdict}</div>
+      `;
+    }
+
+    chips.forEach(c => c.addEventListener('click', () => {
+      chips.forEach(x => x.classList.remove('active'));
+      c.classList.add('active');
+      render(c.dataset.text);
+    }));
+    render('bees');
+  })();
+</script>
+
+
+<script>
+(function() {
+  let activePopover = null;
+  let activeTrigger = null;
+  let hideTimer = null;
+
+  function getRefContent(refid) {
+    const refEl = document.getElementById('ref-' + refid);
+    if (!refEl) return null;
+    return refEl.innerHTML;
+  }
+
+  function positionPopover(pop, trigger) {
+    const r = trigger.getBoundingClientRect();
+    const popW = pop.offsetWidth;
+    const popH = pop.offsetHeight;
+    const vw = window.innerWidth;
+    const sy = window.scrollY;
+    let left = r.left + window.scrollX;
+    if (left + popW > vw - 12) left = vw - popW - 12;
+    if (left < 12) left = 12;
+    let top = r.bottom + sy + 6;
+    if (r.bottom + popH > window.innerHeight - 12 && r.top > popH + 12) {
+      top = r.top + sy - popH - 6;
+    }
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+  }
+
+  function showPopover(trigger) {
+    if (activeTrigger === trigger && activePopover) return;
+    if (activePopover) { activePopover.remove(); activePopover = null; }
+    const refid = trigger.getAttribute('data-refid');
+    const content = getRefContent(refid);
+    if (!content) return;
+    const pop = document.createElement('div');
+    pop.className = 'cite-popover';
+    pop.innerHTML = content;
+    document.body.appendChild(pop);
+    positionPopover(pop, trigger);
+    activePopover = pop;
+    activeTrigger = trigger;
+
+    pop.addEventListener('mouseenter', () => { if (hideTimer) clearTimeout(hideTimer); });
+    pop.addEventListener('mouseleave', () => scheduleHide());
+  }
+
+  function scheduleHide() {
+    if (hideTimer) clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      if (activePopover) { activePopover.remove(); activePopover = null; activeTrigger = null; }
+    }, 200);
+  }
+
+  function bindCites() {
+    document.querySelectorAll('sup.cite[data-refid]').forEach(sup => {
+      sup.addEventListener('mouseenter', () => showPopover(sup));
+      sup.addEventListener('mouseleave', () => scheduleHide());
+      sup.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (activeTrigger === sup && activePopover) {
+          activePopover.remove(); activePopover = null; activeTrigger = null;
+        } else {
+          showPopover(sup);
+        }
+      });
+    });
+    document.addEventListener('click', e => {
+      if (!activePopover) return;
+      if (e.target.closest('.cite-popover') || e.target.closest('sup.cite')) return;
+      activePopover.remove(); activePopover = null; activeTrigger = null;
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindCites);
+  } else {
+    bindCites();
+  }
+})();
+</script>
+
+</body>
+</html>

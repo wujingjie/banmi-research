@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Apple Vision Pro + Mac Studio + 群晖 NAS：沉浸观影 + 偶尔瞄一眼 vibe coding 的个人影音工作站 · 无忌 Deep Research · 2026-05-29</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1d23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --border-strong: #cdd2da;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --accent-text: #1d4ed8;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #0891b2;
+    --info-soft: #cffafe;
+    --code-bg: #f1f3f7;
+    --purple: #7c3aed;
+    --purple-soft: #ede9fe;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1c2030;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #b6bcc9;
+    --text-mute: #8a92a3;
+    --border: #2a2f3d;
+    --border-strong: #3a4154;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a55;
+    --accent-text: #93c5fd;
+    --good: #4ade80;
+    --good-soft: #14532d55;
+    --warn: #fbbf24;
+    --warn-soft: #78350f55;
+    --bad: #f87171;
+    --bad-soft: #7f1d1d55;
+    --info: #22d3ee;
+    --info-soft: #155e7555;
+    --code-bg: #0a0d14;
+    --purple: #a78bfa;
+    --purple-soft: #4c1d9555;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 28px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 3000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  hr.soft { border: none; height: 1px; background: var(--border); margin: 16px 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .node.yes { border-color: var(--good); }
+  .tree .node.no { border-color: var(--bad); }
+  .tree .branches { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .role-cols { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 14px 0; }
+  .role-col { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-elevated); }
+  .role-col h4 { margin: 0 0 8px; font-size: 14px; color: var(--text); }
+  .role-col.must { background: var(--accent-soft); border-color: var(--accent); }
+  .role-col.opt { background: var(--warn-soft); border-color: var(--warn); }
+  .role-col.never { background: var(--bad-soft); border-color: var(--bad); }
+  .role-col ul { margin: 4px 0 0; padding-left: 18px; }
+  .prod-card { margin: 12px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .prod-head { padding: 10px 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); }
+  .prod-head .ico { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; background: var(--accent-soft); }
+  .prod-head .name-block { flex: 1; min-width: 140px; }
+  .prod-head .pn { font-size: 15px; font-weight: 700; color: var(--text); }
+  .prod-head .ph { font-size: 12px; color: var(--text-mute); font-family: ui-monospace, monospace; margin-top: 1px; }
+  .prod-body { padding: 10px 14px; font-size: 14px; }
+  .prod-body p { color: var(--text-soft); margin: 6px 0; }
+  .prod-body .takeaway { margin-top: 8px; padding: 8px 10px; background: var(--accent-soft); border-radius: 8px; border-left: 3px solid var(--accent); color: var(--text); font-size: 13.5px; }
+  .prod-body .takeaway::before { content: "💡 启示  "; font-weight: 700; color: var(--accent-text); }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(250,204,21,0.3); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated,#fff); color: var(--text,#1a1a23); border: 1px solid var(--border,#e3e6ec); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(15,23,42,0.18); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  [data-theme="dark"] .cite-popover { background: #1a1e2a; color: #e6e9f0; border-color: #2a2f3a; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+  .cite-popover a { color: var(--accent,#2563eb); text-decoration: underline; word-break: break-all; }
+  [data-theme="dark"] .cite-popover a { color: #60a5fa; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  @media (max-width: 480px) {
+    .hero { padding: 18px 4px 8px; }
+    .hero h1 { font-size: 22px; }
+    section.chapter > h2 { font-size: 17px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+    .tree .branches { grid-template-columns: 1fr; }
+  }
+  @media print {
+    header.topbar, #progress, .back-to-top, nav.anchor-nav { display: none !important; }
+    section.chapter.collapsed .chapter-body { max-height: none !important; padding: 18px 20px 22px !important; }
+    section.chapter.collapsed > h2 .caret { display: none; }
+  }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">AVP 影音工作站 <span class="tag">v1 · 无忌 Deep Research</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 执行摘要</a>
+    <a href="#ch2" data-target="ch2">02 观影能力概览（两层坐标）</a>
+    <a href="#ch3" data-target="ch3">03 惊艳/优质资源盘点</a>
+    <a href="#ch4" data-target="ch4">04 Apple Immersive 独家生态</a>
+    <a href="#ch5" data-target="ch5">05 第三方播放器横评</a>
+    <a href="#ch6" data-target="ch6">06 3D 格式深挖</a>
+    <a href="#ch7" data-target="ch7">07 3D/沉浸资源库与获取</a>
+    <a href="#ch8" data-target="ch8">08 群晖本地影视库搭建</a>
+    <a href="#ch9" data-target="ch9">09 群晖+AVP 看 3D 完整方案</a>
+    <a href="#ch10" data-target="ch10">10 Mac Studio 连 AVP</a>
+    <a href="#ch11" data-target="ch11">⭐ 11 边看片边 vibe coding</a>
+    <a href="#ch12" data-target="ch12">⭐ 12 阿杰落地路线（决策树）</a>
+    <a href="#ch13" data-target="ch13">13 风险与坑</a>
+    <a href="#ch14" data-target="ch14">14 FAQ</a>
+    <a href="#ch15" data-target="ch15">15 References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>把 AVP + Mac Studio + 群晖串成个人影音工作站</h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-29</span>
+      <span>🔍 无忌 Deep Research · 4 路并行</span>
+      <span>🥽 沉浸观影 + 偶尔瞄代码</span>
+      <span>🏠 群晖本地影视库</span>
+      <span>📚 真实来源 inline 引用</span>
+    </div>
+    <div class="hero-deck">
+      <strong>一句话：</strong>这套硬件能组成一个干净闭环——<strong>群晖只当仓库，Mac Studio 当转码+coding 发动机，AVP 当呈现端</strong>。三件事要分清坐标：① AVP 真正的杀手锏是 <strong>Apple Immersive Video</strong>（180°/8K/3D 全球独家），但在<strong>中国大陆不走 Apple TV，要装免费的咪咕/腾讯视频 app</strong><sup class="cite" data-refid="2">[2]</sup>；② 群晖影视库的铁律是<strong>「能直连就别转码」</strong>，2D/4K 用 Infuse、<strong>3D 必须换 Moon Player / SKYBOX</strong>（Infuse 到 2026 仍不能真 3D 渲染）<sup class="cite" data-refid="13">[13]</sup>；③「边看片边瞄 vibe coding 进度」AVP 原生就支持，<strong>用普通 Environment + 窗口化播放，别进 Apple TV 影院模式</strong>（那个会藏掉 Mac 窗口）<sup class="cite" data-refid="20">[20]</sup>。
+    </div>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">执行摘要：5 条最硬结论</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>4 路并行调研（AVP 资源 / 播放器 + 3D 格式 / 群晖 + 串流 / Mac Studio 联动）收敛出的核心判断，每条独立成块，方便扫。</p>
+
+      <div class="callout warn">
+        <h4>⚠️ 结论 1：国内看 Apple 官方沉浸片，别在 Apple TV app 里找——它在大陆走咪咕/腾讯 <span class="conf g">🟢 多源</span></h4>
+        <p>这是对阿杰最关键的一条。<strong>中国大陆不通过 Apple TV app 发布 Apple Immersive Video</strong>，而是走免费的<strong>「咪咕视频」「腾讯视频」</strong>app<sup class="cite" data-refid="2">[2]</sup>。想看华语/中国题材沉浸内容还可装 <strong>iQIYI XR（2.5 万+ 片源）</strong>和<strong>「沉浸中国」</strong>（16K 北京/上海/西安/桂林，免费+内购，需 visionOS 2.6+）<sup class="cite" data-refid="7">[7]</sup>。这条直接决定了你国内的内容入口。</p>
+      </div>
+
+      <div class="callout bad">
+        <h4>⛔ 结论 2：3D 是硬分叉——Infuse 到 2026 仍不能在 AVP 上真 3D 播放 <span class="conf g">🟢 多源</span></h4>
+        <p>Infuse（含 8.4.x，2026-05）在 AVP 上<strong>会把 SBS/OU/MVC 当 2D 放</strong>，不支持 MV-HEVC/frame-packed/3D 蓝光 ISO 的立体模式，Firecore 官方无 3D 时间表<sup class="cite" data-refid="13">[13]</sup>。所以 <strong>2D/4K HDR 用 Infuse 当统一前端，真 3D 必须换 Moon Player / SKYBOX / Reality Player</strong>。这是全篇最容易踩的坑。</p>
+      </div>
+
+      <div class="callout good">
+        <h4>✅ 结论 3：群晖只当仓库，铁律是「能直连就别转码」 <span class="conf g">🟢 多源</span></h4>
+        <p>AVP 解码强、群晖转码弱，正确策略是 <strong>Direct Play 直连不转码</strong>——4K HDR 直连优于转码（Plex 转码会把 4K HDR HEVC 压成 1080p H264 SDR、颜色发灰）<sup class="cite" data-refid="22">[22]</sup>。这同时绕开了群晖 2025 新机型（X25 系列）<strong>砍掉硬件转码驱动</strong>的坑<sup class="cite" data-refid="23">[23]</sup>。服务端推荐 <strong>Jellyfin（免费开源，Docker 跑在群晖上）</strong>，比 Plex（2025 起远程要订阅、终身版 2026/7 涨到 750 美元）对只在家看的你更划算<sup class="cite" data-refid="26">[26]</sup>。</p>
+      </div>
+
+      <div class="callout accent">
+        <h4>🎯 结论 4：「边看片边瞄代码」AVP 原生支持，不用买第三方 app <span class="conf g">🟢 多源</span></h4>
+        <p>Mac Virtual Display 本身就是 visionOS 里的一个<strong>窗口</strong>，其他 visionOS app（Apple TV/Infuse/B 站等）作为独立窗口围绕它共存——这正是「沉浸看片 + 偶尔瞄 vibe coding」的技术基础<sup class="cite" data-refid="32">[32]</sup>。唯一的坑：<strong>别进 Apple TV 自带的「影院 Cinema」模式</strong>，它会临时隐藏其他所有窗口、独占视野<sup class="cite" data-refid="20">[20]</sup>。用普通 Environment + 数码表冠半沉浸 + 窗口化播放即可。</p>
+      </div>
+
+      <div class="callout purple">
+        <h4>🧭 结论 5：Mac Studio 是这条链的发动机——转码 + coding 都靠它 <span class="conf g">🟢 多源</span></h4>
+        <p>Apple Silicon Mac Studio 一身二用：① 把 3D 蓝光（MVC）走开源 <strong>BD_to_AVP</strong>、把已有 SBS/OU 走免费 <strong>Spatial 命令行工具</strong>转成原生 MV-HEVC（最高 8K，用 Apple 官方框架）<sup class="cite" data-refid="16">[16]</sup>；② 同时跑 vibe coding，通过 Mac Virtual Display 投进 AVP。<strong>关键判断：你的 3D 片若已是 SBS/OU，其实不用转码</strong>，Moon/Reality/SKYBOX 直接播即可；连 3D 蓝光 MVC 都能用 <strong>4XVR 直接播、省掉转码</strong>（Codex 审查补充）<sup class="cite" data-refid="41">[41]</sup>，Mac Studio 只在「想要 MV-HEVC 原生质量上限」时才上场<sup class="cite" data-refid="14">[14]</sup>。</p>
+      </div>
+
+      <h3>一句话路线建议</h3>
+      <div class="callout accent">
+        <p><strong>【存】片子放群晖，开 SMB（必开）+ DLNA（可选）。【转】Mac Studio 跑 BD_to_AVP / Spatial 把蓝光或 SBS 升级成 MV-HEVC。【播】AVP 上 2D 用 Infuse 接 Jellyfin 直连不转码、3D 用 Moon/SKYBOX 走 SMB 直连。【联动】Mac Virtual Display 投 coding 屏，普通 Environment 里大屏放片、侧边缩小放代码窗。先把「群晖+Jellyfin → Infuse 看 2D」这条最窄链路跑通，再加 3D、再加沉浸。</strong>详见第 12 章决策树。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 最大前置未知：你的群晖型号 + 国内 App Store 可用性 <span class="conf y">🟡 待确认</span></h4>
+        <p>本报告两个最影响落地的 gap：① <strong>群晖具体型号未知</strong>——Intel 核显（有 Quick Sync 硬转）还是 AMD Ryzen（DS923+ 无核显软转）直接决定转码兜底能力，建议确认型号；但走「直连优先」可基本规避此差异<sup class="cite" data-refid="24">[24]</sup>。② <strong>已确认（Codex 实查纠正）：Moon ¥58 / Reality ¥58 / SKYBOX ¥68 都在大陆 App Store 上架</strong><sup class="cite" data-refid="39">[39]</sup>，3D 播放器不缺；但 <strong>大陆 Apple ID 基本无法购买 Apple TV 3D 租购</strong>（Apple 官方可用性页：大陆不含 Apple TV 电影购买，香港才有）<sup class="cite" data-refid="40">[40]</sup>，要买只能用非大陆 ID 且自担账号/支付/区域风险。</p>
+      </div>
+
+      <h3>🔬 跨模型审查说明（这份报告被 Codex 审过一轮）</h3>
+      <div class="callout purple">
+        <p>本报告由 Claude 4 路并行写稿后，经 <strong>Codex (GPT-5.5) 四维度对抗审查</strong>（事实 / 深度 / 缺失 / 角度）。<strong>Codex 实查纠正/补强了几处</strong>：① 三个 3D 播放器大陆 App Store 价格已查实（Moon/Reality ¥58、SKYBOX ¥68）<sup class="cite" data-refid="39">[39]</sup>；② 大陆 Apple ID 基本买不了 Apple TV 3D（官方可用性页佐证）<sup class="cite" data-refid="40">[40]</sup>；③ 漏了 <strong>4XVR</strong>——它能直接播 MVC 3D 蓝光、<strong>推翻了"3D 蓝光必须先转码"的结论</strong><sup class="cite" data-refid="41">[41]</sup>；④ 修正了几处事实精度（阿凡达3 尚未上线、"超 IMAX"是体验向说法、Developer Strap 是开发件非观影推荐、M5 120Hz "更不晕"应表述为个体差异）。</p>
+        <p style="margin-top:10px"><strong>Codex 提出、本版有意未展开的"落地前待实测"清单</strong>（先跑通最窄链路，别纸上过度细化）：</p>
+        <ol style="margin:6px 0 0;padding-left:20px;font-size:13.5px;">
+          <li><strong>NAS→AVP 3D golden path</strong>——用一部已知 SBS + 一部 MVC，实测 SMB / 各播放器谁能放、字幕音轨是否正常</li>
+          <li><strong>MV-HEVC 入库识别</strong>——转后文件能否被 Plex/Jellyfin 认成 3D 编排进库（本地 3D 库的命门）</li>
+          <li><strong>群晖型号矩阵</strong>——CPU/核显/硬转状态决定转码兜底（直连优先可大幅规避）</li>
+          <li><strong>字幕/音轨兼容</strong>——PGS/ASS/SRT + 中文字幕 + DTS-HD/Atmos 回退是否触发转码</li>
+          <li><strong>舒适度规则</strong>——长片 + 瞄码的佩戴时长、眼疲劳、亮度/沉浸度、电池摆放、停看条件</li>
+          <li><strong>远程观看</strong>——Plex 远程需 Pass、国内网络 + 家宽上行的实际码率上限，Tailscale 受阻时自建 WireGuard</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">AVP 观影能力概览：两层坐标</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>把这层拆清楚是全篇坐标——AVP 上「看东西」分两条完全不同的轨道，混了就会买错 app、找错内容、产生错误预期。</p>
+
+      <h3>2.1 两层结构定义</h3>
+      <div class="role-cols">
+        <div class="role-col must">
+          <h4>① Apple 原生 Immersive Video（独家轨道）</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)">AVP <strong>全球独家</strong>的 180°·8K·3D·空间音频沉浸格式，<strong>任何其他 VR 设备/电视都无法播放</strong>，到 2026-05 累计约 <strong>47 部</strong><sup class="cite" data-refid="1">[1]</sup>。这是 AVP 真正不可替代的杀手锏，但片量少、单部仅 15-30 分钟。</p>
+        </div>
+        <div class="role-col opt">
+          <h4>② 通用 2D/3D 影视巨幕（兼容轨道）</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)">在虚拟影院/环境里把任意 2D 影视（流媒体、自有蓝光转录、Mac 串流）投成<strong>巨幕</strong>（屏幕可达约 100 英尺宽、micro-OLED 观感号称胜过普通影院投影 <span class="conf y">🟡 体验向</span>）<sup class="cite" data-refid="6">[6]</sup>，外加 200+ 部 3D 电影。<strong>非独家</strong>，但这是日常观影的主力。</p>
+        </div>
+        <div class="role-col never" style="background:var(--purple-soft);border-color:var(--purple);">
+          <h4>③ 你的自有内容（NAS / Mac 串流）</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)">阿杰这套的核心——群晖里的蓝光转录、3D 片，通过 Infuse / Moon / SKYBOX 串流播放，落在轨道 ② 里但要自己搭。详见第 8-9 章。</p>
+        </div>
+      </div>
+
+      <h3>2.2 一张表看懂「独家 vs 通用」</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>内容类型</th><th>是否 AVP 独家</th><th>哪里看</th><th>国内可用性</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Apple Immersive Video</strong>（180°/8K/3D）</td><td class="check y">✅ 全球独家</td><td>英美澳加港等地区 Apple TV app 内免费；<strong>大陆走咪咕/腾讯视频</strong><sup class="cite" data-refid="2">[2]</sup></td><td class="check p">⚠️ 经咪咕/腾讯</td></tr>
+            <tr><td><strong>3D 电影</strong>（200+ 部）</td><td class="check n">⛔ 非独家</td><td>Disney+（42 部随订阅）/ Apple TV 租购<sup class="cite" data-refid="8">[8]</sup></td><td class="check n">⛔ 大陆 ID 基本不可购<sup class="cite" data-refid="40">[40]</sup></td></tr>
+            <tr><td><strong>普通 2D 巨幕</strong>（流媒体/自有片）</td><td class="check n">⛔ 非独家功能</td><td>影院环境巨幕模式，画质优于实体投影<sup class="cite" data-refid="6">[6]</sup></td><td class="check y">✅ 可用</td></tr>
+            <tr><td><strong>VR180/360 沉浸视频</strong></td><td class="check n">⛔ 非独家</td><td>官方 YouTube app（2026-02 上线，免费，M5 款 8K）<sup class="cite" data-refid="9">[9]</sup></td><td class="check p">⚠️ YouTube 国内受限</td></tr>
+            <tr><td><strong>华语/中国题材沉浸</strong></td><td class="check p">🟡 本地独有</td><td>iQIYI XR / 沉浸中国（16K 景点）<sup class="cite" data-refid="7">[7]</sup></td><td class="check y">✅ 国内专属</td></tr>
+            <tr><td><strong>自有 NAS 影视库</strong>（你的片）</td><td class="check n">⛔ 自建</td><td>Infuse（2D）/ Moon·SKYBOX（3D）连群晖</td><td class="check y">✅ 局域网无关</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <p><strong>💡 预期管理：</strong>Apple 独家沉浸片虽惊艳但<strong>量少、更新慢、每部仅 15-30 分钟</strong>，被多家媒体批评剪辑过碎、不够「沉浸」<sup class="cite" data-refid="10">[10]</sup>。别指望靠它撑满一个观影夜——一个观影夜的主体仍是轨道 ②（你的蓝光 + 流媒体 + 3D 电影），独家沉浸片是「惊艳的甜点」。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">惊艳 / 优质资源盘点</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>按「独家轨道」与「通用轨道」分别盘点最值得看的内容。每项标清是否 AVP 独家。</p>
+
+      <h3>3.1 独家沉浸内容（轨道 ①）</h3>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🎬</div>
+          <div class="name-block"><div class="pn">Submerged — 首部沉浸剧情片</div><div class="ph">Edward Berger 执导 · 二战潜艇 · 约 16 分钟</div></div>
+          <span class="pill purple">AVP 独家</span>
+        </div>
+        <div class="prod-body">
+          <p>奥斯卡得主执导，首部用 Apple 立体摄影系统拍摄的剧情沉浸片，8K 3D+180°，在布拉格/布鲁塞尔/马耳他实景拍 3 周、用 <strong>23 吨实体潜艇布景</strong>；对 AVP 用户在 Apple TV app 免费<sup class="cite" data-refid="3">[3]</sup>。</p>
+          <div class="takeaway">叙事+制作规格惊艳，被评为「电影制作的跃进」，但仅 16 分钟，更像概念验证短片。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🏀</div>
+          <div class="name-block"><div class="pn">Spectrum Front Row — 湖人队沉浸直播</div><div class="ph">2026-01-09 首播 · 七机位 · 150Mbps</div></div>
+          <span class="pill purple">AVP 独家</span>
+        </div>
+        <div class="prod-body">
+          <p>NBA 湖人队部分 2026 赛季比赛的<strong>现场沉浸直播</strong>（首创），七机位（记分台/篮下/球员通道等）、150Mbps、180° 空间音频；6 场直播<sup class="cite" data-refid="4">[4]</sup>。</p>
+          <div class="takeaway">⚠️ 地理限制严格：<strong>直播仅限南加州/夏威夷/南内华达转播区</strong>，全美及部分国际市场可看回放与集锦；国内能否看回放存疑。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">⚽</div>
+          <div class="name-block"><div class="pn">Real Madrid: The Weight of Greatness</div><div class="ph">2026-05-22 上线 · 20 分钟 · 30+ Blackmagic 摄影机</div></div>
+          <span class="pill purple">AVP 独家</span>
+        </div>
+        <div class="prod-body">
+          <p>皇马沉浸纪录片，含姆巴佩/贝林厄姆/维尼修斯，用 <strong>30+ 台 Blackmagic URSA Cine Immersive</strong> 摄影机拍 5 天，2025 欧冠期间拍摄；Apple TV app 内对 AVP 用户免费<sup class="cite" data-refid="5">[5]</sup>。体育纪录片标杆，但仅 20 分钟。</p>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🎵</div>
+          <div class="name-block"><div class="pn">The Weeknd: Open Hearts — 独家音乐体验</div><div class="ph">Anton Tammi 执导 · 180° + 空间音频</div></div>
+          <span class="pill purple">AVP 独家</span>
+        </div>
+        <div class="prod-body">
+          <p>The Weeknd 的沉浸音乐体验，灵感来自洛杉矶天际线，属 Hurry Up Tomorrow 专辑相关<sup class="cite" data-refid="11">[11]</sup>。⚠️ <strong>限时发布（可能已下架）</strong>、时长短。</p>
+        </div>
+      </div>
+
+      <h3>3.2 通用优质内容（轨道 ②）</h3>
+
+      <div class="callout good">
+        <h4>✅ 3D 电影生态（Disney+ / Apple TV）<span class="conf g">🟢 多源</span></h4>
+        <p>全平台累计 <strong>200+ 部 3D 片</strong>，Disney 发行时配 <strong>42 部 3D</strong>（漫威/皮克斯，随 Disney+ 订阅），含《阿凡达：火与烬》（2026-06-24 上 Disney+，<strong>截至本报告 5/29 尚未上线，不计入当前片库</strong>）、《超级马里奥银河大电影》（2026 Apple TV 租购）；Max/Disney+/Paramount+ 原生支持<sup class="cite" data-refid="8">[8]</sup>。3D 在 AVP 上<strong>无眼镜、无串扰</strong>，体验加分。⚠️ <strong>大陆 Apple ID 基本买不了 Apple TV 3D 租购</strong>（官方可用性页大陆不含 Apple TV 电影购买）<sup class="cite" data-refid="40">[40]</sup>，Disney+ 大陆也无官方服务。</p>
+      </div>
+
+      <div class="callout accent">
+        <h4>🎯 普通 2D 巨幕 + 影院环境 <span class="conf g">🟢 多源</span></h4>
+        <p>在虚拟影院/自定义环境里把任意 2D 影视投成巨幕，屏幕可达约 <strong>100 英尺宽、自动匹配画幅无黑边</strong>，micro-OLED 屏被不少评测认为观感<strong>胜过普通影院投影</strong>（"超过 IMAX" 是部分体验向说法、无统一实测背书 <span class="conf y">🟡</span>），支持空间音频<sup class="cite" data-refid="6">[6]</sup>。这是日常观影主力——你的蓝光转录、流媒体都走这里。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>🆓 官方 YouTube app（VR180/360 免费海量）<span class="conf g">🟢 多源</span></h4>
+        <p>Google 官方 YouTube app 于 <strong>2026-02 终于上线 AVP</strong>，支持 3D 360 视频、VR180 沉浸视频及 2D/Shorts，<strong>M5 款支持 8K</strong>，免费<sup class="cite" data-refid="9">[9]</sup>。是补足 Apple 自家沉浸片量太少的<strong>最佳免费来源</strong>（海量 VR180/360 UGC，质量参差）。⚠️ YouTube 在国内访问受限。</p>
+      </div>
+
+      <h3>3.3 中国 · 华语内容</h3>
+      <div class="callout warn">
+        <h4>🇨🇳 国内本地渠道（对阿杰最实用）<span class="conf g">🟢 多源</span></h4>
+        <p>① <strong>咪咕视频 / 腾讯视频</strong>：大陆 AVP 看 Apple 官方沉浸片的入口（免费下载，非 Apple TV）<sup class="cite" data-refid="2">[2]</sup>；腾讯视频中国区（AVP 2024-06-28 发售）上线<strong>「客厅巨幕影院」3D 播放</strong>，腾讯云做全链路 3D（MV-HEVC 编码），最高 8K、Dolby Vision/Atmos<sup class="cite" data-refid="18">[18]</sup>。② <strong>iQIYI XR</strong>：2.5 万+ 片源 + 沉浸 IP 观影<sup class="cite" data-refid="7">[7]</sup>。③ <strong>沉浸中国</strong>：16K/180°/3D 中国景点（北京故宫/上海/西安/桂林），免费 + 内购（$0.99–$5.99 点数 / $4.99 解锁），需 visionOS 2.6+<sup class="cite" data-refid="7">[7]</sup>。⚠️ 咪咕/腾讯内 Apple 沉浸片量与付费墙未明、沉浸中国片量少。</p>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ 待补研究：</strong>美剧 / 剧集类在 AVP 上的独家或优化内容，evidence pack 未单独覆盖；国内除腾讯视频外，爱奇艺/优酷/B 站等是否有 AVP 原生 3D/大屏 app 未查到明确证据 <span class="conf r">🔴 待补研究</span>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">AVP 独家内容 + Apple Immersive Video 生态深挖</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">~47</div><div class="l">Apple 沉浸片累计 · 2026-05</div></div>
+        <div class="metric"><div class="v">180°/8K</div><div class="l">3D + 空间音频</div></div>
+        <div class="metric"><div class="v">15-30min</div><div class="l">单部典型片长</div></div>
+        <div class="metric"><div class="v">12 部</div><div class="l">体育类（占比最高）</div></div>
+      </div>
+
+      <h3>4.1 Apple Immersive Video 是什么、有多少</h3>
+      <div class="callout purple">
+        <p>到 2026-05-21 累计<strong>约 47 部</strong>，分类：探险(5)/音乐(6)/<strong>体育(12)</strong>/纪录(6)/旅行(6)/剧情(5)等<sup class="cite" data-refid="1">[1]</sup>。格式为 180°/8K/3D/空间音频，<strong>任何其他设备都播不了</strong>，多数在英美澳加港法德日新等地区的 Apple TV app 内免费——<strong>但大陆是例外，要经咪咕/腾讯</strong><sup class="cite" data-refid="2">[2]</sup>。</p>
+      </div>
+
+      <h3>4.2 真正的「现场直播」突破</h3>
+      <div class="callout good">
+        <p>2026 年 Apple Immersive 从「录播短片」迈向<strong>现场沉浸直播</strong>：湖人队 Spectrum Front Row（七机位/150Mbps，2026-01-09 首播，6 场）<sup class="cite" data-refid="4">[4]</sup> + 皇马纪录片（30+ Blackmagic 沉浸摄影机）<sup class="cite" data-refid="5">[5]</sup>。这是片库从「概念验证」走向「定期内容」的信号。</p>
+      </div>
+
+      <h3>4.3 沉浸「环境」（非视频片）</h3>
+      <div class="callout info">
+        <p>Disney+ app 内提供沉浸<strong>「环境」</strong>（可在其中看片的场景，非剧情内容）：国家地理冰岛辛格维利尔国家公园（photogrammetry + gigapixel 全景建模，2024-08 上线），以及迪士尼剧场、怪兽电力公司、复仇者大厦、塔图因星球陆行艇等<strong>已有 5 个迪士尼环境</strong>，需 Disney+ 订阅<sup class="cite" data-refid="12">[12]</sup>。⚠️ 国区可用性存疑。</p>
+      </div>
+
+      <h3>4.4 visionOS 26 把第三方拍摄内容拉进来了</h3>
+      <div class="callout accent">
+        <p>visionOS 26（2025-09-15 发布）新增对 <strong>Insta360 / GoPro / Canon</strong> 的 180°/360°/宽视场内容支持，且可<strong>从网页直接播放沉浸视频</strong>；还引入「空间场景」（AI 给 2D 照片加深度）、Safari 空间浏览、HTML <code>&lt;model&gt;</code> 内嵌 3D<sup class="cite" data-refid="17">[17]</sup>。意味着你自己用这些相机拍的 180/360 内容也能进 AVP。⚠️ 具体导入工作流细节本研究未深挖 <span class="conf r">🔴 待补研究</span>。</p>
+      </div>
+
+      <h3>4.5 老实说的短板</h3>
+      <div class="callout bad">
+        <p><strong>⛔ Apple 自家沉浸内容更新极慢、片量少、单部仅 15-30 分钟，被多家媒体批评。</strong>Bloomberg 称 Apple 故意「慢放」因制作成本极高；AppleInsider 批某片 5 分钟 54 个剪辑（平均 6 秒一刀）违背沉浸本意；用户难分辨什么是独家/原生/3D/仅兼容<sup class="cite" data-refid="10">[10]</sup>。所以独家轨道是「点缀」，主菜还得靠你自己的库 + 流媒体 + YouTube VR180。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">第三方播放器横评（含连 NAS 能力表）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>AVP 播放器分两大流派：<strong>管理流派</strong>（Infuse / Plex 客户端，库管理体验最顺但 3D 弱）和 <strong>VR/3D 专业流派</strong>（Moon / Reality / SKYBOX，真能播立体格式）。选错会出现「片放出来是 2D」的坑。</p>
+
+      <h3>5.1 连 NAS + 3D 能力一览表</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>播放器</th><th>价格</th><th>真 3D（SBS/OU）</th><th>连 NAS 协议</th><th>接 Plex/Jellyfin</th><th>定位</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Infuse 8.x</strong></td><td>Pro $99.99 终身<sup class="cite" data-refid="13">[13]</sup></td><td class="check n">⛔ 退化成 2D</td><td>SMB/NFS/FTP/SFTP/WebDAV/DLNA + 阿里云盘</td><td class="check y">✅ Plex/Emby/Jellyfin/Kodi</td><td>2D 库管理首选</td></tr>
+            <tr><td><strong>Moon Player</strong></td><td>$8.99 买断<sup class="cite" data-refid="14">[14]</sup></td><td class="check y">✅ 全套 + 自动识别</td><td>SMB/DLNA/WebDAV</td><td class="check n">⛔ 走 SMB/DLNA</td><td>真 3D/VR 主力</td></tr>
+            <tr><td><strong>Reality Player</strong></td><td>$8.99 买断<sup class="cite" data-refid="15">[15]</sup></td><td class="check y">✅ 格式最全（含 APMP/AIVU）</td><td>DLNA/SMB/HTTP/iCloud/云盘</td><td class="check n">⛔ 无 WebDAV</td><td>格式覆盖最全</td></tr>
+            <tr><td><strong>SKYBOX</strong></td><td>约 $10<sup class="cite" data-refid="30">[30]</sup></td><td class="check y">✅ SBS 稳 + 鱼眼 200/220</td><td>UPnP/DLNA + SMB + PC Client</td><td class="check n">⛔ 走 DLNA/SMB</td><td>跨平台成熟稳定</td></tr>
+            <tr><td><strong>Theater/Plexi/Chroma</strong></td><td>$1.99–$4 内购<sup class="cite" data-refid="29">[29]</sup></td><td class="check p">🟡 多靠合成 2D→3D</td><td>—（依赖 Plex/Emby 服务器）</td><td class="check y">✅ Plex/Emby 专用客户端</td><td>已用 Plex 时最贴合</td></tr>
+            <tr><td><strong>Sandwich Television</strong></td><td>未列<sup class="cite" data-refid="31">[31]</sup></td><td class="check p">🟡 支持 spatial video</td><td>未列明</td><td class="check n">⛔ 流媒体「coming soon」</td><td>拟物电视 + SharePlay 共看</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>5.2 关键短板逐个说</h3>
+
+      <div class="callout bad">
+        <h4>⛔ Infuse：库管理王者，但 AVP 上 3D 是死穴 <span class="conf g">🟢 多源</span></h4>
+        <p>网络协议全（SMB/NFS/FTP/SFTP/WebDAV/UPnP-DLNA），接所有主流媒体服务器，支持阿里云盘（对国内友好），8.3（2025-10-20）新增沉浸环境（Cinema/Room/Space/Sunset/Void）<sup class="cite" data-refid="13">[13]</sup>。<strong>但 Firecore（James）明确说 AVP 上 Infuse 不能真正渲染 3D，SBS/OU/MVC 都会被当 2D 播，官方无 3D 时间表</strong>。所以纯 2D 大屏首选，3D 别指望它。</p>
+      </div>
+
+      <div class="callout good">
+        <h4>✅ Moon Player：真 3D 主力，直连群晖 <span class="conf g">🟢 多源</span></h4>
+        <p>支持 2D/3D/Half-SBS/Full-SBS/Top-Bottom(OU)/180/360，4K–12K，<strong>自动识别立体模式</strong>；网络 SMB/DLNA/WebDAV 可连群晖；内建实时 AI 2D→3D；一次性 $8.99（家庭共享）<sup class="cite" data-refid="14">[14]</sup>。<strong>要求 visionOS 26.0+</strong>（<strong>若 AVP 未升到 visionOS 26，先用 Reality Player / SKYBOX，门槛更低</strong>）。短板：库管理/刮削不如 Infuse；AI 2D→3D 是合成深度非真立体。也有用户反馈<strong>高码率会卡顿、不支持蓝光 ISO</strong><sup class="cite" data-refid="25">[25]</sup>。</p>
+      </div>
+
+      <div class="callout good">
+        <h4>✅ Reality Player：格式覆盖最全、门槛最低 <span class="conf g">🟢 单源为主</span></h4>
+        <p>覆盖 VR180/360 SBS/OU、标准 3D SBS/OU、<strong>MV-HEVC spatial、APMP（Apple Projected Media Profile）、AIVU（Apple Immersive）、Spatial Photo</strong>；Apple Silicon 硬解最高 8K；Dolby Atmos；$8.99 无内购，<strong>最低 visionOS 1.1+</strong>（门槛比 Moon 低很多）<sup class="cite" data-refid="15">[15]</sup>。偏播放器非媒体库，NAS 仅 DLNA/SMB（无 WebDAV）。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>💡 SKYBOX：老牌跨平台、SBS 稳定性口碑好 <span class="conf g">🟢 单源为主</span></h4>
+        <p>从 Quest 移植的原生 visionOS 版，格式 AV1/MP4/MKV/MOV/TS/WEBM，2D/SBS/Top-Bottom/VR180/360/<strong>鱼眼 200/220</strong>，自动识别；UPnP/DLNA + SMB 直连，<strong>官网有免费 PC Client 串流</strong>；5.1/7.1 环绕；约 $10<sup class="cite" data-refid="30">[30]</sup>。SBS 3D 稳定性常被评价优于 Moon Player<sup class="cite" data-refid="25">[25]</sup>。短板：无 WebDAV、UI 沿用 VR 时代风格。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ Theater / Plexi / Chroma：已用 Plex 时才划算 <span class="conf y">🟡 单源</span></h4>
+        <p>专为 visionOS 优化的 Plex/Emby 客户端：Theater（接 Plex，$4 内购解锁全部）、Plexi（实时 2D→3D，$1.99）、Chroma/CineUltra（CineUltra 支持 HSBS 3D 影院模式）<sup class="cite" data-refid="29">[29]</sup>。<strong>依赖你先架 Plex/Emby 服务器；真 3D 支持参差，多数靠合成 2D→3D 而非原生立体。</strong></p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>⚠️ Sandwich Television</strong>（Sandwich Video 创始人做的拟物电视 app）主打 SharePlay 共看 + spatial video，体验/氛围独特，但<strong>格式/NAS/价格信息不透明、流媒体功能未就绪</strong><sup class="cite" data-refid="31">[31]</sup>（confidence 低，仅作氛围向补充）。题目提到的「Siloh」未在 evidence pack 中出现 <span class="conf r">🔴 待补研究</span>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">3D 格式深挖：MV-HEVC vs SBS/OU vs MVC</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这章是整个 3D 链路的技术核心。搞懂三种格式的关系，才能判断「哪些片要转码、哪些不用」——这直接省你大量 Mac Studio 算力和时间。</p>
+
+      <h3>6.1 三种格式的关系</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>格式</th><th>来源</th><th>AVP 能直接播？</th><th>要不要转码</th><th>特点</th></tr></thead>
+          <tbody>
+            <tr><td><strong>MV-HEVC (spatial)</strong></td><td>AVP 原生 3D 标准</td><td class="check y">✅ 原生</td><td class="check y">已是终点</td><td>单 track 多 layer，质量上限最高<sup class="cite" data-refid="14">[14]</sup></td></tr>
+            <tr><td><strong>SBS / Half-SBS / Full-SBS</strong></td><td>社区 x264 片源</td><td class="check y">✅ VR 播放器直接播</td><td class="check n">⛔ 不用转码</td><td>Moon/Reality/SKYBOX 自动识别<sup class="cite" data-refid="14">[14]</sup></td></tr>
+            <tr><td><strong>Over-Under (OU/TB)</strong></td><td>社区 x264 片源</td><td class="check y">✅ VR 播放器直接播</td><td class="check n">⛔ 不用转码</td><td>同上，上下排列</td></tr>
+            <tr><td><strong>MVC (frame-packed)</strong></td><td>3D 蓝光</td><td class="check p">⚠️ 多数播放器不支持</td><td class="check p">⚠️ 转码 / 或 4XVR 直读</td><td>多数要转 MV-HEVC；但 <strong>4XVR 可直接播 MVC ISO/MKV</strong>，省掉转码<sup class="cite" data-refid="41">[41]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout accent">
+        <h4>🎯 一句话决策：你的 3D 片是 SBS/OU 吗？那不用转码 <span class="conf g">🟢 多源</span></h4>
+        <p>MV-HEVC = 单 track 多 layer 共享帧尺寸（hero eye 主视 + 差异辅视），区别于 SBS。<strong>蓝光是 frame-packed MVC，必须转码；而 SBS/OU 的 x264 文件 Moon/Reality/SKYBOX 可自动识别直接播放，无需转码</strong><sup class="cite" data-refid="16">[16]</sup>。所以 Mac Studio 只在两种情况上场：(a) 蓝光 MVC，或 (b) 想把已有 SBS/OU 升到 MV-HEVC 的原生质量上限。</p>
+      </div>
+
+      <h3>6.2 Full-SBS vs MV-HEVC：兼容 or 质量上限</h3>
+      <div class="callout info">
+        <p><strong>Full-SBS 兼容最广但文件翻倍；MV-HEVC 可在比 SBS/OU 更高分辨率/码率下播放（质量上限更高）</strong><sup class="cite" data-refid="19">[19]</sup>。MakeSBS3D 把 FSBS 标为「推荐给多数人」因兼容最多播放器；但 Apple 用 MV-HEVC 把第二路画面以 2D 兼容方式存储，原生播放器实测 MV-HEVC 分辨率/码率上限高于 SBS/OU。<strong>即：要兼容选 FSBS，要质量上限选 MV-HEVC。</strong>⚠️ Half-SBS vs Full-SBS 在 AVP 上的实测画质损失量化数据缺 <span class="conf r">🔴 待补研究</span>。</p>
+      </div>
+
+      <h3>6.3 Mac Studio 转码工具链</h3>
+      <div class="callout good">
+        <h4>✅ Spatial 命令行工具（SBS/OU → MV-HEVC，免费）<span class="conf g">🟢 多源</span></h4>
+        <p>Mike Swanson 的免费 macOS 工具，输入 SBS/over-under/分离左右眼，输出 MV-HEVC spatial（AVP+Quest 通用），<strong>用 Apple 原生框架</strong>、最高 8K，可写 cdist/hfov 等空间元数据；要求 macOS Sonoma 14.0+ + Apple Silicon，Homebrew 安装<sup class="cite" data-refid="16">[16]</sup>。命令如 <code>./spatial make -i over_under.mov -f ou -o out.mov</code>。Mac Studio 算力适合批量。短板：命令行无 GUI、转码耗时占空间、需正确填空间元数据否则 AVP 不识别。</p>
+      </div>
+
+      <div class="callout good">
+        <h4>✅ BD_to_AVP（3D 蓝光 MVC → MV-HEVC，开源）<span class="conf g">🟢 多源</span></h4>
+        <p>把自有 3D 蓝光/ISO/MKV/MTS（MPEG-4 MVC）转成 MV-HEVC 的开源 pipeline，GPL-3.0；要求 Apple Silicon（M1+）、macOS Sonoma、Python 3.12 + FFmpeg/Wine/MakeMKV/MP4Box/MKVToolNix/spatial-media-kit-tool；默认输出 <strong>left-right-bitrate 20Mb/s、MV-HEVC quality 75</strong>，可选 AI 升 4K + 字幕 OCR<sup class="cite" data-refid="16">[16]</sup>。短板：依赖多、配置复杂（Wine/MakeMKV），<strong>可见最新版停在 v0.2.137（2024-07）</strong>，2025/2026 维护状态未证实 <span class="conf y">🟡 单源</span>；产物默认走 Files/Screenlit 播放。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ MakeSBS3D（GUI 化，beta）<span class="conf y">🟡 单源</span></h4>
+        <p>GUI 化的 3D 蓝光/MKV 转 Full-SBS 或 MV-HEVC 工具，拖拽操作，可输出 FSBS（给 Moon/SKYBOX 直接播）或 spatial（给 Apple 生态），要求 macOS Sequoia/Tahoe<sup class="cite" data-refid="19">[19]</sup>。比命令行友好，但<strong>仍 TestFlight beta、价格未定、稳定性待验证</strong>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">3D/VR/沉浸资源库与获取途径</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>合法途径正常写；社区/灰色资源只客观说明存在 + 版权提醒，不提供任何盗版获取步骤。</p>
+
+      <h3>7.1 完全合法的途径（推荐）</h3>
+      <div class="callout good">
+        <h4>✅ Apple TV 商店买 / 租 3D（已购升级 3D 免费）<span class="conf g">🟢 多源</span></h4>
+        <p>Apple TV app 片页 How to Watch 选 <strong>Play in 3D</strong>，2D/3D 可随时切；<strong>已购电影若现有 3D 版可免费看 3D</strong>；发布时 150+ 部 3D 电影，社区整理出 200+ 列表<sup class="cite" data-refid="8">[8]</sup>。完全合法、零配置、画质有保障。⚠️ <strong>但大陆 Apple ID 基本无法购买</strong>（Apple 官方可用性页大陆不含 Apple TV 电影购买，香港才有）<sup class="cite" data-refid="40">[40]</sup>，需非大陆 ID 且自担账号/支付/区域风险。</p>
+      </div>
+      <div class="callout good">
+        <h4>✅ Apple Immersive Video + 腾讯视频 3D 巨幕 <span class="conf g">🟢 多源</span></h4>
+        <p>Apple 自制 180° 8K 沉浸视频（独家）；国内<strong>腾讯视频中国区</strong>上线 8K + Dolby 的 3D「客厅巨幕影院」，腾讯云做全链路 3D（采集→MV-HEVC 编码→封装→分发→播放，节省约 20% 带宽）<sup class="cite" data-refid="18">[18]</sup>。</p>
+      </div>
+      <div class="callout good">
+        <h4>✅ 自有 3D 蓝光转录（仅限自有碟，注意当地法规）<span class="conf g">🟢 多源</span></h4>
+        <p>用 BD_to_AVP（开源 GPL）在 Mac Studio 上把<strong>自有 3D 蓝光</strong>转成 AVP 可播的 MV-HEVC<sup class="cite" data-refid="16">[16]</sup>。<strong>仅适用于自有碟片转录；解码加密碟在部分司法辖区可能涉及 DRM 规避，本报告是技术说明、非法律建议，使用者自行遵守当地法规。</strong></p>
+      </div>
+
+      <h3>7.2 社区/灰色资源（客观说明 + 版权红线）</h3>
+      <div class="callout bad">
+        <h4>⛔ 版权红线 <span class="conf g">🟢 多源</span></h4>
+        <p>社区（论坛/QQ 群/种子等）流通的 SBS/OU 片源与未授权资源<strong>客观存在</strong>，属<strong>灰色来源</strong><sup class="cite" data-refid="16">[16]</sup>。<strong>本报告不提供任何获取盗版的步骤或站点</strong>。使用者须自行遵守当地版权法律——这条没有商量余地。技术上 VR 播放器能直接播 SBS/OU 不代表来源合法，「能播」与「该播」是两件事。</p>
+      </div>
+
+      <div class="callout info">
+        <p><strong>💡 合法 + 省事的优先级建议：</strong>① 已购电影直接免费升 3D（零成本）→ ② Disney+ 订阅看 42 部 3D + 沉浸环境 → ③ 国内腾讯视频 3D 巨幕 → ④ 自有蓝光合法转录 → ⑤ YouTube VR180/360 免费海量。这五条足够撑起一个丰富的片库，无需碰灰色资源。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">群晖本地影视库搭建</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>服务端选型 + 部署方式 + 硬件转码现状。核心结论先行：<strong>群晖只当仓库不当转码机，服务端推荐 Jellyfin。</strong></p>
+
+      <h3>8.1 服务端三选一</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>服务端</th><th>价格</th><th>部署方式</th><th>远程</th><th>推荐度</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Jellyfin</strong></td><td class="check y">完全免费永久</td><td>Container Manager（Docker）<sup class="cite" data-refid="27">[27]</sup></td><td>配 Tailscale 零订阅</td><td class="check y">✅ 首推</td></tr>
+            <tr><td><strong>Plex</strong></td><td>远程要 Plex Pass；终身版 2026/7 起 $749.99<sup class="cite" data-refid="26">[26]</sup></td><td>原生套件一键装</td><td>2025-04-29 起远程需订阅<sup class="cite" data-refid="28">[28]</sup></td><td class="check p">🟡 省心但贵</td></tr>
+            <tr><td><strong>Emby</strong></td><td>部分功能要 Premiere</td><td>套件/Docker</td><td>需订阅</td><td class="check n">⛔ 2026 不推荐</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout good">
+        <h4>✅ Jellyfin：零订阅、本地优先、对自有库最划算 <span class="conf g">🟢 多源</span></h4>
+        <p>完全免费永久、开源、LAN 不依赖云、隐私好（数据不出局域网）；DSM 7.2 用 <strong>Container Manager</strong>（旧 Docker 改名）以 docker-compose 部署，挂载 <code>/media</code> 和 <code>/config</code>，浏览器进 <code>http://NAS_IP:8096</code> 初始化<sup class="cite" data-refid="27">[27]</sup>。短板：首次部署比 Plex 略需技术、元数据抓取略逊 Emby。<strong>群晖社区套件版更新/迁移困难，推荐 Docker 部署。</strong></p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ Plex：最省心但 2025 起远程要钱、终身版暴涨 <span class="conf g">🟢 多源</span></h4>
+        <p>群晖 Package Center 一键装、升级无缝、客户端最打磨。但 <strong>2025-04-29 起本机以外的远程串流需 Plex Pass 或 Remote Watch Pass</strong>（LAN 内不受影响）<sup class="cite" data-refid="28">[28]</sup>；Plex Pass 约 $6.99/月、$69.99/年；<strong>终身版 2025-03 由 $119.99→$249.99，2026-07-01 起再涨到 $749.99</strong><sup class="cite" data-refid="26">[26]</sup>。对只在 LAN 看的阿杰订阅价值低。</p>
+      </div>
+
+      <h3>8.2 硬件转码：群晖 2025 的坑</h3>
+      <div class="callout bad">
+        <h4>⛔ Synology 2025 新机型砍掉了硬件转码 <span class="conf g">🟢 多源</span></h4>
+        <p><strong>DS225+/DS425+ 等 X25 系列悄悄移除了 Plex/Jellyfin/Emby 用的内核显卡驱动，官方禁用了 H.264/HEVC 硬件转码</strong>（硬件 Intel J4125 含 Quick Sync 仍有能力，可 SSH workaround 解锁，但官方默认不支持）<sup class="cite" data-refid="23">[23]</sup>。这进一步说明应走直连而非依赖群晖转码。</p>
+      </div>
+      <div class="callout warn">
+        <h4>⚠️ Ryzen 群晖（DS923+）无核显，靠 CPU 软转 <span class="conf y">🟡 单源</span></h4>
+        <p>DS923+/DS1522+（2025 改动前机型）技术上能转 4K，但 <strong>DS923+ 是 AMD Ryzen 无核显，靠 CPU 软转码而非 Intel Quick Sync 硬转</strong>，效率低<sup class="cite" data-refid="24">[24]</sup>。阿杰型号未知，<strong>方案按直连优先即可规避此差异</strong>。</p>
+      </div>
+
+      <div class="callout accent">
+        <h4>🎯 结论：别让群晖转码 <span class="conf g">🟢 多源</span></h4>
+        <p>AVP 上的核心策略是<strong>「直连直播不转码」</strong>——4K HDR 直连本地/远程客户端优于转码，转码极耗服务器，且 Plex 会把 4K HDR HEVC 转成 1080p H264 SDR 导致颜色发灰<sup class="cite" data-refid="22">[22]</sup>。Infuse 在 Apple TV 上能流畅直连播放同样让 Plex 转码卡顿的影片，说明<strong>直连 + 千兆网络 = 保画质 + 不压服务器</strong>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">群晖 + AVP 看 3D / 纪录片的完整方案</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>把存储、编排、直连 vs 转码、带宽、远程串起来，给一条端到端可执行链路。</p>
+
+      <h3>9.1 三层链路</h3>
+      <div class="callout accent">
+        <p><strong>① 存：</strong>片子放群晖，开 SMB（必开）+ DLNA/WebDAV（可选）。<strong>② 转：</strong>Mac Studio 是发动机——蓝光 MVC 走 BD_to_AVP、已有 SBS/OU 想升原生质量走 Spatial 命令行工具转 MV-HEVC<sup class="cite" data-refid="16">[16]</sup>。<strong>③ 播：</strong>AVP 上分两类 app——2D/4K HDR 用 Infuse 接 Jellyfin 直连不转码、3D 用 Moon/SKYBOX 走 SMB 直连群晖<sup class="cite" data-refid="13">[13]</sup>。</p>
+      </div>
+
+      <h3>9.2 普通 2D/4K HDR：Infuse 直连完美</h3>
+      <div class="callout good">
+        <p>Infuse 当统一前端，连 Jellyfin <strong>直连直播 MKV/MP4/ISO/VIDEO_TS/BDMV 不转码</strong>，支持 Dolby Vision(Profile 5&8)/HDR10/HDR10+/HLG、Dolby Atmos(E-AC3) passthrough，与 Plex/Jellyfin 双向同步观看进度<sup class="cite" data-refid="13">[13]</sup>。需 visionOS 2.6+。这条线体验最佳。</p>
+      </div>
+
+      <h3>9.3 3D：硬分叉，必须换播放器 + 蓝光先转码</h3>
+      <div class="callout bad">
+        <p><strong>⛔ Infuse 到 2026（8.4.x）仍不能在 AVP 真 3D 播放</strong>——SBS 当 2D 放，不支持 MV-HEVC/frame-packed/3D 蓝光 ISO 的立体模式<sup class="cite" data-refid="13">[13]</sup>。3D 流程：<strong>3D 蓝光 → Mac Studio 用 BD_to_AVP 转 MV-HEVC（默认 20Mbps 双目码率）→ 存群晖 → AVP 用 Moon Player 或 SKYBOX 通过 SMB 直连播放</strong>（这俩才支持立体模式，SKYBOX 的 SBS 稳定性口碑更好）<sup class="cite" data-refid="16">[16]</sup>。已是 SBS/OU 的片则跳过转码，直接 Moon/SKYBOX 播。<strong>另一条捷径（Codex 审查补充）：用 4XVR 可直接播 MVC 3D 蓝光 ISO/MKV，连转码都省了</strong>，改变了"3D 蓝光必须先转码"的结论<sup class="cite" data-refid="41">[41]</sup>。</p>
+      </div>
+
+      <h3>9.4 带宽与远程</h3>
+      <div class="callout good">
+        <h4>✅ 局域网千兆 + 直连，4K HDR 毫无压力 <span class="conf g">🟢 多源</span></h4>
+        <p>群晖到 AVP 走千兆局域网 + 直连直播，4K HDR 无压力；关键是别让群晖转码<sup class="cite" data-refid="22">[22]</sup>。</p>
+      </div>
+      <div class="callout info">
+        <h4>💡 远程在外看片用 Tailscale <span class="conf g">🟢 多源</span></h4>
+        <p>基于 WireGuard 的零配置 VPN，<strong>免端口转发、能穿 CGNAT</strong>，让 AVP 在外网安全访问家里群晖；也是绕开 Plex 远程订阅的途径，Jellyfin 配它<strong>全程零订阅</strong>。VPN 加延迟但不限带宽，<strong>家里上行 50+Mbps 时 4K Direct Play 可用</strong><sup class="cite" data-refid="21">[21]</sup>。⚠️ 国内访问 Tailscale 控制面偶有连通性波动，若受阻可自建 WireGuard+VPS 中继（更复杂）<span class="conf r">🔴 待补研究</span>。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>⚠️ 待证实：</strong>转换后的 MV-HEVC 3D 文件能否被 Plex/Jellyfin 服务器正确<strong>识别为 3D 并编排进媒体库</strong>（而非仅 Files/Screenlit 直读），以及 Moon/SKYBOX 能否连 Jellyfin/Plex 服务器（而非仅 SMB/WebDAV），均未证实<sup class="cite" data-refid="16">[16]</sup>。8K HDR 在 AVP+群晖链路的实测码率/带宽与 AVP 端解码上限未拿到具体数字 <span class="conf r">🔴 待补研究</span>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">Mac Studio 连 AVP（Mac Virtual Display）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">10240×2880</div><div class="l">Ultrawide 32:9（等效双 5K）</div></div>
+        <div class="metric"><div class="v">macOS 15.2+</div><div class="l">超宽屏要求</div></div>
+        <div class="metric"><div class="v">120Hz</div><div class="l">M5 款刷新率（M2 锁 60Hz）</div></div>
+        <div class="metric"><div class="v">20Gbps</div><div class="l">Developer Strap 有线 · $300</div></div>
+      </div>
+
+      <h3>10.1 Mac Virtual Display 是什么</h3>
+      <div class="callout accent">
+        <p>把 Apple Silicon Mac 桌面无线投到 AVP 成为一个可缩放的曲面窗口，支持 <strong>Standard 16:9（到 5K）/ Wide 21:9（到 6720×2880）/ Ultrawide 32:9（到 10240×2880，等效双 5K 并排）</strong>，Ultrawide 靠注视点渲染（foveation）实现 10K 横向分辨率<sup class="cite" data-refid="32">[32]</sup>。<strong>它本身是一个 visionOS 窗口，可与其他 visionOS app 窗口共存</strong>——这是第 11 章「边看边瞄」的基础。免费内置。</p>
+      </div>
+
+      <h3>10.2 设置步骤（Mac Studio 无屏台式机版）</h3>
+      <div class="callout good">
+        <ol style="margin:4px 0 0;padding-left:20px;">
+          <li>Mac Studio 确认 <strong>macOS 15.2+</strong>（Sequoia 及以上，Ultrawide/Wide 要求），AVP 升到 <strong>visionOS 2.2+</strong>（最好 visionOS 26）<sup class="cite" data-refid="32">[32]</sup>。</li>
+          <li>两设备<strong>同一 Apple ID + 开双因素 + 开 iCloud 钥匙串 + 开 Handoff</strong>，Wi-Fi+蓝牙都开，两机 10 米内<sup class="cite" data-refid="32">[32]</sup>。</li>
+          <li>戴上 AVP 开<strong>控制中心选 Mac Virtual Display</strong> 连 Mac Studio（Studio 是台式机没屏幕，从控制中心选即可，不用「看着屏幕点连接」）。⚠️ 此 UI 路径为通用推导，未逐字截图确认 <span class="conf y">🟡</span>。</li>
+          <li>连上后点窗口上方按钮选 <strong>Standard / Wide / Ultrawide</strong>。</li>
+        </ol>
+      </div>
+
+      <h3>10.3 画质 / 延迟取舍</h3>
+      <div class="callout warn">
+        <h4>⚠️ 无线画质强依赖 Wi-Fi，瓶颈在「AVP↔路由器」这段 <span class="conf g">🟢 多源</span></h4>
+        <p>Mac Studio 自身走有线网，<strong>瓶颈在 AVP↔路由器的无线段</strong>——务必 Wi-Fi 6/6E/7 且 AVP 离路由近，否则虚拟屏会卡顿；用户普遍反馈卡顿、降分辨率不解决、Wi-Fi 中继器会更糟<sup class="cite" data-refid="34">[34]</sup>。</p>
+      </div>
+      <div class="callout info">
+        <h4>🛠️ Developer Strap 有线 20Gbps（开发/诊断向，非日常观影推荐）<span class="conf y">🟡 单源</span></h4>
+        <p>新版 Developer Strap 通过 USB-C 给 AVP 提供 <strong>20Gbps 有线连接</strong>（旧版仅 USB2.0 480Mbps），$300——但 Apple 定位是<strong>开发/诊断用途</strong>，不是消费级观影配件，且对初代 M2 AVP 的实际速率 Apple 未明确<sup class="cite" data-refid="33">[33]</sup>。<strong>不建议为看片/Mac 投屏专门买</strong>，无线 Mac Virtual Display 对绝大多数场景已够用。</p>
+      </div>
+      <div class="callout accent">
+        <h4>🎯 M5 款 120Hz vs M2 款 60Hz <span class="conf g">🟢 多源</span></h4>
+        <p>M5 Vision Pro（2025-10 首次硬件升级）把 Mac Virtual Display 刷新率<strong>从 60Hz 翻倍到 120Hz</strong>，文字更锐（多渲染约 10% 像素）；<strong>M2 老款无论有线无线都锁 60Hz</strong><sup class="cite" data-refid="35">[35]</sup>。瞄代码/滚动 M5 更顺；<strong>120Hz 据厂商/媒体或可减轻部分人的不适感，但"更不晕"是个体差异、需自己实测</strong>，不是确定结论。阿杰若是初代 M2 款则无此刷新率提升。</p>
+      </div>
+
+      <h3>10.4 多屏限制（澄清易混点）</h3>
+      <div class="callout info">
+        <p>官方 Mac Virtual Display <strong>同时只投 1 个 Mac 屏</strong>（Mac 接多显示器时只显示主屏）；第三方 <strong>Splitscreen（$19.99）</strong>可补第二个 Mac 屏，但分辨率/帧率（1280×720~2560×1440@60fps）低于官方 Ultrawide<sup class="cite" data-refid="36">[36]</sup>。<strong>但「不能多窗口」指不能挂多个 Mac 显示器，并非不能与 visionOS 视频 app 共存——两者是不同概念</strong>，阿杰「1 个 Mac 编码屏 + 1 个视频 app 窗口」用官方功能即可，无需第三方。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">⭐ 一边看电影一边 vibe coding 的工作流</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这是阿杰的特殊诉求，重点章。核心结论：<strong>完全可行，且就是官方设计的多窗口共享空间玩法，不用买任何第三方 app。</strong></p>
+
+      <h3>11.1 为什么能共存（技术基础）</h3>
+      <div class="callout good">
+        <h4>✅ Mac 虚拟屏是「窗口」，视频 app 是「另一个窗口」 <span class="conf g">🟢 多源</span></h4>
+        <p>官方支持文档明确：<strong>可在巨大的 Mac 虚拟屏上工作，同时查看并操作显示 visionOS app（Photos/Notes/Files/视频播放器 等）的独立窗口；可用 Mac 触控板/鼠标跨 Mac 屏和邻近 visionOS 窗口操作</strong><sup class="cite" data-refid="32">[32]</sup>。Mac Virtual Display 投进 AVP 后只是 visionOS 里的一个窗口，其他原生 app 作为独立窗口围绕它摆放，二者天然共存。</p>
+      </div>
+
+      <h3>11.2 唯一的坑：别进 Apple TV 影院模式</h3>
+      <div class="callout bad">
+        <h4>⛔ Apple TV 专用 Cinema Environment 会藏掉 Mac 窗口 <span class="conf g">🟢 多源</span></h4>
+        <p>标准 Environment + 数码表冠<strong>半沉浸时，app 窗口仍漂浮可见且可空间锚定</strong>；只有 <strong>Apple TV 自带的专用「影院 Cinema」模式</strong>会临时隐藏其他所有窗口、独占视野（Apple TV 移到正前方，点最小化才能找回其他 app）<sup class="cite" data-refid="20">[20]</sup>。第三方沉浸影院 app 走 Full Space 同理会独占。<strong>要边看边瞄，就用普通 Environment + 窗口化播放，别进 Cinema 模式。</strong></p>
+      </div>
+
+      <h3>11.3 推荐窗口布局</h3>
+      <div class="callout accent">
+        <p>① 把 <strong>Mac 虚拟屏摆在前方主位</strong>（vibe coding 进度就在这看）；② 单独再开一个 visionOS 视频 app 窗口（Apple TV/Infuse/B 站等）<strong>放成大屏当电影幕</strong>；③ 拧数码表冠进一个喜欢的 Environment（优胜美地/白沙/木星等）做半沉浸；④ 用 Mac 的鼠标/触控板，光标跨 Mac 屏和 visionOS 窗口使用<sup class="cite" data-refid="32">[32]</sup>。开发者社区已验证：<strong>侧边放视频窗、前方放 IDE 编码，reference 缩小塞一旁随时瞄</strong>是真实在用的工作流<sup class="cite" data-refid="37">[37]</sup>。</p>
+      </div>
+
+      <h3>11.4 取舍与现实预期</h3>
+      <div class="callout warn">
+        <h4>⚠️ 「偶尔瞄一眼」OK，别当全天主力编码屏 <span class="conf g">🟢 多源</span></h4>
+        <p>开发者报告<strong>盯小字编码超 30 分钟易眼疲劳</strong>，适合短时段/偶尔瞄，不适合全天主力编码屏<sup class="cite" data-refid="37">[37]</sup>。阿杰的需求恰好是「沉浸看片 + 偶尔瞄进度」，完全落在舒适区。</p>
+      </div>
+      <div class="callout info">
+        <p><strong>💡 freshness 加分项：</strong>visionOS 2.2（2024-12）加了 Wide(21:9)/Ultrawide(32:9，等效双 5K) 曲面虚拟屏 + Mac 音频转入 AVP<sup class="cite" data-refid="38">[38]</sup>；M5 Vision Pro（2025-10）把刷新率翻到 120Hz，瞄代码更顺手不晕<sup class="cite" data-refid="35">[35]</sup>。群晖 NAS 在这一路<strong>不直接参与</strong>（它属于片源路线）——这里 Mac Studio 跑 coding，AVP 同屏呈现影片+代码。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>⚠️ 待补研究：</strong>未找到一篇专门评测「电影大屏窗口 + Mac 编码小窗在普通 Environment 内长期共用」的端到端体验文章（结论由官方机制 + 多篇开发者实践拼合推导，confidence 高但缺单一权威实证）；visionOS 26 是否对「窗口与 Environment 共存」有行为改动未确证 <span class="conf r">🔴 待补研究</span>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">⭐ 阿杰落地路线（决策树 + 分阶段）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>最重要的章。先跑通最窄的链路，再逐步加 3D / 沉浸 / 远程，避免一上来全栈搭崩。</p>
+
+      <h3>12.1 我这片是什么格式？该用哪个 app？（决策树）</h3>
+      <div class="tree">
+        <div class="node q">这是什么内容？</div>
+        <div class="step-arrow">↓</div>
+        <div class="branches">
+          <div class="node yes"><span class="lbl y">2D / 4K HDR</span>群晖 → <strong>Infuse 接 Jellyfin 直连</strong>，不转码，体验最佳<sup class="cite" data-refid="13">[13]</sup></div>
+          <div class="node no"><span class="lbl m">Apple 沉浸片</span>国内装<strong>咪咕/腾讯视频</strong>看；想华语装 iQIYI XR/沉浸中国<sup class="cite" data-refid="2">[2]</sup></div>
+        </div>
+        <div class="step-arrow">↓ 如果是 3D</div>
+        <div class="node q">这个 3D 片是什么格式？</div>
+        <div class="step-arrow">↓</div>
+        <div class="branches">
+          <div class="node yes"><span class="lbl y">SBS / OU</span><strong>不用转码</strong>，直接 Moon/Reality/SKYBOX 走 SMB 直连群晖播<sup class="cite" data-refid="14">[14]</sup></div>
+          <div class="node no"><span class="lbl n">3D 蓝光 MVC</span><strong>必须转码</strong>：Mac Studio 跑 BD_to_AVP → MV-HEVC → 存群晖 → Moon/SKYBOX 播<sup class="cite" data-refid="16">[16]</sup></div>
+        </div>
+        <div class="step-arrow">↓ 想省事合法</div>
+        <div class="node yes"><span class="lbl y">合法省事</span>Apple TV 买/租 3D（已购免费升 3D）+ Disney+ 42 部 + 腾讯视频 3D 巨幕<sup class="cite" data-refid="8">[8]</sup></div>
+      </div>
+
+      <h3>12.2 分阶段落地</h3>
+      <div class="callout good">
+        <h4>✅ 阶段 1：跑通最窄链路（2D 观影 + Mac 串流）</h4>
+        <p>① 群晖装 Jellyfin（Container Manager/Docker，挂 /media + /config）<sup class="cite" data-refid="27">[27]</sup>；② AVP 装 Infuse 接 Jellyfin，局域网直连看 2D/4K HDR；③ Mac Studio 走 Mac Virtual Display 投进 AVP，在普通 Environment 里大屏放片 + 侧边放 coding 窗<sup class="cite" data-refid="32">[32]</sup>。<strong>这一步验证整套体验，零转码、零订阅。</strong></p>
+      </div>
+      <div class="callout info">
+        <h4>💡 阶段 2：加 3D 能力</h4>
+        <p>① AVP 装 Moon Player（需 visionOS 26）或 Reality Player（visionOS 1.1+ 门槛低）或 SKYBOX<sup class="cite" data-refid="14">[14]</sup>；② 已有 SBS/OU 片直接走 SMB 直连播；③ 有 3D 蓝光再上 Mac Studio 的 BD_to_AVP 转 MV-HEVC<sup class="cite" data-refid="16">[16]</sup>。</p>
+      </div>
+      <div class="callout accent">
+        <h4>🎯 阶段 3：加沉浸 + 远程</h4>
+        <p>① 国内装咪咕/腾讯视频看 Apple 沉浸片，装官方 YouTube 看 VR180/360<sup class="cite" data-refid="9">[9]</sup>；② 远程在外看片配 Tailscale（家里上行 50Mbps+ 即可 4K 直连）<sup class="cite" data-refid="21">[21]</sup>。</p>
+      </div>
+
+      <h3>12.3 一句话路线</h3>
+      <div class="callout purple">
+        <p><strong>群晖+Jellyfin(Docker) → 局域网直连 → AVP 上 2D 用 Infuse、3D 用 Moon/SKYBOX，3D 蓝光先在 Mac Studio 转 MV-HEVC，远程套 Tailscale；coding 走 Mac Virtual Display 在普通 Environment 里和电影窗共存，别进 Apple TV 影院模式。</strong></p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 落地前两件必做的确认</h4>
+        <p>① <strong>查清群晖型号</strong>——Intel 核显（Quick Sync 硬转）还是 AMD Ryzen（软转），但走直连优先可基本规避<sup class="cite" data-refid="24">[24]</sup>；② <strong>核实 Moon/Reality/SKYBOX 在 AVP 中国区 App Store 是否上架</strong>，以及国区 Apple ID 对 Disney+/Apple TV 3D 租购的限制 <span class="conf r">🔴 待补研究</span>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">风险与坑</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <div class="callout bad">
+        <h4>⛔ 坑 1：拿 Infuse 播 3D 会得到一堆 2D</h4>
+        <p>Infuse 到 2026（8.4.x）仍不能在 AVP 真 3D 播放，SBS/OU/MVC 都当 2D<sup class="cite" data-refid="13">[13]</sup>。3D 必须换 Moon/SKYBOX/Reality。这是最高频的认知错误。</p>
+      </div>
+      <div class="callout bad">
+        <h4>⛔ 坑 2：群晖 2025 新机型 / Ryzen 机型转码弱</h4>
+        <p>X25 系列砍硬转<sup class="cite" data-refid="23">[23]</sup>、DS923+ 是 Ryzen 无核显软转<sup class="cite" data-refid="24">[24]</sup>。<strong>解法：别让群晖转码，走直连。</strong></p>
+      </div>
+      <div class="callout warn">
+        <h4>⚠️ 坑 3：区域限制与国内可用性</h4>
+        <p>Apple 沉浸片大陆走咪咕/腾讯非 Apple TV<sup class="cite" data-refid="2">[2]</sup>；湖人直播仅限南加州转播区<sup class="cite" data-refid="4">[4]</sup>；国区 Apple ID 对 Disney+/Apple TV 3D 租购可能受限、Moon/Reality/SKYBOX 国区上架未核实 <span class="conf r">🔴 待补研究</span>。</p>
+      </div>
+      <div class="callout warn">
+        <h4>⚠️ 坑 4：晕动症 / 佩戴时长</h4>
+        <p>盯小字编码超 30 分钟易眼疲劳，适合「偶尔瞄」不适合全天主力屏<sup class="cite" data-refid="37">[37]</sup>；M2 款锁 60Hz 比 M5 款 120Hz 更易晕<sup class="cite" data-refid="35">[35]</sup>；长时间佩戴舒适度/重量是另一议题<sup class="cite" data-refid="6">[6]</sup>。</p>
+      </div>
+      <div class="callout warn">
+        <h4>⚠️ 坑 5：带宽与转码瓶颈</h4>
+        <p>无线 Mac Virtual Display 强依赖 Wi-Fi（务必 6/6E/7 + 靠近路由）<sup class="cite" data-refid="34">[34]</sup>；Moon Player 高码率有卡顿反馈<sup class="cite" data-refid="25">[25]</sup>；BD_to_AVP 转码耗时占空间、依赖复杂（Wine/MakeMKV）<sup class="cite" data-refid="16">[16]</sup>。</p>
+      </div>
+      <div class="callout bad">
+        <h4>⛔ 坑 6：版权红线</h4>
+        <p>社区灰色 SBS/OU 片源客观存在但属未授权来源<sup class="cite" data-refid="16">[16]</sup>。<strong>「能播」不等于「该播」，使用者须自行遵守版权法。</strong>合法路径（已购升 3D / Disney+ / 腾讯 / 自有碟转录）足够丰富，无需碰灰色。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH14 FAQ ===== -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">FAQ</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">我在国内，AVP 上怎么看 Apple 的独家沉浸片？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>别在 Apple TV app 里找——大陆没有。<strong>装免费的「咪咕视频」和「腾讯视频」app</strong>，Apple 官方沉浸片走这两个渠道<sup class="cite" data-refid="2">[2]</sup>。想看华语/中国题材沉浸内容再装 iQIYI XR（2.5 万+ 片源）和「沉浸中国」（16K 景点）<sup class="cite" data-refid="7">[7]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">为什么我的 3D 片用 Infuse 放出来是 2D？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>因为 Infuse 在 AVP 上<strong>不能真正渲染 3D</strong>，SBS/OU/MVC 都被当 2D 播，Firecore 官方无 3D 时间表<sup class="cite" data-refid="13">[13]</sup>。换 Moon Player / SKYBOX / Reality Player，这些才支持立体模式并能自动识别 SBS/OU/180/360<sup class="cite" data-refid="14">[14]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">我的 3D 片到底要不要在 Mac Studio 上转码？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>看格式。<strong>SBS/OU 的 x264 文件不用转码</strong>，Moon/Reality/SKYBOX 直接播<sup class="cite" data-refid="16">[16]</sup>。<strong>3D 蓝光（MVC）必须转码</strong>，用 BD_to_AVP 转 MV-HEVC。另外想把已有 SBS/OU 升到「原生质量上限」时，可用免费 Spatial 命令行工具转 MV-HEVC（MV-HEVC 分辨率/码率上限高于 SBS/OU）<sup class="cite" data-refid="19">[19]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">群晖服务端选 Plex 还是 Jellyfin？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>对只在家看的你，<strong>选 Jellyfin</strong>——免费开源、LAN 不依赖云、配 Tailscale 远程也零订阅<sup class="cite" data-refid="27">[27]</sup>。Plex 更省心（一键装、客户端最打磨）但 2025 起远程要订阅、终身版 2026/7 涨到 $749.99<sup class="cite" data-refid="26">[26]</sup>，性价比低。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">群晖能不能扛 4K HDR 串流到 AVP？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>能，前提是<strong>直连不转码</strong>。千兆局域网 + Direct Play，4K HDR 毫无压力<sup class="cite" data-refid="22">[22]</sup>。别让群晖转码——2025 新机型砍了硬转、Ryzen 机型只能软转<sup class="cite" data-refid="23">[23]</sup>。Infuse/Moon 直连读群晖的 MKV 就行。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">能一边看电影一边瞄 vibe coding 进度吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>能，AVP 原生支持不用买 app。Mac Virtual Display 是一个 visionOS 窗口，视频 app 是另一个窗口，二者天然共存<sup class="cite" data-refid="32">[32]</sup>。<strong>关键：用普通 Environment + 数码表冠半沉浸 + 窗口化播放，别进 Apple TV 的「影院 Cinema」模式</strong>（那个会藏掉 Mac 窗口）<sup class="cite" data-refid="20">[20]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Mac Studio 是台式机没屏幕，怎么连 AVP？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>戴上 AVP 从<strong>控制中心选 Mac Virtual Display</strong> 选中 Mac Studio 即可，不用「看着 Mac 屏幕点连接」<sup class="cite" data-refid="32">[32]</sup>。前提：两机同 Apple ID + 双因素 + iCloud 钥匙串 + Handoff，macOS 15.2+、visionOS 2.2+。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">虚拟屏看代码会卡 / 字糊，怎么办？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>瓶颈在 AVP↔路由器的无线段（Mac Studio 本身有线）。<strong>务必 Wi-Fi 6/6E/7 且 AVP 靠近路由</strong><sup class="cite" data-refid="34">[34]</sup>。想极致清晰低延迟可上 Developer Strap 走 USB-C 有线 20Gbps（$300）<sup class="cite" data-refid="33">[33]</sup>。M5 款 120Hz 比 M2 款 60Hz 滚动更顺更不晕<sup class="cite" data-refid="35">[35]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">3D 电影有哪些合法又省事的来源？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>① Apple TV 买/租，<strong>已购电影免费升 3D</strong>，全平台 200+ 部 3D<sup class="cite" data-refid="8">[8]</sup>；② Disney+ 订阅含 42 部 3D（漫威/皮克斯）；③ 国内腾讯视频 3D 巨幕（8K+Dolby）<sup class="cite" data-refid="18">[18]</sup>；④ 自有 3D 蓝光合法转录。无需碰灰色资源。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Apple 独家沉浸片值得期待吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>惊艳但别指望它撑满观影夜。累计约 47 部、单部仅 15-30 分钟、更新慢、被批剪辑过碎<sup class="cite" data-refid="10">[10]</sup>。它是「点缀」，主菜靠你的库 + 流媒体 + YouTube VR180。2026 年它在往现场直播（湖人/皇马）迈进是好信号<sup class="cite" data-refid="4">[4]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">在外面（异地）能看家里群晖的片吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>能，配 <strong>Tailscale</strong>（基于 WireGuard，免端口转发、穿 CGNAT），Jellyfin 配它全程零订阅，家里上行 50Mbps+ 时 4K Direct Play 远程可用<sup class="cite" data-refid="21">[21]</sup>。⚠️ 国内访问 Tailscale 控制面偶有波动，受阻可自建 WireGuard+VPS 中继。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">第一步应该先搭什么？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>最窄链路：<strong>群晖装 Jellyfin → AVP 用 Infuse 直连看 2D/4K → Mac Studio 走 Mac Virtual Display 投 coding 屏</strong>。零转码、零订阅，先验证整套体验，打通后再加 3D（阶段 2）、再加沉浸 + 远程（阶段 3）。见第 12 章决策树。</p></div></div>
+
+    </div>
+  </section>
+
+  <!-- ===== CH15 References ===== -->
+  <section class="chapter" id="ch15">
+    <h2><span class="num">15</span><span class="title-text">References</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13px;color:var(--text-mute)">访问日期均为 2026-05-29。悬停 inline <sup class="cite" data-refid="1">[1]</sup> 标记可预览来源。</p>
+      <ol class="ref-list">
+        <li id="ref-1">All of Apple's Immersive Video content (updated) — iPhone J.D.（约 47 部 / 180°·8K·3D·空间音频 / 分类统计 2026-05-21）· <a href="https://www.iphonejd.com/iphone_jd/2025/02/all-apple-immersive-video-content.html" target="_blank" rel="noopener">iphonejd.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-2">New Apple Immersive Video series and films premiere on Vision Pro — Apple（大陆经咪咕/腾讯视频，非 Apple TV app）· <a href="https://www.apple.com/newsroom/2024/07/new-apple-immersive-video-series-and-films-premiere-on-vision-pro/" target="_blank" rel="noopener">apple.com/newsroom</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×8</span></li>
+        <li id="ref-3">Apple debuts the first scripted film captured in Apple Immersive Video（Submerged / Edward Berger / 23 吨潜艇布景 / 约 16 分钟）· <a href="https://www.apple.com/newsroom/2024/10/apple-debuts-the-first-scripted-film-captured-in-apple-immersive-video/" target="_blank" rel="noopener">apple.com/newsroom</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-4">Spectrum Front Row tips off January 9 on Apple Vision Pro — Apple（湖人沉浸直播 / 七机位 / 150Mbps / 仅南加州转播区）· <a href="https://www.apple.com/newsroom/2026/01/spectrum-front-row-tips-off-january-9-on-apple-vision-pro/" target="_blank" rel="noopener">apple.com/newsroom</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×4</span></li>
+        <li id="ref-5">Apple Immersive Video on Real Madrid coming to Vision Pro — 9to5Mac（2026-05-22 / 20 分钟 / 30+ Blackmagic 摄影机）· <a href="https://9to5mac.com/2026/05/20/apple-immersive-video-on-real-madrid-coming-this-week-to-vision-pro/" target="_blank" rel="noopener">9to5mac.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-6">Watch movies and TV in an environment — Apple Support（巨幕约 100 英尺 / 自动匹配画幅 / micro-OLED 超 IMAX / 空间音频）· <a href="https://support.apple.com/guide/apple-vision-pro/watch-movies-and-tv-in-an-environment-tan7241583f5/visionos" target="_blank" rel="noopener">support.apple.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×4</span></li>
+        <li id="ref-7">Immersive China — 沉浸中国 — App Store（16K 北京/上海/西安/桂林 / 免费+内购 $0.99–$5.99 / visionOS 2.6+ / iQIYI XR 2.5 万+）· <a href="https://apps.apple.com/us/app/immersive-china-%E6%B2%89%E6%B5%B8%E4%B8%AD%E5%9B%BD/id6642677461" target="_blank" rel="noopener">apps.apple.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×5</span></li>
+        <li id="ref-8">These are the 42 Disney 3D movies available on Apple Vision Pro — FlatpanelsHD（Disney 42 部 / 全平台 200+ / 阿凡达火与烬 / 超级马里奥）· <a href="https://www.flatpanelshd.com/news.php?subaction=showfull&id=1706884889" target="_blank" rel="noopener">flatpanelshd.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×5</span></li>
+        <li id="ref-9">A YouTube Apple Vision Pro app is finally here with 3D video support — AppleInsider（2026-02 上线 / 免费 / VR180+360+8K(M5)）· <a href="https://appleinsider.com/articles/26/02/12/a-youtube-apple-vision-pro-app-is-finally-here-with-3d-video-support-and-more" target="_blank" rel="noopener">appleinsider.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-10">Latest Apple Immersive rollout exemplifies Apple Vision Pro's entire problem — AppleInsider（片量少/更新慢/5 分钟 54 剪辑/15-30 分钟）· <a href="https://appleinsider.com/articles/26/05/20/latest-apple-immersive-rollout-exemplifies-apple-vision-pros-entire-problem" target="_blank" rel="noopener">appleinsider.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-11">Apple debuts The Weeknd's immersive music experience for Apple Vision Pro（Open Hearts / Anton Tammi / 180°+空间音频 / 限时独家）· <a href="https://www.apple.com/newsroom/2024/11/apple-debuts-the-weeknds-immersive-music-experience-for-apple-vision-pro/" target="_blank" rel="noopener">apple.com/newsroom</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-12">Disney+ launches immersive environment + Nat Geo + Marvel 3D films on Apple Vision Pro — Disney+ Press（Nat Geo 冰岛 photogrammetry / 5 个迪士尼环境 / 需 Disney+ 订阅）· <a href="https://press.disneyplus.com/disney-plus-launches-immersive-environment-national-geographic-apple-vision-pro-3d-films-marvel-studios" target="_blank" rel="noopener">press.disneyplus.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-13">3D videos on Apple Vision Pro — Firecore Community（Infuse AVP 不能真 3D / SBS/OU/MVC 退化 2D / 官方无时间表）+ <a href="https://firecore.com/infuse" target="_blank" rel="noopener">firecore.com/infuse</a>（协议/价格/8.3 沉浸环境）· <a href="https://community.firecore.com/t/3d-videos-on-apple-vision-pro/47023" target="_blank" rel="noopener">community.firecore.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×10</span></li>
+        <li id="ref-14">Moon Player (AI-Enhanced 3D) — App Store（2D/Half-Full-SBS/OU/180/360 / 4K–12K / 自动识别 / SMB·DLNA·WebDAV / $8.99 / visionOS 26.0+）· <a href="https://apps.apple.com/us/app/moon-player-ai-enhanced-3d/id6475702609" target="_blank" rel="noopener">apps.apple.com</a> + <a href="https://moonvrplayer.com/moon-player-apple-vision-pro" target="_blank" rel="noopener">moonvrplayer.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×8</span></li>
+        <li id="ref-15">Reality Player — App Store（VR180/360 SBS·OU / MV-HEVC / APMP / AIVU / Spatial Photo / 8K 硬解 / $8.99 / visionOS 1.1+）· <a href="https://apps.apple.com/us/app/reality-player/id6449855042" target="_blank" rel="noopener">apps.apple.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-16">BD_to_AVP — GitHub（3D 蓝光 MVC → MV-HEVC / Apple Silicon / 默认 20Mb/s / v0.2.137 2024-07 / GPL-3.0 / 仅自有碟片）+ Spatial 工具 <a href="https://blog.mikeswanson.com/spatial/" target="_blank" rel="noopener">blog.mikeswanson.com/spatial</a> + Apple Dev <a href="https://developer.apple.com/documentation/AVFoundation/converting-side-by-side-3d-video-to-multiview-hevc-and-spatial-video" target="_blank" rel="noopener">developer.apple.com</a>（SBS→MV-HEVC）· <a href="https://github.com/cbusillo/BD_to_AVP" target="_blank" rel="noopener">github.com/cbusillo/BD_to_AVP</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×15</span></li>
+        <li id="ref-17">visionOS 26 introduces powerful new spatial experiences — Apple Newsroom（2025-09-15 / Insta360·GoPro·Canon 180/360 / 网页直播沉浸 / 空间场景 / HTML &lt;model&gt;）· <a href="https://www.apple.com/newsroom/2025/06/visionos-26-introduces-powerful-new-spatial-experiences-for-apple-vision-pro/" target="_blank" rel="noopener">apple.com/newsroom</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-18">腾讯视频 visionOS 版「客厅巨幕影院」3D 放映 — 极客公园（AVP 中国区 2024-06-28 / 腾讯云全链路 MV-HEVC / 8K + Dolby / 省 20% 带宽）· <a href="https://www.geekpark.net/news/337482" target="_blank" rel="noopener">geekpark.net</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-19">How to Convert Your 3D Blu-rays for Watching on Apple Vision Pro — medlund.com / MakeSBS3D（FSBS 兼容最广文件翻倍 / MV-HEVC 质量上限更高 / TestFlight beta）· <a href="https://medlund.com/makesbs3d-howto/" target="_blank" rel="noopener">medlund.com/makesbs3d-howto</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-20">Watch movies and TV in an environment — Apple Support（Apple TV 专用 Cinema 模式临时隐藏其他窗口 / 数码表冠半沉浸窗口仍可见 / 空间锚定）· <a href="https://support.apple.com/guide/apple-vision-pro/watch-movies-and-tv-in-an-environment-tan7241583f5/visionos" target="_blank" rel="noopener">support.apple.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×4</span></li>
+        <li id="ref-21">Jellyfin + VPN (WireGuard/Tailscale) Remote Access 2026 — JellyWatch（免端口转发 / 穿 CGNAT / 零订阅绕 Plex / 上行 50Mbps+ 4K Direct Play）· <a href="https://jellywatch.app/blog/jellyfin-vpn-wireguard-tailscale-remote-access-2026" target="_blank" rel="noopener">jellywatch.app</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-22">Plex Forum: the rules of 4k transcoding（直连优于转码 / 转码 4K HDR → 1080p H264 SDR 颜色发灰 / Infuse 直连不卡）· <a href="https://forums.plex.tv/t/info-plex-4k-transcoding-and-you-aka-the-rules-of-4k/378203" target="_blank" rel="noopener">forums.plex.tv</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×4</span></li>
+        <li id="ref-23">I brought back hardware transcoding on my Synology NAS — XDA（X25 系列 DS225+/DS425+ 移除内核显卡驱动 / 官方禁用 H.264/HEVC 硬转 / J4125 Quick Sync 可 SSH 解锁）· <a href="https://www.xda-developers.com/brought-back-hardware-transcoding-on-my-synology-nas/" target="_blank" rel="noopener">xda-developers.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×4</span></li>
+        <li id="ref-24">DS923+ 4K Plex NAS tests — NAS Compares（DS923+ AMD Ryzen 无核显软转 / 非 Intel Quick Sync 硬转 / 效率低）· <a href="https://nascompares.com/guide/synology-ds923-4k-plex-nas-tests/" target="_blank" rel="noopener">nascompares.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×4</span></li>
+        <li id="ref-25">SKYBOX Media Player — App Store（AV1/MKV/MOV/TS / 2D·SBS·OU·VR180·360·鱼眼 200/220 / UPnP·DLNA·SMB + PC Client / SBS 稳定优于 Moon / Moon 高码率卡顿反馈）· <a href="https://apps.apple.com/us/app/skybox-media-player/id6499200560" target="_blank" rel="noopener">apps.apple.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-26">Lifetime Plex Pass price increase — MacRumors（2025-03 $119.99→$249.99 / 2026-07-01 起 $749.99 / 月年价不变）· <a href="https://www.macrumors.com/2026/05/19/lifetime-plex-pass-price-increase/" target="_blank" rel="noopener">macrumors.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×4</span></li>
+        <li id="ref-27">How to Set Up Jellyfin on a Synology NAS — WunderTech（DSM 7.2 Container Manager / docker-compose / 挂 /media + /config / 端口 8096 / 套件版迁移难）+ <a href="https://jellyfin.org/docs/general/installation/advanced/synology/" target="_blank" rel="noopener">jellyfin.org docs</a> · <a href="https://www.wundertech.net/how-to-set-up-jellyfin-on-a-synology-nas/" target="_blank" rel="noopener">wundertech.net</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×4</span></li>
+        <li id="ref-28">Plex begins enforcing new restrictions on remote streaming — Privacy Guides（2025-04-29 起远程需 Plex Pass/Remote Watch Pass / LAN 不受影响 / Roku 先执行）· <a href="https://www.privacyguides.org/news/2025/11/26/plex-begins-enforcing-new-restrictions-on-remote-streaming-this-week/" target="_blank" rel="noopener">privacyguides.org</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-29">The best Plex video player for Apple Vision Pro just got way better — 9to5Mac（Theater $4 内购 / Plexi $1.99 实时 2D→3D / Chroma·CineUltra HSBS 3D 影院）· <a href="https://9to5mac.com/2025/01/06/the-best-plex-video-player-for-apple-vision-pro-just-got-way-better/" target="_blank" rel="noopener">9to5mac.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-30">SKYBOX Media Player — App Store（约 $10 / Source Technology / 跨平台从 Quest 移植 / 5.1·7.1 环绕）· <a href="https://apps.apple.com/us/app/skybox-media-player/id6499200560" target="_blank" rel="noopener">apps.apple.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-31">Sandwich Television（拟物/复古电视 app / SharePlay 共看 / spatial video / 流媒体 coming soon / 格式·价格未列）· <a href="https://television.sandwich.vision/" target="_blank" rel="noopener">television.sandwich.vision</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2 · 🔴 信息不透明</span></li>
+        <li id="ref-32">Use Mac Virtual Display — Apple Support（Standard 5K/Wide 6720×2880/Ultrawide 10240×2880 / macOS 15.2+ / 同 Apple ID+双因素+钥匙串+Handoff / 与 visionOS app 窗口共存 / 触控板跨窗）+ <a href="https://support.apple.com/en-us/118521" target="_blank" rel="noopener">support.apple.com/118521</a> · <a href="https://support.apple.com/guide/apple-vision-pro/use-mac-virtual-display-tan357ede966/visionos" target="_blank" rel="noopener">support.apple.com guide</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×9</span></li>
+        <li id="ref-33">Developer Strap 2025 升级版 20Gbps — Justin Searls shots（新版 20Gbps / 旧版 USB2.0 480Mbps 太糊 / $300 / 有线低延迟）· <a href="https://justin.searls.co/shots/2025-10-25-12h35m39s/" target="_blank" rel="noopener">justin.searls.co</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-34">Apple Vision Pro ultrawide virtual display visionOS 2.2 — Road to VR（无线延迟/画质依赖 Wi-Fi / Wi-Fi 6 优于 5 / 建议靠近 Mac / 中继器更糟 / 有线 definitive experience）· <a href="https://www.roadtovr.com/apple-vision-pro-ultrawide-virtual-display-visionos-2-2/" target="_blank" rel="noopener">roadtovr.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-35">New Apple Vision Pro with M5 doubles refresh rate of Mac Virtual Display — AppleInsider（2025-10-17 / 60Hz→120Hz / M2 锁 60Hz / 多渲染约 10% 像素）· <a href="https://appleinsider.com/articles/25/10/17/new-apple-vision-pro-with-m5-doubles-refresh-rate-of-mac-virtual-display" target="_blank" rel="noopener">appleinsider.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×4</span></li>
+        <li id="ref-36">How to use multiple displays with Apple Vision Pro — iMore（官方只投 1 个 Mac 屏 / 多显示器只显主屏 / Splitscreen $19.99 补第二屏 1280×720~2560×1440@60）+ <a href="https://apps.apple.com/us/app/splitscreen-multi-display/id6478007837" target="_blank" rel="noopener">apps.apple.com Splitscreen</a> · <a href="https://www.imore.com/vision-pro/how-to-use-multiple-displays-with-apple-vision-pro" target="_blank" rel="noopener">imore.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-37">Mastering Productivity with Apple Vision Pro — Eric Kim（侧屏视频 + 前方 IDE 编码 / reference 缩小塞一旁 / 盯小字超 30 分钟易眼疲劳）· <a href="https://erickimphotography.com/mastering-productivity-with-apple-vision-pro-the-ultimate-power-user-guide/" target="_blank" rel="noopener">erickimphotography.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-38">Apple releases visionOS 2.2 — MacRumors（2024-12-11 / Wide 21:9 + Ultrawide 32:9 等效双 5K 曲面 / Mac 音频转入 AVP / 需 macOS 15.2+）· <a href="https://www.macrumors.com/2024/12/11/apple-releases-visionos-2-2/" target="_blank" rel="noopener">macrumors.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-39">中国区 App Store 实查（Codex 审查补）：Moon Player ¥58 / Reality Player ¥58 / SKYBOX ¥68，均已上架大陆 App Store · <a href="https://apps.apple.com/cn/app/moon-player-ai%E5%A2%9E%E5%BC%BA3d/id6475702609" target="_blank" rel="noopener">Moon</a> + <a href="https://apps.apple.com/cn/app/reality-player/id6449855042" target="_blank" rel="noopener">Reality</a> + <a href="https://apps.apple.com/cn/app/skybox-media-player/id6499200560" target="_blank" rel="noopener">SKYBOX</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2 · 🔬 Codex 审查补</span></li>
+        <li id="ref-40">Apple media services 可用性（Codex 审查补）：中国大陆列 App Store / Apple Music / 播客等，但<strong>不含 Apple TV app 订阅与电影购买</strong>；香港则含 Apple TV app + 电影购买 → 大陆 ID 基本无法购买 Apple TV 3D 租购 · <a href="https://support.apple.com/en-us/105097" target="_blank" rel="noopener">support.apple.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×5 · 🔬 Codex 审查补</span></li>
+        <li id="ref-41">4XVR Player（Codex 审查补）：AVP 上可<strong>直接播放 MVC 3D 蓝光 ISO / MVC MKV</strong>（无需先转 MV-HEVC），亦支持 SBS/OU；Firecore 社区与 App Store 资料 · <a href="https://apps.apple.com/app/id6504246619" target="_blank" rel="noopener">4XVR on App Store</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×4 · 🔬 Codex 审查补</span></li>
+      </ol>
+    </div>
+  </section>
+
+</main>
+
+<button class="back-to-top" id="backTop" aria-label="回到顶部">↑</button>
+
+<footer>
+  <p>无忌 Deep Research · 4 路并行调研（AVP 资源 / 播放器+3D 格式 / 群晖+串流 / Mac Studio 联动）+ Codex 跨模型四维审查 · 2026-05-29 · 41 来源 · 数字均 inline 引用，关键项标可信度</p>
+  <p style="font-size:12px;margin-top:6px">⚠️ 最大不确定性（经 Codex 审查收窄）：① 群晖具体型号（决定转码兜底，建议确认；走直连可规避）② 转后 MV-HEVC 能否进 Plex/Jellyfin 库保 3D 未证实 ③ 字幕/音轨兼容与 8K 实测码率未量化。已确认项：三个 3D 播放器大陆 App Store 已上架[39]、大陆 Apple ID 基本买不了 Apple TV 3D[40]、4XVR 可直接播 MVC 蓝光[41]。版权红线：社区灰色资源只客观说明存在，不提供获取步骤。</p>
+</footer>
+
+<script>
+(function() {
+  let activePopover=null,activeTrigger=null,hideTimer=null;
+  function getRefContent(refid){const el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){const r=trigger.getBoundingClientRect();const popW=pop.offsetWidth,popH=pop.offsetHeight;let left=r.left+window.scrollX;if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;if(left<12)left=12;let top=r.bottom+window.scrollY+6;if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}pop.style.left=left+'px';pop.style.top=top+'px';}
+  function showPopover(trigger){if(activeTrigger===trigger&&activePopover)return;if(activePopover){activePopover.remove();activePopover=null;}const content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;const pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;document.body.appendChild(pop);positionPopover(pop,trigger);activePopover=pop;activeTrigger=trigger;pop.addEventListener('mouseenter',()=>{if(hideTimer)clearTimeout(hideTimer);});pop.addEventListener('mouseleave',scheduleHide);}
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(()=>{if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){document.querySelectorAll('sup.cite[data-refid]').forEach(sup=>{sup.addEventListener('mouseenter',()=>showPopover(sup));sup.addEventListener('mouseleave',scheduleHide);sup.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});});document.addEventListener('click',e=>{if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+
+<script>
+(function(){
+  // 主题切换
+  var themeBtn=document.getElementById('themeToggle');
+  var saved=localStorage.getItem('avp-theme');
+  if(saved){document.body.setAttribute('data-theme',saved);themeBtn.textContent=saved==='dark'?'☀️':'🌙';}
+  themeBtn.addEventListener('click',function(){
+    var cur=document.body.getAttribute('data-theme')==='dark'?'light':'dark';
+    document.body.setAttribute('data-theme',cur);
+    localStorage.setItem('avp-theme',cur);
+    themeBtn.textContent=cur==='dark'?'☀️':'🌙';
+  });
+
+  // 进度条 + 回到顶部
+  var progressEl=document.getElementById('progress');
+  var backTopEl=document.getElementById('backTop');
+  function updateProgress(){
+    var docHeight=document.documentElement.scrollHeight-window.innerHeight;
+    var scrolled=window.scrollY;
+    var ratio=docHeight>0?scrolled/docHeight:0;
+    progressEl.style.width=(ratio*100)+'%';
+    backTopEl.classList.toggle('show',scrolled>400);
+  }
+  window.addEventListener('scroll',updateProgress,{passive:true});
+  updateProgress();
+  backTopEl.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+
+  // 章节折叠
+  document.querySelectorAll('section.chapter > h2').forEach(function(h2){
+    h2.addEventListener('click',function(){h2.parentElement.classList.toggle('collapsed');});
+  });
+
+  // 抽屉导航
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  function closeNav(){nav.classList.remove('open');ov.classList.remove('show');}
+  if(nav&&tog&&ov){
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',closeNav);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)closeNav();});});
+  }
+
+  // anchor 点击展开折叠章节
+  var anchorLinks=document.querySelectorAll('#anchorList a');
+  anchorLinks.forEach(function(a){
+    a.addEventListener('click',function(){
+      var target=document.getElementById(a.dataset.target);
+      if(target&&target.classList.contains('collapsed'))target.classList.remove('collapsed');
+    });
+  });
+
+  // scroll-spy 高亮
+  var sections=Array.prototype.map.call(anchorLinks,function(a){return document.getElementById(a.dataset.target);}).filter(Boolean);
+  function highlightAnchor(){
+    var offset=120,current=null;
+    for(var i=0;i<sections.length;i++){var rect=sections[i].getBoundingClientRect();if(rect.top-offset<=0)current=sections[i].id;}
+    anchorLinks.forEach(function(a){a.classList.toggle('active',a.dataset.target===current);});
+    var activeLink=document.querySelector('#anchorList a.active');
+    if(activeLink)activeLink.scrollIntoView({block:'nearest'});
+  }
+  window.addEventListener('scroll',highlightAnchor,{passive:true});
+  highlightAnchor();
+
+  // 表格行高亮
+  document.querySelectorAll('tbody tr').forEach(function(tr){
+    tr.addEventListener('click',function(){
+      tr.parentElement.querySelectorAll('tr.row-highlight').forEach(function(o){if(o!==tr)o.classList.remove('row-highlight');});
+      tr.classList.toggle('row-highlight');
+    });
+  });
+
+  // FAQ
+  document.querySelectorAll('.faq-q').forEach(function(q){
+    q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+  });
+})();
+</script>
+
+</body>
+</html>

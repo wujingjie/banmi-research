@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cursor vs Claude Code 深度对比：自主度 / 交互范式不同 → 适用场景不同 · 无忌 Deep Research · 2026-05-29</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1d23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --border-strong: #cdd2da;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --accent-text: #1d4ed8;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #0891b2;
+    --info-soft: #cffafe;
+    --code-bg: #f1f3f7;
+    --purple: #7c3aed;
+    --purple-soft: #ede9fe;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1c2030;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #b6bcc9;
+    --text-mute: #8a92a3;
+    --border: #2a2f3d;
+    --border-strong: #3a4154;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a55;
+    --accent-text: #93c5fd;
+    --good: #4ade80;
+    --good-soft: #14532d55;
+    --warn: #fbbf24;
+    --warn-soft: #78350f55;
+    --bad: #f87171;
+    --bad-soft: #7f1d1d55;
+    --info: #22d3ee;
+    --info-soft: #155e7555;
+    --code-bg: #0a0d14;
+    --purple: #a78bfa;
+    --purple-soft: #4c1d9555;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 28px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 3000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  hr.soft { border: none; height: 1px; background: var(--border); margin: 16px 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .node.yes { border-color: var(--good); }
+  .tree .node.no { border-color: var(--bad); }
+  .tree .branches { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .role-cols { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 14px 0; }
+  .role-col { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-elevated); }
+  .role-col h4 { margin: 0 0 8px; font-size: 14px; color: var(--text); }
+  .role-col.must { background: var(--accent-soft); border-color: var(--accent); }
+  .role-col.opt { background: var(--warn-soft); border-color: var(--warn); }
+  .role-col.never { background: var(--bad-soft); border-color: var(--bad); }
+  .role-col ul { margin: 4px 0 0; padding-left: 18px; }
+  .prod-card { margin: 12px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .prod-head { padding: 10px 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); }
+  .prod-head .ico { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; background: var(--accent-soft); }
+  .prod-head .name-block { flex: 1; min-width: 140px; }
+  .prod-head .pn { font-size: 15px; font-weight: 700; color: var(--text); }
+  .prod-head .ph { font-size: 12px; color: var(--text-mute); font-family: ui-monospace, monospace; margin-top: 1px; }
+  .prod-body { padding: 10px 14px; font-size: 14px; }
+  .prod-body p { color: var(--text-soft); margin: 6px 0; }
+  .prod-body .takeaway { margin-top: 8px; padding: 8px 10px; background: var(--accent-soft); border-radius: 8px; border-left: 3px solid var(--accent); color: var(--text); font-size: 13.5px; }
+  .prod-body .takeaway::before { content: "💡 启示  "; font-weight: 700; color: var(--accent-text); }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(250,204,21,0.3); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated,#fff); color: var(--text,#1a1a23); border: 1px solid var(--border,#e3e6ec); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(15,23,42,0.18); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  [data-theme="dark"] .cite-popover { background: #1a1e2a; color: #e6e9f0; border-color: #2a2f3a; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+  .cite-popover a { color: var(--accent,#2563eb); text-decoration: underline; word-break: break-all; }
+  [data-theme="dark"] .cite-popover a { color: #60a5fa; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  .spectrum { margin: 16px 0; padding: 16px 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .spectrum .bar { height: 10px; border-radius: 999px; background: linear-gradient(90deg, var(--info), var(--accent), var(--purple), var(--bad)); margin: 10px 0 6px; }
+  .spectrum .ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-mute); font-weight: 600; }
+  .spectrum .stops { display: flex; justify-content: space-between; margin-top: 10px; gap: 6px; flex-wrap: wrap; }
+  .spectrum .stop { flex: 1; min-width: 120px; font-size: 12.5px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  .spectrum .stop b { color: var(--text); display: block; margin-bottom: 2px; }
+  @media (max-width: 480px) {
+    .hero { padding: 18px 4px 8px; }
+    .hero h1 { font-size: 22px; }
+    section.chapter > h2 { font-size: 17px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+    .tree .branches { grid-template-columns: 1fr; }
+  }
+  @media print {
+    header.topbar, #progress, .back-to-top, nav.anchor-nav { display: none !important; }
+    section.chapter.collapsed .chapter-body { max-height: none !important; padding: 18px 20px 22px !important; }
+    section.chapter.collapsed > h2 .caret { display: none; }
+  }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">Cursor vs Claude Code 深研 <span class="tag">v1 · 无忌 Deep Research</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 执行摘要</a>
+    <a href="#ch2" data-target="ch2">02 本质区别：协作 vs 自主（不是智力是范式）</a>
+    <a href="#ch3" data-target="ch3">03 Cursor 全貌</a>
+    <a href="#ch4" data-target="ch4">04 Claude Code 全貌</a>
+    <a href="#ch5" data-target="ch5">05 功能对位大表</a>
+    <a href="#ch6" data-target="ch6">⭐ 06 自主度 ↔ 思考力 trade-off</a>
+    <a href="#ch7" data-target="ch7">07 实测与社区口碑</a>
+    <a href="#ch8" data-target="ch8">08 定价与国内可用性</a>
+    <a href="#ch9" data-target="ch9">⭐ 09 何时用哪个（决策树）</a>
+    <a href="#ch10" data-target="ch10">10 两个都用的组合打法</a>
+    <a href="#ch11" data-target="ch11">11 对阿杰的建议</a>
+    <a href="#ch12" data-target="ch12">12 FAQ</a>
+    <a href="#ch13" data-target="ch13">13 References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>Cursor vs Claude Code：不是谁更强，是自主度与交互范式不同</h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-29</span>
+      <span>🔍 无忌 Deep Research · 3 路并行</span>
+      <span>🎚️ 自主度光谱，不是二选一</span>
+      <span>🧠 核心议题：工具会不会让人变笨</span>
+      <span>🇨🇳 含国内可用性</span>
+    </div>
+    <div class="hero-deck">
+      <strong>一句话：</strong>到 2026 年 5 月，Cursor 和 Claude Code 的本质差异<strong>不是「谁更聪明」</strong>——两者可跑同一底层模型，Cursor 自研 Composer 2.5 在 SWE-bench Multilingual 拿 79.8% 已基本追平 Claude Opus 4.7 的 80.5%（成本仅 1/10）<sup class="cite" data-refid="2">[2]</sup>。真正的差异是<strong>交互范式与自主度</strong>：Cursor 是 <em>IDE-first</em>（你开车、逐行看 diff、line-level 接受/拒绝、时刻盯代码，天然练判断力）；Claude Code 是 <em>agent-first</em>（你描述目标、AI 驱动、跑完一批再回审，省力但易脱离理解）<sup class="cite" data-refid="1">[1]</sup>。这是<strong>光谱不是二元</strong>——CC 有 Plan Mode、Cursor 有 Cloud Agent，两端都能往中间靠，<strong>是习惯而非工具决定你落在哪</strong>。对「工具会不会让人变笨」这一核心担忧，Anthropic 自家 RCT 给了最干净的答案：纯委托 AI 生成代码的人理解测验 &lt;40%，而边用边问概念/要解释的人 65%+<sup class="cite" data-refid="3">[3]</sup>。
+    </div>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">执行摘要：5 条最硬结论</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>3 路并行调研（Cursor 深挖 / Claude Code 深挖 / 横向对比+口碑+国内）收敛出的核心判断，每条独立成块，方便扫。</p>
+
+      <div class="callout accent">
+        <h4>🎚️ 结论 1：本质差异是「自主度/控制权」，不是智力——别问谁更强，问这个任务你要不要保留理解 <span class="conf g">🟢 多源同口径</span></h4>
+        <p>Builder.io 原话：「真正的哲学分歧在于<strong>控制权</strong>——Claude Code 是 agent-first，你描述目标、AI 驱动、你事后审查结果；Cursor 是 IDE-first」<sup class="cite" data-refid="1">[1]</sup>。Emergent 把它叫「Execution AI（执行型）vs Editor AI（编辑型）」<sup class="cite" data-refid="1">[1]</sup>。证据：Composer 2.5 已追平 Opus 4.7（成本 1/10）<sup class="cite" data-refid="2">[2]</sup>，说明「谁更聪明」不再是选型关键变量。选型应按「<strong>这个任务我要不要保留理解</strong>」来分，而不是按「哪个模型强」。</p>
+      </div>
+
+      <div class="callout purple">
+        <h4>🧠 结论 2：「工具会不会让人变笨」有实证答案，且是「取决于用法」 <span class="conf g">🟢 Anthropic 自家 RCT</span></h4>
+        <p>Anthropic 2026-02 的 RCT（52 名工程师学陌生异步库 Trio）：AI 辅助组理解测验均分 <strong>50% vs 手写组 67%</strong>（低约 17%，debug 和「判断代码错在哪」差距最大），且 AI 组只快约 2 分钟、不显著<sup class="cite" data-refid="3">[3]</sup>。但关键转折在同一研究内部：用 AI <strong>问概念/要解释/边问边独立写</strong>的人拿 65%+，<strong>纯委托生成</strong>代码的人 &lt;40%<sup class="cite" data-refid="4">[4]</sup>。Addy Osmani 的「认知卸载 vs 认知投降」框架进一步说明：identical tools 因用法不同产生相反结果<sup class="cite" data-refid="5">[5]</sup>。<strong>这直接坐实了阿杰的核心洞察——而且是数据，不是哲学。</strong></p>
+      </div>
+
+      <div class="callout good">
+        <h4>✅ 结论 3：Cursor = 高频精修 + 时刻在环路；Claude Code = 重活 + 自主长任务 <span class="conf y">🟡 实务共识为主</span></h4>
+        <p>实测对比：Claude Code 在 36 项测试中代码质量/正确性<strong>赢 67%</strong>、同任务 token 用量约 Cursor 的 <strong>1/5.5</strong>（188K vs 33K）、复杂多文件每美元 8.5 准确分 vs Cursor 6.2；但简单工具函数 Cursor <strong>42 vs 31</strong> 性价比更高<sup class="cite" data-refid="6">[6]</sup>。Cursor 的 Tab 多行补全被反复称为「上瘾点」，逐行 diff + 内置浏览器视觉调试是 solo dev 首选<sup class="cite" data-refid="9">[9]</sup>。实务共识：<strong>很多 power user 两个都用</strong>，组合月费约 \$40<sup class="cite" data-refid="6">[6]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 结论 4：国内是硬约束——两者直连均被封，Claude/GPT 模型对国内地区严格封禁 <span class="conf y">🟡 第三方教程为主</span></h4>
+        <p>Anthropic 封中国 IP（影响 OAuth/API/CLI/VS Code 插件），2025/9 起封、2026/4 起部分用户须政府 ID+自拍验证<sup class="cite" data-refid="13">[13]</sup>；Cursor 客户端国内可下可登，但调 AI 接口必须代理且不稳，Claude/GPT 模型对检测到的国内地区<strong>严格封禁</strong>（账号有钱也用不了），仅收 Visa/MC 双币卡<sup class="cite" data-refid="14">[14]</sup>。绕过：VPN / 中转 / 火山引擎方舟（ByteDance，Anthropic 兼容端点，国内可直连，¥40-200/月）<sup class="cite" data-refid="15">[15]</sup>。<strong>这只影响阿杰自己的开发链路，不影响半米产品架构。</strong></p>
+      </div>
+
+      <div class="callout info">
+        <h4>💡 结论 5：对阿杰（独立全栈 + 做学习产品 + 怕工具让人变笨）——默认 Cursor 主力、CC 跑明确边界的重活 <span class="conf y">🟡 基于背景推断</span></h4>
+        <p>你是单人维护，最怕的不是慢，是三个月后「看不懂自己项目」——而 CC 的批量自主执行正是这个风险的高发区<sup class="cite" data-refid="11">[11]</sup>。所以建议：<strong>Cursor 当主力</strong>（盯 diff 练判断 + Tab 补全省力 + 视觉调前端），<strong>CC 留给明确边界的重活</strong>（跨多文件重构、写测试、基建脚本），且在 CC 里用 Plan Mode、控 PR 在 ~100 行以内、跑完逐段读 diff<sup class="cite" data-refid="5">[5]</sup>。更深一层：Cursor 的「AI 提议、人确认」diff-review 范式本身就是半米学习产品防「认知投降」的好范本<sup class="cite" data-refid="5">[5]</sup>。详见第 11 章。</p>
+      </div>
+
+      <h3>一句话选型建议</h3>
+      <div class="callout accent">
+        <p><strong>【别站队】</strong>把它当光谱用，不是二选一。<strong>【主力 Cursor】</strong>高频小改、单文件、UI 微调、视觉调试、Tab 补全——心智不切换、性价比高、逼你盯 diff 练判断。<strong>【重活给 CC】</strong>跨 6-12 文件重构、基建、写测试、大代码库迁移——省 5.5x token、漏改更少，但务必用 Plan Mode 先看计划、逐段审 diff。<strong>【别迷信谁更聪明 / 用 AI 更快】</strong>Composer 2.5 已追平 Opus 4.7，模型不再是关键<sup class="cite" data-refid="2">[2]</sup>；METR 实测资深开发者用 AI 反而<strong>慢 19%</strong> 却自感快 20%，主观体感严重不可靠<sup class="cite" data-refid="8">[8]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 几个最影响判断的 gap（已在正文标注） <span class="conf y">🟡 待确认</span></h4>
+        <p>① <strong>Composer 2.5 的 benchmark 多来自 Cursor 官方自评</strong>（CursorBench 是供应商自评），存选择性披露风险，🟡 仅作「同档」参考；② <strong>国内中转/VPN 用 CC 的真实封号率、各中转商可靠性无权威数据</strong> 🔴；③ <strong>火山引擎方舟价格/可用性来自第三方教程，未经 ByteDance 官方页二次核实</strong> 🟡；④ 技能退化研究样本是 52 名初级工程师学陌生库，对「资深开发者做熟悉领域」是否同样退化未覆盖，外推需谨慎 🟡；⑤ 未找到 2026 年 Cursor vs CC 的一手 Reddit/HN 原帖，社区口碑多为二手汇总，已对观点型来源标 confidence=medium。</p>
+      </div>
+
+      <h3>🔬 关于这份报告</h3>
+      <div class="callout purple">
+        <p>本报告由 Claude <strong>3 路并行调研</strong>（Cursor 深挖 / Claude Code 深挖 / 横向对比+社区口碑+国内可用性+付费）收敛而成，所有数字/版本/价格均 inline 引用、关键项标可信度（🟢 多源 / 🟡 单源或观点 / 🔴 估算或待补）。核心叙事不写「谁更强」，而写<strong>「自主度/交互范式不同 → 适用场景不同」</strong>，并重点贯穿 <strong>Cursor 练思考 vs CC 省力易脱离</strong> 的 trade-off（第 6 章），呼应阿杰关心的「工具会不会让人变笨」。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">本质区别：IDE 协作 vs 终端自主（不是智力，是范式）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>先把最容易被带偏的问题摆正：这两个工具的差异<strong>不在模型聪明度</strong>，而在「你对每一步改动有多少控制权」。多个独立来源用几乎相同的话印证了这一点。</p>
+
+      <div class="callout accent">
+        <p><strong>Builder.io：</strong>「The real philosophical split is about control. Claude Code is agent-first... you review the results. Cursor is IDE-first.」<sup class="cite" data-refid="1">[1]</sup> <strong>Emergent：</strong>Execution AI（执行型）vs Editor AI（编辑型）<sup class="cite" data-refid="1">[1]</sup>。两端各自的默认工作流，决定了你日常的「认知姿势」。</p>
+      </div>
+
+      <h3>2.1 为什么「谁更聪明」是个伪命题</h3>
+      <div class="callout good">
+        <p>Cursor 自研 <strong>Composer 2.5</strong>（2026-05-18 发布）在 <strong>SWE-bench Multilingual 拿 79.8%</strong>，基本追平 Claude <strong>Opus 4.7 的 80.5%</strong>，token 价 \$0.50/\$2.50 每百万、约 Opus 4.7 的 <strong>1/10</strong><sup class="cite" data-refid="2">[2]</sup>。CursorBench v3.1：Composer 2.5 63.2% &gt; Opus 4.7 61.6%；Terminal-Bench 2.0：69.3% vs 69.4%<sup class="cite" data-refid="2">[2]</sup>。<strong>⚠️ 这些 benchmark 多为 Cursor 官方/转述（CursorBench 供应商自评），需谨慎</strong>，但多个独立 benchmark 趋同显示已是同档 <span class="conf y">🟡</span>。结论：模型不是选型关键变量，<strong>交互范式才是</strong>。</p>
+      </div>
+
+      <h3>2.2 这是一条光谱，不是二元</h3>
+      <div class="spectrum">
+        <div class="ends"><span>← 人在环路 / 控制紧</span><span>自主 / 放手多 →</span></div>
+        <div class="bar"></div>
+        <div class="stops">
+          <div class="stop"><b>Tab 补全</b>打字即预测，按键确认（最高频微决策）</div>
+          <div class="stop"><b>Cmd-K 内联改</b>选中+提示，就地流式 diff，ESC/接受</div>
+          <div class="stop"><b>Composer / CC Plan Mode</b>多文件统一 diff 逐个 accept/reject</div>
+          <div class="stop"><b>CC 默认 agent</b>给目标→规划→执行→跑测试→回审</div>
+          <div class="stop"><b>Cloud / Dynamic Workflows</b>云端 VM / 数百 subagent 并行，开 PR</div>
+        </div>
+      </div>
+      <div class="callout info">
+        <p>两端都能往中间靠：<strong>CC 有 Plan Mode</strong>（执行前人工批准）和可调自主度（从「每个动作都批准」到「分类器自动区分安全/危险」）<sup class="cite" data-refid="10">[10]</sup>；<strong>Cursor 有 Background/Cloud Agent</strong>（云端 Ubuntu VM 跑、开 PR，最接近 CC 自主端，2026-02 起带 Computer Use 能开 localhost 点 UI 验证）<sup class="cite" data-refid="20">[20]</sup>。所以——<strong>是习惯而非工具决定你落在光谱哪一端</strong>。这正是第 6 章 trade-off 的根基。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>⚠️ 旧二分法已失效：</strong>不要再说「终端 vs IDE」。2026 年 Claude Code 已覆盖 CLI / VS Code 官方插件 / 桌面 App / 浏览器版 IDE（claude.ai/code）多端，不再是纯终端工具<sup class="cite" data-refid="10b">[16]</sup>；Cursor 3.0（2026-04-02）也把重心从编辑器转向 agent<sup class="cite" data-refid="17">[17]</sup>。真正的差异始终是<strong>自主度</strong>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">Cursor 全貌（IDE-first，人在环路）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>Cursor 是 VSCode fork 的 AI 原生编辑器，2026 年核心已从「编辑器」演进为「agent 优先」界面（3.0，2026-04-02），但灵魂仍是<strong>人在环路</strong>：你始终盯代码、逐行 review diff、按键做每一个微决策<sup class="cite" data-refid="16">[16b]</sup>。</p>
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">3.5</div><div class="l">主线版本 · 2026-05-19~20</div></div>
+        <div class="metric"><div class="v">Composer 2.5</div><div class="l">自研模型 · 2026-05-18</div></div>
+        <div class="metric"><div class="v">$20/mo</div><div class="l">Pro（Tab 无限）</div></div>
+        <div class="metric"><div class="v">+28%</div><div class="l">Tab 接受率（vs 旧版）</div></div>
+      </div>
+
+      <h3>3.1 功能光谱：从「几乎不放手」到「半放手」</h3>
+      <div class="callout accent">
+        <p>层层递进：<strong>Tab 补全</strong>（你打字它预测、按键确认）→ <strong>Cmd-K 内联改</strong>（选中代码+提示，diff 就地流式出现，ESC 或接受）→ <strong>Composer/Agent 多文件</strong>（跑工具改多文件，但给你统一 diff 逐个 accept/reject，自动建 checkpoint 可回滚）→ <strong>Background/Cloud Agent</strong>（云端 VM 跑、开 PR，最接近 CC 自主模式）<sup class="cite" data-refid="16">[16b]</sup>。Composer 把改动就地流式呈现在你正看的代码里，让你停在同一心智框架；Agent 模式用 LSP go-to-definition 定位引用后给干净统一 diff，支持排队后续指令、可暂停问澄清<sup class="cite" data-refid="18">[18]</sup>。</p>
+      </div>
+
+      <h3>3.2 Tab 补全：日常黏性核心</h3>
+      <div class="callout good">
+        <p>用专用模型，并从你的 accept/reject 行为学习。官方称比旧版单行自动补全<strong>接受率高约 28%、建议数少约 21%</strong>；预测依据=当前文件+打开的 tab+最近编辑+项目 rules<sup class="cite" data-refid="21">[21]</sup>。社区反复称之为「上瘾点」——能写出你还没想到的 5-10 行<sup class="cite" data-refid="9">[9]</sup>。<strong>这是最高频的人在环路微决策。</strong></p>
+      </div>
+
+      <h3>3.3 @ 上下文 + Rules：人主动喂上下文、定规矩</h3>
+      <div class="callout purple">
+        <p><code>@Files</code>/<code>@Code</code>/<code>@Docs</code>（可爬第三方文档）/<code>@Codebase</code>（触发整库语义搜索）+ <code>.cursorrules</code>/<code>.cursor/rules</code>（放项目根目录给 AI 常驻指令，对 Chat 和 Cmd-K 都生效）<sup class="cite" data-refid="19">[19]</sup>。最佳实践是用 @ 显式给上下文而非靠对话历史猜——<strong>这本身就是「人在做判断」的体现</strong>，是人在环路范式的一部分<sup class="cite" data-refid="19">[19]</sup>。</p>
+      </div>
+
+      <h3>3.4 2026 版本与定价</h3>
+      <div class="callout info">
+        <p><strong>版本：</strong>3.0(2026-04-02，新界面+Agents Window 可并行跑多 agent+Design Mode 浏览器内标注 UI)、3.4(05-13，全屏 tab+紧凑响应)、3.5(05-19~20，Jira 集成+Cloud Agents+共享 Canvas+/loop)<sup class="cite" data-refid="17">[17]</sup>。<strong>定价：</strong>Free(Hobby，限量 Tab+Agent，无需信用卡) / Pro \$20/mo(年付 \$16，\$20 月度额度，Tab 无限、Auto 无限) / Pro+ \$60(3x) / Ultra \$200(20x) / Teams \$40/seat<sup class="cite" data-refid="22">[22]</sup>。2025-06 起付费档含等于档位价的月度额度池，Auto 模式不耗额度，手动选前沿模型才扣<sup class="cite" data-refid="22">[22]</sup>。</p>
+      </div>
+
+      <div class="role-cols">
+        <div class="role-col must">
+          <h4>✅ 强项</h4>
+          <ul style="font-size:13.5px;color:var(--text-soft)">
+            <li>Tab 补全业界最强 <sup class="cite" data-refid="21">[21]</sup></li>
+            <li>整库语义索引理解 <sup class="cite" data-refid="16">[16b]</sup></li>
+            <li>VSCode 习惯/扩展/主题零迁移 <sup class="cite" data-refid="16">[16b]</sup></li>
+            <li>高频小改每美元 42 准确分 vs CC 31 <sup class="cite" data-refid="6">[6]</sup></li>
+            <li>HITL diff review 让你保持判断 <sup class="cite" data-refid="16">[16b]</sup></li>
+          </ul>
+        </div>
+        <div class="role-col never">
+          <h4>⛔ 短板</h4>
+          <ul style="font-size:13.5px;color:var(--text-soft)">
+            <li>5000+ 行大文件/monorepo 卡顿 <sup class="cite" data-refid="16">[16b]</sup></li>
+            <li>AI 输出不稳需逐行盯（曾漏 async 调 sync 静默 bug）<sup class="cite" data-refid="23">[23]</sup></li>
+            <li>UI 杂乱、Cmd-K 快捷键冲突 <sup class="cite" data-refid="16">[16b]</sup></li>
+            <li>前沿模型选多了烧额度快（有人月费 \$1500-2000）<sup class="cite" data-refid="9">[9]</sup></li>
+            <li>厂商锁定、代码上传第三方 API <sup class="cite" data-refid="16">[16b]</sup></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">Claude Code 全貌（agent-first，目标导向自主）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>Claude Code 是 Anthropic 的「agent-first」编码工具：你描述目标 → AI 自主规划、多步执行（读写文件、跑命令、跑测试、调 MCP 工具）→ 你审结果<sup class="cite" data-refid="10b">[16]</sup>。它有 Plan Mode 和可调自主度，也支持 subagents / 动态工作流并行。</p>
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">Opus 4.8</div><div class="l">默认模型 · 2026-05-28</div></div>
+        <div class="metric"><div class="v">88.6%</div><div class="l">SWE-bench Verified</div></div>
+        <div class="metric"><div class="v">1M</div><div class="l">上下文 token</div></div>
+        <div class="metric"><div class="v">1/5.5</div><div class="l">同任务 token vs Cursor</div></div>
+      </div>
+
+      <h3>4.1 自主能力栈</h3>
+      <div class="callout accent">
+        <p><strong>Subagent：</strong>各自独立上下文窗口/系统提示/工具权限，主 agent 负责规划与整合，把有界子任务（代码审查/跑测试/前端 QA/安全检查）派出去，可路由到更便宜模型（如 Haiku）控成本<sup class="cite" data-refid="23b">[24]</sup>。<strong>Hooks：</strong>在生命周期/工具事件上确定性触发 shell/HTTP/LLM，做强制规则——提交前跑测试、拦危险命令、编辑后跑 formatter、要求分支名带 issue ID<sup class="cite" data-refid="24b">[25]</sup>。<strong>MCP / Skills / Plugins：</strong>MCP 接外部系统（GitHub/Slack/DB/Notion），Skills 封装长流程，Plugin 把以上打包分发<sup class="cite" data-refid="25b">[26]</sup>。一句话：<strong>subagent 决定谁干活，MCP 决定能碰什么</strong>。</p>
+      </div>
+
+      <h3>4.2 2026-05-28 Opus 4.8 + Dynamic Workflows（研究预览）</h3>
+      <div class="callout purple">
+        <p><strong>数百 subagent 并行</strong>（动态工作流单次最多 1000 subagents、16 并发），可从 kickoff 到 merge 跑完<strong>数十万行代码库级迁移</strong>，以现有测试套件为验收标准<sup class="cite" data-refid="7">[7]</sup>。Opus 4.8 同价同 1M 上下文，SWE-bench Verified 88.6%、SWE-bench Pro 69.2%，比 4.7 少约 4 倍「让自写代码缺陷蒙混过关」，fast mode 快约 2.5 倍且便宜 3 倍<sup class="cite" data-refid="7">[7]</sup>。<strong>这是自主度推到极致的代表——也意味着更要主动设防护栏。</strong> <span class="conf y">🟡 研究预览，实际门槛/并发上限真实数字未确认</span></p>
+      </div>
+
+      <h3>4.3 人审/介入机制：这条范式的安全阀</h3>
+      <div class="callout good">
+        <p><strong>Permission modes：</strong>plan（只读）/ accept-edits（自动接受编辑）/ bypass（全跳过，<code>--dangerously-skip-permissions</code>）<sup class="cite" data-refid="11b">[27]</sup>。<strong>2026 新增 Auto Mode：</strong>用 Sonnet 4.6 分类器在动作执行前判定，两层防御（输入层扫 prompt injection，输出层 transcript 分类器逐动作判 block/allow），拦 overeager/honest mistake/injection/scope creep 四类；<strong>3 次连续或 20 次累计拒绝就升级给人</strong><sup class="cite" data-refid="11b">[27]</sup>。实测假阳性 0.4%，但只抓到 83% 真危险动作——<strong>故仍需人主动监督</strong><sup class="cite" data-refid="11b">[27]</sup>。</p>
+      </div>
+
+      <h3>4.4 定价与 token 效率</h3>
+      <div class="callout info">
+        <p><strong>订阅：</strong>Pro \$20/月（含 CC，约每 5 小时 45 条提示+周上限）/ Max 5x \$100/月（多数全天开发不再被限）/ Max 20x \$200/月（约 22 万 token/5 小时窗口+每周封顶，idle 不计）<sup class="cite" data-refid="12">[12]</sup>。<strong>API 按量：</strong>Opus 4.8 \$5/\$25 每百万输入/输出、Sonnet 4.6 \$3/\$15、Haiku 4.5 \$1/\$5<sup class="cite" data-refid="12">[12]</sup>。<strong>关键效率优势：</strong>同任务 token 用量约 Cursor 的 1/5.5（188K vs 33K 实测案例）<sup class="cite" data-refid="6">[6]</sup>。VS Code 插件需 1.98.0+<sup class="cite" data-refid="10b">[16]</sup>。</p>
+      </div>
+
+      <div class="role-cols">
+        <div class="role-col must">
+          <h4>✅ 强项</h4>
+          <ul style="font-size:13.5px;color:var(--text-soft)">
+            <li>自主多步执行、大规模重构/迁移 <sup class="cite" data-refid="6">[6]</sup></li>
+            <li>代码库探索、复杂调试、测试生成与执行 <sup class="cite" data-refid="6">[6]</sup></li>
+            <li>1M 上下文，monorepo 按需读文件更稳 <sup class="cite" data-refid="6">[6]</sup></li>
+            <li>subagent 并行编排、token 效率高 <sup class="cite" data-refid="6">[6]</sup></li>
+            <li>36 项测试代码质量/正确性赢 67% <sup class="cite" data-refid="6">[6]</sup></li>
+          </ul>
+        </div>
+        <div class="role-col never">
+          <h4>⛔ 短板</h4>
+          <ul style="font-size:13.5px;color:var(--text-soft)">
+            <li>无逐行 line-level 接受/拒绝，批量执行后回审，最易触发「看不懂自己项目」<sup class="cite" data-refid="11">[11]</sup></li>
+            <li>国内官方封禁，需 VPN/中转有封号风险 <sup class="cite" data-refid="13">[13]</sup></li>
+            <li>高自主度易让人脱离代码理解 <sup class="cite" data-refid="3">[3]</sup></li>
+            <li>Max 个人档 \$100-200 比 Cursor Pro+ \$60 贵 <sup class="cite" data-refid="12">[12]</sup></li>
+            <li>团队版贵（10人 \$1250/mo vs Cursor \$400）<sup class="cite" data-refid="11">[11]</sup></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">功能对位大表</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>把两者放到同一张表里逐维对照。<strong>点行高亮</strong>方便聚焦。注意：这是为了看清差异，不是评分判输赢。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>维度</th><th>Cursor（IDE-first）</th><th>Claude Code（agent-first）</th></tr></thead>
+          <tbody>
+            <tr><td><strong>范式定位</strong></td><td>Editor AI：你开车、AI 在身边补全/建议 <sup class="cite" data-refid="1">[1]</sup></td><td>Execution AI：你给目标、AI 驱动、你审结果 <sup class="cite" data-refid="1">[1]</sup></td></tr>
+            <tr><td><strong>形态</strong></td><td>VSCode fork 桌面编辑器 + Cloud Agent <sup class="cite" data-refid="16b">[16b]</sup></td><td>CLI / VS Code 插件 / 桌面 App / 浏览器 IDE <sup class="cite" data-refid="10b">[16]</sup></td></tr>
+            <tr><td><strong>改动审查粒度</strong></td><td>逐行 diff、line-level accept/reject、就地流式 <sup class="cite" data-refid="16b">[16b]</sup></td><td>批量执行后回审统一结果（Plan Mode 可先批准）<sup class="cite" data-refid="11">[11]</sup></td></tr>
+            <tr><td><strong>高频补全</strong></td><td>Tab 多行补全（+28% 接受率，「上瘾点」）<sup class="cite" data-refid="21">[21]</sup></td><td>无对位（非编辑器内补全工具）⚠️</td></tr>
+            <tr><td><strong>自主上限</strong></td><td>Background/Cloud Agent（VM 跑、开 PR）<sup class="cite" data-refid="20">[20]</sup></td><td>Dynamic Workflows 数百 subagent 并行 <sup class="cite" data-refid="7">[7]</sup></td></tr>
+            <tr><td><strong>人审机制</strong></td><td>diff 逐个 accept/reject + 自动 checkpoint 可回滚 <sup class="cite" data-refid="18">[18]</sup></td><td>permission modes + Auto Mode 分类器（3连/20累拒升级人）<sup class="cite" data-refid="11b">[27]</sup></td></tr>
+            <tr><td><strong>上下文机制</strong></td><td>@Files/@Code/@Docs/@Codebase + .cursorrules <sup class="cite" data-refid="19">[19]</sup></td><td>1M 上下文按需读文件 + MCP + CLAUDE.md <sup class="cite" data-refid="10b">[16]</sup></td></tr>
+            <tr><td><strong>扩展生态</strong></td><td>VSCode 扩展 + Rules + Bugbot（Teams）<sup class="cite" data-refid="22">[22]</sup></td><td>subagent / hooks / MCP / Skills / Plugins <sup class="cite" data-refid="25b">[26]</sup></td></tr>
+            <tr><td><strong>模型</strong></td><td>Claude/GPT-5.x/Gemini 3/Grok/自研 Composer 2.5 + Auto <sup class="cite" data-refid="16b">[16b]</sup></td><td>Opus 4.8 默认 / Sonnet 4.6 / Haiku 4.5 <sup class="cite" data-refid="12">[12]</sup></td></tr>
+            <tr><td><strong>大库表现</strong></td><td>5000+ 行/monorepo 卡顿 <sup class="cite" data-refid="16b">[16b]</sup></td><td>monorepo 按需读更稳 <sup class="cite" data-refid="6">[6]</sup></td></tr>
+            <tr><td><strong>同任务 token</strong></td><td>约 188K（实测案例）<sup class="cite" data-refid="6">[6]</sup></td><td>约 33K（约 Cursor 的 1/5.5）<sup class="cite" data-refid="6">[6]</sup></td></tr>
+            <tr><td><strong>性价比侧重</strong></td><td>简单工具函数每美元 42 准确分 <sup class="cite" data-refid="6">[6]</sup></td><td>复杂多文件每美元 8.5 vs Cursor 6.2 <sup class="cite" data-refid="6">[6]</sup></td></tr>
+            <tr><td><strong>个人定价</strong></td><td>Free / Pro \$20 / Pro+ \$60 / Ultra \$200 <sup class="cite" data-refid="22">[22]</sup></td><td>Pro \$20 / Max 5x \$100 / Max 20x \$200 <sup class="cite" data-refid="12">[12]</sup></td></tr>
+            <tr><td><strong>团队定价</strong></td><td>Teams \$40/seat <sup class="cite" data-refid="22">[22]</sup></td><td>约 \$125/人（10人 \$1250/mo）<sup class="cite" data-refid="11">[11]</sup></td></tr>
+            <tr><td><strong>国内可用性</strong></td><td>可下可登，调 AI 须代理，Claude/GPT 对国内封禁 <sup class="cite" data-refid="14">[14]</sup></td><td>官方封中国 IP，须 VPN/中转有封号风险 <sup class="cite" data-refid="13">[13]</sup></td></tr>
+            <tr><td><strong>对「练判断力」</strong></td><td>默认偏友好端：逼你持续看 diff、按键确认 <sup class="cite" data-refid="5">[5]</sup></td><td>默认偏省力端：放手跑易脱离理解，需主动设防 <sup class="cite" data-refid="3">[3]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">⭐ 自主度 ↔ 思考力 trade-off（核心章）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这是整份报告的核心。把上面的范式差异落到阿杰最关心的问题：<strong>用这些工具，会不会让人变笨？</strong>答案有研究背书，且是「取决于用法」——而工具的默认值会把你推向某一端。</p>
+
+      <div class="callout purple">
+        <h4>🧠 一句话：工具给默认值，习惯决定结果</h4>
+        <p>Cursor 默认让你<strong>盯 diff</strong>（认知投入高，被动练判断），CC 默认让你<strong>放手跑</strong>（认知投入低，省力）。但两者用法都可调——CC 用 Plan Mode 就能逼自己看计划，Cursor 开 Cloud Agent 也能放手。所以会不会变笨，<strong>不取决于装哪个，取决于你把它放在光谱哪一端用</strong><sup class="cite" data-refid="4">[4]</sup>。</p>
+      </div>
+
+      <h3>6.1 实证：同一工具，习惯决定理解力差一倍</h3>
+      <div class="callout bad">
+        <p><strong>Anthropic RCT（2026-02，52 名工程师学陌生异步库 Trio）：</strong>AI 辅助组理解测验均分 <strong>50% vs 手写组 67%</strong>（低约 17%，debug 和「判断代码错在哪」差距最大），AI 组只快约 2 分钟且不显著<sup class="cite" data-refid="3">[3]</sup>。<strong>同一研究的关键分化：</strong>用 AI <strong>问概念/要解释/边问边独立写</strong>的人拿 65%+，<strong>纯委托生成</strong>代码的人 &lt;40%<sup class="cite" data-refid="4">[4]</sup>。结论：寻求解释保留学习，外包实现削弱学习。<strong>⚠️ 样本是初级工程师学陌生库，对资深开发者做熟悉领域是否同样退化未覆盖，外推需谨慎</strong> <span class="conf y">🟡</span>。</p>
+      </div>
+
+      <h3>6.2 框架：认知卸载 vs 认知投降（Addy Osmani）</h3>
+      <div class="callout warn">
+        <p><strong>认知卸载</strong>=委托 how、保留对 what 的判断；<strong>认知投降</strong>=停止形成独立观点、把 AI 输出当自己的<sup class="cite" data-refid="5">[5]</sup>。研究显示 AI 可用时 <strong>73% 的时候人接受了错误答案且信心反升</strong><sup class="cite" data-refid="5">[5]</sup>。Osmani 给出五个保 judgment 的习惯：① 先写下预期再看答案；② 批判性读 diff（像审 junior 的代码）；③ 要 AI 反驳自己；④ 累了就停止委托；⑤ 追踪信心来源。结构性防护：要证据非「看起来好」、PR 控在 ~100 行（人能理解的单位）、新系统先让 AI 解释再生成<sup class="cite" data-refid="5">[5]</sup>。</p>
+      </div>
+
+      <h3>6.3 佐证：主观体感不可靠 + 技术债照来</h3>
+      <div class="callout info">
+        <p><strong>METR RCT（2025-07）：</strong>资深开源开发者用 AI 反而<strong>慢 19%</strong>，但自我感觉<strong>快 20%</strong>（开发者预测会快 24%、专家预测快 38-39%，结果全反）<sup class="cite" data-refid="8">[8]</sup>。<strong>技术债 arXiv 研究：</strong>自主 agent 提速但维护账单照来——静态分析告警约 +18%、认知复杂度约 +39%，且「把动手思考变成从输出里挑选」时组织会失去判断产出质量的能力<sup class="cite" data-refid="8b">[28]</sup>。这与「放手跑省力但易脱离理解」的范式判断一致 <span class="conf y">🟡</span>。</p>
+      </div>
+
+      <h3>6.4 映射到两个工具</h3>
+      <div class="role-cols">
+        <div class="role-col must">
+          <h4>🟢 Cursor：天然偏「练思考」端</h4>
+          <ul style="font-size:13.5px;color:var(--text-soft)">
+            <li>Tab/Cmd-K/Composer 逼你持续看 diff、按键做判断，判断力在用进废退里被动锻炼 <sup class="cite" data-refid="16b">[16b]</sup></li>
+            <li>「时刻在环路」对要长期 own 代码的人是特性不是 bug <sup class="cite" data-refid="11">[11]</sup></li>
+            <li><strong>但警惕 review 疲劳：</strong>Composer 多文件大改时评测者亲历漏掉 async 调 sync 的静默 bug，放手越多越要刻意逐行看 <sup class="cite" data-refid="23">[23]</sup></li>
+          </ul>
+        </div>
+        <div class="role-col never">
+          <h4>🔴 Claude Code：偏「省力但易脱离」端</h4>
+          <ul style="font-size:13.5px;color:var(--text-soft)">
+            <li>批量执行后回审、无 line-level diff，最易触发「看不懂自己项目」<sup class="cite" data-refid="11">[11]</sup></li>
+            <li>Dynamic Workflows 本质是把「动手思考」换成「从输出里挑选」<sup class="cite" data-refid="3">[3]</sup></li>
+            <li><strong>但可设防：</strong>用 plan mode 看计划、逐个审 diff、让它解释而非直接接受；用 hooks 强制提交前跑测试当安全阀 <sup class="cite" data-refid="24b">[25]</sup></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>🎯 核心 trade-off 一句话：</strong>你想练判断力的核心模块（产品核心逻辑、长期要维护的代码），用偏「人在环路」的姿势（Cursor 盯 diff，或 CC 的 plan mode + 逐个审 + 让它解释）；你不在乎理解的边角活（脚手架、批量重构、测试样板、一次性脚本），放手跑省力。<strong>选型按「这个任务我要不要保留理解」来分，而不是按「哪个工具强」。</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">实测与社区口碑</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>把口碑分成「实测数据」和「观点共识」两层看——前者可信度更高，后者要警惕主观偏差。</p>
+
+      <h3>7.1 实测数据（可信度较高）</h3>
+      <div class="callout good">
+        <p><strong>独立评测（36 项测试）：</strong>Claude Code 代码质量/正确性/完整性<strong>赢 67%</strong>，相同任务省 <strong>5.5x token</strong>（188K vs 33K），复杂多文件每美元 8.5 准确分 vs Cursor 6.2；但简单工具函数 Cursor <strong>42 vs 31</strong><sup class="cite" data-refid="6">[6]</sup>。<strong>结论：CC 赢难题，Cursor 赢高频简单活，多数 power user 两个都用</strong><sup class="cite" data-refid="6">[6]</sup>。<strong>METR：</strong>资深开发者用 AI 反而慢 19% 却自感快 20%<sup class="cite" data-refid="8">[8]</sup>。</p>
+      </div>
+
+      <h3>7.2 观点共识（可信度中等，警惕主观）</h3>
+      <div class="callout info">
+        <p><strong>典型工作流比喻：</strong>「Claude Code 是搭房子的施工队，Cursor 是收尾的细木工」——早上用 CC 跨 6-12 文件搭脚手架，下午同一 repo 在 Cursor 里精调 UI/修边界/调文案<sup class="cite" data-refid="6">[6]</sup>。<strong>solo dev 评价：</strong>「对多数 solo SaaS 开发者，Cursor 是更好的日常选择」——社区支持多、无限自动补全、VSCode 工作流成熟，Tab 是「上瘾点」<sup class="cite" data-refid="9">[9]</sup>。<strong>⚠️ 这类来自观点型文章，war-story 细节偏少，证据强度中等</strong> <span class="conf y">🟡</span>。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>⚠️ 口碑的可信度警告：</strong>① 未找到 2026 年针对 Cursor vs CC 的一手 Reddit/HN 原帖（搜索 API 对 reddit 返回空），社区口碑多为二手汇总 <span class="conf y">🟡</span>；② 多数「3 个月实测」文章经核查偏观点/比喻，缺具体踩坑案例 🔴；③ METR 已证明「用 AI 更快」的体感严重不准——<strong>对任何「更快/更省力」的口碑都要打折，建议自己做小对照（同类任务记一次手动、一次 AI 的真实耗时）</strong><sup class="cite" data-refid="8">[8]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">定价与国内可用性</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>8.1 定价对照</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>档位</th><th>Cursor</th><th>Claude Code</th></tr></thead>
+          <tbody>
+            <tr><td>免费</td><td>Hobby \$0（限量 Tab+Agent）<sup class="cite" data-refid="22">[22]</sup></td><td>无独立免费档（含在 Claude 免费层外）⚠️</td></tr>
+            <tr><td>入门 \$20</td><td>Pro \$20（\$20 额度，Tab 无限）<sup class="cite" data-refid="22">[22]</sup></td><td>Pro \$20（约每 5h 45 条提示）<sup class="cite" data-refid="12">[12]</sup></td></tr>
+            <tr><td>中档</td><td>Pro+ \$60（3x）<sup class="cite" data-refid="22">[22]</sup></td><td>Max 5x \$100（全天开发不被限）<sup class="cite" data-refid="12">[12]</sup></td></tr>
+            <tr><td>重度</td><td>Ultra \$200（20x）<sup class="cite" data-refid="22">[22]</sup></td><td>Max 20x \$200（约 22万 token/5h）<sup class="cite" data-refid="12">[12]</sup></td></tr>
+            <tr><td>团队/人</td><td>Teams \$40/seat <sup class="cite" data-refid="22">[22]</sup></td><td>约 \$125/人 <sup class="cite" data-refid="11">[11]</sup></td></tr>
+            <tr><td>token 价</td><td>Composer 2.5 \$0.50/\$2.50 每百万 <sup class="cite" data-refid="2">[2]</sup></td><td>Opus 4.8 \$5/\$25、Sonnet 4.6 \$3/\$15 每百万 <sup class="cite" data-refid="12">[12]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout info">
+        <p><strong>组合月费约 \$40</strong>（两个 \$20 入门档）是很多 power user 的实际选择<sup class="cite" data-refid="6">[6]</sup>。注意 Cursor 团队版便宜（\$40/seat）、CC 团队版贵（约 \$125/人，10 人 \$1250/mo vs Cursor \$400/mo，约 3x 溢价）<sup class="cite" data-refid="11">[11]</sup>。</p>
+      </div>
+
+      <h3>8.2 国内可用性（硬约束）</h3>
+      <div class="callout bad">
+        <p><strong>两者直连均被封。Claude Code：</strong>Anthropic 政策明确把中国大陆排除在支持地区外，封中国 IP（影响 OAuth/API/CLI/VS Code 插件），2025/9 起封、2025/11 大规模封号潮、2026/4 起部分用户须政府 ID+自拍验证；VPN 切美/日/台 IP 可用，但中国 IP 登录、频繁切 IP、共享账号是封号主因<sup class="cite" data-refid="13">[13]</sup>。<strong>Cursor：</strong>客户端国内可下可登，但调 AI 接口必须代理且不稳，Claude/GPT 模型对检测到的国内地区<strong>严格封禁</strong>（账号有钱也用不了），仅收 Visa/MC 双币卡，不收支付宝/微信/PayPal<sup class="cite" data-refid="14">[14]</sup>。</p>
+      </div>
+      <div class="callout warn">
+        <p><strong>绕过方案：</strong>① VPN/Clash；② <strong>火山引擎方舟</strong>（ByteDance，Anthropic 兼容端点，国内可直连无需代理，Coding Plan Lite ¥40 / Pro ¥200 每月，但换成豆包/DeepSeek 模型）<sup class="cite" data-refid="15">[15]</sup>；③ QCode.cc 等中转（支持支付宝）<sup class="cite" data-refid="15">[15]</sup>；④ Cursor 国内纯直连替代：字节 Trae CN、Cline+火山方舟<sup class="cite" data-refid="14">[14]</sup>。<strong>⚠️ 中转/VPN 用 CC 的真实封号率、各中转商可靠性无权威数据 🔴；火山方舟价格来自第三方教程未经官方二次核实 🟡。</strong></p>
+      </div>
+      <div class="callout accent">
+        <p><strong>🎯 对阿杰：</strong>你已有代理，自己用没问题。但 CC 在国内可用性比 Cursor 更脆弱（官方封 + ID 验证），可考虑「<strong>Cursor 做主力交互式编辑、CC 在能稳定连通时跑自主长任务</strong>」的混合法。<strong>这只影响你的开发链路，不影响半米产品架构</strong>——但若未来想把「AI 辅助编码/学习」做进给国内用户的产品里，Cursor/CC 这条路对终端用户门槛太高，得考虑 Trae CN / Cline+火山方舟这类国内直连方案或自建。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">⭐ 何时用 Cursor / 何时用 CC（决策树）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>不要问「哪个更好」，按下面这棵树问「这个任务的性质是什么」。核心判据：<strong>任务范围 + 你要不要保留理解</strong>。</p>
+
+      <div class="tree">
+        <div class="node q">Q1：这个任务你以后要不要长期维护、要不要真懂它？</div>
+        <div class="branches">
+          <div class="node yes"><span class="lbl y">要懂</span>核心逻辑 / 长期 own 的代码 → 偏人在环路（Cursor 盯 diff，或 CC Plan Mode + 逐个审 + 让它解释）<sup class="cite" data-refid="5">[5]</sup></div>
+          <div class="node no"><span class="lbl n">不在乎</span>脚手架 / 一次性脚本 / 测试样板 → 放手跑省力，去 Q2 看交给谁</div>
+        </div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q2：任务范围有多大？</div>
+        <div class="branches">
+          <div class="node yes"><span class="lbl m">高频小</span>单文件改 / UI 微调 / 单函数 / 补全 → <strong>Cursor</strong>（心智不切换、每美元 42 准确分、Tab 上瘾）<sup class="cite" data-refid="6">[6]</sup></div>
+          <div class="node no"><span class="lbl m">复杂大</span>跨 6-12 文件重构 / 基建 / 大库迁移 / 写测试 → <strong>Claude Code</strong>（省 5.5x token、漏改更少、monorepo 更稳）<sup class="cite" data-refid="6">[6]</sup></div>
+        </div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q3：你在国内、当下能稳定连通吗？</div>
+        <div class="branches">
+          <div class="node yes"><span class="lbl y">能</span>按 Q1/Q2 选；CC 跑自主长任务务必 Plan Mode + PR ≤100 行 + 逐段审 diff <sup class="cite" data-refid="5">[5]</sup></div>
+          <div class="node no"><span class="lbl n">不稳</span>CC 可用性更脆弱（封 IP + ID 验证）→ 优先 Cursor，或走火山方舟/中转 <sup class="cite" data-refid="13">[13]</sup></div>
+        </div>
+      </div>
+
+      <div class="callout good">
+        <h4>✅ 一句话决策</h4>
+        <p><strong>要懂 + 高频小 → Cursor。不在乎懂 + 复杂大 → Claude Code。要懂 + 复杂大 → CC 但开 Plan Mode 把它当「会解释的 junior」逐段审。</strong>别让「哪个模型强」进入决策——Composer 2.5 已追平 Opus 4.7，模型不是变量<sup class="cite" data-refid="2">[2]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">两个都用的组合打法</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>实务共识：多数 power user <strong>两个都装</strong>，按任务性质切换，组合月费约 \$40<sup class="cite" data-refid="6">[6]</sup>。下面是一套可直接抄的工作流。</p>
+
+      <div class="callout accent">
+        <h4>🔧 典型一天</h4>
+        <p><strong>上午（重活）：</strong>用 Claude Code 跨 6-12 文件搭脚手架 / 跑大重构 / 写测试套件——开 <strong>Plan Mode</strong> 先看计划再放行，跑完<strong>逐段读 diff</strong>。<strong>下午（精修）：</strong>同一 repo 切到 <strong>Cursor</strong> 精调 UI、修边界、调文案、视觉调试（内置浏览器）——靠 Tab 补全和逐行 diff 保持手感<sup class="cite" data-refid="6">[6]</sup>。比喻：CC 是施工队，Cursor 是细木工<sup class="cite" data-refid="6">[6]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>🛡️ 给「单人维护大产品」的护栏（防技术债 + 防变笨）</h4>
+        <ul style="margin-top:6px">
+          <li><strong>CC 里用 hooks 强制提交前跑测试</strong>——挡住高自主度带来的技术债（研究里认知复杂度 +39% 正是放手跑的代价）<sup class="cite" data-refid="24b">[25]</sup></li>
+          <li><strong>PR 控在 ~100 行</strong>（人能理解的单位），新系统先让 AI 解释再生成 <sup class="cite" data-refid="5">[5]</sup></li>
+          <li><strong>核心模块绝不纯委托</strong>——边问概念边写，把 AI 输出当 junior 的代码审 <sup class="cite" data-refid="4">[4]</sup></li>
+          <li><strong>不迷信体感</strong>——同类任务偶尔记一次手动 vs AI 的真实耗时，校准自己的判断 <sup class="cite" data-refid="8">[8]</sup></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">对阿杰（独立全栈 + 做学习产品 + 保持思考）的建议</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>三条直接落到你身上的判断，结合你的三个标签：独立全栈、做 AI 学习产品（半米）、怕工具让人变笨。</p>
+
+      <div class="callout purple">
+        <h4>1️⃣ 你的核心洞察被实证坐实了，而且证据很硬</h4>
+        <p>Anthropic 自家 RCT：纯委托 AI 生成代码的人理解测验 &lt;40%，而「边用边问概念/要解释」的人 65%+——<strong>同样的 AI，习惯决定你变笨还是变强</strong><sup class="cite" data-refid="4">[4]</sup>。这不是哲学，是数据。把这条放进半米的产品叙事里很有说服力：你做的是「学习产品」，恰恰可以把「认知投降」设计成产品要避免的反面。Osmani 的解法（先写下预期再看答案、把 AI 输出当 junior 的代码审、让 AI 反驳自己、新系统先让它解释再生成）几乎可以直接迁移成半米的「防变笨」学习机制设计<sup class="cite" data-refid="5">[5]</sup>。</p>
+      </div>
+
+      <div class="callout accent">
+        <h4>2️⃣ 默认 Cursor 当主力，CC 留给明确边界的重活</h4>
+        <p>你是单人维护，最怕的不是慢，是三个月后「看不懂自己项目」——而 CC 的批量自主执行正是这个风险的高发区<sup class="cite" data-refid="11">[11]</sup>。所以：<strong>Cursor 主力</strong>（盯 diff 练判断 + Tab 省力 + 视觉调前端，「时刻在环路」对要长期 own 代码的人是特性不是 bug）；<strong>CC 跑重活</strong>（跨多文件重构、写测试、基建脚本），且开 Plan Mode、控 PR ≤100 行、跑完逐段读 diff，用 hooks 当安全阀<sup class="cite" data-refid="5">[5]</sup><sup class="cite" data-refid="24b">[25]</sup>。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>3️⃣ 别迷信「谁更聪明」和「用 AI 更快」+ 把 diff-review 范式借进半米</h4>
+        <p>Composer 2.5 已追平 Opus 4.7，模型不再是选型关键<sup class="cite" data-refid="2">[2]</sup>；METR 实测资深开发者用 AI 反而慢 19% 却自感快 20%，你对「AI 提速」的体感很可能不准——建议自己做小对照<sup class="cite" data-refid="8">[8]</sup>。<strong>更深一层：</strong>Cursor 的「AI 提议、人确认」diff-review 范式恰恰是个好范本——让 AI 做事但把「确认/拒绝/理解」这一步还给人。<strong>你的学习产品可以借鉴这种交互来防止学习者外包思考</strong><sup class="cite" data-refid="5">[5]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 国内提醒</h4>
+        <p>你用户在国内，但你自己开发用这俩都得绕墙（Anthropic 封中国 IP，Cursor 限 Claude）<sup class="cite" data-refid="13">[13]</sup><sup class="cite" data-refid="14">[14]</sup>。若想稳定可看火山引擎方舟（Anthropic 兼容、国内直连、¥40-200/月）<sup class="cite" data-refid="15">[15]</sup>。<strong>但这只影响你的开发链路，不影响半米产品架构。</strong>真要把 AI 编码/学习能力做进国内产品，得另选国内直连方案或自建。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 FAQ ===== -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">FAQ</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">到底哪个更强？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>问错了。两者可跑同一底层模型，Cursor 自研 Composer 2.5 已基本追平 Claude Opus 4.7（SWE-bench Multilingual 79.8% vs 80.5%，成本 1/10）<sup class="cite" data-refid="2">[2]</sup>。真正差异是<strong>自主度/交互范式</strong>：Cursor 让你逐行看 diff（练判断），CC 让你给目标放手跑（省力）<sup class="cite" data-refid="1">[1]</sup>。按「这个任务要不要保留理解」选，不按「哪个模型强」选。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">用这些工具会不会让我变笨？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>取决于用法，有数据。Anthropic RCT：纯委托 AI 生成代码的人理解测验 &lt;40%，边用边问概念/要解释的人 65%+<sup class="cite" data-refid="4">[4]</sup>。核心模块边问边写、把 AI 输出当 junior 的代码审；边角活才放手<sup class="cite" data-refid="5">[5]</sup>。⚠️ 该研究样本是初级工程师学陌生库，资深做熟悉领域是否同样退化未覆盖<sup class="cite" data-refid="3">[3]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">我是独立全栈，只能选一个，选哪个？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>选 Cursor 当主力。单人维护最怕三个月后看不懂自己项目，Cursor「时刻在环路」对长期 own 代码是特性<sup class="cite" data-refid="11">[11]</sup>。Tab 补全省力 + 逐行 diff 练判断 + 内置浏览器调前端，solo dev 公认日常首选<sup class="cite" data-refid="9">[9]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">什么时候才该用 Claude Code？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>明确边界的重活：跨 6-12 文件重构、基建、写测试套件、大代码库迁移——CC 省 5.5x token、漏改更少、monorepo 更稳<sup class="cite" data-refid="6">[6]</sup>。务必开 Plan Mode 先看计划、控 PR ≤100 行、跑完逐段审 diff，用 hooks 强制提交前跑测试当安全阀<sup class="cite" data-refid="5">[5]</sup><sup class="cite" data-refid="24b">[25]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">两个都装会不会太贵/太乱？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不会。两个入门档各 \$20，组合约 \$40/月，是很多 power user 的实际配置<sup class="cite" data-refid="6">[6]</sup>。工作流清晰：CC 干重活（施工队），Cursor 做精修（细木工），按任务性质切换不冲突<sup class="cite" data-refid="6">[6]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">我感觉用 AI 明显更快，这不好吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>体感很可能不准。METR RCT 实测资深开源开发者用 AI 反而<strong>慢 19%</strong>，但自我感觉<strong>快 20%</strong>，开发者和专家的预测全反<sup class="cite" data-refid="8">[8]</sup>。建议自己做小对照：同类任务记一次手动、一次 AI 的真实耗时，再下结论。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">在国内能用吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>都得绕墙。Anthropic 封中国 IP（2025/9 起、2026/4 起部分要 ID+自拍验证），Cursor 客户端可登但 Claude/GPT 模型对国内地区严格封禁、只收双币卡<sup class="cite" data-refid="13">[13]</sup><sup class="cite" data-refid="14">[14]</sup>。绕过：VPN / 火山引擎方舟（¥40-200/月，换豆包/DeepSeek）/ 中转<sup class="cite" data-refid="15">[15]</sup>。CC 比 Cursor 更脆弱，国内优先 Cursor。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">CC 的 Dynamic Workflows / 数百 subagent 我用得上吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>大概率暂时用不上。它是 2026-05-28 随 Opus 4.8 发的研究预览，能从 kickoff 到 merge 跑数十万行代码库级迁移、单次最多 1000 subagents<sup class="cite" data-refid="7">[7]</sup>，但实际门槛（是否限 Max/企业、并发上限真实数字）未确认 <span class="conf y">🟡</span>。对单人项目，自主度越高越要主动设防护栏。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">CC 有没有 Cursor 那种逐行 accept/reject？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>未找到明确确认 CC 已加入 Cursor 式的 line-level diff 接受/拒绝 UI——目前证据是「批量执行后回审」为主，配 Plan Mode 在执行前批准 <span class="conf r">🔴 待确认</span><sup class="cite" data-refid="11">[11]</sup>。这也是 CC 比 Cursor 更易脱离代码理解的结构原因。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">这跟我做半米学习产品有什么关系？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>关系很大。Cursor 的「AI 提议、人确认」diff-review 范式是防「认知投降」的好范本——让 AI 做事但把确认/拒绝/理解还给人<sup class="cite" data-refid="5">[5]</sup>。你的学习产品可以借鉴这种交互防止学习者外包思考；Osmani 的五个保 judgment 习惯也能直接迁移成产品机制<sup class="cite" data-refid="4">[4]</sup>。</p></div></div>
+
+    </div>
+  </section>
+
+  <!-- ===== CH13 References ===== -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">References</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13px;color:var(--text-mute)">访问日期均为 2026-05-29。悬停 inline <sup class="cite" data-refid="1">[1]</sup> 标记可预览来源。</p>
+      <ol class="ref-list">
+        <li id="ref-1">Claude Code vs Cursor: What to Choose in 2026 — Builder.io（"The real philosophical split is about control"，agent-first vs IDE-first；Emergent 称 Execution AI vs Editor AI）· <a href="https://www.builder.io/blog/cursor-vs-claude-code" target="_blank" rel="noopener">builder.io/blog/cursor-vs-claude-code</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 多源 · 引用 ×多</span></li>
+        <li id="ref-2">Cursor Composer 2.5 Matches Claude Opus 4.7 on Coding Benchmarks — TechTimes（SWE-bench Multilingual 79.8% vs 80.5%；CursorBench v3.1 63.2% vs 61.6%；Terminal-Bench 2.0 69.3% vs 69.4%；token \$0.50/\$2.50、约 1/10；2026-05-18 发布；⚠️ CursorBench 供应商自评需谨慎）· <a href="https://www.techtimes.com/articles/316917/20260520/cursor-composer-25-matches-claude-opus-47-coding-benchmarks-one-tenth-cost.htm" target="_blank" rel="noopener">techtimes.com</a><span class="ref-meta">· 访问 2026-05-29 · 🟡 部分供应商自评 · 引用 ×多</span></li>
+        <li id="ref-3">How AI assistance impacts the formation of coding skills — Anthropic（RCT 52 名工程师学新库 Trio，AI 组理解测验 50% vs 手写 67%，低约 17%，debug 差距最大，完成只快约 2 分钟不显著）· <a href="https://www.anthropic.com/research/AI-assistance-coding-skills" target="_blank" rel="noopener">anthropic.com/research</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 一手研究 · 引用 ×多</span></li>
+        <li id="ref-4">Anthropic Study: AI Coding Assistance Reduces Developer Skill Mastery by 17% — InfoQ（同研究关键分化：问概念/要解释的人 65%+，纯委托生成 &lt;40%；寻求解释保留学习，外包实现削弱学习）· <a href="https://www.infoq.com/news/2026/02/ai-coding-skill-formation/" target="_blank" rel="noopener">infoq.com</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 引用一手研究 · 引用 ×多</span></li>
+        <li id="ref-5">Cognitive Offloading vs. Cognitive Surrender — Addy Osmani（认知卸载 vs 认知投降框架；AI 可用时 73% 接受错误答案且信心反升；五个保 judgment 习惯 + 结构性防护 PR ≤100 行/先解释再生成）· <a href="https://addyosmani.com/blog/cognitive-surrender/" target="_blank" rel="noopener">addyosmani.com/blog/cognitive-surrender</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 · 引用 ×多</span></li>
+        <li id="ref-6">Claude Code vs Cursor 2026: Terminal Autonomy vs IDE Velocity — WaveSpeed + Builder.io（36 项测试 CC 质量/正确性赢 67%，省 5.5x token 188K vs 33K，复杂多文件每美元 8.5 vs 6.2，简单工具 Cursor 42 vs 31；多数 power user 两个都用、组合约 \$40；施工队 vs 细木工比喻）· <a href="https://wavespeed.ai/blog/posts/claude-code-vs-cursor-2026/" target="_blank" rel="noopener">wavespeed.ai</a><span class="ref-meta">· 访问 2026-05-29 · 🟡 比喻型证据中等 · 引用 ×多</span></li>
+        <li id="ref-7">Anthropic releases Opus 4.8 with new 'dynamic workflow' tool — TechCrunch + MarkTechPost（2026-05-28；数百 subagent 并行、单次最多 1000 subagents/16 并发、数十万行代码库级迁移以测试套件验收；SWE-bench Verified 88.6%、Pro 69.2%；fast mode 快 2.5x 便宜 3x；研究预览）· <a href="https://techcrunch.com/2026/05/28/anthropic-releases-opus-4-8-with-new-dynamic-workflow-tool/" target="_blank" rel="noopener">techcrunch.com</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 · 引用 ×多</span></li>
+        <li id="ref-8">Measuring the Impact of Early-2025 AI on Experienced Developer Productivity — METR（2025-07 RCT；资深开源开发者用 AI 反而慢 19%，自感快 20%；开发者预测快 24%、专家预测快 38-39% 全反；主要用 Cursor Pro + Claude 3.5/3.7）· <a href="https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/" target="_blank" rel="noopener">metr.org</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 · 引用 ×多</span></li>
+        <li id="ref-9">Cursor Review 2026 / solo dev comparisons — devtoolpicks / allaboutai（对多数 solo SaaS 开发者 Cursor 更好；无限自动补全 + VSCode 工作流成熟；Tab 是上瘾点；前沿模型烧额度有人月费 \$1500-2000）· <a href="https://devtoolpicks.com/blog/cursor-vs-windsurf-2026-solo-developers" target="_blank" rel="noopener">devtoolpicks.com</a><span class="ref-meta">· 访问 2026-05-29 · 🟡 观点型 · 引用 ×多</span></li>
+        <li id="ref-10">Claude Code 2026 自主度 — MarkTechPost / Anthropic docs（Plan Mode 执行前人工批准 / 可调自主度从「每动作批准」到分类器自动区分 / subagents / 动态工作流最多 1000 agents）· <a href="https://www.marktechpost.com/2026/05/28/anthropic-ships-claude-opus-4-8-alongside-dynamic-workflows-and-cheaper-fast-mode-with-workflows-capped-at-1000-subagents/" target="_blank" rel="noopener">marktechpost.com</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 · 引用 ×2</span></li>
+        <li id="ref-11">Claude Code vs Cursor in 2026 — Builder.io / 横评（CC 无 line-level 接受拒绝、批量执行后回审最易触发「看不懂自己项目」；团队版 10人 \$1250/mo vs Cursor \$400 约 3x；终端范式对 IDE 习惯者有门槛）· <a href="https://www.builder.io/blog/cursor-vs-claude-code" target="_blank" rel="noopener">builder.io/blog/cursor-vs-claude-code</a><span class="ref-meta">· 访问 2026-05-29 · 🟡 · 引用 ×多</span></li>
+        <li id="ref-12">Claude Code Pricing 2026 — SSD Nodes / Verdent（Opus 4.8 默认 effort high / fast mode 用 4.7；Pro \$20 约 44K token/5h 约 10-40 prompt；Max 5x \$100；Max 20x \$200 约 22万 token/5h+周封顶 idle 不计；API Opus \$5/\$25、Sonnet \$3/\$15、Haiku \$1/\$5；1M 上下文；VS Code 插件需 1.98.0+）· <a href="https://www.ssdnodes.com/blog/claude-code-pricing-in-2026-every-plan-explained-pro-max-api-teams/" target="_blank" rel="noopener">ssdnodes.com</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 · 引用 ×多</span></li>
+        <li id="ref-13">How to Use Claude Code in China: 5 Working Methods — CodePick + SCMP Shadow APIs（中国大陆官方封禁，2025/9 起封、2025/11 封号潮、2026/4 起部分须政府 ID+自拍验证；VPN 切美/日/台可用；中国 IP 登录/频繁切 IP/共享账号是封号主因；淘宝/闲鱼中转 + 火山方舟中转）· <a href="https://codepick.dev/en/guides/claude-code-china-usage/" target="_blank" rel="noopener">codepick.dev/en/guides/claude-code-china-usage</a><span class="ref-meta">· 访问 2026-05-29 · 🟡 · 引用 ×多</span></li>
+        <li id="ref-14">Cursor 国内使用完整指南 — CodePick + 知乎封禁讨论（客户端国内可下可登，调 AI 接口须代理且不稳；Claude/ChatGPT 对检测到国内地区严格封禁；仅收 Visa/MC 双币卡不收支付宝/微信/PayPal；国内直连替代字节 Trae CN、Cline+火山方舟）· <a href="https://codepick.dev/zh/guides/cursor-china-usage" target="_blank" rel="noopener">codepick.dev/zh/guides/cursor-china-usage</a><span class="ref-meta">· 访问 2026-05-29 · 🟡 · 引用 ×多</span></li>
+        <li id="ref-15">火山引擎方舟 / 国内中转（ByteDance Anthropic 兼容端点，国内可直连无需代理，Coding Plan Lite ¥40 / Pro ¥200 每月，换豆包/DeepSeek 模型；QCode.cc 支持支付宝；⚠️ 第三方教程价格未经官方二次核实）· <a href="https://codepick.dev/en/guides/claude-code-china-usage/" target="_blank" rel="noopener">codepick.dev（含火山方舟方法）</a><span class="ref-meta">· 访问 2026-05-29 · 🟡 第三方教程 · 引用 ×多</span></li>
+        <li id="ref-16">Claude Code VS Code 插件 / 多端 — Claude Code Docs（CLI / VS Code 插件 / 桌面 App / 浏览器版 IDE claude.ai/code 多端，不再纯终端；agent-first：给目标→自主规划多步执行→审结果）· <a href="https://code.claude.com/docs/en/vs-code" target="_blank" rel="noopener">code.claude.com/docs/en/vs-code</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 · 引用 ×多</span></li>
+        <li id="ref-16b">Cursor (AI Code Editor) — cursor.com（VSCode fork AI 原生编辑器，2026 演进 agent 优先但保留 IDE 深度；功能光谱 Tab→Cmd-K→Composer→Cloud Agent；支持 Claude/GPT-5.x/Gemini 3/Grok/自研 Composer + Auto；整库语义索引；强项 Tab 补全/HITL diff/VSCode 零迁移；短板大文件卡顿/UI 杂乱/厂商锁定/代码上传第三方）· <a href="https://cursor.com/" target="_blank" rel="noopener">cursor.com</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 · 引用 ×多</span></li>
+        <li id="ref-17">New Cursor Interface / Changelog 3.0~3.5 — Cursor 官方（3.0 2026-04-02 新界面+Agents Window 并行 agent+Design Mode；3.4 05-13 全屏 tab；3.5 05-19~20 Jira 集成+Cloud Agents+共享 Canvas+/loop；Composer 2.5 05-18）· <a href="https://cursor.com/changelog/3-0" target="_blank" rel="noopener">cursor.com/changelog/3-0</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 官方 · 引用 ×多</span></li>
+        <li id="ref-18">Cursor Agent Overview — Cursor Docs（Agent 用 LSP go-to-definition 定位引用后给干净统一 diff；改动前自动建 checkpoint 可预览/回滚；支持排队后续指令、可暂停问澄清；统一 diff 逐个 accept/reject）· <a href="https://cursor.com/docs/agent/overview" target="_blank" rel="noopener">cursor.com/docs/agent/overview</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 官方 · 引用 ×2</span></li>
+        <li id="ref-19">Prompting agents / @-symbols — Cursor Docs + Instructa Rules guide（@Files/@Code/@Docs 可爬第三方文档/@Codebase 触发整库语义搜索；.cursorrules 放项目根目录给 AI 常驻指令对 Chat 和 Cmd-K 都生效；最佳实践用 @ 显式给上下文）· <a href="https://cursor.com/docs/context/mentions" target="_blank" rel="noopener">cursor.com/docs/context/mentions</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 官方 · 引用 ×2</span></li>
+        <li id="ref-20">Cursor Changelog / Cloud Agents — 官方（Cloud Agents 在隔离 Ubuntu VM 跑、开 PR，最接近 CC 自主模式；2026-02 起带 Computer Use 自带桌面+浏览器能开 localhost 点 UI 验证；/loop 可按计划反复跑直到达成目标）· <a href="https://cursor.com/changelog" target="_blank" rel="noopener">cursor.com/changelog</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 官方 · 引用 ×2</span></li>
+        <li id="ref-21">Cursor IDE Review (DEV) + cursor-tab-completion（Tab 用专用模型并从 accept/reject 行为学习；比旧版单行补全接受率高约 28%、建议数少约 21%；预测依据=当前文件+打开 tab+最近编辑+项目 rules）· <a href="https://dev.to/pickuma/cursor-ide-review-what-makes-it-a-genuinely-different-ai-code-editor-jj4" target="_blank" rel="noopener">dev.to/pickuma</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 含官方数据 · 引用 ×多</span></li>
+        <li id="ref-22">Cursor AI Pricing 2026 — NxCode + cursor.com/pricing（Free Hobby / Pro \$20 年付 \$16，\$20 月度额度 Tab 无限 Auto 无限 / Pro+ \$60 3x / Ultra \$200 20x / Teams \$40/seat 含 SSO/Bugbot/共享 rules；2025-06 起付费档含等额额度池，Auto 不耗额度）· <a href="https://www.nxcode.io/resources/news/cursor-ai-pricing-plans-guide-2026" target="_blank" rel="noopener">nxcode.io</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 · 引用 ×多</span></li>
+        <li id="ref-23">Cursor IDE Review (DEV) — review 疲劳实例（Composer 23 路由漏 error handler / async 调 sync 静默 bug，放手越多越要逐行看）· <a href="https://dev.to/pickuma/cursor-ide-review-what-makes-it-a-genuinely-different-ai-code-editor-jj4" target="_blank" rel="noopener">dev.to/pickuma</a><span class="ref-meta">· 访问 2026-05-29 · 🟡 单源 · 引用 ×2</span></li>
+        <li id="ref-23b">Create custom subagents — Claude Code Docs（subagent 独立上下文窗口/自定义系统提示/特定工具访问/独立权限；主 agent 规划与整合；可路由便宜模型如 Haiku 控成本；保护主上下文/限制工具/跨项目复用/专精/控成本）· <a href="https://code.claude.com/docs/en/sub-agents" target="_blank" rel="noopener">code.claude.com/docs/en/sub-agents</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 官方 · 引用 ×2</span></li>
+        <li id="ref-24b">Hooks reference — Claude Code Docs + Releasebot（生命周期/工具事件确定性触发 shell/HTTP/LLM 不靠模型解释；强制规则：提交前跑测试、拦危险命令、编辑后跑 formatter、分支名带 issue ID；2026-05 MCP stdio server 拿 CLAUDE_PROJECT_DIR）· <a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener">code.claude.com/docs/en/hooks</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 官方 · 引用 ×多</span></li>
+        <li id="ref-25b">Claude Code Extensions Explained: Skills/MCP/Hooks/Subagents/Plugins — Towards AI（MCP 接外部 GitHub/Slack/DB/Notion；Skills 封装长流程；Plugin 把 skills+subagents+slash 命令+hooks+输出风格+MCP 打包分发；subagent 决定谁干活，MCP 决定能碰什么）· <a href="https://pub.towardsai.net/claude-code-extensions-explained-skills-mcp-hooks-subagents-agent-teams-plugins-9294907e84ff" target="_blank" rel="noopener">pub.towardsai.net</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 · 引用 ×2</span></li>
+        <li id="ref-11b">How we built Claude Code auto mode — Anthropic Engineering（permission modes plan/accept-edits/bypass；Auto Mode 用 Sonnet 4.6 两层防御：输入层扫 injection、输出层 transcript 分类器逐动作判 block/allow；拦 overeager/honest mistake/injection/scope creep；3 连拒或 20 累拒升级人；假阳性 0.4% 但只抓 83% 真危险动作仍需人监督）· <a href="https://www.anthropic.com/engineering/claude-code-auto-mode" target="_blank" rel="noopener">anthropic.com/engineering/claude-code-auto-mode</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 官方 · 引用 ×多</span></li>
+        <li id="ref-8b">AI IDEs or Autonomous Agents? Measuring the Impact of Coding Agents — arXiv（自主 agent 提速但技术债照来：静态分析告警约 +18%、认知复杂度约 +39%；AI-fluent 仓库提交/增量大涨，AI-inexperienced 几乎不动；速度红利不保证）· <a href="https://arxiv.org/html/2601.13597v2" target="_blank" rel="noopener">arxiv.org/html/2601.13597v2</a><span class="ref-meta">· 访问 2026-05-29 · 🟡 · 引用 ×1</span></li>
+      </ol>
+    </div>
+  </section>
+
+</main>
+
+<button class="back-to-top" id="backTop" aria-label="回到顶部">↑</button>
+
+<footer>
+  <p>无忌 Deep Research · 3 路并行调研（Cursor 深挖 / Claude Code 深挖 / 横向对比+社区口碑+国内可用性+付费）· 2026-05-29 · 数字/版本/价格均 inline 引用，关键项标可信度</p>
+  <p style="font-size:12px;margin-top:6px">⚠️ 最大不确定性：① Composer 2.5 的 benchmark 多为 Cursor 官方/转述（CursorBench 供应商自评），存选择性披露风险，仅作「同档」参考；② 国内中转/VPN 用 CC 的真实封号率、各中转商可靠性无权威数据；③ 火山引擎方舟价格/可用性来自第三方教程未经官方二次核实；④ 技能退化研究样本是初级工程师学陌生库，对资深做熟悉领域是否同样退化未覆盖；⑤ 未找到 2026 年 Cursor vs CC 一手 Reddit/HN 原帖，社区口碑多为二手汇总，观点型来源已标 🟡。star/价格/版本均标可信度（🟢多源/🟡单源或观点/🔴估算待补）。</p>
+</footer>
+
+<script>
+(function() {
+  let activePopover=null,activeTrigger=null,hideTimer=null;
+  function getRefContent(refid){const el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){const r=trigger.getBoundingClientRect();const popW=pop.offsetWidth,popH=pop.offsetHeight;let left=r.left+window.scrollX;if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;if(left<12)left=12;let top=r.bottom+window.scrollY+6;if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}pop.style.left=left+'px';pop.style.top=top+'px';}
+  function showPopover(trigger){if(activeTrigger===trigger&&activePopover)return;if(activePopover){activePopover.remove();activePopover=null;}const content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;const pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;document.body.appendChild(pop);positionPopover(pop,trigger);activePopover=pop;activeTrigger=trigger;pop.addEventListener('mouseenter',()=>{if(hideTimer)clearTimeout(hideTimer);});pop.addEventListener('mouseleave',scheduleHide);}
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(()=>{if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){document.querySelectorAll('sup.cite[data-refid]').forEach(sup=>{sup.addEventListener('mouseenter',()=>showPopover(sup));sup.addEventListener('mouseleave',scheduleHide);sup.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});});document.addEventListener('click',e=>{if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+
+<script>
+(function(){
+  // 主题切换
+  var themeBtn=document.getElementById('themeToggle');
+  var saved=localStorage.getItem('cursorcc-theme');
+  if(saved){document.body.setAttribute('data-theme',saved);themeBtn.textContent=saved==='dark'?'☀️':'🌙';}
+  themeBtn.addEventListener('click',function(){
+    var cur=document.body.getAttribute('data-theme')==='dark'?'light':'dark';
+    document.body.setAttribute('data-theme',cur);
+    localStorage.setItem('cursorcc-theme',cur);
+    themeBtn.textContent=cur==='dark'?'☀️':'🌙';
+  });
+
+  // 进度条 + 回到顶部
+  var progressEl=document.getElementById('progress');
+  var backTopEl=document.getElementById('backTop');
+  function updateProgress(){
+    var docHeight=document.documentElement.scrollHeight-window.innerHeight;
+    var scrolled=window.scrollY;
+    var ratio=docHeight>0?scrolled/docHeight:0;
+    progressEl.style.width=(ratio*100)+'%';
+    backTopEl.classList.toggle('show',scrolled>400);
+  }
+  window.addEventListener('scroll',updateProgress,{passive:true});
+  updateProgress();
+  backTopEl.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+
+  // 章节折叠
+  document.querySelectorAll('section.chapter > h2').forEach(function(h2){
+    h2.addEventListener('click',function(){h2.parentElement.classList.toggle('collapsed');});
+  });
+
+  // 抽屉导航
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  function closeNav(){nav.classList.remove('open');ov.classList.remove('show');}
+  if(nav&&tog&&ov){
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',closeNav);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)closeNav();});});
+  }
+
+  // anchor 点击展开折叠章节
+  var anchorLinks=document.querySelectorAll('#anchorList a');
+  anchorLinks.forEach(function(a){
+    a.addEventListener('click',function(){
+      var target=document.getElementById(a.dataset.target);
+      if(target&&target.classList.contains('collapsed'))target.classList.remove('collapsed');
+    });
+  });
+
+  // scroll-spy 高亮
+  var sections=Array.prototype.map.call(anchorLinks,function(a){return document.getElementById(a.dataset.target);}).filter(Boolean);
+  function highlightAnchor(){
+    var offset=120,current=null;
+    for(var i=0;i<sections.length;i++){var rect=sections[i].getBoundingClientRect();if(rect.top-offset<=0)current=sections[i].id;}
+    anchorLinks.forEach(function(a){a.classList.toggle('active',a.dataset.target===current);});
+    var activeLink=document.querySelector('#anchorList a.active');
+    if(activeLink)activeLink.scrollIntoView({block:'nearest'});
+  }
+  window.addEventListener('scroll',highlightAnchor,{passive:true});
+  highlightAnchor();
+
+  // 表格行高亮
+  document.querySelectorAll('tbody tr').forEach(function(tr){
+    tr.addEventListener('click',function(){
+      tr.parentElement.querySelectorAll('tr.row-highlight').forEach(function(o){if(o!==tr)o.classList.remove('row-highlight');});
+      tr.classList.toggle('row-highlight');
+    });
+  });
+
+  // FAQ
+  document.querySelectorAll('.faq-q').forEach(function(q){
+    q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+  });
+})();
+</script>
+
+</body>
+</html>

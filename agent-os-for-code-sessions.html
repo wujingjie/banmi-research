@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>给 AI Code Session 做一个操作系统 · Wave + Mission Control + Agentic OS · 统管异构 Agent · 无忌 Deep Research · 2026-05-29</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1d23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --border-strong: #cdd2da;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --accent-text: #1d4ed8;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #0891b2;
+    --info-soft: #cffafe;
+    --code-bg: #f1f3f7;
+    --purple: #7c3aed;
+    --purple-soft: #ede9fe;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1c2030;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #b6bcc9;
+    --text-mute: #8a92a3;
+    --border: #2a2f3d;
+    --border-strong: #3a4154;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a55;
+    --accent-text: #93c5fd;
+    --good: #4ade80;
+    --good-soft: #14532d55;
+    --warn: #fbbf24;
+    --warn-soft: #78350f55;
+    --bad: #f87171;
+    --bad-soft: #7f1d1d55;
+    --info: #22d3ee;
+    --info-soft: #155e7555;
+    --code-bg: #0a0d14;
+    --purple: #a78bfa;
+    --purple-soft: #4c1d9555;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 28px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 3000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  hr.soft { border: none; height: 1px; background: var(--border); margin: 16px 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .node.yes { border-color: var(--good); }
+  .tree .node.no { border-color: var(--bad); }
+  .tree .branches { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .role-cols { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 14px 0; }
+  .role-col { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-elevated); }
+  .role-col h4 { margin: 0 0 8px; font-size: 14px; color: var(--text); }
+  .role-col.must { background: var(--accent-soft); border-color: var(--accent); }
+  .role-col.opt { background: var(--warn-soft); border-color: var(--warn); }
+  .role-col.never { background: var(--bad-soft); border-color: var(--bad); }
+  .role-col ul { margin: 4px 0 0; padding-left: 18px; }
+  .prod-card { margin: 12px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .prod-head { padding: 10px 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); }
+  .prod-head .ico { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; background: var(--accent-soft); }
+  .prod-head .name-block { flex: 1; min-width: 140px; }
+  .prod-head .pn { font-size: 15px; font-weight: 700; color: var(--text); }
+  .prod-head .ph { font-size: 12px; color: var(--text-mute); font-family: ui-monospace, monospace; margin-top: 1px; }
+  .prod-body { padding: 10px 14px; font-size: 14px; }
+  .prod-body p { color: var(--text-soft); margin: 6px 0; }
+  .prod-body .takeaway { margin-top: 8px; padding: 8px 10px; background: var(--accent-soft); border-radius: 8px; border-left: 3px solid var(--accent); color: var(--text); font-size: 13.5px; }
+  .prod-body .takeaway::before { content: "💡 启示  "; font-weight: 700; color: var(--accent-text); }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(250,204,21,0.3); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated,#fff); color: var(--text,#1a1a23); border: 1px solid var(--border,#e3e6ec); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(15,23,42,0.18); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  [data-theme="dark"] .cite-popover { background: #1a1e2a; color: #e6e9f0; border-color: #2a2f3a; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+  .cite-popover a { color: var(--accent,#2563eb); text-decoration: underline; word-break: break-all; }
+  [data-theme="dark"] .cite-popover a { color: #60a5fa; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  @media (max-width: 480px) {
+    .hero { padding: 18px 4px 8px; }
+    .hero h1 { font-size: 22px; }
+    section.chapter > h2 { font-size: 17px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+    .tree .branches { grid-template-columns: 1fr; }
+  }
+  @media print {
+    header.topbar, #progress, .back-to-top, nav.anchor-nav { display: none !important; }
+    section.chapter.collapsed .chapter-body { max-height: none !important; padding: 18px 20px 22px !important; }
+    section.chapter.collapsed > h2 .caret { display: none; }
+  }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">Agent OS for Code Sessions <span class="tag">v1 · 无忌 Deep Research</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 执行摘要</a>
+    <a href="#ch2" data-target="ch2">02 概念拆层：什么是 Agent OS</a>
+    <a href="#ch3" data-target="ch3">03 Wave Terminal 底座评估</a>
+    <a href="#ch4" data-target="ch4">04 Workflow 编排横评</a>
+    <a href="#ch5" data-target="ch5">05 监控/可观测性横评</a>
+    <a href="#ch6" data-target="ch6">06 多项目/多 session 管理</a>
+    <a href="#ch7" data-target="ch7">07 Agentic OS 概念与现有尝试</a>
+    <a href="#ch8" data-target="ch8">08 异构 agent 统管：谁能做到</a>
+    <a href="#ch9" data-target="ch9">09 横向对比大表</a>
+    <a href="#ch10" data-target="ch10">10 自建 vs 现成 vs 在 Wave 上搭</a>
+    <a href="#ch11" data-target="ch11">11 阿杰执行路线（决策树）</a>
+    <a href="#ch12" data-target="ch12">12 风险与坑</a>
+    <a href="#ch13" data-target="ch13">13 FAQ</a>
+    <a href="#ch14" data-target="ch14">14 References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>给 AI Code Session 做一个操作系统</h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-29</span>
+      <span>🔍 无忌 Deep Research · 5 路并行</span>
+      <span>🧩 编排 + 监控 + 多项目 三合一</span>
+      <span>🤖 统管异构 agent</span>
+      <span>📚 47 来源</span>
+      <span>🔬 经 Codex 跨模型审查</span>
+    </div>
+    <div class="hero-deck">
+      <strong>一句话：</strong>在 <strong>Wave Terminal</strong> 上做"管 N 个异构 agent 的操作系统"，技术底座<strong>完全可行</strong>，但定位要摆正——Wave 给的是<strong>三大能力的现成原语</strong>（block + wsh + badge），不是开箱即用成品。真正的核心价值得落在你的 <strong>Mission Control</strong>（编排大脑 + 任务依赖 + 状态机），Wave 当"可视化 + 进程托管外壳"。最大的活儿是 <strong>agent-agnostic 抹平层</strong>——Claude Code / Codex / Gemini 的事件机制各不相同，得自己写薄 adapter。一条正在成型的行业主张是 <strong>"标准化控制平面，而不是标准化 agent"</strong>，"工程师 = AI Orchestrator" 也正成为主流叙事，你做的这件事方向完全对。
+    </div>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">执行摘要：5 条最硬结论</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>5 路并行调研收敛出的核心判断，每条独立成块，方便扫。</p>
+
+      <div class="callout good">
+        <h4>✅ 结论 1：Wave 底座可行性 = 高，但它是"原语"不是"成品" <span class="conf g">🟢 多源</span></h4>
+        <p>Wave Terminal（<code>wavetermdev/waveterm</code>，Apache-2.0，约 <strong>20.9k stars</strong>，最新 <strong>v0.14.5</strong>/2026-04-16）的三件套 <strong>Block + wsh + badge</strong> 天然覆盖你要的三大能力<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="4">[4]</sup>：编排（<code>wsh run --cwd &lt;项目&gt; -- claude/codex/gemini</code> 脚本拉起任意 agent block）、监控（badge rollup 在 tab 聚合多 session 状态）、多项目（workspace/tab 隔离）。但这些是积木，编排逻辑还得你自己拼。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 结论 2：最大的活儿是"异构 agent 抹平层"——Wave 官方只给了 Claude 专属集成 <span class="conf g">🟢 多源</span></h4>
+        <p>Wave 的官方"Claude Code Integration"<strong>寄生在 Claude Code 自己的 lifecycle hooks</strong> 上（<code>permission_prompt</code>/<code>Stop</code>/<code>PreToolUse</code> 调 <code>wsh badge</code> 亮状态灯）<sup class="cite" data-refid="5">[5]</sup>。<strong>好消息（经 Codex 跨模型核查修正）：Codex / Gemini 也各有 hook 机制</strong>——Gemini CLI 有成熟 hooks（<code>.gemini/settings.json</code>，<code>BeforeTool</code>/<code>AfterTool</code>/<code>SessionStart</code> 等，可阻断）<sup class="cite" data-refid="46">[46]</sup>、Codex 有 <code>codex-hooks</code> 引擎 + <code>hooks.json</code>（仍在演进，plugin 加载路径未完全落地）<sup class="cite" data-refid="47">[47]</sup>。所以抹平层是"把三家各自的 hooks/事件统一映射成 MC 状态灯"，<strong>是真活儿但不是空白未知</strong>。这也是 Warp 据称已原生抹平（<span class="conf y">🟡 无独立 citation</span>）、而你在 Wave 上要自建的差异点。</p>
+      </div>
+
+      <div class="callout accent">
+        <h4>🎯 结论 3：监控这一路有"天降标准"——三大 agent 都内置 OpenTelemetry <span class="conf g">🟢 多源</span></h4>
+        <p>Claude Code、OpenAI Codex CLI、Google Gemini CLI <strong>都内置 OTLP 导出</strong>，且都向同一标准（OTEL GenAI <code>gen_ai.*</code> 语义约定）靠拢<sup class="cite" data-refid="12">[12]</sup>。VictoriaMetrics 实测：<strong>一个 OTEL Collector 同时吃 CC/Codex/Gemini/Qwen</strong><sup class="cite" data-refid="13">[13]</sup>。所以 agent-agnostic 监控不靠某个 SaaS 拼 SDK，而是"一个 Collector 端点接所有 agent"这个架构事实。监控层别自己造轮子。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>🔁 结论 4：别从零设计编排——已有现成同构物可抄 <span class="conf g">🟢 多源</span></h4>
+        <p><code>agent-kanban</code>（leader-worker + <code>depends_on</code> 环检测 + 子任务 + SSE 监控 + 人审 merge + CC/Codex/Gemini/ACP 多 runtime）<strong>几乎就是 Mission Control 的开源同构物</strong><sup class="cite" data-refid="9">[9]</sup>；想要确定性可审计引擎看 <code>Bernstein</code>（Goal→TaskGraph→并行→Janitor 门禁→merge，44 个 CLI adapter）<sup class="cite" data-refid="10">[10]</sup>；同名的 <code>builderz-labs/mission-control</code>（5.1k★）有 adapter 抽象 + 26 个监控面板可借鉴<sup class="cite" data-refid="24">[24]</sup>。</p>
+      </div>
+
+      <div class="callout purple">
+        <h4>🧭 结论 5："标准化控制平面，不标准化 agent" + 2027 工程师 = Orchestrator <span class="conf g">🟢 多源</span></h4>
+        <p>2026 正在成型的架构主张：让开发者各用各的 CLI，但所有 agent 都过同一个 gateway hop，统一拿可观测/成本/审计/策略<sup class="cite" data-refid="23">[23]</sup>。这正是你的 Agentic OS 该采用的原则。而"管理 agent = 未来核心技能"已被 Karpathy、Cognition（"Devin 管 Devin"）、Cursor 多方背书<sup class="cite" data-refid="25">[25]</sup><sup class="cite" data-refid="26">[26]</sup>——你做的不是工具，是"一个人当一支队伍"的操作系统。</p>
+      </div>
+
+      <h3>一句话路线建议</h3>
+      <div class="callout accent">
+        <p><strong>Wave 当"终端侧 agent OS 外壳"（呈现 + 进程托管），Mission Control 当"编排大脑"（任务依赖 + 状态机 + 抹平层 adapter），监控直接嵌 OTEL Collector + SigNoz/Langfuse。第一步先用 Claude Code 一个 agent 在 Wave 里把"启动 block + badge 状态灯 + MC 任务回写"这条最窄链路跑通，再加 Codex、再加 Gemini。</strong>详见第 11 章决策树。</p>
+      </div>
+
+      <h3>🔬 跨模型审查说明（这份报告被 Codex 审过一轮）</h3>
+      <div class="callout purple">
+        <p>本报告由 Claude 写稿后，经 <strong>Codex (GPT-5.5) 四维度对抗审查</strong>（事实 / 深度 / 缺失 / 角度）。<strong>最大修正</strong>：初稿把"Codex / Gemini 有没有 lifecycle hooks"列为项目最大未知（标 🔴），Codex 作为当事方核查后纠正——<strong>三家都有 hook 机制</strong>（Gemini 成熟<sup class="cite" data-refid="46">[46]</sup>、Codex 引擎演进中<sup class="cite" data-refid="47">[47]</sup>、Claude 最全），项目最大工程风险因此下调。这正是异源跨模型审查的价值：同源模型查不出自己的盲点。</p>
+        <p style="margin-top:10px"><strong>Codex 提出、本版有意未展开的"阶段二待深化"清单</strong>（现在先跑通最窄链路，避免过度工程）：</p>
+        <ol style="margin:6px 0 0;padding-left:20px;font-size:13.5px;">
+          <li><strong>hook 安全 / 信任边界</strong>——hooks 执行本地命令，untrusted repo 的 hook config 是供应链风险</li>
+          <li><strong>进程恢复模型</strong>——block 死 / agent 退出未触发 hook / Collector 宕机时的 reconciliation、心跳、孤儿清理</li>
+          <li><strong>telemetry 隐私</strong>——OTEL 可能含 prompt / 文件路径 / 代码片段，需 redaction + local-only 档</li>
+          <li><strong>license 商用分析</strong>——AGPL / FSL / 闭源各异，要分清能 embed / 能 fork / 仅参考</li>
+          <li><strong>状态机契约</strong>——hook 事件 → running/waiting/approval/done/error 的精确映射 + agent profile schema</li>
+          <li><strong>命名</strong>——严格说这是 control plane + 进程监管 + 终端外壳，"操作系统"是修辞</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">概念拆层：什么是 "Agent OS for Code Sessions"</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>先把概念焊清楚，后面所有对比才有坐标。阿杰要做的东西 = <strong>一个统一的容器/控制层，把 N 个独立 CLI coding agent（Claude Code、Codex、Gemini…）的启动、状态、产出、成本统管起来</strong>，让一个人能像"操作系统调度进程"一样调度 agent。它要同时解决三大能力 + 一个硬约束。</p>
+
+      <h3>2.1 三大能力定义</h3>
+      <div class="role-cols">
+        <div class="role-col must">
+          <h4>① Workflow 编排（Orchestration）</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)">把高层目标拆成任务、按依赖关系（<code>depends_on</code>）派给不同 agent、并行跑、在人审/merge 节点把关。2025-2026 范式已从"单 agent 结对（conductor）"转向"一个人编排 N 个 agent（orchestrator）"，瓶颈从<strong>生成</strong>转为<strong>验证</strong><sup class="cite" data-refid="6">[6]</sup>。</p>
+        </div>
+        <div class="role-col opt">
+          <h4>② 监控 / 可观测性（Observability）</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)">一眼看全局：谁在跑、谁在等你输入、谁出错了、花了多少 token/钱。核心痛点不是启动而是<strong>"哪个 agent 卡住等我输入了"</strong>。状态总览要做 running / waiting / idle / error 四态检测<sup class="cite" data-refid="20">[20]</sup>。</p>
+        </div>
+        <div class="role-col never" style="background:var(--purple-soft);border-color:var(--purple);">
+          <h4>③ 多项目 / 多 session 管理</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)">跨多个 repo / 项目隔离地跑 N 个 session 不打架。底层隔离范式收敛到两条：<strong>git worktree</strong>（轻量、共享本机环境、切换成本低）和 <strong>Docker 容器/microVM</strong>（强隔离、避免依赖污染、有冷启动成本）<sup class="cite" data-refid="18">[18]</sup>。</p>
+        </div>
+      </div>
+
+      <h3>2.2 硬约束：异构 agent 为什么是难点</h3>
+      <div class="callout bad">
+        <p><strong>⛔ 这是全篇的核心难点。</strong>阿杰要统管的是<strong>异构 agent</strong>——Claude Code、Codex CLI、Gemini CLI 是三家不同公司、三套不同的启动方式、配置、hook/事件机制、输出格式、鉴权。市面上<strong>真正 agent-agnostic 的工具是少数派</strong>：终端/TUI 类（cmux、Claude Squad、agent-deck）或 MCP 协议层（container-use）能做到，因为它们把 agent 抽象成"任意可启动的 CLI"或"任意 MCP server"；而图形桌面 app（Conductor/Sculptor/Nimbalyst）几乎都只支持 Claude Code + Codex 两家，<strong>覆盖不到 Gemini</strong><sup class="cite" data-refid="19">[19]</sup>。</p>
+      </div>
+      <div class="callout info">
+        <p><strong>💡 为什么会这样？</strong>桌面 app 要为每家 agent 做深度 UI 集成，成本高 → 收窄到 2 家。所以阿杰若坚持异构（含 Gemini CLI），<strong>只能走"CLI 抽象"或"MCP 抽象"路线</strong>，不能走深度集成桌面 app 路线——这条原则决定了后面所有选型。</p>
+      </div>
+
+      <h3>2.3 学术界的六层栈（给你的能力地图）</h3>
+      <p>MindStudio 提出的 Agentic OS 六层框架可以给你的 OS 做能力地图：<strong>Model / Memory / Tool-Integration / Orchestration / Workflow / Interface(人机交互与监控)</strong><sup class="cite" data-refid="27">[27]</sup>。它警告：多数早期部署只做了 Model + Workflow 两层，<strong>Memory 和 Orchestration 后补会成技术债</strong>。你既然要重做 OS，把这两层一开始就当一等公民。</p>
+      <div class="callout warn">
+        <p><strong>⚠️ 学术映射的局限：</strong>ASPLOS 2026 的 AgenticOS workshop 把"OS 要为 agent 重新设计"写成共识（五大问题=资源管理/隔离/状态/可观测性/虚拟化）<sup class="cite" data-refid="28">[28]</sup>，但学术原型（AIOS/Letta）管的是<strong>框架级 LLM agent</strong>，不是 Claude Code / Codex 这类终端 CLI agent，抽象层级和你的需求<strong>错位</strong>——只能当"OS 词汇表/记忆层设计"借鉴，不能直接拿来用（详见第 7 章）。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">Wave Terminal 底座评估：适不适合当地基</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>阿杰计划在 Wave 上开发，这章直接回答：这个地基能不能用、能用到什么程度、哪里要自己补。</p>
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">20.9k</div><div class="l">GitHub stars · 2026-04</div></div>
+        <div class="metric"><div class="v">v0.14.5</div><div class="l">最新版 · 2026-04-16</div></div>
+        <div class="metric"><div class="v">Apache-2.0</div><div class="l">可商业化二次开发</div></div>
+        <div class="metric"><div class="v">月度</div><div class="l">发版节奏（活跃）</div></div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🌊</div>
+          <div class="name-block"><div class="pn">Wave Terminal (wavetermdev/waveterm)</div><div class="ph">Go 48.5% + TS/React 43.4% + Electron · v0.14.5</div></div>
+          <span class="pill good">底座可行性 高</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>是什么：</strong>开源跨平台 AI 集成终端，核心是可拖拽平铺的 <strong>Block 系统</strong>（终端/Web/编辑器/AI chat 都是 block，MVVM + Jotai 管理，组织成 tab/workspace）<sup class="cite" data-refid="2">[2]</sup>。后端经 RPC（<code>CreateBlockCommand</code> 等）管理 block 生命周期，配 SQLite。</p>
+          <p><strong>编排骨架 = wsh CLI + RPC 层：</strong><code>wsh run -m/-x/--cwd/-p -- &lt;cmd&gt;</code> 在新 block 跑任意命令，<code>wsh setmeta/launch/badge/notify/getvar/setvar</code> 跨 block 桥接数据，RPC 自动路由 WS/unix socket/SSH/stdio<sup class="cite" data-refid="4">[4]</sup>。</p>
+          <div class="takeaway">Block + wsh + badge 三件套 = 你要的 workflow / 监控 / 多项目三合一原语，技术上完全够用。但"统管 Codex/Gemini"那层抹平要自己写。</div>
+        </div>
+      </div>
+
+      <h3>3.1 三大能力如何映射到 Wave 原语</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>你要的能力</th><th>Wave 现成原语</th><th>怎么用</th></tr></thead>
+          <tbody>
+            <tr><td><strong>① 编排</strong></td><td><code>wsh run</code> + RPC</td><td>Mission Control shell 调 <code>wsh run --cwd &lt;项目&gt; -- claude/codex/gemini ...</code> 脚本化拉起任意 agent 的 block，<code>wsh setvar</code> 跨 block 传数据<sup class="cite" data-refid="3">[3]</sup></td></tr>
+            <tr><td><strong>② 监控</strong></td><td><code>wsh badge</code> + badge rollup</td><td>抄 Claude Code badge 范式：每个 agent session 一个 block，hook→<code>wsh badge</code> 亮状态（等审批/完成/出错），tab badge rollup 一眼看全局<sup class="cite" data-refid="5">[5]</sup></td></tr>
+            <tr><td><strong>③ 多项目</strong></td><td>workspace / tab</td><td>workspace/tab 天然隔离多项目；workspace-scoped widgets（<code>widgets.json</code> 按 workspace 显隐）<sup class="cite" data-refid="3">[3]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3.2 优势（为什么选 Wave 对）</h3>
+      <div class="callout good">
+        <p><strong>✅ Apache-2.0 自由 fork + 扩展点清晰：</strong>可自由在上面搭私有层；repo 有 <code>CLAUDE.md</code> + skill guides 教怎么加 RPC/view/wsh 命令<sup class="cite" data-refid="1">[1]</sup>。自定义 widget 通过 <code>widgets.json</code> 的 <code>cmd</code>/<code>shell</code> controller 可拉起任意 CLI（含持久交互式 shell）——任何终端 CLI agent 都能配成可点击启动的 widget/block<sup class="cite" data-refid="3">[3]</sup>。</p>
+      </div>
+      <div class="callout good">
+        <p><strong>✅ 已踩出 Claude Code 集成路线 + 跨平台远程：</strong>官方 badge hooks 模式可直接抄给其它 agent；跨平台 + 远程 SSH durable session 适合一人管多机多项目<sup class="cite" data-refid="5">[5]</sup>。block controller（进程生命周期管理）+ Tsunami widget 框架正好是"每个 agent 一个 block + 统一面板"的原生能力，不用自己造终端多路复用。</p>
+      </div>
+
+      <h3>3.3 弱点与必须自己补的窟窿</h3>
+      <div class="callout bad">
+        <p><strong>⛔ 官方 Claude Code 集成是 Claude 专属：</strong>统管 Codex/Gemini 的"抹平层"要你自己写——三家都有 hook 机制（Claude lifecycle hooks<sup class="cite" data-refid="5">[5]</sup> / Gemini <code>settings.json</code> hooks<sup class="cite" data-refid="46">[46]</sup> / Codex <code>hooks.json</code>，演进中<sup class="cite" data-refid="47">[47]</sup>），但事件名与配置各不同，要各写一个薄 adapter 把它们统一成 MC 状态。Wave 不像 Warp 那样开箱原生抹平多 agent。</p>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ Wave 自身的 agentic 能力还在愿望清单：</strong>Wave AI（内置助手）<strong>尚未原生支持 MCP</strong>（discussion #2691，2025-12 提出，无 maintainer 响应）<sup class="cite" data-refid="7">[7]</sup>；"Wave Agent Mode"（issue #2168，2025-05）仍 open/triage 未落地<sup class="cite" data-refid="8">[8]</sup>。<strong>别指望 Wave 官方很快给出 agent-agnostic 编排</strong>，你的"大脑"应该是 Mission Control + 各 CLI agent，Wave 只当编排+可视化外壳。</p>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ 无 <code>wsh layout</code> 命令 + 重量级 Electron：</strong>精确网格定位能力有限（只能 setmeta 定位到 block/tab/this，平铺布局靠 UI/拖拽）；自动平铺得靠 UI 或自己补 RPC<sup class="cite" data-refid="4">[4]</sup>。自定义只到 <code>widgets.json</code> 配置级 + 改源码加 view，<strong>没有轻量第三方插件市场</strong>。</p>
+      </div>
+      <div class="callout info">
+        <p><strong>⚠️ 待补研究：</strong>Wave 是否有 headless/无 GUI 模式（影响能否在服务器无人值守跑 agent 集群）未确认；<code>wsh run</code> 指定目标 tab/workspace 的精确语法靠文档镜像推断，建议本地 <code>wsh run --help</code> / <code>wsh setmeta --help</code> 实测。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">Workflow 编排方案横评</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>编排是三大能力里最核心的一块。这章横评编排多个 coding agent 的工具，重点标出"是否 agent-agnostic"这个硬约束。</p>
+
+      <div class="callout accent">
+        <p><strong>范式已收敛：</strong>每个 task 一个 git worktree（或容器）做隔离 + 并行跑 + 人在 review/merge 节点把关。Addy Osmani《The Code Agent Orchestra》原话："You used to pair with one AI. Now you manage an agent team" / "The bottleneck is no longer generation. It is verification" / "Your spec is the leverage"<sup class="cite" data-refid="6">[6]</sup>。并明确主张 <strong>tool-agnostic 优于 vendor lock-in</strong>。</p>
+      </div>
+
+      <h3>4.1 最对味的两个：agent-kanban + Bernstein</h3>
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">📋</div>
+          <div class="name-block"><div class="pn">agent-kanban (saltbo/agent-kanban)</div><div class="ph">307★ · v1.13.4 (2026-05-19) · FSL-1.1-ALv2</div></div>
+          <span class="pill good">MC 同构物</span>
+        </div>
+        <div class="prod-body">
+          <p>"agent-first 任务看板 / AI workforce mission control"：leader agent 接高层目标→拆任务→派给 worker agent（各自 worktree）；worker 认领、写码、提 PR；leader review+merge<sup class="cite" data-refid="9">[9]</sup>。支持 CC/Codex/Gemini/Copilot + 任意 ACP 兼容 agent，每个 agent 有 Ed25519 加密身份贯穿 task/commit/PR。</p>
+          <div class="takeaway">几乎就是 Mission Control 的开源同构物：task 依赖（<code>depends_on</code> + 环检测）+ agent 可建子任务 + SSE 实时监控 + 人审批不能 agent 自 merge。先把它的数据模型/调度逻辑读透，要么对标抄进 MC，要么直接 fork 当内核。</div>
+        </div>
+      </div>
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🎼</div>
+          <div class="name-block"><div class="pn">Bernstein (sipyourdrink-ltd/bernstein)</div><div class="ph">~178★ · PyPI v1.5.17 (2026) <span class="conf y">🟡 单源</span></div></div>
+          <span class="pill accent">确定性引擎</span>
+        </div>
+        <div class="prod-body">
+          <p>确定性、"审计级"多 agent CLI 编排器：Goal→LLM Planner→Task Graph→Orchestrator→并行 Agents→Janitor 验证→git merge→main。<strong>Planner 只用一次 LLM 调用拆图，之后纯 Python 调度（协调零 token）</strong><sup class="cite" data-refid="10">[10]</sup>。开箱 44 个 CLI adapter（CC/Codex/Gemini +40），可作 MCP server 模式接入。</p>
+          <div class="takeaway">最契合 Agentic OS 的可靠/可观测诉求：显式 task-graph 依赖 + Janitor 合并前门禁（tests/lint/types 通过才落 main）+ HMAC-SHA256 审计链。可作为 MC 派发引擎的参考蓝本。但偏 CLI/工程向无现成 GUI，对单人开发者可能偏重。</div>
+        </div>
+      </div>
+
+      <h3>4.2 异构覆盖最广的活跃方案</h3>
+      <div class="callout good">
+        <p><strong>✅ Emdash (generalaction/emdash, YC W26)：</strong>2.4k★、v0.4.41、3108 commits、81 releases，是横评里多后端覆盖最广（<strong>27 个 CLI agent</strong>）、最活跃的桌面方案<sup class="cite" data-refid="11">[11]</sup>。明确以"异构 multi-agent 未来"为核心论点；支持 SSH 远程跑 agent + ticket(Linear/GitHub/Jira/Asana)直喂；worktree 隔离让多 agent 同改一文件不冲突。<strong>建议阿杰装来感受 agnostic 交互</strong>。弱点：没有显式跨任务依赖图，不是可嵌入 Wave 的库。</p>
+      </div>
+      <div class="callout info">
+        <p><strong>🔌 container-use (dagger/container-use)：</strong>3.8k★、v0.4.2(2025-08，更新偏慢、early development)。最干净的"隔离执行层"底座：作为 <strong>MCP server</strong>，"works with any MCP-compatible agent"<sup class="cite" data-refid="16">[16]</sup>。容器隔离比 git worktree 更强（agent 砸不到宿主）。但只管隔离不含编排/看板/依赖图——需上层（MC）拼。</p>
+      </div>
+
+      <h3>4.3 避坑名单（不要当长期底座）</h3>
+      <div class="callout bad">
+        <p><strong>⛔ Vibe Kanban (BloopAI)：</strong>26.6k★ 人气最高、多 agent(10+)，但<strong>母公司 Bloop 已于 2026-04-10 宣布关停</strong>、转纯社区维护，远程服务 30 天后只剩本地架构<sup class="cite" data-refid="14">[14]</sup>。只能当设计参考（"任务卡拖到 In Progress 即起 worktree+分支"映射值得学），不能依赖。</p>
+      </div>
+      <div class="callout bad">
+        <p><strong>⛔ 锁 Claude 系的：</strong>Conductor(闭源 macOS，仅 CC+Codex，不支持 Gemini)、Crystal(2026-02 已 deprecated)/Nimbalyst(仅 CC+Codex)、sketch(已死，纯 Claude)——都违背异构硬约束，不适合长期底座<sup class="cite" data-refid="15">[15]</sup>。</p>
+      </div>
+
+      <h3>4.4 工业级 HITL（人审节点）的参考</h3>
+      <div class="callout info">
+        <p><strong>💡 durable-execution 引擎：</strong>Temporal/Inngest/Trigger.dev 把 HITL 直接映射到 <strong>suspend/resume 原语</strong>——可暂停数小时/天等审批而不丢状态<sup class="cite" data-refid="17">[17]</sup>。但对单人开发者偏重（over-engineering），且不含 worktree/diff/dashboard 等 coding 专用件。<strong>单人不必上整套重型引擎，借鉴其 suspend/resume 思路即可。</strong></p>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ Wave 本身不做编排：</strong>它是 20.9k★ 的可视化终端壳，原生无多 agent 协调（Wave Agent Mode 仍是 open issue #2168）<sup class="cite" data-refid="1">[1]</sup>。在 Wave 上做编排 = 自己写编排逻辑（MC），Wave 只当 UI/监控外壳。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">监控 / 可观测性方案横评</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这一路有个"天降标准"的好消息，直接改变选型逻辑。</p>
+
+      <div class="callout good">
+        <h4>✅ 关键发现：三大 CLI agent 都内置 OpenTelemetry，agent-agnostic 监控的根本是 OTEL 标准 <span class="conf g">🟢 多源</span></h4>
+        <p>Claude Code、OpenAI Codex CLI、Google Gemini CLI <strong>都内置 OTLP 导出</strong>，可指向同一个 Collector endpoint，且都向 OTEL GenAI <code>gen_ai.*</code> 语义约定靠拢<sup class="cite" data-refid="12">[12]</sup>。三者用法：CC 用 <code>CLAUDE_CODE_ENABLE_TELEMETRY=1 + OTEL_EXPORTER_OTLP_ENDPOINT</code>；Codex 用 <code>~/.codex/config.toml [otel]</code> 段；Gemini 用 <code>.gemini/settings.json</code>。<strong>VictoriaMetrics 实测一个 Collector 同时吃 CC/Codex/Gemini/Qwen</strong><sup class="cite" data-refid="13">[13]</sup>。所以选型重点从"这个平台支不支持我的 agent"转为"这个后端是不是 OTLP-native"。</p>
+      </div>
+
+      <h3>5.1 落地架构：在 Wave 里嵌一个 OTEL Collector</h3>
+      <div class="callout accent">
+        <p><strong>具体做法：</strong>① 给每个 session/项目设 <code>OTEL_SERVICE_NAME</code> + <code>OTEL_RESOURCE_ATTRIBUTES</code>（如 <code>project=X, agent=claude-code, session=...</code>），后端就能按<strong>项目/agent/session 三维过滤</strong>，正好对接 Mission Control 多项目管理。② Claude Code 用 <code>session.id</code> 属性天然支持 session 级 trace（<code>claude_code.interaction</code> span 套 <code>llm_request</code>/<code>tool</code> span，subagent 自动嵌套成一条 trace）<sup class="cite" data-refid="21">[21]</sup>——这是做可观测性的金矿。③ 编排器派出去的每个 agent 进程注入 OTEL env 即可。</p>
+      </div>
+
+      <h3>5.2 后端选型（三档，全 OSS 可自托管）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>后端</th><th>定位</th><th>许可/活跃度</th><th>适合谁</th></tr></thead>
+          <tbody>
+            <tr><td><strong>SigNoz</strong></td><td>OTLP-native APM，有现成 Claude Code dashboard（token 分类型、cost per request 带 <code>agent.name</code>、LOC/commit/PR）<sup class="cite" data-refid="22">[22]</sup></td><td>OSS（license 细节 <span class="conf y">🟡</span>），一个 docker compose</td><td>最轻量、想自己掌控全栈</td></tr>
+            <tr><td><strong>Langfuse</strong></td><td>LLM engineering 平台，OTLP endpoint <code>/api/public/otel</code> 能吃任意 OTEL 源<sup class="cite" data-refid="29">[29]</sup></td><td>28.2k★、MIT、v3.176.0 (2026-05-28)</td><td>想要 LLM 语义更强的 trace UI</td></tr>
+            <tr><td><strong>Laminar (lmnr)</strong></td><td>专为长跑 agent 设计：transcript view + SQL over traces + rollout debugger<sup class="cite" data-refid="30">[30]</sup></td><td>3k★、Apache-2.0、2026-03 融资 $3M</td><td>最贴"监控长跑 agent session"用例</td></tr>
+            <tr><td><strong>Arize Phoenix</strong></td><td>OTEL-native + agent eval 能力最深<sup class="cite" data-refid="31">[31]</sup></td><td>9.9k★、Elastic License 2.0（非纯 OSS）</td><td>想要 agent eval/benchmark</td></tr>
+            <tr><td><strong>claude-code-otel 模板</strong></td><td>OTEL Collector + Prometheus + Loki + Grafana 五类 dashboard<sup class="cite" data-refid="32">[32]</sup></td><td>412★、仅 4 commits、CC 专用但可扩展</td><td>想抄现成模板做起点</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>5.3 关键坑：Codex 不出 metrics</h3>
+      <div class="callout bad">
+        <p><strong>⛔ Codex CLI 的 OTEL metrics 有重大缺口：</strong>交互式 <code>codex</code> 支持 traces+logs+metrics，但 <code>codex exec</code>（无人值守批跑最常用）<strong>只支持 traces+logs（无 metrics）</strong>，<code>codex mcp-server</code> 三者全无<sup class="cite" data-refid="33">[33]</sup>。意味着"统一 token/cost metric 看板"对 Codex 这一路会缺数据，需从 log 反推。这是 open issue #12913。</p>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ 跨 agent 成本聚合需做映射：</strong>CC 用 <code>claude_code.token.usage</code>（按 input/output/cacheRead/cacheCreation 拆）、Gemini 用标准 <code>gen_ai.client.token.usage</code>、Codex 无 metrics——三者拼一张统一花费看板需在 Collector 做 metric 转换/映射，<strong>本研究未找到现成 mapping 配置</strong>（待补）。另外 OTEL GenAI 语义约定整体仍 <strong>experimental</strong>，span/attribute 可能版本间变。</p>
+      </div>
+
+      <h3>5.4 不适配 CLI agent 的（别选）</h3>
+      <div class="callout bad">
+        <p><strong>⛔ AgentOps / OpenLLMetry / Helicone：</strong>AgentOps(5.6k★) 和 OpenLLMetry(7.2k★) 都靠<strong>代码内 SDK instrument</strong>，面向 Python agent 框架（CrewAI/LangChain），<strong>监控不到 Claude Code/Codex/Gemini 这类终端 CLI agent</strong><sup class="cite" data-refid="34">[34]</sup>；Helicone 是 proxy 模式只看 API 层、无 session/tool 级 trace，且据多份对比已进 maintenance mode<sup class="cite" data-refid="35">[35]</sup>。Braintrust 闭源无 OSS 自托管。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">多项目 / 多 session 管理横评</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>"一个人跑 N 个 agent 不乱"已经形成成熟工具品类。这章重点是阿杰的头号参考/竞品 cmux，以及隔离范式的取舍。</p>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🪞</div>
+          <div class="name-block"><div class="pn">cmux — 你 Wave 路线的镜子</div><div class="ph">18.8k★ · libghostty · Swift/AppKit · macOS only</div></div>
+          <span class="pill purple">头号参考/竞品</span>
+        </div>
+        <div class="prod-body">
+          <p>基于 libghostty 的"为并行 AI agent 多任务而生的原生 macOS 终端"（非 Electron）<sup class="cite" data-refid="36">[36]</sup>。垂直 tab 显示每 session 的 git 分支/工作目录/端口/通知；agent 需注意时给 pane 画 <strong>notification ring + 角标 + macOS 通知</strong>；内置可编程浏览器；带 <strong>socket/CLI API</strong> 可自动化。<strong>完全 agent-agnostic</strong>：任何能在终端启动的 agent 开箱即用（CC/Codex/Gemini/Aider/Goose/Amp/Cline/Cursor Agent 等）。</p>
+          <div class="takeaway">一个 18.8k★、完全 agnostic 的"为并行 agent 而生的终端"已经存在。你必须先把 cmux 跑一遍、读源码，搞清你在 Wave 上做的事和它的差异点——你的差异化应该是 <strong>Mission Control 这层任务/看板编排</strong>，而不是终端层 session 呈现（那层 cmux/Claude Squad 已做透）。</div>
+        </div>
+      </div>
+
+      <h3>6.1 其它 agent-agnostic 终端/TUI 类</h3>
+      <div class="callout good">
+        <p><strong>✅ Claude Squad (7.7k★, v1.0.18, AGPL-3.0)：</strong>tmux 隔离 session + git worktree，支持 CC/Codex/Gemini/Aider/OpenCode/Amp（用 <code>cs -p</code> 切后端）<sup class="cite" data-refid="37">[37]</sup>。架构简单可直接抄。注意：agnostic 是"换后端"而非"同界面混跑"。</p>
+      </div>
+      <div class="callout good">
+        <p><strong>✅ agent-deck (2.6k★, v1.9.43/2026-05-28 极新)：</strong>单 TUI 统一管理多 agent，招牌是<strong>智能状态检测（running/waiting/idle/error）+ 单键跳转到 waiting 的 session</strong><sup class="cite" data-refid="20">[20]</sup>。这正是"谁在等输入"这个第一痛点的现成范式，必抄。还有 fork+resume 上下文管理。</p>
+      </div>
+
+      <h3>6.2 隔离范式的取舍：worktree vs 容器</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>范式</th><th>代表工具</th><th>优点</th><th>缺点</th></tr></thead>
+          <tbody>
+            <tr><td><strong>git worktree</strong></td><td>Claude Squad / cmux / Emdash / Vibe Kanban</td><td>轻量、共享本机环境、切换成本最低</td><td>依赖共享问题；大型 repo 磁盘膨胀 + dev-server 端口冲突</td></tr>
+            <tr><td><strong>容器/microVM</strong></td><td>container-use / Sculptor / Docker Sandbox</td><td>强隔离、agent 砸不到宿主、避免依赖污染</td><td>冷启动 + 磁盘 + 重量成本</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout info">
+        <p><strong>💡 给阿杰：</strong>单人轻量场景 <strong>git worktree 起步</strong>（切换成本最低），只在要跑不可信代码时再上容器（container-use 用 dagger 把容器+worktree 叠加）<sup class="cite" data-refid="18">[18]</sup>。沙箱最佳实践：只挂项目目录、默认无出网、CPU/内存/磁盘硬上限、用完自毁。</p>
+      </div>
+
+      <h3>6.3 实用并行上限：个位数</h3>
+      <div class="callout warn">
+        <p><strong>⚠️ N 的现实区间是 3-8 个，不是几十个：</strong>实测并行 agent 实用上限是 2-4 个（受内存/CPU/API rate limit 约束），Cursor 上限设到 8<sup class="cite" data-refid="38">[38]</sup>；Claude Code agent-teams 官方建议 3-5 个 teammate。<strong>设计 MC 面板时按"同屏一眼看完 3-8 个 session 状态"来设计信息密度最合适</strong><span class="conf y">🟡 单源</span>。</p>
+      </div>
+
+      <h3>6.4 Claude Code 原生 agent-teams：反例但协调原语可抄</h3>
+      <div class="callout bad">
+        <p><strong>⛔ 只能编排 Claude 自己（homogeneous）：</strong>v2.1.32+ 实验功能，无法管 Codex/Gemini——对异构需求是反例<sup class="cite" data-refid="39">[39]</sup>。<strong>但</strong>它的 <strong>shared task list + mailbox + 任务依赖自动解锁 + file-locking 抢任务 + TaskCreated/Completed hooks</strong> 这套协调原语正是 MC 可直接照搬的设计，state 存 <code>~/.claude/teams</code> 和 <code>~/.claude/tasks</code>（外部可读，利于监控）。<strong>Wave 特定坑：</strong>CC agent-teams 的 split-pane 不支持 Ghostty 类终端，Wave 是自建终端，要做多 pane 得自己实现，别想白嫖 CC 的 tmux 模式。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">Agentic OS 概念与现有尝试（AIOS / Letta / Mission Control 同名项目）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>"Agentic Operating System"在 2026 已从概念走到学术 + 工业双重落地。这章给你词汇表 + 可直接借鉴的现成项目。</p>
+
+      <h3>7.1 学术锚点（借词汇表，不直接用）</h3>
+      <div class="callout info">
+        <p><strong>AIOS (agiresearch/AIOS, 5.8k★, v0.3.0/2026-01, COLM 2025 论文)：</strong>把 LLM 嵌入 OS，提供 agent kernel——调度/内存管理/上下文切换/存储/工具管理/访问控制<sup class="cite" data-refid="40">[40]</sup>。概念权威，可借词汇表给你的 OS 命名分层。<strong>但</strong>管的是通用 LLM agent（框架级），<strong>不是 Claude Code/Codex 这类终端 CLI agent，抽象层级错位</strong>——更像理念来源而非可直接用的面板。</p>
+      </div>
+      <div class="callout info">
+        <p><strong>Letta (formerly MemGPT, 23k★, Apache-2.0)：</strong>"LLM as operating system" 范式代表，核心是 memory blocks + 上下文管理 + agent server + ADE 图形界面<sup class="cite" data-refid="41">[41]</sup>。记忆/上下文这层做得最深，但本质是<strong>建 agent 的框架不是管现有异构 CLI agent 的面板</strong>，可借鉴的是它的 memory/context OS 抽象。</p>
+      </div>
+
+      <h3>7.2 同名 "Mission Control" 开源面板（可直接抄）</h3>
+      <div class="callout good">
+        <p><strong>✅ builderz-labs/mission-control (5.1k★, MIT, v2.0.1/2026-03)：</strong>和阿杰项目同名同形——<strong>26 个监控面板</strong>覆盖 tasks/agents/logs/tokens/memory/cron/alerts/webhooks/pipelines，SQLite 零依赖单命令启动，内置 adapter 层（OpenClaw/CrewAI/LangGraph/AutoGen/Claude SDK + generic fallback）<sup class="cite" data-refid="24">[24]</sup>。Next.js 16/React 19/TS 栈。可借走 adapter 抽象 + 监控面板设计。<strong>⚠️ 注意：</strong>是否"直连 CC/Codex 无需 gateway"两处来源口径冲突（README 说能直连，另一对比文说 gateway-dependent 且 alpha），需实测验证。</p>
+      </div>
+      <div class="callout good">
+        <p><strong>✅ wolverin0/clawtrol (39★, MIT, Ruby/Rails8/PG)：</strong>对异构多模型支持最直白——<strong>persona 系统允许 Opus/Codex/Gemini/GLM/Sonnet/Flash 各配不同模型同台运行</strong>，任意能调 REST API 的 agent 都能接入<sup class="cite" data-refid="42">[42]</sup>。还有 live agent streaming terminal、factory loop（find→improve→test→commit 自主循环）。persona+多模型正是管异构 agent 的现成参考。弱点：仅 39★ 社区小、Ruby 栈移植成本。</p>
+      </div>
+      <div class="callout info">
+        <p><strong>crshdn/mission-control (Autensa, 2.1k★, MIT)：</strong>"Autonomous Product Engine"，<strong>convoy mode（带依赖图的并行子任务 + 自动恢复）+ crash recovery（checkpoint 续跑）+ 80+ REST API + git worktree 隔离</strong><sup class="cite" data-refid="43">[43]</sup>。这套"一人撬动 N agent"工程模式最成熟。弱点：强绑 OpenClaw Gateway 架构、定位偏全自动产品流水线比"session OS"更重。</p>
+      </div>
+
+      <h3>7.3 顶层架构原则 + 竞品缺口</h3>
+      <div class="callout accent">
+        <p><strong>🧭 "标准化控制平面，不标准化 agent"（Futurum 2026 gateway field guide 原话）：</strong>"The right reflex is to standardize the control plane, not the agent. Let developers keep their chosen surface; make every agent answer to the same gateway hop."<sup class="cite" data-refid="23">[23]</sup> OpenClaw 的"gateway as single source of truth"架构（所有 session/路由/channel 都过一个 Gateway）成为个人 AI agent 蓝图<sup class="cite" data-refid="44">[44]</sup>。<strong>启示：在 Wave 上也应有一个等价的"单一 gateway/session 真相源"，所有异构 agent 的 IO/事件/成本/状态都汇报到它，监控和编排才有统一抓手。</strong></p>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ 最该补的竞品缺口：</strong><code>amux.io</code> 自称 "The Agent Control Plane"，与阿杰目标几乎同名，但官网返回 403 抓不到，<strong>是否开源、支持哪些 CLI、star/版本均未知</strong><span class="conf r">🔴 待补研究</span><sup class="cite" data-refid="45">[45]</sup>。建议阿杰直接访问 amux.io 及其 GitHub。另外 "OpenClaw" 这个共同 gateway 后端究竟是真实项目还是搜索层对某个被改名项目的抽象，未完全证实。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">异构 agent 统管这关键约束：谁能做到（CC + Codex + Gemini）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这是阿杰的硬约束，单列一章把"谁真能同时管 Claude Code + Codex + Gemini 三家"讲透。</p>
+
+      <div class="callout bad">
+        <h4>⛔ 第一性原理：异构只在两种架构下成立 <span class="conf g">🟢 多源</span></h4>
+        <p>真正满足"CC+Codex+Gemini 同跑"的工具都把 agent 抽象成<strong>"任意可启动的 CLI"</strong>（cmux/Claude Squad/agent-deck/Emdash 路线）或<strong>"任意 MCP server"</strong>（container-use 路线）<sup class="cite" data-refid="19">[19]</sup>。<strong>千万别走深度集成桌面 app 路线</strong>（Conductor/Sculptor/Nimbalyst），那条路注定收窄到 Claude+Codex、丢掉 Gemini。</p>
+      </div>
+
+      <h3>8.1 三层"统管"能力，三家各自的现状</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>统管动作</th><th>Claude Code</th><th>Codex CLI</th><th>Gemini CLI</th></tr></thead>
+          <tbody>
+            <tr><td><strong>启动（编排）</strong></td><td class="check y">✅ 任意 CLI 可 wsh run</td><td class="check y">✅ 任意 CLI 可 wsh run</td><td class="check y">✅ 任意 CLI 可 wsh run</td></tr>
+            <tr><td><strong>状态灯（hook→badge）</strong></td><td class="check y">✅ 官方 lifecycle hooks<sup class="cite" data-refid="5">[5]</sup></td><td class="check p">⚠️ codex-hooks 引擎+hooks.json，演进中<sup class="cite" data-refid="47">[47]</sup></td><td class="check y">✅ 原生 hooks（settings.json，可阻断）<sup class="cite" data-refid="46">[46]</sup></td></tr>
+            <tr><td><strong>监控 trace（OTEL）</strong></td><td class="check y">✅ 完整 session trace<sup class="cite" data-refid="21">[21]</sup></td><td class="check p">⚠️ logs+traces，exec 无 metrics<sup class="cite" data-refid="33">[33]</sup></td><td class="check y">✅ metrics 最全<sup class="cite" data-refid="12">[12]</sup></td></tr>
+            <tr><td><strong>成本/token metric</strong></td><td class="check y">✅ claude_code.token.usage</td><td class="check n">⛔ exec 无 metrics，从 log 反推</td><td class="check y">✅ gen_ai.client.token.usage</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>8.2 监控层好消息 vs 状态灯坏消息</h3>
+      <div class="callout good">
+        <p><strong>✅ 监控层（OTEL）三家天然统一：</strong>三大 CLI agent 都 emit OTLP 到同一 Collector，VictoriaMetrics 实测可同时接<sup class="cite" data-refid="13">[13]</sup>。这一层的"统管"几乎是免费的——只要注入 OTEL env。</p>
+      </div>
+      <div class="callout good">
+        <p><strong>✅ 状态灯层（实时 badge）三家都有 hook 抓手（经 Codex 跨模型核查确认）：</strong>三家都有 lifecycle hook 机制可驱动状态灯——Claude 最成熟（<code>permission_prompt</code>/<code>Stop</code>/<code>PreToolUse</code> → <code>wsh badge</code>）<sup class="cite" data-refid="5">[5]</sup>；<strong>Gemini CLI 有 production 级 hooks</strong>（<code>.gemini/settings.json</code>，<code>BeforeTool</code>/<code>AfterTool</code>/<code>BeforeAgent</code>/<code>AfterAgent</code>/<code>SessionStart</code>/<code>SessionEnd</code>，作为同步中间件能 <code>deny</code>/阻断）<sup class="cite" data-refid="46">[46]</sup>；<strong>Codex 有 <code>codex-hooks</code> 引擎 + <code>hooks.json</code></strong>（可阻断不安全命令、注入上下文、会话起始检查），但截至 2026-04 plugin manifest 声明的 hooks 加载路径仍未完全落地，属演进中<sup class="cite" data-refid="47">[47]</sup>。<strong>结论：badge 范式可复用到三家，抹平层是"把各家 hook 事件名映射成统一状态机"——工作量明确，不再是空白未知。</strong></p>
+      </div>
+
+      <h3>8.3 抹平层应该怎么做</h3>
+      <div class="callout accent">
+        <p><strong>🎯 建议做成 Mission Control 里一层薄 adapter：</strong>每个 agent 一个 profile = <strong>启动命令 + 状态探测方式 + OTEL env 模板</strong>。监控走 OTEL（免费统一），实时状态灯按 agent 分别探测（三家都用各自原生 hooks：CC lifecycle hooks / Gemini <code>settings.json</code> hooks / Codex <code>hooks.json</code>；Codex hooks 仍在完善，未覆盖的事件用 OTEL 事件流兜底）。可直接借鉴 <code>clawtrol</code> 的 persona 系统（给不同 agent 配不同模型/行为档案）和 <code>Bernstein</code> 的 44 个 CLI adapter 设计<sup class="cite" data-refid="42">[42]</sup><sup class="cite" data-refid="10">[10]</sup>。</p>
+      </div>
+      <div class="callout info">
+        <p><strong>⚠️ 待补研究：</strong>各工具对 Codex CLI / Gemini CLI 的接入是否真顺滑（声称支持 vs 实际可用常有差距，尤其鉴权/输出解析）；把 Codex/Gemini 的 OTLP 同时指向同后端时 trace 能否干净按 agent 区分（service.name/属性命名是否冲突）——都建议阿杰真跑一遍验证。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">横向对比大表（工具 × 三能力 × agnostic × 开源/活跃度）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>所有调研到的工具汇总一表。点行可高亮。<span class="conf g">🟢</span>=多源 / <span class="conf y">🟡</span>=单源。<strong>agnostic 列</strong>：✅=真异构(含 Gemini) / ⚠️=部分(仅 CC+Codex) / ⛔=单生态。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>工具</th><th>主能力</th><th>异构(含Gemini)</th><th>开源/许可</th><th>活跃度</th><th>对阿杰</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Wave Terminal</strong></td><td>底座外壳(块/wsh/badge)</td><td class="check y">✅ 底座层</td><td>Apache-2.0</td><td>20.9k★ v0.14.5<sup class="cite" data-refid="1">[1]</sup></td><td>地基，自己搭编排</td></tr>
+            <tr><td><strong>agent-kanban</strong></td><td>编排(leader-worker+依赖)</td><td class="check y">✅</td><td>FSL-1.1-ALv2</td><td>307★ v1.13.4<sup class="cite" data-refid="9">[9]</sup></td><td>MC 同构物，抄设计</td></tr>
+            <tr><td><strong>Bernstein</strong></td><td>编排(确定性task-graph+门禁)</td><td class="check y">✅ 44 adapter</td><td>—</td><td>~178★ <span class="conf y">🟡</span><sup class="cite" data-refid="10">[10]</sup></td><td>派发引擎蓝本</td></tr>
+            <tr><td><strong>Emdash</strong></td><td>编排桌面(27 agent+SSH)</td><td class="check y">✅</td><td>开源</td><td>2.4k★ v0.4.41<sup class="cite" data-refid="11">[11]</sup></td><td>装来感受 agnostic</td></tr>
+            <tr><td><strong>container-use</strong></td><td>隔离执行层(MCP)</td><td class="check y">✅ any-MCP</td><td>开源</td><td>3.8k★ v0.4.2<sup class="cite" data-refid="16">[16]</sup></td><td>隔离层首选</td></tr>
+            <tr><td><strong>cmux</strong></td><td>多session 终端</td><td class="check y">✅</td><td>开源</td><td>18.8k★<sup class="cite" data-refid="36">[36]</sup></td><td>头号镜子/竞品</td></tr>
+            <tr><td><strong>Claude Squad</strong></td><td>多session TUI</td><td class="check y">✅ 换后端</td><td>AGPL-3.0</td><td>7.7k★ v1.0.18<sup class="cite" data-refid="37">[37]</sup></td><td>隔离逻辑可抄</td></tr>
+            <tr><td><strong>agent-deck</strong></td><td>多session+状态检测</td><td class="check y">✅</td><td>开源</td><td>2.6k★ v1.9.43<sup class="cite" data-refid="20">[20]</sup></td><td>四态检测范式必抄</td></tr>
+            <tr><td><strong>Vibe Kanban</strong></td><td>编排看板(10+ agent)</td><td class="check y">✅</td><td>Apache-2.0</td><td>26.6k★ 已关停<sup class="cite" data-refid="14">[14]</sup></td><td>⛔ 已 sunset，仅参考</td></tr>
+            <tr><td><strong>builderz mission-control</strong></td><td>面板(26 监控+adapter)</td><td class="check p">⚠️ 口径冲突</td><td>MIT</td><td>5.1k★ v2.0.1<sup class="cite" data-refid="24">[24]</sup></td><td>adapter+面板可借</td></tr>
+            <tr><td><strong>clawtrol</strong></td><td>面板(persona多模型)</td><td class="check y">✅</td><td>MIT</td><td>39★ v2026.3.2<sup class="cite" data-refid="42">[42]</sup></td><td>persona 范式参考</td></tr>
+            <tr><td><strong>crshdn mission-control</strong></td><td>面板(convoy+恢复)</td><td class="check y">✅ via gateway</td><td>MIT</td><td>2.1k★ v2.5.1<sup class="cite" data-refid="43">[43]</sup></td><td>工程模式参考</td></tr>
+            <tr><td><strong>SigNoz</strong></td><td>监控(OTLP APM)</td><td class="check y">✅ OTLP</td><td>OSS <span class="conf y">🟡</span></td><td>有 CC dashboard<sup class="cite" data-refid="22">[22]</sup></td><td>监控后端最轻量</td></tr>
+            <tr><td><strong>Langfuse</strong></td><td>监控(LLM trace)</td><td class="check y">✅ OTLP</td><td>MIT</td><td>28.2k★ v3.176<sup class="cite" data-refid="29">[29]</sup></td><td>LLM 语义 trace</td></tr>
+            <tr><td><strong>Laminar</strong></td><td>监控(长跑 agent)</td><td class="check y">✅ OTLP</td><td>Apache-2.0</td><td>3k★ v0.1.45<sup class="cite" data-refid="30">[30]</sup></td><td>最贴长跑用例</td></tr>
+            <tr><td><strong>Conductor (Melty)</strong></td><td>编排桌面</td><td class="check p">⚠️ 仅 CC+Codex</td><td>闭源</td><td>macOS app<sup class="cite" data-refid="15">[15]</sup></td><td>⛔ 丢 Gemini</td></tr>
+            <tr><td><strong>CC agent-teams</strong></td><td>编排(原生)</td><td class="check n">⛔ 仅 Claude</td><td>—</td><td>实验功能<sup class="cite" data-refid="39">[39]</sup></td><td>协调原语可抄</td></tr>
+            <tr><td><strong>AIOS / Letta</strong></td><td>学术 OS / 记忆框架</td><td class="check p">⚠️ 框架级</td><td>Apache-2.0</td><td>5.8k/23k★<sup class="cite" data-refid="40">[40]</sup></td><td>词汇表/记忆层借鉴</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12.5px;color:var(--text-mute)">点表格行可高亮对照。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">自建 vs 用现成 vs 在 Wave 上搭 的取舍</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>阿杰面前其实有三条路，这章把取舍摆清楚。</p>
+
+      <div class="role-cols">
+        <div class="role-col never">
+          <h4>❌ 路线 A：从零纯自建</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)">自己造终端多路复用 + 编排引擎 + 监控栈。<strong>过度工程</strong>——cmux/Claude Squad 已把终端层做透，OTEL 已把监控标准化，agent-kanban 已把编排语义做出来。从零造等于重复造轮子。</p>
+        </div>
+        <div class="role-col opt">
+          <h4>🟡 路线 B：直接用现成成品</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)">装 Emdash / cmux 当主力。<strong>能立刻用</strong>，但① 都是独立 app，无法和你的 Mission Control 任务系统/Agentic OS 理念融合；② cmux 仅 macOS；③ 你失去差异化。适合"先体验交互"，不适合当终态。</p>
+        </div>
+        <div class="role-col must">
+          <h4>✅ 路线 C：在 Wave 上搭（推荐）</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)"><strong>Wave 当外壳</strong>（block/wsh/badge 现成原语 + 进程托管）+ <strong>Mission Control 当编排大脑</strong>（任务依赖/状态机/抹平层 adapter）+ <strong>嵌 OTEL Collector + SigNoz 当监控</strong>。差异化落在 MC 这层，复用 Wave/OTEL/现成设计省掉 80% 轮子。</p>
+        </div>
+      </div>
+
+      <h3>10.1 路线 C 的"借 vs 自写"清单</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>模块</th><th>直接复用/借鉴</th><th>必须自写</th></tr></thead>
+          <tbody>
+            <tr><td>终端多路复用 / 进程托管</td><td>Wave block controller + wsh<sup class="cite" data-refid="3">[3]</sup></td><td>—</td></tr>
+            <tr><td>监控/可观测</td><td>OTEL Collector + SigNoz/Langfuse<sup class="cite" data-refid="13">[13]</sup></td><td>跨 agent 成本 metric 映射（Codex 无 metrics）</td></tr>
+            <tr><td>编排语义</td><td>抄 agent-kanban + CC agent-teams 协调原语<sup class="cite" data-refid="9">[9]</sup></td><td>MC 任务依赖图与状态机落地</td></tr>
+            <tr><td>隔离执行</td><td>git worktree（起步）/ container-use<sup class="cite" data-refid="18">[18]</sup></td><td>worktree 端口/磁盘冲突管理</td></tr>
+            <tr><td>异构抹平层</td><td>clawtrol persona + Bernstein adapter 设计<sup class="cite" data-refid="42">[42]</sup></td><td><strong>每个 agent 的 profile（启动+状态探测+OTEL env）</strong></td></tr>
+            <tr><td>状态总览 UI</td><td>抄 agent-deck 四态检测 + cmux notification ring<sup class="cite" data-refid="20">[20]</sup></td><td>Wave badge → MC 面板的桥接</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout accent">
+        <p><strong>💡 结论：</strong>路线 C 的核心价值 = <strong>异构抹平层 adapter + MC 编排状态机</strong>这两块（必须自写），其余全部借现成。这也正好是 Warp 已原生、而开源世界还没有人为"Wave + 异构 + 个人 OS"专门做的差异化空间。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">⭐ 阿杰执行路线：Wave + Mission Control + Agentic OS 落地决策树</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这是最重要的一章。给分阶段可执行的下一步，第一步是"先跑通哪个最窄的"，服务"管理 N 个异构 agent"。</p>
+
+      <div class="callout accent">
+        <p><strong>🎯 核心原则（先记住）：</strong>① 标准化控制平面，不标准化 agent；② 监控走 OTEL（几乎免费）、状态灯按 agent 分别探测；③ 先窄后宽——先 1 个 Claude Code 跑通整条链路，再加 Codex、再加 Gemini；④ 隔离用 worktree 起步；⑤ N 按 3-8 个设计信息密度。</p>
+      </div>
+
+      <h3>11.1 决策树</h3>
+      <div class="tree">
+        <div class="node q">Q0：你现在能不能在 Wave 里用 wsh run 拉起一个 Claude Code block 并让它跑 MC 的一个任务？</div>
+        <div class="branches">
+          <div class="node no"><span class="lbl n">还不能</span>先做这个！这是地基。本地实测 <code>wsh run --help</code> / <code>wsh badge --help</code> / <code>wsh setmeta --help</code>，把"MC 任务 → wsh run 拉 block → 任务回写 doing"打通。</div>
+          <div class="node yes"><span class="lbl y">能了</span>进 Q1。</div>
+        </div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q1：单个 Claude Code agent 的"状态灯（等审批/完成/出错）"在 Wave tab 上亮起来了吗？</div>
+        <div class="branches">
+          <div class="node no"><span class="lbl n">没有</span>抄官方 Claude Code Integration：在 <code>~/.claude/settings.json</code> 配 lifecycle hooks 调 <code>wsh badge</code>（permission_prompt→gold / Stop→green / 出错→red）。</div>
+          <div class="node yes"><span class="lbl y">亮了</span>进 Q2。</div>
+        </div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q2：把同样的链路复制给 Codex CLI 和 Gemini CLI 了吗？（抹平层第一次实战）</div>
+        <div class="branches">
+          <div class="node no"><span class="lbl n">没有</span>给 MC 写 agent profile：每个 agent = 启动命令 + 状态探测 + OTEL env。三家都用各自原生 hooks 上报状态（Gemini <code>.gemini/settings.json</code> / Codex <code>hooks.json</code> / CC lifecycle hooks），Codex hooks 未覆盖的事件用 OTEL 兜底。</div>
+          <div class="node yes"><span class="lbl y">有了</span>进 Q3。</div>
+        </div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q3：监控统一面板（按 项目/agent/session 三维看 trace + 成本）起来了吗？</div>
+        <div class="branches">
+          <div class="node no"><span class="lbl n">没有</span>在 Wave 里跑 OTEL Collector + SigNoz，给每个 agent 进程注入 <code>OTEL_RESOURCE_ATTRIBUTES</code>。Codex 无 metrics 的坑先记着，cost 看板对 Codex 标"待补"。</div>
+          <div class="node yes"><span class="lbl y">有了</span>进 Q4。</div>
+        </div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q4：要不要上"任务依赖图 + 并行多 agent + 人审 merge"的完整编排？</div>
+        <div class="branches">
+          <div class="node no"><span class="lbl m">先不</span>当前已是可用的"单人盯 N 个异构 agent"OS。把它用顺手再说。</div>
+          <div class="node yes"><span class="lbl y">要</span>抄 agent-kanban 的 depends_on 环检测 + CC agent-teams 的 file-locking 抢任务，落进 MC 的状态机。</div>
+        </div>
+      </div>
+
+      <h3>11.2 分阶段路线（按周/迭代）</h3>
+      <div class="callout good">
+        <h4>✅ 阶段 0（最窄，先跑通）：一个 Claude Code 在 Wave 里全链路</h4>
+        <p>MC 任务 → <code>wsh run --cwd &lt;项目&gt; -- claude</code> 拉起 block → lifecycle hooks → <code>wsh badge</code> 亮状态 → 任务回写 MC（doing/review/done）。<strong>这条链路打通 = 你的 OS 有了最小骨架</strong>。只用 Claude Code，不碰异构，先验证 Wave 原语够不够用。</p>
+      </div>
+      <div class="callout info">
+        <h4>🟡 阶段 1（监控免费午餐）：嵌 OTEL Collector + SigNoz</h4>
+        <p>给 Claude Code 注入 OTEL env，在 SigNoz 看到 session trace + token/cost。验证三维过滤（project/agent/session）。这一步几乎是抄 claude-code-otel 模板<sup class="cite" data-refid="32">[32]</sup>。</p>
+      </div>
+      <div class="callout accent">
+        <h4>🎯 阶段 2（异构第一次落地）：加 Codex CLI</h4>
+        <p>写 MC 的第一个非 Claude agent profile。Codex 的 OTLP 指向同一个 Collector（监控免费统一），状态灯优先用 Codex 原生 hooks（<code>hooks.json</code>），加载路径未落地的部分用 OTEL 事件兜底。这一步会暴露抹平层的真实工作量，是整个项目的<strong>风险验证点</strong>。</p>
+      </div>
+      <div class="callout purple">
+        <h4>🔭 阶段 3（异构补全）：加 Gemini CLI + 多项目 workspace</h4>
+        <p>Gemini OTEL metrics 最全，监控好接。用 Wave workspace/tab 隔离多项目。此时已是完整的"一人撬动 N 个异构 agent"OS。</p>
+      </div>
+      <div class="callout">
+        <h4>⏭️ 阶段 4（可选，按需）：完整编排引擎</h4>
+        <p>只有当真有"任务依赖图 + 并行 + 人审 merge"的复杂需求时再做。抄 agent-kanban + Bernstein。隔离需要更强时上 container-use。<strong>别提前做，会过度工程。</strong></p>
+      </div>
+
+      <h3>11.3 第一步具体动作（今天就能做）</h3>
+      <div class="callout accent">
+        <p><strong>1）</strong>本地装 Wave，跑 <code>wsh run --help</code> / <code>wsh badge --help</code> / <code>wsh setmeta --help</code> 摸清精确语法（文档只到 TOC，必须实测）。<strong>2）</strong>读 Wave repo 的 <code>CLAUDE.md</code> + skill guides，确认加 RPC/view/wsh 命令的扩展上限。<strong>3）</strong>装 cmux 跑一遍，看你的差异化（MC 编排层）到底在哪。<strong>4）</strong>读 agent-kanban 源码的数据模型，决定对标抄 or fork。<strong>5）</strong>验证 builderz-labs/mission-control 的"直连无 gateway"口径冲突（实测能不能直连 CC/Codex）。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">风险与坑</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <div class="callout bad">
+        <h4>⛔ 坑 1：异构抹平层是真活儿，不是配置</h4>
+        <p>Wave 官方只给 Claude 专属集成，Codex/Gemini 的状态灯要自写 adapter。好在<strong>三家都有 hook 机制</strong>（Gemini 成熟<sup class="cite" data-refid="46">[46]</sup> / Codex 演进中<sup class="cite" data-refid="47">[47]</sup> / Claude 最全），所以这是"把各家 hook 事件统一映射成 MC 状态"的<strong>明确工作量，不再是"有没有 hooks"的未知</strong>。真正待验证的是 Codex <code>hooks.json</code> 加载路径的完整度，建议阶段 2 实测。</p>
+      </div>
+      <div class="callout bad">
+        <h4>⛔ 坑 2：Codex exec 无 OTEL metrics</h4>
+        <p>无人值守批跑最常用的 <code>codex exec</code> 不出 metrics<sup class="cite" data-refid="33">[33]</sup>，统一成本看板对 Codex 这路会缺数据，需从 log 反推或单独处理。跨 agent 成本 metric 映射目前<strong>无现成配置</strong>。</p>
+      </div>
+      <div class="callout warn">
+        <h4>⚠️ 坑 3：别把 Wave 当大脑</h4>
+        <p>Wave AI/Agent Mode/MCP 都还在 open 愿望阶段无路线图（issue #2168/#2791、discussion #2691）<sup class="cite" data-refid="7">[7]</sup><sup class="cite" data-refid="8">[8]</sup>。指望 Wave 官方很快给 agent-agnostic 编排会落空，你的大脑必须是 MC。</p>
+      </div>
+      <div class="callout warn">
+        <h4>⚠️ 坑 4：选错底座工具会被弃坑/锁死</h4>
+        <p>Vibe Kanban(母公司已关停)、sketch(已死)、Conductor/Crystal/Nimbalyst(锁 Claude 系)都不适合当长期底座<sup class="cite" data-refid="14">[14]</sup><sup class="cite" data-refid="15">[15]</sup>。只能借设计，别依赖。</p>
+      </div>
+      <div class="callout warn">
+        <h4>⚠️ 坑 5：Wave 多 pane / headless 能力未坐实</h4>
+        <p>无 <code>wsh layout</code> 命令，精确网格布局受限<sup class="cite" data-refid="4">[4]</sup>；CC agent-teams 的 split-pane 不支持 Ghostty 类终端，Wave 自建终端要做多 pane 得自己实现<sup class="cite" data-refid="39">[39]</sup>；Wave 是否有 headless 模式（无人值守跑 agent 集群）未确认<span class="conf r">🔴 待补研究</span>。</p>
+      </div>
+      <div class="callout warn">
+        <h4>⚠️ 坑 6：国内可用性 + 鉴权未覆盖</h4>
+        <p>各工具在"用户在国内"场景下 Gemini CLI/Codex/Claude 的网络可达性与鉴权<strong>本研究未深挖</strong>，这直接影响异构混跑的实际落地<span class="conf r">🔴 待补研究</span>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 FAQ ===== -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">FAQ</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Wave Terminal 到底能不能当这个 OS 的地基？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>能，可行性高。它的 Block + wsh + badge 三件套天然覆盖编排/监控/多项目三大能力<sup class="cite" data-refid="1">[1]</sup>。但它给的是<strong>原语不是成品</strong>——编排逻辑和异构抹平层得你自己在 Mission Control 里写。把 Wave 定位成"终端侧 agent OS 外壳"（呈现 + 进程托管），别指望它当大脑。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">为什么"统管异构 agent"这么难？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>因为 CC/Codex/Gemini 是三家不同公司、三套不同的启动/配置/hook/输出/鉴权。真正 agent-agnostic 的工具只在两种架构下成立：把 agent 抽象成"任意可启动的 CLI"或"任意 MCP server"<sup class="cite" data-refid="19">[19]</sup>。深度集成桌面 app（Conductor/Sculptor）注定收窄到 CC+Codex、丢掉 Gemini。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">监控异构 agent 是不是要给每家找一个监控平台？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不用。<strong>三大 CLI agent 都内置 OpenTelemetry</strong>，监控的正确做法是在 Wave 里嵌一个 OTEL Collector，把三个 agent 的 OTLP 都指向同一个自托管后端（SigNoz/Langfuse）<sup class="cite" data-refid="12">[12]</sup><sup class="cite" data-refid="13">[13]</sup>。监控层别自己造轮子。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">第一步应该先跑通什么？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>最窄链路：<strong>一个 Claude Code 在 Wave 里走完"MC 任务 → wsh run 拉 block → lifecycle hooks → wsh badge 亮状态 → 回写 MC"</strong>。先不碰异构，验证 Wave 原语够不够用。打通后再嵌 OTEL，再加 Codex（异构第一次落地、风险验证点），再加 Gemini。见第 11 章决策树。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Mission Control 要从零设计编排逻辑吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不要。<code>agent-kanban</code> 几乎就是 MC 的开源同构物（leader-worker + depends_on 环检测 + 子任务 + SSE 监控 + 人审 merge）<sup class="cite" data-refid="9">[9]</sup>；CC agent-teams 的 shared task list + file-locking 抢任务 + TaskCreated/Completed hooks 也可直接照搬<sup class="cite" data-refid="39">[39]</sup>。先读透它们的数据模型再决定对标抄 or fork。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">隔离用 git worktree 还是容器？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>单人轻量起步用 <strong>git worktree</strong>（切换成本最低，cmux/Claude Squad/Emdash 都这么做），只在要跑不可信代码时再上容器（container-use 容器隔离比 worktree 强，agent 砸不到宿主）<sup class="cite" data-refid="18">[18]</sup>。注意大型 repo 的 worktree 磁盘膨胀 + dev-server 端口冲突要自己管理。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">cmux 既然已经做了这件事，我还有必要在 Wave 上做吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>有，但你的差异化必须想清楚。cmux（18.8k★）已把<strong>终端层多 agent session 呈现</strong>做透了<sup class="cite" data-refid="36">[36]</sup>。你的差异化应该是 <strong>Mission Control 这层任务/看板编排 + Agentic OS 理念</strong>，而不是再造一个终端。先把 cmux 跑一遍读源码，确认你要补的是它没做的编排层。cmux 还只支持 macOS，Wave 跨平台是一个潜在差异点。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">N 个 agent 的 N 现实能到多少？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>个位数。实测并行实用上限 2-4 个（受内存/CPU/API rate limit 约束），Cursor 设到 8，CC agent-teams 官方建议 3-5 个<sup class="cite" data-refid="38">[38]</sup>。<strong>设计 MC 面板按"同屏一眼看完 3-8 个 session 状态"的信息密度</strong>，别按几十个设计。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">状态总览最该先做哪个功能？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p><strong>"哪个 agent 卡住等我输入了"——running/waiting/idle/error 四态检测 + 一键跳到等输入的 session</strong>。这是单人跑 N 个 agent 的第一痛点，agent-deck 把它做成头等公民、cmux 用 notification ring<sup class="cite" data-refid="20">[20]</sup>。直接抄这个范式。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">学术界的 AIOS / Letta 能直接拿来用吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不能直接用。AIOS/Letta 管的是<strong>框架级 LLM agent</strong>，不是 Claude Code/Codex 这类终端 CLI agent，抽象层级错位<sup class="cite" data-refid="40">[40]</sup><sup class="cite" data-refid="41">[41]</sup>。只能借它们的"OS 词汇表（调度/上下文切换/访问控制）"和 memory layer 设计。Memory/Orchestration 层一开始就当一等公民，别后补成技术债<sup class="cite" data-refid="27">[27]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">顶层架构原则用一句话概括？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>"标准化控制平面，而不是标准化 agent"<sup class="cite" data-refid="23">[23]</sup>。让 CC/Codex/Gemini 各自原样跑，但全部把 IO/事件/成本/状态汇报到一个统一 hop（你的 MC = 单一 session 真相源）。这是管异构 agent 唯一可扩展的姿势。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">"管理 agent 是未来核心技能"这个叙事站得住吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>站得住。Karpathy 把 agentic engineering 定义为"orchestrating agents + oversight"；Cognition 已落地"Devin 管 Devin"（15 人团队管一个 Devin 舰队）；Cursor 3.2 把 IDE 重构成 agent execution runtime、统一 sidebar 管 8 个并行 agent；业界普遍预测 2027 工程师 = AI Orchestrator<sup class="cite" data-refid="25">[25]</sup><sup class="cite" data-refid="26">[26]</sup>。你做的不是工具，是"一个人当一支队伍"的操作系统。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">最该先去验证的竞品/疑点是什么？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>① <code>amux.io</code>（自称 "The Agent Control Plane"，与你目标几乎同名，但 403 抓不到，开源/CLI 支持/star 全未知）<sup class="cite" data-refid="45">[45]</sup>；② builderz-labs/mission-control 的"直连无 gateway"口径冲突；③ Codex <code>hooks.json</code> 的 plugin 加载路径完整度（Gemini hooks 已成熟<sup class="cite" data-refid="46">[46]</sup>、Codex 引擎在演进<sup class="cite" data-refid="47">[47]</sup>，三家都有 hooks、badge 范式可复用已确认）。这三个都建议阿杰亲自跑一遍验证。</p></div></div>
+
+    </div>
+  </section>
+
+  <!-- ===== CH14 References ===== -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">References</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13px;color:var(--text-mute)">访问日期均为 2026-05-29。悬停 inline <sup class="cite" data-refid="1">[1]</sup> 标记可预览来源。</p>
+      <ol class="ref-list">
+        <li id="ref-1">GitHub - wavetermdev/waveterm（Apache-2.0 / 20.9k★ / v0.14.5 / Wave Agent Mode issue #2168）· <a href="https://github.com/wavetermdev/waveterm" target="_blank" rel="noopener">github.com/wavetermdev/waveterm</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×5</span></li>
+        <li id="ref-2">Block System | DeepWiki（Block 系统/MVVM+Jotai/CreateBlockCommand）· <a href="https://deepwiki.com/wavetermdev/waveterm/3.2-block-system" target="_blank" rel="noopener">deepwiki.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-3">Custom Widgets | Wave Terminal Documentation（widgets.json / cmd·shell controller）· <a href="https://docs.waveterm.dev/customwidgets" target="_blank" rel="noopener">docs.waveterm.dev/customwidgets</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×4</span></li>
+        <li id="ref-4">wsh reference / overview | Wave Terminal Documentation（wsh run/setmeta/badge/notify/setvar，无 wsh layout）· <a href="https://docs.waveterm.dev/wsh-reference" target="_blank" rel="noopener">docs.waveterm.dev/wsh-reference</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×4</span></li>
+        <li id="ref-5">Claude Code Integration | Wave Terminal Documentation（lifecycle hooks → wsh badge / badge rollup，Claude 专属）· <a href="https://docs.waveterm.dev/claude-code" target="_blank" rel="noopener">docs.waveterm.dev/claude-code</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×6</span></li>
+        <li id="ref-6">AddyOsmani.com - The Code Agent Orchestra（conductor→orchestrator / 验证瓶颈 / tool-agnostic）· <a href="https://addyosmani.com/blog/code-agent-orchestra/" target="_blank" rel="noopener">addyosmani.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-7">Integrate MCP Client into Wave AI · Discussion #2691（2025-12，无 maintainer 响应）· <a href="https://github.com/wavetermdev/waveterm/discussions/2691" target="_blank" rel="noopener">github.com/wavetermdev/waveterm/discussions/2691</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-8">[Feature]: Wave Agent Mode · Issue #2168 · wavetermdev/waveterm（2025-05，open/triage）· <a href="https://github.com/wavetermdev/waveterm/issues/2168" target="_blank" rel="noopener">github.com/wavetermdev/waveterm/issues/2168</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-9">GitHub - saltbo/agent-kanban（307★ / v1.13.4 / leader-worker + depends_on + SSE / CC·Codex·Gemini·ACP / Ed25519 / FSL-1.1-ALv2）· <a href="https://github.com/saltbo/agent-kanban" target="_blank" rel="noopener">github.com/saltbo/agent-kanban</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×4</span></li>
+        <li id="ref-10">GitHub - sipyourdrink-ltd/bernstein（~178★ / PyPI v1.5.17 / Goal→TaskGraph→Janitor 门禁 / 协调零 token / HMAC 审计链 / 44 CLI adapter / MCP server）· <a href="https://github.com/sipyourdrink-ltd/bernstein" target="_blank" rel="noopener">github.com/sipyourdrink-ltd/bernstein</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-11">GitHub - generalaction/emdash (YC W26)（2.4k★ / v0.4.41 / 27 agent / SSH 远程 / ticket 集成 / worktree 隔离）· <a href="https://github.com/generalaction/emdash" target="_blank" rel="noopener">github.com/generalaction/emdash</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-12">AI Agent Observability - Evolving Standards and Best Practices - OpenTelemetry（gen_ai.* 语义约定 / CC·Codex·Gemini 都 emit OTLP / experimental）· <a href="https://opentelemetry.io/blog/2025/ai-agent-observability/" target="_blank" rel="noopener">opentelemetry.io</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-13">Vibe coding tools observability with VictoriaMetrics Stack and OpenTelemetry（实测一个 Collector 同时吃 CC/Codex/Gemini/Qwen）· <a href="https://victoriametrics.com/blog/vibe-coding-observability/" target="_blank" rel="noopener">victoriametrics.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-14">Goodbye bloop / Vibe Kanban shutdown（2026-04-10 关停，转社区维护，远程 30 天后只剩本地，26.6k★ v0.1.44）· <a href="https://www.vibekanban.com/blog/shutdown" target="_blank" rel="noopener">vibekanban.com/blog/shutdown</a> + <a href="https://github.com/BloopAI/vibe-kanban" target="_blank" rel="noopener">github.com/BloopAI/vibe-kanban</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-15">Best Multi-Agent Desktop Apps 2026 - Nimbalyst（桌面 app 几乎只 CC+Codex / Conductor 闭源 / Crystal→Nimbalyst）· <a href="https://nimbalyst.com/blog/best-multi-agent-desktop-apps-claude-code-codex-2026/" target="_blank" rel="noopener">nimbalyst.com</a> + <a href="https://www.conductor.build/" target="_blank" rel="noopener">conductor.build</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-16">GitHub - dagger/container-use（3.8k★ / v0.4.2 2025-08 / MCP server, any-MCP-agent / 容器+worktree 隔离 / early development）· <a href="https://github.com/dagger/container-use" target="_blank" rel="noopener">github.com/dagger/container-use</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-17">Durable Execution: The Key to Harnessing AI Agents in Production - Inngest（HITL=suspend/resume 原语，2026-02 Temporal 兼容）· <a href="https://www.inngest.com/blog/durable-execution-key-to-harnessing-ai-agents" target="_blank" rel="noopener">inngest.com</a> + <a href="https://temporal.io/blog/from-agent-zoo-to-agent-orchestra-temporal-agentic-control-plane" target="_blank" rel="noopener">temporal.io</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-18">Docker Sandboxes / Container Use 沙箱隔离综述（worktree vs 容器/microVM 隔离范式收敛 / 沙箱最佳实践）· <a href="https://www.docker.com/blog/docker-sandboxes-a-new-approach-for-coding-agent-safety/" target="_blank" rel="noopener">docker.com/blog</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-19">9 Open-Source Agent Orchestrators for AI Coding (2026) | Augment Code（真异构=少数派 / Emdash·Vibe Kanban agnostic / Conductor·Nimbalyst 锁 Claude 系）· <a href="https://www.augmentcode.com/tools/open-source-agent-orchestrators" target="_blank" rel="noopener">augmentcode.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-20">GitHub - asheshgoplani/agent-deck（2.6k★ / v1.9.43 2026-05-28 / running·waiting·idle·error 四态检测 + 单键跳转 / fork+resume）· <a href="https://github.com/asheshgoplani/agent-deck" target="_blank" rel="noopener">github.com/asheshgoplani/agent-deck</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×4</span></li>
+        <li id="ref-21">Observability with OpenTelemetry - Claude Code Docs（claude_code.interaction span 套 llm_request/tool/hook，subagent 自动嵌套 / session.id / token 分类型 + cost counter / W3C trace context）· <a href="https://code.claude.com/docs/en/agent-sdk/observability" target="_blank" rel="noopener">code.claude.com/docs</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-22">Claude Code Monitoring & Observability with OpenTelemetry - SigNoz Docs（现成 CC dashboard / cost metric 带 agent.name / OTLP-native APM）· <a href="https://signoz.io/docs/claude-code-monitoring/" target="_blank" rel="noopener">signoz.io/docs/claude-code-monitoring</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-23">Enterprise Controls for All CLI Coding Agents: A 2026 Gateway Field Guide - Futurum/FutureAGI（"standardize the control plane, not the agent"）· <a href="https://futureagi.com/blog/enterprise-controls-cli-coding-agents-gateway-field-guide-2026/" target="_blank" rel="noopener">futureagi.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-24">GitHub - builderz-labs/mission-control（5.1k★ / MIT / v2.0.1 2026-03 / 26 监控面板 / SQLite 零依赖 / adapter 层 OpenClaw·CrewAI·LangGraph·AutoGen·Claude SDK / 直连口径冲突）· <a href="https://github.com/builderz-labs/mission-control" target="_blank" rel="noopener">github.com/builderz-labs/mission-control</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-25">How Engineering Managers Should Prepare for Agentic Engineering / Karpathy guidelines（orchestrating agents + oversight / 2027 AI Orchestrator）· <a href="https://www.moelzayat.com/how-engineering-managers-should-prepare-for-agentic-engineering-2/" target="_blank" rel="noopener">moelzayat.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-26">Devin's 2025 Performance Review / Cognition blog（"Devin manages Devins" / 15 人团队管 Devin 舰队 / coordinator spawn subagent）· <a href="https://cognition.ai/blog/devin-annual-performance-review-2025" target="_blank" rel="noopener">cognition.ai</a> + <a href="https://futurumgroup.com/insights/cursor-3-2-reframes-the-ide-as-an-agent-execution-runtime/" target="_blank" rel="noopener">Cursor 3.2 Futurum</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-27">What Is an Agentic Operating System? The Six-Layer Infrastructure Stack | MindStudio（Model/Memory/Tool/Orchestration/Workflow/Interface 六层 / memory·orchestration 后补=技术债）· <a href="https://www.mindstudio.ai/blog/what-is-agentic-operating-system" target="_blank" rel="noopener">mindstudio.ai</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-28">AgenticOS 2026 | Operating Systems Design for AI Agents (ASPLOS)（五大系统问题=资源管理/隔离/状态/可观测性/虚拟化）· <a href="https://os-for-agent.github.io/asplos-2026.html" target="_blank" rel="noopener">os-for-agent.github.io</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-29">OpenTelemetry (OTEL) for LLM Observability - Langfuse（/api/public/otel endpoint 吃任意 OTEL 源 / 28.2k★ MIT v3.176.0 / OTLP HTTP）· <a href="https://langfuse.com/integrations/native/opentelemetry" target="_blank" rel="noopener">langfuse.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-30">lmnr-ai/lmnr GitHub（Laminar / 3k★ Apache-2.0 v0.1.45 / transcript view + SQL over traces + rollout debugger / 2026-03 $3M 融资聚焦 long-running agents）· <a href="https://github.com/lmnr-ai/lmnr" target="_blank" rel="noopener">github.com/lmnr-ai/lmnr</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-31">Arize-ai/phoenix GitHub（9.9k★ / Elastic License 2.0 / OTEL-native + agent eval 最深）· <a href="https://github.com/Arize-ai/phoenix" target="_blank" rel="noopener">github.com/Arize-ai/phoenix</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-32">ColeMurray/claude-code-otel GitHub（412★ / OTEL Collector + Prometheus + Loki + Grafana 五类 dashboard 模板 / CC 专用可扩展）· <a href="https://github.com/ColeMurray/claude-code-otel" target="_blank" rel="noopener">github.com/ColeMurray/claude-code-otel</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-33">codex exec emits no OTel metrics; codex mcp-server emits no telemetry - Issue #12913（交互式有 metrics，codex exec 无 metrics，mcp-server 全无）· <a href="https://github.com/openai/codex/issues/12913" target="_blank" rel="noopener">github.com/openai/codex/issues/12913</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-34">AgentOps-AI/agentops GitHub（5.6k★ MIT / SDK 框架 instrument，不适配 CLI agent）+ traceloop/openllmetry（7.2k★ Apache-2.0）· <a href="https://github.com/AgentOps-AI/agentops" target="_blank" rel="noopener">github.com/AgentOps-AI/agentops</a> + <a href="https://github.com/traceloop/openllmetry" target="_blank" rel="noopener">traceloop/openllmetry</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-35">Langfuse vs Braintrust / Helicone observability 对比（Braintrust 闭源无 OSS 自托管 / Helicone proxy 模式 maintenance mode）· <a href="https://www.braintrust.dev/articles/langfuse-vs-braintrust" target="_blank" rel="noopener">braintrust.dev</a> + <a href="https://www.helicone.ai/blog/the-complete-guide-to-LLM-observability-platforms" target="_blank" rel="noopener">helicone.ai</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-36">cmux — The terminal built for multitasking（18.8k★ / libghostty / Swift·AppKit / 垂直 tab + notification ring / socket·CLI API / 完全 agent-agnostic / macOS only）· <a href="https://cmux.com/" target="_blank" rel="noopener">cmux.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-37">GitHub - smtg-ai/claude-squad（7.7k★ / v1.0.18 / AGPL-3.0 / tmux+worktree / CC·Codex·Gemini·Aider·OpenCode·Amp 换后端）· <a href="https://github.com/smtg-ai/claude-squad" target="_blank" rel="noopener">github.com/smtg-ai/claude-squad</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-38">How to Run Parallel AI Coding Agents With Git Worktrees | MindStudio（实用并行上限 2-4 个 / Cursor 设到 8 / CC agent-teams 建议 3-5）· <a href="https://www.mindstudio.ai/blog/parallel-ai-coding-agents-git-worktrees" target="_blank" rel="noopener">mindstudio.ai</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-39">Orchestrate teams of Claude Code sessions - Claude Code Docs（agent-teams v2.1.32+ / 仅 Claude / shared task list + mailbox + file-locking + TaskCreated/Completed hooks / split-pane 不支持 Ghostty）· <a href="https://code.claude.com/docs/en/agent-teams" target="_blank" rel="noopener">code.claude.com/docs/en/agent-teams</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-40">GitHub - agiresearch/AIOS（5.8k★ / v0.3.0 2026-01 / COLM 2025 / agent kernel: 调度·内存·上下文切换·工具·访问控制 / 框架级而非 CLI agent / arXiv 2403.16971）· <a href="https://github.com/agiresearch/AIOS" target="_blank" rel="noopener">github.com/agiresearch/AIOS</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-41">GitHub - letta-ai/letta (formerly MemGPT)（23k★ / Apache-2.0 / v0.16.8 / memory blocks + agent server + ADE / 建 agent 框架非管 agent 面板）· <a href="https://github.com/letta-ai/letta" target="_blank" rel="noopener">github.com/letta-ai/letta</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-42">GitHub - wolverin0/clawtrol（39★ / MIT / v2026.3.2 / Ruby·Rails8·PG / persona 系统 Opus·Codex·Gemini·GLM 多模型同台 / live streaming terminal / factory loop / 任意 REST API agent）· <a href="https://github.com/wolverin0/clawtrol" target="_blank" rel="noopener">github.com/wolverin0/clawtrol</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-43">GitHub - crshdn/mission-control (Autensa)（2.1k★ / MIT / v2.5.1 2026-04-29 / convoy mode 依赖图并行+自动恢复 / crash recovery / 80+ REST API / worktree 隔离 / OpenClaw Gateway）· <a href="https://github.com/crshdn/mission-control" target="_blank" rel="noopener">github.com/crshdn/mission-control</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-44">How OpenClaw Works: Understanding AI Agents Through a Real Architecture（gateway as single source of truth / routing+session+context+ReAct+tool+memory+scheduling）· <a href="https://bibek-poudel.medium.com/how-openclaw-works-understanding-ai-agents-through-a-real-architecture-5d59cc7a4764" target="_blank" rel="noopener">bibek-poudel.medium.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-45">amux — The Agent Control Plane（自称面向多 CLI agent 控制平面，官网 403 抓不到，开源/CLI 支持/star 未验证）· <a href="https://amux.io/" target="_blank" rel="noopener">amux.io</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1 · 🔴 待补</span></li>
+        <li id="ref-46">Tailor Gemini CLI to your workflow with hooks - Google Developers Blog（2026-01-28 / BeforeTool·AfterTool·AfterAgent·SessionStart 等 / <code>.gemini/settings.json</code> / 同步中间件可 <code>deny</code>/阻断）· <a href="https://developers.googleblog.com/en/tailor-gemini-cli-to-your-workflow-with-hooks/" target="_blank" rel="noopener">developers.googleblog.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×7 · 🔬 Codex 审查补</span></li>
+        <li id="ref-47">Codex plugin manifest hooks not loaded by codex-hooks engine · Issue #17331 · openai/codex（<code>codex-hooks</code> 引擎 + <code>hooks.json</code> 存在，但 plugin manifest 的 hooks 加载路径未落地，2026-04-10 closed / 演进中）· <a href="https://github.com/openai/codex/issues/17331" target="_blank" rel="noopener">github.com/openai/codex/issues/17331</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×7 · 🔬 Codex 审查补</span></li>
+      </ol>
+    </div>
+  </section>
+
+</main>
+
+<button class="back-to-top" id="backTop" aria-label="回到顶部">↑</button>
+
+<footer>
+  <p>无忌 Deep Research · 5 路并行调研 + Codex 跨模型四维审查 · 2026-05-29 · 47 来源 · 数字均 inline 引用，关键项标可信度</p>
+  <p style="font-size:12px;margin-top:6px">⚠️ 最大不确定性：Codex <code>hooks.json</code> 加载路径完整度（三家均有 hooks，已经 Codex 跨模型核查 [46][47]）+ Codex exec 无 OTEL metrics + amux.io 竞品 403 抓不到。经 Codex 四维审查加固，详见第 1（审查说明）、8、12 章。</p>
+</footer>
+
+<script>
+(function() {
+  let activePopover=null,activeTrigger=null,hideTimer=null;
+  function getRefContent(refid){const el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){const r=trigger.getBoundingClientRect();const popW=pop.offsetWidth,popH=pop.offsetHeight;let left=r.left+window.scrollX;if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;if(left<12)left=12;let top=r.bottom+window.scrollY+6;if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}pop.style.left=left+'px';pop.style.top=top+'px';}
+  function showPopover(trigger){if(activeTrigger===trigger&&activePopover)return;if(activePopover){activePopover.remove();activePopover=null;}const content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;const pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;document.body.appendChild(pop);positionPopover(pop,trigger);activePopover=pop;activeTrigger=trigger;pop.addEventListener('mouseenter',()=>{if(hideTimer)clearTimeout(hideTimer);});pop.addEventListener('mouseleave',scheduleHide);}
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(()=>{if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){document.querySelectorAll('sup.cite[data-refid]').forEach(sup=>{sup.addEventListener('mouseenter',()=>showPopover(sup));sup.addEventListener('mouseleave',scheduleHide);sup.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});});document.addEventListener('click',e=>{if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+
+<script>
+(function(){
+  // 主题切换
+  var themeBtn=document.getElementById('themeToggle');
+  var saved=localStorage.getItem('agentos-theme');
+  if(saved){document.body.setAttribute('data-theme',saved);themeBtn.textContent=saved==='dark'?'☀️':'🌙';}
+  themeBtn.addEventListener('click',function(){
+    var cur=document.body.getAttribute('data-theme')==='dark'?'light':'dark';
+    document.body.setAttribute('data-theme',cur);
+    localStorage.setItem('agentos-theme',cur);
+    themeBtn.textContent=cur==='dark'?'☀️':'🌙';
+  });
+
+  // 进度条 + 回到顶部
+  var progressEl=document.getElementById('progress');
+  var backTopEl=document.getElementById('backTop');
+  function updateProgress(){
+    var docHeight=document.documentElement.scrollHeight-window.innerHeight;
+    var scrolled=window.scrollY;
+    var ratio=docHeight>0?scrolled/docHeight:0;
+    progressEl.style.width=(ratio*100)+'%';
+    backTopEl.classList.toggle('show',scrolled>400);
+  }
+  window.addEventListener('scroll',updateProgress,{passive:true});
+  updateProgress();
+  backTopEl.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+
+  // 章节折叠
+  document.querySelectorAll('section.chapter > h2').forEach(function(h2){
+    h2.addEventListener('click',function(){h2.parentElement.classList.toggle('collapsed');});
+  });
+
+  // 抽屉导航
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  function closeNav(){nav.classList.remove('open');ov.classList.remove('show');}
+  if(nav&&tog&&ov){
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',closeNav);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)closeNav();});});
+  }
+
+  // anchor 点击展开折叠章节
+  var anchorLinks=document.querySelectorAll('#anchorList a');
+  anchorLinks.forEach(function(a){
+    a.addEventListener('click',function(){
+      var target=document.getElementById(a.dataset.target);
+      if(target&&target.classList.contains('collapsed'))target.classList.remove('collapsed');
+    });
+  });
+
+  // scroll-spy 高亮
+  var sections=Array.prototype.map.call(anchorLinks,function(a){return document.getElementById(a.dataset.target);}).filter(Boolean);
+  function highlightAnchor(){
+    var offset=120,current=null;
+    for(var i=0;i<sections.length;i++){var rect=sections[i].getBoundingClientRect();if(rect.top-offset<=0)current=sections[i].id;}
+    anchorLinks.forEach(function(a){a.classList.toggle('active',a.dataset.target===current);});
+    var activeLink=document.querySelector('#anchorList a.active');
+    if(activeLink)activeLink.scrollIntoView({block:'nearest'});
+  }
+  window.addEventListener('scroll',highlightAnchor,{passive:true});
+  highlightAnchor();
+
+  // 表格行高亮
+  document.querySelectorAll('tbody tr').forEach(function(tr){
+    tr.addEventListener('click',function(){
+      tr.parentElement.querySelectorAll('tr.row-highlight').forEach(function(o){if(o!==tr)o.classList.remove('row-highlight');});
+      tr.classList.toggle('row-highlight');
+    });
+  });
+
+  // FAQ
+  document.querySelectorAll('.faq-q').forEach(function(q){
+    q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+  });
+})();
+</script>
+
+</body>
+</html>

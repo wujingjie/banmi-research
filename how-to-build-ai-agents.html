@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>怎么打造 AI Agents：小白能照着走的实操能力阶梯（无代码 → 框架 → 手搓） · 无忌 Deep Research · 2026-05-29</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1d23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --border-strong: #cdd2da;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --accent-text: #1d4ed8;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #0891b2;
+    --info-soft: #cffafe;
+    --code-bg: #f1f3f7;
+    --purple: #7c3aed;
+    --purple-soft: #ede9fe;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1c2030;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #b6bcc9;
+    --text-mute: #8a92a3;
+    --border: #2a2f3d;
+    --border-strong: #3a4154;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a55;
+    --accent-text: #93c5fd;
+    --good: #4ade80;
+    --good-soft: #14532d55;
+    --warn: #fbbf24;
+    --warn-soft: #78350f55;
+    --bad: #f87171;
+    --bad-soft: #7f1d1d55;
+    --info: #22d3ee;
+    --info-soft: #155e7555;
+    --code-bg: #0a0d14;
+    --purple: #a78bfa;
+    --purple-soft: #4c1d9555;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 28px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 3000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  hr.soft { border: none; height: 1px; background: var(--border); margin: 16px 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .node.yes { border-color: var(--good); }
+  .tree .node.no { border-color: var(--bad); }
+  .tree .branches { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .role-cols { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 14px 0; }
+  .role-col { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-elevated); }
+  .role-col h4 { margin: 0 0 8px; font-size: 14px; color: var(--text); }
+  .role-col.must { background: var(--accent-soft); border-color: var(--accent); }
+  .role-col.opt { background: var(--warn-soft); border-color: var(--warn); }
+  .role-col.never { background: var(--bad-soft); border-color: var(--bad); }
+  .role-col ul { margin: 4px 0 0; padding-left: 18px; }
+  .prod-card { margin: 12px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .prod-head { padding: 10px 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); }
+  .prod-head .ico { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; background: var(--accent-soft); }
+  .prod-head .name-block { flex: 1; min-width: 140px; }
+  .prod-head .pn { font-size: 15px; font-weight: 700; color: var(--text); }
+  .prod-head .ph { font-size: 12px; color: var(--text-mute); font-family: ui-monospace, monospace; margin-top: 1px; }
+  .prod-body { padding: 10px 14px; font-size: 14px; }
+  .prod-body p { color: var(--text-soft); margin: 6px 0; }
+  .prod-body .takeaway { margin-top: 8px; padding: 8px 10px; background: var(--accent-soft); border-radius: 8px; border-left: 3px solid var(--accent); color: var(--text); font-size: 13.5px; }
+  .prod-body .takeaway::before { content: "💡 启示  "; font-weight: 700; color: var(--accent-text); }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(250,204,21,0.3); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated,#fff); color: var(--text,#1a1a23); border: 1px solid var(--border,#e3e6ec); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(15,23,42,0.18); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  [data-theme="dark"] .cite-popover { background: #1a1e2a; color: #e6e9f0; border-color: #2a2f3a; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+  .cite-popover a { color: var(--accent,#2563eb); text-decoration: underline; word-break: break-all; }
+  [data-theme="dark"] .cite-popover a { color: #60a5fa; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  @media (max-width: 480px) {
+    .hero { padding: 18px 4px 8px; }
+    .hero h1 { font-size: 22px; }
+    section.chapter > h2 { font-size: 17px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+    .tree .branches { grid-template-columns: 1fr; }
+  }
+  @media print {
+    header.topbar, #progress, .back-to-top, nav.anchor-nav { display: none !important; }
+    section.chapter.collapsed .chapter-body { max-height: none !important; padding: 18px 20px 22px !important; }
+    section.chapter.collapsed > h2 .caret { display: none; }
+  }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">怎么打造 AI Agents <span class="tag">v1 · 无忌 Deep Research</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 执行摘要</a>
+    <a href="#ch2" data-target="ch2">02 先建心智模型：Agent 是什么</a>
+    <a href="#ch3" data-target="ch3">03 架构范式说人话</a>
+    <a href="#ch4" data-target="ch4">04 能力阶梯总览</a>
+    <a href="#ch5" data-target="ch5">05 路线一·无代码平台横评</a>
+    <a href="#ch6" data-target="ch6">06 路线二·代码框架横评</a>
+    <a href="#ch7" data-target="ch7">07 路线三·手搓最小 Agent</a>
+    <a href="#ch8" data-target="ch8">08 核心概念深一点</a>
+    <a href="#ch9" data-target="ch9">09 横向对比大表</a>
+    <a href="#ch10" data-target="ch10">10 第一个 agent 做什么</a>
+    <a href="#ch11" data-target="ch11">11 常见坑与避坑</a>
+    <a href="#ch12" data-target="ch12">12 评估·调试·部署</a>
+    <a href="#ch13" data-target="ch13">⭐ 13 小白实操 roadmap</a>
+    <a href="#ch14" data-target="ch14">14 学习资源</a>
+    <a href="#ch15" data-target="ch15">15 FAQ</a>
+    <a href="#ch16" data-target="ch16">16 References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>怎么打造 AI Agents：小白能照着走的实操能力阶梯</h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-29</span>
+      <span>🔍 无忌 Deep Research · 5 路并行</span>
+      <span>🪜 无代码 → 框架 → 手搓</span>
+      <span>🇨🇳 国产平台/中文资源正面覆盖</span>
+      <span>📚 真实来源 inline 引用</span>
+    </div>
+    <div class="hero-deck">
+      <strong>一句话：</strong>打造 AI Agent 不是「学不学得会」的问题，是「从哪一级上手」的问题。本报告把它写成一条<strong>三级能力阶梯</strong>——① <strong>不写代码就能搭</strong>（国内首选扣子 coze.cn，5 分钟拖出第一个能用的 bot<sup class="cite" data-refid="9">[9]</sup>）→ ② <strong>轻量代码框架</strong>（先 CrewAI / OpenAI Agents SDK，~20 行跑通<sup class="cite" data-refid="18">[18]</sup>）→ ③ <strong>手搓最小 agent 理解原理</strong>（约 50-80 行 Python 的 while 循环，看穿框架本质<sup class="cite" data-refid="29">[29]</sup>）。贯穿全篇的一条心智模型：<strong>agent = 大脑 LLM + 手（工具调用）+ 记忆 + 循环</strong>，和 chatbot 的区别是「会做不只会说」，和工作流的区别是「自己决定怎么做」<sup class="cite" data-refid="1">[1]</sup>。国内小白零障碍：几乎所有框架都能改 <code>base_url</code> 接 DeepSeek / 通义千问，<strong>无需翻墙、有免费额度</strong><sup class="cite" data-refid="22">[22]</sup>。
+    </div>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">执行摘要：给小白的 5 条最关键结论</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>5 路并行调研（概念地基 / 无代码平台 / 代码框架 / 手搓原理 / 学习路径+避坑）收敛出的核心判断，每条独立成块，方便扫。</p>
+
+      <div class="callout accent">
+        <h4>🪜 结论 1：别纠结「学什么」，走「三级能力阶梯」就对了 <span class="conf g">🟢 多源</span></h4>
+        <p>最优路径是<strong>三级阶梯</strong>：① 先用无代码平台（国内首选扣子 / 腾讯元器 / 阿里百炼，10 分钟拖出第一个能用的 agent，先建立成就感）→ ② 上轻量框架（先做完免费课，再用 CrewAI / smolagents / PydanticAI 写第一个代码 agent）→ ③ 手搓约 50-80 行 Python 的 while 循环看穿原理<sup class="cite" data-refid="30">[30]</sup>。<strong>关键：别一上来就写代码、别一上来就上 LangChain</strong>，先在无代码平台用免费额度跑出一个窄场景 agent 找到手感<sup class="cite" data-refid="30">[30]</sup>。</p>
+      </div>
+
+      <div class="callout good">
+        <h4>✅ 结论 2：先记住一个心智模型——agent = LLM + 工具 + 记忆 + 循环 <span class="conf g">🟢 多源</span></h4>
+        <p>任何 agent 拆开就 4 件事：<strong>大脑（LLM）+ 手（工具调用）+ 记忆 + 循环</strong><sup class="cite" data-refid="2">[2]</sup>。和 chatbot 的区别是「会做不只会说」，和工作流的区别是「自己决定怎么做」（Anthropic 官方：工作流走预设代码路径，agent 由 LLM 动态决定用什么工具）<sup class="cite" data-refid="1">[1]</sup>。<strong>最关键纠错</strong>：LLM 不执行工具，只输出「我想调用这个工具」的 JSON，真正执行靠你的代码——懂这点心智模型就对一半<sup class="cite" data-refid="2">[2]</sup>。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>🇨🇳 结论 3：国内小白零障碍——国产平台直连 + 国产模型免费额度 <span class="conf g">🟢 多源</span></h4>
+        <p>无代码首选<strong>扣子 coze.cn</strong>（中文、直连、抖音扫码登录、一键发微信/抖音）<sup class="cite" data-refid="9">[9]</sup>；要写代码时几乎所有框架都能改 <code>base_url</code> 接 <strong>DeepSeek / 通义千问</strong>，<strong>无需翻墙、有免费额度</strong>（DeepSeek 新用户送 500 万 token<sup class="cite" data-refid="28">[28]</sup>，智谱新用户送 2000 万 token 永久有效、阿里百炼新用户 90 天免费<sup class="cite" data-refid="14">[14]</sup>）。海外的 Zapier / Lindy 等先放着，等你有梯子且要接 Gmail/Slack 再碰<sup class="cite" data-refid="13">[13]</sup>。</p>
+      </div>
+
+      <div class="callout bad">
+        <h4>⛔ 结论 4：最贵的坑是无限循环烧 token——第一天就设硬上限 <span class="conf g">🟢 多源</span></h4>
+        <p>2025 年 11 月一篇广为流传的博文称：一个跑 4 个 LangChain agent 的市场调研 pipeline <strong>意外进入无限循环跑了 11 天、账单 4.7 万美元</strong>（<span class="conf y">🟡 单篇博文轶事、未独立核实，数字当警示而非铁证</span>）<sup class="cite" data-refid="31">[31]</sup>。但教训成立：<strong>第一天就给 agent 设迭代/token/时间/花费硬上限</strong>（ReAct 循环典型设 15-25 步上限）<sup class="cite" data-refid="3">[3]</sup>；不可逆操作（发消息/改库/付款）必须人工确认<sup class="cite" data-refid="35">[35]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 结论 5：两个「别过度工程化」的坑——多 agent 后置、旧 AutoGen 别学 <span class="conf g">🟢 多源</span></h4>
+        <p>① <strong>Multi-agent（多智能体协作）坚决后置</strong>：单 agent 能搞定就别上多 agent，一上来就搭多 agent「又慢又贵又难调」<sup class="cite" data-refid="5">[5]</sup>。② <strong>新项目别从旧 AutoGen 起步</strong>：微软 AutoGen 已进入维护模式（只修 bug、不加新功能），官方继任者是 2026-04 GA 的 Microsoft Agent Framework 1.0——新项目直接用 MAF。旧 AutoGen 维护模式公告之前的教程 <strong>API 大概率过时，但 multi-agent 概念本身仍可借鉴</strong>，别照抄代码即可<sup class="cite" data-refid="19">[19]</sup>。</p>
+      </div>
+
+      <h3>一句话路线建议</h3>
+      <div class="callout accent">
+        <p><strong>【第 0 步·懂】</strong>记住「agent = LLM + 工具 + 记忆 + 循环」，看 Anthropic《Building Effective Agents》建立「能简单就别复杂」的认知<sup class="cite" data-refid="1">[1]</sup>。<strong>【第 1 步·搭】</strong>打开扣子 coze.cn，照模板拖 5 分钟搭出第一个 bot<sup class="cite" data-refid="9">[9]</sup>。<strong>【第 2 步·写】</strong>做完 HuggingFace 免费课，用 CrewAI 或 OpenAI Agents SDK 写第一个代码 agent，模型接 DeepSeek<sup class="cite" data-refid="18">[18]</sup>。<strong>【第 3 步·拆】</strong>照抄一个 80 行的最小 agent 跑一次，读 smolagents 源码看穿原理<sup class="cite" data-refid="20">[20]</sup>。详见第 13 章决策树。</p>
+      </div>
+
+      <div class="callout purple">
+        <h4>🧭 预期校准：今天的 AI 系统大多还在「L1-L2」级 <span class="conf y">🟡 单源</span></h4>
+        <p>Vellum 的 L0-L5 agentic 阶梯（2025-12）：今天多数 AI 系统在 <strong>L1 基础响应</strong>，<strong>L2 会用工具</strong>这一层创业最活跃，L4 全自主仍受限，L5 全创造远未到达<sup class="cite" data-refid="8">[8]</sup>。这条戳破「agent 已全自主」的炒作——你做的第一个 agent 就在 L2，完全够用、也最实用。各家分级口径不统一，属理解脚手架。</p>
+      </div>
+
+      <h3>🔬 跨模型审查说明（这份报告被 Codex 审过一轮）</h3>
+      <div class="callout purple">
+        <p>本报告由 Claude 5 路并行写稿后，经 <strong>Codex (GPT-5.5) 四维度对抗审查</strong>（事实/深度/缺失/角度）。<strong>已据此收紧几处</strong>：① $4.7 万案例降级为"单篇博文轶事、未独立核实"；② AutoGen 措辞改为"新项目用 MAF、旧教程概念仍可借鉴"；③ 国产模型 tool-calling 兼容性从"待补"升级为查实小表（见 §7.5）；④ DeepSeek 模型名、MCP "事实标准"表述、"所有 OpenAI 兼容 API" 等绝对化措辞已加 nuance。</p>
+        <p style="margin-top:10px"><strong>Codex 提出、本版有意未展开的"动手前建议补的"清单</strong>（先照阶梯跑起来，别被这些劝退）：</p>
+        <ol style="margin:6px 0 0;padding-left:20px;font-size:13.5px;">
+          <li><strong>一份完整可跑的 80 行最小 agent</strong>（含 .env / 错误重试 / 多工具调用 / 成本上限 / 一条测试 transcript）——本版 §7 是骨架，跑通见原仓库</li>
+          <li><strong>工具 schema 设计的好坏对比</strong>（单一职责 / required vs optional / enum / 参数校验 / 结果大小限制）——坏 schema 是 agent 失败头号原因</li>
+          <li><strong>大陆新手落地清单</strong>（实名 / 充值开票 / 合规与内容审核 / 微信抖音发布限制 / 是否需 GitHub 或外网包源）</li>
+          <li><strong>"何时别建 agent" 前置门</strong>（能写个函数/工作流/RAG/chatbot 解决就别上 agent——微软 MAF 官方同款建议）</li>
+          <li><strong>工具型 agent 安全清单</strong>（最小权限 key / 工具与域名白名单 / 默认不给裸 shell / 沙箱 / 密钥脱敏 / 副作用人工确认 / prompt 注入测试）</li>
+          <li><strong>20 条起步评估集</strong>（工具选择准确率 / 该不该用工具 / 坏参数 / API 失败 / 长上下文 / 恶意文档文本 / 预算上限 / 最终答案正确性）</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">先建心智模型：Agent 到底是什么</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>动手之前先把脑子里的图画对。这一章给三句话的心智模型，建立对了，后面所有工具/框架/范式都只是「在这 4 件事上做花样」。</p>
+
+      <h3>2.1 三句话分清 Chatbot / 工作流 / Agent</h3>
+      <div class="role-cols">
+        <div class="role-col never" style="background:var(--bg-soft);border-color:var(--border);">
+          <h4>① Chatbot（聊天机器人）</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)"><strong>只会说，不会做。</strong>你问它答，它不去外面查资料、不操作任何东西。比如普通的问答 bot。</p>
+        </div>
+        <div class="role-col opt">
+          <h4>② Workflow 工作流（按写死的步骤做）</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)">会做，但<strong>按预先写死的步骤走</strong>。Anthropic 官方定义：工作流是 LLM 和工具走「预定义代码路径」<sup class="cite" data-refid="1">[1]</sup>。流程是人定的，它只是照做。</p>
+        </div>
+        <div class="role-col must">
+          <h4>③ Agent 智能体（自己决定怎么做）</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)"><strong>自己决定流程、能据反馈调整。</strong>Anthropic 官方：agent 由 LLM「动态自主决定如何完成任务、用什么工具」<sup class="cite" data-refid="1">[1]</sup>。<strong>分水岭就是「谁控制流程」。</strong></p>
+        </div>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ 小白最容易被误导的一点：</strong>「agent」这个词被市场严重滥用，<strong>很多产品叫 agent 实际上只是 workflow</strong><sup class="cite" data-refid="1">[1]</sup>。判断标准永远是那一句：流程是 LLM 自己决定的（agent），还是人写死的（workflow）。</p>
+      </div>
+
+      <h3>2.2 任何 agent 拆开就 4 件事</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">🧠 LLM</div><div class="l">大脑：理解 + 决策</div></div>
+        <div class="metric"><div class="v">🛠️ 工具</div><div class="l">手：function calling 调用</div></div>
+        <div class="metric"><div class="v">💾 记忆</div><div class="l">短期上下文 + 长期向量库</div></div>
+        <div class="metric"><div class="v">🔁 循环</div><div class="l">反复思考-行动-观察</div></div>
+      </div>
+      <p><strong>白话拆解：</strong></p>
+      <ul>
+        <li><strong>大脑（LLM）</strong>=理解你要什么、决定下一步干嘛。</li>
+        <li><strong>手（工具调用 / function calling）</strong>=<span style="color:var(--bad)">这里有个关键纠错</span>：LLM 并不亲自执行工具，它只输出一段结构化 JSON，意思是「我想调用 <code>查天气</code> 这个工具，参数是北京」；<strong>真正去执行的是你的代码</strong>，执行完把结果喂回给 LLM<sup class="cite" data-refid="2">[2]</sup>。懂这点，心智模型就对一半。</li>
+        <li><strong>记忆（memory）</strong>=短期（这次对话的上下文窗口）+ 长期（跨会话存到向量库）。<strong>第一个 agent 只用短期记忆就够</strong>，长期记忆涉及 embedding / 向量库对小白偏抽象，不必一上来就上<sup class="cite" data-refid="2">[2]</sup>。</li>
+        <li><strong>循环（loop）</strong>=反复「思考 → 行动 → 观察」直到任务完成。</li>
+      </ul>
+      <div class="callout info">
+        <p><strong>💡 中文等价公式：</strong>国内资料常写的 <strong>「智能体 = 大模型 + 规划 + 记忆 + 工具」</strong> 和上面 4 件事是同一回事<sup class="cite" data-refid="7">[7]</sup>。先记住任意一个版本即可。</p>
+      </div>
+
+      <h3>2.3 给国内小白的第一站</h3>
+      <div class="callout good">
+        <p>建议<strong>概念第一站看中文、再看英文课动手</strong>：Jimmy Song《AI 实用指南·智能体》章节（jimmysong.io，<strong>全中文、国内直连</strong>，讲定义 + 四组件 + 五步循环）<sup class="cite" data-refid="7">[7]</sup>，然后转 HuggingFace 免费 Agents Course 用 Alfred 天气 agent 完整走一遍循环<sup class="cite" data-refid="2">[2]</sup>。⚠️ jimmysong.io 该页标注「草稿状态」深度有限，知乎长文质量参差需挑高赞。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">架构范式说人话（ReAct / 范式 / RAG / MCP）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>所有「范式」都是在第 2 章那 4 件事上做花样。小白不用全懂，只需把下面几个词当「黑话词汇表」会用即可，第一个 agent 只需 ReAct + 工具调用。</p>
+
+      <h3>3.1 ReAct——最该先懂的范式</h3>
+      <div class="callout accent">
+        <p><strong>ReAct = Reasoning + Acting（推理 + 行动）</strong>，本质就是一个 <code>while</code> 循环：<strong>Thought（想下一步）→ Action（调工具）→ Observation（看返回结果）→ 再 Thought</strong>，循环到任务完成才停<sup class="cite" data-refid="2">[2]</sup>。源自 2022 年 Yao 等论文，比纯推理或盲目调工具效果显著更好（在 ALFWorld 基准 +34%、WebShop +10%）<sup class="cite" data-refid="32">[32]</sup>。这三步规则常直接写在 system prompt 里。</p>
+      </div>
+      <div class="callout bad">
+        <p><strong>⛔ 手搓务必加上限：</strong>纯 ReAct 容易死循环烧 token，生产环境必须设 <strong>max iterations（典型 15-25 步）</strong>和 token 预算上限<sup class="cite" data-refid="3">[3]</sup>。这是第 11 章会反复强调的第一坑。</p>
+      </div>
+
+      <h3>3.2 四大设计范式（Andrew Ng）——黑话词汇表</h3>
+      <p>吴恩达 2024 年提出、已成行业通用语言，记住四个词的含义即可<sup class="cite" data-refid="4">[4]</sup>：</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>范式</th><th>白话</th><th>小白要不要先用</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Tool Use 工具使用</strong></td><td>决定调用哪个工具</td><td class="check y">✅ 第一个 agent 就用</td></tr>
+            <tr><td><strong>Reflection 反思</strong></td><td>检查并改进自己的输出</td><td class="check p">🟡 进阶</td></tr>
+            <tr><td><strong>Planning 规划</strong></td><td>把大任务拆成子任务</td><td class="check p">🟡 进阶</td></tr>
+            <tr><td><strong>Multi-agent 多智能体</strong></td><td>多个专长 agent 协作</td><td class="check n">⛔ 坚决后置</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ 别过度工程化：</strong>易让小白误以为「必须四范式全上」。<strong>第一个 agent 只用 Tool Use + 简单 loop，其余后置</strong><sup class="cite" data-refid="4">[4]</sup>。</p>
+      </div>
+
+      <h3>3.3 Multi-agent 多智能体——为什么要后置</h3>
+      <p>多个专长 agent 分工，通常有一个 orchestrator/supervisor（编排者/主管）负责拆任务、分派、汇总，<strong>它自己不干活只规划路由，像呼叫中心的派单经理</strong><sup class="cite" data-refid="5">[5]</sup>。判断标准：<strong>单 agent 能搞定就别上多 agent</strong>——单 agent 适合自包含的短链条任务；多 agent 才适合复杂长链条/多专长/可并行的任务<sup class="cite" data-refid="5">[5]</sup>。小白最易掉的坑就是一上来就搭多 agent，又慢又贵又难调。</p>
+
+      <h3>3.4 RAG——和 agent 是两回事</h3>
+      <div class="callout info">
+        <p><strong>RAG（检索增强生成）</strong>：LLM 回答前先去外部知识库（通常是向量库）检索资料、再基于资料生成答案，解决「知识过时」和「瞎编」<sup class="cite" data-refid="6">[6]</sup>。流程：问题转成向量 → 向量库匹配相关片段 → 喂给 LLM 生成。<strong>关键认知：RAG 只让答案更准，它不做决策、不行动</strong>——这是它和 agent 的根本区别<sup class="cite" data-refid="6">[6]</sup>。比喻：RAG 像给 LLM 加了研究笔记，agent 像项目经理。两者常组合——<strong>agent 把 RAG 当成一个工具来用</strong>。做「自家文档问答助手」用 RAG 就够，不必上 agent。</p>
+      </div>
+
+      <h3>3.5 MCP——2025-2026 接工具的事实标准</h3>
+      <div class="callout purple">
+        <p><strong>MCP（Model Context Protocol，模型上下文协议）</strong>是 Anthropic 2024-11 推出的开放标准，<strong>相当于「AI 世界的 USB-C 接口」</strong><sup class="cite" data-refid="11">[11]</sup>。解决的痛点是 N×M 集成难题：一个工具写成一个 MCP server，就能被所有支持 MCP 的客户端（Claude / ChatGPT / Cursor / VS Code）调用，<strong>一次接好、到处可用</strong>。server 暴露三种东西：<strong>Tools（可调函数）、Resources（可读数据）、Prompts（可复用模板）</strong>。</p>
+        <p style="margin-top:10px"><strong>为什么学了不会过时</strong>：2025-03 OpenAI 采纳、2025-04 Google Gemini 支持、2025-12 捐给 Linux 基金会的 Agentic AI Foundation 中立治理<sup class="cite" data-refid="11">[11]</sup>；下载量从 2024-11 约 10 万涨到 2025-04 超 800 万，已有 5800+ servers、300+ clients<sup class="cite" data-refid="11">[11]</sup>。小白上手门槛：在 Claude Desktop / Cursor 里配现成 server 很低，自己写 server 稍进阶。</p>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ 安全提醒：</strong>MCP 概念偏抽象，安全面（恶意 server、prompt injection 提示注入、权限边界）需注意——<strong>配第三方 server 时是真实隐患</strong><sup class="cite" data-refid="11">[11]</sup>，别随便装来路不明的 server。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">能力阶梯总览：三条路怎么选</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这是全篇的骨架——打造 agent 有三条由易到难的路，<strong>不是三选一，而是建议依次走完</strong>：先无代码建立成就感，再框架写代码，最后手搓看穿原理。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>路线</th><th>是谁在干活</th><th>上手难度</th><th>给谁/什么时候</th><th>代表工具</th><th>第一个项目</th></tr></thead>
+          <tbody>
+            <tr><td><strong>① 无代码平台</strong></td><td>拖拽配置，不写代码</td><td class="check y">🟢 最低</td><td>纯小白起步、想最快出成果</td><td>扣子 / 腾讯元器 / 阿里百炼 / Dify / n8n</td><td>FAQ 客服 bot、资料整理助手</td></tr>
+            <tr><td><strong>② 轻量代码框架</strong></td><td>写几十行 Python</td><td class="check p">🟡 中</td><td>会一点 Python、想要可定制</td><td>CrewAI / OpenAI Agents SDK / smolagents / PydanticAI</td><td>多角色协作 crew、文档问答 agent</td></tr>
+            <tr><td><strong>③ 手搓最小 agent</strong></td><td>自己写循环和工具</td><td class="check n">🔴 略高（但代码很短）</td><td>想彻底看穿原理、破除框架黑箱</td><td>OpenAI/Anthropic SDK 直接调 + while 循环</td><td>50-80 行的工具调用 agent</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tree">
+        <div class="node q">你现在会写 Python 吗？想先要成果还是先懂原理？</div>
+        <div class="branches">
+          <div class="node no"><span class="lbl n">不会代码</span>直接走<strong>路线 ①</strong>：扣子 coze.cn 拖一个出来，先有成就感</div>
+          <div class="node yes"><span class="lbl y">会点 Python</span>路线 ① 玩一个后转<strong>路线 ②</strong>：CrewAI / OpenAI Agents SDK 写第一个</div>
+        </div>
+        <div class="step-arrow">↓ 跑通后</div>
+        <div class="node"><span class="lbl m">想懂原理</span>走<strong>路线 ③</strong>：照抄 80 行最小 agent 跑一次，读 smolagents 源码（才 ~1000 行）</div>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>💡 为什么这个顺序最优：</strong>无代码平台让你<strong>10 分钟出成果建立直觉</strong>，不会一上来就被环境配置/报错劝退<sup class="cite" data-refid="30">[30]</sup>；框架课（HuggingFace + 吴恩达）给你「原理 + 动手」，再上轻量框架写代码<sup class="cite" data-refid="33">[33]</sup>；最后手搓让你<strong>看穿「每个 agent 本质就是个 while 循环」</strong>，破除对框架的黑箱恐惧<sup class="cite" data-refid="30">[30]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">路线一·无代码平台横评（含国内可用性）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>不写代码搭 agent，2025-2026 分两大阵营：<strong>国产 SaaS</strong>（国内直连零门槛、中文、有免费额度，国内小白最优起点）和 <strong>海外 SaaS</strong>（功能强但普遍需科学上网 + 英文 + 订阅）。还有<strong>开源自托管</strong>可云端试玩也可私有化。</p>
+
+      <div class="callout good">
+        <p><strong>✅ 国内小白一句话路径：</strong>先用<strong>扣子 coze.cn</strong> 5 分钟拖出第一个能用 bot（直连 + 中文 + 一键发微信/抖音），想要更强可定制/私有化再上 <strong>Dify</strong>（理念相通、知识可迁移）；纯自动化场景（agent 只是流程一环、要定时/触发/接 400+ 应用）选 <strong>n8n</strong><sup class="cite" data-refid="9">[9]</sup>。</p>
+      </div>
+
+      <h3>5.1 国产平台（国内直连，首选）</h3>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🟢</div>
+          <div class="name-block"><div class="pn">扣子 Coze（coze.cn · 字节跳动）</div><div class="ph">零代码拖拽 · 豆包模型 · 一键发抖音/飞书/微信公众号</div></div>
+          <span class="pill good">国内首选</span>
+        </div>
+        <div class="prod-body">
+          <p>拖拽插件 + 知识库(RAG) + 工作流，主打「5 分钟搭聊天机器人」。<strong>国内版 coze.cn 直连、中文界面、抖音账号扫码登录、零访问门槛</strong>，社区公认入门首选<sup class="cite" data-refid="9">[9]</sup>。专业版每日赠 500 资源点（当日有效）抵扣调用费；2025-07 核心组件 Coze Studio 开源（Apache 2.0）可 Docker 自部署<sup class="cite" data-refid="10">[10]</sup>。⚠️ 海外版 coze.com 需外国 IP + 仅英文 + 约 9 美元/月起<sup class="cite" data-refid="10">[10]</sup>。</p>
+          <div class="takeaway">上手最快、插件库丰富、中文教程海量（B 站有 20 案例/360 分钟全套入门）；缺点是国内版仅豆包模型、资源点计费规则改过多次。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">💬</div>
+          <div class="name-block"><div class="pn">腾讯元器（yuanqi.tencent.com）</div><div class="ph">混元大模型 · 一键发微信/QQ/腾讯元宝</div></div>
+          <span class="pill good">微信生态独一份</span>
+        </div>
+        <div class="prod-body">
+          <p>腾讯基于混元的零代码智能体平台，自然语言建 agent，官方称「3 分钟 5 步发布第一个智能体」<sup class="cite" data-refid="12">[12]</sup>。<strong>国内直连、免费对外开放、每用户约 1 亿 token 体验额度</strong>，用完走 API 付费<sup class="cite" data-refid="15">[15]</sup>。想把 agent 接进微信/QQ 生态的小白极友好。⚠️ 评测显示事实准确性略逊于扣子<sup class="cite" data-refid="16">[16]</sup>。</p>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">☁️</div>
+          <div class="name-block"><div class="pn">阿里云百炼 Model Studio</div><div class="ph">通义千问 + 多模型 · 100+ Agent 模板</div></div>
+          <span class="pill accent">想多模型选型选它</span>
+        </div>
+        <div class="prod-body">
+          <p>一站式大模型开发平台，支持通义全系 + DeepSeek + Kimi + 智谱 GLM 等多模型，可视化控制台<strong>约 10 分钟搭基础 agent</strong><sup class="cite" data-refid="14">[14]</sup>。<strong>新用户免费额度 90 天有效（2025-09-08 起）、每模型送 100 万 token、累计可超 7000 万 token 限免</strong><sup class="cite" data-refid="14">[14]</sup>。比扣子更偏「开发/企业」味，界面略复杂、纯小白上手略慢。</p>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🔢</div>
+          <div class="name-block"><div class="pn">智谱 GLM 开放平台（bigmodel.cn）</div><div class="ph">GLM 系列 · 多款永久免费 Flash 模型</div></div>
+          <span class="pill warn">偏开发者向</span>
+        </div>
+        <div class="prod-body">
+          <p>国内直连、中文，<strong>有多款永久免费 Flash 模型</strong>（GLM-4-Flash 等）适合零成本试，新用户送 2000 万 token 永久有效<sup class="cite" data-refid="14">[14]</sup>。但<strong>零代码可视化搭建体验弱于扣子/元器，更像「API + 模型平台」</strong> <span class="conf y">🟡 单源</span><sup class="cite" data-refid="17">[17]</sup>。⚠️ 它是否有像扣子那样完整的零代码可视化搭建器，证据偏弱，建议到 bigmodel.cn 实地确认。</p>
+        </div>
+      </div>
+
+      <h3>5.2 开源自托管（可云端试玩，也可私有化）</h3>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🧩</div>
+          <div class="name-block"><div class="pn">Dify（开源，LangGenius）</div><div class="ph">可视化编排 + RAG + Agent + 工作流 · 生产级运维</div></div>
+          <span class="pill accent">进阶/团队首选</span>
+        </div>
+        <div class="prod-body">
+          <p>开源 LLM 应用开发平台，云服务 + Docker 自托管 + 企业版。<strong>GitHub 111k+ stars</strong> <span class="conf y">🟡 数字以官方实时为准</span>，Apache 系开源（含「禁未授权 SaaS」限制）<sup class="cite" data-refid="10">[10]</sup>。<strong>理念与扣子工作流高度相似，扣子玩熟可无缝迁移</strong><sup class="cite" data-refid="9">[9]</sup>。国内访问云版选亚太节点（新加坡/东京）延迟低；自托管需 Docker 基础。云沙盒含 200 次免费 GPT-4 调用，专业版 59 美元/月<sup class="cite" data-refid="10">[10]</sup>。</p>
+          <div class="takeaway">开源可私有化、RAG 强、中文文档全；缺点是功能多学习曲线比扣子陡、自托管对纯小白有门槛。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🔗</div>
+          <div class="name-block"><div class="pn">n8n（fair-code 开源）</div><div class="ph">节点式工作流自动化 + AI Agent 节点 · 400+ 集成</div></div>
+          <span class="pill accent">agent 只是流程一环时选它</span>
+        </div>
+        <div class="prod-body">
+          <p>类 Zapier 的可视化画布，2024 加了 AI Agent 节点。<strong>GitHub 130k+ stars</strong> <span class="conf y">🟡 以官方为准</span>，Sustainable Use License（fair-code，可自托管免费、不可转售为托管服务）<sup class="cite" data-refid="21">[21]</sup>。强在「<strong>定时/触发/重试 + 连 400+ 外部应用</strong>」；<strong>AI Agent 节点平台层免费，只付自己的模型 token</strong>，是跑生产级 tool-calling agent 较便宜的路子<sup class="cite" data-refid="21">[21]</sup>。云版 €24/€60/€800 月档（海外站、英文为主），自托管软件免费仅付服务器（约 $5-80/月）<sup class="cite" data-refid="21">[21]</sup>。官方有 Self-hosted AI Starter Kit（n8n+Ollama+Qdrant+Postgres）一键起本地 AI 环境<sup class="cite" data-refid="23">[23]</sup>。</p>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <p><strong>其他开源选项：</strong>Flowise（基于 LangChain，三档难度 Assistant/Chatflow/Agentflow，2025-08 被 Workday 收购、v3.1.0 于 2026-03-16 发布；英文为主）<sup class="cite" data-refid="24">[24]</sup>；Coze Studio（扣子开源版，2025-07 开源 Apache 2.0 商用无限制，可把扣子能力私有化）<span class="conf y">🟡 开源较新</span><sup class="cite" data-refid="25">[25]</sup>。</p>
+      </div>
+
+      <h3>5.3 海外 SaaS（仅在有梯子 + 接海外应用时才碰）</h3>
+      <div class="callout warn">
+        <p><strong>⚠️ 国内默认不推荐：</strong>Zapier Agents（7000+ 集成、80+ 模板，免费档 100 tasks/月仅 2 步很弱）<sup class="cite" data-refid="26">[26]</sup>、Lindy（号称 60 秒从 prompt 到 agent、能打电话发短信，免费档 400 credits/月）<sup class="cite" data-refid="27">[27]</sup>、Make（性价比高，约 9 美元含 10000 operations/月）、Relevance AI（agent-first 设计、可自带 API key 省模型费）——<strong>这些都需科学上网 + 英文 + 按月订阅</strong>，且价格 2025-2026 变动频繁、不同来源数字有出入，需以官网当下为准。仅当你已有梯子 + 要接 Gmail/Slack 等海外生态时才值得碰<sup class="cite" data-refid="13">[13]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">路线二·代码框架横评（小白先学哪个）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>要写点代码的框架分三档：<strong>① 最低门槛入门</strong>（CrewAI / OpenAI Agents SDK）→ <strong>② 工业级主力</strong>（LangChain/LangGraph / LlamaIndex）→ <strong>③ 用来看懂原理</strong>（smolagents / Pydantic AI）。还有几个偏特定生态的（微软/谷歌/Anthropic）小白别当起点。</p>
+
+      <div class="callout good">
+        <p><strong>✅ 小白最快路径：</strong>先用 <strong>CrewAI（~20 行、1 小时跑通）</strong> 或 <strong>OpenAI Agents SDK（一条命令、自带 tracing）</strong>，二者学习曲线被多篇 2026 评测列为最低；模型直接用 <code>base_url</code> 接 DeepSeek/通义千问省钱免翻墙；跑通后再读 smolagents 源码看懂原理<sup class="cite" data-refid="18">[18]</sup>。</p>
+      </div>
+
+      <h3>6.1 入门首选（最低门槛）</h3>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">👥</div>
+          <div class="name-block"><div class="pn">CrewAI</div><div class="ph">角色扮演式多智能体 · 纯 Python 不依赖 LangChain</div></div>
+          <span class="pill good">小白友好度最高之一</span>
+        </div>
+        <div class="prod-body">
+          <p>把 agent 当成有「角色/目标/背景故事」的团队成员，配 YAML 定义。<strong>~20 行代码、1 小时内跑通一个多智能体 crew</strong>，团队比喻直觉好懂<sup class="cite" data-refid="18">[18]</sup>。<strong>52.4k GitHub star，v1.14.6（2026-05-28），MIT 许可</strong><sup class="cite" data-refid="34">[34]</sup>。有官方免费课 learn.crewai.com、菜鸟教程中文版。国内可用：pip 用阿里云镜像装，模型通过 <code>LLM(base_url=...)</code> 接 DeepSeek<sup class="cite" data-refid="22">[22]</sup>。</p>
+          <div class="takeaway">上手最快、心智模型直观、社区大；缺点是抽象较高看不到底层 agent loop、复杂有状态场景不如 LangGraph。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">⚡</div>
+          <div class="name-block"><div class="pn">OpenAI Agents SDK</div><div class="ph">官方轻量 SDK · provider 无关 · 自带 tracing/guardrails</div></div>
+          <span class="pill good">设计最干净</span>
+        </div>
+        <div class="prod-body">
+          <p>OpenAI 官方轻量多智能体 SDK（取代实验性的 Swarm），<strong>provider 无关、支持 100+ LLM</strong>，自带 tracing、guardrails、session、human-in-the-loop。<strong>一条 <code>pip install openai-agents</code></strong>，26.7k star，v0.17.4（2026-05-26）<sup class="cite" data-refid="36">[36]</sup>。<strong>国内可用：因 provider 无关，可配 <code>base_url</code> 指向 DeepSeek/Qwen，无需 OpenAI 账号也能跑</strong><sup class="cite" data-refid="22">[22]</sup>。</p>
+          <div class="takeaway">官方出品、自带 tracing/guardrails 这些生产要素、学习曲线被列为最低之一；缺点是相对新、第三方教程不如 LangChain 多。</div>
+        </div>
+      </div>
+
+      <h3>6.2 工业级主力（生产经得起考验，但门槛中等）</h3>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🦜</div>
+          <div class="name-block"><div class="pn">LangChain 1.0 / LangGraph 1.0</div><div class="ph">生态最大 · create_agent 新入口 · LangSmith 可观测</div></div>
+          <span class="pill warn">小白别当第一个</span>
+        </div>
+        <div class="prod-body">
+          <p>LangChain 是最流行的 LLM 应用框架，<strong>1.0 起 <code>create_agent</code> 是唯一建 agent 新入口（旧 Agent/AgentExecutor 已弃用）</strong>；LangGraph 是底层有状态图编排引擎，专做长时运行/持久化/人在环。<strong>LangChain 1.0 与 LangGraph 1.0 均已 GA</strong><sup class="cite" data-refid="37">[37]</sup>，LangGraph 33.3k star、极活跃<sup class="cite" data-refid="37">[37]</sup>。LangChain 是「快车道」对小白更友好；LangGraph 需理解图/状态概念（~60+ 行起步），不建议作为第一个框架。中文教程最多。</p>
+          <div class="takeaway">生态最大、生产最经得起考验；坑是版本演进快（1.0 弃用一批旧 API，<strong>老教程大量过时</strong>），LangGraph 概念多易劝退小白。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">📚</div>
+          <div class="name-block"><div class="pn">LlamaIndex</div><div class="ph">数据/文档为中心 · RAG 最强 · 5 行起步</div></div>
+          <span class="pill accent">「让 agent 读我的文档」选它</span>
+        </div>
+        <div class="prod-body">
+          <p>以数据/文档为中心的 LLM 框架，<strong>强项是数据连接、索引、检索（RAG）</strong>，高层 API <strong>5 行就能 ingest + query 自己的数据</strong>。49.8k star，v0.14.22（2026-05-14）<sup class="cite" data-refid="38">[38]</sup>。<strong>如果你的目标是「让 agent 读我的文档/知识库」，这是最省事的入口</strong>。国内可用：支持 OpenAI-compatible 模型接国产 API。缺点：通用多智能体编排不是主场。</p>
+        </div>
+      </div>
+
+      <h3>6.3 用来看懂原理</h3>
+      <div class="callout purple">
+        <p><strong>🔬 想真正看懂 agent 原理选 smolagents</strong>（HuggingFace）：核心仅约 <strong>1000 行</strong>，理念是 agent <strong>直接生成并执行 Python 代码（CodeAgent）</strong>而非 JSON 工具调用，号称少 30% 步骤，代码最透明<sup class="cite" data-refid="20">[20]</sup>。27.6k star，v1.26.0（2026-05-29）<sup class="cite" data-refid="20">[20]</sup>。⚠️ 强依赖大模型能力——<strong>小模型（&lt;7B）写代码 bug 频发</strong>，预算有限只能用小模型时要注意。<br><strong>要类型安全/生产可靠选 Pydantic AI</strong>：Pydantic 团队出品，FastAPI 式开发体验，靠类型提示让输入/输出/工具调用全类型安全，<strong>内置 DeepSeek provider（设 <code>DEEPSEEK_API_KEY</code> 即可 <code>Agent('deepseek:deepseek-chat')</code>）</strong>，17.4k star、v1.104.0（2026-05-29）<sup class="cite" data-refid="22">[22]</sup>。</p>
+      </div>
+
+      <h3>6.4 偏特定生态——小白别当起点</h3>
+      <div class="callout bad">
+        <p><strong>⛔ 千万别学旧 AutoGen：</strong>微软 AutoGen 仓库（58.5k star）<strong>最后 release 停在 2025-09-30 并标维护模式</strong>，官方继任者是 2026-04 GA 的 <strong>Microsoft Agent Framework 1.0</strong>（融合 AutoGen + Semantic Kernel，.NET + Python）。网上大量「AutoGen 教程」已过时，新人应直接用 MAF<sup class="cite" data-refid="19">[19]</sup>。MAF 偏企业/.NET、中文资料少，不推荐作为小白第一个框架。</p>
+      </div>
+      <div class="callout info">
+        <p><strong>另两个偏生态的：</strong>Google ADK（code-first、绑谷歌云 Vertex AI、国内部署不顺，19.9k star）<sup class="cite" data-refid="39">[39]</sup>；Claude Agent SDK（Anthropic 把 Claude Code 的同一套 agent loop 开放成 SDK，「给 agent 一台真电脑」shell+文件+网络，7.1k star，MIT；但绑 Claude 模型 + 需 Claude Code CLI，国内调 Anthropic 不便）<sup class="cite" data-refid="40">[40]</sup>。两者都不建议作小白起点。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">路线三·手搓最小 Agent（看穿原理）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这是破除框架黑箱的关键一步。结论先说：<strong>一个 agent 的本质极其简单——agent = LLM + 工具 + 一个 while 循环</strong>。所有框架都只是在这个循环外面包了一层管理（上下文、安全、成本），<strong>核心循环是同一段代码穿不同的衣服</strong><sup class="cite" data-refid="29">[29]</sup>。</p>
+
+      <h3>7.1 最小 agent 的 6 行循环逻辑</h3>
+      <div class="callout accent">
+        <p>循环逻辑只有六行：<strong>① 调 LLM（带上工具定义）→ ② 如果返回了 tool_call 就执行工具、把结果塞回消息历史 → ③ 继续循环 → ④ 直到 LLM 不再要工具、直接出文本就停</strong><sup class="cite" data-refid="29">[29]</sup>。五大组件：<strong>语言模型、工具（函数 + JSON schema）、消息历史、while 循环、停止条件</strong><sup class="cite" data-refid="29">[29]</sup>。</p>
+      </div>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">~35 行</div><div class="l">核心循环代码量<sup class="cite" data-refid="30">[30]</sup></div></div>
+        <div class="metric"><div class="v">~60-80 行</div><div class="l">含工具的完整最小 agent<sup class="cite" data-refid="30">[30]</sup></div></div>
+        <div class="metric"><div class="v">315 行</div><div class="l">Thorsten Ball 编程 agent (Go)<sup class="cite" data-refid="41">[41]</sup></div></div>
+        <div class="metric"><div class="v">131 行</div><div class="l">O'Reilly 通用 agent (Python)<sup class="cite" data-refid="42">[42]</sup></div></div>
+      </div>
+
+      <h3>7.2 OpenAI function calling 的 5 步流程</h3>
+      <p>function calling 是手搓 agent 的第一道门槛，本质 5 步<sup class="cite" data-refid="43">[43]</sup>：</p>
+      <ol>
+        <li><strong>定义工具</strong>：给每个函数写 JSON schema（名字 + 参数描述）。</li>
+        <li><strong>模型返回 tool call</strong>：LLM 不执行，只输出「我想调用哪个工具、参数是什么」。</li>
+        <li><strong>本地执行</strong>：你的代码解析 <code>tool_calls</code>，真正跑那个函数。</li>
+        <li><strong>把结果回传</strong>：以 <code>{role:'tool', tool_call_id, content}</code> 追加到消息历史。</li>
+        <li><strong>拿最终答案</strong>：再调一次 LLM，它基于工具结果给出回答（或继续要下一个工具）。</li>
+      </ol>
+      <div class="callout info">
+        <p><strong>💡 2025 新增 Responses API</strong>：经典 Chat Completions 仍可用<sup class="cite" data-refid="43">[43]</sup>。小白照旧用 Chat Completions（解析 <code>response.choices[0].message.tool_calls</code>）即可。</p>
+      </div>
+
+      <h3>7.3 可照抄的最小骨架（伪代码，带注释）</h3>
+      <p>下面是综合多个最小教程结构提炼的<strong>骨架伪代码</strong>（演示 ReAct 循环逻辑，<span class="conf y">🟡 非逐行复制的完整运行代码——完整版见 7.5 的来源仓库</span>）。国内小白把 <code>base_url</code> / <code>api_key</code> 换成 DeepSeek 即可跑：</p>
+      <pre><code># pip install openai
+from openai import OpenAI
+
+# 国内直连：base_url 换成 DeepSeek，免翻墙、有免费额度 [22][28]
+# 注：deepseek-chat 现已是 deepseek-v4-flash 的兼容别名（官方标注将来弃用），新代码建议直接用 deepseek-v4-flash [28]
+client = OpenAI(api_key="你的KEY", base_url="https://api.deepseek.com")
+
+# 1) 定义工具：JSON schema 告诉模型"有个 get_weather 函数可用"
+tools = [{
+  "type": "function",
+  "function": {
+    "name": "get_weather",
+    "description": "查某城市天气",
+    "parameters": {"type":"object","properties":{"city":{"type":"string"}},"required":["city"]}
+  }
+}]
+
+# 你的真实工具：LLM 不执行它，执行靠这段代码 [2]
+def get_weather(city):
+    return f"{city} 今天晴 25 度"
+
+messages = [{"role":"user","content":"北京天气怎么样？"}]
+
+# 2) while 循环 = agent 的本体；设上限防死循环烧 token [3][31]
+for step in range(15):                       # max iterations 上限，铁律！
+    resp = client.chat.completions.create(
+        model="deepseek-chat", messages=messages, tools=tools)
+    msg = resp.choices[0].message
+
+    if not msg.tool_calls:                    # 3) 停止条件：模型不要工具了，出文本 → 结束
+        print(msg.content); break
+
+    # 关键顺序：先 push 含 tool_calls 的 assistant 回复，再 append 工具结果 [29]
+    messages.append(msg)
+    for call in msg.tool_calls:
+        import json
+        args = json.loads(call.function.arguments)
+        result = get_weather(**args)          # 你的代码真正执行工具
+        messages.append({                     # 4) 把结果塞回消息历史，带 tool_call_id
+            "role":"tool", "tool_call_id":call.id, "content":result})
+    # 循环回到顶部，模型看到工具结果后继续决策</code></pre>
+
+      <h3>7.4 新手最常见的坑（消息顺序）</h3>
+      <div class="callout bad">
+        <p><strong>⛔ 最常见新手坑：把工具结果在 assistant 消息之前 append。</strong>消息历史顺序必须是 <code>[用户] → [assistant 含 tool_calls] → [tool 结果(带 tool_call_id)] → [assistant...]</code>，<strong>顺序反了会校验失败</strong>——这是 OpenAI Chat Completions 风格 API 的<strong>通用</strong>约束<sup class="cite" data-refid="29">[29]</sup>。⚠️ 但各家国产 provider 仍有细节差异（如阿里 Qwen 兼容端点对 <code>tool_call_id</code> 的要求、tools 与 <code>stream=True</code> 的兼容性、支持工具调用的模型范围各不同），照搬前先看对应官方文档。</p>
+      </div>
+
+      <h3>7.5 照着走的最小教程（按友好度排序）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>教程</th><th>语言/行数</th><th>适合谁</th><th>国内适配</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Leonie《AI agent from scratch》</strong></td><td>~80-100 行 Python · 计算器工具</td><td>看清最小骨架最干净的范例<sup class="cite" data-refid="44">[44]</sup></td><td class="check y">换国产模型</td></tr>
+            <tr><td><strong>freeCodeCamp / Boot.dev（Gemini）</strong></td><td>&lt;80 行 Python · 4 工具编码 agent</td><td>有 Python 基础、想做编码 agent<sup class="cite" data-refid="45">[45]</sup></td><td class="check p">Gemini 需翻墙，建议换 Qwen/DeepSeek</td></tr>
+            <tr><td><strong>Thorsten Ball《How to Build an Agent》</strong></td><td>315 行 Go（有 Python/TS 复刻版）</td><td>「撕开框架幻觉」最有力的一篇<sup class="cite" data-refid="41">[41]</sup></td><td class="check y">复刻版可换模型</td></tr>
+            <tr><td><strong>Datawhale hello-agents（中文）</strong></td><td>16 章中文体系 · 配套代码</td><td>国内小白最佳系统化中文路径<sup class="cite" data-refid="20">[20]</sup></td><td class="check y">代码用 OpenAI 风格可改国产</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout good">
+        <p><strong>✅ Thorsten Ball 的结论值得记住：</strong>他用 315 行 Go 写出能读文件/列目录/改代码的编程 agent，结论是「它就是<strong>一个 LLM、一个循环、足够的 token——没有秘密，没有护城河</strong>」<sup class="cite" data-refid="41">[41]</sup>。O'Reilly 也证明 <strong>131 行 Python</strong> 就能写出「通用」agent：给它 read/write/edit/bash 四个工具，加了 shell 就能做任何终端能做的事<sup class="cite" data-refid="42">[42]</sup>。</p>
+      </div>
+      <h3>7.6 国产模型 tool-calling / MCP 兼容速查（Codex 审查补）</h3>
+      <p>这是国内小白最该确认的一点——你照搬的英文教程改了 base_url 后，工具调用到底能不能跑。三家主流国产模型现状（均提供 OpenAI 兼容端点，可直接套用 OpenAI SDK）：</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>模型</th><th>function calling</th><th>多轮/并行调用</th><th>MCP</th><th>中文文档</th><th>已知坑</th></tr></thead>
+          <tbody>
+            <tr><td><strong>DeepSeek</strong></td><td class="check y">✅ 支持，含 strict 模式 beta</td><td class="check p">🟡 多轮可用，历史上偶有不稳</td><td class="check p">🟡 经客户端/框架接</td><td class="check y">✅ 有中文文档</td><td><code>deepseek-chat</code> 已是别名，模型名留意弃用<sup class="cite" data-refid="28">[28]</sup></td></tr>
+            <tr><td><strong>Qwen（通义/百炼）</strong></td><td class="check y">✅ Qwen-Agent 原生支持</td><td class="check y">✅ 宣称原生 parallel/multi-step/multi-turn</td><td class="check y">✅ Qwen-Agent 支持 MCP</td><td class="check y">✅ 阿里中文文档全</td><td>兼容端点 tools 与 <code>stream=True</code> 有限制、模型范围受限<sup class="cite" data-refid="28">[28]</sup></td></tr>
+            <tr><td><strong>智谱 GLM</strong></td><td class="check y">✅ 部分模型支持</td><td class="check p">🟡 视模型</td><td class="check y">✅ MCP 作为一种 tool 类型</td><td class="check y">✅ bigmodel 中文文档</td><td><code>tool_choice</code> 仅支持 <code>auto</code><sup class="cite" data-refid="28">[28]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ 仍建议落地前自测：</strong>上表为官方文档/社区口径速查，具体到你的代码（多工具、并行、流式、严格 schema）务必拿一个最小例子在目标 provider 上跑一遍。本报告 §7.3 是结构骨架，要「可直接复制运行」的逐行版到对应仓库取原文。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">核心概念深一点：工具/记忆/上下文/RAG/MCP</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>跑通第一个 agent 后，这几个概念决定你能不能做出「好用」的 agent。小白第一个项目不必全上，但要知道它们是啥、什么时候加。</p>
+
+      <h3>8.1 工具设计——要像写 prompt 一样下功夫</h3>
+      <div class="callout warn">
+        <p><strong>⚠️ 最常见失败模式之一：工具集臃肿、功能重叠，导致「选哪个工具」的决策点模糊</strong><sup class="cite" data-refid="35">[35]</sup>。Anthropic 的建议：Agent-Computer Interface（ACI，agent 和工具之间的接口）要靠<strong>完善的工具文档和测试</strong>精心打造；工具应<strong>自包含、容错、用途极清晰，参数描述性强无歧义</strong>。生产级实践含：工具优先、单工具单职责、外部化 prompt 管理、KISS 原则（保持简单）<sup class="cite" data-refid="35">[35]</sup>。</p>
+      </div>
+
+      <h3>8.2 记忆——短期够用，长期后置</h3>
+      <p>记忆分两层：<strong>短期</strong>=这次对话的上下文窗口（第一个 agent 只用这个就够）；<strong>长期</strong>=跨会话存到向量库，IBM 又细分为语义/情景/程序三类<sup class="cite" data-refid="2">[2]</sup>。长期记忆涉及 embedding（把文字转成向量）/ 向量库，对小白偏抽象，<strong>不必一上来就上</strong>。</p>
+
+      <h3>8.3 上下文 & RAG & MCP——快速回顾</h3>
+      <ul>
+        <li><strong>上下文（context）</strong>：喂给 LLM 的所有信息（指令 + 历史 + 工具结果 + 检索资料）。管理它是 2025 新兴的「上下文工程」话题 <span class="conf y">🟡 待补研究</span>，本报告未深挖。</li>
+        <li><strong>RAG</strong>：见第 3.4 节——让答案更准但不行动；agent 把 RAG 当工具用。做「自家文档助手」用 RAG 即可<sup class="cite" data-refid="6">[6]</sup>。Agentic RAG（agent 自主决定检索什么）是进阶概念 <span class="conf y">🟡 待补研究</span>。</li>
+        <li><strong>MCP</strong>：见第 3.5 节——接工具的事实标准，现成 server 生态巨大；配第三方 server 注意安全<sup class="cite" data-refid="11">[11]</sup>。</li>
+      </ul>
+      <div class="callout info">
+        <p><strong>💡 小白第一个项目的取舍：</strong>记忆只用短期、RAG 只在「要读自家文档」时加、MCP 只在「想接现成工具」时配。<strong>别一上来就把这些全堆上去。</strong></p>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ 待补研究（evidence gap）：</strong>① 国产模型（智谱/Qwen/DeepSeek）对 function calling 和 MCP 的原生支持及中文文档质量未深挖；② 上下文工程作为 2025 新兴框架词只顺带提及；③ Agentic RAG 作为 RAG↔agent 过渡话题未深挖。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">横向对比大表（一张表选工具）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>点击任意行高亮。<strong>star 数/价格/版本随时间变动，以官方实时为准。</strong></p>
+
+      <h3>9.1 无代码平台</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>平台</th><th>上手难度</th><th>国内可用</th><th>免费额度</th><th>适合场景</th></tr></thead>
+          <tbody>
+            <tr><td><strong>扣子 coze.cn</strong></td><td class="check y">🟢 最低</td><td class="check y">✅ 直连</td><td>专业版每日 500 资源点<sup class="cite" data-refid="10">[10]</sup></td><td>第一个 bot、发抖音/微信</td></tr>
+            <tr><td><strong>腾讯元器</strong></td><td class="check y">🟢 最低</td><td class="check y">✅ 直连</td><td>约 1 亿 token 体验额<sup class="cite" data-refid="15">[15]</sup></td><td>发微信/QQ</td></tr>
+            <tr><td><strong>阿里百炼</strong></td><td class="check p">🟡 略复杂</td><td class="check y">✅ 直连</td><td>90 天/每模型 100 万 token<sup class="cite" data-refid="14">[14]</sup></td><td>多模型选型</td></tr>
+            <tr><td><strong>Dify</strong></td><td class="check p">🟡 中</td><td class="check p">🟡 云选亚太/自托管</td><td>云沙盒 200 次 GPT-4<sup class="cite" data-refid="10">[10]</sup></td><td>私有化、RAG 强</td></tr>
+            <tr><td><strong>n8n</strong></td><td class="check p">🟡 中</td><td class="check p">🟡 自托管可</td><td>自托管软件免费<sup class="cite" data-refid="21">[21]</sup></td><td>自动化 + 触发器</td></tr>
+            <tr><td><strong>Zapier/Lindy/Make</strong></td><td class="check y">🟢 自然语言</td><td class="check n">⛔ 需翻墙</td><td>免费档很弱<sup class="cite" data-refid="26">[26]</sup></td><td>接 Gmail/Slack 海外应用</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>9.2 代码框架</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>框架</th><th>上手难度</th><th>star</th><th>国内可用</th><th>适合场景</th></tr></thead>
+          <tbody>
+            <tr><td><strong>CrewAI</strong></td><td class="check y">🟢 最低之一</td><td>52.4k<sup class="cite" data-refid="34">[34]</sup></td><td class="check y">✅ base_url 接 DeepSeek</td><td>第一个代码 agent、多角色协作</td></tr>
+            <tr><td><strong>OpenAI Agents SDK</strong></td><td class="check y">🟢 最低之一</td><td>26.7k<sup class="cite" data-refid="36">[36]</sup></td><td class="check y">✅ provider 无关</td><td>设计干净、要 tracing</td></tr>
+            <tr><td><strong>smolagents</strong></td><td class="check p">🟡 简单</td><td>27.6k<sup class="cite" data-refid="20">[20]</sup></td><td class="check y">✅ 任意兼容模型</td><td>看懂原理（~1000 行）</td></tr>
+            <tr><td><strong>Pydantic AI</strong></td><td class="check p">🟡 需类型基础</td><td>17.4k<sup class="cite" data-refid="22">[22]</sup></td><td class="check y">✅ 内置 DeepSeek</td><td>类型安全、生产可靠</td></tr>
+            <tr><td><strong>LlamaIndex</strong></td><td class="check p">🟡 中（RAG 5 行）</td><td>49.8k<sup class="cite" data-refid="38">[38]</sup></td><td class="check y">✅ 兼容模型</td><td>文档/知识库 agent</td></tr>
+            <tr><td><strong>LangChain/LangGraph</strong></td><td class="check p">🟡 概念多</td><td>33.3k(LG)<sup class="cite" data-refid="37">[37]</sup></td><td class="check y">✅ base_url</td><td>生产、复杂有状态编排</td></tr>
+            <tr><td><strong>Microsoft Agent Framework</strong></td><td class="check n">🔴 偏企业/.NET</td><td>—</td><td class="check p">🟡 中文资料少</td><td>企业级（别学旧 AutoGen<sup class="cite" data-refid="19">[19]</sup>）</td></tr>
+            <tr><td><strong>Google ADK / Claude Agent SDK</strong></td><td class="check n">🔴 绑特定生态</td><td>19.9k / 7.1k<sup class="cite" data-refid="39">[39]</sup></td><td class="check n">⛔ 国内不便</td><td>谷歌云 / Claude Code 封装</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <p><strong>💡 学习曲线排序（多篇 2026 评测）：</strong>OpenAI Agents SDK &lt; CrewAI &lt; LangChain &lt; AutoGen ≈ LangGraph；CrewAI 20 行 vs LangGraph 60+ 行<sup class="cite" data-refid="18">[18]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">第一个 agent 做什么不劝退</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>第一个项目<strong>别贪大</strong>。Anthropic 反复强调「start simple——先单次 LLM 调用 + 检索 + 示例，简单方案不够用了再加 agentic 复杂度」<sup class="cite" data-refid="1">[1]</sup>。选个<strong>窄而可衡量</strong>的场景。</p>
+
+      <div class="role-cols">
+        <div class="role-col must">
+          <h4>✅ 推荐的入门项目（窄、可衡量）</h4>
+          <ul>
+            <li><strong>FAQ 客服 bot</strong>——喂一份文档，回答关于它的问题（用 RAG，无代码平台 10 分钟）</li>
+            <li><strong>资料整理助手</strong>——给链接/文本，自动总结归类</li>
+            <li><strong>个人助理</strong>——查天气/查资料/简单待办（最适合手搓练 ReAct）</li>
+            <li><strong>编码助手</strong>——读文件/列目录/改代码（Thorsten Ball 同款，手搓最佳练手）</li>
+          </ul>
+        </div>
+        <div class="role-col never">
+          <h4>⛔ 第一个 agent 别碰</h4>
+          <ul>
+            <li><strong>多 agent 协作系统</strong>——又慢又贵又难调，坚决后置<sup class="cite" data-refid="5">[5]</sup></li>
+            <li><strong>长期记忆 + 向量库</strong>——对小白偏抽象，第一个用短期记忆即可<sup class="cite" data-refid="2">[2]</sup></li>
+            <li><strong>不可逆操作</strong>（自动付款/删库/群发）——必须先有 human-in-the-loop<sup class="cite" data-refid="35">[35]</sup></li>
+            <li><strong>全自主无人值守</strong>——今天的系统大多还在 L1-L2<sup class="cite" data-refid="8">[8]</sup></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>💡 为什么选「窄而可衡量」：</strong>窄 = 容易跑通、容易调试、容易有成就感；可衡量 = 你知道它「做对了没有」（FAQ 答得准不准、总结全不全），方便后面加评估。<strong>Agent 的能力上限取决于它能访问的数据和工具</strong>——先做小，跑通了再扩<sup class="cite" data-refid="46">[46]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">常见坑与避坑</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这些坑每条都有真实代价，按「最贵→最常见」排。</p>
+
+      <div class="callout bad">
+        <h4>🔴 坑 1：无限循环烧 token（最贵）<span class="conf g">🟢 多源</span></h4>
+        <p>2025 年 11 月真实案例：4 个 LangChain agent 的市场调研 pipeline 意外进入无限循环，<strong>跑了 11 天、账单 4.7 万美元</strong>——agent 因概率本质误判终止信号而反复调同一工具<sup class="cite" data-refid="31">[31]</sup>。<strong>避坑：硬上限（迭代/token/时间/花费）在生产中不可妥协，且预算限制必须多层（每会话/每用户/每工具），不能只在应用层</strong><sup class="cite" data-refid="31">[31]</sup>。手搓时第一天就在 while 循环里写 <code>for step in range(15)</code>。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>🟡 坑 2：工具集臃肿、功能重叠 <span class="conf g">🟢 多源</span></h4>
+        <p>工具太多、职责重叠会让模型「选哪个工具」决策模糊，是最常见失败模式之一<sup class="cite" data-refid="35">[35]</sup>。<strong>避坑：单工具单职责、用途极清晰、参数无歧义、像写 prompt 一样写工具文档</strong><sup class="cite" data-refid="35">[35]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>🟡 坑 3：上下文爆炸 / 消息顺序错 <span class="conf g">🟢 多源</span></h4>
+        <p>循环跑多了消息历史越堆越长（上下文爆炸，又慢又贵）；手搓时<strong>把工具结果在 assistant 消息之前 append 会直接校验失败</strong><sup class="cite" data-refid="29">[29]</sup>。<strong>避坑：控制历史长度、严格保证 <code>[assistant 含 tool_calls] → [tool 结果]</code> 顺序</strong>。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>🟡 坑 4：过早上框架 / 过度工程化 <span class="conf g">🟢 多源</span></h4>
+        <p>Anthropic：<strong>框架会掩盖底层代码让调试变难、并诱使你过早加复杂度</strong>，应先用直接 API 调用理解机制再上框架<sup class="cite" data-refid="1">[1]</sup>。尤其别一上来就上多 agent<sup class="cite" data-refid="5">[5]</sup>、别学旧 AutoGen<sup class="cite" data-refid="19">[19]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>🟡 坑 5：幻觉 / 缺评估 <span class="conf g">🟢 多源</span></h4>
+        <p>LLM 会瞎编（幻觉），且 agent 是概率系统、难调试。<strong>避坑：要接私有/实时知识用 RAG 降幻觉<sup class="cite" data-refid="6">[6]</sup>；从一开始就铺日志和评估（见第 12 章）</strong>，否则你根本不知道 agent 好不好。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">评估、调试、部署上线（小白够用版）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>Agent 难调试（概率系统、多步），所以「怎么知道它好不好」和「上线前要铺什么」是必修。这里只讲小白够用的最小实践。</p>
+
+      <h3>12.1 调试的眼睛：trace / 可观测</h3>
+      <div class="callout info">
+        <p>调 agent 要看 <strong>trace（执行树）</strong>——每一步选了什么工具、传了什么参数、检索了什么。推荐 <strong>Langfuse</strong>（开源、19000+ stars、MIT，2025-06 把 LLM-as-judge 评估/标注/prompt 实验全开源转 MIT）<sup class="cite" data-refid="47">[47]</sup>；用 LangChain 的人配 LangSmith 自动集成。<strong>纯无代码平台用户用平台自带日志即可</strong>，OpenAI Agents SDK 自带 tracing<sup class="cite" data-refid="36">[36]</sup>。</p>
+      </div>
+
+      <h3>12.2 评估：Evaluation-Driven Development</h3>
+      <p>评估应作为开发的<strong>持续环节</strong>，用 <strong>LLM-as-judge（让另一个 LLM 当裁判）规模化评估 + 人工复核兜底高风险样本</strong><sup class="cite" data-refid="48">[48]</sup>。agentic 系统评估要超越单模型基准，看整体行为：<strong>工具选择准确性、多步推理连贯性、任务完成率</strong>；生产环境评估须异步跑、不阻塞响应<sup class="cite" data-refid="48">[48]</sup>。</p>
+
+      <h3>12.3 上线前三件套</h3>
+      <div class="callout accent">
+        <p><strong>预算限制 + 护栏 + 监控，必须在 agent 接触真实用户/数据/外部系统之前就位</strong><sup class="cite" data-refid="35">[35]</sup>：</p>
+        <ul>
+          <li><strong>护栏 + human-in-the-loop</strong>：不可逆操作（发消息/改库/付款）必须显式人工确认；定义决策边界（如密码重置可自主、&gt;$500 退款转人工）<sup class="cite" data-refid="35">[35]</sup>。</li>
+          <li><strong>监控/日志</strong>：上线前先记全量日志（每次工具调用、输入输出、每任务成本、trace ID、上报事件）<sup class="cite" data-refid="35">[35]</sup>。</li>
+          <li><strong>预算限制</strong>：多层硬上限（呼应第 11 章那 4.7 万美元的教训）<sup class="cite" data-refid="31">[31]</sup>。</li>
+        </ul>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ 推荐学习顺序（Brightdata roadmap）：</strong>定目的 → 设计工作流（节点图）→ 选数据源 → 选模型 → 集成工具(MCP) → 实现逻辑(框架) → 测试迭代(含边界用例) → 部署监控；先判断「到底需不需要完整 agent 还是简单 workflow」<sup class="cite" data-refid="46">[46]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">⭐ 小白实操 roadmap（决策树）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这是全篇最重要的一章——<strong>你想做什么 → 走哪条路 → 第一步具体动作</strong>。</p>
+
+      <h3>13.1 第一步走哪条路（决策树）</h3>
+      <div class="tree">
+        <div class="node q">Q1：你会写 Python 吗？</div>
+        <div class="branches">
+          <div class="node no"><span class="lbl n">不会</span>→ 走<strong>无代码</strong>。第一步：打开 <strong>coze.cn</strong> 抖音扫码登录，照模板拖一个 FAQ bot</div>
+          <div class="node yes"><span class="lbl y">会一点</span>→ 先去 Q2 选目标</div>
+        </div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q2：你想做的是什么？</div>
+        <div class="branches">
+          <div class="node"><span class="lbl m">读我的文档</span>→ <strong>LlamaIndex</strong>（5 行 RAG）或无代码平台知识库</div>
+          <div class="node"><span class="lbl m">多角色干活</span>→ <strong>CrewAI</strong>（团队比喻、~20 行）</div>
+        </div>
+        <div class="branches">
+          <div class="node"><span class="lbl m">通用 + 要 tracing</span>→ <strong>OpenAI Agents SDK</strong></div>
+          <div class="node"><span class="lbl m">想看穿原理</span>→ <strong>手搓 80 行</strong> + 读 smolagents</div>
+        </div>
+        <div class="step-arrow">↓ 任何一条都先做这件事</div>
+        <div class="node yes"><span class="lbl y">第 0 步</span>模型选 <strong>DeepSeek / 通义千问</strong>（改 base_url、免翻墙、有免费额度），第一天就给循环设迭代上限</div>
+      </div>
+
+      <h3>13.2 三阶段具体动作清单</h3>
+
+      <div class="callout good">
+        <h4>✅ 阶段 1（第 1-3 天）：无代码搭出第一个，建立成就感</h4>
+        <ol>
+          <li>打开 <strong>coze.cn</strong>，抖音扫码登录<sup class="cite" data-refid="9">[9]</sup>。</li>
+          <li>挑一个模板（FAQ 客服 / 资料整理），上传一份文档当知识库。</li>
+          <li>调通对话，<strong>一键发布到微信/抖音</strong>，发给自己用一次。</li>
+          <li>（可选）想私有化就装 Dify，体验它和扣子几乎一样的工作流<sup class="cite" data-refid="9">[9]</sup>。</li>
+        </ol>
+      </div>
+
+      <div class="callout accent">
+        <h4>🎯 阶段 2（第 1-2 周）：上轻量框架写第一个代码 agent</h4>
+        <ol>
+          <li>先看完免费课：<strong>HuggingFace AI Agents Course</strong>（有中文翻译）建立动手能力<sup class="cite" data-refid="33">[33]</sup> + <strong>吴恩达 Agentic AI</strong> 四大设计模式建立心智模型<sup class="cite" data-refid="49">[49]</sup>。</li>
+          <li>装 <strong>CrewAI</strong> 或 <strong>OpenAI Agents SDK</strong>，模型 <code>base_url</code> 接 DeepSeek（送 500 万 token）<sup class="cite" data-refid="28">[28]</sup>。</li>
+          <li>跑通官方 quickstart 的多角色 crew（~20 行），改成你自己的窄场景<sup class="cite" data-refid="18">[18]</sup>。</li>
+          <li>接 Langfuse 看 trace，知道 agent 每一步在干嘛<sup class="cite" data-refid="47">[47]</sup>。</li>
+        </ol>
+      </div>
+
+      <div class="callout purple">
+        <h4>🔬 阶段 3（第 2-4 周）：手搓看穿原理</h4>
+        <ol>
+          <li>照抄 <strong>Leonie 的 80 行 Python</strong>（计算器工具）或 freeCodeCamp 版，亲手跑一次<sup class="cite" data-refid="44">[44]</sup>。</li>
+          <li>读 <strong>smolagents 源码</strong>（才 ~1000 行），看懂 agent loop<sup class="cite" data-refid="20">[20]</sup>。</li>
+          <li>看中文系统教程 <strong>Datawhale hello-agents</strong>（54.6k star，第 4-7 章手写 ReAct loop）<sup class="cite" data-refid="20">[20]</sup>。</li>
+          <li>你会发现：<strong>agent 没有魔法，就是「问 AI 该用哪个工具 → 执行 → 把结果告诉 AI → 重复直到它说完事」一个循环</strong><sup class="cite" data-refid="29">[29]</sup>。</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>⚠️ 贯穿三阶段的铁律：</strong>① 第一天就设迭代/花费硬上限<sup class="cite" data-refid="31">[31]</sup>；② 单 agent 能搞定就别上多 agent<sup class="cite" data-refid="5">[5]</sup>；③ 不可逆操作必须人工确认<sup class="cite" data-refid="35">[35]</sup>；④ 别学旧 AutoGen<sup class="cite" data-refid="19">[19]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH14 ===== -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">学习资源（含中文）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>资源</th><th>语言</th><th>类型</th><th>给谁</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Anthropic《Building Effective Agents》</strong></td><td>英（有中译）</td><td>认知地基</td><td>所有人必读第一篇<sup class="cite" data-refid="1">[1]</sup></td></tr>
+            <tr><td><strong>HuggingFace AI Agents Course</strong></td><td>英（有中文志愿翻译）</td><td>免费动手课</td><td>会点 Python 的小白<sup class="cite" data-refid="33">[33]</sup></td></tr>
+            <tr><td><strong>吴恩达 Agentic AI（DeepLearning.AI）</strong></td><td>英</td><td>四大设计模式</td><td>建立心智模型，可免费旁听<sup class="cite" data-refid="49">[49]</sup></td></tr>
+            <tr><td><strong>Datawhale hello-agents</strong></td><td>中文</td><td>从零手搓 + 低代码（54.6k star）</td><td>国内小白最佳系统教材<sup class="cite" data-refid="20">[20]</sup></td></tr>
+            <tr><td><strong>Jimmy Song AI 实用指南·智能体</strong></td><td>中文（国内直连）</td><td>概念入门</td><td>概念第一站<sup class="cite" data-refid="7">[7]</sup></td></tr>
+            <tr><td><strong>菜鸟教程 CrewAI/LangChain</strong></td><td>中文</td><td>实战（教阿里云镜像+DeepSeek）</td><td>写代码起步配套<sup class="cite" data-refid="22">[22]</sup></td></tr>
+            <tr><td><strong>learn.crewai.com</strong></td><td>英（菜鸟有中文）</td><td>官方免费课</td><td>学 CrewAI<sup class="cite" data-refid="34">[34]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout good">
+        <p><strong>✅ 国内小白配套：</strong>HF 课程有中文翻译、B 站有大量扣子零基础全套教程、国产平台均国内直连<sup class="cite" data-refid="30">[30]</sup>。中文系统教材首推 <strong>Datawhale hello-agents</strong>（既讲原理又带可跑代码，正好对应「手搓」那一阶，需 Python 基础）<sup class="cite" data-refid="20">[20]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH15 FAQ ===== -->
+  <section class="chapter" id="ch15">
+    <h2><span class="num">15</span><span class="title-text">FAQ</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">完全不会写代码，能做 AI agent 吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>能，而且应该从这里开始。直接打开<strong>扣子 coze.cn</strong>（中文、国内直连、抖音扫码登录），照模板拖拽 5 分钟就能搭出第一个能用的 bot 并一键发到微信/抖音<sup class="cite" data-refid="9">[9]</sup>。想要更强可定制再上 Dify（理念和扣子几乎一样）。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Agent 和 ChatGPT、和 workflow 到底差在哪？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>一句话：chatbot 只会说不会做，workflow 会做但按写死的步骤走，<strong>agent 自己决定怎么做</strong>。Anthropic 官方区分标准是「谁控制流程」——workflow 走预定义代码路径，agent 由 LLM 动态决定<sup class="cite" data-refid="1">[1]</sup>。注意很多产品叫 agent 其实只是 workflow。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">国内用，要不要翻墙？模型选哪个？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>无代码用国产平台（扣子/元器/百炼）全部国内直连<sup class="cite" data-refid="9">[9]</sup>；写代码时几乎所有框架都能改 <code>base_url</code> 接 <strong>DeepSeek / 通义千问</strong>，无需翻墙、有免费额度（DeepSeek 新用户送 500 万 token<sup class="cite" data-refid="28">[28]</sup>）。海外的 Zapier/Lindy 才需要翻墙。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">第一个该学哪个代码框架？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>先 <strong>CrewAI</strong>（团队比喻、~20 行、1 小时跑通）或 <strong>OpenAI Agents SDK</strong>（一条命令、自带 tracing），二者学习曲线被多篇评测列为最低<sup class="cite" data-refid="18">[18]</sup>。<strong>千万别一上来学 LangGraph（概念多易劝退）或旧 AutoGen（已停更）</strong><sup class="cite" data-refid="19">[19]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">手搓一个 agent 到底要写多少代码？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>很少。核心循环约 35 行，含工具的完整最小 agent 约 60-80 行 Python<sup class="cite" data-refid="30">[30]</sup>。Thorsten Ball 用 315 行 Go 写出能改代码的编程 agent，结论是「一个 LLM、一个循环、足够的 token，没有秘密」<sup class="cite" data-refid="41">[41]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">LLM 是自己执行工具吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p><strong>不是。</strong>LLM 只输出一段 JSON 说「我想调用这个工具、参数是什么」，<strong>真正执行靠你的代码</strong>，执行完把结果喂回给 LLM<sup class="cite" data-refid="2">[2]</sup>。懂这点，agent 的心智模型就对一半。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">RAG 是不是 agent？需要先学 RAG 吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不是。<strong>RAG 只让答案更准，不做决策不行动</strong>，这是它和 agent 的根本区别<sup class="cite" data-refid="6">[6]</sup>。如果你只想做「自家文档问答助手」，用 RAG 就够，不必上 agent。两者常组合——agent 把 RAG 当一个工具用。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">MCP 必须学吗？难不难？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>是 2025-2026 接工具的事实标准，值得了解，<strong>学了不会很快过时</strong>（已被 OpenAI/Google 采纳、捐给 Linux 基金会）<sup class="cite" data-refid="11">[11]</sup>。在 Claude Desktop/Cursor 里配现成 server 门槛低，自己写 server 稍进阶。⚠️ 配第三方 server 注意安全（恶意 server、prompt injection）<sup class="cite" data-refid="11">[11]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">第一个 agent 该做什么项目？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>选<strong>窄而可衡量</strong>的：FAQ 客服 bot、资料整理助手、个人助理、编码助手<sup class="cite" data-refid="1">[1]</sup>。别碰多 agent、长期记忆、不可逆操作、全自主无人值守——这些都该后置<sup class="cite" data-refid="5">[5]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">我会不会一不小心烧很多钱？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>有这个风险——2025 年 11 月有 agent 无限循环跑 11 天烧 4.7 万美元的真实案例<sup class="cite" data-refid="31">[31]</sup>。<strong>避坑：第一天就设迭代/token/花费硬上限</strong>（ReAct 循环典型 15-25 步上限），且预算限制要多层<sup class="cite" data-refid="3">[3]</sup>。练手用国产模型免费额度，基本花不到钱。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">怎么知道我的 agent 做得好不好？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>要<strong>看 trace + 做评估</strong>。用 Langfuse（开源免费）看每一步选了什么工具、传了什么参数<sup class="cite" data-refid="47">[47]</sup>；用 LLM-as-judge 规模化评估任务完成率、工具选择准确性，高风险样本人工复核<sup class="cite" data-refid="48">[48]</sup>。无代码平台用自带日志即可。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">为什么大家都说「别一上来就用框架」？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>Anthropic 官方明确：<strong>框架会掩盖底层代码让调试变难、并诱使你过早加复杂度</strong>，建议先直接用 LLM API 理解机制，很多 agent 模式几行代码就能实现，只在性能确有提升时才加复杂度<sup class="cite" data-refid="1">[1]</sup>。这也是本报告把「手搓」放进阶梯的原因。</p></div></div>
+
+    </div>
+  </section>
+
+  <!-- ===== CH16 References ===== -->
+  <section class="chapter" id="ch16">
+    <h2><span class="num">16</span><span class="title-text">References</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13px;color:var(--text-mute)">访问日期均为 2026-05-29。悬停 inline <sup class="cite" data-refid="1">[1]</sup> 标记可预览来源。star 数/价格/版本以官方实时为准。</p>
+      <ol class="ref-list">
+        <li id="ref-1">Building Effective Agents — Anthropic Engineering（workflow vs agent 控制流定义 / 能简单就别复杂 / 别盲目上框架 / augmented LLM / ACI 工具设计）· <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">anthropic.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×12</span></li>
+        <li id="ref-2">HuggingFace Agents Course — agent steps & structure（4 组件 LLM+工具+记忆+循环 / LLM 不执行只提议 / Alfred 天气 demo / 长期记忆三类）· <a href="https://huggingface.co/learn/agents-course/en/unit1/agent-steps-and-structure" target="_blank" rel="noopener">huggingface.co</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×8</span></li>
+        <li id="ref-3">The Agent Loop — Tredence（ReAct=while 循环 / 纯 ReAct 易死循环 / 生产设 max iterations 典型 15-25 步）· <a href="https://www.tredence.com/blog/ai-agent-loop" target="_blank" rel="noopener">tredence.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-4">Andrew Ng — Four agentic design patterns（Reflection/Planning/Tool Use/Multi-agent / 行业通用语言 / 第一个 agent 只需 Tool Use+loop）· <a href="https://x.com/AndrewYNg/status/1773393357022298617" target="_blank" rel="noopener">x.com/AndrewYNg</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-5">Single-Agent vs Multi-Agent: when to build — Towards Data Science（orchestrator/supervisor 派单经理 / 单 agent 能搞定就别上多 agent / 多 agent 又慢又贵又难调）· <a href="https://towardsdatascience.com/single-agent-vs-multi-agent-when-to-build-a-multi-agent-system/" target="_blank" rel="noopener">towardsdatascience.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×5</span></li>
+        <li id="ref-6">AI agent vs RAG — Merge（RAG 只让答案更准不做决策不行动 / 流程问题转向量→匹配→生成 / agent 把 RAG 当工具 / 常被误认 agent）· <a href="https://www.merge.dev/blog/rag-vs-ai-agent" target="_blank" rel="noopener">merge.dev</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×5</span></li>
+        <li id="ref-7">AI 实用指南·智能体基础 — Jimmy Song（全中文国内直连 / 定义+四组件大脑·规划·记忆·工具+五步循环 / 智能体=大模型+规划+记忆+工具 / 页面草稿状态）· <a href="https://jimmysong.io/zh/book/ai-handbook/agent/agent-basics/" target="_blank" rel="noopener">jimmysong.io</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-8">Six Levels of Agentic Behavior — Vellum（L0-L5 阶梯 / 今天多数系统 L1 / L2 会用工具创业最活跃 / L5 远未到达 / 各家口径不统一）· <a href="https://www.vellum.ai/blog/levels-of-agentic-behavior" target="_blank" rel="noopener">vellum.ai</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3 · 🟡 单源</span></li>
+        <li id="ref-9">关于智能体搭建 Dify、n8n、Coze 超详细总结 — 53AI（小白首选扣子→进阶 Dify / coze.cn 直连中文抖音登录 / Dify 工作流与扣子相似可迁移）· <a href="https://www.53ai.com/news/dify/2025111152897.html" target="_blank" rel="noopener">53ai.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×6</span></li>
+        <li id="ref-10">Coze 扣子 / Dify 平台资料（coze.cn 直连 / 海外 coze.com 需 VPN 约 $9/月 / Coze Studio 2025-07 开源 Apache 2.0 / Dify 111k+ stars Apache 系含禁 SaaS / 云沙盒 200 次 GPT-4 专业版 $59/月）· <a href="https://www.coze.cn/studio" target="_blank" rel="noopener">coze.cn/studio</a> + <a href="https://docs.dify.ai/zh/use-dify/getting-started/introduction" target="_blank" rel="noopener">docs.dify.ai</a> + <a href="https://www.iplaysoft.com/coze.html" target="_blank" rel="noopener">iplaysoft.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×6</span></li>
+        <li id="ref-11">Model Context Protocol Introduction — 官方（AI 的 USB-C / N×M 集成 / Tools·Resources·Prompts / 2025-03 OpenAI、2025-04 Google、2025-12 捐 Linux 基金会 / 下载 10 万→800 万、5800+ servers / 安全风险）· <a href="https://modelcontextprotocol.io/introduction" target="_blank" rel="noopener">modelcontextprotocol.io</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×4</span></li>
+        <li id="ref-12">腾讯元器 — 官网（混元大模型 / 3 分钟 5 步发布 / 一键发微信/QQ/腾讯元宝 / 多模态）· <a href="https://yuanqi.tencent.com/" target="_blank" rel="noopener">yuanqi.tencent.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-13">Top No-Code AI Agent Builders Tested — Lindy（海外 SaaS 需翻墙+英文 / Lindy 60 秒建 agent 免费 400 credits / Zapier 100 tasks/月仅 2 步 / credit 试错易超支）· <a href="https://www.lindy.ai/blog/no-code-ai-agent-builder" target="_blank" rel="noopener">lindy.ai</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-14">阿里云百炼新人免费额度与计费 / 智谱 GLM 平台（百炼 2025-09-08 起 90 天有效、每模型 100 万、累计超 7000 万 token / 约 10 分钟搭 agent / 智谱新用户 2000 万 token 永久 + 永久免费 Flash 模型）· <a href="https://help.aliyun.com/zh/model-studio/new-free-quota" target="_blank" rel="noopener">help.aliyun.com</a> + <a href="https://bigmodel.cn/" target="_blank" rel="noopener">bigmodel.cn</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×4</span></li>
+        <li id="ref-15">腾讯元器免费额度（约 1 亿 token 体验额度 / 免费对外开放 / 用完走 API 付费 / 依托混元）· <a href="https://yuanqi.tencent.com/" target="_blank" rel="noopener">yuanqi.tencent.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-16">大厂智能体平台评测 — 人人都是产品经理（元器/百炼/智谱对比 / 扣子事实准确性最佳 / 元器智谱略逊 / 百炼支持多模型）· <a href="https://www.woshipm.com/evaluating/6204580.html" target="_blank" rel="noopener">woshipm.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2 · 🟡 单源</span></li>
+        <li id="ref-17">智谱 GLM 开放平台（GLM 系列 / AutoGLM·GLM-PC / 零代码可视化体验弱于扣子、更像 API+模型平台 / 需实地确认）· <a href="https://bigmodel.cn/" target="_blank" rel="noopener">bigmodel.cn</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1 · 🟡 单源</span></li>
+        <li id="ref-18">CrewAI vs LangGraph vs AutoGen — DataCamp（学习曲线 OpenAI Agents SDK&lt;CrewAI&lt;LangChain&lt;AutoGen≈LangGraph / CrewAI 20 行 vs LangGraph 60+ 行 / 1 小时跑通）· <a href="https://www.datacamp.com/tutorial/crewai-vs-langgraph-vs-autogen" target="_blank" rel="noopener">datacamp.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×4</span></li>
+        <li id="ref-19">Microsoft Agent Framework Overview / AutoGen GitHub（AutoGen 58.5k star 最后 release 2025-09-30 维护模式 / 官方继任者 MAF 1.0 2026-04 GA / 融合 AutoGen+Semantic Kernel / .NET+Python / 新人别学旧 AutoGen）· <a href="https://learn.microsoft.com/en-us/agent-framework/overview/" target="_blank" rel="noopener">learn.microsoft.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×6</span></li>
+        <li id="ref-20">datawhalechina/hello-agents — GitHub + smolagents — GitHub（hello-agents 54.6k star V1.0.2 2026-02-10 / 16 章中文 / 第 4-7 章手写 ReAct·Plan-and-Solve·Reflection / smolagents 27.6k star v1.26.0 2026-05-29 核心~1000 行 CodeAgent 直接写 Python / &lt;7B 小模型 bug 频发）· <a href="https://github.com/datawhalechina/hello-agents" target="_blank" rel="noopener">github.com/datawhalechina/hello-agents</a> + <a href="https://github.com/huggingface/smolagents" target="_blank" rel="noopener">github.com/huggingface/smolagents</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×9</span></li>
+        <li id="ref-21">n8n Plans and Pricing — 官网（130k+ stars / Sustainable Use License fair-code 自托管免费不可转售 / AI Agent 节点平台层免费只付模型 token / 云 €24/€60/€800 月 / 自托管软件免费仅付服务器 $5-80/月 / 400+ 集成）· <a href="https://n8n.io/pricing/" target="_blank" rel="noopener">n8n.io/pricing</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-22">DeepSeek API Docs / CrewAI LLMs / Pydantic AI providers（几乎所有框架可改 base_url 接 DeepSeek/Qwen 国内免翻墙 / CrewAI LLM(base_url=...) / Pydantic AI 内置 DeepSeekProvider 17.4k star v1.104.0 2026-05-29 / 菜鸟教程教阿里云镜像+DeepSeek）· <a href="https://api-docs.deepseek.com/" target="_blank" rel="noopener">api-docs.deepseek.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×5</span></li>
+        <li id="ref-23">n8n Self-hosted AI Starter Kit — GitHub（n8n+Ollama+Qdrant+Postgres / Docker 一键起本地 AI 环境 / 本地模型保护隐私）· <a href="https://github.com/n8n-io/n8n" target="_blank" rel="noopener">github.com/n8n-io/n8n</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-24">Flowise 官网与 GitHub（基于 LangChain / Assistant·Chatflow·Agentflow 三档 / 2025-08 被 Workday 收购 / v3.1.0 2026-03-16 AgentFlow SDK+LangChain v1 / 自托管免费 / 英文为主）· <a href="https://flowiseai.com/" target="_blank" rel="noopener">flowiseai.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-25">coze-dev/coze-studio — GitHub（扣子开源版 2025-07 / 15k+ stars / Apache 2.0 商用无限制 / 微服务 Docker Compose 一键部署 / 可私有化扣子能力）· <a href="https://github.com/coze-dev/coze-studio" target="_blank" rel="noopener">github.com/coze-dev/coze-studio</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1 · 🟡 开源较新</span></li>
+        <li id="ref-26">Zapier Agents — 官网（7000+ 集成 / 80+ 模板 / 自然语言建 agent / 免费档 100 tasks/月仅 2 步 / Professional 约 $29.99/月起 / 国内需翻墙英文）· <a href="https://zapier.com/agents" target="_blank" rel="noopener">zapier.com/agents</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-27">Lindy — 官网（纯 prompt 建 agent 号称 60 秒 / 100+ 模板 / 能打电话发短信 / 免费 400 credits/月、付费 $19.99/月起 / credit 试错易超支 / 国内需翻墙英文）· <a href="https://www.lindy.ai/" target="_blank" rel="noopener">lindy.ai</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-28">DeepSeek API / 阿里云百炼 OpenAI 兼容（DeepSeek api.deepseek.com OpenAI 兼容+function calling 新用户送 5M 免费 token / Qwen 百炼 dashscope.aliyuncs.com/compatible-mode/v1 北京端点支持 tools / 改 base_url+api_key 即可跑英文教程 / 函数调用历史一度不稳建议看官方最新）· <a href="https://help.aliyun.com/zh/model-studio/compatibility-of-openai-with-dashscope" target="_blank" rel="noopener">help.aliyun.com</a> + <a href="https://api-docs.deepseek.com/" target="_blank" rel="noopener">api-docs.deepseek.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×4</span></li>
+        <li id="ref-29">The Anatomy of an Agent Loop — Steve Kinney（agent 本质=六行 while 循环 / 五组件语言模型·工具·消息历史·循环·停止条件 / 模型出文本而非请求工具时停 / 新手坑工具结果不能在 assistant 之前 append、顺序硬约束）· <a href="https://stevekinney.com/writing/agent-loops" target="_blank" rel="noopener">stevekinney.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×6</span></li>
+        <li id="ref-30">学习路径与最小 agent（三级阶梯无代码→框架→手搓 / 别一上来写代码或上 LangChain / 核心循环~35 行完整~60 行 / 从零~45 分钟比 LangChain 还快 / HF 中文翻译、B 站扣子教程 / 国产平台直连）· <a href="https://www.aibuilderclub.com/blog/how-to-build-ai-agent-from-scratch" target="_blank" rel="noopener">aibuilderclub.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×6</span></li>
+        <li id="ref-31">The $47,000 Agent Loop — DEV Community（2025-11 / 4 个 LangChain agent A2A 协调市场调研 pipeline 无限循环跑 11 天烧 $47,000 / 误判终止信号反复调同一工具 / 硬上限不可妥协、预算限制须多层）· <a href="https://dev.to/waxell/the-47000-agent-loop-why-token-budget-alerts-arent-budget-enforcement-389i" target="_blank" rel="noopener">dev.to</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×6</span></li>
+        <li id="ref-32">ReAct: Synergizing Reasoning and Acting in Language Models — Yao et al.（2022-10 / Thought-Action-Observation 交替 / ALFWorld +34%、WebShop +10% / 手写 agent 循环经典理论原型）· <a href="https://arxiv.org/abs/2210.03629" target="_blank" rel="noopener">arxiv.org/abs/2210.03629</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-33">HuggingFace AI Agents Course — unit0 introduction（全网最好免费 agentic 课 / 4 单元+3 奖励 / 前置基础 Python+LLM / 中文志愿翻译 / smolagents·LlamaIndex·LangGraph / HF Spaces 预配环境 / 结课证书）· <a href="https://huggingface.co/learn/agents-course/unit0/introduction" target="_blank" rel="noopener">huggingface.co</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-34">crewAIInc/crewAI — GitHub（52.4k star / v1.14.6 2026-05-28 / Python 98.6% / MIT / ~20 行 1 小时跑通 / 角色扮演多智能体 / 官方免费课 learn.crewai.com / 10 万+认证开发者）· <a href="https://github.com/crewAIInc/crewAI" target="_blank" rel="noopener">github.com/crewAIInc/crewAI</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-35">Building Effective Agents — Anthropic Research（ACI 工具设计像写 prompt / 工具集臃肿功能重叠失败模式 / 单工具单职责·容错·参数无歧义 / 上线前预算+护栏+监控 / 不可逆操作 human-in-the-loop / 决策边界 / 全量日志 trace ID）· <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank" rel="noopener">anthropic.com/research</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×5</span></li>
+        <li id="ref-36">openai/openai-agents-python — GitHub（26.7k star / v0.17.4 2026-05-26 / provider 无关支持 100+ LLM / 取代 Swarm / 自带 tracing·guardrails·session·HITL / 一条 pip install openai-agents / 配 base_url 接 DeepSeek/Qwen）· <a href="https://github.com/openai/openai-agents-python" target="_blank" rel="noopener">github.com/openai/openai-agents-python</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-37">LangChain and LangGraph 1.0 — LangChain Blog + GitHub（LangChain 1.0 与 LangGraph 1.0 均 GA / create_agent 唯一新入口旧 Agent/AgentExecutor 弃用 / LangChain 是快车道构建在 LangGraph 上 / LangGraph 33.3k star 底层有状态编排 / 老教程大量过时）· <a href="https://blog.langchain.com/langchain-langgraph-1dot0/" target="_blank" rel="noopener">blog.langchain.com</a> + <a href="https://github.com/langchain-ai/langgraph" target="_blank" rel="noopener">github.com/langchain-ai/langgraph</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-38">run-llama/llama_index — GitHub（49.8k star / v0.14.22 2026-05-14 / 数据/文档为中心 RAG 最强 / 高层 API 5 行 ingest+query / 数据连接器丰富 / 支持 OpenAI-compatible 接国产 API）· <a href="https://github.com/run-llama/llama_index" target="_blank" rel="noopener">github.com/run-llama/llama_index</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-39">google/adk-python — GitHub（19.9k star / v2.1.0 2026-05-23 / code-first 图式 Workflow Runtime+Task API / 多语言 SDK / 绑谷歌云 Vertex AI / 国内部署不顺 / 不推荐小白起点）· <a href="https://github.com/google/adk-python" target="_blank" rel="noopener">github.com/google/adk-python</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-40">anthropics/claude-agent-sdk-python — GitHub（7.1k star / v0.2.87 2026-05-23 / MIT / Claude Code 同套 agent loop 开放成 SDK / 给 agent 一台真电脑 shell+文件+网络 / in-process MCP+hooks / 绑 Claude 模型需 Claude Code CLI / 国内调 Anthropic 不便）· <a href="https://github.com/anthropics/claude-agent-sdk-python" target="_blank" rel="noopener">github.com/anthropics/claude-agent-sdk-python</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-41">How to Build an Agent — ampcode.com (Thorsten Ball)（2025-04-15 / 315 行 Go / 3 工具 read_file·list_files·edit_file / 一个 LLM·一个循环·足够 token 没有秘密没有护城河 / 有 Python/TS/Gemini 复刻版）· <a href="https://ampcode.com/how-to-build-an-agent" target="_blank" rel="noopener">ampcode.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-42">How to Build a General-Purpose AI Agent in 131 Lines of Python — O'Reilly (Hugo Bowne-Anderson)（2026-03-24 / 131 行通用 agent / read·write·edit·bash 四工具加 shell 做任何终端事 / Pydantic 工具 schema + while 循环 + 对话循环 / 换工具就能做搜索 agent）· <a href="https://www.oreilly.com/radar/how-to-build-a-general-purpose-ai-agent-in-131-lines-of-python/" target="_blank" rel="noopener">oreilly.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-43">Function calling — OpenAI API Docs（5 步：定义工具 JSON schema→模型返回 tool call→本地执行→结果回传 {role:tool,tool_call_id,content}→拿最终答案 / 2025 新增 Responses API、Chat Completions 仍可用）· <a href="https://developers.openai.com/api/docs/guides/function-calling" target="_blank" rel="noopener">developers.openai.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-44">Building an AI agent from scratch in Python — Leonie Monigatti（2025-09-30 / ~80-100 行 / Agent+CalculatorTool+run_agent 循环 / Anthropic SDK 0.69.0 Claude Sonnet 4 / stop_reason==tool_use→执行→tool_result 喂回→继续 / 无框架 / 可换国产模型）· <a href="https://www.leoniemonigatti.com/blog/ai-agent-from-scratch-in-python.html" target="_blank" rel="noopener">leoniemonigatti.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-45">Build an AI Coding Agent with Python and Gemini — freeCodeCamp / Boot.dev（2025-10-02 / gemini-2.0-flash-001 免费额度 / 4 工具 / &lt;80 行 / main.py 循环最多 20 轮 / Gemini 国内需翻墙建议换 Qwen/DeepSeek / Boot.dev 完整内容需会员）· <a href="https://www.freecodecamp.org/news/build-an-ai-coding-agent-with-python-and-gemini/" target="_blank" rel="noopener">freecodecamp.org</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-46">How to Build AI Agents: Full Roadmap — Brightdata（定目的→设计工作流→选数据源→选模型→集成工具 MCP→实现逻辑→测试迭代→部署监控 / 先判断需不需要完整 agent / agent 能力上限取决于能访问的数据 / 先简单后复杂）· <a href="https://brightdata.com/blog/ai/ai-agents-roadmap" target="_blank" rel="noopener">brightdata.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2 · 🟡 单源</span></li>
+        <li id="ref-47">Langfuse — 官网（agent 追踪·可观测·评估 / 渲染完整执行树工具选择·参数·检索 / 19000+ GitHub stars MIT / 2025-06 把 LLM-as-judge·标注队列·prompt 实验·Playground 全开源转 MIT / 本地可部署 / 单人开发友好）· <a href="https://langfuse.com/" target="_blank" rel="noopener">langfuse.com</a> + <a href="https://langfuse.com/blog/2025-03-19-ai-agent-comparison" target="_blank" rel="noopener">框架对比</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-48">Evaluation-Driven Development and Operations of LLM Agents — arXiv（评估作为持续环节 / LLM-as-judge 规模化+人工复核高风险 / 超越单模型基准评估涌现行为：工具选择准确性·多步推理连贯性·记忆检索效率·任务完成率 / 生产异步跑不阻塞）· <a href="https://arxiv.org/html/2411.13768v3" target="_blank" rel="noopener">arxiv.org/html/2411.13768v3</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-49">DeepLearning.AI Courses — Andrew Ng Agentic AI（四大可迁移设计模式 Reflection/Tool Use/Planning/Multi-Agent / 框架无关建立心智模型 / 可免费旁听 / 另有与 Anthropic 合作 Agent Skills、与 LangChain/Tavily 合作 LangGraph 课）· <a href="https://www.deeplearning.ai/courses" target="_blank" rel="noopener">deeplearning.ai/courses</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+      </ol>
+    </div>
+  </section>
+
+</main>
+
+<button class="back-to-top" id="backTop" aria-label="回到顶部">↑</button>
+
+<footer>
+  <p>无忌 Deep Research · 5 路并行调研（概念地基 / 无代码平台 / 代码框架 / 手搓原理 / 学习路径+避坑）+ Codex 跨模型四维审查 · 2026-05-29 · 49 来源 · 数字均 inline 引用、关键项标可信度</p>
+  <p style="font-size:12px;margin-top:6px">⚠️ 最大不确定性（经 Codex 审查收窄）：① 国产模型 tool-calling/MCP 已查实速查表见 §7.5，但具体多工具/并行/流式仍建议自测 ② 各平台真实搭建 UI 步骤未实测、海外工具价格/star/免费档 2026 变动频繁需以官网为准 ③ §7.3 最小代码为结构骨架非逐行验证版 ④ 上下文工程/Agentic RAG 未深挖。Codex 建议补的完整可跑代码/工具 schema/大陆落地清单/安全清单/评估集见第 1 章末「待深化清单」。版权与安全：MCP 第三方 server 有恶意/注入风险，配置需谨慎。</p>
+</footer>
+
+<script>
+(function() {
+  let activePopover=null,activeTrigger=null,hideTimer=null;
+  function getRefContent(refid){const el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){const r=trigger.getBoundingClientRect();const popW=pop.offsetWidth,popH=pop.offsetHeight;let left=r.left+window.scrollX;if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;if(left<12)left=12;let top=r.bottom+window.scrollY+6;if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}pop.style.left=left+'px';pop.style.top=top+'px';}
+  function showPopover(trigger){if(activeTrigger===trigger&&activePopover)return;if(activePopover){activePopover.remove();activePopover=null;}const content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;const pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;document.body.appendChild(pop);positionPopover(pop,trigger);activePopover=pop;activeTrigger=trigger;pop.addEventListener('mouseenter',()=>{if(hideTimer)clearTimeout(hideTimer);});pop.addEventListener('mouseleave',scheduleHide);}
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(()=>{if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){document.querySelectorAll('sup.cite[data-refid]').forEach(sup=>{sup.addEventListener('mouseenter',()=>showPopover(sup));sup.addEventListener('mouseleave',scheduleHide);sup.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});});document.addEventListener('click',e=>{if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+
+<script>
+(function(){
+  // 主题切换
+  var themeBtn=document.getElementById('themeToggle');
+  var saved=localStorage.getItem('agents-theme');
+  if(saved){document.body.setAttribute('data-theme',saved);themeBtn.textContent=saved==='dark'?'☀️':'🌙';}
+  themeBtn.addEventListener('click',function(){
+    var cur=document.body.getAttribute('data-theme')==='dark'?'light':'dark';
+    document.body.setAttribute('data-theme',cur);
+    localStorage.setItem('agents-theme',cur);
+    themeBtn.textContent=cur==='dark'?'☀️':'🌙';
+  });
+
+  // 进度条 + 回到顶部
+  var progressEl=document.getElementById('progress');
+  var backTopEl=document.getElementById('backTop');
+  function updateProgress(){
+    var docHeight=document.documentElement.scrollHeight-window.innerHeight;
+    var scrolled=window.scrollY;
+    var ratio=docHeight>0?scrolled/docHeight:0;
+    progressEl.style.width=(ratio*100)+'%';
+    backTopEl.classList.toggle('show',scrolled>400);
+  }
+  window.addEventListener('scroll',updateProgress,{passive:true});
+  updateProgress();
+  backTopEl.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+
+  // 章节折叠
+  document.querySelectorAll('section.chapter > h2').forEach(function(h2){
+    h2.addEventListener('click',function(){h2.parentElement.classList.toggle('collapsed');});
+  });
+
+  // 抽屉导航
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  function closeNav(){nav.classList.remove('open');ov.classList.remove('show');}
+  if(nav&&tog&&ov){
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',closeNav);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)closeNav();});});
+  }
+
+  // anchor 点击展开折叠章节
+  var anchorLinks=document.querySelectorAll('#anchorList a');
+  anchorLinks.forEach(function(a){
+    a.addEventListener('click',function(){
+      var target=document.getElementById(a.dataset.target);
+      if(target&&target.classList.contains('collapsed'))target.classList.remove('collapsed');
+    });
+  });
+
+  // scroll-spy 高亮
+  var sections=Array.prototype.map.call(anchorLinks,function(a){return document.getElementById(a.dataset.target);}).filter(Boolean);
+  function highlightAnchor(){
+    var offset=120,current=null;
+    for(var i=0;i<sections.length;i++){var rect=sections[i].getBoundingClientRect();if(rect.top-offset<=0)current=sections[i].id;}
+    anchorLinks.forEach(function(a){a.classList.toggle('active',a.dataset.target===current);});
+    var activeLink=document.querySelector('#anchorList a.active');
+    if(activeLink)activeLink.scrollIntoView({block:'nearest'});
+  }
+  window.addEventListener('scroll',highlightAnchor,{passive:true});
+  highlightAnchor();
+
+  // 表格行高亮
+  document.querySelectorAll('tbody tr').forEach(function(tr){
+    tr.addEventListener('click',function(){
+      tr.parentElement.querySelectorAll('tr.row-highlight').forEach(function(o){if(o!==tr)o.classList.remove('row-highlight');});
+      tr.classList.toggle('row-highlight');
+    });
+  });
+
+  // FAQ
+  document.querySelectorAll('.faq-q').forEach(function(q){
+    q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+  });
+})();
+</script>
+
+</body>
+</html>

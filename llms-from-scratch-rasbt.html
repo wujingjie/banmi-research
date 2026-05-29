@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>rasbt/LLMs-from-scratch 深度研究：纯 PyTorch 从零手搓 GPT，阿杰该不该学 · 无忌 Deep Research · 2026-05-29</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1d23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --border-strong: #cdd2da;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --accent-text: #1d4ed8;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #0891b2;
+    --info-soft: #cffafe;
+    --code-bg: #f1f3f7;
+    --purple: #7c3aed;
+    --purple-soft: #ede9fe;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1c2030;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #b6bcc9;
+    --text-mute: #8a92a3;
+    --border: #2a2f3d;
+    --border-strong: #3a4154;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a55;
+    --accent-text: #93c5fd;
+    --good: #4ade80;
+    --good-soft: #14532d55;
+    --warn: #fbbf24;
+    --warn-soft: #78350f55;
+    --bad: #f87171;
+    --bad-soft: #7f1d1d55;
+    --info: #22d3ee;
+    --info-soft: #155e7555;
+    --code-bg: #0a0d14;
+    --purple: #a78bfa;
+    --purple-soft: #4c1d9555;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 28px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 3000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  hr.soft { border: none; height: 1px; background: var(--border); margin: 16px 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .node.yes { border-color: var(--good); }
+  .tree .node.no { border-color: var(--bad); }
+  .tree .branches { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .role-cols { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 14px 0; }
+  .role-col { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-elevated); }
+  .role-col h4 { margin: 0 0 8px; font-size: 14px; color: var(--text); }
+  .role-col.must { background: var(--accent-soft); border-color: var(--accent); }
+  .role-col.opt { background: var(--warn-soft); border-color: var(--warn); }
+  .role-col.never { background: var(--bad-soft); border-color: var(--bad); }
+  .role-col ul { margin: 4px 0 0; padding-left: 18px; }
+  .prod-card { margin: 12px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .prod-head { padding: 10px 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); }
+  .prod-head .ico { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; background: var(--accent-soft); }
+  .prod-head .name-block { flex: 1; min-width: 140px; }
+  .prod-head .pn { font-size: 15px; font-weight: 700; color: var(--text); }
+  .prod-head .ph { font-size: 12px; color: var(--text-mute); font-family: ui-monospace, monospace; margin-top: 1px; }
+  .prod-body { padding: 10px 14px; font-size: 14px; }
+  .prod-body p { color: var(--text-soft); margin: 6px 0; }
+  .prod-body .takeaway { margin-top: 8px; padding: 8px 10px; background: var(--accent-soft); border-radius: 8px; border-left: 3px solid var(--accent); color: var(--text); font-size: 13.5px; }
+  .prod-body .takeaway::before { content: "💡 启示  "; font-weight: 700; color: var(--accent-text); }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(250,204,21,0.3); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated,#fff); color: var(--text,#1a1a23); border: 1px solid var(--border,#e3e6ec); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(15,23,42,0.18); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  [data-theme="dark"] .cite-popover { background: #1a1e2a; color: #e6e9f0; border-color: #2a2f3a; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+  .cite-popover a { color: var(--accent,#2563eb); text-decoration: underline; word-break: break-all; }
+  [data-theme="dark"] .cite-popover a { color: #60a5fa; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  @media (max-width: 480px) {
+    .hero { padding: 18px 4px 8px; }
+    .hero h1 { font-size: 22px; }
+    section.chapter > h2 { font-size: 17px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+    .tree .branches { grid-template-columns: 1fr; }
+  }
+  @media print {
+    header.topbar, #progress, .back-to-top, nav.anchor-nav { display: none !important; }
+    section.chapter.collapsed .chapter-body { max-height: none !important; padding: 18px 20px 22px !important; }
+    section.chapter.collapsed > h2 .caret { display: none; }
+  }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">LLMs-from-scratch 深研 <span class="tag">v1 · 无忌 Deep Research</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 执行摘要</a>
+    <a href="#ch2" data-target="ch2">02 这是什么：项目+书+作者</a>
+    <a href="#ch3" data-target="ch3">03 内容结构全览（章节地图）</a>
+    <a href="#ch4" data-target="ch4">04 核心章节深挖</a>
+    <a href="#ch5" data-target="ch5">05 学习门槛：前置 + 硬件</a>
+    <a href="#ch6" data-target="ch6">06 对比同类资源（横评）</a>
+    <a href="#ch7" data-target="ch7">07 学习路径与时间投入</a>
+    <a href="#ch8" data-target="ch8">08 国内可用性 + 中文资源</a>
+    <a href="#ch9" data-target="ch9">⭐ 09 阿杰该不该学（决策树）</a>
+    <a href="#ch10" data-target="ch10">10 常见卡点与避坑</a>
+    <a href="#ch11" data-target="ch11">11 它教不了的（边界）</a>
+    <a href="#ch12" data-target="ch12">12 FAQ</a>
+    <a href="#ch13" data-target="ch13">13 References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>纯 PyTorch 从零手搓 GPT：rasbt/LLMs-from-scratch 深度研究</h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-29</span>
+      <span>🔍 无忌 Deep Research · 4 路并行</span>
+      <span>📚 96.2k stars · Apache 2.0</span>
+      <span>🐍 纯 PyTorch · 笔记本可跑</span>
+      <span>🇨🇳 国内资源齐全</span>
+    </div>
+    <div class="hero-deck">
+      <strong>一句话：</strong>这是 Sebastian Raschka《Build a LLM From Scratch》的官方配套代码库——<strong>用纯 PyTorch 手搓 GPT 的模型架构（从分词一路到微调），不套任何现成 LLM 框架</strong>（GPT-2 权重加载、tokenizer 仍用到 TF checkpoint 工具/tiktoken 等支撑库）<sup class="cite" data-refid="1">[1]</sup>。截至 2026-05 约 <strong>96.2k stars</strong>，在同类 from-scratch 教学 repo 里 star 居首<sup class="cite" data-refid="2">[2]</sup>。对阿杰（产品/全栈、做 AI 学习产品、国内）的判断是明确的「<strong>值得学，但按选读+选做打，不全做</strong>」：第 2-4 章（分词/注意力/搭 GPT）亲手敲，第 6-7 章（微调）读+跑通理解，bonus 当参考手册<sup class="cite" data-refid="3">[3]</sup>。硬件几乎零负担（普通笔记本 CPU 几分钟跑完正文）<sup class="cite" data-refid="4">[4]</sup>，国内有官方中文版+社区翻译+免费视频，唯一要绕的是用 <code>hf-mirror.com</code> 下 GPT-2 权重<sup class="cite" data-refid="5">[5]</sup>。
+    </div>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">执行摘要：5 条最硬结论</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>4 路并行调研（项目+作者+书 / 内容结构+门槛+硬件 / 同类对比 / 学习路径+国内+ROI）收敛出的核心判断，每条独立成块，方便扫。</p>
+
+      <div class="callout good">
+        <h4>✅ 结论 1：在「从零造 LLM」教学 repo 里，它是最完整的一套（按 star 居首）<span class="conf g">🟢 多源</span></h4>
+        <p>约 <strong>96.2k stars / 14.7k forks</strong>（2026-05 抓取），在同类 from-scratch 教学 repo 里 star 居首，显著高于 Karpathy 的 nanochat（54.4k）和 nanoGPT（~44k）<sup class="cite" data-refid="2">[2]</sup>（注：star 是人气、不直接等于"教学质量最高"，但叠加下面的完整闭环可视为同类最完整）。它独特在「<strong>书 + 一致代码库 + 17h15m 免费视频 + 习题</strong>」构成完整教学闭环，而非靠你自己悟<sup class="cite" data-refid="6">[6]</sup>。作者 Sebastian Raschka 是前 UW-Madison 统计学助理教授、现 Lightning AI 资深研究工程师，业内权威<sup class="cite" data-refid="7">[7]</sup>。<strong>⚠️ Apache 2.0 只覆盖 repo 代码</strong>——书的正文/图/视频/中文译本、OpenAI 权重、第三方数据集各有各的授权，做产品要分别看（详见下文审查说明）<sup class="cite" data-refid="8">[8]</sup>。</p>
+      </div>
+
+      <div class="callout accent">
+        <h4>🎯 结论 2：硬件门槛几乎为零——普通笔记本 CPU 几分钟就能跑通正文 <span class="conf g">🟢 多源</span></h4>
+        <p>正文目标只到 <strong>GPT-2 small（124M）</strong>，README 原话是「设计为在普通笔记本合理时间内运行、不需专门硬件」，有 GPU 自动用<sup class="cite" data-refid="4">[4]</sup>。<strong>注意这个"几分钟"特指正文教学路径 + 第 5 章那个玩具级预训练演示</strong>（极小数据集《The Verdict》约 2 万字符、已打包 repo，<strong>某读者实测 MacBook Air CPU 约 5 分钟 / RTX 3090 约 11 秒</strong>跑完一轮<sup class="cite" data-refid="9">[9]</sup>）——更大档微调/更长训练并不"几分钟"。真正的「能力」来自加载 OpenAI 官方 GPT-2 权重，不是靠算力从零烧训<sup class="cite" data-refid="4">[4]</sup>。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>💡 结论 3：前置温和——中级 Python + 一点 ML 即可，PyTorch/数学非硬门槛 <span class="conf g">🟢 多源</span></h4>
+        <p>Manning 官方：「读者需要中级 Python 技能和一些机器学习知识」；附录 A 有约 40 页 PyTorch 速成，数学只需懂矩阵乘法<sup class="cite" data-refid="10">[10]</sup>。书评补充：真正的难点是「能跟踪 tensor 维度」的直觉（注意力章），线代可用 3Blue1Brown 补<sup class="cite" data-refid="11">[11]</sup>。<strong>对阿杰这种中级动手型开发者门槛匹配</strong>，是「边敲边懂」而非「读论文」。</p>
+      </div>
+
+      <div class="callout purple">
+        <h4>🧭 结论 4：国内可用性好——三件套齐全，唯一卡点是下 GPT-2 权重，镜像即解 <span class="conf g">🟢 多源</span></h4>
+        <p>GitHub repo 可 clone，核心数据 the-verdict.txt（公版文本）已打包在 repo 不用另下<sup class="cite" data-refid="5">[5]</sup>。GPT-2 权重默认走 Azure blob（国内偏慢），但作者提供 Backblaze 备份 URL + HuggingFace 镜像 repo，国内设 <code>export HF_ENDPOINT=https://hf-mirror.com</code> 即可稳定拉取<sup class="cite" data-refid="12">[12]</sup>。中文资源极丰富：<strong>官方中文版《从零构建大模型》（人邮/图灵 2025-04，109 元，豆瓣 9.4）</strong><sup class="cite" data-refid="13">[13]</sup> + 社区翻译 repo + Datawhale 独立中文重实现<sup class="cite" data-refid="14">[14]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 结论 5：对阿杰的 ROI 不在「能训模型」，而在「彻底搞懂概念 + 反哺产品」——选读选做 <span class="conf y">🟡 基于背景推断</span></h4>
+        <p>阿杰是产品/全栈、做 AI 学习产品、不训大模型，所以 ROI 三点：① 彻底搞懂 tokenizer/embedding/attention/上下文窗口/采样这些每天打交道却常一知半解的概念，做产品时能正确设计 prompt/RAG/token 成本；② 建立对 LLM 能力边界的物理直觉；③ 「从零搭 GPT」本身可做成产品里的 flagship 课程模块<sup class="cite" data-refid="3">[3]</sup>。<strong>不要全做：第 2-4 章必修敲，第 6-7 章选修跑，bonus 当参考手册。</strong>选读路线约 12-20 小时，全做 30-50 小时<sup class="cite" data-refid="3">[3]</sup>。详见第 9 章决策树。</p>
+      </div>
+
+      <h3>一句话路线建议</h3>
+      <div class="callout accent">
+        <p><strong>【读】第 1 章读过即可。【敲】第 2-3-4 章（分词→注意力→搭 GPT 架构）是精华，亲手敲一遍，约 8-12 小时，国内零障碍。【跑】第 5 章（预训练）读懂流程 + 跑一遍 the-verdict 玩具训练；第 6-7 章（分类/指令微调）对做产品最实用，读+跑，理解 LoRA（附录 E）和指令数据格式。【跳】bonus 里的 Llama3.2/Qwen3/MoE/KV cache/GRPO 全部先跳过，等有具体需求再回来挑。【可选续作】想碰推理/o1 类能力再上 reasoning-from-scratch（基于 Qwen3 base，不烧训练）。</strong>配套书可买可不买——免费 repo + 17h15m 视频已能走完。详见第 7、9 章。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 最大前置未知：配套书确切售价 + 中文版「新增 DeepSeek」说法待核 <span class="conf y">🟡 待确认</span></h4>
+        <p>本报告几个最影响判断的 gap：① <strong>英文配套书的确切现价</strong>——Manning 列 ebook \$38.49 / print \$41.99（约 30% off）<sup class="cite" data-refid="15">[15]</sup>，但国内电商到岸价/中文版销量数据未拿到。② <strong>中文版的 DeepSeek 说法已部分查实（Codex 审查纠正）</strong>：豆瓣/当当云阅读/天龙的目录显示中文版加了一个<strong>附录 F（推理模型，含"简要介绍 DeepSeek R1 的训练流程"）</strong>——附录 F 确实存在（零售商/电子书 TOC 佐证），但"首次新增章节"的措辞偏营销，且官方人邮/作者页仍未见明确确认 <span class="conf y">🟡 零售商 TOC 佐证</span><sup class="cite" data-refid="13">[13]</sup>。③ GPT-2 medium/large/XL 各档微调显存占用书内是否给精确表未确认，「1.5B 需 16GB」是外部社区经验值非书内权威数<sup class="cite" data-refid="16">[16]</sup>。</p>
+      </div>
+
+      <h3>🔬 跨模型审查说明（这份报告被 Codex 审过一轮）</h3>
+      <div class="callout purple">
+        <p>本报告由 Claude 4 路并行写稿后，经 <strong>Codex (GPT-5.5) 四维度对抗审查</strong>（事实/深度/缺失/角度）。<strong>已据此收紧</strong>：① DeepSeek 那条从"未核实"升级为"附录 F 确实存在（零售商 TOC 佐证含 DeepSeek R1），官方页仍未确认"；② "认可度最高/最权威"软化为"同类 star 居首"；③ "纯 PyTorch 不依赖任何库"补上"权重加载/tokenizer 仍用支撑库"；④ "几分钟跑完"限定到正文教学路径 + Ch5 玩具预训练；⑤ Apache 2.0 只覆盖代码、书/图/译本/权重/数据集各有授权。</p>
+        <p style="margin-top:10px"><strong>Codex 提出、本版未展开的"深读前可补的"清单</strong>（先按下面 ROI 建议选读选做）：</p>
+        <ol style="margin:6px 0 0;padding-left:20px;font-size:13.5px;">
+          <li><strong>逐章"实现图"</strong>（每章具体实现了什么组件、张量形状、失败点、获得什么产品直觉）——比营销式章节摘要更有用</li>
+          <li><strong>显存分档表</strong>（推理 / LoRA / 全量微调 / 预训练 各自显存，而非笼统"16GB"）</li>
+          <li><strong>中文路径评估</strong>（官方中文版 vs MLNLP 社区翻译 vs Datawhale 重实现 的版本漂移/质量/授权/章节对齐取舍）</li>
+          <li><strong>国内下载矩阵</strong>（GitHub / Azure / Backblaze / HF 镜像 / 包镜像 各自文件大小与兜底命令，实测而非断言）</li>
+          <li><strong>ROI 机会成本对比</strong>（vs Karpathy 视频 / HF course / 架构博客——对"不训大模型"的你哪个更划算）</li>
+          <li><strong>学完的 exit criteria</strong>（能讲清注意力张量形状 / 估算上下文与 token 成本 / 加载 GPT-2 权重 / 跑一个 SFT notebook / 说清玩具预训练≠产品训练 / 做出一个教学 demo）</li>
+          <li><strong>transferable vs 过时</strong>映射（GPT-2 老架构里哪些直觉可迁移、哪些要靠 bonus 的 RoPE/GQA/KV-cache/MoE 补）</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">这是什么：项目 + 配套书 + 作者 Sebastian Raschka</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>先把「三位一体」的关系拆清：一本书（理论叙事）+ 一个 repo（可跑代码）+ 一套免费视频（跟敲），三者严格对应，作者本人维护。</p>
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">~96.2k</div><div class="l">GitHub stars · 2026-05</div></div>
+        <div class="metric"><div class="v">14.7k</div><div class="l">forks</div></div>
+        <div class="metric"><div class="v">7+5</div><div class="l">正文章节 + 附录 A-E</div></div>
+        <div class="metric"><div class="v">Apache 2.0</div><div class="l">可商用许可</div></div>
+      </div>
+
+      <h3>2.1 项目本体：rasbt/LLMs-from-scratch</h3>
+      <div class="callout good">
+        <p>用<strong>纯 PyTorch、不依赖任何第三方 LLM 库</strong>，step-by-step 实现一个 GPT-like LLM：tokenization → attention → GPT 架构 → 预训练 → 分类微调 → 指令微调 → LoRA。含 Jupyter notebook + 大量 bonus 材料。约 <strong>96.2k stars / 14.7k forks，1000+ commits，2026-05-23 仍在 push，open issues 仅 2（维护极活跃）</strong><sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="17">[17]</sup>。许可证 <strong>Apache License 2.0</strong>（版权 Sebastian Raschka 2023-2026），明确允许商业使用、修改、分发与专利授权，仅需保留版权与修改声明<sup class="cite" data-refid="8">[8]</sup>。</p>
+      </div>
+
+      <h3>2.2 配套书：《Build a Large Language Model (From Scratch)》</h3>
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">📘</div>
+          <div class="name-block"><div class="pn">英文正书（Manning, 2024-09）</div><div class="ph">368 页 · ISBN 9781633437166 · Amazon 4.5★（504 评）</div></div>
+          <span class="pill accent">原版</span>
+        </div>
+        <div class="prod-body">
+          <p>repo 是其逐章配套代码，与书严格对应。Manning 现价约 <strong>ebook \$38.49 / print \$41.99 / online+audio \$34.99</strong>（约 30% off，原价 \$54.99/\$59.99/\$49.99）；Manning Pro 订阅 \$24.99/月也可读<sup class="cite" data-refid="15">[15]</sup>。Goodreads 4.7、口碑高<sup class="cite" data-refid="18">[18]</sup>。</p>
+          <div class="takeaway">书+代码+视频三模态，作者亲述、评价口碑高；英文原版对国内读者有语言门槛，可走中文版更划算。</div>
+        </div>
+      </div>
+
+      <h3>2.3 作者：Sebastian Raschka</h3>
+      <div class="callout purple">
+        <p>前 <strong>UW-Madison 统计学助理教授</strong>，2022 起加入独角兽 <strong>Lightning AI 任资深研究工程师</strong>；运营业内知名的《Ahead of AI》newsletter，另有 LLM Architecture Gallery、KV-cache 等深度技术博文<sup class="cite" data-refid="7">[7]</sup>。学术+工业双背景，内容权威且与最新进展同步，持续产出免费博客拉高 repo 价值——无明显短板，个人品牌强、可信度高<sup class="cite" data-refid="7">[7]</sup>。</p>
+      </div>
+
+      <h3>2.4 续作：《Build a Reasoning Model (From Scratch)》</h3>
+      <div class="callout info">
+        <p>同作者新书的配套 repo <strong>reasoning-from-scratch（约 4.4k star）</strong>，在预训练 LLM（用 Qwen3 base）基础上从零实现推理增强：inference-time scaling、RL（GRPO/RLVR）、蒸馏；正对 2025 DeepSeek-R1 路线<sup class="cite" data-refid="19">[19]</sup>。Manning 2025 出版，ISBN 9781633434677，8 章 + 7 附录，284+ commits，CI 过 Linux/macOS/Win<sup class="cite" data-refid="19">[19]</sup>。<strong>需先有 LLM 基础（建议先读第一本），目前暂无官方中文版信息</strong> <span class="conf r">🔴 待补研究</span>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">内容结构全览（章节地图）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这是一本「边读边手敲」的工程实战书：7 个正文章节是主线，5 个附录是补给，bonus 目录是滚动追新的进阶区。下面这张表就是 LLM 工程的标准心智模型<sup class="cite" data-refid="20">[20]</sup>。</p>
+
+      <h3>3.1 正文 7 章（主线）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>章</th><th>主题</th><th>关键内容</th><th>对阿杰</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Ch1</strong></td><td>LLM 概览</td><td>无代码，纯概念铺垫<sup class="cite" data-refid="20">[20]</sup></td><td class="check p">读过即可</td></tr>
+            <tr><td><strong>Ch2</strong></td><td>文本数据</td><td>BPE 分词 + embedding + dataloader<sup class="cite" data-refid="20">[20]</sup></td><td class="check y">✅ 必敲</td></tr>
+            <tr><td><strong>Ch3</strong></td><td>注意力机制</td><td>自注意力 → 因果掩码 → 多头注意力<sup class="cite" data-refid="20">[20]</sup></td><td class="check y">✅ 必敲（精华）</td></tr>
+            <tr><td><strong>Ch4</strong></td><td>从零搭 GPT 架构</td><td>把组件拼成完整 GPT-2 架构<sup class="cite" data-refid="20">[20]</sup></td><td class="check y">✅ 必敲</td></tr>
+            <tr><td><strong>Ch5</strong></td><td>预训练 + 加载权重</td><td>训练循环 + 加载 OpenAI GPT-2 权重 + 采样<sup class="cite" data-refid="20">[20]</sup></td><td class="check p">读懂 + 跑一遍</td></tr>
+            <tr><td><strong>Ch6</strong></td><td>分类微调</td><td>垃圾邮件分类微调<sup class="cite" data-refid="20">[20]</sup></td><td class="check y">✅ 读+跑（实用）</td></tr>
+            <tr><td><strong>Ch7</strong></td><td>指令微调 (SFT)</td><td>指令数据格式 + SFT，bonus 含 DPO<sup class="cite" data-refid="20">[20]</sup></td><td class="check y">✅ 读+跑（最相关）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3.2 附录 A-E（补给）</h3>
+      <div class="callout info">
+        <p><strong>A=PyTorch 入门（约 40 页速成）</strong> / B=参考文献 / C=习题解答 / D=训练循环增强（warmup/梯度裁剪）/ <strong>E=LoRA 参数高效微调</strong><sup class="cite" data-refid="20">[20]</sup>。每章末有习题自检，解答在附录 C<sup class="cite" data-refid="6">[6]</sup>。附录 A 是 PyTorch 不熟者的兜底，附录 E 对做产品的「定制小模型」最相关。</p>
+      </div>
+
+      <h3>3.3 Bonus 目录（滚动追新，repo 独有）</h3>
+      <div class="callout purple">
+        <p>正文之外大量可选进阶材料，是这个 repo「长期保鲜」的关键——把「GPT-2 老架构」延伸到当下真实在用的架构：<strong>现代模型从零复现</strong>（Llama 3.2 / Qwen3 dense+MoE / Qwen3.5 / Gemma 3 / Gemma 4(E2B/E4B) / Olmo 3 / Tiny Aya）+ <strong>注意力变体</strong>（KV Cache、GQA、MLA 多头潜在注意力、滑动窗口、DeepSeek 稀疏注意力、Cross-Layer KV Sharing）+ <strong>对齐/推理</strong>（DPO、GRPO/RLVR）<sup class="cite" data-refid="21">[21]</sup><sup class="cite" data-refid="22">[22]</sup>。这些多是 2025-2026 才加的新内容，是同类资源里唯一系统覆盖最新模型的<sup class="cite" data-refid="2">[2]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>⚠️ 边界提醒：</strong>主线只到「指令微调 + LoRA」，最新架构散落在 bonus 子目录、文档较散，需自己翻目录<sup class="cite" data-refid="1">[1]</sup>。定位是「理解原理」而非「训练生产级模型」，RLHF/推理强化在续作 reasoning-from-scratch 里<sup class="cite" data-refid="19">[19]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">核心章节深挖</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>挑出对「真正搞懂 LLM 内部」最关键的几节展开。这些是你敲完会有「原来如此」体验的部分。</p>
+
+      <h3>4.1 注意力机制（Ch3）——全书最精华、也最难的一章</h3>
+      <div class="callout accent">
+        <p>从自注意力（self-attention）→ 因果掩码（causal）→ 多头注意力（multi-head）层层递进<sup class="cite" data-refid="20">[20]</sup>。书评公认这一章是难点核心：真正需要的不是高深数学，而是「<strong>能跟踪 tensor 维度</strong>」的 PyTorch 直觉<sup class="cite" data-refid="11">[11]</sup>。敲通这一章，等于把整个 Transformer 的引擎拆开看了一遍。</p>
+      </div>
+
+      <h3>4.2 从零搭 GPT 架构（Ch4）</h3>
+      <div class="callout good">
+        <p>把分词、embedding、注意力、前馈层、LayerNorm、残差连接组装成完整的 GPT-2 架构<sup class="cite" data-refid="20">[20]</sup>。这一步给你「我亲手造了一个 GPT 骨架」的成就感——它还只是个未训练的空壳，但结构已经和真 GPT-2 一致。</p>
+      </div>
+
+      <h3>4.3 预训练（Ch5 上）——演示规模，别误会成「真训出可用模型」</h3>
+      <div class="callout warn">
+        <p>Ch5 演示预训练用<strong>极小数据集《The Verdict》（约 2 万字符的小说）</strong>，读者实跑记录：124M 模型在 <strong>MacBook Air CPU 约 5 分钟、RTX 3090 约 11 秒</strong>跑完一轮<sup class="cite" data-refid="9">[9]</sup>。<strong>⚠️ 关键认知：这是教学演示规模，不是真正从零训出可用模型</strong>——真实能力靠下一步加载 OpenAI 预训练权重<sup class="cite" data-refid="9">[9]</sup>。</p>
+      </div>
+
+      <h3>4.4 加载 OpenAI GPT-2 官方权重（Ch5 下）——「让模型会说话」的魔法时刻</h3>
+      <div class="callout purple">
+        <p>把你手搓的空架构填入 OpenAI 官方 GPT-2 权重，模型立刻「会说话」<sup class="cite" data-refid="20">[20]</sup>。<strong>国内注意：</strong>默认从 Azure blob（<code>openaipublic.blob.core.windows.net</code>）下载偏慢，但有 Backblaze 备份 + HF 镜像 repo <code>rasbt/gpt2-from-scratch-pytorch</code> 双通道；<code>02_alternative_weight_loading</code> 方案可直接从 HuggingFace 加载 PyTorch state_dict，配 <code>hf-mirror.com</code> 即可秒下<sup class="cite" data-refid="12">[12]</sup>。可选加载更大模型（medium 355M / large 774M / XL 1558M）用于微调，但显存压力上升<sup class="cite" data-refid="16">[16]</sup>。</p>
+      </div>
+
+      <h3>4.5 指令微调（Ch7）——对做产品最相关</h3>
+      <div class="callout good">
+        <p>理解指令数据格式 + SFT（监督微调）流程，bonus 区还有 DPO<sup class="cite" data-refid="20">[20]</sup>。<strong>这章 + 附录 E 的 LoRA</strong>对阿杰做「定制小模型 / 教学产品里的微调演示」最直接有用。注意：指令微调止于 SFT + DPO bonus，<strong>不含完整 RLHF</strong><sup class="cite" data-refid="20">[20]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">学习门槛：前置知识 + 硬件要求</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这章回答两个最实际的问题：我够格学吗？我的电脑跑得动吗？结论都是乐观的。</p>
+
+      <h3>5.1 前置知识：门槛温和</h3>
+      <div class="role-cols">
+        <div class="role-col must">
+          <h4>✅ 真正需要的</h4>
+          <ul style="font-size:13.5px;color:var(--text-soft)">
+            <li><strong>中级 Python</strong>——README 称「最重要的前置是扎实的 Python 基础」<sup class="cite" data-refid="4">[4]</sup></li>
+            <li><strong>一点 ML 基础</strong>——Manning 原文「intermediate Python + some ML」<sup class="cite" data-refid="10">[10]</sup></li>
+            <li><strong>追踪 tensor 维度的直觉</strong>——注意力章的真正难点<sup class="cite" data-refid="11">[11]</sup></li>
+          </ul>
+        </div>
+        <div class="role-col opt">
+          <h4>🟡 有兜底、非硬前置</h4>
+          <ul style="font-size:13.5px;color:var(--text-soft)">
+            <li><strong>PyTorch</strong>——附录 A 约 40 页速成，不会也能上<sup class="cite" data-refid="10">[10]</sup></li>
+            <li><strong>线性代数</strong>——只需懂矩阵乘法，可用 3Blue1Brown 补<sup class="cite" data-refid="11">[11]</sup></li>
+          </ul>
+        </div>
+        <div class="role-col never">
+          <h4>⛔ 不需要的</h4>
+          <ul style="font-size:13.5px;color:var(--text-soft)">
+            <li>深厚数学推导 / 论文级理论功底</li>
+            <li>专用 GPU / 云算力</li>
+            <li>深度 ML 研究背景</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>5.2 硬件要求：能不能 Mac / CPU / 小显卡跑？</h3>
+      <div class="callout good">
+        <h4>✅ 能。正文设计成「普通笔记本就能跑通」 <span class="conf g">🟢 多源</span></h4>
+        <p>README/书原话：「<em>designed to run on conventional laptops within a reasonable timeframe and does not require specialized hardware</em>」，代码自动检测并使用 GPU（若有）<sup class="cite" data-refid="4">[4]</sup>。正文目标只到 GPT-2 small（124M），预训练演示数据集仅 2 万字符——<strong>MacBook Air CPU 约 5 分钟、RTX 3090 约 11 秒</strong>跑完一轮<sup class="cite" data-refid="9">[9]</sup>。</p>
+      </div>
+
+      <h3>5.3 各档模型的硬件压力</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>场景</th><th>模型规模</th><th>能否笔记本/CPU</th><th>显存参考</th></tr></thead>
+          <tbody>
+            <tr><td>正文主路径（预训练演示 + 推理）</td><td>GPT-2 small 124M</td><td class="check y">✅ CPU 几分钟</td><td>无要求<sup class="cite" data-refid="4">[4]</sup></td></tr>
+            <tr><td>加载更大权重做微调</td><td>medium 355M / large 774M</td><td class="check p">⚠️ 建议 GPU/Colab</td><td>显存上升<sup class="cite" data-refid="16">[16]</sup></td></tr>
+            <tr><td>最大档全参微调</td><td>GPT-2 XL 1558M</td><td class="check n">⛔ 需 GPU</td><td>~16GB VRAM 起 <span class="conf r">🔴 外部经验</span><sup class="cite" data-refid="16">[16]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ Apple Silicon 坑：</strong>在 MPS 后端跑部分计算结果与书中（CUDA/CPU）有<strong>数值差异</strong>，书评建议纠结结果一致性时切 Google Colab<sup class="cite" data-refid="11">[11]</sup>。「GPT-2 XL 需 ~16GB VRAM」是外部社区经验值（DeepSpeed/HF 论坛），非书内权威数 <span class="conf r">🔴 估算</span><sup class="cite" data-refid="16">[16]</sup>。各章在 CPU/MPS/消费级 GPU 上的精确耗时表书内未给全 <span class="conf r">🔴 待补研究</span>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">对比同类资源（横评 + 独特价值）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>「从零学/造 LLM」赛道里有几条不同路线，搞清边界才不会选错。核心区分：<strong>rasbt 是「书+一致代码+习题」的结构化主线，Karpathy 系是「极简代码+视频、自己悟」，HF 是「用现成库」，fast.ai 是「top-down 入门」</strong>。</p>
+
+      <h3>6.1 横向对比表</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>资源</th><th>stars</th><th>形态</th><th>从零造 transformer</th><th>硬件门槛</th><th>定位</th></tr></thead>
+          <tbody>
+            <tr><td><strong>rasbt/LLMs-from-scratch</strong></td><td>~96.2k<sup class="cite" data-refid="2">[2]</sup></td><td>书+代码+17h 视频+习题</td><td class="check y">✅ 纯 PyTorch</td><td class="check y">普通笔记本</td><td>结构化主线最优</td></tr>
+            <tr><td><strong>Karpathy nn-zero-to-hero</strong></td><td>免费视频<sup class="cite" data-refid="23">[23]</sup></td><td>视频+repo（无书无习题）</td><td class="check y">✅ 字符级为主</td><td class="check y">低</td><td>底层直觉无人能敌</td></tr>
+            <tr><td><strong>Karpathy nanoGPT</strong></td><td>~44k+<sup class="cite" data-refid="24">[24]</sup></td><td>~600 行精简代码</td><td class="check p">复现非教学</td><td class="check p">需 GPU 训练</td><td><strong>2025-11 已弃用</strong></td></tr>
+            <tr><td><strong>Karpathy nanochat</strong></td><td>54.4k<sup class="cite" data-refid="25">[25]</sup></td><td>完整 ChatGPT 管线代码库</td><td class="check y">✅ 含 SFT/RL/UI</td><td class="check n">⛔ 理想 8×H100</td><td>研究/hacker 向</td></tr>
+            <tr><td><strong>HuggingFace LLM Course</strong></td><td>免费 12 章<sup class="cite" data-refid="26">[26]</sup></td><td>在线课程（有中文版）</td><td class="check n">⛔ 用现成库</td><td class="check y">Colab 可跑</td><td>用 LLM 做应用</td></tr>
+            <tr><td><strong>fast.ai</strong></td><td>免费<sup class="cite" data-refid="27">[27]</sup></td><td>top-down 视频课</td><td class="check n">⛔ DL 总入门</td><td class="check y">低</td><td>打底好选择</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>6.2 关键差异逐个说</h3>
+
+      <div class="callout good">
+        <h4>✅ rasbt 的独特价值：解释最详尽 + 章节边界最清晰 + bonus 持续追新 <span class="conf g">🟢 多源</span></h4>
+        <p>同类里 star 数最高（96.2k）<sup class="cite" data-refid="2">[2]</sup>，「书+一致代码库+视频+习题」构成完整闭环；bonus 系统覆盖 2025-2026 新模型（Qwen3/Gemma3/OLMo3/MoE/DeepSeek 稀疏注意力），是同类里唯一做到的<sup class="cite" data-refid="2">[2]</sup>。短板：篇幅大、偏「怎么做」，数学直觉/「为什么这样设计」讲得少<sup class="cite" data-refid="2">[2]</sup>。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>💡 与 Karpathy 是互补而非替代——作者本人也推荐两者都看 <span class="conf g">🟢 多源</span></h4>
+        <p>DataTalks 书评指出：Raschka 讲常规 GPT（+bonus Llama）、含分类与指令微调；Karpathy 视频偏字符级模型、呈现方式完全不同。<strong>Raschka 本人建议视频与书一起看以获得更完整图景</strong><sup class="cite" data-refid="28">[28]</sup>。Karpathy 的 'Let's build GPT'（约 2 小时）和 micrograd（手推反向传播）建立底层直觉无人能敌，正好补 rasbt 的「为什么」短板<sup class="cite" data-refid="23">[23]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ nanoGPT 已弃用；nanochat 硬件门槛高，不适合起步 <span class="conf g">🟢 多源</span></h4>
+        <p>nanoGPT 于 2025-11 标注 deprecated 留作存档，官方接班人是 <strong>nanochat</strong>（单库覆盖分词→预训练→SFT→RL→评测→推理→聊天 Web UI，约 \$48 在 8×H100 跑通）<sup class="cite" data-refid="25">[25]</sup>。但 nanochat 理想要 8×H100、偏研究 hacker、无书无逐步讲解，<strong>性价比不如先用 rasbt 在笔记本上跑通概念</strong><sup class="cite" data-refid="25">[25]</sup>。</p>
+      </div>
+
+      <div class="callout accent">
+        <h4>🎯 HF Course 和 fast.ai 不是「从零造」——是互补层 <span class="conf g">🟢 多源</span></h4>
+        <p>HF LLM Course 是「用现成库和预训练模型」做应用工程（免费、有中文版、Colab 可跑），<strong>学不到内部机制</strong>；fast.ai 是 top-down 深度学习入门，LLM 只是其中一块<sup class="cite" data-refid="26">[26]</sup><sup class="cite" data-refid="27">[27]</sup>。三者可叠成路径：<strong>先 fast.ai 打底 → rasbt 吃透内核 → HF 做应用</strong>。做 AI 学习产品很可能 rasbt + HF 两条都要，但顺序上先 rasbt 建立 mental model<sup class="cite" data-refid="29">[29]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">学习路径与时间投入</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>作者给了官方学习法，社区给了真实耗时，下面把它们和「对阿杰的选读策略」合在一起。</p>
+
+      <h3>7.1 作者官方推荐的 4 步学习法</h3>
+      <div class="callout purple">
+        <p><strong>① 先读章节（不敲码）→ ② 看视频 → ③ 跟着敲码 → ④ 做章末练习</strong>。作者说 retyping（亲手重敲）是「最好但最耗时」的方式<sup class="cite" data-refid="6">[6]</sup>。配套<strong>免费 YouTube 课约 17h15m</strong>（环境0:21/文本1:28/注意力2:16/架构0:21/预训练2:37/分类微调2:15/指令微调1:46），另有约 3 小时浓缩 workshop<sup class="cite" data-refid="6">[6]</sup>。用 uv 管理环境，Windows 需删 TensorFlow 依赖行<sup class="cite" data-refid="6">[6]</sup>。</p>
+      </div>
+
+      <h3>7.2 真实耗时</h3>
+      <div class="callout info">
+        <p>一位读者约 <strong>2 周读完（含敲码）</strong>；另有评论提醒「阅读时间会比预期长，书较厚」<sup class="cite" data-refid="30">[30]</sup>。对阿杰的<strong>选读路线约 12-20 小时</strong>（建议 2-3 周每天 1 小时），<strong>全做约 30-50 小时</strong><sup class="cite" data-refid="3">[3]</sup>。</p>
+      </div>
+
+      <h3>7.3 阿杰专属：选读 + 选做路线</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>章节</th><th>怎么对待</th><th>预估</th><th>理由</th></tr></thead>
+          <tbody>
+            <tr><td>Ch1 概览</td><td class="check p">读过即可</td><td>~0.5h</td><td>纯理论<sup class="cite" data-refid="3">[3]</sup></td></tr>
+            <tr><td>Ch2-3-4 分词/注意力/架构</td><td class="check y">✅ 必敲</td><td>8-12h</td><td>精华，国内零障碍<sup class="cite" data-refid="3">[3]</sup></td></tr>
+            <tr><td>Ch5 预训练</td><td class="check p">读懂 + 跑一遍</td><td>2-4h</td><td>不必深究优化<sup class="cite" data-refid="3">[3]</sup></td></tr>
+            <tr><td>Ch6-7 微调</td><td class="check y">✅ 读+跑</td><td>4-6h</td><td>对做产品最实用<sup class="cite" data-refid="3">[3]</sup></td></tr>
+            <tr><td>bonus（Qwen3/MoE/KV cache/GRPO）</td><td class="check n">⛔ 先全跳</td><td>按需</td><td>有具体需求再回来<sup class="cite" data-refid="3">[3]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>7.4 要不要买书？</h3>
+      <div class="callout good">
+        <p><strong>可买可不买。</strong>你完全可以靠免费 repo + 官方 17h15m 视频 + Datawhale 中文重实现走完，预算紧就不买书；想要线性叙事和最佳体验再买电子版（中文版 109 元 / 英文 ebook \$38.49）<sup class="cite" data-refid="3">[3]</sup><sup class="cite" data-refid="15">[15]</sup>。纯读不敲收益打折——核心价值在亲手敲<sup class="cite" data-refid="6">[6]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">国内可用性 + 中文资源</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这是国内视角下少见的「原版 + 官方中文 + 社区中文」三件套齐全的项目，可达性几乎无障碍。</p>
+
+      <h3>8.1 访问与下载链路</h3>
+      <div class="callout good">
+        <h4>✅ 核心数据零下载，权重有多重备份 + 成熟镜像 <span class="conf g">🟢 多源</span></h4>
+        <p>GitHub repo 本身国内可访问（偶尔需加速）；<strong>the-verdict.txt（公版文本）已直接打包在 ch02 目录无需另下</strong><sup class="cite" data-refid="5">[5]</sup>。<code>gpt_download.py</code> 内置 OpenAI 主源 + <strong>Backblaze 备份 URL</strong>；作者在 HF 上传了 <code>rasbt/gpt2-from-scratch-pytorch</code> / <code>qwen3-from-scratch</code>；国内走 <code>hf-mirror.com</code> 设 <code>export HF_ENDPOINT=https://hf-mirror.com</code> 即可<sup class="cite" data-refid="12">[12]</sup>。唯一卡点是 OpenAI 主源在国内可能超时——改用 Backblaze 备份或 HF 镜像即可绕过<sup class="cite" data-refid="12">[12]</sup>。</p>
+      </div>
+
+      <h3>8.2 中文资源生态</h3>
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">📕</div>
+          <div class="name-block"><div class="pn">官方中文版《从零构建大模型》</div><div class="ph">人民邮电/图灵 · 2025-04 · 310 页 · 109 元 · 豆瓣 9.4（248 评）</div></div>
+          <span class="pill good">官方授权</span>
+        </div>
+        <div class="prod-body">
+          <p>覃立波（中南大）/冯骁骋（哈工大）/刘乾 译，译者为 NLP 领域学者；微信读书有电子版，国内可正规获取<sup class="cite" data-refid="13">[13]</sup>。<strong>✅ 中文版的 DeepSeek 内容已部分查实（Codex 审查）：豆瓣/当当/天龙目录显示加了附录 F（推理模型，含 DeepSeek R1 训练流程简介）——附录 F 确实存在（零售商 TOC 佐证），但"首次新增章节"是营销口径、官方页仍未确认</strong> <span class="conf y">🟡</span><sup class="cite" data-refid="13">[13]</sup>。页数各源不一（豆瓣 310 / 天龙 325），以实物为准。</p>
+          <div class="takeaway">国内最低门槛入口，豆瓣高分；翻译版通常滞后于 repo 最新 bonus。</div>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <h4>🆓 社区翻译 + 独立中文重实现（免费）<span class="conf g">🟢 多源</span></h4>
+        <p>① <strong>MLNLP-World/LLMs-from-scratch-CN（约 2.6-2.7k stars）</strong>：逐章中文翻译 + 笔记，Jupyter 代码带详细中文注释，覆盖 7 章+附录+bonus，随原仓库结构走，2026-04 仍更新<sup class="cite" data-refid="14">[14]</sup>。② <strong>Datawhale/llms-from-scratch-cn（约 4.2k stars）</strong>：独立中文重实现，覆盖国产模型视角（GLM4/ChatGLM3/Llama3/RWKV/MiniCPM）——是另起炉灶非官方，与原书章节不一一对应<sup class="cite" data-refid="14">[14]</sup>。另有 skindhu 整书翻译、繁中纸书《让 AI 好好说话》、B 站中英字幕视频<sup class="cite" data-refid="14">[14]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>⚠️ 待补研究：</strong>民间翻译/PDF 的版本时效与质量未逐一核验；国内 B 站是否有官方授权（而非搬运）中文字幕视频未核实；hf-mirror.com 对 <code>rasbt/qwen3-from-scratch</code> 等具体权重 repo 的可下性未逐个实测（镜像通常同步）<span class="conf r">🔴 待补研究</span><sup class="cite" data-refid="14">[14]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">⭐ 阿杰该不该学：ROI 决策树</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这是全篇最重要的一章。按「你的目标」分流，给明确判断。阿杰的画像：产品/全栈、做 AI 学习产品、用户在国内、不训大模型。</p>
+
+      <h3>9.1 按目标分流</h3>
+      <div class="tree">
+        <div class="node q">你学这个的核心目标是什么？</div>
+        <div class="step-arrow">↓</div>
+        <div class="branches">
+          <div class="node yes"><span class="lbl y">目标 A</span><strong>理解 LLM 原理</strong><br><span style="font-size:13px;color:var(--text-soft)">→ ✅ 强烈推荐。rasbt 就是为此量身定的结构化主线，按选读+选做打<sup class="cite" data-refid="29">[29]</sup></span></div>
+          <div class="node"><span class="lbl m">目标 B</span><strong>做 AI 学习产品</strong><br><span style="font-size:13px;color:var(--text-soft)">→ ✅ 推荐但分两层：rasbt 建 mental model，HF Course 做工程落地<sup class="cite" data-refid="29">[29]</sup></span></div>
+        </div>
+        <div class="branches">
+          <div class="node no"><span class="lbl n">目标 C</span><strong>训练自己的生产级模型</strong><br><span style="font-size:13px;color:var(--text-soft)">→ ⛔ 不对口。rasbt 是「理解原理」不是「训生产模型」；要训大的另寻分布式/算力路径<sup class="cite" data-refid="1">[1]</sup></span></div>
+          <div class="node"><span class="lbl m">目标 D</span><strong>碰推理/o1/R1 类能力</strong><br><span style="font-size:13px;color:var(--text-soft)">→ 先做完主书，再上续作 reasoning-from-scratch（基于 Qwen3 base，不烧训练）<sup class="cite" data-refid="19">[19]</sup></span></div>
+        </div>
+      </div>
+
+      <h3>9.2 对阿杰的明确判断：值得学，但选读选做</h3>
+      <div class="callout good">
+        <h4>✅ 为什么值得（三个 ROI 点）<span class="conf y">🟡 基于背景推断</span></h4>
+        <p><strong>① 彻底搞懂高频概念：</strong>tokenizer/embedding/attention/上下文窗口/采样这些每天打交道却常一知半解的东西——做学习产品时能正确设计 prompt、RAG、token 成本、context 策略<sup class="cite" data-refid="29">[29]</sup>。<strong>② 建立 LLM 能力边界的物理直觉：</strong>少踩「让模型干它结构上干不了的事」的坑<sup class="cite" data-refid="29">[29]</sup>。<strong>③ 可直接复用的「教学母本」：</strong>把「从零搭 GPT」做成你 AI 学习产品的一个 flagship 课程模块，省去自己设计课程；作者的免费博客（KV-cache/架构对比）也是很好的内容选题参考<sup class="cite" data-refid="31">[31]</sup>。</p>
+      </div>
+
+      <div class="callout accent">
+        <h4>🎯 为什么对你低成本、高匹配 <span class="conf g">🟢 多源</span></h4>
+        <p><strong>硬件零负担</strong>——现成 Mac/笔记本就能跑通正文，不用买卡、不用云 GPU 烧钱<sup class="cite" data-refid="4">[4]</sup>。<strong>门槛匹配</strong>——中级 Python 就够，PyTorch/线代有附录 A 和 3Blue1Brown 兜底<sup class="cite" data-refid="10">[10]</sup>。<strong>国内可达</strong>——数据在 repo、权重配 hf-mirror.com 秒下、中文版+社区翻译让你无语言障碍<sup class="cite" data-refid="12">[12]</sup><sup class="cite" data-refid="13">[13]</sup>。<strong>许可友好</strong>——Apache 2.0 可商用，代码和讲解能直接吸收进产品/课程，无 license 顾虑<sup class="cite" data-refid="8">[8]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 但别全做——这是 ROI 最高的学法 <span class="conf y">🟡 基于背景推断</span></h4>
+        <p>把<strong>第 2-4 章当必修课认真敲</strong>（拿到「我能造一个能说话的模型」的成就感），<strong>第 6-7 章当选修跑通理解</strong>（这跟你做学习产品的「定制小模型」最相关），<strong>其余（预训练优化细节、bonus 新架构）当参考手册</strong>，等真有具体需求（比如想讲推理模型）再回来挑着看<sup class="cite" data-refid="3">[3]</sup>。进阶别从零训大的，直接看 repo 里 Llama3.2/Qwen3 的 from-scratch 实现去理解你产品里实际会用的现代模型内部<sup class="cite" data-refid="3">[3]</sup>。</p>
+      </div>
+
+      <div class="callout purple">
+        <h4>🧭 落地路线一句话 <span class="conf y">🟡 基于背景推断</span></h4>
+        <p>先啃 Ch2-Ch5 主线（分词→注意力→搭 GPT→加载权重生成文本）拿到成就感，再按需进 Ch6/7 微调；配套 15-17h 免费视频可当背景播放跟敲；总预算选读路线 12-20 小时<sup class="cite" data-refid="3">[3]</sup>。做 AI 学习产品很可能 rasbt + HF Course 两条都要，但<strong>顺序上先 rasbt 建立 mental model，再 HF 做工程落地</strong><sup class="cite" data-refid="29">[29]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">常见卡点与避坑</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>把社区/书评里反复出现的坑集中列出，照着绕能省不少时间。</p>
+
+      <div class="callout warn">
+        <h4>⚠️ 坑 1：Apple Silicon (MPS) 数值与书里对不上 <span class="conf y">🟡 单源</span></h4>
+        <p>在 Apple Silicon 的 MPS 后端上跑部分计算，结果与书中（CUDA/CPU）有数值差异。书评建议：纠结结果一致性时切 Google Colab 二刷<sup class="cite" data-refid="11">[11]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 坑 2：GPT-2 权重国内下不动 <span class="conf g">🟢 多源</span></h4>
+        <p>Ch5 默认从 Azure blob 下 GPT-2 权重，国内偏慢/不稳。解法：用 <code>02_alternative_weight_loading</code> 从 HuggingFace 加载，或设 <code>export HF_ENDPOINT=https://hf-mirror.com</code> 走镜像；原始权重还需 TensorFlow 来读再转 PyTorch（HF 方案可绕过）<sup class="cite" data-refid="12">[12]</sup>。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>💡 坑 3：注意力章 tensor 维度容易绕晕 <span class="conf g">🟢 多源</span></h4>
+        <p>Ch3 是公认难点，难在追踪 tensor 维度而非数学。配合 Karpathy 'Let's build GPT' 视频（约 2 小时）补直觉效果好，作者本人也推荐视频+书一起看<sup class="cite" data-refid="11">[11]</sup><sup class="cite" data-refid="28">[28]</sup>。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>💡 坑 4：Windows 环境依赖 + uv 管理 <span class="conf g">🟢 单源</span></h4>
+        <p>repo 用 uv 管理环境；<strong>Windows 需删掉 TensorFlow 依赖行</strong>否则可能装不上<sup class="cite" data-refid="6">[6]</sup>。Mac/Linux 一般无此问题。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 坑 5：把「预训练演示」误当「训出可用模型」 <span class="conf g">🟢 多源</span></h4>
+        <p>Ch5 用 2 万字符的 The Verdict 训出来的是玩具模型，<strong>真实能力靠加载 OpenAI 权重</strong>，别期望从零训出能用的 LLM<sup class="cite" data-refid="9">[9]</sup>。这是认知坑不是技术坑，但最容易让初学者失望。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">这个项目教不了的（边界）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>清楚边界才能配齐拼图。rasbt 教 pretrain + SFT，下面这些它（主线）不教，需要时去别处补。</p>
+
+      <div class="role-cols">
+        <div class="role-col never">
+          <h4>⛔ 主线明确不覆盖</h4>
+          <ul style="font-size:13.5px;color:var(--text-soft)">
+            <li><strong>完整 RLHF</strong>——主线止于 SFT，DPO 在 bonus<sup class="cite" data-refid="20">[20]</sup></li>
+            <li><strong>分布式/超大规模训练</strong>——定位是笔记本可跑的理解，不是生产训练<sup class="cite" data-refid="1">[1]</sup></li>
+            <li><strong>推理部署/serving 工程</strong>——不在范围<sup class="cite" data-refid="1">[1]</sup></li>
+            <li><strong>用现成库做应用</strong>——那是 HF Course 的活<sup class="cite" data-refid="26">[26]</sup></li>
+          </ul>
+        </div>
+        <div class="role-col opt">
+          <h4>🟡 bonus 部分覆盖（散）</h4>
+          <ul style="font-size:13.5px;color:var(--text-soft)">
+            <li>现代架构（Qwen3/Gemma3/MoE/KV cache/GQA/MLA）<sup class="cite" data-refid="21">[21]</sup></li>
+            <li>DPO / 偏好对齐<sup class="cite" data-refid="22">[22]</sup></li>
+            <li>FLOPs 分析、注意力变体<sup class="cite" data-refid="21">[21]</sup></li>
+          </ul>
+        </div>
+        <div class="role-col must">
+          <h4>✅ 续作补齐的（reasoning-from-scratch）</h4>
+          <ul style="font-size:13.5px;color:var(--text-soft)">
+            <li>inference-time scaling<sup class="cite" data-refid="19">[19]</sup></li>
+            <li>RL：GRPO / RLVR（可验证奖励）<sup class="cite" data-refid="19">[19]</sup></li>
+            <li>蒸馏 + judgment/benchmark 评测<sup class="cite" data-refid="19">[19]</sup></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>🎯 给阿杰的配齐建议：</strong>rasbt 主线吃透「LLM 内核」后，做产品落地走 <strong>HuggingFace LLM Course</strong>（用现成库/部署/demo）<sup class="cite" data-refid="26">[26]</sup>；想理解 o1/R1 推理范式走 <strong>reasoning-from-scratch 续作</strong><sup class="cite" data-refid="19">[19]</sup>；底子薄先用 <strong>fast.ai</strong> 打底<sup class="cite" data-refid="27">[27]</sup>。这四块拼起来覆盖「从原理到应用」的完整链路。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 FAQ ===== -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">FAQ</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">完全没碰过 PyTorch 能学吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>能。PyTorch 非硬前置——附录 A 有约 40 页速成，最重要的是扎实的 Python 基础<sup class="cite" data-refid="4">[4]</sup><sup class="cite" data-refid="10">[10]</sup>。数学只需懂矩阵乘法，线代可用 3Blue1Brown 补<sup class="cite" data-refid="11">[11]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">我只有 MacBook，没有显卡，跑得动吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>跑得动。正文设计成普通笔记本 CPU 几分钟跑完，目标只到 GPT-2 124M、预训练演示数据集仅 2 万字符（MacBook Air CPU 约 5 分钟）<sup class="cite" data-refid="4">[4]</sup><sup class="cite" data-refid="9">[9]</sup>。注意 Apple Silicon (MPS) 上部分数值会和书里（CUDA）对不上，纠结一致性时切 Colab<sup class="cite" data-refid="11">[11]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">国内能正常学吗？要不要翻墙？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>能正常学。GitHub repo 可 clone，核心数据 the-verdict.txt 已打包在 repo<sup class="cite" data-refid="5">[5]</sup>；唯一外网卡点是下 GPT-2 权重，设 <code>export HF_ENDPOINT=https://hf-mirror.com</code> 即可，另有 Backblaze 备份 URL<sup class="cite" data-refid="12">[12]</sup>。中文版+社区翻译+B 站视频让你无语言障碍<sup class="cite" data-refid="13">[13]</sup><sup class="cite" data-refid="14">[14]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">买英文书还是中文版？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>国内读者推荐官方中文版《从零构建大模型》（人邮/图灵 2025-04，109 元，豆瓣 9.4），译者为 NLP 学者，微信读书有电子版<sup class="cite" data-refid="13">[13]</sup>。英文 ebook \$38.49/print \$41.99，与 repo 最新 bonus 同步更好<sup class="cite" data-refid="15">[15]</sup>。其实书可买可不买——免费 repo + 17h15m 视频已够<sup class="cite" data-refid="3">[3]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">和 Karpathy 的视频比，选哪个？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不是二选一，是互补——作者本人也推荐两者都看<sup class="cite" data-refid="28">[28]</sup>。rasbt 是结构化主线（书+一致代码+习题），Karpathy 是「极简代码+视频、建立底层直觉」。主线吃 rasbt，想要直觉补强时穿插 Karpathy 的 'Let's build GPT'（约 2 小时）和 micrograd<sup class="cite" data-refid="23">[23]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">学完能自己训出一个 ChatGPT 吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不能，也不是它的目标。它教你理解 LLM 内部机制、加载现成权重、做微调，主线止于 GPT-2 量级 + SFT<sup class="cite" data-refid="1">[1]</sup>。想要完整 ChatGPT 端到端管线（含 RL/聊天 UI）看 Karpathy nanochat（但要 8×H100 级硬件）<sup class="cite" data-refid="25">[25]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">这个 repo 还在更新吗？会过时吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>维护极活跃，2026-05-23 仍在 push，1000+ commits、open issues 仅 2<sup class="cite" data-refid="17">[17]</sup>。靠 bonus 目录滚动追新到 2025-2026 最新架构（Qwen3/Gemma3/OLMo3/MoE/DeepSeek 稀疏注意力），不容易过时<sup class="cite" data-refid="21">[21]</sup>。是否出第 2 版未查到明确信息——目前看是靠 bonus 滚动更新而非出新版 <span class="conf r">🔴 待补</span>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">可以把代码用在我的商业产品里吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>可以。许可证是 Apache License 2.0，明确允许商业使用、修改、分发与专利授权，仅需保留版权与修改声明<sup class="cite" data-refid="8">[8]</sup>。对做 AI 学习产品的开发者无 license 顾虑。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">大概要花多久？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>一位读者约 2 周读完（含敲码）<sup class="cite" data-refid="30">[30]</sup>。对阿杰的选读路线约 12-20 小时（2-3 周每天 1 小时），全做约 30-50 小时<sup class="cite" data-refid="3">[3]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">续作《Build a Reasoning Model》要不要一起学？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>对阿杰属「锦上添花」，非入门必读，先做完主书再说<sup class="cite" data-refid="3">[3]</sup>。它在 Qwen3 base 上从零实现推理增强（inference-time scaling / GRPO / 蒸馏），正对 2025 DeepSeek-R1 浪潮；想理解 o1/R1 范式或做推理方向产品时再上<sup class="cite" data-refid="19">[19]</sup>。目前暂无官方中文版信息<span class="conf r">🔴 待补</span>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">做 AI 学习产品的话，学完它就够了吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不够，但它是关键的第一块。它建「LLM 内核 mental model」，做产品落地还要 HuggingFace LLM Course（用现成库/部署/demo，有中文版）<sup class="cite" data-refid="26">[26]</sup>。顺序上先 rasbt 后 HF<sup class="cite" data-refid="29">[29]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">第一步应该先做什么？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>clone repo → 用 uv 配环境（Windows 删 TensorFlow 依赖行）→ 直接啃 Ch2-3-4 亲手敲（分词/注意力/搭 GPT）<sup class="cite" data-refid="6">[6]</sup>。这部分国内零障碍、CPU 几分钟跑完，敲完拿到「我造了个 GPT 骨架」的成就感后再往下<sup class="cite" data-refid="3">[3]</sup>。</p></div></div>
+
+    </div>
+  </section>
+
+  <!-- ===== CH13 References ===== -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">References</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13px;color:var(--text-mute)">访问日期均为 2026-05-29。悬停 inline <sup class="cite" data-refid="1">[1]</sup> 标记可预览来源。</p>
+      <ol class="ref-list">
+        <li id="ref-1">rasbt/LLMs-from-scratch — GitHub（纯 PyTorch 从零实现 GPT / ch01-07 + 附录 A-E + bonus / 主章节笔记本可跑 / 定位理解原理）· <a href="https://github.com/rasbt/LLMs-from-scratch" target="_blank" rel="noopener">github.com/rasbt/LLMs-from-scratch</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×6</span></li>
+        <li id="ref-2">GitHub repo 页面 star/fork 快照（约 96.2k stars / 14.7k forks，2026-05；高于 nanochat 54.4k、nanoGPT ~44k；bonus 系统覆盖 2025-2026 新架构）· <a href="https://github.com/rasbt/LLMs-from-scratch" target="_blank" rel="noopener">github.com/rasbt/LLMs-from-scratch</a><span class="ref-meta">· 访问 2026-05-29 · 🟢 多源 · 引用 ×6</span></li>
+        <li id="ref-3">综合 forJay 研判（选读+选做路线 / 选读 12-20h、全做 30-50h / Ch2-4 必敲、Ch6-7 选跑、bonus 跳）· 4 路调研收敛 <span class="ref-meta">· 🟡 基于阿杰背景推断 · 引用 ×多</span></li>
+        <li id="ref-4">README.md — rasbt/LLMs-from-scratch（"designed to run on conventional laptops within a reasonable timeframe and does not require specialized hardware" / 代码自动用 GPU / 前置扎实 Python）· <a href="https://github.com/rasbt/LLMs-from-scratch/blob/main/README.md" target="_blank" rel="noopener">github.com/.../README.md</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×多</span></li>
+        <li id="ref-5">setup/README + ch02（the-verdict.txt 公版文本已打包在 repo 无需另下 / GitHub 国内可访问）· <a href="https://github.com/rasbt/LLMs-from-scratch/blob/main/setup/README.md" target="_blank" rel="noopener">github.com/.../setup/README.md</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-6">Coding LLMs from the Ground Up — 作者 4 步学习法（读→看视频→敲码→练习）+ 免费 YouTube 约 17h15m + 3h workshop / uv 管理环境 / Windows 删 TensorFlow · <a href="https://sebastianraschka.com/llms-from-scratch/" target="_blank" rel="noopener">sebastianraschka.com/llms-from-scratch</a> + <a href="https://magazine.sebastianraschka.com/p/coding-llms-from-the-ground-up" target="_blank" rel="noopener">magazine.sebastianraschka.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×多</span></li>
+        <li id="ref-7">Sebastian Raschka, PhD — 个人主页（前 UW-Madison 统计学助理教授 / 2022 起 Lightning AI 资深研究工程师 / 《Ahead of AI》newsletter / LLM Architecture Gallery / KV-cache 博文）· <a href="https://sebastianraschka.com/" target="_blank" rel="noopener">sebastianraschka.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-8">LICENSE.txt — rasbt/LLMs-from-scratch（Apache License 2.0 / 版权 Sebastian Raschka 2023-2026 / 允许商用·修改·分发·专利授权 / 需保留版权与修改声明）· <a href="https://github.com/rasbt/LLMs-from-scratch/blob/main/LICENSE.txt" target="_blank" rel="noopener">github.com/.../LICENSE.txt</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×5</span></li>
+        <li id="ref-9">Giles' blog: finally training our LLM（读者实跑 124M + The Verdict 约 2 万字符 / MacBook Air CPU 约 5 分钟、RTX 3090 约 11 秒 / 教学演示非可用模型 / 能力靠加载 OpenAI 权重）· <a href="https://www.gilesthomas.com/2025/10/llm-from-scratch-22-finally-training-our-llm" target="_blank" rel="noopener">gilesthomas.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×多</span></li>
+        <li id="ref-10">Build a Large Language Model (From Scratch) — Manning 书页（"intermediate Python skills and some knowledge of machine learning" / PyTorch 附录 A 速成 / 368 页 / ISBN 9781633437166 / 2024-09）· <a href="https://www.manning.com/books/build-a-large-language-model-from-scratch" target="_blank" rel="noopener">manning.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×多</span></li>
+        <li id="ref-11">Book review by uponthesky — dev.to（注意力章难点=追踪 tensor 维度 / 线代用 3Blue1Brown 补 / Apple Silicon MPS 数值与书中 CUDA 不一致、建议 Colab）· <a href="https://dev.to/uponthesky/book-review-build-a-large-language-model-from-scratch-by-sebastian-raschka-1286" target="_blank" rel="noopener">dev.to/uponthesky</a><span class="ref-meta">· 访问 2026-05-29 · 🟡 单源为主 · 引用 ×多</span></li>
+        <li id="ref-12">LLMs-from-scratch Discussion #273 + HF-Mirror（GPT-2 权重 Azure blob 主源 + Backblaze 备份 + HF 镜像 rasbt/gpt2-from-scratch-pytorch / 02_alternative_weight_loading / export HF_ENDPOINT=https://hf-mirror.com）· <a href="https://github.com/rasbt/LLMs-from-scratch/discussions/273" target="_blank" rel="noopener">github.com discussions/273</a> + <a href="https://hf-mirror.com/" target="_blank" rel="noopener">hf-mirror.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×多</span></li>
+        <li id="ref-13">从零构建大模型 — 豆瓣（官方授权简体中文版 / 人民邮电·图灵 / 2025-04 / 310 页 / 109 元 / 覃立波·冯骁骋·刘乾 译 / 豆瓣 9.4·248 评 / 微信读书有电子版；"新增 DeepSeek 解析"来自营销稿未核实 🔴）· <a href="https://book.douban.com/subject/37305124/" target="_blank" rel="noopener">book.douban.com/subject/37305124</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×多</span></li>
+        <li id="ref-14">中文资源生态：MLNLP-World/LLMs-from-scratch-CN（约 2.6-2.7k★逐章翻译+中文注释 notebook，2026-04 更新）+ Datawhale/llms-from-scratch-cn（约 4.2k★独立中文重实现 GLM4/ChatGLM3/Llama3/RWKV/MiniCPM）+ skindhu 整书翻译 + B 站中英字幕 · <a href="https://github.com/MLNLP-World/LLMs-from-scratch-CN" target="_blank" rel="noopener">MLNLP-World CN</a> + <a href="https://github.com/datawhalechina/llms-from-scratch-cn" target="_blank" rel="noopener">datawhalechina/llms-from-scratch-cn</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×多</span></li>
+        <li id="ref-15">Manning book page — 定价（ebook \$38.49 / print \$41.99 / online+audio \$34.99，约 30% off；原价 \$54.99/\$59.99/\$49.99；Manning Pro \$24.99/月）· <a href="https://www.manning.com/books/build-a-large-language-model-from-scratch" target="_blank" rel="noopener">manning.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-16">ch05 + 社区经验（GPT-2 medium 355M/large 774M/XL 1558M 可选加载微调，显存上升；GPT-2 XL 全参微调 ~16GB VRAM 起为外部社区经验值非书内权威数 🔴）· <a href="https://github.com/rasbt/LLMs-from-scratch/tree/main/ch05" target="_blank" rel="noopener">github.com/.../ch05</a><span class="ref-meta">· 访问 2026-05-29 · 🔴 部分估算 · 引用 ×3</span></li>
+        <li id="ref-17">GitHub API 实测（stargazers_count=96244, forks=14720, pushed_at=2026-05-23, open_issues=2, 1054+ commits）· <a href="https://github.com/rasbt/LLMs-from-scratch" target="_blank" rel="noopener">github.com/rasbt/LLMs-from-scratch</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-18">Build a Large Language Model (From Scratch) — Goodreads / Amazon（Goodreads 4.7 / Amazon 4.5★ 504 评）· <a href="https://www.goodreads.com/book/show/206336240-build-a-large-language-model-from-scratch" target="_blank" rel="noopener">goodreads.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-19">rasbt/reasoning-from-scratch — GitHub（续作配套 / 约 4.4k★ / 8 章+7 附录 / 基于 Qwen3 base / inference-time scaling·GRPO·RLVR·蒸馏 / Manning 2025 ISBN 9781633434677 / 284+ commits / 暂无官方中文版信息）· <a href="https://github.com/rasbt/reasoning-from-scratch" target="_blank" rel="noopener">github.com/rasbt/reasoning-from-scratch</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×多</span></li>
+        <li id="ref-20">正文章节结构 — sebastianraschka.com/llms-from-scratch + Manning 目录（Ch1 概览无代码 / Ch2 BPE+embedding+dataloader / Ch3 自注意力→因果→多头 / Ch4 搭 GPT / Ch5 预训练+加载 GPT-2 权重+采样 / Ch6 分类微调 / Ch7 指令微调 SFT；附录 A PyTorch B 参考 C 习题解答 D 训练增强 E LoRA）· <a href="https://sebastianraschka.com/llms-from-scratch/" target="_blank" rel="noopener">sebastianraschka.com/llms-from-scratch</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×多</span></li>
+        <li id="ref-21">Bonus 架构实现（ch04/05_mla 等 / Llama3.2 / Qwen3 dense+MoE / Qwen3.5 / Gemma3 / Gemma4 E2B·E4B / Olmo3 / Tiny Aya / KV Cache / GQA / MLA / 滑动窗口 / DeepSeek 稀疏注意力 / Cross-Layer KV Sharing / FLOPs 分析）· <a href="https://github.com/rasbt/LLMs-from-scratch/tree/main/ch04/05_mla" target="_blank" rel="noopener">github.com/.../ch04/05_mla</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×3</span></li>
+        <li id="ref-22">README bonus 区 — DPO / GRPO / RLVR / self-consistency（对齐与推理方法 bonus）· <a href="https://github.com/rasbt/LLMs-from-scratch" target="_blank" rel="noopener">github.com/rasbt/LLMs-from-scratch</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-23">Karpathy — nn-zero-to-hero（micrograd 手推反向传播 / makemore 字符级 / Let's build GPT 约 2 小时 / 免费 YouTube+repo / 前置基础 Python+高中微积分 / 建立底层直觉 / 互补 rasbt）· <a href="https://karpathy.ai/zero-to-hero.html" target="_blank" rel="noopener">karpathy.ai/zero-to-hero</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-24">Karpathy — nanoGPT（~600 行 train.py+model.py / 复现中型 GPT-2 / 约 44k+★ / 2025-11 标注 deprecated 留存档 / 指引改用 nanochat）· <a href="https://github.com/karpathy/nanoGPT" target="_blank" rel="noopener">github.com/karpathy/nanoGPT</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+        <li id="ref-25">Karpathy — nanochat（54.4k★ / 完整 ChatGPT 管线含分词·预训练·SFT·RL·评测·推理·聊天 Web UI / 约 \$48 在 8×H100 跑通、spot 约 \$15 / 为 8×H100 设计 / 偏研究 hacker / 是代码库非课程）· <a href="https://github.com/karpathy/nanochat" target="_blank" rel="noopener">github.com/karpathy/nanochat</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×多</span></li>
+        <li id="ref-26">Hugging Face LLM Course — chapter1（免费 12 章 / 用 Transformers·Datasets·Tokenizers·Accelerate+Hub / 用现成库和预训练模型非从零造 transformer / 有简体中文 / Colab 可跑 / 覆盖部署与 demo / 与 rasbt 互补）· <a href="https://huggingface.co/learn/llm-course/chapter1/1" target="_blank" rel="noopener">huggingface.co/learn/llm-course</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×多</span></li>
+        <li id="ref-27">fast.ai — Practical Deep Learning for Coders（Jeremy Howard / top-down 先跑通 SOTA 再讲原理 / 免费 / 前置约 1 年编程+高中数学 / PyTorch+fastai / DL 总入门最友好 / 上 rasbt 前打底）· <a href="https://course.fast.ai/" target="_blank" rel="noopener">course.fast.ai</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-28">Build a Large Language Model From Scratch — DataTalks.Club 书评（Raschka 讲常规 GPT+bonus Llama·含分类与指令微调；Karpathy 偏字符级·呈现方式不同；作者本人建议视频与书一起看获更完整图景）· <a href="https://datatalks.club/books/20241017-build-large-language-model-from-scratch.html" target="_blank" rel="noopener">datatalks.club</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×2</span></li>
+        <li id="ref-29">综合定位研判（rasbt=造模型懂原理 / HF Course=用现成库做产品；做 AI 学习产品两条都要、先 rasbt 建 mental model 再 HF 落地 / fast.ai 打底→rasbt 内核→HF 应用）· 4 路调研收敛 <span class="ref-meta">· 🟡 基于背景推断 · 引用 ×多</span></li>
+        <li id="ref-30">Review: Build a Large Language Model from Scratch — Medium（一位读者约 2 周读完含敲码 / 提醒阅读时间比预期长、书较厚 / Apple MPS 结果不一致小坑）· <a href="https://medium.com/@minguinialfredo/review-build-a-large-language-model-from-scratch-by-sebastian-raschka-e6a5245e8088" target="_blank" rel="noopener">medium.com</a><span class="ref-meta">· 访问 2026-05-29 · 🟡 单源 · 引用 ×1</span></li>
+        <li id="ref-31">作者免费技术博文 — Ahead of AI / KV-cache / LLM Architecture Gallery（可作 AI 学习产品的内容选题参考；教学范式"从零逐章+笔记本可跑+大量配图"本身是好模板）· <a href="https://magazine.sebastianraschka.com/" target="_blank" rel="noopener">magazine.sebastianraschka.com</a><span class="ref-meta">· 访问 2026-05-29 · 引用 ×1</span></li>
+      </ol>
+    </div>
+  </section>
+
+</main>
+
+<button class="back-to-top" id="backTop" aria-label="回到顶部">↑</button>
+
+<footer>
+  <p>无忌 Deep Research · 4 路并行调研（项目+作者+书 / 内容结构+门槛+硬件 / 同类对比 / 学习路径+国内+ROI）+ Codex 跨模型四维审查 · 2026-05-29 · 31 来源 · 数字均 inline 引用，关键项标可信度</p>
+  <p style="font-size:12px;margin-top:6px">⚠️ 最大不确定性（经 Codex 审查收窄）：① 中文版附录 F（含 DeepSeek R1）已由零售商 TOC 佐证存在，"首次新增章节"为营销口径、官方页未确认 ② GPT-2 各档微调精确显存书内未给表（16GB 为外部经验值）③ 国内下载/中文路径为口径速查、未逐一实测 ④ reasoning-from-scratch 是否有中文版未确认。Codex 建议补的逐章实现图/显存分档/ROI 对比/exit criteria 见第 1 章末「待深化清单」。star/价格/版本均标可信度（🟢多源/🟡单源/🔴估算）。</p>
+</footer>
+
+<script>
+(function() {
+  let activePopover=null,activeTrigger=null,hideTimer=null;
+  function getRefContent(refid){const el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){const r=trigger.getBoundingClientRect();const popW=pop.offsetWidth,popH=pop.offsetHeight;let left=r.left+window.scrollX;if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;if(left<12)left=12;let top=r.bottom+window.scrollY+6;if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}pop.style.left=left+'px';pop.style.top=top+'px';}
+  function showPopover(trigger){if(activeTrigger===trigger&&activePopover)return;if(activePopover){activePopover.remove();activePopover=null;}const content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;const pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;document.body.appendChild(pop);positionPopover(pop,trigger);activePopover=pop;activeTrigger=trigger;pop.addEventListener('mouseenter',()=>{if(hideTimer)clearTimeout(hideTimer);});pop.addEventListener('mouseleave',scheduleHide);}
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(()=>{if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){document.querySelectorAll('sup.cite[data-refid]').forEach(sup=>{sup.addEventListener('mouseenter',()=>showPopover(sup));sup.addEventListener('mouseleave',scheduleHide);sup.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});});document.addEventListener('click',e=>{if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+
+<script>
+(function(){
+  // 主题切换
+  var themeBtn=document.getElementById('themeToggle');
+  var saved=localStorage.getItem('llmscratch-theme');
+  if(saved){document.body.setAttribute('data-theme',saved);themeBtn.textContent=saved==='dark'?'☀️':'🌙';}
+  themeBtn.addEventListener('click',function(){
+    var cur=document.body.getAttribute('data-theme')==='dark'?'light':'dark';
+    document.body.setAttribute('data-theme',cur);
+    localStorage.setItem('llmscratch-theme',cur);
+    themeBtn.textContent=cur==='dark'?'☀️':'🌙';
+  });
+
+  // 进度条 + 回到顶部
+  var progressEl=document.getElementById('progress');
+  var backTopEl=document.getElementById('backTop');
+  function updateProgress(){
+    var docHeight=document.documentElement.scrollHeight-window.innerHeight;
+    var scrolled=window.scrollY;
+    var ratio=docHeight>0?scrolled/docHeight:0;
+    progressEl.style.width=(ratio*100)+'%';
+    backTopEl.classList.toggle('show',scrolled>400);
+  }
+  window.addEventListener('scroll',updateProgress,{passive:true});
+  updateProgress();
+  backTopEl.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+
+  // 章节折叠
+  document.querySelectorAll('section.chapter > h2').forEach(function(h2){
+    h2.addEventListener('click',function(){h2.parentElement.classList.toggle('collapsed');});
+  });
+
+  // 抽屉导航
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  function closeNav(){nav.classList.remove('open');ov.classList.remove('show');}
+  if(nav&&tog&&ov){
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',closeNav);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)closeNav();});});
+  }
+
+  // anchor 点击展开折叠章节
+  var anchorLinks=document.querySelectorAll('#anchorList a');
+  anchorLinks.forEach(function(a){
+    a.addEventListener('click',function(){
+      var target=document.getElementById(a.dataset.target);
+      if(target&&target.classList.contains('collapsed'))target.classList.remove('collapsed');
+    });
+  });
+
+  // scroll-spy 高亮
+  var sections=Array.prototype.map.call(anchorLinks,function(a){return document.getElementById(a.dataset.target);}).filter(Boolean);
+  function highlightAnchor(){
+    var offset=120,current=null;
+    for(var i=0;i<sections.length;i++){var rect=sections[i].getBoundingClientRect();if(rect.top-offset<=0)current=sections[i].id;}
+    anchorLinks.forEach(function(a){a.classList.toggle('active',a.dataset.target===current);});
+    var activeLink=document.querySelector('#anchorList a.active');
+    if(activeLink)activeLink.scrollIntoView({block:'nearest'});
+  }
+  window.addEventListener('scroll',highlightAnchor,{passive:true});
+  highlightAnchor();
+
+  // 表格行高亮
+  document.querySelectorAll('tbody tr').forEach(function(tr){
+    tr.addEventListener('click',function(){
+      tr.parentElement.querySelectorAll('tr.row-highlight').forEach(function(o){if(o!==tr)o.classList.remove('row-highlight');});
+      tr.classList.toggle('row-highlight');
+    });
+  });
+
+  // FAQ
+  document.querySelectorAll('.faq-q').forEach(function(q){
+    q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+  });
+})();
+</script>
+
+</body>
+</html>

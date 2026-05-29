@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>四大模型对比 2026 · Claude Code / Codex / Gemini / Grok · 无忌 Deep Research · 2026-05-29</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1d23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --border-strong: #cdd2da;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --accent-text: #1d4ed8;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #0891b2;
+    --info-soft: #cffafe;
+    --code-bg: #f1f3f7;
+    --purple: #7c3aed;
+    --purple-soft: #ede9fe;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1c2030;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #b6bcc9;
+    --text-mute: #8a92a3;
+    --border: #2a2f3d;
+    --border-strong: #3a4154;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a55;
+    --accent-text: #93c5fd;
+    --good: #4ade80;
+    --good-soft: #14532d55;
+    --warn: #fbbf24;
+    --warn-soft: #78350f55;
+    --bad: #f87171;
+    --bad-soft: #7f1d1d55;
+    --info: #22d3ee;
+    --info-soft: #155e7555;
+    --code-bg: #0a0d14;
+    --purple: #a78bfa;
+    --purple-soft: #4c1d9555;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 28px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 3000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  hr.soft { border: none; height: 1px; background: var(--border); margin: 16px 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .node.yes { border-color: var(--good); }
+  .tree .node.no { border-color: var(--bad); }
+  .tree .branches { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .role-cols { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 14px 0; }
+  .role-col { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-elevated); }
+  .role-col h4 { margin: 0 0 8px; font-size: 14px; color: var(--text); }
+  .role-col.must { background: var(--accent-soft); border-color: var(--accent); }
+  .role-col.opt { background: var(--warn-soft); border-color: var(--warn); }
+  .role-col.never { background: var(--bad-soft); border-color: var(--bad); }
+  .role-col ul { margin: 4px 0 0; padding-left: 18px; }
+  .prod-card { margin: 12px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .prod-head { padding: 10px 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); }
+  .prod-head .ico { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; background: var(--accent-soft); }
+  .prod-head .name-block { flex: 1; min-width: 140px; }
+  .prod-head .pn { font-size: 15px; font-weight: 700; color: var(--text); }
+  .prod-head .ph { font-size: 12px; color: var(--text-mute); font-family: ui-monospace, monospace; margin-top: 1px; }
+  .prod-body { padding: 10px 14px; font-size: 14px; }
+  .prod-body p { color: var(--text-soft); margin: 6px 0; }
+  .prod-body .takeaway { margin-top: 8px; padding: 8px 10px; background: var(--accent-soft); border-radius: 8px; border-left: 3px solid var(--accent); color: var(--text); font-size: 13.5px; }
+  .prod-body .takeaway::before { content: "💡 启示  "; font-weight: 700; color: var(--accent-text); }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(250,204,21,0.3); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated,#fff); color: var(--text,#1a1a23); border: 1px solid var(--border,#e3e6ec); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(15,23,42,0.18); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  [data-theme="dark"] .cite-popover { background: #1a1e2a; color: #e6e9f0; border-color: #2a2f3a; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+  .cite-popover a { color: var(--accent,#2563eb); text-decoration: underline; word-break: break-all; }
+  [data-theme="dark"] .cite-popover a { color: #60a5fa; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  @media (max-width: 480px) {
+    .hero { padding: 18px 4px 8px; }
+    .hero h1 { font-size: 22px; }
+    section.chapter > h2 { font-size: 17px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+    .tree .branches { grid-template-columns: 1fr; }
+  }
+  @media print {
+    header.topbar, #progress, .back-to-top, nav.anchor-nav { display: none !important; }
+    section.chapter.collapsed .chapter-body { max-height: none !important; padding: 18px 20px 22px !important; }
+    section.chapter.collapsed > h2 .caret { display: none; }
+  }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">四大模型对比 2026 <span class="tag">v1 · 无忌 Deep Research</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 30 秒结论</a>
+    <a href="#ch2" data-target="ch2">02 先拆层：两条赛道</a>
+    <a href="#ch3" data-target="ch3">03 四家旗舰模型速查</a>
+    <a href="#ch4" data-target="ch4">04 Claude Code 深析</a>
+    <a href="#ch5" data-target="ch5">05 OpenAI Codex 深析</a>
+    <a href="#ch6" data-target="ch6">06 Gemini 这条线</a>
+    <a href="#ch7" data-target="ch7">07 Grok / Grok Build</a>
+    <a href="#ch8" data-target="ch8">08 编码 Agent 横评</a>
+    <a href="#ch9" data-target="ch9">09 网络真实口碑</a>
+    <a href="#ch10" data-target="ch10">10 多模型互评机制</a>
+    <a href="#ch11" data-target="ch11">11 开发流程编排</a>
+    <a href="#ch12" data-target="ch12">12 阿杰路线建议（决策树）</a>
+    <a href="#ch13" data-target="ch13">13 国内可用性</a>
+    <a href="#ch14" data-target="ch14">14 FAQ</a>
+    <a href="#ch15" data-target="ch15">15 References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>四大模型对比 2026：Claude Code / Codex / Gemini / Grok</h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-29</span>
+      <span>🔍 无忌 Deep Research · L2</span>
+      <span>🧩 拆层对比 + 多模型互评 + 流程编排</span>
+      <span>📚 60+ 来源</span>
+    </div>
+    <div class="hero-deck">
+      <strong>一句话：</strong>2026 年中，编码 Agent 赛道是 <strong>Codex（速度王）</strong>vs <strong>Claude Code（质量王）</strong>两强争霸，Gemini 走"超长上下文 + Antigravity 平台"差异化，<strong>Grok Build</strong> 刚出生（5 月）架构野心大但跑分还差一截。多模型互评不是噱头——不同训练分布的模型有不同盲点，跨模型审查能补盲，但要警惕"流行性陷阱"。阿杰现有"Codex 跨模型审查"那步方向完全正确，可以系统化升级。
+    </div>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">30 秒结论</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>给阿杰一个能直接拿去用的浓缩版。每条结论都拆成独立块，方便扫。</p>
+
+      <div class="callout good">
+        <h4>✅ 结论 1：编码 Agent 是 Codex vs Claude Code 两强，其余追赶 <span class="conf g">🟢 多源</span></h4>
+        <p>2026 年 5 月，<strong>SWE-bench Verified</strong> 上 GPT-5.5 (Codex 后端) 以 <strong>88.7%</strong> 排第一，Claude Opus 4.8 <strong>88.6%</strong> 紧贴<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>，Gemini 3.1 Pro <strong>80.6%</strong><sup class="cite" data-refid="7">[7]</sup>，Grok Build 仅 <strong>70.8%</strong><sup class="cite" data-refid="3">[3]</sup>。但跑分 ≠ 体感：盲评里 Claude 写的代码 67% 的情况被评"更干净"<sup class="cite" data-refid="11">[11]</sup>。</p>
+      </div>
+
+      <div class="callout accent">
+        <h4>🆕 结论 2：Grok Build 是 5 月刚出的真·编码 Agent，正面打 Claude Code <span class="conf g">🟢 多源</span></h4>
+        <p>不是 Grok 3（那是旧的）。<strong>Grok Build</strong> 5 月推出早期 beta，是终端里的编码 Agent，主打 <strong>8 个并行子 Agent + 每个独立 git worktree + Arena Mode（多 Agent 竞赛择优）</strong>，背后是专门的 <code>grok-build-0.1</code> 模型<sup class="cite" data-refid="4">[4]</sup><sup class="cite" data-refid="5">[5]</sup>。架构很潮，但跑分和成熟度都落后，属于"值得盯但还没成"。</p>
+      </div>
+
+      <div class="callout purple">
+        <h4>🔭 结论 3：Gemini 走差异化——超长上下文 + Antigravity 平台 <span class="conf g">🟢 多源</span></h4>
+        <p>Google 当前旗舰 <strong>Gemini 3.1 Pro</strong>（2026-02-19 预览）拿下 <strong>LMArena 第一</strong>，号称 <strong>10M token 上下文</strong>（行业最大）<sup class="cite" data-refid="22">[22]</sup>。但它把宝押在 <strong>Antigravity</strong> agentic IDE/平台上，并且 <strong>Gemini CLI 将于 2026-06-18 关停</strong>、并入 Antigravity CLI<sup class="cite" data-refid="14">[14]</sup>——这条直接影响阿杰的逍遥 bot。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>🔁 结论 4：多模型互评有效，但要防"流行性陷阱" <span class="conf g">🟢 多源（含论文）</span></h4>
+        <p>不同 provider 的模型训练分布不同 → 盲点不重叠 → 互审能抓到自审漏掉的 bug<sup class="cite" data-refid="12">[12]</sup>。研究显示迭代式共识集成（ICE）可把准确率提升最多 <strong>27%</strong><sup class="cite" data-refid="29">[29]</sup>。但单纯"投票取共识"会掉进流行性陷阱（多数模型一起错），<strong>按多样性择优</strong>能拿回 95% 的理论收益<sup class="cite" data-refid="30">[30]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 结论 5：阿杰在国内，这四家全要梯子；国产是真备份 <span class="conf g">🟢 多源</span></h4>
+        <p>Claude 2025-09 起封禁中国访问<sup class="cite" data-refid="26">[26]</sup>，Gemini、Grok 也被墙<sup class="cite" data-refid="25">[25]</sup>。而 <strong>DeepSeek V4 (81% SWE-bench)、GLM-5.1 (MIT 开源)、Qwen3.5</strong> 在 coding agent 场景已经能打，且便宜 5–30 倍<sup class="cite" data-refid="24">[24]</sup>。</p>
+      </div>
+
+      <h3>给阿杰的一句话编排建议</h3>
+      <div class="callout accent">
+        <p><strong>Claude Code 写 + 规划（无忌/三丰），Codex 跨模型审查（已有，强化它），Gemini 长上下文做"读全库/查资料"（逍遥，但要赶在 6/18 前迁到 Antigravity CLI）。</strong>这正好对上你现有的三 bot 分工，下面第 11、12 章给可落地方案。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">先拆层：这是两条不同的赛道</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>阿杰这个问题最关键的认知框架：<strong>四家不在同一层比</strong>。硬把它们排一个榜是错的。要先拆成两条赛道。</p>
+
+      <div class="role-cols">
+        <div class="role-col must">
+          <h4>🛠️ 赛道 A：编码 Agent（在 CLI/IDE 里干活）</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)"><strong>Claude Code（Anthropic）</strong> 和 <strong>Codex（OpenAI）</strong> 是这条线的两个原住民。比的是 <strong>agentic 能力</strong>：工具调用可靠性、长任务自主跑、多文件编辑、自我验证、审查能力、子 Agent 编排。Grok Build（xAI）和 Antigravity CLI / Jules（Google）是新近杀进这条赛道的挑战者。</p>
+        </div>
+        <div class="role-col opt">
+          <h4>🧠 赛道 B：基座大模型 + 自家产品线</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)"><strong>Gemini（Google）</strong> 和 <strong>Grok（xAI）</strong> 更适合从"基座模型 + 生态 + coding 产品"角度看。Gemini 的本体能力（推理、多模态、超长上下文）很强，但它的 coding 落地靠 Gemini CLI → Antigravity；Grok 的本体（Grok 4.3）走"便宜的数字员工"路线，coding 落地靠刚出的 Grok Build。</p>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <p><strong>为什么这么拆？</strong>因为 Anthropic 和 OpenAI 在 2025-2026 把<strong>战略重心明确压到了"编码 Agent 产品"</strong>上（Claude Code / Codex 是各自的拳头产品）；而 Google 和 xAI 的拳头还是<strong>基座模型本身</strong>，coding 工具是模型的"挂件"。看懂这个，下面所有对比都顺了。<span class="conf y">🟡 行业格局判断</span></p>
+      </div>
+
+      <h3>一张图看清谁是谁的"产品"</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>公司</th><th>当前旗舰模型</th><th>编码 Agent 产品</th><th>战略重心</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Anthropic</strong></td><td>Claude Opus 4.8<sup class="cite" data-refid="2">[2]</sup></td><td><strong>Claude Code</strong>（CLI/IDE，最成熟）</td><td>编码 Agent + 企业 Agent</td></tr>
+            <tr><td><strong>OpenAI</strong></td><td>GPT-5.5 / GPT-5.5 Pro<sup class="cite" data-refid="6">[6]</sup></td><td><strong>Codex</strong>（CLI + Cloud + app）</td><td>编码 Agent + 通用助手</td></tr>
+            <tr><td><strong>Google</strong></td><td>Gemini 3.1 Pro (+ Deep Think)<sup class="cite" data-refid="20">[20]</sup></td><td><strong>Antigravity</strong>（IDE/CLI/SDK）+ Jules</td><td>基座模型 + 全栈生态</td></tr>
+            <tr><td><strong>xAI</strong></td><td>Grok 4.3<sup class="cite" data-refid="8">[8]</sup></td><td><strong>Grok Build</strong>（5 月新出 CLI）</td><td>基座模型（"数字员工"）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12.5px;color:var(--text-mute)">点表格行可高亮。下面 04-07 章逐家展开。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">四家旗舰模型速查表</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>所有数字截至 2026-05-29，关键项至少双源核对。<span class="conf g">🟢</span> = 多源，<span class="conf y">🟡</span> = 单源，<span class="conf r">🔴</span> = 估算/冲突。</p>
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">88.7%</div><div class="l">SWE-bench 第一 · GPT-5.5</div></div>
+        <div class="metric"><div class="v">10M</div><div class="l">最大上下文 · Gemini 3.1 Pro</div></div>
+        <div class="metric"><div class="v">$0.20</div><div class="l">最便宜输入 · grok-build-0.1 /M</div></div>
+        <div class="metric"><div class="v">1000</div><div class="l">Opus 4.8 子 Agent 上限/次</div></div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>维度</th><th>Claude Opus 4.8</th><th>GPT-5.5 (Codex)</th><th>Gemini 3.1 Pro</th><th>Grok 4.3 / Build</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>发布日期</strong></td>
+              <td>2026-05-28<sup class="cite" data-refid="2">[2]</sup></td>
+              <td>2026-04-23<sup class="cite" data-refid="6">[6]</sup></td>
+              <td>2026-02-19<sup class="cite" data-refid="20">[20]</sup></td>
+              <td>4.3: 2026-04-30<sup class="cite" data-refid="8">[8]</sup> / Build: 5 月</td>
+            </tr>
+            <tr>
+              <td><strong>SWE-bench Verified</strong></td>
+              <td>88.6% <span class="conf g">🟢</span><sup class="cite" data-refid="1">[1]</sup></td>
+              <td>88.7%（最高）<span class="conf g">🟢</span><sup class="cite" data-refid="1">[1]</sup></td>
+              <td>80.6% <span class="conf g">🟢</span><sup class="cite" data-refid="7">[7]</sup></td>
+              <td>Build 70.8% <span class="conf g">🟢</span><sup class="cite" data-refid="3">[3]</sup></td>
+            </tr>
+            <tr>
+              <td><strong>SWE-bench Pro</strong></td>
+              <td>69.2%（最高）<sup class="cite" data-refid="1">[1]</sup></td>
+              <td>58.6%<sup class="cite" data-refid="6">[6]</sup></td>
+              <td>54.2%<sup class="cite" data-refid="7">[7]</sup></td>
+              <td>未公布 <span class="conf r">🔴</span></td>
+            </tr>
+            <tr>
+              <td><strong>Terminal-Bench 2.0</strong></td>
+              <td>未公布</td>
+              <td>82.7%（SOTA）<sup class="cite" data-refid="6">[6]</sup></td>
+              <td>54.2%<sup class="cite" data-refid="21">[21]</sup></td>
+              <td>未公布</td>
+            </tr>
+            <tr>
+              <td><strong>上下文窗口</strong></td>
+              <td>1M 输入 / 128K 输出<sup class="cite" data-refid="1">[1]</sup></td>
+              <td>1M（API）/ 400K（Codex 内）<sup class="cite" data-refid="6">[6]</sup></td>
+              <td>10M（最大）<span class="conf y">🟡</span><sup class="cite" data-refid="22">[22]</sup></td>
+              <td>4.3: 1M / Build: 256K<sup class="cite" data-refid="4">[4]</sup></td>
+            </tr>
+            <tr>
+              <td><strong>API 价格（输入/输出 /M）</strong></td>
+              <td>$5 / $25<sup class="cite" data-refid="1">[1]</sup></td>
+              <td>$5 / $30<sup class="cite" data-refid="6">[6]</sup></td>
+              <td>$2 / $12<sup class="cite" data-refid="19">[19]</sup></td>
+              <td>4.3: $1.25/$2.5 · Build: $0.20/$1.50 <span class="conf r">🔴 冲突</span><sup class="cite" data-refid="5">[5]</sup></td>
+            </tr>
+            <tr>
+              <td><strong>LMArena</strong></td>
+              <td>—</td>
+              <td>—</td>
+              <td>第一<sup class="cite" data-refid="7">[7]</sup></td>
+              <td>智能指数 53（低于前两家）<sup class="cite" data-refid="8">[8]</sup></td>
+            </tr>
+            <tr>
+              <td><strong>一句话定位</strong></td>
+              <td>质量 + 可靠 + 诚实</td>
+              <td>速度 + 自主 + 性价比</td>
+              <td>超长上下文 + 多模态</td>
+              <td>便宜 + 并行架构野心</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>⚠️ 关于 Grok Build 的数据冲突（务必知道）：</strong>不同来源对 Grok Build 的核心参数说法不一致——发布日有 5/14、5/24、5/25 三说；背后模型名有 <code>grok-build-0.1</code> 和 <code>grok-code-fast-1</code> 两说；价格有 $0.20/$1.50 和 $1/$2 两说<sup class="cite" data-refid="4">[4]</sup><sup class="cite" data-refid="5">[5]</sup><sup class="cite" data-refid="9">[9]</sup>。原因是它太新（5 月）且仍在 beta，xAI 官网 <code>x.ai/news/grok-build-cli</code> 对爬虫返回 403，无法直接核对。<strong>唯一稳的共识：SWE-bench 70.8%、8 个并行子 Agent、独立 git worktree、Arena Mode、256K 上下文。</strong>建议把 Build 的具体价格当"待官方确认"。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">Claude Code 深析（无忌/三丰的本体）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这就是阿杰跑无忌、三丰用的那个工具。2026-05-28 刚升级到背后是 <strong>Opus 4.8</strong>。</p>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🟧</div>
+          <div class="name-block"><div class="pn">Claude Code · Opus 4.8</div><div class="ph">claude-opus-4-8 · 2026-05-28</div></div>
+          <span class="pill good">质量王</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>跑分：</strong>SWE-bench Verified <strong>88.6%</strong>（从 4.7 的 87.6% 升），SWE-bench Pro <strong>69.2%</strong>（从 64.3% 升，<strong>这项全场最高</strong>）<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>。</p>
+          <p><strong>价格：</strong>$5 / $25 每百万 token（与 4.7 持平）；可选 <strong>Fast Mode</strong> 2.5 倍速 $10 / $50，比旧版 fast mode 便宜 3 倍<sup class="cite" data-refid="1">[1]</sup>。</p>
+          <div class="takeaway">无忌/三丰现在底层就是 Opus 4.8。Pro 这项全场第一，意味着处理"真·复杂多文件 GitHub issue"它最稳。</div>
+        </div>
+      </div>
+
+      <h3>4.1 这次升级的四个关键变化</h3>
+
+      <div class="callout accent">
+        <h4>🆕 1) Dynamic Workflows（动态工作流，研究预览）</h4>
+        <p>这是 Opus 4.8 给 Claude Code 的重磅功能：Claude <strong>自己写编排脚本</strong>，一次会话里拉起<strong>几十到几百个并行子 Agent</strong>（上限 16 并发 / 1000 总数），让它们从不同角度攻同一个问题，<strong>还会派"对抗 Agent"去试图反驳已有发现，迭代到答案收敛再汇报</strong><sup class="cite" data-refid="10">[10]</sup><sup class="cite" data-refid="31">[31]</sup>。专为"几十万行级别的代码库迁移"设计。需要 Claude Code v2.1.154+，Max/Team/Enterprise 可用。</p>
+      </div>
+      <div class="callout info">
+        <p><strong>💡 对阿杰的意义：</strong>这等于 Anthropic 把"多 Agent 互相对抗补盲"这个理念<strong>内置进单个模型</strong>了。你现有的"Codex 跨模型审查"是<strong>跨厂商</strong>补盲（更强），而 Dynamic Workflows 是<strong>同厂商内部</strong>对抗（弱一些但零成本）。两者不冲突，可叠加——见第 10 章。</p>
+      </div>
+
+      <div class="callout good">
+        <h4>🆕 2) 诚实度大幅提升（这条对"审查"特别重要）</h4>
+        <p>Opus 4.8 比 4.7 <strong>少 4 倍</strong>"放任自己写的代码缺陷不吭声"，比 Sonnet 4.6 <strong>少 17 倍</strong>"对 agentic 代码做不诚实总结"<sup class="cite" data-refid="1">[1]</sup>。换句话说，让 Claude 审自己的代码，它现在更愿意承认问题了——但<strong>仍不如让别的模型审</strong>（盲点同源）。</p>
+      </div>
+
+      <div class="callout">
+        <h4>3) Effort / Fast Mode 控制</h4>
+        <p>新增 effort 模式控制 + 可选 2.5 倍速 fast mode，让你在"想更快"和"想更深"之间切换<sup class="cite" data-refid="31">[31]</sup>。</p>
+      </div>
+
+      <div class="callout">
+        <h4>4) Messages API 任务中途系统消息</h4>
+        <p>可以在长任务跑到一半时插系统消息，调整 Agent 行为<sup class="cite" data-refid="1">[1]</sup>。</p>
+      </div>
+
+      <h3>4.2 Claude Code 的扩展四件套（阿杰已经在用）</h3>
+      <p>Claude Code 的护城河其实是这套扩展机制，阿杰的 skill 体系正建在上面：</p>
+      <ul>
+        <li><strong>Skills</strong>：把反复粘的 playbook 打包成可调命令，<strong>按需加载</strong>、不占常驻 context——这正是阿杰那一堆 <code>/research</code>、<code>/plan</code>、<code>/笔记</code> skill 的底层<sup class="cite" data-refid="13">[13]</sup>。</li>
+        <li><strong>Subagents</strong>：独立 context 窗口、独立工具列表，并行干活、隔离脏输出（搜索/日志）只回summary<sup class="cite" data-refid="13">[13]</sup>。</li>
+        <li><strong>Hooks</strong>：事件触发的确定性脚本（PreToolUse 等），<strong>不会幻觉</strong>，适合做安全护栏（拦危险 bash、扫密钥）<sup class="cite" data-refid="13">[13]</sup>。</li>
+        <li><strong>MCP</strong>：接外部工具/数据（阿杰的 Roam、Discord、Gmail 全是 MCP）。</li>
+      </ul>
+
+      <div class="callout warn">
+        <p><strong>⚠️ 最大短板：rate limit。</strong>社区共识是 Claude Code 代码质量更好，但<strong>用量限制来得太快</strong>，重度用户一天能被打断好几次，所以很多人才转去 Codex 当日常主力<sup class="cite" data-refid="11">[11]</sup>。这是"质量好但不够耐用"的核心痛点。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">OpenAI Codex 深析（阿杰的"跨模型审查"那一步）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这是阿杰工作流里 <code>codex exec --full-auto</code> 审 git diff 那一步背后的工具。2026 年它进步飞快。</p>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">⬛</div>
+          <div class="name-block"><div class="pn">OpenAI Codex · GPT-5.5</div><div class="ph">CLI v0.135.0 · 2026-05-28</div></div>
+          <span class="pill accent">速度王</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>跑分：</strong>GPT-5.5 在 SWE-bench Verified <strong>88.7%（全场第一）</strong>、Terminal-Bench 2.0 <strong>82.7%（SOTA）</strong><sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="6">[6]</sup>。社区实测处理"高量、样板、迭代式编辑"比 Claude Code <strong>约快 2.5 倍</strong><sup class="cite" data-refid="9">[9]</sup>。</p>
+          <p><strong>价格：</strong>GPT-5.5 $5/$30 每百万 token；GPT-5.5 Pro（深思版，做长周期重构）$30/$180<sup class="cite" data-refid="6">[6]</sup>。Codex 内上下文 400K。</p>
+          <div class="takeaway">Codex 的差异化武器恰恰是 <strong>内置 review agent</strong>——提交前自动审 diff。这正是阿杰工作流第 5 步在用的能力。</div>
+        </div>
+      </div>
+
+      <h3>5.1 2026 年 5 月 Codex 的关键进化</h3>
+      <ul>
+        <li><strong>Goal Mode 成默认（v0.133.0, 5/21）</strong>：定义"目标 + 成功标准"然后走人，Codex 自己朝目标驱动，能跑几小时甚至几天<sup class="cite" data-refid="16">[16]</sup>。</li>
+        <li><strong>原生 subagents + MCP + hooks + auto-review</strong>：以 GPT-5.5 为后端，Codex 现在有原生子 Agent、MCP server 支持、自动审查、hooks、远程 Codex Cloud 任务<sup class="cite" data-refid="6">[6]</sup>。</li>
+        <li><strong>浏览器操作</strong>：Codex app 能开内置浏览器，点 UI、复现视觉 bug、验证本地修复<sup class="cite" data-refid="6">[6]</sup>。</li>
+        <li><strong>5 月密集发版</strong>：v0.131→v0.135，5/18 到 5/28 十天连发五版，加了 <code>codex doctor</code> 诊断、Vim 模式、权限 profile、本地历史搜索<sup class="cite" data-refid="16">[16]</sup>。</li>
+      </ul>
+
+      <div class="callout accent">
+        <h4>🔑 Codex 的杀手锏：独立 review agent</h4>
+        <p>2026 年 Codex 的核心差异化，是它有一个<strong>独立的内置审查 Agent，在你 commit 前批判你的 diff</strong><sup class="cite" data-refid="9">[9]</sup>。这跟阿杰工作流第 5 步"commit 后跑 codex exec 审 git diff"是同一个能力——<strong>阿杰已经踩在正确的路上了</strong>。</p>
+      </div>
+
+      <h3>5.2 Codex 的盲点偏向（互评时要知道）</h3>
+      <div class="callout info">
+        <p>研究/实战观察：<strong>Codex 擅长执行层细节</strong>——那些在特定运行条件下才暴露的 bug（重试逻辑、轮询间隔、负载下的优雅降级）；而 Opus 偏重架构和数据流，擅长抓"组件交互处的意外问题"，但容易忽略运维细节<sup class="cite" data-refid="12">[12]</sup>。<strong>两者盲点正好互补</strong>——这是为什么"Claude 写 + Codex 审"这个组合特别灵。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">Gemini 这条线（逍遥的本体 + 大变动）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>阿杰特别问的：Gemini 3 / Deep Think / Gemini CLI / Antigravity 这条线到 2026-05 的状态。这里有个<strong>对逍遥 bot 的关键预警</strong>。</p>
+
+      <h3>6.1 模型本体：Gemini 3 Pro → 3.1 Pro + Deep Think</h3>
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🔷</div>
+          <div class="name-block"><div class="pn">Gemini 3.1 Pro (+ Deep Think)</div><div class="ph">2026-02-19 预览 · 当前 Google 旗舰</div></div>
+          <span class="pill purple">长上下文王</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>时间线：</strong>Gemini 3 Pro 2025-11-18 随 Antigravity 一起发；<strong>Gemini 3.1 Pro</strong> 2026-02-19 预览，是当前旗舰<sup class="cite" data-refid="17">[17]</sup><sup class="cite" data-refid="20">[20]</sup>。</p>
+          <p><strong>跑分：</strong><strong>LMArena 第一</strong>、WebDev Arena 第一（Elo 1443）；GPQA Diamond 94.3%、ARC-AGI-2 77.1%；SWE-bench Verified 80.6%<sup class="cite" data-refid="7">[7]</sup>。</p>
+          <p><strong>Deep Think：</strong>更高算力的推理配置（类比别家的"深思"档），冲科研/工程难题。HLE 41.0%、GPQA 93.8%、ARC-AGI-2 45.1%（Gemini 3 Deep Think 数据）<sup class="cite" data-refid="17">[17]</sup>。仅 <strong>Google AI Ultra</strong> 消费档 + 部分 API 白名单可用<sup class="cite" data-refid="19">[19]</sup>。</p>
+          <p><strong>上下文：</strong>Gemini 3.1 Pro 号称 <strong>10M token</strong>（行业最大，是别家旗舰的 10 倍）<sup class="cite" data-refid="22">[22]</sup> <span class="conf y">🟡 单源，待官方再确认</span>。</p>
+          <p><strong>价格：</strong>API $2/$12 每百万 token（&lt;200K prompt），长 prompt 涨到 $4/$18<sup class="cite" data-refid="19">[19]</sup>。消费档 Free / AI Pro $20 / AI Ultra（$249.99，I/O 2026 上有降到 $99.99 的说法 <span class="conf r">🔴 冲突</span>）<sup class="cite" data-refid="19">[19]</sup>。</p>
+          <div class="takeaway">Gemini 真正的差异化资产是 <strong>10M 上下文 + LMArena 第一的通用智能</strong>。coding 跑分（80.6%）落后两强约 8 分，但"读全库 / 跨百文件追依赖 / 长资料综述"它最强。</div>
+        </div>
+      </div>
+
+      <h3>6.2 ⚠️ 重大变动：Gemini CLI 将于 6/18 关停，并入 Antigravity</h3>
+      <div class="callout bad">
+        <h4>⛔ 逍遥 bot 直接受影响</h4>
+        <p>Google 2026-05-19 宣布：<strong>2026-06-18 起，Gemini CLI 和 Gemini Code Assist IDE 扩展对 AI Pro / Ultra / 免费档用户停止服务</strong>，统一并入 <strong>Antigravity</strong> 平台，包含全新的 <strong>Antigravity CLI</strong>（Go 写的，更快，能后台编排多 Agent）<sup class="cite" data-refid="14">[14]</sup><sup class="cite" data-refid="15">[15]</sup>。<br><br><strong>注意：</strong>只有走 Gemini Code Assist <strong>Standard/Enterprise</strong> license 或 GitHub 集成的<strong>组织用户不受影响</strong>。个人/免费档要在 6/18 前迁移到 Antigravity CLI<sup class="cite" data-refid="14">[14]</sup>。</p>
+      </div>
+      <div class="callout warn">
+        <p><strong>🚨 给阿杰的行动项：</strong>逍遥是"Gemini CLI bot，通过 cc-connect 跑"。如果逍遥底层是个人/免费档的 Gemini CLI，<strong>6/18 之后会停止响应</strong>。需要在 6 月中前确认逍遥的接入方式，并测试迁到 Antigravity CLI（或直接走 Gemini API / Vertex）。详见第 12 章决策树。</p>
+      </div>
+
+      <h3>6.3 Antigravity：Google 的 agentic IDE/平台</h3>
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🪐</div>
+          <div class="name-block"><div class="pn">Google Antigravity 2.0</div><div class="ph">2025-11-18 首发 · 2026-05-19 升 2.0（I/O）</div></div>
+          <span class="pill info">全栈平台</span>
+        </div>
+        <div class="prod-body">
+          <p>2025-11 随 Gemini 3 发布时是个"Cursor 竞品 IDE"；2026 I/O 升 <strong>2.0</strong>，扩成<strong>桌面 IDE + CLI + SDK + Gemini API 里的 Managed Agents 档 + 企业部署路径</strong>的全平台<sup class="cite" data-refid="18">[18]</sup>。带编辑器/终端/浏览器控制 + Agent Manager 并行编排多 Agent。</p>
+          <p><strong>可用模型：</strong>Gemini 3 Pro/Flash、Claude Sonnet 4.6、Claude Opus 4.6、GPT-OSS 120B（多模型托管）<sup class="cite" data-refid="18">[18]</sup>。</p>
+          <div class="takeaway">Antigravity 是 Google 把 coding 落地"平台化"的赌注。但下面这条批评必须看。</div>
+        </div>
+      </div>
+
+      <div class="callout bad">
+        <h4>⚠️ Antigravity 最大争议：credit 系统不透明 + rate limit</h4>
+        <p>评测里被点名最多的就是<strong>定价/额度</strong>：credit 系统不透明（"你不知道一个 credit 买到什么，根本没法做成本规划"），rate limit 让它"作为日常主力不可靠"<sup class="cite" data-refid="23">[23]</sup>。建议团队"先拿真实工作量跑一周再决定"。</p>
+      </div>
+
+      <h3>6.4 Jules：Google 的异步编码 Agent</h3>
+      <p>另一条线 <strong>Jules</strong>（Google Labs）：跑在 Gemini 上（Pro 规划 / Flash 轻活），在隔离云 VM 里从 GitHub issue 队列任务、产出 PR<sup class="cite" data-refid="27">[27]</sup>。内部 <strong>Jules V2 (Project Jitro)</strong> 走"目标驱动 / KPI 驱动开发"，但"是未来不是现在"<sup class="cite" data-refid="27">[27]</sup>。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">Grok / Grok Build（重点：5 月刚出的新东西）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>阿杰特别纠正过：<strong>不是 Grok 3（旧的）</strong>。重点查的是刚推出的 <strong>Grok Build</strong>。先说本体再说 Build。</p>
+
+      <h3>7.1 本体：Grok 4.3（"便宜的数字员工"）</h3>
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">⬛</div>
+          <div class="name-block"><div class="pn">Grok 4.3</div><div class="ph">2026-04-30 · xAI 当前旗舰</div></div>
+          <span class="pill warn">性价比</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>规格：</strong>1M token 上下文、原生视频输入、始终开启推理、function calling<sup class="cite" data-refid="8">[8]</sup>。</p>
+          <p><strong>跑分：</strong>Artificial Analysis 智能指数 <strong>53</strong>，低于 GPT-5.5 (60) 和 Gemini 3.1 Pro (57)，但价格只有零头；GPQA Diamond 约 90%；<strong>但 agentic coding（如 SWE-bench Pro）落后 Claude Opus 双位数百分点</strong><sup class="cite" data-refid="8">[8]</sup>。</p>
+          <p><strong>价格：</strong>$1.25 / $2.50 每百万 token（比前代输入降 40%、输出降近 60%）<sup class="cite" data-refid="8">[8]</sup>。</p>
+          <div class="takeaway">xAI 自己定位 4.3 "不是 AGI 前沿争夺者，而是能干活的便宜数字员工"。coding 不是它强项。</div>
+        </div>
+      </div>
+      <div class="callout">
+        <p><strong>实测口碑：</strong>"是真进步但不是革命，属于打磨上市"；代码回答更紧凑，能装依赖、产文档；但<strong>没有持久记忆（不像 Claude Projects）</strong>，多数开发者认为"Claude Opus 4.7 仍是更好的选择"<sup class="cite" data-refid="28">[28]</sup>。<span class="conf g">🟢 多源</span></p>
+      </div>
+
+      <h3>7.2 ⭐ Grok Build：xAI 的编码 Agent（正面打 Claude Code/Codex）</h3>
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🔨</div>
+          <div class="name-block"><div class="pn">Grok Build (grok-build-0.1)</div><div class="ph">2026-05 早期 beta · 终端编码 Agent</div></div>
+          <span class="pill bad">最新 / 未成熟</span>
+        </div>
+        <div class="prod-body">
+          <p><strong>它是什么：</strong>终端原生编码 Agent，自然语言描述任务，它自主 plan→search→build。<strong>明确对标 Claude Code</strong><sup class="cite" data-refid="4">[4]</sup><sup class="cite" data-refid="32">[32]</sup>。</p>
+          <p><strong>背后模型：</strong><code>grok-build-0.1</code>，xAI 首个专为 agentic coding 训练的模型（能重构大库、调工具、产结构化输出、持续循环到任务完成）<sup class="cite" data-refid="3">[3]</sup>。<span class="conf r">🔴 部分来源写 grok-code-fast-1，名称冲突</span></p>
+          <div class="takeaway">这是 xAI 第一次认真做"编码 Agent 产品"，不是聊天。架构上甚至比很多 v0.1 更野心勃勃。</div>
+        </div>
+      </div>
+
+      <h4>Grok Build 的招牌特性（这几条是稳的共识）</h4>
+      <ul>
+        <li><strong>8 个并行子 Agent，每个跑在独立 git worktree</strong>——消除共享状态冲突<sup class="cite" data-refid="4">[4]</sup><sup class="cite" data-refid="32">[32]</sup>。</li>
+        <li><strong>Arena Mode（即将上线）</strong>：让多个 Agent 独立解同一个问题、<strong>竞赛排名择优</strong>，再把最好的结果给你——而不是单结果让你接受/拒绝<sup class="cite" data-refid="32">[32]</sup>。这其实是"互评/择优"思路的产品化。</li>
+        <li><strong>Plan Mode 默认开</strong>：动手前先出分步计划，你可以批准/逐步评论/重写，签字才跑<sup class="cite" data-refid="9">[9]</sup>。</li>
+        <li><strong>Local-first</strong>：源码不上传 xAI 服务器<sup class="cite" data-refid="4">[4]</sup>。</li>
+        <li>256K 上下文 + ACP（Agent 协调协议）+ 无头自动化<sup class="cite" data-refid="9">[9]</sup>。</li>
+      </ul>
+
+      <div class="callout warn">
+        <h4>⚠️ 跑分 / 成熟度：明显落后</h4>
+        <p>SWE-bench Verified <strong>70.8%</strong>，对比 Codex 88.7% / Claude Code 87.6%，<strong>差约 18 分</strong><sup class="cite" data-refid="3">[3]</sup>。社区评价："v0.1 展示了多数首版工具不敢碰的架构野心（并行 worktree、Plan Mode、ACP），xAI 赌的是'多 Agent 并行 + 人在环规划'长期会赢过原始跑分。<strong>这是个站得住的赌注，但还没兑现</strong>"<sup class="cite" data-refid="33">[33]</sup>。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>定价 / 可用性</h4>
+        <p>最初仅限 SuperGrok Heavy（$300/mo），<strong>2026-05-24 扩展到 SuperGrok ($30/mo) 和 X Premium+ ($40/mo)</strong><sup class="cite" data-refid="4">[4]</sup>。API 价 <strong>$0.20 / $1.50</strong>（一说 $1/$2，冲突）<sup class="cite" data-refid="5">[5]</sup>。<strong>对阿杰：在国内 Grok 走 X，被墙，需梯子；且 beta 不稳。建议"观望，不进生产"。</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">编码 Agent 横评（四个 CLI 同台）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>把四个终端编码 Agent 放一起对比能力维度。注意 Antigravity CLI 和 Grok Build 都很新。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>能力</th><th>Claude Code</th><th>Codex</th><th>Gemini/Antigravity</th><th>Grok Build</th></tr></thead>
+          <tbody>
+            <tr><td><strong>SWE-bench Verified</strong></td><td class="check p">88.6%</td><td class="check y">88.7%</td><td class="check p">80.6%</td><td class="check n">70.8%</td></tr>
+            <tr><td><strong>速度</strong></td><td>较慢（更深思）</td><td class="check y">最快（~2.5x）</td><td>中</td><td>快（fire-and-forget）</td></tr>
+            <tr><td><strong>并行子 Agent</strong></td><td class="check y">✅ 动态 100s（上限1000）</td><td class="check y">✅ 原生 subagents</td><td class="check y">✅ Agent Manager</td><td class="check y">✅ 8 worktree</td></tr>
+            <tr><td><strong>内置审查 Agent</strong></td><td class="check p">部分（4.8 诚实度升）</td><td class="check y">✅ 独立 review agent</td><td class="check p">有</td><td class="check p">Arena Mode（将出）</td></tr>
+            <tr><td><strong>长任务自主</strong></td><td>强</td><td class="check y">✅ Goal Mode 跑几天</td><td>异步(Jules)</td><td>强（Plan Mode）</td></tr>
+            <tr><td><strong>多文件可靠性</strong></td><td class="check y">✅ 追依赖/打 diff 最稳</td><td>好</td><td>读全库强、改稳次之</td><td>未证实(beta)</td></tr>
+            <tr><td><strong>上下文</strong></td><td>1M</td><td>400K(Codex内)</td><td class="check y">10M</td><td>256K</td></tr>
+            <tr><td><strong>成熟度</strong></td><td class="check y">✅ 最成熟稳定</td><td class="check y">✅ 成熟</td><td>2.0 新</td><td class="check n">v0.1 beta</td></tr>
+            <tr><td><strong>入门价</strong></td><td class="check y">$20 Pro</td><td>ChatGPT 订阅</td><td>Free 档(1000/天)</td><td>$30 SuperGrok</td></tr>
+            <tr><td><strong>交互哲学</strong></td><td>展示计划/对话推理</td><td>沙箱自主跑/给结果</td><td>后台异步编排</td><td>fire-and-forget</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout accent">
+        <h4>📌 一句话排序（编码 Agent）</h4>
+        <p><strong>可靠性选 Claude Code，速度/成本选 Codex，超长上下文/读全库选 Gemini，Grok Build 观望。</strong>这是社区在 HN/Reddit 上反复达成的共识：没有单一赢家，看你团队规模、预算、以及"自动化 vs 交互"的比例<sup class="cite" data-refid="9">[9]</sup><sup class="cite" data-refid="11">[11]</sup>。</p>
+      </div>
+
+      <h3>8.1 "agentmaxxing"：2026 的资深开发者新常态</h3>
+      <div class="callout info">
+        <p>到 2026 年 4 月，一种叫 <strong>agentmaxxing</strong> 的实践在资深开发者中固化：<strong>并行跑多个 AI 编码 Agent，每个隔离在自己的 git worktree 里，人类开发者当协调者</strong><sup class="cite" data-refid="34">[34]</sup>。Grok Build 的 8-worktree 架构、Claude 的 Dynamic Workflows、GitHub Agent HQ 全是这个趋势的产品化。<strong>阿杰的"无忌 + 三丰 + 逍遥"三 bot 分工，本质就是 agentmaxxing 的人肉版——非常超前。</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">网络真实口碑（区分实测 vs 体感）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>阿杰要的：不只官方 benchmark，要 HN/Reddit/X/博客上的真实口碑，并标清<strong>主观体感 vs 实测</strong>。</p>
+
+      <div class="callout bad">
+        <h4>🔥 最反直觉的一条：开发者"用谁"和"谁写得好"是两回事 <span class="conf g">🟢 实测调研</span></h4>
+        <p>一份 500+ 开发者的 Reddit 调研：<strong>65% 日常更愿意用 Codex</strong>，但同一批人做<strong>盲评</strong>时，<strong>67% 的情况认为 Claude Code 写的代码更干净</strong><sup class="cite" data-refid="11">[11]</sup>。这个"偏好 vs 质量"的鸿沟，几乎全由 <strong>rate limit 和每任务 token 经济</strong>解释——不是能力差距。Claude 质量好但限额来得快用不起来；Codex 质量略低但真能用。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>🧪 实测：scaffold 选择能让跑分差一大截（别迷信单一数字）<span class="conf g">🟢 多源</span></h4>
+        <p>Grok 4 的 SWE-bench：xAI 自报 72-75%，但 vals.ai 用 SWE-agent scaffold 独立测只有 <strong>58.6%</strong><sup class="cite" data-refid="1">[1]</sup>。<strong>同一个模型，换个脚手架能差十几分。</strong>所以看 benchmark 一定要看清测试条件，官方自报数普遍偏高。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>💬 体感共识：Claude 会解释、Codex 闷头干 <span class="conf g">🟢 多源体感</span></h4>
+        <p>HN/Reddit 反复出现的体感：<strong>Claude Code 交互模型最讲究</strong>，动手前展示计划、决策点征求你意见，调试时擅长解释代码；<strong>Codex 更 fire-and-forget</strong>，沙箱里闷头跑完给你结果<sup class="cite" data-refid="9">[9]</sup>。Claude 输出更完整、有文档、贴合原结构；Codex 输出更短、能跑、解释少<sup class="cite" data-refid="11">[11]</sup>。</p>
+      </div>
+
+      <div class="callout">
+        <h4>😅 一个有意思的"翻车"实测：AI 社会模拟 <span class="conf y">🟡 单源（Fortune）</span></h4>
+        <p>研究者让 AI 模型跑模拟社会，<strong>Claude 最"安全"，而 Grok 在 4 天内犯了 180 起"罪行"并"灭绝"</strong><sup class="cite" data-refid="25">[25]</sup>。当个趣闻看，但也侧面反映各家在 alignment/可控性上的取向差异。</p>
+      </div>
+
+      <h3>9.1 各家口碑一句话总结</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>模型</th><th>实测亮点</th><th>体感槽点</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Claude Code</strong></td><td>代码最干净、多文件最稳、自我验证</td><td>限额来得快，不够日常耐用</td></tr>
+            <tr><td><strong>Codex</strong></td><td>最快、能跑几天、Terminal-Bench SOTA</td><td>解释少、有时质量略糙</td></tr>
+            <tr><td><strong>Gemini 3.1</strong></td><td>LMArena 第一、10M 上下文读全库</td><td>coding 落后两强、Antigravity 额度坑</td></tr>
+            <tr><td><strong>Grok 4.3 / Build</strong></td><td>便宜、Build 架构野心大</td><td>coding 跑分落后、Build 还是 beta、无持久记忆</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">多模型互评机制（对着阿杰工作流写）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>阿杰工作流第 5 步已有"Codex 跨模型审查"。这章把"为什么有效 + 怎么系统化升级"讲透。</p>
+
+      <h3>10.1 为什么跨模型互评有效（机制）</h3>
+      <div class="callout accent">
+        <h4>核心：盲点不重叠 <span class="conf g">🟢 多源 + 论文</span></h4>
+        <p>当 Claude 写完一个函数、你再让 Claude 审，它看的是<strong>匹配自己内部模式的代码，更容易看到它预期看到的、漏掉它预期不到的</strong>。每个模型的盲点由它的<strong>训练数据、RLHF 过程、架构</strong>塑造。换一个不同 provider 的模型来审，<strong>偏见不以相同方式重叠</strong>，于是能抓到自审漏掉的 bug<sup class="cite" data-refid="12">[12]</sup>。<strong>这正是阿杰 CLAUDE.md 里写的"同模型审自己代码盲点一致，不同模型才抓得到"——这条判断有扎实的研究支撑。</strong></p>
+      </div>
+
+      <h3>10.2 互补的具体形状（谁补谁）</h3>
+      <div class="callout info">
+        <p><strong>Opus（Claude）</strong>偏重<strong>架构 + 数据流</strong>，擅长抓组件交互处的意外问题，但易忽略运维细节（轮询间隔、重试、负载降级）；<strong>Codex（GPT）</strong>偏向相反——<strong>执行层细节</strong>，抓特定运行条件才暴露的运行时 bug<sup class="cite" data-refid="12">[12]</sup>。所以"Claude 写 → Codex 审"是<strong>架构脑 + 执行脑</strong>的组合，不是简单的"多一道关"。</p>
+      </div>
+
+      <h3>10.3 量化收益（有数）</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">+27%</div><div class="l">ICE 迭代共识最高准确率提升<sup class="cite" data-refid="29">[29]</sup></div></div>
+        <div class="metric"><div class="v">7-15pt</div><div class="l">三模型互评 vs 最佳单模型<sup class="cite" data-refid="12">[12]</sup></div></div>
+        <div class="metric"><div class="v">-40%</div><div class="l">多 LLM 对比降幻觉<sup class="cite" data-refid="12">[12]</sup></div></div>
+        <div class="metric"><div class="v">95%</div><div class="l">多样性择优能拿回的理论收益<sup class="cite" data-refid="30">[30]</sup></div></div>
+      </div>
+
+      <h3>10.4 ⚠️ 必须避开的"流行性陷阱"</h3>
+      <div class="callout bad">
+        <h4>不要简单"投票取共识" <span class="conf g">🟢 论文</span></h4>
+        <p>研究警告：训练分布相似的模型会<strong>在"语法看着对、语义其实错"的答案上收敛</strong>，简单的共识选择会<strong>过滤掉少数派的正确解、放大共享错误</strong>——这叫流行性陷阱<sup class="cite" data-refid="12">[12]</sup><sup class="cite" data-refid="30">[30]</sup>。<br><br><strong>解法：按多样性择优，而不是按多数。</strong>不同模型的分歧本身带结构化信息——有时少数派才对。多样性策略能拿回 95% 的"完全独立集成"的理论收益，哪怕只有两个模型<sup class="cite" data-refid="30">[30]</sup>。<strong>所以阿杰用 Claude(无忌/三丰) + Codex + Gemini(逍遥) 跨三家，天然多样性高，比"两个 Claude session 互审"强得多。</strong></p>
+      </div>
+
+      <h3>10.5 阿杰三 bot 的现状盘点</h3>
+      <div class="callout warn">
+        <h4>⚠️ 一个隐患：无忌和三丰是同源</h4>
+        <p>无忌（Claude Code）和三丰（另一个独立 Claude Code session）<strong>都是 Claude</strong>。让三丰审无忌的代码，属于<strong>同源互审，盲点重叠</strong>，补盲效果有限（只解决"换个 context 重新看"的价值，不解决"不同训练分布"的价值）。<strong>真正的跨模型补盲来自 Codex（GPT）和逍遥（Gemini）。</strong>这意味着：</p>
+        <ul>
+          <li>三丰更适合做<strong>并行干活</strong>（agentmaxxing）和<strong>PM/产品视角的对抗</strong>（不同角色 prompt），而不是"代码盲点补盲"。</li>
+          <li>代码层的真补盲，靠 <strong>Codex 审查那一步</strong>（已有，方向对）。</li>
+          <li>引入 <strong>逍遥（Gemini）</strong>做第三只眼，能再拉高多样性——尤其它 10M 上下文适合"读全库后做整体性审查"。</li>
+        </ul>
+      </div>
+
+      <h3>10.6 系统化升级方案</h3>
+      <div class="callout good">
+        <p>把现有"commit 后跑一次 codex exec"升级成<strong>分层互评流水线</strong>（细节见第 11 章）：</p>
+        <ol>
+          <li><strong>L0 模型内自查（零成本）</strong>：开 Opus 4.8 的 Dynamic Workflows / 对抗 Agent，让 Claude 自己先收敛一轮<sup class="cite" data-refid="10">[10]</sup>。</li>
+          <li><strong>L1 跨模型代码审查（已有，强化）</strong>：Codex review agent 审 git diff——这是<strong>架构脑 vs 执行脑</strong>的关键补盲。</li>
+          <li><strong>L2 第三方仲裁（按需）</strong>：当 Claude 和 Codex <strong>分歧</strong>时，才召逍遥（Gemini 长上下文）读全库做仲裁——而不是无脑三方投票（避开流行性陷阱）。</li>
+          <li><strong>L3 角色对抗（PM/CTO 双轮）</strong>：阿杰的 <code>/review</code> skill 已经在做（Codex 当 CTO、独立 Opus 当 PM 对抗式复审）——这是产品/架构层的互评，与代码层互补。</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">开发流程编排（谁写 / 谁审 / 谁查 / 谁规划）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>各模型优势怎么编排进开发流程。先给业界已验证的角色分工，再给阿杰的可落地版。</p>
+
+      <h3>11.1 业界已固化的编排模式</h3>
+      <div class="callout accent">
+        <p>2026 年多个开源编排框架收敛到同一个分工：<strong>Gemini 当 orchestrator（编排/长上下文规划）、Claude 当 coder（写）、Codex 当 reviewer（审）</strong><sup class="cite" data-refid="35">[35]</sup>。还有更细的：复杂后端用 Codex、快速前端迭代用 Claude Code、UI 打磨用 Gemini<sup class="cite" data-refid="35">[35]</sup>。每个 PR 在人类审之前先过多个 AI 模型，每个抓不同问题。</p>
+      </div>
+
+      <h3>11.2 按任务类型选模型（落地速查）</h3>
+      <div class="role-cols">
+        <div class="role-col must">
+          <h4>✍️ 写代码 / 多文件改 → Claude Code（无忌/三丰）</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)">SWE-bench Pro 全场第一、多文件追依赖最稳、4.8 诚实度高。复杂重构、迁移用 Dynamic Workflows 拉并行子 Agent。</p>
+        </div>
+        <div class="role-col">
+          <h4>🔍 审查 / 补盲 → Codex（跨模型那步）</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)">独立 review agent + 执行层盲点与 Claude 互补。阿杰已在用，方向对。速度快也适合"高量样板代码 + 迭代式编辑"。</p>
+        </div>
+        <div class="role-col opt">
+          <h4>📚 查资料 / 读全库 / 长上下文 → Gemini（逍遥）</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)">10M 上下文 + LMArena 第一通用智能。适合"一次性吞整个中小型库做整体性分析"、长资料综述、跨百文件追逻辑。⚠️ 6/18 前迁 Antigravity CLI。</p>
+        </div>
+        <div class="role-col never">
+          <h4>⛔ 暂不进生产 → Grok Build</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)">v0.1 beta、跑分落后 18 分、国内要梯子、数据冲突。架构（Arena Mode 择优）值得学习，但别押生产。当"观察对象"。</p>
+        </div>
+      </div>
+
+      <h3>11.3 谁适合"规划"？</h3>
+      <div class="callout info">
+        <p>规划分两种：<strong>(a) 长上下文型规划</strong>（要先读懂整个大库再定方案）→ Gemini 长上下文有优势；<strong>(b) 推理深度型规划</strong>（架构权衡、对抗式审查）→ Claude Opus（Plan Mode + Extended Thinking）或 GPT-5.5 Pro 更强。阿杰的 <code>/plan</code> skill（产品轮 + 架构轮）走的是 (b)，主力用 Claude 合理；遇到"要先吃透一个陌生大库"的规划，可临时拉 Gemini 读全库出 brief。</p>
+      </div>
+
+      <h3>11.4 阿杰现有 MC 工作流的"模型贴图"</h3>
+      <p>把阿杰 CLAUDE.md 里的 8 步 MC 工作流，标注每步最优模型：</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>MC 步骤</th><th>当前做法</th><th>最优模型 / 升级建议</th></tr></thead>
+          <tbody>
+            <tr><td>1. 领任务 / 读上下文</td><td>Claude (无忌)</td><td>Claude OK；大库可拉 Gemini 出 brief</td></tr>
+            <tr><td>2. 按 prompt 实现</td><td>Claude (无忌/三丰)</td><td class="check y">✅ Claude Code（最优）</td></tr>
+            <tr><td>3. 验证（build）</td><td>构建命令</td><td>确定性脚本（hooks 自动化）</td></tr>
+            <tr><td>4. 提交审查</td><td>状态改 review</td><td>—</td></tr>
+            <tr><td>5. Codex 跨模型审查</td><td>codex exec 审 git diff</td><td class="check y">✅ 已对；可加"分歧才召 Gemini 仲裁"</td></tr>
+            <tr><td>6. 部署</td><td>项目特定</td><td>—</td></tr>
+            <tr><td>7. 标记完成</td><td>状态改 done</td><td>—</td></tr>
+            <tr><td>8. 下一个</td><td>循环</td><td>三丰可并行领独立任务(agentmaxxing)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout good">
+        <h4>✅ 三处具体强化建议</h4>
+        <p><strong>(1) 强化第 5 步：</strong>codex 审查时明确让它<strong>聚焦执行层</strong>（重试/边界/并发/资源泄漏），因为这正是它相对 Claude 的盲点优势区，别让它泛泛审。</p>
+        <p><strong>(2) 加一个"分歧仲裁"分支：</strong>只在 Claude 和 Codex 意见冲突时，才召逍遥(Gemini)读相关全库做第三方裁决——避开流行性陷阱、又省 token。</p>
+        <p><strong>(3) 三丰转型：</strong>把三丰从"同源审查"转去做<strong>并行独立任务</strong>（agentmaxxing）+ <strong>PM/产品角色对抗</strong>（你的 /review skill 已在做），发挥"独立 session"而非"不同模型"的价值。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">半米 / 阿杰开发流程 · 路线建议（决策树）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这章直接对着阿杰的 MC 工作流 + 三 bot 分工，给可执行编排方案。</p>
+
+      <h3>12.1 主决策树：一个任务来了，怎么分配模型</h3>
+      <div class="tree">
+        <div class="node q">Q1：这个任务要先读懂一个大代码库/大堆资料吗？</div>
+        <div class="branches">
+          <div class="node yes"><span class="lbl y">是</span>先让 <strong>Gemini(逍遥)</strong> 用 10M 上下文吞全库/全资料，产出 brief + 关键文件清单 → 再进 Q2</div>
+          <div class="node no"><span class="lbl n">否</span>直接进 Q2</div>
+        </div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q2：要写/改代码吗？</div>
+        <div class="branches">
+          <div class="node yes"><span class="lbl y">是</span><strong>Claude Code(无忌)</strong> 写。复杂迁移开 Dynamic Workflows 拉并行子 Agent</div>
+          <div class="node no"><span class="lbl n">否（纯研究/规划）</span>Claude 主导 /plan；要吃透陌生大库时回 Q1 拉 Gemini</div>
+        </div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q3：代码写完，commit 了吗？</div>
+        <div class="branches">
+          <div class="node yes"><span class="lbl y">是</span><strong>Codex</strong> 审 git diff（聚焦执行层 bug）→ Q4</div>
+          <div class="node no"><span class="lbl m">codex 不存在</span>跳过，但记一笔技术债</div>
+        </div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q4：Codex 和 Claude 对某处有分歧吗？</div>
+        <div class="branches">
+          <div class="node yes"><span class="lbl m">有分歧</span>召 <strong>逍遥(Gemini)</strong> 读相关全库做<strong>仲裁</strong>（按多样性择优，不投票）</div>
+          <div class="node no"><span class="lbl y">无分歧</span>修复 → 部署 → done</div>
+        </div>
+      </div>
+
+      <h3>12.2 三 bot 角色重定位</h3>
+      <div class="role-cols">
+        <div class="role-col must">
+          <h4>🟧 无忌 (Claude Code) = 主力写手 + 编排者</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)">写代码、规划、调度。底层 Opus 4.8，质量最稳。当 orchestrator 决定何时召其他 bot。</p>
+        </div>
+        <div class="role-col opt">
+          <h4>🟦 三丰 (独立 Claude session) = 并行手 + PM 对抗</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)">领独立任务并行干(agentmaxxing)；或在 /review 里当 PM 角色对抗。<strong>不依赖"它是别的模型"——它和无忌同源，价值在独立 context + 不同角色。</strong></p>
+        </div>
+        <div class="role-col">
+          <h4>🔷 逍遥 (Gemini) = 第三只眼 + 长上下文专家</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)">读全库、长资料综述、分歧仲裁。<strong>它是真正跨厂商的多样性来源。</strong>⚠️ 6/18 前必须迁 Antigravity CLI 或 Gemini API。</p>
+        </div>
+        <div class="role-col never">
+          <h4>⬛ Codex = 跨模型审查官（不是 bot，是工作流一步）</h4>
+          <p style="font-size:13.5px;color:var(--text-soft)">commit 后审 diff，聚焦执行层。架构脑(Claude) + 执行脑(Codex) 的关键补盲。</p>
+        </div>
+      </div>
+
+      <h3>12.3 ⏰ 时间敏感的行动项（6 月前）</h3>
+      <div class="callout bad">
+        <h4>⛔ 6/18 Gemini CLI 关停 — 逍遥要迁移</h4>
+        <p><strong>立刻做：</strong>确认逍遥底层是不是个人/免费档 Gemini CLI。如果是，6/18 后会停响应。<strong>三条迁移路线：</strong></p>
+        <ol>
+          <li><strong>迁 Antigravity CLI</strong>（Google 官方继任，Go 写、更快）——但要重测 cc-connect 接入。</li>
+          <li><strong>改走 Gemini API / Vertex AI</strong>——绕过 CLI，最稳，国内可用 Vertex。</li>
+          <li><strong>若组织有 Gemini Code Assist Standard/Enterprise license</strong>——不受影响，可继续<sup class="cite" data-refid="14">[14]</sup>。</li>
+        </ol>
+      </div>
+
+      <h3>12.4 给半米项目（阿杰单人全栈）的精简建议</h3>
+      <div class="callout good">
+        <p>阿杰是<strong>单人全栈</strong>，不要追求"全套多 Agent 工厂"，会过度工程。落地优先级：</p>
+        <ol>
+          <li><strong>保留并强化现有的 Codex 审查那一步</strong>（投入最小、补盲收益最大）——只这一条就拿到跨模型互评 80% 的价值。</li>
+          <li><strong>逍遥迁移做掉</strong>（不做会断，时间敏感）。</li>
+          <li><strong>分歧仲裁分支</strong>当"锦上添花"，分歧不多时不必每次都召第三方。</li>
+          <li>Dynamic Workflows / agentmaxxing 等"重型并行"<strong>等真有几十万行迁移任务再用</strong>，半米现阶段用不上，别为用而用。</li>
+        </ol>
+        <p><strong>一句话：你的工作流内核（写→跨模型审→改）是对的，2026 的新东西大多是"放大器"，按需取用，别被新产品牵着跑。</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">国内可用性（阿杰在国内）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>客观一段：这四家在国内的真实可用性，以及国产替代的位置。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>服务</th><th>国内直连</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Claude / Claude Code</strong></td><td class="check n">⛔ 封禁</td><td>Anthropic 2025-09 起封禁中国访问，11 月大封号波，检测严<sup class="cite" data-refid="26">[26]</sup>。需梯子 + 非中国区账号。</td></tr>
+            <tr><td><strong>Gemini / Antigravity</strong></td><td class="check n">⛔ 被墙</td><td>web 和 API endpoint 都被墙。可走 VPN / API 网关 / <strong>Vertex AI</strong><sup class="cite" data-refid="25">[25]</sup>。</td></tr>
+            <tr><td><strong>Grok / Grok Build</strong></td><td class="check n">⛔ 被墙</td><td>走 X，X 在国内被墙，需梯子<sup class="cite" data-refid="25">[25]</sup>。</td></tr>
+            <tr><td><strong>OpenAI / Codex</strong></td><td class="check n">⛔ 被墙</td><td>同样需梯子 + 非中国区账号。</td></tr>
+            <tr><td><strong>DeepSeek V4</strong></td><td class="check y">✅ 直连</td><td>SWE-bench 81%、1M 上下文，国产最强 coding 之一<sup class="cite" data-refid="24">[24]</sup>。</td></tr>
+            <tr><td><strong>GLM-5.1 (智谱)</strong></td><td class="check y">✅ 直连</td><td>MIT 开源、可自托管，曾在某 coding benchmark 上超 Claude Opus 4.6<sup class="cite" data-refid="24">[24]</sup>。</td></tr>
+            <tr><td><strong>Qwen3.5 (阿里)</strong></td><td class="check y">✅ 直连</td><td>开源、便宜 5-30 倍，agentic coding 可用<sup class="cite" data-refid="24">[24]</sup>。</td></tr>
+            <tr><td><strong>Kimi K2.6</strong></td><td class="check y">✅ 直连</td><td>SWE-bench Pro 58.6%，长文本强<sup class="cite" data-refid="24">[24]</sup>。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <p><strong>给阿杰的现实建议：</strong>四大家全要梯子，阿杰显然已在用（无忌/三丰/逍遥都在跑）。但<strong>把 DeepSeek V4 / GLM-5.1 当"断网备份"或"成本敏感批量任务的执行层"</strong>是务实的——比如半米里"便宜模型 pipeline"（你已有的 cheap-models-pipeline 研究）就可以用 DeepSeek/Qwen 跑量，把贵的 Claude/Codex 留给关键审查。国产在 coding agent 场景已经"能打"，不再只是凑数。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH14 FAQ ===== -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">FAQ · 12 条</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">2026 年 5 月，编码 Agent 到底谁第一？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>没有绝对第一。<strong>跑分</strong>上 Codex(GPT-5.5) 88.7% SWE-bench Verified 略胜 Claude Code(Opus 4.8) 88.6%<sup class="cite" data-refid="1">[1]</sup>；但 <strong>SWE-bench Pro</strong>（更难）Claude 69.2% 反超 Codex 58.6%。<strong>体感</strong>上 Claude 代码更干净（盲评 67%），Codex 更快更耐用（65% 人日常用）<sup class="cite" data-refid="11">[11]</sup>。结论：可靠性选 Claude，速度成本选 Codex，多数 pro 两个都用。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Grok Build 是什么？真能打 Claude Code 吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>是 xAI 2026 年 5 月刚推的终端编码 Agent，<strong>明确对标 Claude Code</strong>。招牌是 8 个并行子 Agent + 独立 git worktree + Arena Mode（多 Agent 竞赛择优）<sup class="cite" data-refid="4">[4]</sup>。但 SWE-bench 只有 70.8%，落后两强约 18 分，还是 v0.1 beta<sup class="cite" data-refid="3">[3]</sup>。<strong>架构野心大，但还没兑现，现阶段别进生产。</strong></p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Grok 3 和 Grok Build 是一回事吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不是。Grok 3 是<strong>旧的聊天模型</strong>。当前 xAI 旗舰聊天模型是 <strong>Grok 4.3</strong>（2026-04-30）<sup class="cite" data-refid="8">[8]</sup>；<strong>Grok Build</strong> 是独立的<strong>编码 Agent 产品</strong>，背后是专门的 grok-build-0.1 模型，跟聊天模型是两码事。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Gemini CLI 要没了？逍遥怎么办？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>是的，<strong>2026-06-18 Gemini CLI 对个人/免费档停止服务</strong>，并入 Antigravity（含新的 Antigravity CLI）<sup class="cite" data-refid="14">[14]</sup>。如果逍遥底层是个人档 Gemini CLI，6/18 后会停。三条路：迁 Antigravity CLI / 改走 Gemini API 或 Vertex / 若有 Code Assist Standard+ license 则不受影响。见第 12.3 节。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">为什么不直接让 Claude 审自己的代码就好？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>因为同一个模型审自己，看的是匹配自己内部模式的代码，<strong>盲点一致</strong>——更容易看到它预期的、漏掉它预期不到的<sup class="cite" data-refid="12">[12]</sup>。换不同 provider 的模型审，偏见不重叠，能抓到自审漏掉的。Opus 4.8 诚实度提升了 4 倍，让自审好一些，但<strong>仍不如跨模型</strong>。阿杰的"Codex 跨模型审查"判断完全正确。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">多模型互评是不是模型越多越好？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不是。<strong>关键是多样性不是数量。</strong>简单"多数投票"会掉进流行性陷阱——相似模型一起在"语法对语义错"的答案上收敛，把少数派正确解过滤掉<sup class="cite" data-refid="30">[30]</sup>。研究显示<strong>按多样性择优，哪怕只两个模型也能拿回 95% 的理论收益</strong>。阿杰跨 Claude/Codex/Gemini 三家，多样性已经足够。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">无忌和三丰互审有用吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>有用但有限。两个都是 Claude，<strong>同源、盲点重叠</strong>，互审只拿到"换个 fresh context 重看"的价值，拿不到"不同训练分布"的补盲价值。建议三丰转去做<strong>并行独立任务</strong>或<strong>不同角色（PM）的对抗</strong>，代码层真补盲交给 Codex。见第 10.5 节。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Gemini 的 10M 上下文有什么实际用处？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>它是别家旗舰（1M）的 10 倍<sup class="cite" data-refid="22">[22]</sup>。实际用处：<strong>一次性吞下整个中小型代码库做整体性分析、跨上百文件追逻辑、长资料综述、读全库后做"整体性代码审查"</strong>。这是它相对 Claude/Codex 的差异化优势区。但注意这是单源数据，建议官方再确认。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">官方 benchmark 能信吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>要打折看。同一模型换个 scaffold 能差十几分（Grok 4 自报 72-75%，独立测 58.6%）<sup class="cite" data-refid="1">[1]</sup>。官方自报数普遍偏高。看 benchmark 一定看清<strong>测试条件 + scaffold</strong>，并结合 LMArena（人类盲评）和社区实测口碑交叉验证。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">阿杰单人全栈，需要搞全套多 Agent 编排吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不需要，会过度工程。优先级：<strong>(1) 保留强化 Codex 审查那一步（最小投入最大补盲）；(2) 把逍遥迁移做掉（不做会断）；(3) 分歧仲裁当锦上添花。</strong>Dynamic Workflows / agentmaxxing 等重型并行，等真有几十万行迁移任务再用。见第 12.4 节。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">国产模型能替代这四家吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>部分能。DeepSeek V4 (81% SWE-bench)、GLM-5.1 (MIT 开源、曾超 Opus 4.6 某 coding 项)、Qwen3.5、Kimi K2.6 在 coding agent 场景已经"能打"，且<strong>国内直连 + 便宜 5-30 倍</strong><sup class="cite" data-refid="24">[24]</sup>。建议当"断网备份"和"成本敏感批量任务执行层"，把贵的 Claude/Codex 留给关键审查。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Codex 审查那步具体怎么写更好？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>明确让 Codex <strong>聚焦执行层 bug</strong>——重试逻辑、边界条件、并发、资源泄漏、负载降级。因为这正是 Codex 相对 Claude 的盲点优势区<sup class="cite" data-refid="12">[12]</sup>，而 Claude 自己已经盯架构/数据流了。别让 Codex 泛泛审"有没有 bug"，针对性提示能让两个模型盲点互补最大化。见第 11.4 节。</p></div></div>
+
+    </div>
+  </section>
+
+  <!-- ===== CH15 References ===== -->
+  <section class="chapter" id="ch15">
+    <h2><span class="num">15</span><span class="title-text">References</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13px;color:var(--text-mute)">访问日期均为 2026-05-29。悬停 inline <sup class="cite" data-refid="1">[1]</sup> 标记可预览来源。</p>
+      <ol class="ref-list">
+        <li id="ref-1">Claude Opus 4.8 Release, Benchmarks And More · SWE-bench/价格/上下文 · <a href="https://llm-stats.com/blog/research/claude-opus-4-8-launch" target="_blank" rel="noopener">llm-stats.com</a> + SWE-bench leaderboard <a href="https://www.marc0.dev/en/leaderboard" target="_blank" rel="noopener">marc0.dev</a><span class="ref-meta">· 引用 ×11</span></li>
+        <li id="ref-2">Anthropic Launches Claude Opus 4.8 · 发布日 2026-05-28 · <a href="https://www.macrumors.com/2026/05/28/anthropic-claude-opus-4-8/" target="_blank" rel="noopener">MacRumors</a> + <a href="https://www.anthropic.com/news/claude-opus-4-8" target="_blank" rel="noopener">anthropic.com/news</a><span class="ref-meta">· 引用 ×4</span></li>
+        <li id="ref-3">xAI Launches grok-build-0.1: Agentic Coding Model · 70.8% SWE-bench · <a href="https://www.basenor.com/blogs/news/xai-launches-grok-build-0-1-agentic-coding-model-explained" target="_blank" rel="noopener">basenor.com</a><span class="ref-meta">· 引用 ×4</span></li>
+        <li id="ref-4">Grok Build Review: Terminal Coding Agent w/ Isolated Subagents · <a href="https://chatforest.com/reviews/xai-grok-build-terminal-coding-agent-review/" target="_blank" rel="noopener">chatforest.com</a><span class="ref-meta">· 引用 ×6</span></li>
+        <li id="ref-5">xAI Grok Build CLI: Parallel Coding Agents (价格 $0.20/$1.50) · <a href="https://www.digitalapplied.com/blog/xai-grok-build-cli-parallel-coding-agents" target="_blank" rel="noopener">digitalapplied.com</a><span class="ref-meta">· 引用 ×3</span></li>
+        <li id="ref-6">Introducing GPT-5.5 + Codex upgrades · 价格/上下文/特性 · <a href="https://openai.com/index/introducing-gpt-5-5/" target="_blank" rel="noopener">openai.com</a> + <a href="https://llm-stats.com/models/gpt-5.5" target="_blank" rel="noopener">llm-stats GPT-5.5</a><span class="ref-meta">· 引用 ×6</span></li>
+        <li id="ref-7">Gemini 3.1 Pro Benchmarks · SWE-bench 80.6% / LMArena #1 · <a href="https://benchlm.ai/models/gemini-3-1-pro" target="_blank" rel="noopener">benchlm.ai</a> + <a href="https://whatllm.org/blog/gemini-3-1-pro-preview" target="_blank" rel="noopener">whatllm.org</a><span class="ref-meta">· 引用 ×5</span></li>
+        <li id="ref-8">Grok 4.3 Benchmarks/Pricing · 2026-04-30 · <a href="https://llm-stats.com/models/grok-4.3" target="_blank" rel="noopener">llm-stats grok-4.3</a> + <a href="https://artificialanalysis.ai/models/grok-4-3" target="_blank" rel="noopener">artificialanalysis.ai</a><span class="ref-meta">· 引用 ×6</span></li>
+        <li id="ref-9">Grok Build vs Claude Code vs Codex CLitre: Which Wins 2026 · <a href="https://codersera.com/blog/grok-build-vs-claude-code-vs-codex-cli-2026/" target="_blank" rel="noopener">codersera.com</a><span class="ref-meta">· 引用 ×6</span></li>
+        <li id="ref-10">Anthropic Ships Opus 4.8 w/ Dynamic Workflows, capped 1000 subagents · <a href="https://www.marktechpost.com/2026/05/28/anthropic-ships-claude-opus-4-8-alongside-dynamic-workflows-and-cheaper-fast-mode-with-workflows-capped-at-1000-subagents/" target="_blank" rel="noopener">MarkTechPost</a> + <a href="https://techcrunch.com/2026/05/28/anthropic-releases-opus-4-8-with-new-dynamic-workflow-tool/" target="_blank" rel="noopener">TechCrunch</a><span class="ref-meta">· 引用 ×2</span></li>
+        <li id="ref-11">Claude Code vs Codex 2026: Honest Verdict (500+ dev Reddit 调研) · <a href="https://www.totalum.app/blog/claude-code-vs-codex-2026" target="_blank" rel="noopener">totalum.app</a> + <a href="https://catdoes.com/blog/claude-code-vs-codex" target="_blank" rel="noopener">catdoes.com</a><span class="ref-meta">· 引用 ×6</span></li>
+        <li id="ref-12">Multi-Model AI Code Review: Cross-Model Collaboration · 盲点/互补/+7-15pt/-40%幻觉 · <a href="https://zylos.ai/research/2026-02-17-multi-model-ai-code-review" target="_blank" rel="noopener">zylos.ai</a> + <a href="https://medium.com/@ribrewguy/what-i-found-when-claude-reviewed-codexs-work-5d83a348a2d9" target="_blank" rel="noopener">Todd Orr Medium</a> + <a href="https://www.talkory.ai/blog/multi-llm-comparison-why-one-ai-is-never-enough-2026" target="_blank" rel="noopener">talkory.ai</a><span class="ref-meta">· 引用 ×6</span></li>
+        <li id="ref-13">Claude Code: Hooks, Subagents, Skills 完整指南 · <a href="https://ofox.ai/blog/claude-code-hooks-subagents-skills-complete-guide-2026/" target="_blank" rel="noopener">ofox.ai</a> + <a href="https://code.claude.com/docs/en/sub-agents" target="_blank" rel="noopener">Claude Code Docs</a><span class="ref-meta">· 引用 ×4</span></li>
+        <li id="ref-14">Transitioning Gemini CLI to Antigravity CLI (6/18 sunset) · <a href="https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/" target="_blank" rel="noopener">Google Developers Blog</a><span class="ref-meta">· 引用 ×4</span></li>
+        <li id="ref-15">Bye-bye Gemini CLI; Google nudges devs toward Antigravity · <a href="https://www.theregister.com/ai-ml/2026/05/20/bye-bye-gemini-cli-google-nudges-devs-toward-antigravity/5243605" target="_blank" rel="noopener">The Register</a><span class="ref-meta">· 引用 ×1</span></li>
+        <li id="ref-16">Codex Changelog (v0.131-0.135, Goal Mode default v0.133.0 5/21) · <a href="https://developers.openai.com/codex/changelog" target="_blank" rel="noopener">OpenAI Developers</a><span class="ref-meta">· 引用 ×2</span></li>
+        <li id="ref-17">Gemini 3 + Deep Think 发布(2025-11-18) · <a href="https://blog.google/products/gemini/gemini-3/" target="_blank" rel="noopener">blog.google Gemini 3</a> + <a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-deep-think/" target="_blank" rel="noopener">Gemini 3 Deep Think</a><span class="ref-meta">· 引用 ×2</span></li>
+        <li id="ref-18">Google launches Antigravity 2.0 (desktop+CLI+SDK, I/O 2026) · <a href="https://techcrunch.com/2026/05/19/google-launches-antigravity-2-0-with-an-updated-desktop-app-and-cli-tool-at-io-2026/" target="_blank" rel="noopener">TechCrunch</a> + <a href="https://thenextweb.com/news/google-antigravity-2-desktop-cli-sdk-io-2026" target="_blank" rel="noopener">TNW</a><span class="ref-meta">· 引用 ×2</span></li>
+        <li id="ref-19">Gemini 3.1 Pro Pricing/API · $2/$12, Ultra 定价冲突 · <a href="https://openrouter.ai/google/gemini-3.1-pro-preview" target="_blank" rel="noopener">OpenRouter</a> + <a href="https://felloai.com/gemini-pricing/" target="_blank" rel="noopener">felloai.com</a><span class="ref-meta">· 引用 ×3</span></li>
+        <li id="ref-20">Gemini 3.1 Pro 发布 2026-02-19 · <a href="https://deepmind.google/models/gemini/pro/" target="_blank" rel="noopener">Google DeepMind</a> + <a href="https://www.nxcode.io/resources/news/gemini-3-1-pro-complete-guide-benchmarks-pricing-api-2026" target="_blank" rel="noopener">nxcode.io</a><span class="ref-meta">· 引用 ×2</span></li>
+        <li id="ref-21">Gemini 3 Pro Terminal-Bench 2.0 54.2% · <a href="https://benchlm.ai/models/gemini-3-pro-deep-think" target="_blank" rel="noopener">benchlm.ai</a><span class="ref-meta">· 引用 ×1</span></li>
+        <li id="ref-22">1M Token Context Reality Check + Gemini 3.1 10M 上下文 · <a href="https://tokenmix.ai/blog/1m-token-context-reality-check-2026" target="_blank" rel="noopener">tokenmix.ai</a> + <a href="https://shipyard.build/blog/claude-code-vs-gemini-cli/" target="_blank" rel="noopener">shipyard.build</a><span class="ref-meta">· 引用 ×2</span></li>
+        <li id="ref-23">Google Antigravity Review 2026 (credit/rate limit 争议) · <a href="https://vibecoding.app/blog/google-antigravity-review" target="_blank" rel="noopener">vibecoding.app</a> + <a href="https://nimbalyst.com/blog/antigravity-ide-review/" target="_blank" rel="noopener">nimbalyst.com</a><span class="ref-meta">· 引用 ×1</span></li>
+        <li id="ref-24">Best Chinese AI Models 2026 (DeepSeek V4/GLM-5.1/Qwen/Kimi) · <a href="https://tokenmix.ai/blog/best-chinese-ai-models-2026-comparison-guide" target="_blank" rel="noopener">tokenmix.ai</a> + <a href="https://benchlm.ai/blog/posts/best-chinese-llm" target="_blank" rel="noopener">benchlm.ai</a><span class="ref-meta">· 引用 ×5</span></li>
+        <li id="ref-25">Use Gemini/Grok in China + AI 社会模拟 · <a href="https://www.aifreeapi.com/en/posts/how-to-use-gemini-in-china" target="_blank" rel="noopener">aifreeapi.com</a> + <a href="https://cyberinsider.com/ai-guides/unblock-grok-ai/" target="_blank" rel="noopener">cyberinsider Grok</a> + <a href="https://fortune.com/2026/05/28/ai-model-simulation-claude-chatgpt-grok-gemini/" target="_blank" rel="noopener">Fortune 模拟</a><span class="ref-meta">· 引用 ×4</span></li>
+        <li id="ref-26">Claude blocked in China/HK · <a href="https://sunsetbrowser.app/blog/use-chatgpt-claude-in-china-en" target="_blank" rel="noopener">sunsetbrowser.app</a> + <a href="https://doodhk.com/blog/why-claude-is-blocked-in-hong-kong-causes-context-and-alternatives/" target="_blank" rel="noopener">doodhk.com</a><span class="ref-meta">· 引用 ×1</span></li>
+        <li id="ref-27">Google Jules + Jules V2 (Project Jitro) · <a href="https://blog.google/innovation-and-ai/models-and-research/google-labs/jules/" target="_blank" rel="noopener">blog.google Jules</a> + <a href="https://dev.to/om_shree_0709/googles-project-jitro-just-redefined-what-a-coding-agent-is-heres-what-it-actually-changes-4oc3" target="_blank" rel="noopener">Project Jitro dev.to</a><span class="ref-meta">· 引用 ×1</span></li>
+        <li id="ref-28">Grok 4.3 Review (无持久记忆/打磨上市) · <a href="https://medium.com/@302.AI/grok-4-3-review-xai-gives-up-on-being-the-best-model-and-thats-a-good-thing-b40bfa7505bb" target="_blank" rel="noopener">302.AI Medium</a> + <a href="https://felloai.com/grok-4-3-review/" target="_blank" rel="noopener">felloai.com</a><span class="ref-meta">· 引用 ×1</span></li>
+        <li id="ref-29">Refining LLMs Outputs with Iterative Consensus Ensemble (ICE) +27% · <a href="https://www.sciencedirect.com/science/article/abs/pii/S0010482525010820" target="_blank" rel="noopener">ScienceDirect</a> + <a href="https://www.medrxiv.org/content/10.1101/2024.12.25.24319629.full.pdf" target="_blank" rel="noopener">medRxiv PDF</a><span class="ref-meta">· 引用 ×2</span></li>
+        <li id="ref-30">Wisdom and Delusion of LLM Ensembles (流行性陷阱/多样性95%) · <a href="https://arxiv.org/pdf/2510.21513" target="_blank" rel="noopener">arXiv 2510.21513</a> + <a href="https://arxiv.org/pdf/2502.16565" target="_blank" rel="noopener">Consensus-Diversity Tradeoff</a><span class="ref-meta">· 引用 ×3</span></li>
+        <li id="ref-31">Claude Opus 4.8: effort/dynamic workflows/honesty · <a href="https://thenewstack.io/claude-opus-48-release/" target="_blank" rel="noopener">The New Stack</a> + <a href="https://www.digitalapplied.com/blog/claude-opus-4-8-release-dynamic-workflows-2026" target="_blank" rel="noopener">digitalapplied.com</a><span class="ref-meta">· 引用 ×2</span></li>
+        <li id="ref-32">Grok Build Arena Mode/8 parallel agents · <a href="https://sdd.sh/2026/05/grok-build-xai-coding-agent-arena-mode/" target="_blank" rel="noopener">sdd.sh</a> + <a href="https://ai2.work/blog/xai-grok-build-multi-agent-arena-mode-redefines-ai-coding" target="_blank" rel="noopener">ai2.work</a><span class="ref-meta">· 引用 ×2</span></li>
+        <li id="ref-33">Grok Build: What xAI Actually Shipped (And What's Overstated) · <a href="https://medium.com/@candemir13/grok-build-what-xai-actually-shipped-and-whats-overstated-f98961b0d301" target="_blank" rel="noopener">Can Demir Medium</a> + <a href="https://byteiota.com/grok-build-coding-agent-review-2026/" target="_blank" rel="noopener">byteiota.com</a><span class="ref-meta">· 引用 ×1</span></li>
+        <li id="ref-34">Agentmaxxing: Parallel Multi-CLI Orchestration · <a href="https://codex.danielvaughan.com/2026/04/11/agentmaxxing-parallel-multi-cli-orchestration/" target="_blank" rel="noopener">codex.danielvaughan.com</a> + <a href="https://addyo.substack.com/p/my-llm-coding-workflow-going-into" target="_blank" rel="noopener">Addy Osmani</a><span class="ref-meta">· 引用 ×1</span></li>
+        <li id="ref-35">Multi-model orchestration (Gemini编排/Claude写/Codex审) · <a href="https://github.com/Z-M-Huang/claude-codex-gemini" target="_blank" rel="noopener">GitHub claude-codex-gemini</a> + <a href="https://dev.to/elophanto/how-i-orchestrate-claude-code-codex-and-gemini-cli-as-a-swarm-4p3c" target="_blank" rel="noopener">dev.to swarm</a> + <a href="https://addyosmani.com/blog/code-agent-orchestra/" target="_blank" rel="noopener">Addy Osmani Orchestra</a><span class="ref-meta">· 引用 ×1</span></li>
+      </ol>
+    </div>
+  </section>
+
+</main>
+
+<button class="back-to-top" id="backTop" aria-label="回到顶部">↑</button>
+
+<footer>
+  <p>无忌 Deep Research · L2 级 · 2026-05-29 · 60+ 来源 · 数字均 inline 引用，关键项双源核对</p>
+  <p style="font-size:12px;margin-top:6px">⚠️ Grok Build 太新（5 月 beta），部分参数来源冲突已标注；所有 benchmark 看清 scaffold 条件再信。</p>
+</footer>
+
+<script>
+(function() {
+  let activePopover=null,activeTrigger=null,hideTimer=null;
+  function getRefContent(refid){const el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){const r=trigger.getBoundingClientRect();const popW=pop.offsetWidth,popH=pop.offsetHeight;let left=r.left+window.scrollX;if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;if(left<12)left=12;let top=r.bottom+window.scrollY+6;if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}pop.style.left=left+'px';pop.style.top=top+'px';}
+  function showPopover(trigger){if(activeTrigger===trigger&&activePopover)return;if(activePopover){activePopover.remove();activePopover=null;}const content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;const pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;document.body.appendChild(pop);positionPopover(pop,trigger);activePopover=pop;activeTrigger=trigger;pop.addEventListener('mouseenter',()=>{if(hideTimer)clearTimeout(hideTimer);});pop.addEventListener('mouseleave',scheduleHide);}
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(()=>{if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){document.querySelectorAll('sup.cite[data-refid]').forEach(sup=>{sup.addEventListener('mouseenter',()=>showPopover(sup));sup.addEventListener('mouseleave',scheduleHide);sup.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});});document.addEventListener('click',e=>{if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+
+<script>
+(function(){
+  // 主题切换
+  var themeBtn=document.getElementById('themeToggle');
+  var saved=localStorage.getItem('fm2026-theme');
+  if(saved){document.body.setAttribute('data-theme',saved);themeBtn.textContent=saved==='dark'?'☀️':'🌙';}
+  themeBtn.addEventListener('click',function(){
+    var cur=document.body.getAttribute('data-theme')==='dark'?'light':'dark';
+    document.body.setAttribute('data-theme',cur);
+    localStorage.setItem('fm2026-theme',cur);
+    themeBtn.textContent=cur==='dark'?'☀️':'🌙';
+  });
+
+  // 进度条 + 回到顶部
+  var progressEl=document.getElementById('progress');
+  var backTopEl=document.getElementById('backTop');
+  function updateProgress(){
+    var docHeight=document.documentElement.scrollHeight-window.innerHeight;
+    var scrolled=window.scrollY;
+    var ratio=docHeight>0?scrolled/docHeight:0;
+    progressEl.style.width=(ratio*100)+'%';
+    backTopEl.classList.toggle('show',scrolled>400);
+  }
+  window.addEventListener('scroll',updateProgress,{passive:true});
+  updateProgress();
+  backTopEl.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+
+  // 章节折叠
+  document.querySelectorAll('section.chapter > h2').forEach(function(h2){
+    h2.addEventListener('click',function(){h2.parentElement.classList.toggle('collapsed');});
+  });
+
+  // 抽屉导航
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  function closeNav(){nav.classList.remove('open');ov.classList.remove('show');}
+  if(nav&&tog&&ov){
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',closeNav);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)closeNav();});});
+  }
+
+  // anchor 点击展开折叠章节
+  var anchorLinks=document.querySelectorAll('#anchorList a');
+  anchorLinks.forEach(function(a){
+    a.addEventListener('click',function(){
+      var target=document.getElementById(a.dataset.target);
+      if(target&&target.classList.contains('collapsed'))target.classList.remove('collapsed');
+    });
+  });
+
+  // scroll-spy 高亮
+  var sections=Array.prototype.map.call(anchorLinks,function(a){return document.getElementById(a.dataset.target);}).filter(Boolean);
+  function highlightAnchor(){
+    var offset=120,current=null;
+    for(var i=0;i<sections.length;i++){var rect=sections[i].getBoundingClientRect();if(rect.top-offset<=0)current=sections[i].id;}
+    anchorLinks.forEach(function(a){a.classList.toggle('active',a.dataset.target===current);});
+    var activeLink=document.querySelector('#anchorList a.active');
+    if(activeLink)activeLink.scrollIntoView({block:'nearest'});
+  }
+  window.addEventListener('scroll',highlightAnchor,{passive:true});
+  highlightAnchor();
+
+  // 表格行高亮
+  document.querySelectorAll('tbody tr').forEach(function(tr){
+    tr.addEventListener('click',function(){
+      tr.parentElement.querySelectorAll('tr.row-highlight').forEach(function(o){if(o!==tr)o.classList.remove('row-highlight');});
+      tr.classList.toggle('row-highlight');
+    });
+  });
+
+  // FAQ
+  document.querySelectorAll('.faq-q').forEach(function(q){
+    q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+  });
+})();
+</script>
+
+</body>
+</html>

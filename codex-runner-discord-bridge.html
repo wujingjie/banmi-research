@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>后台 Coding Agent Runner 对接 Discord：实时通知 + 一个 Bot 双向驱动 · 无忌 Deep Research · 2026-05-30</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1d23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --border-strong: #cdd2da;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --accent-text: #1d4ed8;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #0891b2;
+    --info-soft: #cffafe;
+    --code-bg: #f1f3f7;
+    --purple: #7c3aed;
+    --purple-soft: #ede9fe;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1c2030;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #b6bcc9;
+    --text-mute: #8a92a3;
+    --border: #2a2f3d;
+    --border-strong: #3a4154;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a55;
+    --accent-text: #93c5fd;
+    --good: #4ade80;
+    --good-soft: #14532d55;
+    --warn: #fbbf24;
+    --warn-soft: #78350f55;
+    --bad: #f87171;
+    --bad-soft: #7f1d1d55;
+    --info: #22d3ee;
+    --info-soft: #155e7555;
+    --code-bg: #0a0d14;
+    --purple: #a78bfa;
+    --purple-soft: #4c1d9555;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 28px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 3000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  hr.soft { border: none; height: 1px; background: var(--border); margin: 16px 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .node.yes { border-color: var(--good); }
+  .tree .node.no { border-color: var(--bad); }
+  .tree .branches { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .arch { margin: 16px 0; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; line-height: 1.5; color: var(--text-soft); overflow-x: auto; }
+  .arch .lyr { padding: 8px 12px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 9px; margin: 5px 0; }
+  .arch .lyr.a { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
+  .arch .lyr.g { border-color: var(--good); }
+  .arch .lyr.p { border-color: var(--purple); }
+  .arch .ar { text-align: center; color: var(--text-mute); font-size: 16px; margin: 1px 0; }
+  .role-cols { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 14px 0; }
+  .role-col { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-elevated); }
+  .role-col h4 { margin: 0 0 8px; font-size: 14px; color: var(--text); }
+  .role-col.must { background: var(--accent-soft); border-color: var(--accent); }
+  .role-col.opt { background: var(--warn-soft); border-color: var(--warn); }
+  .role-col.never { background: var(--bad-soft); border-color: var(--bad); }
+  .role-col ul { margin: 4px 0 0; padding-left: 18px; }
+  .prod-card { margin: 12px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .prod-head { padding: 10px 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); }
+  .prod-head .ico { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; background: var(--accent-soft); }
+  .prod-head .name-block { flex: 1; min-width: 140px; }
+  .prod-head .pn { font-size: 15px; font-weight: 700; color: var(--text); }
+  .prod-head .ph { font-size: 12px; color: var(--text-mute); font-family: ui-monospace, monospace; margin-top: 1px; }
+  .prod-body { padding: 10px 14px; font-size: 14px; }
+  .prod-body p { color: var(--text-soft); margin: 6px 0; }
+  .prod-body .takeaway { margin-top: 8px; padding: 8px 10px; background: var(--accent-soft); border-radius: 8px; border-left: 3px solid var(--accent); color: var(--text); font-size: 13.5px; }
+  .prod-body .takeaway::before { content: "💡 启示  "; font-weight: 700; color: var(--accent-text); }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(250,204,21,0.3); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated,#fff); color: var(--text,#1a1a23); border: 1px solid var(--border,#e3e6ec); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(15,23,42,0.18); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  [data-theme="dark"] .cite-popover { background: #1a1e2a; color: #e6e9f0; border-color: #2a2f3a; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+  .cite-popover a { color: var(--accent,#2563eb); text-decoration: underline; word-break: break-all; }
+  [data-theme="dark"] .cite-popover a { color: #60a5fa; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  @media (max-width: 480px) {
+    .hero { padding: 18px 4px 8px; }
+    .hero h1 { font-size: 22px; }
+    section.chapter > h2 { font-size: 17px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+    .tree .branches { grid-template-columns: 1fr; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    header.topbar, #progress, .back-to-top, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .prod-card, .metric-grid, .tree, .arch, .faq-item, .role-cols, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: #1d4ed8 !important; }
+    a { color: #1d4ed8 !important; text-decoration: none; }
+  }
+/* PDF-PRINT-PATCH */
+@media print {
+  @page { margin: 14mm 12mm; }
+  html, body { background: #fff !important; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+  header.topbar, #progress, .back-to-top, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn, #toc, .toc, .top-nav { display: none !important; }
+  main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+  .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+  section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+  section.chapter > h2 { cursor: default; position: static; }
+  section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+  .caret { display: none !important; }
+  .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+  .faq-q .toggle { display: none !important; }
+  .callout, .prod-card, .metric-grid, .tree, .arch, .faq-item, .role-cols, table { break-inside: avoid; }
+  h2, h3, h4 { break-after: avoid; }
+  .table-wrap { overflow: visible !important; border: none !important; }
+  table { min-width: 0 !important; font-size: 9pt; }
+  .cite-popover { display: none !important; }
+  sup.cite { border-bottom: none !important; color: #1d4ed8 !important; }
+}
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">后台 Runner 对接 Discord <span class="tag">v1 · 无忌 Deep Research</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 执行摘要</a>
+    <a href="#ch2" data-target="ch2">02 需求拆层：通知 vs 驱动</a>
+    <a href="#ch3" data-target="ch3">03 现状拆解：Wave + Codex runner</a>
+    <a href="#ch4" data-target="ch4">04 Claude Code channels + 通知</a>
+    <a href="#ch5" data-target="ch5">05 Codex 对接 Discord 的桥接</a>
+    <a href="#ch6" data-target="ch6">06 统一 Bot 驱动架构对比</a>
+    <a href="#ch7" data-target="ch7">⭐ 07 推荐方案（3 梯度）</a>
+    <a href="#ch7b" data-target="ch7b">⭐ 落到阿杰真实的 MC</a>
+    <a href="#ch8" data-target="ch8">08 通知层怎么做</a>
+    <a href="#ch9" data-target="ch9">09 驱动层怎么做</a>
+    <a href="#ch10" data-target="ch10">10 任务管理：队列/并发/状态</a>
+    <a href="#ch11" data-target="ch11">11 安全：鉴权/白名单</a>
+    <a href="#ch12" data-target="ch12">12 落地路线（分阶段）</a>
+    <a href="#ch13" data-target="ch13">13 坑与风险</a>
+    <a href="#ch14" data-target="ch14">14 FAQ</a>
+    <a href="#ch15" data-target="ch15">15 References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>后台 Coding Agent Runner 对接 Discord：实时通知 + 一个 Bot 双向驱动</h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-30</span>
+      <span>🔍 无忌 Deep Research · 5 路并行</span>
+      <span>🤖 Codex runner · Claude Code · Gemini</span>
+      <span>📐 出站易 · 入站难</span>
+      <span>🌍 海外视角</span>
+    </div>
+    <div class="hero-deck">
+      <strong>一句话：</strong>把 Wave 里全天跑的 Codex runner（Codex 调 Claude Code 跑 + 自审）接到 Discord，要分清两件难度天差地别的事——<strong>① 出站通知（runner→Discord，单向，今晚就能上）极简，一个 webhook 就够</strong><sup class="cite" data-refid="1">[1]</sup>；<strong>② 入站驱动（Discord 发指令→触发后台 runner，双向）才是真功夫，需要一个常驻 Bot 进程长连监听</strong><sup class="cite" data-refid="9">[9]</sup>。出站建议先上 <code>codex exec --json</code> 事件流管道推 webhook<sup class="cite" data-refid="2">[2]</sup>；入站建议直接用现成 gateway（<strong>OpenClaw / cc-connect / OpenACP</strong>）而非从零自建——Codex 没有原生 channels 必须搭桥，但桥已经有人造好了<sup class="cite" data-refid="4">[4]</sup>。本报告给 A/B/C 三梯度方案，从「最省事单向通知」到「一个 Bot 统一驱动 Codex+CC+Gemini」。
+    </div>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">执行摘要：5 条最硬结论</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>5 路并行调研（现状拆解 / Claude Code channels+通知 / Codex 桥接 / 统一 Bot 架构 / 完整方案落地）收敛出的核心判断，每条独立成块，方便扫。</p>
+
+      <div class="callout good">
+        <h4>✅ 结论 1：出站通知今晚就能上——webhook + <code>codex exec --json</code> 是零依赖最快路径 <span class="conf g">🟢 官方机制</span></h4>
+        <p><code>codex exec --json</code> 把 stdout 变成 JSONL 事件流，逐行吐 <code>thread.started / turn.started / item.completed / turn.completed</code>（item 含命令执行、文件改动、plan 更新、token 用量），这是把后台进度实时推 Discord 的天然事件源<sup class="cite" data-refid="2">[2]</sup>。串一个极简脚本把感兴趣的事件 <code>curl</code> 到一个 Discord incoming webhook（频道设置里 1 分钟建好、免写 bot）就成<sup class="cite" data-refid="1">[1]</sup>。这一步与现状零冲突、不需要 bot token、不需要公网，是回报最快的一步<sup class="cite" data-refid="20">[20]</sup>。</p>
+      </div>
+
+      <div class="callout accent">
+        <h4>🎯 结论 2：出站易、入站难——这是全篇最该先记住的分界线 <span class="conf g">🟢 边界判断</span></h4>
+        <p><strong>出站（进度→Discord）极简：webhook 即可，单向、零依赖</strong><sup class="cite" data-refid="1">[1]</sup>。<strong>入站（Discord 发指令→触发 runner）才是难点</strong>：webhook 做不到，必须有一个常驻 Bot 进程（gateway 长连）去监听 Discord 消息再 spawn runner<sup class="cite" data-refid="9">[9]</sup>。把两件事拆开、分阶段做，比一上来想"一个 bot 全包"更稳——很多人卡住就是因为把"看进度"和"派任务"混成一件事<sup class="cite" data-refid="20">[20]</sup>。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>💡 结论 3：Codex 没有原生 channels，但桥已造好——不用从零搭 <span class="conf g">🟢 已知事实+现成方案</span></h4>
+        <p>Anthropic 官方 Claude Code Channels 只能遥控 Claude Code 自己（无忌正用这套），<strong>驱动不了 Codex</strong><sup class="cite" data-refid="7">[7]</sup>。但 Codex 接 Discord 完全可行：现成统一 gateway 里 <strong>cc-connect</strong>（~11.1k star、Go、Discord 走 Gateway 无需公网 IP、Codex+CC 同一个 bot、流式回推）<sup class="cite" data-refid="4">[4]</sup>、<strong>OpenClaw ACP</strong>（一个 gateway spawn 多 harness、逍遥已在用）<sup class="cite" data-refid="13">[13]</sup>、<strong>OpenACP</strong>（中立 gateway、带 REST API 可被外部脚本触发）<sup class="cite" data-refid="11">[11]</sup>三者都把 Codex 纳入了同一个 bot——阿杰说的"一个 Bot 驱动所有任务"是现成的<sup class="cite" data-refid="10">[10]</sup>。</p>
+      </div>
+
+      <div class="callout purple">
+        <h4>🧭 结论 4：自审循环别动，但全天编排别让 Codex 当 orchestrator <span class="conf y">🟡 方向判断</span></h4>
+        <p>「Codex 调 CC 跑 + 自审」这条跨模型自审循环本身保持不动（这正是阿杰全局 CLAUDE.md 里那套 SOP，业界主流做法）<sup class="cite" data-refid="5">[5]</sup>。但<strong>"全天任务编排 + Discord 驱动"这一层不要交给 Codex 当总控</strong>——Codex 没内建队列/并发/状态，它的 scheduled 走桌面 App 的 Review inbox（攒着事后看），不适合 Discord 实时驱动<sup class="cite" data-refid="6">[6]</sup>。编排交给 <strong>CC channels（最熟）或 OpenClaw（最强统一）</strong>，由它 fire-and-forget 拉起 Codex runner——即"上层 CC/OpenClaw 驱动，下层 Codex 跑 + 自审"<sup class="cite" data-refid="22">[22]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 结论 5：Wave 只是壳，别指望它做远程通知；安全是入站的硬门槛 <span class="conf g">🟢 文档证实</span></h4>
+        <p>Wave Terminal 在这套里只是"跑 runner 的容器 + 持久化输出"，<code>wsh notify</code> 只发<strong>本机桌面通知，到不了手机 Discord</strong>——真正的 Discord 对接发生在 runner 命令层，跟 Wave 解耦，换掉 Wave 方案照样成立<sup class="cite" data-refid="3">[3]</sup>。另一条硬门槛：一旦做入站驱动，<strong>"在 Discord 发指令就能让你机器跑命令"等于把 shell 开放给了一个聊天频道</strong>——必须上白名单（per-channel opt-in / admin_from）+ 权限模式（yolo vs 逐条审批），别让任意人驱动你的机器<sup class="cite" data-refid="8">[8]</sup>。</p>
+      </div>
+
+      <h3>一句话路线建议（给阿杰）</h3>
+      <div class="callout accent">
+        <p><strong>【第 0 步·今晚】</strong>Wave 里 runner 不动，启动命令从 <code>codex exec</code> 改成 <code>codex exec --json | notify.py</code>，notify.py 挑 item.completed / turn.completed 推一个 Discord webhook——立刻"不盯电脑看全天进度"<sup class="cite" data-refid="2">[2]</sup>。<strong>【第 1 步·这周末】</strong>要双向驱动就选 gateway：想统一 Codex+CC+Gemini（逍遥也在）走 <strong>OpenClaw ACP</strong>（沉没成本最低）<sup class="cite" data-refid="13">[13]</sup>；想最快最稳走 <strong>cc-connect</strong>（11k star、支持 Codex、无需公网）<sup class="cite" data-refid="4">[4]</sup>；想用最熟的退路走 <strong>CC channels 当调度员</strong>（无忌已验证）fire-and-forget 拉 Codex<sup class="cite" data-refid="9">[9]</sup>。<strong>【不动】</strong>Codex 调 CC 自审循环保留。<strong>【上白名单】</strong>入站第一天就锁 allowlist。详见第 7、12 章。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 最大不确定性：现成桥的"流式粒度"和"嵌套自审进度归属"都需本地实测 <span class="conf y">🟡 待核</span></h4>
+        <p>几个最该谨慎的 gap：① <strong>cc-connect 对 <code>codex exec --json</code> 流的解析到底推到 item 级还是只 turn 级</strong>，文档只说"streaming"，需本地跑一次验证<sup class="cite" data-refid="4">[4]</sup>。② <strong>Codex 调 CC 自审时，子 agent(CC) 的进度是否冒泡进 Codex 的 --json 流 / hooks</strong>未确认，可能 CC 那侧要单独挂 Stop hook<sup class="cite" data-refid="2">[2]</sup>。③ codex-marketplace 的 Discord 通知插件成熟度低（仅 1 upvote），未验证 2026-05 最新 Codex 上是否仍可用<sup class="cite" data-refid="14">[14]</sup>。④ <strong>没有任何工具能 attach 到 Wave 里已手动起跑的 runner 进程接管其进度流</strong>——所有 gateway 都是 gateway 自己 spawn agent；要双向驱动只能让 gateway 接管 spawn，Wave 退回偶尔手动调试用<sup class="cite" data-refid="12">[12]</sup>。</p>
+      </div>
+
+      <div class="callout purple">
+        <h4>🔬 来源说明（本报告的可信度标注规则）</h4>
+        <p>本报告由无忌 5 路并行调研收敛而成。可信度标记：<strong>🟢 官方 docs / 多源</strong>（OpenAI Codex developers docs、code.claude.com、各项目 README/官方文档）；<strong>🟡 单源 / 社区项目 / 转述</strong>（个位数 star 的早期项目、社区博客、未实测数据）；<strong>🔴 估算或待核</strong>。<strong>凡 evidence 未覆盖的内容标 ⚠️ 不写。</strong>海外视角：webhook / Gateway 长连在海外环境都不需要梯子，cc-connect 的 no-public-IP Gateway 尤其适合 Mac Studio 全天跑<sup class="cite" data-refid="10">[10]</sup>。Codex runner 的精确"调 CC 方向"（orchestrator→worker 还是主→审）未由阿杰本人确认，落地脚本需按实际方向适配 <span class="conf y">🟡</span>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">需求拆层：通知（单向·易）vs Bot 驱动（双向·难）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>把心智模型钉死：阿杰的两个需求难度差一个量级，混在一起想会卡住。先拆清，后面所有章节都按这条主线走。</p>
+
+      <div class="role-cols">
+        <div class="role-col must">
+          <h4>① 需求一：实时进度通知（出站 · 单向 · 易）</h4>
+          <p style="margin:4px 0">"不盯电脑也能看 runner 进度"。数据流向：<strong>runner → Discord</strong>。</p>
+          <ul>
+            <li>用 <strong>Incoming Webhook</strong> 即可，不需要 bot token、不需要 bot 在线、不需要公网 IP<sup class="cite" data-refid="1">[1]</sup></li>
+            <li>runner 里一行 <code>curl</code> POST 就发出去了<sup class="cite" data-refid="10">[10]</sup></li>
+            <li>5 分钟能跑通，与现状零冲突<sup class="cite" data-refid="20">[20]</sup></li>
+          </ul>
+        </div>
+        <div class="role-col never">
+          <h4>② 需求二：一个 Bot 驱动所有任务（入站 · 双向 · 难）</h4>
+          <p style="margin:4px 0">"在 Discord 发指令 → 触发后台 runner → 进度回推"。数据流向：<strong>Discord ⇄ runner</strong>。</p>
+          <ul>
+            <li>webhook <strong>做不到入站</strong>——它只能往 Discord 发，收不了消息<sup class="cite" data-refid="9">[9]</sup></li>
+            <li>必须一个<strong>常驻 Bot 进程</strong>（Gateway 长连）监听 Discord 消息<sup class="cite" data-refid="4">[4]</sup></li>
+            <li>还要 spawn 进程、解析输出回推、管权限、管多任务状态——这是 gateway 的全部活<sup class="cite" data-refid="9">[9]</sup></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <h4>为什么 webhook 收不了消息？</h4>
+        <p>Discord Incoming Webhook 本质是"一个对外开放的发消息 URL"——你 POST 给它，它替你在频道发条消息。它是<strong>纯出站</strong>的，没有任何"监听用户发了什么"的能力<sup class="cite" data-refid="1">[1]</sup>。要"听见"用户在 Discord 说什么，必须有一个 <strong>bot 用 Gateway（WebSocket 长连）挂在 Discord 上</strong>，这就是为什么入站一定需要常驻进程<sup class="cite" data-refid="4">[4]</sup>。</p>
+      </div>
+
+      <div class="callout accent">
+        <h4>🎯 拆层后的落地顺序（本报告的主轴）</h4>
+        <p><strong>先吃下出站（需求一）</strong>——立刻见效、零风险、不动现有架构。<strong>再啃入站（需求二）</strong>——选一个现成 gateway，别自建。两步之间没有强依赖，出站做完照样独立可用。第 12 章给完整分阶段路线。</p>
+      </div>
+
+      <h3>2.1 三个层的职责（贯穿全文的分层）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>层</th><th>干什么</th><th>谁来做</th></tr></thead>
+          <tbody>
+            <tr><td><strong>通知层（出站）</strong></td><td>把 runner 进度推到 Discord</td><td>webhook + <code>codex exec --json</code> 脚本，或 hooks<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td><strong>驱动层（入站）</strong></td><td>监听 Discord 指令 → 路由 → spawn runner</td><td>常驻 gateway（cc-connect / OpenClaw / OpenACP）<sup class="cite" data-refid="4">[4]</sup></td></tr>
+            <tr><td><strong>执行层</strong></td><td>真正干活 + 跨模型自审</td><td>Codex runner 调 CC（保持不动）<sup class="cite" data-refid="5">[5]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">现状拆解：Wave + Codex runner +「调 CC 跑 + 自审」到底是什么</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>阿杰这套现状的每一块都查清楚了——<strong>每一块都已经有可直接利用的"出事件 / 推通知"接口，不需要从零搭桥</strong><sup class="cite" data-refid="2">[2]</sup>。三层拆解。</p>
+
+      <h3>3.1 Wave Terminal —— 只是"跑 runner 的壳"</h3>
+      <div class="callout info">
+        <p>Wave 里一切都是 block。<code>wsh run</code> 把命令跑在新 block 里（<code>-m</code> 放大、<code>-x</code> 跑完关），block 输出由 Block Controller 持久化、跨 session 保留；v0.14 加了 Durable Sessions（SSH 断线重连不丢）<sup class="cite" data-refid="3">[3]</sup>。Wave 自带 <code>wsh notify "Build complete"</code>——但这只是<strong>本机桌面通知，到不了手机 Discord</strong><sup class="cite" data-refid="3">[3]</sup>。</p>
+        <p style="margin-top:8px"><strong>关键结论：</strong>Wave 本身只是"能跑常驻命令 + 持久化输出 + 本机桌面通知"的容器，<strong>它不负责把消息推到 Discord</strong>——这一步要靠跑在 block 里的那条命令自己做。换句话说，Discord 对接发生在 runner 命令层，跟 Wave 解耦，<strong>就算以后不用 Wave，方案照样成立</strong><sup class="cite" data-refid="3">[3]</sup>。</p>
+      </div>
+
+      <h3>3.2 Codex CLI runner —— 三个对接金钥匙</h3>
+      <p>核心是 <code>codex exec</code>（headless / 非交互，无 TUI、无审批），适合 cron / CI / 脚本；官方说全天跑后台任务的路径就是 <strong>cron + codex exec</strong><sup class="cite" data-refid="6">[6]</sup>。三个对接接口：</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>接口</th><th>是什么</th><th>适合</th></tr></thead>
+          <tbody>
+            <tr><td><strong><code>codex exec --json</code></strong></td><td>stdout 变 JSONL 事件流，逐行吐 thread/turn/item 事件（含命令执行、文件改动、plan 更新、token 用量）</td><td>最丰富的实时进度源<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td><strong>Hooks 系统</strong></td><td>SessionStart/PreToolUse/PostToolUse/Stop 等生命周期 hook，从 stdin 收 JSON，可跑任意脚本</td><td>细粒度：每步工具调用/每轮结束播报<sup class="cite" data-refid="21">[21]</sup></td></tr>
+            <tr><td><strong><code>notify</code>（legacy）</strong></td><td>config.toml 顶部 <code>notify=[...]</code>，只在 agent-turn-complete 触发一次</td><td>最简的"完成了"提醒（官方已推荐改 hooks）<sup class="cite" data-refid="16">[16]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ 一个关键限制：</strong>Codex 的 hook <strong>只在 turn 边界触发</strong>（turn 开始/结束），<strong>没有 mid-task 进度 hook</strong>——所以"实时进度"不能靠 hook，要靠 <code>--json</code> 事件流<sup class="cite" data-refid="22">[22]</sup>。这是为什么本报告通知层首推 <code>codex exec --json</code> 而非 hooks。</p>
+      </div>
+
+      <h3>3.3「Codex 后台调 Claude Code 跑 + 自审」是什么</h3>
+      <p>这是当前最成熟、有现成实现的跨模型工作流，两种方向，阿杰这套大概率是其组合：</p>
+      <div class="callout accent">
+        <p><strong>跨模型自审（最稳）：</strong>Claude 实现 → commit → Codex 作为审查方跑 <code>git diff HEAD</code> → 返回结构化 verdict（APPROVED / WARNING / BLOCKED）→ Claude 修 CRITICAL/HIGH → 重审，最多 3 轮。现成实现 <strong>ching-kuo/claude-codex</strong>（把 Codex 当 MCP server，codex 自己跑 diff 只回 verdict 省 token）——这跟阿杰 CLAUDE.md 里"Codex 跨模型审查"的 SOP 完全一致<sup class="cite" data-refid="5">[5]</sup>。</p>
+      </div>
+      <div class="callout purple">
+        <p><strong>Codex 当 orchestrator 调 CC 当 worker：</strong>codex-subagents-mcp（每次调用开干净 context + AGENTS.md 注入 persona + <code>codex exec --profile &lt;agent&gt;</code>），或 <code>claude -p</code> headless 被 codex exec 当子进程 fan-out（各自独立 git worktree）。Codex 已 GA subagents（manager 拆任务最多 8 个并行云沙箱，2026-03-14），3-16 CLI 也上了 sub-agent<sup class="cite" data-refid="18">[18]</sup>。</p>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ 待确认：</strong>阿杰"Codex 后台调 CC"的精确方向（orchestrator→worker 还是主→审，抑或双向）未由本人确认。两种现成实现都查到了，但落地脚本需按他实际方向适配 <span class="conf y">🟡</span><sup class="cite" data-refid="18">[18]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">Claude Code channels + 通知机制（无忌就是活例子）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>Claude Code 在 Discord 对接上有两条官方原生路径，无忌正用其中一条——但能力边界很关键，搞错了就会"卡住不回 Discord"。</p>
+
+      <h3>4.1 Channels 模式（无忌正在跑的）</h3>
+      <div class="callout info">
+        <p>Channels 是 research preview（需 v2.1.80+）：channel 本质是一个跑在本机、Claude Code 以子进程通过 stdio 拉起的 MCP server。它把外部事件 push 进一个<strong>【已经开着的】</strong>Claude Code session，官方 Discord 插件双向：Claude 用 <code>reply/react/edit_message/fetch_messages/download_attachment</code> 回推 Discord<sup class="cite" data-refid="9">[9]</sup>。启动靠 <code>claude --channels plugin:discord@claude-plugins-official</code><sup class="cite" data-refid="17">[17]</sup>。</p>
+      </div>
+      <div class="callout bad">
+        <h4>⚠️ 能力边界（三条硬伤，决定它适合做什么）</h4>
+        <p>① <strong>必须有一个 live session 才收得到消息</strong>，session 不开时消息【永久丢失、无离线队列】——always-on 要 tmux/screen + <code>--dangerously-skip-permissions</code>，关终端即掉线<sup class="cite" data-refid="9">[9]</sup>。② <strong>一个 session = 一个上下文</strong>，channels 是"把消息喂进我这个会话"，不是"每条消息开一个新任务"的<strong>调度器</strong><sup class="cite" data-refid="9">[9]</sup>。③ research preview，<code>--channels</code> 语法/协议可能变<sup class="cite" data-refid="9">[9]</sup>。</p>
+      </div>
+      <div class="callout warn">
+        <p><strong>这正是无忌（阿杰=channels 用户）已验证的活例子：</strong>无忌跑在 <code>--channels plugin:discord</code> 上，所以它的 CLAUDE.md 明确禁用 <code>AskUserQuestion</code> 等 TUI 控件——因为 TUI 框只在 tmux 里弹、Discord 端渲染不出来，会卡住等回答导致"不回 Discord"。这条经验直接说明：<strong>channels 适合"我跟一个 always-on 助手聊天派活"，不适合"派 N 个互不干扰的后台任务"</strong><sup class="cite" data-refid="9">[9]</sup>。</p>
+      </div>
+
+      <h3>4.2 Hooks 做"实时进度通知"（不依赖 channels）</h3>
+      <p>settings.json 里 <code>Stop / Notification / SessionEnd / SubagentStop / PostToolUse</code> 等事件都支持 <code>command</code> 类型 hook，可执行任意 shell（直接 <code>curl</code> Discord webhook），还有 <code>http</code> 类型 hook 直接打 webhook URL<sup class="cite" data-refid="19">[19]</sup>。</p>
+      <div class="callout good">
+        <p><strong>这是最轻量、最可靠的进度推送方式</strong>：不依赖 channels、不依赖订阅类型，对 Codex 调起的 Claude Code 子进程同样生效（hooks 是 CC 自己的，谁调它都触发）<sup class="cite" data-refid="19">[19]</sup>。如果阿杰的自审循环里 CC 那侧也想播报，这条直接挂上即可。</p>
+      </div>
+
+      <h3>4.3 Headless / <code>claude -p</code> 后台 runner</h3>
+      <p><code>claude -p</code> + <code>--output-format stream-json --verbose --include-partial-messages</code> 拿实时事件流；<code>--resume &lt;session_id&gt;</code> 续接；<code>--dangerously-skip-permissions</code> / <code>--permission-mode acceptEdits</code> 无人值守<sup class="cite" data-refid="15">[15]</sup>。</p>
+      <div class="callout warn">
+        <p><strong>⚠️ 一个要提前知道的坑：</strong>2026-06-15 起订阅版 <code>claude -p</code> / Agent SDK 走【独立的 Agent SDK 月度额度】，跟交互额度分开算——阿杰要全天跑 headless runner，这条直接影响成本/额度规划，建议早确认 Pro/Max 计划下这块额度多大<sup class="cite" data-refid="15">[15]</sup>。具体配额数字未查到 ⚠️。</p>
+      </div>
+
+      <h3>4.4 现成参考：ebibibi/claude-code-discord-bridge（与阿杰愿景几乎 1:1）</h3>
+      <div class="callout accent">
+        <p>自建 Discord bot 调 <code>claude -p --output-format stream-json</code>：每个 thread 映射一个独立子进程（各自 cwd/git worktree），REST <code>POST /api/spawn</code> 非阻塞起任务、<code>POST /api/tasks</code> 注册定时任务、SchedulerCog 30s 轮询，emoji/embed 实时回推进度，<strong>v3 支持 <code>/backend claude|codex</code> 运行时切后端</strong>——直接覆盖阿杰"Bot 驱动 + Codex runner"两点<sup class="cite" data-refid="10">[10]</sup>。可直接抄架构或 fork。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">Codex 对接 Discord 的桥接方案（四层机制，从轻到重）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>Codex CLI 本身没有原生 channels，但接 Discord 完全可行，2025-2026 已有四层成熟机制，从轻到重排。</p>
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">--json</div><div class="l">实时进度最强 · 零依赖</div></div>
+        <div class="metric"><div class="v">hooks</div><div class="l">turn 边界细粒度 · 官方原生</div></div>
+        <div class="metric"><div class="v">notify</div><div class="l">完成才响一次 · 最省事</div></div>
+        <div class="metric"><div class="v">cc-connect</div><div class="l">双向驱动 · 11.1k★</div></div>
+      </div>
+
+      <h3>5.1 ①【最佳·实时进度】<code>codex exec --json</code> 自建管道</h3>
+      <div class="callout good">
+        <p>不靠现成 Bot，直接管道。官方给出的范式：</p>
+        <pre><code>codex exec --json "$TASK" \
+  | jq -rc 'select(.type=="item.completed" or .type=="turn.completed")' \
+  | while read e; do
+      curl -sX POST "$DISCORD_WEBHOOK" -d "{\"content\": ...}"
+    done</code></pre>
+        <p>事件类型：<code>thread.started / turn.started / item.started / item.completed / turn.completed</code>；item 子类型含 command_execution / file_change / agent_message / reasoning / mcp_tool_call / web_search / plan_update<sup class="cite" data-refid="2">[2]</sup>。<strong>强：</strong>实时进度最强、零依赖、完全可控、能精确选哪些事件推（如只推 plan 和命令执行避免刷屏）<sup class="cite" data-refid="2">[2]</sup>。</p>
+      </div>
+
+      <h3>5.2 ②【native·细粒度】Codex hooks.json（2026-04 上线）</h3>
+      <p>现代生命周期钩子系统（取代旧 notify）。<code>~/.codex/hooks.json</code> 或 config.toml <code>[hooks]</code>，事件含 SessionStart/PreToolUse/PostToolUse/SubagentStart/SubagentStop/Stop 等，每个 hook 从 stdin 收 JSON（session_id, tool_name, tool_input, tool_response），跑命令即可 POST Discord webhook，<code>exit 0</code> 成功 / <code>exit 2</code> 阻断<sup class="cite" data-refid="21">[21]</sup>。比 notify 粒度细、有 schema 校验，但<strong>钩子在 turn/tool 边界触发，非"每 token"流式</strong><sup class="cite" data-refid="22">[22]</sup>。</p>
+
+      <h3>5.3 ③【最简·完成通知】legacy notify + Marketplace 一键插件</h3>
+      <div class="callout info">
+        <p>旧 <code>notify</code>：config.toml 顶部 <code>notify=["python3","/path/notify.py"]</code>，只在 agent-turn-complete 触发一次，传单 JSON arg（含 last-assistant-message）<sup class="cite" data-refid="16">[16]</sup>。Codex Marketplace 有现成插件一行装：<code>npx codex-marketplace add am-will/codex-skills/hooks/aitmpl-codex/automation/discord-notifications --hook</code>，设 <code>DISCORD_WEBHOOK_URL</code> 即可——Codex 完成时触发<sup class="cite" data-refid="14">[14]</sup>。<strong>⚠️ 该插件仅 1 upvote、成熟度未知，未验证最新 Codex 兼容性</strong> <span class="conf y">🟡</span><sup class="cite" data-refid="14">[14]</sup>。</p>
+      </div>
+
+      <h3>5.4 ④【双向驱动·开箱即用】现成桥三档</h3>
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🌉</div>
+          <div class="name-block"><div class="pn">cc-connect (chenhg5)</div><div class="ph">Go · ~11.1k★ · Codex+CC 统一 · 无需公网</div></div>
+          <span class="pill accent">首推</span>
+        </div>
+        <div class="prod-body">
+          <p>Go 写的本地 AI coding agent → IM 桥接网关，把 Codex / Claude Code / Cursor / Gemini 接到 Discord/Slack/Telegram。Discord 走 Gateway 无需公网 IP；streaming/chunked 回推；<code>/model /reasoning /mode</code> 等 slash 双向驱动；<code>run_as_user</code> OS 级隔离<sup class="cite" data-refid="4">[4]</sup>。</p>
+          <p><strong>强：</strong>成熟度最高、Codex+CC 同一个 bot、流式回推、权限隔离。<strong>弱：</strong>Go 二进制定制 fork 门槛略高；<strong>进度粒度取决于它对 <code>codex --json</code> 流的解析程度（需实测）</strong><sup class="cite" data-refid="4">[4]</sup>。</p>
+          <div class="takeaway">阿杰"一个 Bot 驱动所有任务"最现成、最重量级的答案，跟 Codex-调-CC-自审栈天然兼容。</div>
+        </div>
+      </div>
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">📘</div>
+          <div class="name-block"><div class="pn">discord-codex-bot (pikachu0310)</div><div class="ph">TS/Deno · 8★ · thread-per-repo · 解析 JSON 流</div></div>
+          <span class="pill">参考实现</span>
+        </div>
+        <div class="prod-body">
+          <p><code>/start owner/repo</code> 建工作线程并 clone 仓库，每条消息转给 Codex CLI，解析 Codex JSON 流后把 <strong>intermediate+final 输出</strong>回推到同一线程；<code>/plan /stop /status</code> slash<sup class="cite" data-refid="23">[23]</sup>。</p>
+          <p><strong>强：</strong>双向驱动+实时进度的最佳参考代码，thread-per-repo 隔离干净。<strong>弱：</strong>8 star 早期项目，生产前需自审；只针对 Codex<sup class="cite" data-refid="23">[23]</sup>。</p>
+          <div class="takeaway">想自己改/抄解析 codex --json 流代码的最贴场景范例。</div>
+        </div>
+      </div>
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🐍</div>
+          <div class="name-block"><div class="pn">OpenAB (xx025)</div><div class="ph">Python · 41★ · 薄包装 · 零侵入 Codex</div></div>
+          <span class="pill good">轻量起步</span>
+        </div>
+        <div class="prod-body">
+          <p>Python 薄包装，把 Telegram/Discord 消息转给 <code>codex exec / codex exec resume --last</code>，用 <code>--output-last-message</code> 读回复发回；读 <code>~/.codex/sessions</code> 支持会话切换；"one config file, no changes to Codex"<sup class="cite" data-refid="24">[24]</sup>。</p>
+          <p><strong>强：</strong>最轻、Python 易改、零侵入、会话恢复。<strong>弱：</strong>基本 <strong>final-only</strong>（无实时流式进度）；CC 支持未实现<sup class="cite" data-refid="24">[24]</sup>。</p>
+        </div>
+      </div>
+
+      <div class="callout bad">
+        <h4>❌ 关键避坑：Composio 的 Discord MCP 对 Codex 是只读</h4>
+        <p>Composio 的 Discord MCP 可用工具仅 read/management（取 profile、列服务器、guild member），<strong>无 send message</strong>——不能用来让 Codex 自己往 Discord 发消息播报进度，这条路别走<sup class="cite" data-refid="25">[25]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">统一 Bot 驱动架构对比（OpenClaw / cc-connect / OpenACP / 自建）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>"一个 Discord Bot 驱动所有后台任务（Codex+CC+Gemini），发指令触发 runner、进度实时回推"——2026 年已有现成成熟 gateway 直接覆盖，不必从零自建。核心四类。</p>
+
+      <h3>6.1 四类 gateway 横评</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>方案</th><th>多 agent 模型</th><th>单 bot 多 agent？</th><th>外部触发</th><th>成熟度</th><th>对阿杰</th></tr></thead>
+          <tbody>
+            <tr><td><strong>OpenACP</strong></td><td>Discord forum 里每 thread 一 agent，Codex/CC/Gemini 可并行</td><td class="check y">是（单 bot 多 thread）</td><td class="check y">REST API 可被 CI/脚本触发</td><td>~404★ · 2026-05-18 极新</td><td>最贴"外部触发"需求<sup class="cite" data-refid="11">[11]</sup></td></tr>
+            <tr><td><strong>OpenClaw</strong></td><td>一进程多 agent 完全隔离（各自 model/memory）</td><td class="check n">否（每 agent 一 bot account）</td><td class="check p">通过 <code>/acp spawn</code> 在 Discord 触发</td><td>逍遥已在用</td><td>沉没成本最低<sup class="cite" data-refid="13">[13]</sup></td></tr>
+            <tr><td><strong>cc-connect</strong></td><td>一进程多项目，各自 agent+platform 组合</td><td class="check p">偏"项目并存"非多 thread 同跑</td><td class="check n">无明确 REST 触发</td><td>~11.1k★ 最成熟</td><td>最快最稳<sup class="cite" data-refid="4">[4]</sup></td></tr>
+            <tr><td><strong>自建 bot</strong></td><td>自己写编排</td><td class="check y">想怎样都行</td><td class="check y">自己实现</td><td>从零</td><td>不符"别重复造轮子"<sup class="cite" data-refid="20">[20]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>6.2 三个 gateway 详解</h3>
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🧩</div>
+          <div class="name-block"><div class="pn">OpenACP (Open-ACP)</div><div class="ph">MIT · TS · ~404★ · 中立 ACP gateway</div></div>
+          <span class="pill accent">外部触发最强</span>
+        </div>
+        <div class="prod-body">
+          <p>基于 ACP（Agent Client Protocol）开放协议，从注册表拉 28+ agent，<strong>明确同时支持 Codex CLI / Claude Code / Gemini CLI 并能在 Discord 里并行跑</strong>（一个 forum channel，每 thread 一 agent 一任务）<sup class="cite" data-refid="11">[11]</sup>。差异化：自带 <strong>REST API（<code>openacp api new/status/cancel</code>）可从 GitHub Actions / issue tracker / 任意外部脚本触发 session</strong>——正好对接"一个 bot 驱动 + 外部 runner 触发"<sup class="cite" data-refid="11">[11]</sup>。实时 tool-call 流式回推（蓝=运行/绿=完成/红=错误），破坏性操作出 Approve/Deny 按钮，session 跨重启持久。</p>
+          <p><strong>弱：</strong>一个 thread 锁一个 agent（换 agent 开新 thread）；三 agent 并行三倍烧 API 需设 budget；星数中等、生态比 cc-connect 小<sup class="cite" data-refid="12">[12]</sup>。</p>
+          <div class="takeaway">想要"干净中立 gateway + 外部脚本/CI 触发 session"，这是最贴的。</div>
+        </div>
+      </div>
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🦅</div>
+          <div class="name-block"><div class="pn">OpenClaw (acpx/ACP)</div><div class="ph">逍遥在用 · 一 gateway 多 harness</div></div>
+          <span class="pill purple">沉没成本最低</span>
+        </div>
+        <div class="prod-body">
+          <p>一个 Gateway 进程内可挂多个完全隔离的 agent（各自 model/memory/workspace，存 <code>~/.openclaw/agents/&lt;id&gt;</code>），通过 acpx 插件以 ACP 后端调 Codex/CC/Gemini<sup class="cite" data-refid="13">[13]</sup>。<strong>对 Codex 有专门支持</strong>：model ref 归一化（<code>openai-codex/gpt-5.4</code>）、reasoning effort 映射、隔离 CODEX_HOME、native Codex 优先 ACP 为 fallback<sup class="cite" data-refid="26">[26]</sup>。从 Discord <code>/acp spawn codex --bind here</code> 触发，后台 spawn 走独立 lane 不阻塞主 session，进度 <code>streamTo:'parent'</code> 回推；每个 spawn 当 background task 跟踪在 <code>/automation/tasks</code><sup class="cite" data-refid="22">[22]</sup>。</p>
+          <p><strong>弱：</strong>Discord 侧是<strong>"一个 agent 一个 bot account/token"</strong>（不是单 bot 多 agent，要给每个 agent 建 Discord 应用）；配置项多、上手曲线陡；多 gateway 实例要 <code>slash_commands:false</code> 防注册冲突<sup class="cite" data-refid="27">[27]</sup>。</p>
+          <div class="takeaway">逍遥已在 OpenClaw 上，把 Codex runner 也搬进同一个 gateway 一劳永逸——但接受"一个 bot 对一个脑"模型。</div>
+        </div>
+      </div>
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🌉</div>
+          <div class="name-block"><div class="pn">cc-connect (chenhg5)</div><div class="ph">Go · ~11.1k★ · 最成熟 bridge daemon</div></div>
+          <span class="pill good">最快最稳</span>
+        </div>
+        <div class="prod-body">
+          <p>星最多的 self-hosted bridge daemon，一进程多项目，明确支持 Codex+CC+Gemini+Cursor 10+，Discord 走 Gateway 无需公网 IP；<code>/list /switch</code> 管多 session（30 分钟闲置 rotate）；<code>/mode yolo</code> 自动批准 vs <code>/mode default</code> 逐条确认；<code>admin_from</code> 限特权用户、<code>run_as_user</code> 跑不同 Unix 用户做 OS 级隔离；支持自然语言 cron<sup class="cite" data-refid="4">[4]</sup>。</p>
+          <p><strong>弱：</strong>多 agent 是"多项目各自一个组合"偏个人遥控，<strong>不是 Discord 里多 thread 同时并行编排</strong>；无明确 REST API 触发（对"外部 runner 触发"不如 OpenACP 直给）<sup class="cite" data-refid="4">[4]</sup>。</p>
+          <div class="takeaway">只想要最成熟、个人手机遥控、不追求多 agent 同屏并行——上手最快最稳。</div>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 两个 CC-only 通知向工具，对 Codex runner 不适用</h4>
+        <p><strong>Claude-Code-Remote</strong>（~1.2k★，靠 ~/.claude hooks 推 Telegram/email/LINE + 回信注入命令）和 <strong>claudecode-discord</strong>（~53★，多机一机一 bot）都<strong>仅支持 Claude Code、不支持 Codex</strong>，对阿杰的 Codex runner 不适用<sup class="cite" data-refid="28">[28]</sup>。但 claudecode-discord 的架构（队列 + SQLite 持久化 + 心跳进度 + Pro/Max 免 key）可抄<sup class="cite" data-refid="28">[28]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">⭐ 推荐方案：A/B/C 三梯度（最省事 → 最强统一）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>按阿杰现状（海外、独立全栈、Mac Studio + RunPod、已有 Wave+Codex runner、无忌跑 CC channels、逍遥跑 OpenClaw）给三梯度。<strong>两步走，别一上来就重构。</strong></p>
+
+      <h3>7.1 决策树：你该走哪条？</h3>
+      <div class="tree">
+        <div class="node q">你现在最想解决哪个？</div>
+        <div class="branches">
+          <div class="node yes"><span class="lbl y">只想看进度</span> 不盯电脑、不在 Discord 派活 → <strong>方案 A（webhook 通知）</strong>，今晚上</div>
+          <div class="node no"><span class="lbl n">要在 Discord 派活</span> 发指令触发后台 runner → 继续往下</div>
+        </div>
+        <div class="step-arrow">↓ 要派活，再问</div>
+        <div class="node q">想统一 Codex + CC + Gemini（逍遥也进来）一个 bot 管全部吗？</div>
+        <div class="branches">
+          <div class="node yes"><span class="lbl y">想统一</span> → <strong>方案 C：OpenClaw ACP</strong>（逍遥已在、沉没成本最低）或 OpenACP（中立+REST 触发）</div>
+          <div class="node no"><span class="lbl m">先驱动 Codex/CC 就行</span> → <strong>方案 B：CC channels 当调度员</strong>（无忌已验证）或 cc-connect（最稳）</div>
+        </div>
+      </div>
+
+      <h3>7.2 方案 A：Codex exec --json + Webhook（最省事·零架构改动）</h3>
+      <div class="arch">
+        <div class="lyr g">Wave block（不动）：codex exec --json "$TASK"</div>
+        <div class="ar">│ JSONL 事件流</div>
+        <div class="lyr">notify.py：逐行 read，挑 item.completed / turn.completed</div>
+        <div class="ar">│ curl POST</div>
+        <div class="lyr a">Discord Incoming Webhook → 你的手机</div>
+      </div>
+      <div class="callout good">
+        <p><strong>组件：</strong>Wave 里 runner 不动，启动命令加 <code>--json</code> + 一个几十行 notify 脚本 tail JSONL 推 webhook。<strong>步骤：</strong>① Discord 频道设置建 webhook（1 分钟）；② 启动命令改 <code>codex exec --json ... | tee &gt;(notify.py)</code>；③ notify.py 解析事件 curl。<strong>强：</strong>今晚就能上、与现状零冲突、无需 bot token、绕开 hook 只在 turn 边界触发的限制<sup class="cite" data-refid="2">[2]</sup>。<strong>弱：</strong>单向——只通知不驱动；需自己写几十行解析脚本<sup class="cite" data-refid="2">[2]</sup>。</p>
+      </div>
+
+      <h3>7.3 方案 B：CC channels 当控制平面 + fire-and-forget 拉 Codex（最熟退路）</h3>
+      <div class="arch">
+        <div class="lyr a">你在 Discord 发指令</div>
+        <div class="ar">↓ channels（无忌已验证）</div>
+        <div class="lyr">常驻 CC channels session（tmux 保活 · --dangerously-skip-permissions）= 调度员</div>
+        <div class="ar">↓ Bash 后台 fire-and-forget</div>
+        <div class="lyr g">codex exec --json | notify.py（后台跑，自审循环不变）</div>
+        <div class="ar">↑ webhook 进度回推</div>
+        <div class="lyr a">Discord 频道</div>
+      </div>
+      <div class="callout accent">
+        <p><strong>核心思路：</strong>让 CC channels 只做轻活（接指令 + 拉 runner + 待命），重活甩给后台 Codex 进程，<strong>正好规避 channels 不适合长后台的弱点</strong><sup class="cite" data-refid="9">[9]</sup>。<strong>强：</strong>CC 原生、无忌已跑通、双向、不引入新框架。<strong>弱：</strong>channels 无后台 daemon（关终端掉线，要 tmux）；channels session 本身不是队列/状态系统，多任务得自己用 SQLite/文件管；没有现成开源实现这个具体组合，需自己拼几十行脚本 ⚠️<sup class="cite" data-refid="22">[22]</sup>。</p>
+      </div>
+
+      <h3>7.4 方案 C：OpenClaw ACP —— 一个 Bot 驱动 Codex+CC+Gemini（最强统一）</h3>
+      <div class="arch">
+        <div class="lyr a">Discord（按频道路由不同 agent）</div>
+        <div class="ar">↓ bindings 路由</div>
+        <div class="lyr p">OpenClaw Gateway（逍遥已在）</div>
+        <div class="ar">↓ acpx spawn · 各走 background lane</div>
+        <div class="lyr g">codex / claude / gemini harness（各自本机登录态，免额外 key）</div>
+        <div class="ar">↑ streamTo:'parent' 实时回推</div>
+        <div class="lyr a">Discord 子线程 + /automation/tasks 跟踪</div>
+      </div>
+      <div class="callout purple">
+        <p><strong>唯一开箱即用的"一个 Bot 管全部 agent"方案</strong>：单 gateway spawn 多 harness、<code>streamTo:'parent'</code> 把进度作为 system events 实时回推、每个 spawn 当 background task 跟踪 + background lane 防慢 harness 阻塞、每个 harness 用各自本机 provider auth（Codex/CC 都不用额外 key）<sup class="cite" data-refid="22">[22]</sup>。<strong>代价：</strong>要把 Codex/CC 都纳入一个 gateway 配置（allowedAgents/bindings/ttlMinutes），迁移成本中等；Discord 侧是"每 agent 一 bot account"<sup class="cite" data-refid="27">[27]</sup>。<strong>实测建议：</strong>先在 Mac Studio 起 daemon 跑一个 Codex thread，验证嵌套"Codex 调 CC 自审"是否稳 ⚠️<sup class="cite" data-refid="11">[11]</sup>。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>三梯度速选</h4>
+        <p><strong>A</strong>=今晚见效的单向通知（人人都该先上）。<strong>B</strong>=不想碰新框架、用最熟的 CC channels 做退路。<strong>C</strong>=一劳永逸把 Codex+CC+Gemini 收进逍遥已在的 OpenClaw。推荐节奏：<strong>今晚上 A，这周末评估 C，B 作退路</strong><sup class="cite" data-refid="29">[29]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH7B — 落到阿杰真实的 MC ===== -->
+  <section class="chapter" id="ch7b">
+    <h2><span class="num">⭐</span><span class="title-text">落到阿杰真实的 MC：具体怎么接</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <div class="callout accent">
+        <p><strong>📍 本章为「本地实情」</strong>——以下内容来自无忌对阿杰本机 Mission Control（MC）的实地核查，<strong>不是 web 来源、不带 cite</strong>。前面 A/B/C 三梯度是通用方案，这一章把它焊到阿杰<strong>已经在跑</strong>的真实系统上。结论先行：<strong>阿杰的 MC 不是空壳，是一个带完整 REST API + SSE 事件流的已运行本地服务，三个对接接口现成可用，阶段 1 今晚就能零改上线。</strong></p>
+      </div>
+
+      <h3>7B.1 MC 现状：一个已运行的本地 Go 服务（本地实情）</h3>
+      <div class="callout info">
+        <p>阿杰的 MC = 本地 <strong>Go 服务</strong>，代码在 <code>/Users/jay/Projects/mission-control</code>，server 监听端口 <strong>3001</strong>。它<strong>不是设想、是已经在跑的服务</strong>，已具备：</p>
+        <ul>
+          <li><strong>完整 REST API</strong>：<code>/api/tasks</code>、<code>/api/sessions</code>、<code>/api/intents</code>、<code>/api/events</code>、<code>/api/documents</code>，带鉴权头 <code>MC_AUTH_KEY=localdev</code></li>
+          <li><strong>SSE 事件流</strong>：<code>GET /api/events/stream</code>（背后 MCEvent 表），可订阅实时事件</li>
+          <li><strong>SQLite</strong> 做持久化</li>
+          <li><strong>Task 状态流</strong>：<code>todo → doing → review → done / blocked / parked</code></li>
+        </ul>
+        <p style="margin-top:8px">换句话说：本报告第 9/10 章里"驱动层需要的常驻进程 + 队列 + 状态持久 + 事件回推"这套底座，<strong>MC 这边其实已经有了</strong>——剩下的只是把它和 Discord 接起来。</p>
+      </div>
+
+      <h3>7B.2 今天的 runner（已在跑）：一个 mailbox 状态机（本地实情）</h3>
+      <div class="callout good">
+        <p>当前后台 runner 跑在 tmux session <code>mc-auto-runner</code> 里，执行 <code>scripts/mc-mailbox-runner.py</code>——一个 <strong>mailbox 状态机</strong>：</p>
+        <ul>
+          <li>每 <strong>30s</strong> 读 Obsidian 里 <code>MC-Claude-Codex-Mailbox.md</code> 的最新 packet，决定启谁</li>
+          <li><strong>Claude 写代码</strong>（<code>claude -p</code>）<strong>→ Codex 审查</strong>（<code>codex exec --full-auto</code>，verdict = <code>accept / needs_fix / blocked</code>）<strong>→ Codex 当 planner 选下一片 → <code>--auto-merge-accepted</code> ff-only 推 main</strong></li>
+          <li>状态 / 日志写在 <code>.mc-runner/live/runner.log</code></li>
+        </ul>
+        <p style="margin-top:8px">这正是本报告反复说的"<strong>Codex 调 CC 跑 + 自审循环</strong>"在阿杰这边的真身——<strong>这条循环不动</strong>，我们只在它外面挂通知 / 在它前面加驱动。</p>
+      </div>
+
+      <h3>7B.3 三个现成对接接口（本地实情）</h3>
+      <div class="callout purple">
+        <h4>① REST API → 驱动</h4>
+        <p>Discord bot 收到指令后直接 <code>POST / PATCH http://127.0.0.1:3001/api/tasks</code>（带 <code>MC_AUTH_KEY</code>）即可建任务 / 改状态 / 查列表——<strong>零改 MC 代码</strong>。这就是第 9 章"驱动层"在阿杰这边最省事的落点。</p>
+      </div>
+      <div class="callout purple">
+        <h4>② SSE <code>/api/events/stream</code> → 通知源</h4>
+        <p>一个独立小进程订阅这条流，task 状态变更 / merge / review 结果直接推 Discord——<strong>零改 runner</strong>。这是第 8 章"通知层"在阿杰这边的天然出站事件源（比 <code>codex exec --json</code> 更高层、更干净）。</p>
+      </div>
+      <div class="callout purple">
+        <h4>③ <code>runner.log</code> → 进度事件</h4>
+        <p>逐行 tail：<code>[runner] launch...</code> / <code>[merge-gate] fast-forwarded main</code> / <code>verdict=needs_fix</code> 等。尤其 <strong><code>verdict=blocked</code> 和"2 次失败封顶"最该 ping 阿杰</strong>——这俩是真正需要人介入的点，其余可静默。</p>
+      </div>
+
+      <h3>7B.4 两个关键约束</h3>
+      <div class="callout warn">
+        <h4>⚠️ 约束 1：MC 纯本地 <code>127.0.0.1</code>、无 remote</h4>
+        <p>MC 只监听本机回环，没有公网入口 → <strong>Discord bot 必须跑在同一台机器上</strong>（或同网段内能打到 3001 的机器）。这跟本报告"Gateway 长连无需公网"的结论不冲突——bot 的出站 Gateway 连接不用公网，但 bot 进程本身得贴着 MC 跑。</p>
+      </div>
+      <div class="callout bad">
+        <h4>❌ 约束 2：阿杰的 v2 协议有两条硬红线，别踩</h4>
+        <p><strong>① agent 不能直接 <code>PATCH status=done</code></strong>——只能推到 <code>review</code>，<code>done</code> 由 verification + reviewer 投影出来。Discord bot 同理：让它建任务 / 推到 review 可以，<strong>别让它代写 done</strong>。</p>
+        <p style="margin-top:8px"><strong>② v2 协议把"外部服务 / 代用户发消息"列为 stop condition</strong>。所以：让 runner 主动推 Discord <strong>必须阿杰显式授权</strong>，且要做成 <strong>runner 外挂的独立 watcher</strong>（读 log / 订 SSE 后再推），<strong>绝不要把"发 Discord"塞进 agent 的 prompt</strong>——否则会触发 agent 自己的安全停机，整条循环卡死。这是本章最该记住的一条。</p>
+      </div>
+
+      <h3>7B.5 结合 MC 的三阶段落地</h3>
+      <div class="tree">
+        <div class="node yes"><span class="lbl y">阶段 1 · 今晚 · 零改</span> 一个独立 watcher 进程 <code>tail runner.log</code> 或订阅 SSE → 关键事件（<code>blocked</code> / 失败封顶 / merge / review verdict）<code>POST</code> 到 Discord webhook。<strong>纯出站通知、不碰 MC / runner 一行代码。</strong></div>
+        <div class="step-arrow">↓ 想在 Discord 派活，再加</div>
+        <div class="node q"><span class="lbl m">阶段 2 · 加驱动</span> 一个常驻 Discord bot（跑同机）收指令 → <code>POST / PATCH :3001/api/tasks</code> 驱动 MC（建任务 / 改状态 / 查 todo），或往 mailbox <code>append</code> packet 注入下一片。</div>
+        <div class="step-arrow">↓ 想一个 bot 管全部脑，再统一</div>
+        <div class="node no"><span class="lbl n">阶段 3 · 统一 bot</span> 把统一 gateway（OpenClaw ACP，逍遥已在用）做成驱动层，统管 Codex + CC + Gemini；runner 改由 gateway spawn（而非在 Wave 里手起）。<strong>自审 loop 本身仍不动。</strong></div>
+      </div>
+      <div class="callout info">
+        <p><strong>对照通用方案：</strong>这套阶段 1/2/3 = 第 12 章"阶段 0 webhook 通知 → 阶段 1 单任务驱动 → 阶段 2 统一 Bot"在阿杰真实 MC 上的具体投影。区别只在于：阿杰这边的通知源是 <strong>MC SSE / runner.log</strong>（比裸 <code>codex exec --json</code> 高一层），驱动落点是 <strong>MC REST API</strong>（现成、零改）。</p>
+      </div>
+
+      <h3>7B.6 未确认 / 待实测（⚠️）</h3>
+      <div class="callout warn">
+        <p>以下三点本地核查未能定论，需起 daemon 实测后再固化脚本：</p>
+        <ul>
+          <li>⚠️ <strong>cc-connect 对 <code>codex exec --json</code> 流的解析粒度</strong>（推到 item 级还是 turn 级）——若走 cc-connect 路线需本地跑一次确认。</li>
+          <li>⚠️ <strong>Codex 调 CC 自审时，子 agent(CC) 的进度是否冒泡进 <code>--json</code> 流 / hooks</strong>——可能 CC 侧要单独挂 Stop hook 才能播报内部进度。</li>
+          <li>⚠️ <strong>跨天 mailbox 文件是否自动切换</strong>（runner / watcher 跨日 0 点后能否正确追到新 mailbox / 新 daily 文件）——需本地起 daemon 跨天观察。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">通知层怎么做（webhook / hooks 具体）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>出站三选一，建议先上事件流管道。三条路可叠加。</p>
+
+      <div class="role-cols">
+        <div class="role-col must">
+          <h4>路 ①：<code>codex exec --json</code> 管道（最丰富）</h4>
+          <p style="margin:4px 0">逐行解析 thread/turn/item 事件，自己挑哪些推（建议只推 <code>turn.completed</code> 和 <code>turn.failed</code> 避免刷屏）<sup class="cite" data-refid="2">[2]</sup>。</p>
+          <ul><li>实时进度最强、完全可控</li><li>能精确筛事件类型（如只推命令执行+plan）</li></ul>
+        </div>
+        <div class="role-col opt">
+          <h4>路 ②：Codex hooks.json（细粒度）</h4>
+          <p style="margin:4px 0">给 Codex 配 <code>Stop</code> + <code>PostToolUse</code> hook，从 stdin 收 JSON（含 tool_name / exit_code），脚本 curl webhook，每步工具调用都能播报<sup class="cite" data-refid="21">[21]</sup>。</p>
+          <ul><li>声明式配置、有 schema 校验</li><li>turn/tool 边界触发，非每 token</li></ul>
+        </div>
+        <div class="role-col never">
+          <h4>路 ③：现成插件（最快但只在完成时发）</h4>
+          <p style="margin:4px 0"><code>npx codex-marketplace add .../discord-notifications --hook</code> + 设 <code>DISCORD_WEBHOOK_URL</code>，零代码<sup class="cite" data-refid="14">[14]</sup>。</p>
+          <ul><li>今晚就能跑通</li><li>仅 1 upvote、默认只在"完成"时发 ⚠️</li></ul>
+        </div>
+      </div>
+
+      <h3>8.1 防刷屏：节流 + Discord 限速</h3>
+      <div class="callout warn">
+        <p><strong>⚠️ Discord 限速：</strong>实时推每个 PostToolUse 可能触发 429 限流（Discord 约 30 req/min + 单条 2000 字符上限），实操要 <strong>batch / 节流</strong><sup class="cite" data-refid="20">[20]</sup>。用 <code>WebhookClient</code> 会自动处理 429 重试，发 webhook 不需 bot token；shell 端 <code>discord.sh</code> 仅需 curl+jq<sup class="cite" data-refid="20">[20]</sup>。<strong>未实测：</strong>高频事件下的具体限流阈值需自己跑一次确认 ⚠️<sup class="cite" data-refid="2">[2]</sup>。</p>
+      </div>
+
+      <h3>8.2 嵌套自审的进度怎么办</h3>
+      <div class="callout info">
+        <p>阿杰是 Codex 调 CC 自审。<strong>CC 那侧想播报，最干净是给 CC 的 settings.json 挂 Stop/SubagentStop hook 直接 curl webhook</strong>——hooks 是 CC 自己的，谁调它都触发<sup class="cite" data-refid="19">[19]</sup>。<strong>⚠️ 待确认：</strong>子 agent(CC) 的进度事件是否会冒泡进 Codex 的 <code>--json</code> 流 / SubagentStart/Stop hooks（是否带 CC 内部细节）未确认，可能需 CC 侧单独挂<sup class="cite" data-refid="2">[2]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">驱动层怎么做（常驻 bot 监听 → 路由 → 回推）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>入站的核心：一个常驻进程用 Gateway 长连监听 Discord，收到指令后 spawn runner，再把进度回推。三个环节。</p>
+
+      <h3>9.1 监听：为什么必须常驻 + Gateway 长连</h3>
+      <div class="callout info">
+        <p>Discord 的"听消息"靠 bot 通过 <strong>Gateway（WebSocket 长连）</strong>挂在 Discord 上——这就是为什么入站一定要一个常驻进程<sup class="cite" data-refid="4">[4]</sup>。<strong>cc-connect / OpenClaw 的 Gateway 连接无需公网 IP</strong>，特别适合阿杰 Mac Studio 全天跑（不用做端口转发/反代）<sup class="cite" data-refid="10">[10]</sup>。CC channels 也是常驻（本机 MCP server + tmux 保活），但<strong>关终端即掉线、消息无离线队列永久丢失</strong>，这是它和真 gateway 的关键差距<sup class="cite" data-refid="9">[9]</sup>。</p>
+      </div>
+
+      <h3>9.2 路由：一条指令该交给哪个 agent / 哪个任务</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>gateway</th><th>路由机制</th><th>并发模型</th></tr></thead>
+          <tbody>
+            <tr><td><strong>OpenACP</strong></td><td>forum channel 每 thread 一 agent，<code>/new [agent] [workspace]</code> 开新 thread</td><td>多 thread 并行（三 agent 同跑三倍烧 key）<sup class="cite" data-refid="11">[11]</sup></td></tr>
+            <tr><td><strong>OpenClaw</strong></td><td>bindings 用 <code>agentId + match.channel + match.peer.id</code> 把频道路由到 agent</td><td>background lane 防慢 harness 阻塞，每 spawn 进 tasks<sup class="cite" data-refid="22">[22]</sup></td></tr>
+            <tr><td><strong>cc-connect</strong></td><td><code>/list /switch</code> 管多 session（30min 闲置 rotate）</td><td>多项目并存（偏个人遥控非多 thread 同屏）<sup class="cite" data-refid="4">[4]</sup></td></tr>
+            <tr><td><strong>ebibibi bridge</strong></td><td>每个 Discord thread 1:1 映射独立子进程（各自 cwd/worktree）</td><td>thread-per-task，REST <code>/api/spawn</code> 非阻塞<sup class="cite" data-refid="10">[10]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ 多 agent 并行的进度归并：</strong>多个 subagent 并行时，进度消息聚到一个 Discord 频道需要在 notifier 层做归并/打标签，否则消息会乱——这块没找到现成方案，需自行设计（用 thread 隔离是最省事的天然归并）⚠️<sup class="cite" data-refid="18">[18]</sup>。</p>
+      </div>
+
+      <h3>9.3 回推：进度怎么回到 Discord</h3>
+      <div class="callout good">
+        <p>各 gateway 都有现成回推机制：OpenClaw 用 <code>streamTo:'parent'</code> 把 ACP 进度作为 system events 实时回推<sup class="cite" data-refid="22">[22]</sup>；OpenACP 实时 tool-call 流式回推 + 颜色状态 + 按钮审批<sup class="cite" data-refid="11">[11]</sup>；ebibibi bridge 用 emoji 状态（🧠思考 🛠️读 💻改 🌐搜）+ 流式文本 + 工具 embed + 置顶 dashboard<sup class="cite" data-refid="10">[10]</sup>；claudecode-discord 每 1.5s 编辑消息 + 每 15s 心跳显示当前工具+耗时<sup class="cite" data-refid="28">[28]</sup>。<strong>实操提醒：</strong>编辑消息（edit）不触发推送通知，长任务完成时要发<strong>新消息</strong>才会让手机 ping<sup class="cite" data-refid="17">[17]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">任务管理：队列 / 并发 / 状态 / 持久化</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>"全天跑 + 多任务"必须解决：任务排队、并发隔离、状态跨重启不丢。这正是 webhook 和 CC channels 都不带、需要 gateway 或自建队列补的部分。</p>
+
+      <h3>10.1 全天跑的官方原语：cron + codex exec</h3>
+      <div class="callout info">
+        <p>Codex CLI 官方全天跑后台任务的路径是 <strong>cron + codex exec</strong>（非内置 webhook），如 <code>0 3 * * * /usr/local/bin/nightly-health-check.sh</code><sup class="cite" data-refid="6">[6]</sup>。如果阿杰已在 Wave block 里手动常驻跑，可平移成 cron + <code>codex exec --json</code> 管道，<strong>更稳、断了能重拉</strong><sup class="cite" data-refid="6">[6]</sup>。Codex 桌面 App 还把 Automations 做成 first-class 特性，但其 scheduled 走 Review inbox（攒着事后看），<strong>不适合 Discord 实时驱动</strong><sup class="cite" data-refid="6">[6]</sup>。</p>
+      </div>
+
+      <h3>10.2 队列 / 并发 / 状态：各方案能力对照</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>能力</th><th>webhook (A)</th><th>CC channels (B)</th><th>OpenClaw (C)</th><th>cc-connect</th><th>ebibibi bridge</th></tr></thead>
+          <tbody>
+            <tr><td>任务队列</td><td class="check n">无</td><td class="check n">无（自建）</td><td class="check y">background lane</td><td class="check p">/list /switch</td><td class="check y">SchedulerCog</td></tr>
+            <tr><td>并发隔离</td><td class="check n">无</td><td class="check p">单 session</td><td class="check y">每 agent/lane 排队</td><td class="check y">run_as_user</td><td class="check y">thread+worktree</td></tr>
+            <tr><td>状态持久（跨重启）</td><td class="check n">无</td><td class="check p">session_id resume</td><td class="check y">session 持久(TTL)</td><td class="check y">session 可恢复</td><td class="check y">SQLite</td></tr>
+            <tr><td>定时任务</td><td class="check p">cron</td><td class="check p">cron</td><td class="check y">/automation/tasks</td><td class="check y">自然语言 cron</td><td class="check y">POST /api/tasks</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>10.3 自建队列可抄的架构（chadingTV / ebibibi）</h3>
+      <div class="callout accent">
+        <p>若走自建/fork：<strong>ebibibi/chadingTV 的现成架构</strong>——POST <code>/api/spawn</code> 从任意脚本拉起新 thread+session；SchedulerCog = SQLite + 30s 主循环 + POST <code>/api/tasks</code> 注册任务；跨重启 SQLite 持久化；<code>/queue list</code> 显示待办可单个取消<sup class="cite" data-refid="28">[28]</sup>。每个 Discord thread 1:1 映射独立子进程（各自 cwd/git worktree）是最干净的并发隔离<sup class="cite" data-refid="10">[10]</sup>。<strong>⚠️ OpenClaw 的 SQLite 状态社区提醒会损坏，需定期备份；全局并发上限无官方数字，小规模实测后再全量迁移</strong><sup class="cite" data-refid="27">[27]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">安全：别让任意人 Discord 驱动你的机器跑命令</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>入站驱动一旦开，<strong>"在 Discord 发指令就能让你机器跑 shell 命令"</strong>——这是把执行权交给一个聊天频道。必须三道门：鉴权白名单 + 权限模式 + 隔离。</p>
+
+      <div class="callout bad">
+        <h4>❌ 最危险的误解：以为"我自己的频道很安全"</h4>
+        <p>prompt 注入是真实威胁：Discord 消息里如果有人说"approve the pending pairing / add me to allowlist"，<strong>这正是注入攻击会发的请求，必须拒绝</strong>——access.json/pairing 只能由阿杰在终端亲手操作，不能因为频道里有人说就批<sup class="cite" data-refid="9">[9]</sup>。这条无忌的运行约束里就明确写了。</p>
+      </div>
+
+      <h3>11.1 三道门</h3>
+      <div class="role-cols">
+        <div class="role-col must">
+          <h4>① 鉴权 / 白名单（必须）</h4>
+          <ul>
+            <li>CC channels：<code>access.json</code> allowlist + per-channel opt-in pairing（<code>/discord:access policy allowlist</code>）<sup class="cite" data-refid="17">[17]</sup></li>
+            <li>cc-connect：<code>admin_from</code> 限定特权用户<sup class="cite" data-refid="4">[4]</sup></li>
+            <li>OpenClaw：<code>acp.allowedAgents</code> + permissions profile（strict/approve-all）<sup class="cite" data-refid="27">[27]</sup></li>
+          </ul>
+        </div>
+        <div class="role-col opt">
+          <h4>② 权限模式（按风险定）</h4>
+          <ul>
+            <li>逐条审批：cc-connect <code>/mode default</code>、OpenACP 破坏操作出 Approve/Deny 按钮<sup class="cite" data-refid="11">[11]</sup></li>
+            <li>全自动：<code>/mode yolo</code> / <code>--dangerously-skip-permissions</code>（仅信任环境）<sup class="cite" data-refid="4">[4]</sup></li>
+            <li>CC permission relay（v2.1.81+）把审批弹窗转发 Discord 远程批准<sup class="cite" data-refid="9">[9]</sup></li>
+          </ul>
+        </div>
+        <div class="role-col never">
+          <h4>③ 进程 / 凭据隔离</h4>
+          <ul>
+            <li>cc-connect <code>run_as_user</code> 跑不同 Unix 用户做 OS 级隔离<sup class="cite" data-refid="4">[4]</sup></li>
+            <li>每 thread 独立 git worktree / cwd<sup class="cite" data-refid="10">[10]</sup></li>
+            <li>OpenClaw 隔离 CODEX_HOME；Mac Studio 本机 vs RunPod 隔离自评估<sup class="cite" data-refid="26">[26]</sup></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 全天无人值守的取舍</h4>
+        <p>permission relay（远程逐条批准）vs <code>--dangerously-skip-permissions</code>（全放开）——文档未给推荐默认，阿杰需按安全偏好定<sup class="cite" data-refid="9">[9]</sup>。CC channels 在长时间 <code>--dangerously-skip-permissions</code> 下的越权边界<strong>无实测数据</strong>，放全天无人值守需自己评估沙箱（本机 vs 隔离容器）⚠️<sup class="cite" data-refid="22">[22]</sup>。建议：<strong>先对所有动作设审批门，再随信心逐步放开</strong>——低风险任务 yolo、删 Roam/改生产/花钱类强制 review。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">落地路线：先通知 → 再单任务驱动 → 再统一 Bot</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>分阶段，每阶段独立可用、不依赖下一阶段。回报最快的先吃。</p>
+
+      <h3>阶段 0：webhook 通知（今晚 · 30 分钟 · 零架构改动）</h3>
+      <div class="callout good">
+        <p>保持 Wave 里 runner 不动，启动命令 <code>codex exec</code> → <code>codex exec --json ... | tee &gt;(notify.py)</code>。notify.py 逐行读 JSONL，遇 <code>item.command_executed / item.plan_updated / turn.completed</code> 就 POST 到一个 Discord webhook（频道设置 1 分钟建好）<sup class="cite" data-refid="2">[2]</sup>。<strong>今晚就能"不盯电脑、Discord 看全天进度"——这是回报最快的一步，先吃下。</strong></p>
+      </div>
+
+      <h3>阶段 1：单任务驱动（这周 · 选一个 gateway 试水）</h3>
+      <div class="callout accent">
+        <p>要"Discord 发指令→触发后台 runner→进度回推"。<strong>最快退路 = CC channels 当调度员（方案 B）</strong>：tmux 常驻一个 <code>claude --channels plugin:discord --dangerously-skip-permissions</code>，你发指令它 Bash 里 fire-and-forget 拉起 <code>codex exec --json | notify.py</code>，自己继续待命<sup class="cite" data-refid="9">[9]</sup>。<strong>或最稳 = cc-connect</strong>（11k★、支持 Codex、无需公网，上手最快）<sup class="cite" data-refid="4">[4]</sup>。第一天就锁 allowlist（第 11 章）。</p>
+      </div>
+
+      <h3>阶段 2：统一 Bot（这周末评估 · 一劳永逸）</h3>
+      <div class="callout purple">
+        <p>要"一个 Bot 管全部 agent（Codex+CC+Gemini 逍遥都进来）" = <strong>OpenClaw ACP（方案 C）</strong>。因为逍遥已经在 OpenClaw 上，把 Codex runner 也搬进同一个 gateway 一劳永逸<sup class="cite" data-refid="13">[13]</sup>。<strong>关键提醒：</strong>所有 gateway 都倾向由 gateway 自己 spawn agent——要双向驱动，最干净是<strong>把"起 runner"交给 gateway spawn，而不是在 Wave 手起再 attach</strong>（后者没有现成工具支持）<sup class="cite" data-refid="12">[12]</sup>。所以阶段 2 本质是"让 gateway 接管 Codex 启动"，Wave 退回偶尔手动调试用。先起 daemon 跑一个 Codex thread 实测嵌套自审是否稳<sup class="cite" data-refid="11">[11]</sup>。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>三阶段一句话</h4>
+        <p><strong>阶段 0（今晚）</strong>webhook 单向通知立刻见效 → <strong>阶段 1（这周）</strong>CC channels 或 cc-connect 试单任务驱动 → <strong>阶段 2（周末）</strong>OpenClaw 统一所有 agent。<strong>自审循环全程不动</strong>（Codex 调 CC 跨模型审查保留）<sup class="cite" data-refid="5">[5]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">坑与风险</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <div class="callout bad">
+        <h4>❌ 坑 1：以为 <code>wsh notify</code> 能远程通知</h4>
+        <p>Wave 的 <code>wsh notify</code> 只发<strong>本机桌面通知</strong>，到不了手机 Discord。远程通知必须靠 runner 命令层自己 curl webhook<sup class="cite" data-refid="3">[3]</sup>。</p>
+      </div>
+      <div class="callout bad">
+        <h4>❌ 坑 2：以为 webhook 能做入站驱动</h4>
+        <p>webhook 纯出站，收不了消息。入站必须常驻 bot Gateway 长连——混淆这点会卡住整个"Bot 驱动"需求<sup class="cite" data-refid="9">[9]</sup>。</p>
+      </div>
+      <div class="callout bad">
+        <h4>❌ 坑 3：用 Composio Discord MCP 让 Codex 自己发消息</h4>
+        <p>Composio Discord MCP 对 Codex 是<strong>只读</strong>（无 send message），发不出去，这条路别走<sup class="cite" data-refid="25">[25]</sup>。</p>
+      </div>
+      <div class="callout bad">
+        <h4>❌ 坑 4：想 attach 到 Wave 里已手动起跑的 runner 接管进度流</h4>
+        <p>没有任何工具能做到——所有 gateway 都是 gateway 自己 spawn agent。坚持 Wave 手起只能走 webhook/hook 旁路通知；双向驱动必须让 gateway 接管 spawn ⚠️<sup class="cite" data-refid="12">[12]</sup>。</p>
+      </div>
+      <div class="callout warn">
+        <h4>⚠️ 坑 5：高频事件刷屏 + Discord 429 限流</h4>
+        <p>实时推每个工具调用可能触发 Discord 限速（约 30 req/min + 2000 字符上限），需 batch/节流，只推 turn 级或筛事件类型<sup class="cite" data-refid="20">[20]</sup>。具体阈值未实测 ⚠️<sup class="cite" data-refid="2">[2]</sup>。</p>
+      </div>
+      <div class="callout warn">
+        <h4>⚠️ 坑 6：CC channels 关终端消息永久丢失</h4>
+        <p>channels 无离线队列，session 不开消息丢失（Discord 在 bot 离线期间会 queue 一部分、Telegram 直接丢），要 tmux/screen 常驻<sup class="cite" data-refid="9">[9]</sup>。</p>
+      </div>
+      <div class="callout warn">
+        <h4>⚠️ 坑 7：6-15 起 claude -p / Agent SDK 独立额度</h4>
+        <p>2026-06-15 起订阅版 headless 走独立 Agent SDK 月度额度，全天跑成本要重算，配额数字未查到，按 Pro/Max 计划确认 ⚠️<sup class="cite" data-refid="15">[15]</sup>。</p>
+      </div>
+      <div class="callout warn">
+        <h4>⚠️ 坑 8：社区桥成熟度低 + 嵌套自审进度归属未知</h4>
+        <p>discord-codex-bot(8★)/link-codex-to-discord(3★，自称 sanitized) 生产前务必审代码；codex-marketplace 插件仅 1 upvote 兼容性未验；Codex 调 CC 时子 agent 进度是否冒泡进 --json/hooks 无文档实测 ⚠️<sup class="cite" data-refid="23">[23]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH14 FAQ ===== -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">FAQ</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">最快能上的是哪个？今晚就想看到进度。</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>webhook + <code>codex exec --json</code>。Wave 里 runner 不动，启动命令加 <code>--json</code> 管道给一个几十行脚本，挑 <code>turn.completed</code> 等事件 curl 到一个 Discord incoming webhook（频道设置 1 分钟建好，免写 bot）。零依赖、无需公网、5 分钟跑通<sup class="cite" data-refid="2">[2]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Codex 有没有像 Claude Code channels 那样的原生 Discord？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>没有。截至 2026-05 Codex 无原生 channels，必须搭桥（<code>exec --json</code> 出站 / gateway 双向）。Anthropic 官方 channels 只能遥控 Claude Code 自己，驱动不了 Codex<sup class="cite" data-refid="7">[7]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">webhook 能不能让我在 Discord 发指令触发任务？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不能。webhook 纯出站（只能往 Discord 发），收不了消息。入站驱动必须一个常驻 bot 用 Gateway 长连监听<sup class="cite" data-refid="9">[9]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">一个 Bot 真能同时管 Codex + Claude Code + Gemini 吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>能，但开箱即用的只有 OpenClaw ACP / OpenACP / cc-connect 这几个。OpenClaw 是逍遥已在用的，把 Codex 也搬进去一劳永逸；OpenACP 带 REST API 可被外部脚本触发；cc-connect 最成熟最稳<sup class="cite" data-refid="13">[13]</sup>。注意 OpenClaw 的 Discord 侧是"每 agent 一 bot account"<sup class="cite" data-refid="27">[27]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">那个"Codex 调 CC 自审"还要改吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不改。跨模型自审循环本身保持 Codex 调 CC（这正是阿杰全局 CLAUDE.md 那套 SOP，业界主流）。要改的只是上面的"编排/Discord 驱动"层——那层别让 Codex 当 orchestrator，交给 CC channels 或 OpenClaw<sup class="cite" data-refid="5">[5]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">为什么不让 Codex 自己当总控调度所有任务？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>Codex 没内建队列/并发/状态，它的 scheduled 走桌面 App 的 Review inbox（攒着事后看），不适合 Discord 实时驱动。Codex 的强项是单次 exec 一锤子任务 + 干净 worktree 隔离<sup class="cite" data-refid="6">[6]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">海外环境要不要梯子 / 公网 IP？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>都不要。webhook / Gateway 长连在海外环境都直连，cc-connect 和 OpenClaw 的 Gateway 连接无需公网 IP，特别适合 Mac Studio 全天跑（不用端口转发/反代）<sup class="cite" data-refid="10">[10]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">怎么防止别人在 Discord 驱动我机器跑命令？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>三道门：① 白名单/allowlist（CC channels access.json / cc-connect admin_from）；② 权限模式（危险操作逐条审批，低风险才 yolo）；③ 进程/凭据隔离（run_as_user / worktree / 隔离 CODEX_HOME）。且 access.json/pairing 只能你在终端亲手批，频道里有人喊"approve me"必须拒绝（注入）<sup class="cite" data-refid="8">[8]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">CC channels 能不能直接当那个"统一 Bot"？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不太行。channels 是"一个常驻 session 一个上下文"，不是任务调度器；session 一断消息丢、无离线队列。适合"我跟一个 always-on 助手聊天派活"，不适合"派 N 个互不干扰的后台任务"。可以让它当调度员 fire-and-forget 拉 runner（方案 B），但重活要甩后台<sup class="cite" data-refid="9">[9]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">实时进度推每一步会不会刷屏？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>会，所以要筛事件 + 节流。建议只推 <code>turn.completed</code> / <code>turn.failed</code>，或在 notifier 里 batch；Discord 约 30 req/min + 单条 2000 字符上限，高频推 PostToolUse 会触发 429<sup class="cite" data-refid="20">[20]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">有没有跟我愿景几乎一样的现成开源项目？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>有。ebibibi/claude-code-discord-bridge：自建 bot 调 <code>claude -p stream-json</code>，每 thread 一独立子进程，REST <code>/api/spawn</code> 起任务 + <code>/api/tasks</code> 定时，emoji+embed 实时回推，<strong>v3 已内建 <code>/backend claude|codex</code> 运行时切后端</strong>——直接覆盖"Bot 驱动 + Codex"两点，可 fork<sup class="cite" data-refid="10">[10]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Wave 以后还用得上吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>用得上但角色变了。出站方案里 Wave 是"跑 runner 的壳 + 本机桌面提醒兜底"；入站统一后 runner 由 gateway spawn，Wave 退回"偶尔手动调试"。整套 Discord 对接跟 Wave 解耦，换掉 Wave 方案照样成立<sup class="cite" data-refid="3">[3]</sup>。</p></div></div>
+    </div>
+  </section>
+
+  <!-- ===== CH15 References ===== -->
+  <section class="chapter" id="ch15">
+    <h2><span class="num">15</span><span class="title-text">References</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13px;color:var(--text-mute)">访问日期 2026-05-30。悬停 inline <sup class="cite" data-refid="1">[1]</sup> 标记可预览来源。可信度：🟢 官方 docs/多源 · 🟡 单源/社区项目/转述 · 🔴 估算。</p>
+      <ol class="ref-list">
+        <li id="ref-1">Discord.js Webhook Guide — discord-webhook.com（Incoming Webhook 纯出站发消息、无需 bot token/公网；WebhookClient 自动处理 429 重试；content 2000 字符上限、约 30 req/min；discord.sh 仅需 curl+jq；spawn 监听 stdout 批量推）· <a href="https://discord-webhook.com/en/blog/discord-js-webhook-guide/" target="_blank" rel="noopener">discord-webhook.com</a><span class="ref-meta">· 2025 · 🟢 · 引用 ×多</span></li>
+        <li id="ref-2">Non-interactive mode — Codex | OpenAI Developers（<code>codex exec --json</code> JSONL 事件流 thread/turn/item.* 含 command_execution/file_change/plan_update/token；progress 走 stderr final 走 stdout；<code>--output-last-message</code>；<code>exec resume --last</code>；管道接 while/jq 推 webhook）· <a href="https://developers.openai.com/codex/noninteractive" target="_blank" rel="noopener">developers.openai.com/codex/noninteractive</a><span class="ref-meta">· 2026 · 🟢 官方 · 引用 ×多</span></li>
+        <li id="ref-3">wsh overview — Wave Terminal Docs（<code>wsh run -m/-x</code> 持久化 block、Block Controller 跨 session、v0.14 Durable Sessions；<code>wsh notify</code> 仅本机桌面通知到不了 Discord；Discord 对接在 runner 命令层与 Wave 解耦）· <a href="https://docs.waveterm.dev/wsh" target="_blank" rel="noopener">docs.waveterm.dev/wsh</a><span class="ref-meta">· 2025 · 🟢 官方 · 引用 ×多</span></li>
+        <li id="ref-4">cc-connect (chenhg5) — GitHub（Go ~11.1k★ v1.3.2 2026-04-21；Codex+CC+Gemini+Cursor 10+；Discord Gateway 无需公网 IP；streaming/chunked 回推；/model /reasoning /mode slash；admin_from 限特权；run_as_user OS 隔离；/list /switch 30min rotate；自然语言 cron）· <a href="https://github.com/chenhg5/cc-connect" target="_blank" rel="noopener">github.com/chenhg5/cc-connect</a><span class="ref-meta">· 2026-04-21 · 🟢 · 引用 ×多</span></li>
+        <li id="ref-5">claude-codex (ching-kuo) — GitHub（跨模型自审 workflow：实现→commit→Codex 跑 git diff HEAD→APPROVED/WARNING/BLOCKED→修→重审最多 3 轮；Codex 当 MCP server 只回 verdict 省 token；与阿杰 CLAUDE.md 跨模型审查 SOP 一致）· <a href="https://github.com/ching-kuo/claude-codex" target="_blank" rel="noopener">github.com/ching-kuo/claude-codex</a><span class="ref-meta">· 2026 · 🟢 · 引用 ×多</span></li>
+        <li id="ref-6">Codex CLI Automations and Scheduled Tasks — danielvaughan.com（官方全天跑路径 cron + codex exec；GitHub Actions schedule；Codex 桌面 App Automations first-class 走 Review inbox 攒着事后看，不适合实时 Discord）· <a href="https://codex.danielvaughan.com/2026/03/27/codex-cli-automations-scheduled-tasks/" target="_blank" rel="noopener">codex.danielvaughan.com</a><span class="ref-meta">· 2026-03-27 · 🟢 · 引用 ×多</span></li>
+        <li id="ref-7">Claude Code Channels — claudefast.st / code.claude.com（2026-03-20 research preview 仅覆盖 Claude Code 自身、驱动不了 Codex；channel 插件作 MCP server，claude --channels 激活双向收发；无忌正用此模式）· <a href="https://claudefa.st/blog/guide/development/claude-code-channels" target="_blank" rel="noopener">claudefa.st</a><span class="ref-meta">· 2026-03-20 · 🟢 · 引用 ×2</span></li>
+        <li id="ref-8">AI Agent 鉴权/白名单综合（per-channel allowlist + admin_from + 权限模式 + 进程隔离；prompt 注入拒批 pairing；危险操作先审批门再放开）· 5 路调研收敛 + Discord 插件运行约束 <span class="ref-meta">· 🟡 多源综合 · 引用 ×多</span></li>
+        <li id="ref-9">Push events into a running session with channels — Claude Code Docs（channel=本机 stdio MCP server；事件只在 session 开着时到达、不开永久丢失无离线队列；一 session 一上下文非调度器；非 -p 禁用交互工具；permission relay v2.1.81+ 远程批准；reply/react/edit_message/fetch_messages 工具）· <a href="https://code.claude.com/docs/en/channels" target="_blank" rel="noopener">code.claude.com/docs/en/channels</a><span class="ref-meta">· 2026 · 🟢 官方 · 引用 ×多</span></li>
+        <li id="ref-10">ebibibi/claude-code-discord-bridge — GitHub（自建 bot 调 claude -p stream-json；thread 1:1 独立子进程各自 cwd/worktree；emoji 状态+流式+embed+置顶 dashboard；REST POST /api/spawn 非阻塞 + /api/tasks 定时 + GitHub webhook；SchedulerCog 30s 轮询；v3 /backend claude|codex 运行时切后端；Gateway 无需公网适合 Mac Studio）· <a href="https://github.com/ebibibi/claude-code-discord-bridge" target="_blank" rel="noopener">github.com/ebibibi/claude-code-discord-bridge</a><span class="ref-meta">· 2026 · 🟢 · 引用 ×多</span></li>
+        <li id="ref-11">OpenACP (Open-ACP) — GitHub（MIT TS ~404★ v2026.518.2 2026-05-18；ACP 注册表 28+ agent 含 Codex/CC/Gemini Discord forum 并行；REST API openacp api new/status/cancel 外部触发；实时 tool-call 流式回推蓝/绿/红 + Approve/Deny 按钮；session 跨重启持久 TTL；daemon 模式）· <a href="https://github.com/Open-ACP/OpenACP" target="_blank" rel="noopener">github.com/Open-ACP/OpenACP</a><span class="ref-meta">· 2026-05-18 · 🟢/🟡 极新生态小 · 引用 ×多</span></li>
+        <li id="ref-12">How to run Claude Code, Gemini and Codex side-by-side from Discord — dev.to/tigergethigher（OpenACP 一 thread 一 agent 一 task、换 agent 用 /new 开新 thread；三 agent 并行成本三倍需早设 budget；gateway 自己 spawn agent 无法 attach 已起进程）· <a href="https://dev.to/tigergethigher/how-to-run-claude-code-gemini-and-codex-side-by-side-from-discord-55a4" target="_blank" rel="noopener">dev.to/tigergethigher</a><span class="ref-meta">· 2026 · 🟡 · 引用 ×2</span></li>
+        <li id="ref-13">ACP agents — OpenClaw Docs（一 gateway spawn/steer 多 harness codex/claude/gemini；bindings agentId+match.channel+peer.id 路由频道到 agent；/acp spawn codex --bind here 触发；逍遥已在 OpenClaw 上）· <a href="https://docs.openclaw.ai/tools/acp-agents" target="_blank" rel="noopener">docs.openclaw.ai/tools/acp-agents</a><span class="ref-meta">· 2026 · 🟢 官方 · 引用 ×多</span></li>
+        <li id="ref-14">Discord Notifications — Codex Plugin Marketplace（一键装 <code>npx codex-marketplace add am-will/.../discord-notifications --hook</code> 设 DISCORD_WEBHOOK_URL；completion-only；含 Detailed/Error 版本；仅 1 upvote 成熟度未知）· <a href="https://www.codex-marketplace.com/hooks" target="_blank" rel="noopener">codex-marketplace.com/hooks</a><span class="ref-meta">· 2026 · 🟡 社区 · 引用 ×2</span></li>
+        <li id="ref-15">Run Claude Code programmatically (headless) — Claude Code Docs（claude -p --output-format stream-json --verbose --include-partial-messages 实时事件流；--resume/--continue 续接；--dangerously-skip-permissions/--permission-mode acceptEdits 无人值守；--bare；⚠️2026-06-15 起订阅版 -p/SDK 走独立 Agent SDK 月度额度）· <a href="https://code.claude.com/docs/en/headless" target="_blank" rel="noopener">code.claude.com/docs/en/headless</a><span class="ref-meta">· 2026-06-15 · 🟢 官方 · 引用 ×2</span></li>
+        <li id="ref-16">Advanced Configuration — Codex | OpenAI Developers（legacy notify=["python3","/path/notify.py"] 仅 agent-turn-complete 触发一次传单 JSON arg 含 last-assistant-message；必须放 config.toml 顶部；新用法官方推荐 hooks；参考实现 heydong1/codex-notify）· <a href="https://developers.openai.com/codex/config-advanced" target="_blank" rel="noopener">developers.openai.com/codex/config-advanced</a><span class="ref-meta">· 2026 · 🟢 官方 · 引用 ×2</span></li>
+        <li id="ref-17">claude-plugins-official Discord plugin README — GitHub（启动 claude --channels plugin:discord@claude-plugins-official；/discord:configure token；pairing /discord:access pair；policy allowlist 锁定；DISCORD_STATE_DIR 区分多实例；fetch_messages 每次≤100；编辑消息不触发推送，完成发新消息才 ping）· <a href="https://github.com/anthropics/claude-plugins-official/blob/main/external_plugins/discord/README.md" target="_blank" rel="noopener">github.com/anthropics/claude-plugins-official</a><span class="ref-meta">· 2026 · 🟢 官方 · 引用 ×2</span></li>
+        <li id="ref-18">codex-subagents-mcp (leonardsellem) — GitHub（Codex 当 orchestrator 调子 agent：codex exec --profile &lt;agent&gt; 干净 context+AGENTS.md persona；claude -p fan-out 各自 worktree；Codex 2026-03-14 GA subagents 最多 8 并行云沙箱、3-16 CLI 上 sub-agent；多 agent 进度归并需 notifier 打标签）· <a href="https://github.com/leonardsellem/codex-subagents-mcp" target="_blank" rel="noopener">github.com/leonardsellem/codex-subagents-mcp</a><span class="ref-meta">· 2026 · 🟡 · 引用 ×2</span></li>
+        <li id="ref-19">Hooks reference — Claude Code Docs（Stop/Notification/SessionEnd/SubagentStop/PostToolUse 支持 command 类型直接 curl webhook + http 类型打 URL；Stop 可 decision:block；不依赖 channels/订阅类型；对 Codex 调起的 CC 子进程同样生效）· <a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener">code.claude.com/docs/en/hooks</a><span class="ref-meta">· 2026 · 🟢 官方 · 引用 ×多</span></li>
+        <li id="ref-20">最快落地零依赖 webhook 旁路 + Discord 限速（runner 直接 curl webhook 无需 bot/公网；30 req/min + 2000 字符上限需 batch/节流；discord.sh 仅 curl+jq）· 统一 Bot 架构调研收敛 <span class="ref-meta">· 🟢 · 引用 ×多</span></li>
+        <li id="ref-21">Codex CLI Hooks: Complete Guide — danielvaughan.com / developers.openai.com/codex/hooks（2026-04 hooks.json 取代 notify；SessionStart/PreToolUse/PostToolUse/PermissionRequest/Stop/SubagentStart/Stop 等；stdin 收 JSON session_id/tool_name/tool_input/tool_response/exit_code；exit2 阻断；命令以 session cwd 工作）· <a href="https://codex.danielvaughan.com/2026/04/15/codex-cli-hooks-complete-guide-events-policy-patterns/" target="_blank" rel="noopener">codex.danielvaughan.com</a><span class="ref-meta">· 2026-04-15 · 🟢 · 引用 ×多</span></li>
+        <li id="ref-22">Codex hook 仅 turn 边界触发无 mid-task 进度 hook + OpenClaw background lane / streamTo:parent + 上层编排不交给 Codex（hooks fire at turn boundaries only no mid-task；streamTo:'parent' 写 acp-stream.jsonl 实时回推；每 spawn 当 background task；上层 CC/OpenClaw 驱动下层 Codex 跑+自审）· <a href="https://codex.danielvaughan.com/2026/04/15/codex-cli-hooks-complete-guide-events-policy-patterns/" target="_blank" rel="noopener">codex.danielvaughan.com</a> + <a href="https://docs.openclaw.ai/tools/acp-agents" target="_blank" rel="noopener">docs.openclaw.ai</a><span class="ref-meta">· 2026-04 · 🟢/🟡 · 引用 ×多</span></li>
+        <li id="ref-23">discord-codex-bot (pikachu0310) — GitHub（TS/Deno 8★ thread-per-repo；/start owner/repo clone 仓库；解析 Codex JSON 流推 intermediate+final real-time；/plan /stop /status；早期项目生产前自审）· <a href="https://github.com/pikachu0310/discord-codex-bot" target="_blank" rel="noopener">github.com/pikachu0310/discord-codex-bot</a><span class="ref-meta">· 2026 · 🟡 · 引用 ×多</span></li>
+        <li id="ref-24">OpenAB (xx025) — GitHub / openai/codex Discussion #13144（Python 41★ 薄包装；codex exec / exec resume --last + --output-last-message；读 ~/.codex/sessions 切会话；one config no changes to Codex；基本 final-only 无流式；CC 未实现）· <a href="https://github.com/xx025/openab" target="_blank" rel="noopener">github.com/xx025/openab</a><span class="ref-meta">· 2026 · 🟢 官方 Discussion 推荐 · 引用 ×2</span></li>
+        <li id="ref-25">How to integrate Discord MCP with Codex — Composio（Discord MCP 对 Codex 只读 read/management 无 send message，不能让 Codex 自己播报进度；config.toml [mcp_servers.composio] url+x-consumer-api-key）· <a href="https://composio.dev/toolkits/discord/framework/codex" target="_blank" rel="noopener">composio.dev/toolkits/discord/framework/codex</a><span class="ref-meta">· 2026 · 🟡 · 引用 ×2</span></li>
+        <li id="ref-26">ACP agents Codex 专门支持 — OpenClaw Docs（openai-codex/gpt-5.4 model ref 归一化；/high 映射 reasoning_effort；隔离 CODEX_HOME；native Codex 优先 ACP fallback；native 时权限走 OpenClaw approval hook；resumeSessionId 续聊）· <a href="https://docs.openclaw.ai/tools/acp-agents" target="_blank" rel="noopener">docs.openclaw.ai/tools/acp-agents</a><span class="ref-meta">· 2026 · 🟢 官方 · 引用 ×2</span></li>
+        <li id="ref-27">OpenClaw multi-agent + 配置/状态注意 — OpenClaw Docs（每 agent 独立 model/tools/memory/workspace ~/.openclaw/agents/&lt;id&gt; 共享一 Gateway+主 config；Discord 每 agent 一 bot account 开 Message Content Intent；多 gateway slash_commands:false 防注册冲突；SQLite 状态社区提醒会损坏需备份；并发上限无官方数字）· <a href="https://docs.openclaw.ai/concepts/multi-agent" target="_blank" rel="noopener">docs.openclaw.ai/concepts/multi-agent</a><span class="ref-meta">· 2026 · 🟢 官方 · 引用 ×多</span></li>
+        <li id="ref-28">claudecode-discord (chadingTV) + Claude-Code-Remote (JessyTsui) — GitHub（前者多机一机一 bot Agent SDK 子进程 SQLite 队列 Pro/Max 免 key 每 1.5s 编辑+15s 心跳 POST /api/spawn /queue list；后者 ~1.2k★ ~/.claude hooks 推 Telegram/email/LINE 回信注入命令；两者均 CC-only 不支持 Codex）· <a href="https://github.com/chadingTV/claudecode-discord" target="_blank" rel="noopener">github.com/chadingTV/claudecode-discord</a><span class="ref-meta">· 2026 · 🟡 CC-only · 引用 ×多</span></li>
+        <li id="ref-29">完整方案落地节奏综合研判（先 webhook 通知今晚见效 → CC channels/cc-connect 试单任务驱动 → OpenClaw 统一所有 agent；自审循环全程不动）· 5 路调研收敛 <span class="ref-meta">· 🟡 基于阿杰背景推断 · 引用 ×1</span></li>
+      </ol>
+    </div>
+  </section>
+
+</main>
+
+<button class="back-to-top" id="backTop" aria-label="回到顶部">↑</button>
+
+<footer>
+  <p>无忌 Deep Research · 5 路并行调研（现状拆解 / Claude Code channels+通知 / Codex 桥接 / 统一 Bot 架构 / 完整方案落地）· 2026-05-30 · 29 来源 · 数字均 inline 引用，关键项标可信度（🟢官方/多源 · 🟡单源/社区/转述 · 🔴估算）</p>
+  <p style="font-size:12px;margin-top:6px">⚠️ 最大不确定性：① cc-connect 对 codex exec --json 流的解析粒度（item 级还是 turn 级）需本地实测 ② Codex 调 CC 自审时子 agent 进度是否冒泡进 --json/hooks 未确认，可能 CC 侧要单独挂 Stop hook ③ 没有工具能 attach 到 Wave 已手起 runner 接管进度流，双向驱动须让 gateway 接管 spawn ④ codex-marketplace 插件仅 1 upvote 最新兼容性未验 ⑤ Agent SDK 6-15 独立额度配额数字未查到 ⑥ 阿杰"Codex 调 CC"精确方向未本人确认。主线：出站易（webhook）·入站难（常驻 gateway）贯穿全文。</p>
+</footer>
+
+<script>
+(function() {
+  let activePopover=null,activeTrigger=null,hideTimer=null;
+  function getRefContent(refid){const el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){const r=trigger.getBoundingClientRect();const popW=pop.offsetWidth,popH=pop.offsetHeight;let left=r.left+window.scrollX;if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;if(left<12)left=12;let top=r.bottom+window.scrollY+6;if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}pop.style.left=left+'px';pop.style.top=top+'px';}
+  function showPopover(trigger){if(activeTrigger===trigger&&activePopover)return;if(activePopover){activePopover.remove();activePopover=null;}const content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;const pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;document.body.appendChild(pop);positionPopover(pop,trigger);activePopover=pop;activeTrigger=trigger;pop.addEventListener('mouseenter',()=>{if(hideTimer)clearTimeout(hideTimer);});pop.addEventListener('mouseleave',scheduleHide);}
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(()=>{if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){document.querySelectorAll('sup.cite[data-refid]').forEach(sup=>{sup.addEventListener('mouseenter',()=>showPopover(sup));sup.addEventListener('mouseleave',scheduleHide);sup.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});});document.addEventListener('click',e=>{if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+
+<script>
+(function(){
+  // 主题切换
+  var themeBtn=document.getElementById('themeToggle');
+  var saved=localStorage.getItem('bridge-theme');
+  if(saved){document.body.setAttribute('data-theme',saved);themeBtn.textContent=saved==='dark'?'☀️':'🌙';}
+  themeBtn.addEventListener('click',function(){
+    var cur=document.body.getAttribute('data-theme')==='dark'?'light':'dark';
+    document.body.setAttribute('data-theme',cur);
+    localStorage.setItem('bridge-theme',cur);
+    themeBtn.textContent=cur==='dark'?'☀️':'🌙';
+  });
+
+  // 进度条 + 回到顶部
+  var progressEl=document.getElementById('progress');
+  var backTopEl=document.getElementById('backTop');
+  function updateProgress(){
+    var docHeight=document.documentElement.scrollHeight-window.innerHeight;
+    var scrolled=window.scrollY;
+    var ratio=docHeight>0?scrolled/docHeight:0;
+    progressEl.style.width=(ratio*100)+'%';
+    backTopEl.classList.toggle('show',scrolled>400);
+  }
+  window.addEventListener('scroll',updateProgress,{passive:true});
+  updateProgress();
+  backTopEl.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+
+  // 章节折叠
+  document.querySelectorAll('section.chapter > h2').forEach(function(h2){
+    h2.addEventListener('click',function(){h2.parentElement.classList.toggle('collapsed');});
+  });
+
+  // 抽屉导航
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  function closeNav(){nav.classList.remove('open');ov.classList.remove('show');}
+  if(nav&&tog&&ov){
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',closeNav);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)closeNav();});});
+  }
+
+  // anchor 点击展开折叠章节
+  var anchorLinks=document.querySelectorAll('#anchorList a');
+  anchorLinks.forEach(function(a){
+    a.addEventListener('click',function(){
+      var target=document.getElementById(a.dataset.target);
+      if(target&&target.classList.contains('collapsed'))target.classList.remove('collapsed');
+    });
+  });
+
+  // scroll-spy 高亮
+  var sections=Array.prototype.map.call(anchorLinks,function(a){return document.getElementById(a.dataset.target);}).filter(Boolean);
+  function highlightAnchor(){
+    var offset=120,current=null;
+    for(var i=0;i<sections.length;i++){var rect=sections[i].getBoundingClientRect();if(rect.top-offset<=0)current=sections[i].id;}
+    anchorLinks.forEach(function(a){a.classList.toggle('active',a.dataset.target===current);});
+    var activeLink=document.querySelector('#anchorList a.active');
+    if(activeLink)activeLink.scrollIntoView({block:'nearest'});
+  }
+  window.addEventListener('scroll',highlightAnchor,{passive:true});
+  highlightAnchor();
+
+  // 表格行高亮
+  document.querySelectorAll('tbody tr').forEach(function(tr){
+    tr.addEventListener('click',function(){
+      tr.parentElement.querySelectorAll('tr.row-highlight').forEach(function(o){if(o!==tr)o.classList.remove('row-highlight');});
+      tr.classList.toggle('row-highlight');
+    });
+  });
+
+  // FAQ
+  document.querySelectorAll('.faq-q').forEach(function(q){
+    q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+  });
+})();
+</script>
+
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);
+  window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

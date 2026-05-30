@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>claudepot-app 的好功能怎么搬进 MC（结合方案）· 无忌 Deep Research · 2026-05-30</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-stripe: #f5f7fa;
+    --text: #1a1d23;
+    --text-soft: #4a5160;
+    --text-mute: #7c8493;
+    --border: #e3e6ec;
+    --border-strong: #cdd2da;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --accent-text: #1d4ed8;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #0891b2;
+    --info-soft: #cffafe;
+    --code-bg: #f1f3f7;
+    --purple: #7c3aed;
+    --purple-soft: #ede9fe;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1117;
+    --bg-soft: #161922;
+    --bg-elevated: #1c2030;
+    --bg-stripe: #1a1e2a;
+    --text: #e6e9f0;
+    --text-soft: #b6bcc9;
+    --text-mute: #8a92a3;
+    --border: #2a2f3d;
+    --border-strong: #3a4154;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a55;
+    --accent-text: #93c5fd;
+    --good: #4ade80;
+    --good-soft: #14532d55;
+    --warn: #fbbf24;
+    --warn-soft: #78350f55;
+    --bad: #f87171;
+    --bad-soft: #7f1d1d55;
+    --info: #22d3ee;
+    --info-soft: #155e7555;
+    --code-bg: #0a0d14;
+    --purple: #a78bfa;
+    --purple-soft: #4c1d9555;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-size: 28px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-size: 20px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-size: 17px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 3000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  hr.soft { border: none; height: 1px; background: var(--border); margin: 16px 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-size: 22px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(250,204,21,0.3); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated,#fff); color: var(--text,#1a1a23); border: 1px solid var(--border,#e3e6ec); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(15,23,42,0.18); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  [data-theme="dark"] .cite-popover { background: #1a1e2a; color: #e6e9f0; border-color: #2a2f3a; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+  .cite-popover a { color: var(--accent,#2563eb); text-decoration: underline; word-break: break-all; }
+  [data-theme="dark"] .cite-popover a { color: #60a5fa; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  @media (max-width: 480px) {
+    .hero { padding: 18px 4px 8px; }
+    .hero h1 { font-size: 22px; }
+    section.chapter > h2 { font-size: 17px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    header.topbar, #progress, .back-to-top, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .metric-grid, .tree, .faq-item, table, pre { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: #1d4ed8 !important; }
+    a { color: #1d4ed8 !important; text-decoration: none; }
+  }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">claudepot → MC 结合方案 <span class="tag">v1 · 无忌 Deep Research</span></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 执行摘要</a>
+    <a href="#ch2" data-target="ch2">02 claudepot-app 是什么</a>
+    <a href="#ch3" data-target="ch3">03 三大可借鉴功能深拆</a>
+    <a href="#ch4" data-target="ch4">04 你的 MC 现状</a>
+    <a href="#ch5" data-target="ch5">05 差距对照表</a>
+    <a href="#ch6" data-target="ch6">⭐ 06 结合方案：怎么搬</a>
+    <a href="#ch7" data-target="ch7">07 技术对接细节</a>
+    <a href="#ch8" data-target="ch8">08 落地优先级排序</a>
+    <a href="#ch9" data-target="ch9">09 风险/坑</a>
+    <a href="#ch10" data-target="ch10">10 FAQ</a>
+    <a href="#ch11" data-target="ch11">11 References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>claudepot-app 的好功能怎么搬进你的 MC</h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-30</span>
+      <span>🔍 无忌 Deep Research · 双源码深读合并</span>
+      <span>🎯 claudepot=会话可视化 · MC=任务治理</span>
+      <span>🧩 互补不重叠</span>
+      <span>🇨🇳 全程中文白话</span>
+    </div>
+    <div class="hero-deck">
+      <strong>一句话：</strong>你的 MC 强在<strong>任务治理</strong>（review gate / 依赖 / handoff / 多 executor 开工命令 / Context Pack / Obsidian 关联），但把 session 只当<strong>一行元数据</strong>——<code>transcript_path</code> 字段存在却从不被读取<sup class="cite" data-refid="2">[2]</sup>。claudepot-app（李笑来做的 Claude Code session 管理 GUI）恰好补上你最缺的三块：<strong>① 看每个真实 session 在干啥（live + 历史回放）② skill/agent/command 管理 ③ 账号/用量管理</strong><sup class="cite" data-refid="1">[1]</sup>。两边几乎零重叠，是教科书级的「我有治理、你有可视化」互补。本报告把两份源码深读合并成<strong>一份可落地的搬运方案</strong>：哪些搬、怎么搬、先搬哪个、坑在哪。<strong>最该先搬的是「真实 session 回放」——你已经存了 <code>transcript_path</code>，只差把它读出来渲染这一环。</strong>
+    </div>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">执行摘要：最该搬的几个功能 + 一句话怎么搬</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>两份源码深读（claudepot-app 源码 + 你的 MC 源码）收敛出的核心判断。每条独立成块，方便扫。</p>
+
+      <div class="callout good">
+        <h4>✅ 搬运 1（最高性价比）：真实 session 回放——你只差「读 transcript」这最后一环 <span class="conf g">🟢 双源确认</span></h4>
+        <p>MC 已经在 <code>AgentSession</code> 里存了 <code>transcript_path</code> 字段，但全代码库<strong>没有任何代码读取/serve/渲染它</strong>——SessionsPage 列表项不可点击，没有详情视图<sup class="cite" data-refid="2">[2]</sup>。claudepot 的核心能力就是把这条 <code>.jsonl</code> transcript 真正读出来按对话/工具调用渲染<sup class="cite" data-refid="1">[1]</sup>。<strong>怎么搬：</strong>Go 后端加一个 <code>GET /api/sessions/{id}/transcript</code> 端点，按行读 <code>transcript_path</code> 指向的 jsonl、流式吐给前端；前端给 SessionsPage 卡片加点击路由到详情页渲染。这是 MC 最大缺口、且基础设施（字段+列表）已就位，<strong>投入最小、补的洞最大</strong>。</p>
+      </div>
+
+      <div class="callout accent">
+        <h4>🎯 搬运 2：Live Session 实时状态（busy / waiting / errored）——比你现在的「30s 心跳判活」细一个量级 <span class="conf g">🟢 claudepot 高可借鉴</span></h4>
+        <p>claudepot 不读历史 jsonl，而是扫 <code>~/.claude/sessions</code> 下每进程一个 PID json（含 status）+ sysinfo 探活，再对活 session tail transcript，用状态机跟踪「未闭合的 tool_use（by id）」判断是 busy 还是 waiting<sup class="cite" data-refid="1">[1]</sup>。MC 现在只能靠 hook 发的 run_started/run_ended + 30s staleness watcher 粗判「running / stale」<sup class="cite" data-refid="2">[2]</sup>。<strong>怎么搬：</strong>借鉴 claudepot 的 <code>session_live/status.rs</code> 状态机逻辑（追踪未闭合 tool_use id）——但 MC 是 Go，不必照搬 Rust tick 循环，可在读 transcript 时顺便算出当前状态塞进 SSE 事件。<strong>建议搬「状态机判定逻辑」，不搬「PID 文件扫描数据源」</strong>（见第 7 章数据源差异）。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>💡 搬运 3：Skill / Agent / Command 管理——MC 完全没有，claudepot 有成熟的 disable/trash/restore <span class="conf g">🟢 MC 全缺</span></h4>
+        <p>MC 没有任何 skill 实体/表/端点/页面<sup class="cite" data-refid="2">[2]</sup>。claudepot 把 skill/agent/command 三类统一做生命周期管理：发现靠扫含 <code>SKILL.md</code> 的子目录，disable 用原子 rename 到 <code>.disabled</code>，trash 是两阶段带 manifest 保留 30 天、可 restore<sup class="cite" data-refid="1">[1]</sup>。<strong>怎么搬：</strong>新建一张 skills 表 + 一个 <code>GET /api/skills</code>（扫 <code>~/.claude/skills</code> 和项目 <code>.claude/skills</code>）+ 一个 SkillsPage。其中「trash 带 manifest + TTL 可逆删除」这套设计还能反过来用在 MC 自己的危险操作上（删任务/删 session）。</p>
+      </div>
+
+      <div class="callout purple">
+        <h4>🧭 搬运 4（选搬）：用量快照 usage-snapshot.json——契合 MC 的无人执行 session <span class="conf y">🟡 部分借鉴</span></h4>
+        <p>claudepot 的多账号切换对 MC 借鉴价值低（MC 不管多账号），但它的 <code>usage-snapshot.json</code> 模式值得抄：GUI 每 5 分钟原子写一个 0600 的 json（含 5h/7d 各窗口 utilization），供 cron/Bash 读<sup class="cite" data-refid="1">[1]</sup>。MC 的 Usage 页现在是 "coming soon" 占位<sup class="cite" data-refid="2">[2]</sup>，而 MC 大量跑无人执行 session——一个定期落地的用量快照正好能让 watcher/dispatcher 在额度紧张时降速。<strong>怎么搬：</strong>不必搬账号管理，只搬「定期原子写一份 0600 用量 json」这个轻量产物。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 最该记的一条：搬「设计/逻辑」，别照搬「Rust 代码/数据源」 <span class="conf y">🟡 跨技术栈</span></h4>
+        <p>claudepot 是 <strong>Rust + Tauri 桌面应用</strong>，MC 是 <strong>Go server + React web</strong><sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>。Rust 的 <code>runtime.rs/registry.rs/status.rs</code> 没法直接 copy 进 Go。真正能搬的是<strong>三样东西</strong>：① 数据源知识（transcript jsonl 长什么样、PID 文件在哪）② 状态机逻辑（怎么从事件流判断 busy/waiting）③ 产品设计（详情页怎么渲染、skill 生命周期怎么设计）。代码层面是「重写」不是「复制」。凡涉及 evidence 未覆盖的实现细节，本报告标 ⚠️ 不臆造。</p>
+      </div>
+
+      <h3>一句话路线建议（给阿杰）</h3>
+      <div class="callout accent">
+        <p><strong>【先做】</strong>搬运 1（transcript 回放）——基础设施已就位，一个读端点 + 一个详情页就能把 MC 最大缺口补上。<strong>【再做】</strong>搬运 3（skill 管理）——纯新增、不动现有流水线、风险低。<strong>【然后】</strong>搬运 2（live 细粒度状态）——价值高但要碰 SSE 和状态机，复杂度中。<strong>【选做】</strong>搬运 4（用量快照）——配合无人执行很香，但非紧急。<strong>【纪律】</strong>搬逻辑和设计，不搬 Rust 代码；MC 是 Go 后端，所有「读文件」的活都在 server 侧做、经 SSE/REST 给前端。详见第 6/8 章。</p>
+      </div>
+
+      <div class="callout purple">
+        <h4>🔬 来源说明（本报告的可信度标注规则）</h4>
+        <p>本报告由无忌合并两份源码深读而成，<strong>只用这两份 evidence 的内容</strong>，未覆盖处标 ⚠️。可信度标记：<strong>🟢 双源确认 / 单源码深读直接读到的事实</strong>；<strong>🟡 基于源码事实的迁移推断 / 跨技术栈如何落地的设计建议</strong>；<strong>🔴 待核</strong>。claudepot 侧事实来自其源码深读 confidence=high 的条目；MC 侧事实带具体文件行号（如 <code>models.go:92</code>）均为深读直接读到。涉及「Go 该怎么写」的实现是无忌的迁移建议（🟡），落地时以真实代码为准。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">claudepot-app 是什么 + 架构/技术栈</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>claudepot-app 是李笑来做的 Claude Code session 管理 GUI——一个<strong>桌面应用</strong>，核心是「让你看到本机所有 Claude Code session 在干啥，并管理 skill/agent/command 和多账号」<sup class="cite" data-refid="1">[1]</sup>。它和 MC 是两个物种：MC 是任务编排平台，claudepot 是会话可视化工具。</p>
+
+      <div class="callout info">
+        <h4>架构一句话</h4>
+        <p><strong>Rust 后端（Tauri）+ 前端（TS/React，useSyncExternalStore + RAF）。</strong>数据源不走 MC 那种「应用自己的 DB 记一行」，而是<strong>直接读 Claude Code 在磁盘上的原生产物</strong>：<code>~/.claude/sessions</code> 下的 PID json、<code>~/.claude/projects/*.jsonl</code> transcript、<code>~/.claude/skills</code> 目录。这是它和 MC 最根本的设计差异——claudepot 是「外部观察者」，MC 是「内部登记者」<sup class="cite" data-refid="1">[1]</sup>。</p>
+      </div>
+
+      <h3>2.1 claudepot 的几个核心模块（源码深读所见）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>模块</th><th>干啥</th><th>关键文件</th></tr></thead>
+          <tbody>
+            <tr><td><strong>session_live</strong></td><td>实时发现 + 状态机跟踪每个活 session（busy/waiting/errored），每 500ms tick</td><td><code>runtime.rs</code> <code>registry.rs</code> <code>status.rs</code> <code>hooks/useSessionLive.ts</code><sup class="cite" data-refid="1">[1]</sup></td></tr>
+            <tr><td><strong>session_index</strong></td><td>历史 session 浏览 + 跨项目搜 prompt，SQLite 缓存（WAL，0600）</td><td><code>session_index/mod.rs</code> <code>schema.rs</code> <code>session.rs</code><sup class="cite" data-refid="1">[1]</sup></td></tr>
+            <tr><td><strong>artifact_lifecycle</strong></td><td>skill/agent/command 统一 disable/trash/restore，带 manifest + 30 天 TTL</td><td><code>paths.rs</code> <code>disable.rs</code> <code>trash.rs</code><sup class="cite" data-refid="1">[1]</sup></td></tr>
+            <tr><td><strong>account / rotation</strong></td><td>多账号切换 + 按额度阈值轮换，每 5 分钟写 usage-snapshot.json</td><td><code>account.rs</code> <code>swap.rs</code> <code>keychain.rs</code> <code>rotation/eval.rs</code> <code>services/usage_snapshot.rs</code><sup class="cite" data-refid="1">[1]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout accent">
+        <h4>为什么 claudepot 的设计对 MC 有参考价值</h4>
+        <p>claudepot 把「<strong>真实运行态的 Claude Code 是什么样</strong>」摸得很透——它知道 session 状态藏在 PID 文件、对话内容藏在 transcript jsonl、skill 藏在含 SKILL.md 的目录。MC 因为是「自己登记」的设计，<strong>从没去读过这些原生产物</strong>。把 claudepot 的「数据源知识 + 渲染设计」搬过来，MC 就能从「只知道 session 存在」升级到「知道 session 在干啥、说了啥」<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">claudepot 三大可借鉴功能深拆（含 howImplemented）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这一章把 claudepot 最值得搬的三块按「干啥 / 怎么实现 / 可借鉴度」拆开。第 6 章再讲具体怎么搬进 MC。</p>
+
+      <h3>3.1 Live Session 实时发现 + 可视化 <span class="pill accent">对 MC 最有价值</span></h3>
+      <div class="callout good">
+        <p><strong>干啥：</strong>实时看每个正在跑的 Claude session 是 <strong>busy</strong>（在干活）/ <strong>waiting</strong>（等输入）/ <strong>errored</strong>（卡住）<sup class="cite" data-refid="1">[1]</sup>。</p>
+        <p><strong>怎么实现（howImplemented）：</strong>数据源<strong>不是历史 jsonl</strong>，而是扫 <code>~/.claude/sessions</code> 下每进程一个 PID json 文件（含 status），用 sysinfo 探活确认进程还在；再对活 session tail 对应 <code>projects</code> 下的 transcript jsonl。<code>runtime.rs</code> 的 <code>LiveRuntime</code> 每 500ms tick 一次，<code>status.rs</code> 是状态机——<strong>核心技巧是跟踪「未闭合的 tool_use（by id）」</strong>：发出 tool_use 但还没收到对应 tool_result，就是 busy；都闭合了在等用户就是 waiting。bus 发 delta，<code>live_activity_bridge.rs</code> emit Tauri event，前端 <code>useSessionLive.ts</code> 用 useSyncExternalStore + RAF 合并渲染<sup class="cite" data-refid="1">[1]</sup>。</p>
+      </div>
+      <div class="callout info"><p><strong>可借鉴度：高。</strong>关键文件 <code>session_live/runtime.rs / registry.rs / status.rs / hooks/useSessionLive.ts</code>。MC 可搬整条链路的<strong>设计</strong>：发现 → tail → 状态机 → 推事件 → 前端合并渲染。⚠️ Rust tick 循环不必照搬，Go 侧可用 fsnotify/轮询 + 在已有 SSE hub 上加 per-session 通道（见第 6/7 章）。</p></div>
+
+      <h3>3.2 历史 Session 浏览 + 跨项目搜索</h3>
+      <div class="callout good">
+        <p><strong>干啥：</strong>列每个项目的所有 session，跨项目搜 prompt，过滤，导出前剥 token<sup class="cite" data-refid="1">[1]</sup>。</p>
+        <p><strong>怎么实现：</strong><code>session_index</code> 用 <code>sessions.db</code>（SQLite WAL，权限 0600），每个 jsonl 一行缓存做 fold（折叠成摘要）；判断是否需要重扫用 <strong>size + mtime + inode 三元组</strong> 做 guard（任一变了才重扫）；冷启动全量扫用 rayon 并行<sup class="cite" data-refid="1">[1]</sup>。</p>
+      </div>
+      <div class="callout warn"><p><strong>可借鉴度：中。</strong>这是标准做法，而 <strong>MC 已经有自己的 SQLite DB</strong>，不必照搬整个 index 层。值得借鉴的是「size+mtime+inode 三元组判断 transcript 是否变了」这个增量扫描小技巧，避免每次全量读。关键文件 <code>session_index/mod.rs / schema.rs / session.rs</code>。</p></div>
+
+      <h3>3.3 Skill / Agent / Command 管理（artifact-lifecycle）</h3>
+      <div class="callout good">
+        <p><strong>干啥：</strong>把 skill / agent / command 三类统一做 disable / trash / restore。skill 发现 = 扫 <code>skills</code> 目录下含 <code>SKILL.md</code> 的子目录<sup class="cite" data-refid="1">[1]</sup>。</p>
+        <p><strong>怎么实现：</strong><code>artifact_lifecycle</code> 定义 <code>ArtifactKind</code> 三种，映射到 skills / agents / commands 三个目录。<strong>disable = atomic rename 到 <code>.disabled</code></strong>（瞬间生效、可逆）；<strong>trash = 两阶段带 manifest，保留 30 天</strong>（先移到回收区 + 写一份 manifest 记录原位置，过期才真删，期间可 restore）。入口先 <code>classify_path</code> 返回三元组判断这是什么 artifact，<strong>plugin / managed-policy 的会被拒绝</strong>（不让动托管的）<sup class="cite" data-refid="1">[1]</sup>。</p>
+      </div>
+      <div class="callout info"><p><strong>可借鉴度：中。</strong>「三元组 + classify 守门 + 生命周期」对 MC 管任务模板有参考；「<strong>trash 带 manifest + TTL 可逆删除</strong>」这套可直接用在 MC 自己的危险操作（删任务/删 session）上，给个后悔药。关键文件 <code>artifact_lifecycle/paths.rs / disable.rs / trash.rs</code>。</p></div>
+
+      <h3>3.4 账号管理（多账号切换 + 额度轮换）<span class="pill warn">对 MC 借鉴低</span></h3>
+      <div class="callout warn">
+        <p><strong>干啥：</strong>管多个 Claude 账号，CLI/Desktop 两槽位各自切换；读 5h/7d 各窗口 utilization，越阈值按规则切到备用账号；每 5 分钟写 <code>usage-snapshot.json</code>（0600）<sup class="cite" data-refid="1">[1]</sup>。</p>
+        <p><strong>怎么实现：</strong>元数据存 <code>accounts.db</code>（SQLite 0600）；CC 凭证用 <code>/usr/bin/security</code> 子进程读写 keychain（不直接调 SecItem）；<code>swap.rs</code> 原子读旧写新 + verify + 回滚；<code>rotation/eval.rs</code> 是纯函数求值器（注入 now，输出含护栏的 PendingSwap）<sup class="cite" data-refid="1">[1]</sup>。</p>
+      </div>
+      <div class="callout info"><p><strong>可借鉴度：账号切换本身低</strong>（MC 不管多账号），<strong>但 <code>usage-snapshot.json</code> 模式高</strong>：「GUI 定期原子写 0600 json 供 cron/Bash 读」非常契合 MC 的无人执行场景。关键文件 <code>oauth/usage.rs / services/usage_snapshot.rs</code>。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">你的 MC 现状（session 管理 + mc-web 到哪了）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>先讲清楚 MC 现在是什么、强在哪、弱在哪，才知道该往哪补。一句话：<strong>MC 是任务编排 + 治理平台，session 管理只是这条流水线的一个轻量副产品</strong><sup class="cite" data-refid="2">[2]</sup>。</p>
+
+      <div class="callout info">
+        <h4>技术栈</h4>
+        <p>后端 <strong>Go + gorilla/mux + SQLite</strong>（<code>pkg/mcstore</code>），端口 3001。前端 <strong>Vite 8 + React 19 + TypeScript 6 + Tailwind v4</strong>，端口 3003，Vite proxy <code>/api→3001</code> 注入 Bearer。实时走<strong>原生 SSE</strong>（<code>GET /api/events/stream</code> + EventSource，浏览器自动重连）+ 30s ping。UI 全 inline-style 暗色（#0d1117 GitHub 配色），<strong>无 UI 组件库</strong>。打包进 Electron。鉴权单一 <code>MC_AUTH_KEY</code>（Bearer header 或 <code>?auth=</code> query 供 SSE 用）<sup class="cite" data-refid="2">[2]</sup>。⚠️ react-router-dom 7 已装但 <code>App.tsx</code> 实际用 useState 手写切页，未用 router。</p>
+      </div>
+
+      <h3>4.1 MC 的 session 是怎么管的</h3>
+      <ul>
+        <li><strong>AgentSession 数据模型</strong>：每个 agent 运行登记一行——provider(claude/codex/gemini)、cwd、command、status、task_id/run_id、<code>transcript_path</code>、tab_id、area_id、started_at/last_seen_at。状态机 8 态：starting/running/waiting_input/needs_approval/stale/done/failed/cancelled（<code>models.go:82-97</code>，状态常量 <code>models.go:29-36</code>）<sup class="cite" data-refid="2">[2]</sup>。</li>
+        <li><strong>Hook 驱动的生命周期</strong>：靠 Claude Code 的 SessionStart/Stop hook 自动建/关 session（纯 bash+curl+python3），<code>/tmp</code> 下 idfile 做幂等。SessionStart→建 session + 发 run_started + 顺手把 task 推到 doing；Stop→发 run_ended + 把 session 标 done<sup class="cite" data-refid="2">[2]</sup>。</li>
+        <li><strong>Staleness watcher</strong>：后台每 30s 扫一次，超时未心跳的 running session 标 stale 并 publish 事件；session 自身有 <code>/heartbeat</code> 端点供 worker 续命<sup class="cite" data-refid="2">[2]</sup>。</li>
+        <li><strong>前端两个视图</strong>：SessionsPage（按 project/status 过滤的列表，<strong>卡片不可点进、无详情</strong>）+ LogsPage（结构化治理事件流：run_started/handoff_written/guardrail_passed 等带颜色的事件条）<sup class="cite" data-refid="2">[2]</sup>。</li>
+      </ul>
+
+      <div class="callout bad">
+        <h4>❌ MC 最大的缺口：transcript_path 存了，但从不被读</h4>
+        <p>这是整份报告的核心发现：<code>transcript_path</code> 字段在 <code>models.go:92</code> 和 insert SQL 里存在，但<strong>全代码库 grep 下来，除了 model 定义和 insert，没有任何代码读取/serve/渲染它</strong><sup class="cite" data-refid="2">[2]</sup>。意味着 MC「看 session 在干啥」只能靠两个间接视图——元数据列表（不可点进）+ 治理事件流（粒度是编排事件，不是对话/工具调用）。<strong>MC 没有任何「看真实会话内容/回放」的能力。这正是 claudepot 的差异化切入点，也是最该补的洞。</strong></p>
+      </div>
+
+      <h3>4.2 MC 真正的强项（别动这些，要保护）</h3>
+      <div class="callout accent">
+        <p>MC 强在<strong>任务治理</strong>，不在 session：<strong>review gate</strong>（doing 不能直达 done，只能 →review/blocked）、<strong>depends_on 依赖</strong>、<strong>TaskRun/handoff/VerifierResult 流水线模型</strong>、<strong>多 executor 开工命令生成</strong>（为 claude/codex/gemini 生成可复制命令，注入 MC_API_URL/MC_AUTH_KEY/MC_TASK_ID）、<strong>Context Pack</strong>（project+task+area+docs+guardrails 拼成 markdown）、<strong>Intent 邮箱（claim/lease）</strong>、<strong>Obsidian 文档关联</strong><sup class="cite" data-refid="2">[2]</sup>。搬 claudepot 功能时，这些治理能力是 MC 的护城河，<strong>只做加法、不要碰</strong>。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>⚠️ Usage 页 / Skill 全空：</strong>MC 的 Usage 页是 "coming soon" 纯占位（<code>App.tsx:189</code>），无 token/cost/account 模型；也没有任何 skill 实体/表/端点/页面<sup class="cite" data-refid="2">[2]</sup>。这两块 + transcript 回放，正好是 claudepot 的三个差异化补位点。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">差距对照表：claudepot 有 vs MC 有/缺</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>点一行高亮。✅=有 / ❌=没有 / 🟡=部分。一眼看出哪三块是 claudepot 能补 MC 的。</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>能力</th><th class="check">claudepot</th><th class="check">MC</th><th>结论</th></tr></thead>
+          <tbody>
+            <tr><td><strong>看真实 session 对话/工具调用回放</strong></td><td class="check y">✅</td><td class="check n">❌</td><td>MC 最大缺口，第一优先搬<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td>Live 细粒度状态（busy/waiting/errored）</td><td class="check y">✅</td><td class="check p">🟡</td><td>MC 只有 running/stale 粗判，可升级<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td>跨项目搜 session prompt</td><td class="check y">✅</td><td class="check n">❌</td><td>有 transcript 后可加<sup class="cite" data-refid="1">[1]</sup></td></tr>
+            <tr><td>Skill / Agent / Command 管理</td><td class="check y">✅</td><td class="check n">❌</td><td>MC 全无，纯新增、低风险<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td>可逆删除（trash + manifest + TTL）</td><td class="check y">✅</td><td class="check n">❌</td><td>可借给 MC 危险操作<sup class="cite" data-refid="1">[1]</sup></td></tr>
+            <tr><td>账号/用量面板</td><td class="check y">✅</td><td class="check n">❌</td><td>MC Usage 是 coming soon 占位<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td>用量快照 json（供 cron 读）</td><td class="check y">✅</td><td class="check n">❌</td><td>契合 MC 无人执行，选搬<sup class="cite" data-refid="1">[1]</sup></td></tr>
+            <tr><td><strong>任务治理（review gate/依赖/handoff）</strong></td><td class="check n">❌</td><td class="check y">✅</td><td>MC 护城河，claudepot 没有<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td>多 executor 开工命令生成</td><td class="check n">❌</td><td class="check y">✅</td><td>MC 独有<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td>Context Pack / Obsidian 关联</td><td class="check n">❌</td><td class="check y">✅</td><td>MC 独有<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td>session 自动登记（hook 驱动）</td><td class="check p">🟡</td><td class="check y">✅</td><td>MC 这套 hook→API 很聪明<sup class="cite" data-refid="2">[2]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout good"><p><strong>一句话读这张表：</strong>上半截（session 可视化 / skill / 账号）几乎全是 claudepot ✅ / MC ❌——这是搬运清单；下半截（治理 / 开工命令 / Context Pack）全是 MC ✅ / claudepot ❌——这是 MC 的护城河。<strong>两边零重叠，是干净的互补</strong>，搬运不会冲突。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">⭐ 结合方案：哪些搬、怎么搬</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这是核心章。每个功能给「搬什么 / 不搬什么 / 落地路径」。<strong>总纪律：搬设计和逻辑，所有读文件的活在 Go server 侧做，经 REST/SSE 给前端；不照搬 Rust 代码。</strong></p>
+
+      <h3>6.1 ⭐ 搬运 1：真实 session 回放（最高优先）</h3>
+      <div class="callout good">
+        <p><strong>搬什么：</strong>把 <code>transcript_path</code> 指向的 <code>.jsonl</code> 读出来、按对话/工具调用渲染的能力（这是 MC 缺的那一环）<sup class="cite" data-refid="2">[2]</sup>。<strong>不搬：</strong>claudepot 的 SQLite index 层（MC 已有 DB）。</p>
+        <p><strong>落地路径（Go 侧 🟡 无忌建议）：</strong></p>
+        <ol>
+          <li>后端新增 <code>GET /api/sessions/{id}/transcript</code>：从 DB 取该 session 的 <code>transcript_path</code> → 按行读 jsonl → 解析每行（user/assistant/tool_use/tool_result）→ 返回结构化数组（或流式分页，大文件别一次性读）。</li>
+          <li>前端 SessionsPage 卡片<strong>加点击</strong>→ 路由到 SessionDetail 页（react-router-dom 已装，正好顺势启用，或继续 useState 切页）。</li>
+          <li>SessionDetail 渲染对话气泡 + 工具调用折叠块，复用 MC 现有 inline-style 暗色风格。</li>
+        </ol>
+      </div>
+      <div class="callout info"><p><strong>为什么先做这个：</strong>① 它是 MC 最大缺口 ② 基础设施已就位（字段 + 列表都有，只差读+渲染）③ 不碰治理流水线，风险低 ④ 一旦能读 transcript，跨项目搜 prompt、live 状态判定都建立在同一份数据上，是后续两块的地基。</p></div>
+
+      <h3>6.2 搬运 2：Live 细粒度状态（busy/waiting/errored）</h3>
+      <div class="callout good">
+        <p><strong>搬什么：</strong>claudepot <code>status.rs</code> 的<strong>状态机判定逻辑</strong>——跟踪「未闭合的 tool_use（by id）」来区分 busy（有未闭合 tool_use）vs waiting（都闭合了在等输入）vs errored<sup class="cite" data-refid="1">[1]</sup>。<strong>不搬：</strong>claudepot 的 PID 文件数据源 + 500ms Rust tick 循环（见第 7 章，MC 数据源不同）。</p>
+        <p><strong>落地路径（🟡 无忌建议）：</strong>MC 既然要读 transcript（搬运 1），就在读的时候<strong>顺手跑一遍状态机</strong>算出当前状态，比 30s staleness 粗判细得多。把算出的细粒度状态塞进现有 SSE 事件（<code>session.updated</code>）。⚠️ 若要真正「实时 tail」而非按需读，MC 的全局 SSE hub 可能需要加 per-session 通道（深读指出现有 hub 广播全部事件 + 客户端全量 refetch，不适合高频）。</p>
+      </div>
+
+      <h3>6.3 搬运 3：Skill / Agent / Command 管理</h3>
+      <div class="callout good">
+        <p><strong>搬什么：</strong>① 发现逻辑（扫含 <code>SKILL.md</code> 的子目录）② disable=rename 到 <code>.disabled</code> ③ trash 两阶段带 manifest + 30 天 TTL + restore ④ classify 守门（拒绝动 plugin/managed）<sup class="cite" data-refid="1">[1]</sup>。<strong>不搬：</strong>Rust 的 ArtifactKind 枚举实现细节，按 Go 重写。</p>
+        <p><strong>落地路径（🟡 无忌建议）：</strong></p>
+        <ol>
+          <li>新建 skills 表（或不入库、纯实时扫）+ <code>GET /api/skills</code>：扫 <code>~/.claude/skills</code> 和项目 <code>.claude/skills</code> 下含 <code>SKILL.md</code> 的目录，读 YAML name/description。</li>
+          <li><code>POST /api/skills/{name}/disable|restore</code>：disable=原子 rename，restore=反向。</li>
+          <li>新建 SkillsPage（沿用 inline-style 暗色），列 skill + enable/disable 开关 + trash。</li>
+          <li><strong>顺带福利：</strong>把 trash+manifest+TTL 这套抽成 MC 通用「可逆删除」，用在删任务/删 session。</li>
+        </ol>
+      </div>
+      <div class="callout info"><p><strong>为什么风险低：</strong>纯新增模块，不碰 AgentSession / TaskRun / 治理流水线。失败也只影响 skill 面板，不影响任务执行。</p></div>
+
+      <h3>6.4 搬运 4（选搬）：用量快照</h3>
+      <div class="callout warn">
+        <p><strong>搬什么：</strong>只搬 <code>usage-snapshot.json</code> 模式——定期原子写一份 0600 的用量 json 供 cron/Bash 读<sup class="cite" data-refid="1">[1]</sup>。<strong>不搬：</strong>多账号切换 + keychain + rotation（MC 不管多账号）。<strong>落地：</strong>MC 后台加个定时任务，把当前用量/额度（⚠️ 数据来源 MC 侧 evidence 未覆盖，需另定）原子写到一个 0600 json；无人执行的 watcher/dispatcher 读它，额度紧时降速。把 Usage 页从 "coming soon" 接上这份快照。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">技术对接细节：数据源 + MC 怎么接</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这一章讲两边数据源的具体差异，以及 MC（Go）怎么接同样的数据源。这是搬运能不能落地的关键。</p>
+
+      <h3>7.1 claudepot 读的三个数据源</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>数据源</th><th>路径</th><th>claudepot 拿它干啥</th></tr></thead>
+          <tbody>
+            <tr><td><strong>PID json</strong></td><td><code>~/.claude/sessions/*</code>（每进程一个，含 status）</td><td>发现活 session + 探活<sup class="cite" data-refid="1">[1]</sup></td></tr>
+            <tr><td><strong>transcript jsonl</strong></td><td><code>~/.claude/projects/*.jsonl</code></td><td>读对话/工具调用内容、tail 算状态<sup class="cite" data-refid="1">[1]</sup></td></tr>
+            <tr><td><strong>skill 目录</strong></td><td><code>~/.claude/skills/*/SKILL.md</code>（+ 项目 .claude/skills）</td><td>发现 skill<sup class="cite" data-refid="1">[1]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout accent">
+        <h4>关键差异：MC 已经有 transcript_path，不必自己去猜路径</h4>
+        <p>claudepot 因为是外部观察者，要自己去 <code>~/.claude/projects</code> 找 transcript。<strong>MC 不一样——它的 AgentSession 已经存了 <code>transcript_path</code> 字段</strong>（Claude Code 的 SessionStart hook 登记时就能拿到）<sup class="cite" data-refid="2">[2]</sup>。所以 MC 读 transcript<strong>比 claudepot 还简单</strong>：直接拿字段里的路径去读，不用扫目录、不用匹配项目。这是 MC 的现成优势，让搬运 1 更省事。</p>
+      </div>
+
+      <h3>7.2 Live 状态：MC 该用 hook 数据源，不该照搬 PID 扫描</h3>
+      <div class="callout info">
+        <p>claudepot 扫 PID 文件是因为它没有别的发现机制。<strong>MC 已经有更可靠的发现机制：hook 驱动的自动登记</strong>（SessionStart 建、Stop 关）<sup class="cite" data-refid="2">[2]</sup>。所以 MC <strong>不需要</strong>搬 PID 扫描——它已经知道哪些 session 活着。MC 要搬的只是 claudepot 的<strong>状态机逻辑</strong>（怎么从 transcript 事件流判 busy/waiting）。结论：<strong>发现机制用 MC 自己的 hook，状态判定借 claudepot 的状态机，数据用 MC 已存的 transcript_path</strong>——三者各取所长。</p>
+      </div>
+
+      <h3>7.3 实时推送：MC 的 SSE hub 局限</h3>
+      <div class="callout warn">
+        <p>MC 用极简自写 SSE hub（<code>cmd/mcserver/sse.go</code>，map[chan]bool，满则丢弃），前端原生 EventSource，收事件即<strong>全量 refetch</strong><sup class="cite" data-refid="2">[2]</sup>。这对低频 task/session 元数据变更够用，但<strong>不适合高频/大量的 live transcript 流式</strong>。若搬运 2 要做「实时 tail transcript 逐行推」，⚠️ 现有 hub 可能要加 per-session channel（claudepot 用的是 per-session tail）。<strong>务实做法：先做「点进详情按需读全量 transcript」（搬运 1），不做实时 tail，避开 SSE 改造；等真有需求再上 per-session 流。</strong></p>
+      </div>
+
+      <h3>7.4 增量扫描小技巧（来自 claudepot index）</h3>
+      <div class="callout info"><p>若 MC 要缓存 transcript 摘要（比如做跨项目搜），可借 claudepot 的 <strong>size+mtime+inode 三元组 guard</strong>：只有这三个任一变了才重读 jsonl，避免每次全量扫<sup class="cite" data-refid="1">[1]</sup>。Go 的 <code>os.Stat</code> 拿得到 size/mtime，inode 在 <code>syscall.Stat_t</code> 里。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">落地优先级排序：先搬哪个性价比高</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>按「补的洞大小 × 投入小 × 风险低」排。决策很清晰。</p>
+
+      <div class="tree">
+        <div class="node q">第 1 步：transcript 回放（搬运 1）— 字段已有，只差读+渲染</div>
+        <div class="step-arrow">↓ 地基铺好，transcript 能读了</div>
+        <div class="node">第 2 步：Skill 管理（搬运 3）— 纯新增，不碰流水线，风险最低</div>
+        <div class="step-arrow">↓ 低风险先攒一个完整新模块</div>
+        <div class="node">第 3 步：Live 细粒度状态（搬运 2）— 价值高但要碰状态机/SSE，复杂度中</div>
+        <div class="step-arrow">↓ 行有余力</div>
+        <div class="node">第 4 步：用量快照（搬运 4）— 配合无人执行香，非紧急，数据源待定</div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>搬运</th><th class="check">补洞</th><th class="check">投入</th><th class="check">风险</th><th>顺序</th></tr></thead>
+          <tbody>
+            <tr><td>1 transcript 回放</td><td class="check">大</td><td class="check y">小</td><td class="check y">低</td><td><strong>第 1</strong></td></tr>
+            <tr><td>3 skill 管理</td><td class="check">中</td><td class="check p">中</td><td class="check y">低</td><td><strong>第 2</strong></td></tr>
+            <tr><td>2 live 状态</td><td class="check">中</td><td class="check p">中</td><td class="check p">中</td><td><strong>第 3</strong></td></tr>
+            <tr><td>4 用量快照</td><td class="check">小</td><td class="check y">小</td><td class="check y">低</td><td>选做</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout good"><p><strong>性价比之王是搬运 1。</strong>理由：MC 已经存了 <code>transcript_path</code> 却从不读——这是「已经买了菜没下锅」的状态，补这一环投入最小、价值最大，且它是搬运 2、跨项目搜的共同地基。<strong>从这里开第一刀。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">风险 / 坑</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout bad">
+        <h4>❌ 坑 1：想直接 copy Rust 代码进 Go</h4>
+        <p>claudepot 是 Rust+Tauri，MC 是 Go+React，<strong>两边代码不能互拷</strong><sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>。能搬的是数据源知识 + 状态机逻辑 + 产品设计，代码层面是重写。别指望贴文件。</p>
+      </div>
+
+      <div class="callout bad">
+        <h4>❌ 坑 2：用现有全局 SSE hub 硬推实时 transcript</h4>
+        <p>MC 的 SSE hub 广播全部事件 + 客户端全量 refetch，<strong>扛不住高频 live transcript 流</strong><sup class="cite" data-refid="2">[2]</sup>。先做「按需读全量」，别一上来就上实时 tail，否则要先改 SSE 架构（per-session channel），投入翻倍。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 坑 3：transcript jsonl 可能很大 + 含敏感 token</h4>
+        <p>一次性读整个 jsonl 进内存渲染会卡。claudepot 的 index 用 fold 缓存摘要、导出前剥 token<sup class="cite" data-refid="1">[1]</sup>——MC 也该<strong>分页/流式读 + 渲染前考虑剥 token</strong>（transcript 里可能有 API key 等）。⚠️ MC 侧具体脱敏策略 evidence 未覆盖，需自定。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 坑 4：别碰 MC 的治理流水线</h4>
+        <p>review gate / depends_on / handoff / Context Pack 是 MC 护城河<sup class="cite" data-refid="2">[2]</sup>。搬 claudepot 功能全程<strong>只做加法</strong>（新端点、新页面、新表），不要改 AgentSession 状态机或 TaskRun 逻辑，否则可能波及无人执行流程。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 坑 5：classify 守门别漏——别让用户 disable 掉托管的 skill</h4>
+        <p>claudepot 的 artifact_lifecycle 入口会 <code>classify_path</code> 拒绝动 plugin/managed-policy 的<sup class="cite" data-refid="1">[1]</sup>。MC 搬 skill 管理时要照抄这个守门，否则可能误删/误禁系统级 skill 把执行环境搞坏。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>ℹ️ 待深化（evidence 未覆盖，落地前补）</h4>
+        <p>① MC 侧用量/额度的真实数据来源（搬运 4 依赖它）⚠️ ② transcript jsonl 的精确每行 schema（user/assistant/tool_use/tool_result 字段名）——claudepot 读了但深读未列字段细节，落地时直接看一份真实 jsonl ⚠️ ③ MC 的 <code>.mc-runner/live</code> 目录是否已持有 transcript 实体（深读 gap 提到疑似，未确认）⚠️ ④ MC pipeline.go / mailbox-runner 是否涉及 session 自动 spawn（本次未展开）⚠️。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 FAQ ===== -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">FAQ</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">一句话，claudepot 最该搬进 MC 的是什么？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>真实 session 回放——把 MC 已存的 <code>transcript_path</code> 指向的 jsonl 读出来渲染。MC 字段已有、列表已有，只差「读+渲染」这一环，投入最小、补的洞最大<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">claudepot 是 Rust，MC 是 Go，代码能直接抄吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不能。能搬的是数据源知识（transcript/PID/skill 路径）、状态机逻辑（怎么判 busy/waiting）、产品设计（详情页/skill 生命周期）。代码层面是按 Go 重写，不是复制粘贴<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">MC 要不要照搬 claudepot 的 PID 文件扫描来发现 session？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不用。claudepot 扫 PID 是因为它没别的发现机制；MC 有更可靠的 hook 自动登记（SessionStart/Stop）。MC 用自己的 hook 发现 + 借 claudepot 状态机判活 + 读自己存的 transcript_path，三者各取所长<sup class="cite" data-refid="2">[2]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">搬这些会不会影响 MC 现在的任务治理流程？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不会，只要全程做加法。transcript 回放/skill 管理/用量快照都是新端点+新页面+新表，不动 AgentSession 状态机和 TaskRun 流水线。两边能力零重叠，互补不冲突<sup class="cite" data-refid="2">[2]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">能做到像 claudepot 那样实时 tail 看 session 逐行刷新吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>能，但要先改 SSE。MC 现有 SSE hub 广播全部事件+客户端全量 refetch，扛不住高频流。务实做法：先做「点进详情按需读全量」，要真正实时 tail 再上 per-session channel<sup class="cite" data-refid="2">[2]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">claudepot 的账号管理值得搬吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>多账号切换借鉴低（MC 不管多账号）。但 <code>usage-snapshot.json</code> 模式（定期原子写 0600 json 供 cron 读）很契合 MC 的无人执行——只搬这个轻量产物，让额度紧时降速<sup class="cite" data-refid="1">[1]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">trash+manifest+TTL 那套除了管 skill 还能干啥？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>能抽成 MC 通用「可逆删除」，用在删任务/删 session——两阶段移到回收区+记 manifest，30 天内可 restore，给危险操作一颗后悔药<sup class="cite" data-refid="1">[1]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">读 transcript 有什么安全要注意的？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>jsonl 可能很大（分页/流式读）+ 含敏感 token（渲染/导出前考虑剥）。claudepot 的 index 用 fold 缓存摘要、导出前剥 token，可借鉴。⚠️ MC 具体脱敏策略 evidence 未覆盖，需自定<sup class="cite" data-refid="1">[1]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">先搬哪个？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>1) transcript 回放（地基+最大缺口+投入最小）→ 2) skill 管理（纯新增低风险）→ 3) live 细粒度状态（价值高复杂度中）→ 选做用量快照。见第 8 章<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>。</p></div></div>
+
+    </div>
+  </section>
+
+  <!-- ===== CH11 References ===== -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">References</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13px;color:var(--text-mute)">本报告仅基于两份源码深读 evidence。悬停 inline <sup class="cite" data-refid="1">[1]</sup> 标记可预览来源。</p>
+      <ol class="ref-list">
+        <li id="ref-1">claudepot-app 源码深读（无忌 Deep Research）— 四块功能 confidence=high：① Live Session 实时发现+可视化（数据源 <code>~/.claude/sessions</code> PID json + sysinfo 探活 + tail <code>projects</code> transcript；<code>runtime.rs</code> LiveRuntime 500ms tick；<code>status.rs</code> 状态机跟踪未闭合 tool_use by id；bus→<code>live_activity_bridge.rs</code> emit Tauri event→<code>useSessionLive.ts</code> useSyncExternalStore+RAF）② 历史 session 浏览+跨项目搜索（<code>session_index</code> sessions.db WAL 0600；jsonl 一行 fold 缓存；size+mtime+inode 三元组重扫 guard；rayon 并行冷扫）③ skill/agent/command 管理 artifact_lifecycle（ArtifactKind 三种映射 skills/agents/commands；disable=atomic rename .disabled；trash=两阶段带 manifest 保留 30 天；入口 classify_path 拒绝 plugin/managed-policy）④ 账号管理（accounts.db 0600；<code>/usr/bin/security</code> 子进程读 keychain；<code>swap.rs</code> 原子读旧写新+verify+回滚；<code>rotation/eval.rs</code> 纯函数求值器；<code>usage_snapshot.rs</code> 每 5 分钟写 0600 json）<span class="ref-meta">· 源码深读 · 🟢 confidence high · 引用 ×多</span></li>
+        <li id="ref-2">Mission Control (MC) 源码深读（无忌 Deep Research）— 后端 Go+gorilla/mux+SQLite（<code>pkg/mcstore</code>）:3001，前端 Vite8+React19+TS6+Tailwindv4+react-router-dom7（已装未用）:3003，原生 SSE +30s ping，inline-style 暗色无组件库，打包 Electron，单一 MC_AUTH_KEY。AgentSession 模型 <code>models.go:82-97</code>（含 transcript_path:92，状态常量 <code>models.go:29-36</code> 8 态）；<strong>transcript_path 全代码库无任何读取/serve/渲染</strong>；hook 驱动生命周期（SessionStart/Stop，<code>mc-session-start.sh</code>/<code>mc-session-hook.sh</code>，/tmp idfile 幂等，<code>handlePostEvent</code> server.go:775）；staleness watcher（server.go:939 每 30s，<code>handleSessionHeartbeat</code> server.go:598）；SSE hub（<code>cmd/mcserver/sse.go</code> map[chan]bool 满则丢，<code>useEventStream.ts</code> 原生 EventSource，客户端全量 refetch）；SessionsPage（不可点进）/LogsPage（治理事件流）/TaskDetail（开工命令生成+Context Pack）；无 skill 实体/表/端点/页面；Usage 页 coming soon 占位（App.tsx:189）<span class="ref-meta">· 源码深读 · 🟢 confidence high · 引用 ×多</span></li>
+      </ol>
+    </div>
+  </section>
+
+</main>
+
+<button class="back-to-top" id="backTop" aria-label="回到顶部">↑</button>
+
+<footer>
+  <p>无忌 Deep Research · claudepot-app 源码深读 + MC 源码深读 合并结合方案 · 2026-05-30 · 2 份 evidence · 仅用两份源码深读内容，未覆盖处标 ⚠️</p>
+  <p style="font-size:12px;margin-top:6px">主线：MC 强在任务治理、弱在会话可视化；claudepot 强在会话可视化/skill/账号管理。两边零重叠，是干净的互补。最该先搬：真实 session 回放（MC 已存 transcript_path 却从不读，只差读+渲染这一环）。搬设计/逻辑不搬 Rust 代码，全程做加法不碰治理流水线。</p>
+</footer>
+
+<script>
+(function() {
+  let activePopover=null,activeTrigger=null,hideTimer=null;
+  function getRefContent(refid){const el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){const r=trigger.getBoundingClientRect();const popW=pop.offsetWidth,popH=pop.offsetHeight;let left=r.left+window.scrollX;if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;if(left<12)left=12;let top=r.bottom+window.scrollY+6;if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}pop.style.left=left+'px';pop.style.top=top+'px';}
+  function showPopover(trigger){if(activeTrigger===trigger&&activePopover)return;if(activePopover){activePopover.remove();activePopover=null;}const content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;const pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;document.body.appendChild(pop);positionPopover(pop,trigger);activePopover=pop;activeTrigger=trigger;pop.addEventListener('mouseenter',()=>{if(hideTimer)clearTimeout(hideTimer);});pop.addEventListener('mouseleave',scheduleHide);}
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(()=>{if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){document.querySelectorAll('sup.cite[data-refid]').forEach(sup=>{sup.addEventListener('mouseenter',()=>showPopover(sup));sup.addEventListener('mouseleave',scheduleHide);sup.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});});document.addEventListener('click',e=>{if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+
+<script>
+(function(){
+  var themeBtn=document.getElementById('themeToggle');
+  var saved=localStorage.getItem('claudepot-theme');
+  if(saved){document.body.setAttribute('data-theme',saved);themeBtn.textContent=saved==='dark'?'☀️':'🌙';}
+  themeBtn.addEventListener('click',function(){
+    var cur=document.body.getAttribute('data-theme')==='dark'?'light':'dark';
+    document.body.setAttribute('data-theme',cur);
+    localStorage.setItem('claudepot-theme',cur);
+    themeBtn.textContent=cur==='dark'?'☀️':'🌙';
+  });
+
+  var progressEl=document.getElementById('progress');
+  var backTopEl=document.getElementById('backTop');
+  function updateProgress(){
+    var docHeight=document.documentElement.scrollHeight-window.innerHeight;
+    var scrolled=window.scrollY;
+    var ratio=docHeight>0?scrolled/docHeight:0;
+    progressEl.style.width=(ratio*100)+'%';
+    backTopEl.classList.toggle('show',scrolled>400);
+  }
+  window.addEventListener('scroll',updateProgress,{passive:true});
+  updateProgress();
+  backTopEl.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+
+  document.querySelectorAll('section.chapter > h2').forEach(function(h2){
+    h2.addEventListener('click',function(){h2.parentElement.classList.toggle('collapsed');});
+  });
+
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  function closeNav(){nav.classList.remove('open');ov.classList.remove('show');}
+  if(nav&&tog&&ov){
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',closeNav);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)closeNav();});});
+  }
+
+  var anchorLinks=document.querySelectorAll('#anchorList a');
+  anchorLinks.forEach(function(a){
+    a.addEventListener('click',function(){
+      var target=document.getElementById(a.dataset.target);
+      if(target&&target.classList.contains('collapsed'))target.classList.remove('collapsed');
+    });
+  });
+
+  var sections=Array.prototype.map.call(anchorLinks,function(a){return document.getElementById(a.dataset.target);}).filter(Boolean);
+  function highlightAnchor(){
+    var offset=120,current=null;
+    for(var i=0;i<sections.length;i++){var rect=sections[i].getBoundingClientRect();if(rect.top-offset<=0)current=sections[i].id;}
+    anchorLinks.forEach(function(a){a.classList.toggle('active',a.dataset.target===current);});
+    var activeLink=document.querySelector('#anchorList a.active');
+    if(activeLink)activeLink.scrollIntoView({block:'nearest'});
+  }
+  window.addEventListener('scroll',highlightAnchor,{passive:true});
+  highlightAnchor();
+
+  document.querySelectorAll('tbody tr').forEach(function(tr){
+    tr.addEventListener('click',function(){
+      tr.parentElement.querySelectorAll('tr.row-highlight').forEach(function(o){if(o!==tr)o.classList.remove('row-highlight');});
+      tr.classList.toggle('row-highlight');
+    });
+  });
+
+  document.querySelectorAll('.faq-q').forEach(function(q){
+    q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+  });
+})();
+</script>
+
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);
+  window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

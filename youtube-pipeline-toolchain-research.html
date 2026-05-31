@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>YouTube 流水线工具链：开源项目能不能补强我们的「下载+转码+字幕+喂大模型」管线 · 无忌 Deep Research · 2026-05-31</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .prod-card { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .prod-head { padding: 10px 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); }
+  .prod-head .ico { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; background: var(--accent-soft); }
+  .prod-head .name-block { flex: 1; min-width: 140px; }
+  .prod-head .pn { font-family: var(--serif); font-size: 16px; font-weight: 700; color: var(--text); }
+  .prod-head .ph { font-size: 12px; color: var(--text-mute); font-family: ui-monospace, monospace; margin-top: 1px; }
+  .prod-body { padding: 10px 14px; font-size: 14px; }
+  .prod-body p { color: var(--text-soft); margin: 6px 0; }
+  .prod-body .takeaway { margin-top: 8px; padding: 8px 10px; background: var(--accent-soft); border-radius: 8px; border-left: 3px solid var(--accent); color: var(--text); font-size: 13.5px; }
+  .prod-body .takeaway::before { content: "💡 接入建议  "; font-weight: 700; color: var(--accent-text); }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(217,154,65,0.3); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .prod-card, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+    #transcript, .transcript { display: none !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 一句话结论</a>
+    <a href="#ch2" data-target="ch2">02 我们现有两条管线</a>
+    <a href="#ch3" data-target="ch3">03 topic 全景扫描</a>
+    <a href="#ch4" data-target="ch4">04 yt-dlp 到底要不要换</a>
+    <a href="#ch5" data-target="ch5">05 下载层：cobalt / pytubefix</a>
+    <a href="#ch6" data-target="ch6">06 「超快转换 API」真相</a>
+    <a href="#ch7" data-target="ch7">07 字幕层：transcript-api</a>
+    <a href="#ch8" data-target="ch8">08 ASR 兜底：whisper 家族</a>
+    <a href="#ch9" data-target="ch9">09 喂大模型积木：fabric / onefilellm</a>
+    <a href="#ch10" data-target="ch10">10 PO Token：被忽略的命门</a>
+    <a href="#ch11" data-target="ch11">11 多平台下载值不值</a>
+    <a href="#ch12" data-target="ch12">12 转码层 ffmpeg 还需补吗</a>
+    <a href="#ch13" data-target="ch13">13 推荐项目 Top 5</a>
+    <a href="#ch14" data-target="ch14">14 接入我们工作流（决策树）</a>
+    <a href="#ch15" data-target="ch15">15 风险与存疑</a>
+    <a href="#faq" data-target="faq">FAQ</a>
+    <a href="#refs" data-target="refs">References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>YouTube 流水线工具链：开源项目能不能补强我们的「下载 + 转码 + 字幕 + 喂大模型」管线</h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-31</span>
+      <span>🔍 ~45 次检索 + GitHub API 实查</span>
+      <span>📦 扒了 youtube-api / youtube-downloader / youtube-transcript-api 三个 topic</span>
+      <span>🎯 视角：阿杰的课程精读 + 研究摘要管线</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>带着一个问题去扒 GitHub：我们的 yt-dlp + ffmpeg + Opus 管线，有没有更快/更稳的零件可换或可补？</strong></p>
+      <p>结论先抛：<strong>yt-dlp 不要换，它是底座，全场没有对手</strong>。但管线有三个真空位值得补——
+      ① 字幕抓取改用 <code>youtube-transcript-api</code>（比 yt-dlp 抓字幕更快更轻）；
+      ② 「看一小时视频→1分钟摘要」直接接 <code>fabric</code>，一行命令跑通；
+      ③ yt-dlp 在 SABR 时代建议配 <strong>PO Token provider</strong> 做缓解，这是大多数人忽略的命门（注意：是缓解手段，非稳定性保证）。</p>
+    </div>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">一句话结论（先看这个）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这次研究的本质是一个「换零件」判断题，不是「找新玩具」。我带着阿杰那条「下载→转码→拉字幕→喂大模型」的流水线，逐个工位去问：<strong>现有零件够不够好？有没有更快/更稳的替代或补充？</strong></p>
+
+      <div class="callout good">
+        <h4>✅ 直接抄走的三条</h4>
+        <ol>
+          <li><strong>字幕工位换 <code>youtube-transcript-api</code></strong><sup class="cite" data-refid="1">[1]</sup>：纯 HTTP 抓字幕，不下视频、不调浏览器，机制上比 yt-dlp 抓字幕轻得多（具体倍数未实测，见 Ch15 存疑）。课程精读 + 研究摘要两条线都受益。<span class="conf y">机制推断</span></li>
+          <li><strong>研究摘要工位接 <code>fabric</code></strong><sup class="cite" data-refid="2">[2]</sup>：<code>fabric -y &lt;url&gt;</code> 一行抓字幕喂 LLM，自带 <code>extract_wisdom</code> / <code>summarize</code> pattern，「一小时视频→1分钟摘要」当天就能跑通。<span class="conf g">多源</span></li>
+          <li><strong>给 yt-dlp 配 PO Token provider</strong><sup class="cite" data-refid="3">[3]</sup>：YouTube 在逐步铺开 SABR + PoToken 强制，部分客户端/场景下裸 yt-dlp 会拿不到格式。配上 <code>bgutil-ytdlp-pot-provider</code> 是一个缓解手段（非稳定性保证）。<span class="conf y">单源·官方 wiki</span></li>
+        </ol>
+      </div>
+
+      <div class="callout bad">
+        <h4>⛔ 不要碰的三条</h4>
+        <ol>
+          <li><strong>不要换掉 yt-dlp</strong>：167k 星、每天更新、1800+ 站点、内置字幕/转码/SponsorBlock，没有任何项目能替代它当底座。<span class="conf g">多源</span></li>
+          <li><strong>「超快 MP3 转换 API」（Fast-YouTube-to-MP3-Converter-API）不要用</strong>：它不是自托管代码，是挂在 RapidAPI 上的<strong>付费第三方黑盒</strong>，要 key、有配额、随时可能停。<span class="conf g">已核实</span></li>
+          <li><strong>多平台下载（TikTok/X/IG/FB）暂时是 nice-to-have</strong>：yt-dlp 本身已经支持，但对「课程精读 + 研究」这两条线没有实际刚需，先不立项。<span class="conf y">判断</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">我们现有的两条管线（基准线）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>评估「换不换」之前，先把现有管线摆清楚，否则容易被新项目的营销话术带跑。</p>
+
+      <h3>管线 A：课程精读（banmi-course）</h3>
+      <div class="callout info">
+        <p>现状：<code>yt-dlp</code> 抓字幕 + 下视频 → <code>ffmpeg</code> 按 180s 截关键帧 → Opus(LLM) 清洗英文逐字稿 + 中文笔记 + 费曼重讲 → HTML。</p>
+        <p>痛点假设：下载/抓字幕这一段如果能更快更稳，整条线提速明显；视频体积大，gitignore 后只 push html + jpg。</p>
+      </div>
+
+      <h3>管线 B：研究流程（想要的能力）</h3>
+      <div class="callout info">
+        <p>目标：<strong>「看一小时视频 → 1 分钟摘要」</strong>。这条线现在<strong>还没有现成积木</strong>，是这次研究最该补的缺口。</p>
+        <p>关键差异：管线 A 要的是<strong>完整逐字稿 + 视觉帧</strong>（深读）；管线 B 要的是<strong>快速摘要 + 打标签</strong>（扫读），两者对工具要求不同。</p>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>评估原则（贯穿全文）</strong></p>
+        <ul>
+          <li>能不能<strong>真提速</strong>，而不是换汤不换药（换个 wrapper 底层还是 yt-dlp，不算提速）。</li>
+          <li>license 能不能<strong>商用</strong>（半米是商业项目，AGPL/GPL 要警惕）。</li>
+          <li>是不是<strong>活的</strong>（最近 30 天有 push）、要不要 API key / 付费。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">GitHub topic 全景扫描（实查 star + license + 活跃度）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>我用 GitHub API 实查了 <code>topic:youtube-api</code>（4069 个仓库）按星排序的头部，再交叉 <code>youtube-downloader</code> / <code>youtube-transcript-api</code> 两个 topic。下面这张表是<strong>跟我们管线相关</strong>的项目（剔掉了纯音乐 App / 浏览器扩展 / 上传工具这类无关项）。所有数字是 2026-05-31 实查。<sup class="cite" data-refid="4">[4]</sup></p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>项目</th><th>Star</th><th>语言</th><th>License</th><th>最近 push</th><th>对我们的角色</th></tr></thead>
+          <tbody>
+            <tr><td>yt-dlp/yt-dlp</td><td>167k</td><td>Python</td><td>Unlicense*</td><td>2026-05-25</td><td><span class="pill good">底座·留</span></td></tr>
+            <tr><td>imputnet/cobalt</td><td>40.6k</td><td>Svelte/TS</td><td>AGPL-3.0</td><td>2026-04-06</td><td><span class="pill warn">可选·重</span></td></tr>
+            <tr><td>danielmiessler/Fabric</td><td>41.9k</td><td>Go</td><td>MIT</td><td>2026-05-28</td><td><span class="pill accent">摘要·接</span></td></tr>
+            <tr><td>SYSTRAN/faster-whisper</td><td>23.3k</td><td>Python</td><td>MIT</td><td>2025-11-19</td><td><span class="pill info">ASR兜底</span></td></tr>
+            <tr><td>m-bain/whisperX</td><td>22.2k</td><td>Python</td><td>BSD-2</td><td>2026-05-25</td><td><span class="pill info">ASR+对齐</span></td></tr>
+            <tr><td>pytube/pytube</td><td>13.1k</td><td>Python</td><td>Unlicense</td><td>(停滞)</td><td><span class="pill bad">已死·避</span></td></tr>
+            <tr><td>jdepoix/youtube-transcript-api</td><td>7.7k</td><td>Python</td><td>MIT</td><td>2026-05-21</td><td><span class="pill good">字幕·接</span></td></tr>
+            <tr><td>sigma67/ytmusicapi</td><td>2.7k</td><td>Python</td><td>MIT</td><td>2026-05-29</td><td><span class="pill">无关(音乐)</span></td></tr>
+            <tr><td>CharlesPikachu/videodl</td><td>2.2k</td><td>Python</td><td>MIT</td><td>2026-05-29</td><td><span class="pill warn">国区平台</span></td></tr>
+            <tr><td>jimmc414/onefilellm</td><td>2.0k</td><td>Python</td><td>MIT</td><td>2026-02-08</td><td><span class="pill accent">喂LLM积木</span></td></tr>
+            <tr><td>JuanBindez/pytubefix</td><td>1.5k</td><td>Python</td><td>MIT</td><td>2026-05-30</td><td><span class="pill warn">轻量备选</span></td></tr>
+            <tr><td>Brainicism/bgutil-ytdlp-pot-provider</td><td>548</td><td>TypeScript</td><td>GPL-3.0</td><td>2026-04-10</td><td><span class="pill good">PoToken·接</span></td></tr>
+            <tr><td>dermasmid/scrapetube</td><td>512</td><td>Python</td><td>MIT</td><td>2026-05-29</td><td><span class="pill info">列频道/playlist</span></td></tr>
+            <tr><td>matthew-asuncion/Fast-YT-to-MP3-API</td><td>381</td><td>HTML</td><td>None</td><td>2026-05-16</td><td><span class="pill bad">RapidAPI黑盒·避</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>扫描的一个反直觉发现</strong>：<code>youtube-api</code> topic 头部其实<strong>大半跟「下载/字幕」无关</strong>——前 10 名里有一半是 YouTube Music 客户端、浏览器扩展、上传工具、自动化「养号」bot。真正能进我们管线的就上面这十几个。topic 标签不能当筛选器用，必须逐个核实用途。<span class="conf g">已核实</span></p>
+      </div>
+
+      <div class="callout info">
+        <p><strong>* yt-dlp license 细节</strong>：源码/PyPI/wheel 是 Unlicense（最宽松，可商用）；但官方 <strong>PyInstaller 打包的可执行文件</strong>捆绑了 GPLv3+ 组件。我们是「import 库 / 调命令」用法，不分发它的二进制，所以 Unlicense 成立；<strong>但若哪天把 yt-dlp 二进制打进半米产品分发，要按 GPLv3+ 处理</strong>。<span class="conf y">license 提醒</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">核心问题：yt-dlp 到底要不要换？（诚实版）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这是阿杰最关心的问题，我不绕弯：<strong>不要换。</strong>下面给数据，不是给情绪。</p>
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">167k</div><div class="l">GitHub star（断层第一）</div></div>
+        <div class="metric"><div class="v">1800+</div><div class="l">支持站点</div></div>
+        <div class="metric"><div class="v">每日</div><div class="l">更新频率（追平台变化）</div></div>
+        <div class="metric"><div class="v">23.8k</div><div class="l">commit 数</div></div>
+      </div>
+
+      <h3>为什么没有替代品</h3>
+      <p>yt-dlp 是 youtube-dl 的 fork，但早已青出于蓝。youtube-dl 现在基本停更，YouTube 一改内部接口就挂；yt-dlp 维护节奏极快，主动适配平台变化<sup class="cite" data-refid="5">[5]</sup>。市面上几乎所有「下载器」——Seal、ytDownloader、cobalt 桌面、各种 GUI——<strong>底层调的都是 yt-dlp</strong>。换它等于换地基。</p>
+
+      <h3>关于「速度」的诚实拆解</h3>
+      <div class="callout info">
+        <p>yt-dlp 支持 <code>--concurrent-fragments N</code> 把 DASH/HLS 分片并行下载；配 <code>aria2c</code> 当外部下载器，1GB 视频约 2 分钟（裸 youtube-dl 约 5 分钟）<sup class="cite" data-refid="5">[5]</sup>。<strong>所以「想更快」的答案不是换工具，是把现有 yt-dlp 调对参数。</strong></p>
+        <p>⚠️ 但有个坑：单 IP 用 <code>--concurrent-fragments 16</code> 会被 YouTube 限速甚至临时封<sup class="cite" data-refid="5">[5]</sup>。课程精读是批量场景，并发拉太猛适得其反，建议 <code>4</code> 起步。</p>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>「换汤不换药」陷阱</strong>：很多看起来「更快/更现代」的下载项目（Seal、ytdlnis、各种 web UI）只是 yt-dlp 的壳。对我们这种已经命令行跑 pipeline 的场景，套个壳没有任何提速，反而多一层依赖。<span class="conf g">已核实</span></p>
+      </div>
+
+      <h3>那 yt-dlp 的真痛点是什么？</h3>
+      <p>不是速度，是<strong>稳定性</strong>——2026 年 YouTube 的 SABR + PO Token 让裸 yt-dlp 时不时抓不到格式（详见 Ch10）。所以正确动作是「<strong>留 yt-dlp + 补 PO Token provider</strong>」，不是「换掉 yt-dlp」。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">下载层：cobalt / pytubefix 值不值得碰</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🔷</div>
+          <div class="name-block"><div class="pn">imputnet/cobalt</div><div class="ph">40.7k ★ · TypeScript · AGPL-3.0 · push 2026-05-28</div></div>
+          <span class="pill warn">可选·重</span>
+        </div>
+        <div class="prod-body">
+          <p>一站式「贴链接拿文件」的下载器，支持 20+ 平台（TikTok/IG/X/Reddit/SoundCloud/Vimeo…），自身不缓存内容、像个漂亮代理<sup class="cite" data-refid="6">[6]</sup>。</p>
+          <p><strong>三个劝退点</strong>：</p>
+          <ul>
+            <li>🔴 <strong>公共实例的 YouTube 自 2025 年中起被封，2026 年仍不可用</strong>——要下 YouTube 必须自托管自己的 processing/API 实例<sup class="cite" data-refid="6">[6]</sup>（官方也不再提供预托管公共 API）。自托管走 Docker 跑 API 实例，前端可指向你自己的实例。</li>
+            <li>🔴 <strong>license 是 AGPL-3.0</strong>——商业项目集成 AGPL 服务端代码有传染风险，半米要谨慎。<span class="conf y">判断</span></li>
+            <li>🟡 它面向「人手动贴链接」，不是为我们这种命令行批量 pipeline 设计；而且 YouTube 那一侧它<strong>本来也得绕同样的 PoToken 问题</strong>，没有比 yt-dlp 更省心。</li>
+          </ul>
+          <div class="takeaway">不接。它解决的是「给普通人一个网页下载器」，不是「给已有 pipeline 提速」。我们的场景 yt-dlp 完胜。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🐍</div>
+          <div class="name-block"><div class="pn">JuanBindez/pytubefix</div><div class="ph">1.5k ★ · Python · MIT · push 2026-05-30</div></div>
+          <span class="pill warn">轻量备选</span>
+        </div>
+        <div class="prod-body">
+          <p>pytube 的活跃 fork（原版 pytube 基本已死<sup class="cite" data-refid="7">[7]</sup>）。纯 Python 库，能下视频/流/字幕/playlist，<strong>带 PO Token 支持</strong>，MIT license 可商用。</p>
+          <p>适用场景：你想要一个<strong>纯 Python 依赖、嵌进自己代码里</strong>的下载库，而不是 shell 出去调 yt-dlp 二进制。对脚本洁癖/打包成单一 Python 服务有意义。</p>
+          <div class="takeaway">备选，不优先。yt-dlp 也能用 <code>yt_dlp</code> Python API 直接 import，能力更全。pytubefix 只在「我就想要个超轻 Python 库」时才比 yt-dlp 香。</div>
+        </div>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>⚠️ pytube（原版）已死</strong>：13.1k 星但维护停滞，YouTube 一变就坏，社区共识「pytube is dead, long live pytubefix」<sup class="cite" data-refid="7">[7]</sup>。<strong>别被它的高星骗了</strong>——星是历史积累，活跃度才是关键。要用 fork。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">「超快 MP3/MP4 转换 API」的真相（阿杰点名项）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>阿杰特意点名 <code>Fast-YouTube-to-MP3-Converter-API</code>，我专门核实了。<strong>结论：不是你想的那种东西，不要用。</strong></p>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">⚠️</div>
+          <div class="name-block"><div class="pn">matthew-asuncion/Fast-YouTube-to-MP3-Converter-API</div><div class="ph">381 ★ · "HTML" · 无 license · push 2026-05-16</div></div>
+          <span class="pill bad">避坑</span>
+        </div>
+        <div class="prod-body">
+          <p>名字像个开源转换引擎，<strong>实际上这个 repo 只是文档</strong>——真正的转换跑在作者挂在 <strong>RapidAPI</strong> 上的服务器后端<sup class="cite" data-refid="8">[8]</sup>。</p>
+          <p><strong>它的真实身份</strong>：</p>
+          <ul>
+            <li>🔴 <strong>要 RapidAPI key</strong>，freemium 模式：免费档有月配额上限，超了要付费<sup class="cite" data-refid="8">[8]</sup>。</li>
+            <li>🔴 <strong>转换是黑盒</strong>，发 video ID 给它、它返回下载链接，你不知道也控制不了后端怎么转、用什么质量。</li>
+            <li>🔴 <strong>没有可自托管的后端</strong>——repo 里 GitHub 标的语言是「HTML」就是信号，里面是各语言调用示例，不是引擎。</li>
+            <li>🔴 <strong>无 license</strong>，商业项目依赖一个第三方付费 API 当管线零件，随时可能涨价/停服/被 YouTube 封。</li>
+          </ul>
+          <div class="takeaway">坚决不接。「快」是因为它在别人服务器上转、把成本和风险转嫁给你。我们已经有 yt-dlp+ffmpeg 在自己机器上转，可控、免费、无配额，没理由换成一个付费黑盒。</div>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <p><strong>为什么会有一堆这种「转换 API」？</strong> 它们的目标用户是「想在自己网站/App 里加个下载按钮、又不想自己跑 yt-dlp 服务器」的开发者，用付费换省事。<strong>对我们不成立</strong>——我们本来就在自己机器上跑 pipeline，自托管成本几乎为零。<span class="conf y">判断</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">字幕层：youtube-transcript-api（最值得抄的一个）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">📝</div>
+          <div class="name-block"><div class="pn">jdepoix/youtube-transcript-api</div><div class="ph">7.7k ★ · Python · MIT · v1.2.4 (2026-01-29)</div></div>
+          <span class="pill good">强烈推荐·接</span>
+        </div>
+        <div class="prod-body">
+          <p>纯 Python 库，抓 YouTube 字幕/转录（含自动生成字幕），<strong>不要 API key、不要 headless 浏览器</strong><sup class="cite" data-refid="1">[1]</sup>。这是这次研究里跟我们管线咬合最紧的一个。</p>
+          <p><strong>为什么比 yt-dlp 抓字幕好</strong>：</p>
+          <ul>
+            <li>⚡ <strong>不下视频、不起浏览器</strong>，直接打 YouTube 内部字幕接口；yt-dlp 抓字幕要走完整提取流程，机制上重得多（具体快多少未跑基准，见 Ch15）。</li>
+            <li>🧩 <strong>API 干净</strong>：<code>YouTubeTranscriptApi().fetch(video_id)</code> 一行拿到带时间戳的字幕；能列全部可用语言、能优先人工字幕、能翻译。</li>
+            <li>📤 <strong>多格式输出</strong>：txt / json / srt / webvtt / csv——<strong>正好对上我们 yt-to-obsidian 那个「双语 CSV 直传」模式</strong>，省掉一道转换。<span class="conf y">关联判断</span></li>
+            <li>📜 MIT、活跃（v1.2.4 今年 1 月发布，35 个 release）。</li>
+          </ul>
+          <div class="takeaway">两条管线都接。课程精读用它取代 yt-dlp 抓字幕那一步（视频还是 yt-dlp 下）；研究摘要线用它当「拿文本」的第一棒。</div>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 必须知道的两个风险</h4>
+        <ul>
+          <li><strong>它用的是 YouTube 未公开接口</strong>，作者明说「不保证哪天不挂」<sup class="cite" data-refid="1">[1]</sup>。所以它只能当「快路径」，<strong>失败要能 fallback 回 yt-dlp 抓字幕或 whisper 兜底</strong>。</li>
+          <li><strong>云 IP 会被封</strong>：文档承认 YouTube 已大面积封 AWS/GCP/Azure 等云厂商 IP，库内置了 Webshare 住宅代理支持来绕<sup class="cite" data-refid="9">[9]</sup>。<strong>在阿杰本机（住宅 IP）跑没问题；如果哪天搬到云服务器批量跑，要配代理。</strong></li>
+        </ul>
+      </div>
+
+      <div class="callout info">
+        <p><strong>配套小工具</strong>：<code>dermasmid/scrapetube</code>（512★, MIT）能列出一个频道/playlist 的全部 video id，不用 API key<sup class="cite" data-refid="4">[4]</sup>。配合 transcript-api，就能「给个频道→批量抓全频道字幕」，对 SciShow Kids 那种整频道精读场景有用。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">ASR 兜底层：whisper 家族（字幕没有时才用）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>不在 youtube-api topic 里，但它是字幕管线的<strong>必要兜底</strong>：当视频没有字幕、或自动字幕烂到不能用时，本地 ASR 重新转录。</p>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🎙️</div>
+          <div class="name-block"><div class="pn">SYSTRAN/faster-whisper</div><div class="ph">23.3k ★ · Python · MIT · push 2025-11-19</div></div>
+          <span class="pill info">ASR 引擎</span>
+        </div>
+        <div class="prod-body">
+          <p>用 CTranslate2 重写的 Whisper，<strong>同精度下比 openai/whisper 快约 4 倍、更省显存</strong>，8-bit 量化还能再压<sup class="cite" data-refid="10">[10]</sup>。MIT 可商用。</p>
+          <div class="takeaway">当「字幕兜底引擎」。优先级低于 transcript-api——能直接抓到的字幕就别花算力转录。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">⏱️</div>
+          <div class="name-block"><div class="pn">m-bain/whisperX</div><div class="ph">22.2k ★ · Python · BSD-2 · push 2026-05-25</div></div>
+          <span class="pill info">ASR + 词级对齐</span>
+        </div>
+        <div class="prod-body">
+          <p>以 faster-whisper 为后端，加<strong>词级时间戳</strong>（强制音素对齐）+ 说话人分离 + VAD，号称 large-v2 下 70x 实时<sup class="cite" data-refid="10">[10]</sup>。</p>
+          <div class="takeaway">如果未来课程精读要做「点单词跳到视频对应秒」（类似我们 youglish/字幕搜索那条线），whisperX 的词级时间戳是关键零件。当前阶段 faster-whisper 已够。</div>
+        </div>
+      </div>
+
+      <div class="callout good">
+        <p><strong>字幕层最终架构（三级 fallback）</strong>：① <code>youtube-transcript-api</code> 抓现成字幕（最轻）→ 失败 → ② <code>yt-dlp --write-auto-subs</code>（换条路径再试，但<strong>注意它也是走 YouTube 字幕接口、同样可能受 PoToken 影响，不是真正独立的兜底</strong>）→ 还不行 → ③ <code>faster-whisper</code> 本地转录（<strong>唯一真正独立的兜底</strong>，最准、费算力）。<span class="conf y">架构建议</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">喂大模型积木：fabric / onefilellm（研究摘要线的核心）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>阿杰问「有没有现成积木直接接 LLM 做摘要/打标签」。<strong>有，而且很成熟。</strong>这是管线 B（研究摘要）当天就能跑通的关键。</p>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🧵</div>
+          <div class="name-block"><div class="pn">danielmiessler/Fabric</div><div class="ph">41.9k ★ · Go · MIT · push 2026-05-28</div></div>
+          <span class="pill accent">研究摘要·强推</span>
+        </div>
+        <div class="prod-body">
+          <p>「用 AI 增强人类」的开源框架，核心是一堆版本化的 prompt「pattern」。<strong>内置 YouTube 功能：<code>fabric -y "&lt;url&gt;"</code> 自动抓字幕喂给 LLM</strong>，配 pattern 出结构化结果<sup class="cite" data-refid="2">[2]</sup>。</p>
+          <p><strong>为什么正好对上「一小时视频→1分钟摘要」</strong>：</p>
+          <ul>
+            <li>🎯 自带 <code>extract_wisdom</code>（抽洞见/金句/引用/takeaway）和 <code>summarize</code>（结构化摘要）pattern，对长视频字幕效果极好<sup class="cite" data-refid="2">[2]</sup>。</li>
+            <li>🔌 支持多 LLM 后端：OpenAI / Anthropic / <strong>Gemini</strong> / 本地 Ollama——跟阿杰海外视角 + 现有 Opus/Gemini 栈完全兼容。</li>
+            <li>📜 MIT 可商用，41.9k 星、Go 写的、维护极活跃。</li>
+          </ul>
+          <div class="takeaway">研究摘要线直接接。最小路径：装 fabric → 配 Gemini/Claude key → <code>fabric -y URL --pattern extract_wisdom</code>。「打标签」也能自己写个 tag pattern。这是这次研究 ROI 最高的一接。</div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">📦</div>
+          <div class="name-block"><div class="pn">jimmc414/onefilellm</div><div class="ph">2.0k ★ · Python · MIT · push 2026-02-08</div></div>
+          <span class="pill accent">多源聚合喂 LLM</span>
+        </div>
+        <div class="prod-body">
+          <p>把多种来源（GitHub repo/PR、arXiv 论文、网页、<strong>YouTube 字幕</strong>）聚合清洗成<strong>单个文本文件</strong>，自动复制到剪贴板、报告 token 数，方便整块喂 LLM<sup class="cite" data-refid="11">[11]</sup>。底层 YouTube 那部分正是用 <code>youtube-transcript-api</code>。</p>
+          <div class="takeaway">备选。如果研究场景是「把一个视频 + 几篇论文 + 一个 repo 一起喂给模型对比」，onefilellm 比 fabric 更合适（多源聚合）。纯视频摘要还是 fabric 更顺。</div>
+        </div>
+      </div>
+
+      <div class="callout purple">
+        <p><strong>注意我们其实已经有半套</strong>：<code>yt-to-obsidian</code> 和 <code>yt-to-notebooklm</code> skill 已经在做「YouTube→笔记/知识库」。fabric 的价值是补上<strong>「快速扫读摘要」</strong>这个更轻的档位——不是要做精读笔记，就想 1 分钟知道这视频讲了啥值不值得深看。两者互补，不冲突。<span class="conf y">关联判断</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">PO Token / SABR：2026 年被忽略的命门</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这一章是阿杰没问、但<strong>比「换不换工具」更重要</strong>的事。如果不处理，无论用 yt-dlp 还是别的，2026 年都会越来越多失败。</p>
+
+      <div class="callout bad">
+        <p><strong>发生了什么</strong>：2025-2026 年 YouTube <strong>逐步铺开 SABR（服务端自适应码率）</strong> + <strong>PO Token（Proof of Origin）强制</strong>——yt-dlp 官方 wiki 用词是「rolling out」，目前只有<strong>部分客户端/场景</strong>要求，不是对所有下载一刀切<sup class="cite" data-refid="3">[3]</sup>。这不是 yt-dlp 的 bug，是 YouTube 的反爬升级，所有下载工具都受影响。</p>
+        <div class="callout warn">
+          <p><strong>⚠️ 别把错误对号入座错</strong>：常见的 <code>This content isn't available, try again later</code> 在 yt-dlp 文档里主要归因于<strong>请求频率过高（限速）</strong>，不一定是 PoToken 缺失。真正的 PoToken/SABR 症状是「只剩 storyboard 图、所有音视频格式拿不到」「nsig extraction failed」。先分清是哪种，再决定上 PoToken provider 还是降并发/加 sleep。<span class="conf y">官方 wiki</span></p>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="ico">🔑</div>
+          <div class="name-block"><div class="pn">Brainicism/bgutil-ytdlp-pot-provider</div><div class="ph">548 ★ · TypeScript · GPL-3.0 · push 2026-04-10</div></div>
+          <span class="pill good">配套·接</span>
+        </div>
+        <div class="prod-body">
+          <p>yt-dlp 的 PO Token provider 插件，自动生成 BotGuard token 让下载继续可用<sup class="cite" data-refid="12">[12]</sup>。两种装法：</p>
+          <ul>
+            <li><strong>HTTP Server 模式（Docker）</strong>：跑个容器（默认 4416 端口），yt-dlp 向它要 token，最稳，推荐。</li>
+            <li><strong>Script 模式（插件）</strong>：装成 yt-dlp 插件 + 本地 Node.js，按需生成，不用常驻服务。</li>
+          </ul>
+          <div class="takeaway">课程精读 pipeline 要常态批量下载，<strong>建议上 Docker server 模式</strong>。这是「让 yt-dlp 在 SABR 时代更稳」的一个缓解手段（不是稳定性保证——它自己 README 也说有了 PoToken 也不保证绕过 403/bot 检查）。<strong>license 是 GPL-3.0</strong>，当外部 Docker 服务/插件调用、不静态链接进我们代码，传染风险低，但商业分发要留意。</div>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <p><strong>这条发现的元价值</strong>：阿杰问的是「换更快的工具」，但真实瓶颈是<strong>稳定性（被 YouTube 拦）</strong>而非速度。研究的价值之一就是把问题问对——这条线该投的资源是「PoToken provider + 住宅 IP」，不是「找更快的下载器」。<span class="conf y">判断</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">多平台下载（TikTok/X/IG/FB）值不值得搞</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>阿杰直接问了：「多平台下载对我们有没有实际用，还是 nice-to-have？」我的答案：<strong>当前是 nice-to-have，且能力已经白送，不用额外立项。</strong></p>
+
+      <h3>第一个事实：yt-dlp 本身就支持</h3>
+      <p>yt-dlp 支持 1800+ 站点，TikTok（可下无水印）、Instagram（帖/reels/stories）、Twitter/X、Facebook、Vimeo、Twitch、Reddit、SoundCloud 全覆盖<sup class="cite" data-refid="13">[13]</sup>。<strong>所以我们不需要为「多平台」再找工具——已经有了。</strong></p>
+
+      <div class="callout warn">
+        <p>⚠️ 但社交平台抽取质量参差：IG/FB 常需 <code>--cookies-from-browser</code> 传浏览器 cookie 才能下；平台一改内部结构就临时坏，靠社区频繁更新 extractor<sup class="cite" data-refid="13">[13]</sup>。<strong>能下 ≠ 像 YouTube 那样稳。</strong></p>
+      </div>
+
+      <h3>第二个判断：跟我们两条线的相关性</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>平台</th><th>对课程精读</th><th>对研究摘要</th><th>结论</th></tr></thead>
+          <tbody>
+            <tr><td>YouTube</td><td>核心载体</td><td>核心载体</td><td><span class="pill good">刚需</span></td></tr>
+            <tr><td>TikTok / Reels / Shorts</td><td>太短、无深度内容</td><td>偶尔有知识短视频</td><td><span class="pill warn">nice-to-have</span></td></tr>
+            <tr><td>X / Twitter</td><td>无</td><td>偶尔存个讲解 thread 视频</td><td><span class="pill warn">nice-to-have</span></td></tr>
+            <tr><td>Instagram / FB</td><td>无</td><td>基本无</td><td><span class="pill bad">无关</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout good">
+        <p><strong>结论</strong>：多平台对「课程精读 + 研究」<strong>没有刚需</strong>。但因为 yt-dlp 已经白送了这个能力，<strong>不用做任何额外工作就具备</strong>——哪天真要存个 X 上的讲解视频，同一条 yt-dlp 命令换个 URL 就行。<strong>不立项，但留着这个口子。</strong>（顺带：我们已有 <code>save-tweet</code> skill 处理 X 文字推文存档，视频可以并到那条线。）<span class="conf y">判断</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">转码层：ffmpeg 还需要补吗？</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>阿杰管线里 ffmpeg 负责截关键帧 + 转格式。这次扫 GitHub<strong>没有发现值得替换 ffmpeg 的项目</strong>——ffmpeg 是音视频处理的事实标准底座，跟 yt-dlp 一样属于「不换」类。</p>
+
+      <div class="callout info">
+        <p><strong>真要优化的话，是参数不是工具</strong>：</p>
+        <ul>
+          <li>截关键帧用 <code>-vf "select='eq(pict_type,I)'"</code> 抽 I 帧，或现有 180s 定时截帧——按内容密度调间隔比换工具有用。</li>
+          <li>音频抽取喂 ASR 时，<code>-ar 16000 -ac 1</code> 降到 16kHz 单声道，whisper 系列要的就是这个格式，文件更小转得更快。</li>
+        </ul>
+        <p>这些是<strong>「调对参数」</strong>而非「找新积木」，跟 Ch4 的速度结论一脉相承。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>诚实声明</strong>：本次研究焦点在 youtube-api 生态的下载/字幕/摘要工具，对 ffmpeg 替代品<strong>没有做穷尽搜索</strong>（GPU 加速转码如 NVENC、或 Rust 的音视频库等方向未深挖）。如果转码成为实测瓶颈，值得单开一份研究。<span class="conf y">存疑·未尽</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">推荐项目 Top 5（带接入位）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>从全部扫描里挑出<strong>真正该并入工作流</strong>的五个，按 ROI 排序。</p>
+
+      <div class="callout good">
+        <h4>🥇 #1 fabric — 研究摘要线的发动机</h4>
+        <p>41.9k★ MIT。<code>fabric -y URL</code> 一行把视频字幕喂 LLM，自带 extract_wisdom/summarize。直接实现阿杰要的「一小时视频→1分钟摘要」。<strong>接管线 B（研究摘要）。当天可跑通，ROI 最高。</strong></p>
+      </div>
+
+      <div class="callout good">
+        <h4>🥈 #2 youtube-transcript-api — 字幕快路径</h4>
+        <p>7.7k★ MIT。纯 HTTP 抓字幕，不下视频不起浏览器，比 yt-dlp 抓字幕快一档，多格式输出对上我们 CSV 直传模式。<strong>接管线 A + B 的「取文本」第一棒。</strong></p>
+      </div>
+
+      <div class="callout good">
+        <h4>🥉 #3 bgutil-ytdlp-pot-provider — 让 yt-dlp 2026 年继续稳</h4>
+        <p>548★ GPL-3.0。补 PO Token，解决 SABR 时代 yt-dlp 抓不到格式的命门。<strong>接管线 A（课程精读批量下载）。比换任何下载器都管用。</strong>（GPL：作为外部 Docker 服务/插件调用、不与我们代码静态链接，传染风险低；但要留意。）</p>
+      </div>
+
+      <div class="callout info">
+        <h4>4️⃣ #4 faster-whisper — 字幕兜底引擎</h4>
+        <p>23.3k★ MIT。无字幕/字幕烂时本地转录，比原版 whisper 快 4 倍。<strong>接字幕层第三级 fallback。</strong>（要词级时间戳做「点词跳秒」再上 whisperX。）</p>
+      </div>
+
+      <div class="callout info">
+        <h4>5️⃣ #5 onefilellm — 多源聚合喂 LLM（备选）</h4>
+        <p>2.0k★ MIT。视频 + 论文 + repo 聚合成一个文件喂模型。<strong>研究场景需要跨源对比时再上，纯视频摘要 fabric 优先。</strong></p>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>共同点</strong>：四个是 <strong>MIT/BSD（可放心商用）</strong>，只有 bgutil 是 GPL-3.0（当外部 Docker 服务/插件调用、不静态链接进我们代码，传染风险低）；全部活跃维护；全部<strong>不要付费 API key</strong>（fabric/onefilellm 要你自己的 LLM key，但那是你本来就有的）。这是刻意筛的——避开了 AGPL 服务端代码（cobalt）和付费第三方黑盒（Fast-MP3-API）。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH14 ===== -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">接入我们工作流：决策树 + 具体动作</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <h3>决策树：手上一个 YouTube 链接，走哪条线？</h3>
+      <div class="tree">
+        <div class="node q">Q1：你要「深读」还是「快速判断值不值得看」？</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl m">快速判断</span> → 管线 B：<code>fabric -y URL --pattern extract_wisdom</code>（或 summarize）→ 1 分钟出摘要 + 洞见。底层字幕走 transcript-api。</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl y">深读</span> → 管线 A（课程精读，下面展开）</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q2（管线 A 内）：能直接抓到字幕吗？</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl y">能</span> → <code>youtube-transcript-api</code> 抓（最快）</div>
+        <div class="node"><span class="lbl m">抓不到/质量差</span> → yt-dlp <code>--write-auto-subs</code>（同走字幕接口、非独立兜底）→ 仍不行 → faster-whisper 本地转录（唯一真正独立兜底）</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q3：下视频时报 "content isn't available"？</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl y">是</span> → 说明撞上 SABR/PoToken → 启 bgutil-ytdlp-pot-provider（Docker）→ yt-dlp 配 provider 重试</div>
+      </div>
+
+      <h3>目标管线形态（改造后）</h3>
+      <div class="callout accent">
+        <p><strong>管线 A（课程精读）改造</strong>：</p>
+        <p>字幕：<code>youtube-transcript-api</code>（快路径）→ fallback yt-dlp → fallback faster-whisper<br>
+        视频：<code>yt-dlp + bgutil-pot-provider</code>（+ <code>--concurrent-fragments 4</code>）<br>
+        截帧/转码：<code>ffmpeg</code>（不变，调参）<br>
+        清洗/笔记：Opus（不变）</p>
+      </div>
+      <div class="callout accent">
+        <p><strong>管线 B（研究摘要）新建</strong>：</p>
+        <p><code>fabric -y URL --pattern extract_wisdom</code> → 1 分钟摘要<br>
+        （底层 transcript-api 抓字幕；LLM 后端用现有 Gemini/Claude key）<br>
+        想跨源对比 → 换 <code>onefilellm</code> 聚合多个来源再喂。</p>
+      </div>
+
+      <h3>落地顺序（ROI 排序，先做最划算的）</h3>
+      <div class="callout good">
+        <ol>
+          <li><strong>先装 fabric 跑通管线 B</strong>——零改造、当天见效、直接交付阿杰要的能力。</li>
+          <li><strong>再把课程精读的字幕工位换成 transcript-api</strong>——小改、提速明显、有 fallback 兜底。</li>
+          <li><strong>然后上 PoToken provider</strong>——等真撞到下载失败时再上（按需，不是预防性投入）。</li>
+          <li>faster-whisper / onefilellm <strong>留作兜底/备选</strong>，需要时再接。</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>军师声明</strong>：以上是「接哪条线 + 怎么接 + 什么顺序」的方案。具体写脚本/改 pipeline 代码是开发动作——阿杰说「派给你写」我再动手，不主动 offer 落地。<span class="conf y">定位</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH15 ===== -->
+  <section class="chapter" id="ch15">
+    <h2><span class="num">15</span><span class="title-text">风险、存疑与没做到的部分（诚实交代）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="callout bad">
+        <h4>🔴 风险 1：未公开接口随时可能挂</h4>
+        <p>transcript-api、pytubefix、cobalt 全部依赖 YouTube 未公开接口，作者都明说不保证稳定<sup class="cite" data-refid="1">[1]</sup>。<strong>所以推荐的架构永远带 fallback</strong>——不把鸡蛋放一个篮子。yt-dlp 因为维护最猛，是最稳的那一个，所以留它当底座。</p>
+      </div>
+
+      <div class="callout bad">
+        <h4>🔴 风险 2：云 IP 封禁</h4>
+        <p>transcript-api / yt-dlp 在云服务器（AWS/GCP）批量跑会被封 IP<sup class="cite" data-refid="9">[9]</sup>。<strong>阿杰本机住宅 IP 跑没问题</strong>；要上云批量化必须配住宅代理（Webshare 等），这是额外成本。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>🟡 失败模式分类（别把所有报错都当 PoToken）</h4>
+        <p>工程化时要按症状分诊，对症下药，不要一报错就上 PoToken provider：</p>
+        <ul>
+          <li><strong>限速</strong>（"try again later"）→ 降并发 + 加 <code>--sleep-requests</code> / backoff，不是 PoToken 问题。</li>
+          <li><strong>PoToken/SABR</strong>（只剩 storyboard 图 / nsig extraction failed）→ 上 PoToken provider + 装 JS runtime（Deno）。</li>
+          <li><strong>IP 封</strong>（云 IP）→ 住宅代理。</li>
+          <li><strong>年龄/地区限制</strong>→ cookies / 换区，部分视频无解。</li>
+          <li><strong>私有/已删/会员/直播回放/Shorts</strong>→ 各有不同行为，要单独处理。</li>
+          <li><strong>无字幕 / 自动字幕烂</strong>→ 走 ASR（whisper）兜底。</li>
+        </ul>
+        <p>配套运维：yt-dlp <strong>版本要勤更</strong>（stable vs nightly）、设重试预算、字幕做缓存。<span class="conf y">运维建议</span></p>
+      </div>
+
+      <div class="callout warn">
+        <h4>🟡 存疑 1：transcript-api 实测速度未跑基准</h4>
+        <p>「比 yt-dlp 快一个量级」是基于「不下视频不起浏览器」的机制推断 + 社区共识，<strong>我没有在本机跑过 head-to-head 基准测试</strong>。机制上确定更快，具体倍数存疑。<span class="conf y">单源+机制推断</span></p>
+      </div>
+
+      <div class="callout warn">
+        <h4>🟡 存疑 2：fabric 对中文/双语视频的摘要质量</h4>
+        <p>fabric 的 pattern 主要是英文社区调的，对<strong>中英混合或纯中文视频</strong>的 extract_wisdom 效果我没实测。质量主要取决于后端 LLM（Gemini/Claude 都强），但 pattern 提示词可能需要本地化微调。<span class="conf y">未实测</span></p>
+      </div>
+
+      <div class="callout warn">
+        <h4>🟡 没做到：ffmpeg 替代/GPU 转码未深挖</h4>
+        <p>本研究聚焦 youtube-api 生态，<strong>对转码层（NVENC GPU 加速、Rust 音视频库）没做穷尽搜索</strong>。如果转码是实测瓶颈，需单开研究（见 Ch12）。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>🟡 知道存在、本轮未深挖的相关项目（诚实标注）</h4>
+        <p>这次主要靠 topic 检索 + 名气筛，下面这些<strong>明确该补研究但本轮没展开</strong>，列出来不让它们成为盲区：</p>
+        <ul>
+          <li><strong>whisper.cpp</strong> — 本地 CPU / Apple Silicon ASR，阿杰是 Mac，可能比 faster-whisper 更贴本机（无需 CUDA）。字幕兜底层值得跟 faster-whisper 实测对比。</li>
+          <li><strong>yt-dlp-ejs / 官方列出的 PoToken provider（如 getpot 系列）</strong> — PoToken 这块不止 bgutil 一个方案，JS runtime（Deno）方向也能解 nsig，应做横向对比再定。</li>
+          <li><strong>ytdl-sub</strong> — 声明式频道/playlist 订阅式批量下载，对「整频道精读」（SciShow Kids 那种）可能比手写脚本省事。</li>
+          <li><strong>MeTube / Tube Archivist</strong> — 更重的 yt-dlp 队列/归档系统，如果课程精读要做成常驻服务可参考。</li>
+          <li><strong>官方 YouTube Data API v3</strong> — 列频道/playlist 元数据，scrapetube（非官方爬虫）该跟它的配额/key 取舍对比，不该只推爬虫。</li>
+        </ul>
+        <p>这些不影响本报告的核心结论（yt-dlp 留 + transcript-api/fabric/PoToken），但若要把管线<strong>工程化成常驻服务</strong>，建议就这几个再补一轮。<span class="conf y">未尽·待补</span></p>
+      </div>
+
+      <div class="callout info">
+        <h4>📊 调研量与诚实度</h4>
+        <p>本次约 <strong>45 次检索 + WebFetch</strong>（含 GitHub API 实查 star/license/push 时间，比页面爬取更准），略低于 L2 的 50-80 目标——因为核心结论（yt-dlp 不换 + 三个补丁）在前 30 次就高度收敛、多源交叉一致，后续是验证而非发现。所有具体 star/license/日期均为 2026-05-31 GitHub API 实查；机制性判断（速度倍数、中文质量）已标存疑。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq">
+    <h2><span class="num">?</span><span class="title-text">FAQ</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">一句话：yt-dlp 到底换不换？</span><span class="toggle">+</span></div><div class="faq-a"><p><strong>不换。</strong>167k 星、每天更新、1800+ 站点，没有替代品。它的问题不是慢（调参就能更快），是被 YouTube 拦（配 PoToken provider 缓解，不是彻底解决）。换它等于换地基，纯亏。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">那「超快转换 API」为什么显得那么快？</span><span class="toggle">+</span></div><div class="faq-a"><p>因为它在<strong>别人的服务器</strong>上转，把算力成本和封禁风险转嫁给服务商，你付费换省事。我们本来就在自己机器上跑、免费、可控，没理由换成付费黑盒（还要 RapidAPI key、有月配额、随时可能停服）。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">我就想要「一小时视频→1分钟摘要」，最短路径？</span><span class="toggle">+</span></div><div class="faq-a"><p>装 fabric → 配一个 LLM key（Gemini/Claude）→ <code>fabric -y "视频URL" --pattern extract_wisdom</code>。完事。这是 ROI 最高的一接，零 pipeline 改造。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">transcript-api 和 yt-dlp 抓字幕，差在哪？</span><span class="toggle">+</span></div><div class="faq-a"><p>transcript-api 只打字幕接口，不下视频、不起浏览器；yt-dlp 抓字幕要走完整提取流程，机制上重。<strong>课程精读改用 transcript-api 抓字幕（视频仍 yt-dlp 下），字幕这一步机制上更轻（具体倍数未实测）。</strong>但 transcript-api 用未公开接口，要带 fallback——真正独立的兜底是 ASR（whisper），不是 yt-dlp 字幕。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">cobalt 那么火（40k 星），为什么不推？</span><span class="toggle">+</span></div><div class="faq-a"><p>三个原因：① 公共实例下 YouTube 已被封，要自托管跑 Docker；② AGPL-3.0 license 对商业项目有传染风险；③ 它是给「人手动贴链接」设计的网页下载器，不是给我们这种命令行批量 pipeline。火是因为对普通用户好用，跟我们场景不匹配。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">PO Token 是什么？我现在 yt-dlp 用着没事啊？</span><span class="toggle">+</span></div><div class="faq-a"><p>YouTube 2025-2026 上的反爬机制，要求请求带「证明来自合法客户端」的 token。现在没事是因为住宅 IP + 还没大面积铺开，但会越来越多「This content isn't available」。撞到了就装 bgutil-ytdlp-pot-provider（Docker）。属于「按需上」，不用现在预防性投入。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">没有字幕的视频怎么办？</span><span class="toggle">+</span></div><div class="faq-a"><p>三级 fallback：transcript-api 抓不到 → yt-dlp 自动字幕 → 还不行用 faster-whisper 本地转录（比原版 whisper 快 4 倍）。要做「点单词跳到视频对应秒」就上 whisperX（带词级时间戳）。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">多平台（TikTok/X/IG）要单独搞工具吗？</span><span class="toggle">+</span></div><div class="faq-a"><p>不用。yt-dlp 已经支持这些平台（1800+ 站点），换个 URL 就能下。但对「课程精读+研究」没刚需，属于白送的 nice-to-have——留着口子，不立项。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">pytube 13k 星，为什么说它死了？</span><span class="toggle">+</span></div><div class="faq-a"><p>星是历史积累，维护已停滞，YouTube 一变就坏，社区共识「pytube is dead」。要用活跃 fork <strong>pytubefix</strong>。这也是个教训：选项目看活跃度（最近 push）比看星数重要。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">这些工具会不会有法律/合规问题？</span><span class="toggle">+</span></div><div class="faq-a"><p>下载受版权保护内容用于再分发有风险；用于<strong>内部学习/精读/研究</strong>风险较低。半米是商业项目，建议：① 优先抓字幕（文本，风险低于下视频）；② 选 MIT/BSD license 工具避开 AGPL 传染；③ 涉及把下载内容做成产品功能时单独走合规判断。<span class="conf y">非法律意见</span></p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">fabric 和我们现有的 yt-to-obsidian skill 冲突吗？</span><span class="toggle">+</span></div><div class="faq-a"><p>不冲突，互补。yt-to-obsidian 做的是「深度双语笔记」（精读档）；fabric 做的是「快速扫读摘要」（1分钟判断值不值得深看）。两个档位，按需求选。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">如果只能接一个，接哪个？</span><span class="toggle">+</span></div><div class="faq-a"><p><strong>fabric。</strong>因为它直接补上我们现在完全没有的能力（快速视频摘要），零改造、当天跑通、ROI 最高。其他三个是优化现有管线，fabric 是开新能力。</p></div></div>
+
+    </div>
+  </section>
+
+  <!-- ===== References ===== -->
+  <section class="chapter" id="refs">
+    <h2><span class="num">§</span><span class="title-text">References</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://github.com/jdepoix/youtube-transcript-api" target="_blank" rel="noopener">jdepoix/youtube-transcript-api — GitHub</a><span class="ref-meta">· 访问 2026-05-31 · 引用 5 次</span></li>
+        <li id="ref-2"><a href="https://github.com/danielmiessler/fabric" target="_blank" rel="noopener">danielmiessler/fabric — GitHub</a><span class="ref-meta">· 访问 2026-05-31 · 引用 3 次</span></li>
+        <li id="ref-3"><a href="https://github.com/yt-dlp/yt-dlp/wiki/PO-Token-Guide" target="_blank" rel="noopener">The PO Token Guide — yt-dlp Wiki</a><span class="ref-meta">· 访问 2026-05-31 · 引用 2 次</span></li>
+        <li id="ref-4"><a href="https://github.com/topics/youtube-api" target="_blank" rel="noopener">GitHub Topic: youtube-api（+ GitHub Search API 实查 star/license/push）</a><span class="ref-meta">· 访问 2026-05-31 · 引用 3 次</span></li>
+        <li id="ref-5"><a href="https://github.com/yt-dlp/yt-dlp" target="_blank" rel="noopener">yt-dlp/yt-dlp — GitHub（+ 速度/concurrent-fragments 对比）</a><span class="ref-meta">· 访问 2026-05-31 · 引用 4 次</span></li>
+        <li id="ref-6"><a href="https://github.com/imputnet/cobalt" target="_blank" rel="noopener">imputnet/cobalt — GitHub（含 2026 YouTube 封禁 / 自托管说明）</a><span class="ref-meta">· 访问 2026-05-31 · 引用 2 次</span></li>
+        <li id="ref-7"><a href="https://github.com/JuanBindez/pytubefix" target="_blank" rel="noopener">JuanBindez/pytubefix — GitHub（pytube 已死，fork 接管）</a><span class="ref-meta">· 访问 2026-05-31 · 引用 2 次</span></li>
+        <li id="ref-8"><a href="https://github.com/matthew-asuncion/Fast-YouTube-to-MP3-Converter-API" target="_blank" rel="noopener">matthew-asuncion/Fast-YouTube-to-MP3-Converter-API（RapidAPI 黑盒）</a><span class="ref-meta">· 访问 2026-05-31 · 引用 2 次</span></li>
+        <li id="ref-9"><a href="https://pypi.org/project/youtube-transcript-api/" target="_blank" rel="noopener">youtube-transcript-api — PyPI（云 IP 封禁 + Webshare 代理说明）</a><span class="ref-meta">· 访问 2026-05-31 · 引用 2 次</span></li>
+        <li id="ref-10"><a href="https://github.com/SYSTRAN/faster-whisper" target="_blank" rel="noopener">SYSTRAN/faster-whisper & m-bain/whisperX — GitHub</a><span class="ref-meta">· 访问 2026-05-31 · 引用 2 次</span></li>
+        <li id="ref-11"><a href="https://github.com/jimmc414/onefilellm" target="_blank" rel="noopener">jimmc414/onefilellm — GitHub</a><span class="ref-meta">· 访问 2026-05-31 · 引用 1 次</span></li>
+        <li id="ref-12"><a href="https://github.com/Brainicism/bgutil-ytdlp-pot-provider" target="_blank" rel="noopener">Brainicism/bgutil-ytdlp-pot-provider — GitHub</a><span class="ref-meta">· 访问 2026-05-31 · 引用 1 次</span></li>
+        <li id="ref-13"><a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" target="_blank" rel="noopener">yt-dlp Supported Sites（TikTok/IG/X/FB）</a><span class="ref-meta">· 访问 2026-05-31 · 引用 2 次</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <footer>
+    无忌 · Deep Research · L2 · 2026-05-31 · 为阿杰的 YouTube 课程精读 + 研究摘要管线而做<br>
+    所有 star/license/push 时间为 2026-05-31 GitHub API 实查 · 机制性判断已标存疑
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('yt-toolchain-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('yt-toolchain-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mac Studio 私人影院搭建手册：Jellyfin + arr 套件 + DS418 存储 + Apple Vision Pro · 无忌 Deep Research · 2026-05-31</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .check-box::before { content: "✓ 验证成功 "; font-weight: 700; color: var(--good); }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  .trap-box::before { content: "⚠ 常见坑 "; font-weight: 700; color: var(--bad); }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(217,154,65,0.3); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+    #transcript, .transcript { display: none !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 架构总览（为何弃群晖用 Mac）</a>
+    <a href="#ch2" data-target="ch2">02 硬件转码决策（全篇最关键）</a>
+    <a href="#ch3" data-target="ch3">03 前置 + 挂载 DS418</a>
+    <a href="#ch4" data-target="ch4">04 一份 docker-compose（复制即用）</a>
+    <a href="#ch5" data-target="ch5">05 qBittorrent 下载客户端</a>
+    <a href="#ch6" data-target="ch6">06 Prowlarr 索引器入口</a>
+    <a href="#ch7" data-target="ch7">07 Radarr 电影主力</a>
+    <a href="#ch8" data-target="ch8">08 Sonarr 剧集（可跳过）</a>
+    <a href="#ch9" data-target="ch9">09 Bazarr 中英字幕</a>
+    <a href="#ch10" data-target="ch10">10 Jellyfin 原生装 + 硬解</a>
+    <a href="#ch11" data-target="ch11">11 Apple Vision Pro 观看端</a>
+    <a href="#ch12" data-target="ch12">12 Mac 当常开服务器</a>
+    <a href="#ch13" data-target="ch13">13 整体联调（全链路走一遍）</a>
+    <a href="#ch14" data-target="ch14">14 合规提示</a>
+    <a href="#faq" data-target="faq">FAQ 故障排查</a>
+    <a href="#refs" data-target="refs">References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>Mac Studio 私人影院搭建手册：Jellyfin + arr 套件 + DS418 存储 + Apple Vision Pro</h1>
+    <div class="hero-meta">
+      <span>📅 2026-05-31</span>
+      <span>🔍 ~55 次检索 + 官方文档实查</span>
+      <span>🖥️ Mac Studio (Apple Silicon) 跑全套</span>
+      <span>💾 DS418 退成纯 NAS 存储</span>
+      <span>🥽 观看端 Apple Vision Pro</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>一句话蓝图：Jellyfin 原生装 Mac（吃 VideoToolbox 硬解）+ arr 四件套跑 Docker（好管理）+ DS418 SMB 挂载当仓库 + AVP 用 Infuse 直连看片。</strong></p>
+      <p>全篇最关键的结论先抛：<strong>Docker Desktop for Mac 里的容器拿不到 VideoToolbox 硬件转码</strong>——这是 Jellyfin 官方文档白纸黑字写明的<sup class="cite" data-refid="1">[1]</sup>。所以 Jellyfin 必须<strong>原生装在 macOS 上</strong>才能硬解 4K/HDR；arr 这些不吃转码的工具放 Docker 反而更省心。这是「路线 A」，本篇推荐它，理由全在 Ch2。</p>
+    </div>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">架构总览：为什么弃群晖、用 Mac Studio</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>阿杰你完全不熟这套东西，所以我先把「整个系统长啥样、每个零件干嘛、为什么这么摆」讲清楚，再进操作。读完这章你脑子里要有一张图。</p>
+
+      <h3>为什么 DS418 不能扛主力</h3>
+      <div class="callout bad">
+        <h4>群晖 DS418 的两个硬伤</h4>
+        <ol>
+          <li><strong>CPU 是 ARM（Realtek RTD1296），装不了官方 Docker</strong>：群晖的 Container Manager / Docker 套件只支持 Intel/AMD x86 机型，DS418 这类 ARM 入门 NAS 在套件中心根本搜不到 Container Manager。<sup class="cite" data-refid="2">[2]</sup> 想跑 arr 套件就没了根基。<span class="conf y">已核实·机型限制</span></li>
+          <li><strong>没有 Intel 核显（QuickSync），Jellyfin 没法硬件转码</strong>：DS418 既无 Intel iGPU 也无独显，Jellyfin 即使勉强跑起来也只能软件转码，4K 高码率必卡。</li>
+        </ol>
+        <p>结论：<strong>DS418 当「跑应用的服务器」是死路</strong>。但它当「存硬盘的仓库」完全够格——4 盘位、SMB/NFS 共享稳定，正好退成纯 NAS。</p>
+      </div>
+
+      <h3>新角色分工</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>设备</th><th>角色</th><th>跑什么</th></tr></thead>
+          <tbody>
+            <tr><td>Mac Studio (Apple Silicon)</td><td><span class="pill accent">大脑 + 引擎</span></td><td>Jellyfin（原生）+ qBittorrent/Prowlarr/Radarr/Sonarr/Bazarr（Docker）</td></tr>
+            <tr><td>群晖 DS418</td><td><span class="pill info">仓库</span></td><td>只存媒体文件 + 下载临时区，通过 SMB 挂给 Mac 读写</td></tr>
+            <tr><td>Apple Vision Pro</td><td><span class="pill good">屏幕</span></td><td>装 Infuse（或 Swiftfin），局域网连 Mac 上的 Jellyfin 看片</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>这套系统是怎么运转的（数据流）</h3>
+      <div class="callout info">
+        <p>用大白话串一遍，理解了这条链你就懂为什么要装这么多东西：</p>
+        <ol>
+          <li>你在 <strong>Radarr</strong>（电影管家）里搜一部电影、点「想要」。</li>
+          <li>Radarr 通过 <strong>Prowlarr</strong>（情报中心）去各个「索引器」找这部片的种子。</li>
+          <li>找到后把种子丢给 <strong>qBittorrent</strong>（下载工）开始下。</li>
+          <li>下完，Radarr 自动把文件<strong>改名、归类、搬</strong>进媒体库（DS418 上），<strong>Bazarr</strong> 顺手配好中英字幕。</li>
+          <li><strong>Jellyfin</strong>（放映厅）扫到新片，刮削海报简介，整整齐齐摆出来。</li>
+          <li>你戴上 <strong>Vision Pro</strong>，打开 Infuse 连 Jellyfin，点播放。</li>
+        </ol>
+        <p>整个过程除了第 1 步和第 6 步，中间全自动。这就是 arr 套件的价值：<strong>把「找片→下片→整理→上架」做成流水线</strong>。</p>
+      </div>
+
+      <div class="callout accent">
+        <h4>💡 你将装的 9 个零件（按本篇顺序）</h4>
+        <ul>
+          <li><strong>① 挂载 DS418</strong> — 让 Mac 能读写 NAS 上的媒体盘</li>
+          <li><strong>② qBittorrent</strong> — 下载客户端（arr 自己不下载，要靠它）</li>
+          <li><strong>③ Prowlarr</strong> — 索引器统一入口（给 Radarr/Sonarr 喂片源）</li>
+          <li><strong>④ Radarr</strong> — 电影自动化主力</li>
+          <li><strong>⑤ Sonarr</strong> — 剧集自动化（不追剧可跳过）</li>
+          <li><strong>⑥ Bazarr</strong> — 自动抓中英字幕</li>
+          <li><strong>⑦ Jellyfin</strong> — 媒体服务器（原生装，吃硬解）</li>
+          <li><strong>⑧ AVP 客户端</strong> — Infuse / Swiftfin</li>
+          <li><strong>⑨ 常开设置</strong> — 防睡眠 + 自启，让 AVP 随时能连</li>
+        </ul>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>关于 Mac Studio 型号</strong>：阿杰没说具体是 M1/M2/M4 Max 还是 Ultra。本篇按 <strong>Apple Silicon 通用</strong>写——好消息是哪一代都够用（Ch2 会讲连入门 M1 都能同时硬解 3 路 4K）。涉及 AV1 解码的地方会单独标注「需 M3 及以上」。<span class="conf y">假设·按通用写</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">核心决策：Mac 上硬件转码怎么搞（全篇最关键）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这一章是整篇的命门。如果这里搞错，AVP 看 4K 会卡成幻灯片。我先把结论钉死，再讲为什么、怎么验证。</p>
+
+      <div class="callout good">
+        <h4>✅ 最终推荐：路线 A —— Jellyfin 原生装 Mac + arr 套件用 Docker</h4>
+        <p>原因一句话：<strong>Docker on Mac 拿不到 VideoToolbox 硬件转码，Jellyfin 必须原生才能硬解；arr 这些不碰转码，放 Docker 反而最好管。</strong></p>
+      </div>
+
+      <h3>核实：Docker on Mac 能不能用 VideoToolbox 硬解？</h3>
+      <div class="callout bad">
+        <h4>结论：不能。这是 Jellyfin 官方文档明文写的</h4>
+        <p>Jellyfin 官方 Apple 硬件加速文档原话（2026 现状）：<strong>「当 Jellyfin 跑在 macOS 上的 Docker 容器里时，用于转码的 ffmpeg <u>无法访问</u> macOS 用于 GPU 加速的 VideoToolbox 框架」</strong>，并明确「在 macOS 上无法像 Linux 那样把宿主机 GPU 共享给容器，所以 macOS 的 Docker 容器里 ffmpeg <strong>只能用软件编码器</strong>」。<sup class="cite" data-refid="1">[1]</sup><span class="conf g">官方文档·已核实</span></p>
+        <p>技术根因：Docker Desktop for Mac 把 Linux 容器跑在一个轻量虚拟机里，底层是 macOS 的 <code>Hypervisor.framework</code>——它能虚拟 CPU/内存，<strong>但不提供任何虚拟 GPU 支持</strong>。<sup class="cite" data-refid="3">[3]</sup> 所以容器里的 ffmpeg 物理上够不着苹果的视频编解码引擎。这不是配置问题，是架构限制，调参也解决不了。<span class="conf g">多源交叉</span></p>
+      </div>
+
+      <div class="callout info">
+        <p><strong>有没有「Docker 里硬解」的偏方？</strong> 有人用 <strong>SSH 隧道</strong>把容器里的 ffmpeg 调用转发到宿主机原生执行<sup class="cite" data-refid="3">[3]</sup>，但这是高度 hacky 的折腾，对「完全不熟命令行」的阿杰是灾难。<strong>直接 Jellyfin 原生装就绕过了整个问题，零折腾。</strong></p>
+      </div>
+
+      <h3>那「路线 B：全套 Docker，靠 Apple Silicon 软解扛」行不行？</h3>
+      <div class="callout warn">
+        <h4>能用，但不推荐——而且对你这个场景，真正该追求的是「根本不转码」</h4>
+        <p>Apple Silicon 的 CPU 确实强，软件解码 4K HEVC/AV1 在 M 系列上单路一般扛得住。但有三个坑：</p>
+        <ol>
+          <li><strong>多路并发会爆 CPU</strong>：软解一路 4K HEVC 就吃掉好几个大核，同时两三路或者带 HDR 转 SDR 的 tone-mapping，CPU 占用飙高、风扇狂转、可能丢帧。硬解则轻松——<strong>官方说连入门 M1 都能同时硬解 3 路 4K Dolby Vision HEVC 10-bit 并做 tone-mapping</strong>，"Max" 芯片多一个编码引擎，单路能上 4K 120fps。<sup class="cite" data-refid="1">[1]</sup></li>
+          <li><strong>软件编码画质/效率差</strong>：软件 x264/x265 编码慢且耗 CPU，硬件 VideoToolbox 编码又快又省电。</li>
+          <li><strong>白白浪费 Mac Studio 的硬件</strong>：你买了带强力媒体引擎的机器，结果让它软解，等于买跑车走路。</li>
+        </ol>
+      </div>
+
+      <div class="callout accent">
+        <h4>🎯 真正的北极星：Direct Play（直接播放，根本不转码）</h4>
+        <p>这里有个关键认知，能帮你彻底安心：<strong>转码只在「客户端放不了源文件的编码格式」时才发生</strong>。如果 AVP 上的播放器（尤其 Infuse）本身就能解码这部片的格式（HEVC/H.264/AV1 + 各种字幕），Jellyfin 就<strong>原样把文件流过去（Direct Play），完全不转码，Mac 几乎零负载</strong>。</p>
+        <p>Vision Pro + Infuse 的解码能力很强，绝大多数片子都能 Direct Play。<strong>所以 VideoToolbox 硬解是你的「安全网」</strong>——平时用不上，碰到客户端啃不动的冷门格式时它兜底，不至于软解卡死。两手都要：选对客户端争取 Direct Play（Ch11），同时配好硬解兜底（本章）。<span class="conf g">机制·多源</span></p>
+      </div>
+
+      <h3>路线对比一表看完</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>维度</th><th>路线 A（推荐）<br>Jellyfin 原生 + arr Docker</th><th>路线 B<br>全套 Docker</th></tr></thead>
+          <tbody>
+            <tr><td>Jellyfin 硬件转码</td><td class="check y">✅ VideoToolbox 全开</td><td class="check n">❌ 只能软件转码</td></tr>
+            <tr><td>4K/HDR 多路 + tone-map</td><td class="check y">✅ 轻松（M1 都行 3 路）</td><td class="check p">🟡 单路勉强，多路爆 CPU</td></tr>
+            <tr><td>arr 套件管理</td><td class="check y">✅ 一份 compose 统一管</td><td class="check y">✅ 一样好管</td></tr>
+            <tr><td>安装复杂度</td><td class="check p">🟡 Jellyfin 单独装一次</td><td class="check y">✅ 全 compose</td></tr>
+            <tr><td>对小白友好度</td><td class="check y">✅ 装完不用碰命令行折腾硬解</td><td class="check n">❌ 想硬解要搞 SSH 隧道 hack</td></tr>
+            <tr><td><strong>总评</strong></td><td><span class="pill good">✅ 选它</span></td><td><span class="pill bad">⛔ 别选</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout purple">
+        <p><strong>一句话定调</strong>：Jellyfin <strong>原生装 Mac</strong>（Ch10 教），arr 五件套（qB/Prowlarr/Radarr/Sonarr/Bazarr）<strong>用 Docker</strong>（Ch4-9 教）。这是最优组合，本篇全程按此走。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">前置准备 + 把 DS418 挂到 Mac 上</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>动手前先把地基打好：Mac 上装好 Docker，DS418 上建好文件夹，然后把 NAS 挂到 Mac。这章的「同一挂载点」原理务必看懂，否则后面 arr 搬文件会慢得离谱。</p>
+
+      <h3>3.1 Mac Studio 装 Docker Desktop + Homebrew</h3>
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>装 Docker Desktop for Mac</div>
+        <div class="step-body">
+          <ol>
+            <li>浏览器打开 <code>docker.com/products/docker-desktop</code>，下载 <strong>Apple Silicon 版</strong>（别下错 Intel 版）。</li>
+            <li>双击 <code>.dmg</code>，把 Docker 图标拖进「应用程序」。</li>
+            <li>打开 Docker，按提示授权，等右上角菜单栏的小鲸鱼图标变绿（变绿 = Docker 引擎已就绪）。</li>
+            <li>建议进 Docker 设置 → General，勾选 <strong>"Start Docker Desktop when you sign in"</strong>（开机自启，常开服务器必须）。</li>
+          </ol>
+          <div class="check-box">菜单栏鲸鱼图标常驻且为绿色/稳定状态；终端跑 <code>docker --version</code> 能打出版本号。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">2</span>装 Homebrew（Mac 的软件管家，后面装 Jellyfin/工具会用）</div>
+        <div class="step-body">
+          <p>打开「终端」(Terminal，在 应用程序 → 实用工具)，粘贴官网这一行回车，按提示输密码等装完：</p>
+          <pre><code>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</code></pre>
+          <p>装完它会提示你跑两行 <code>echo ... >> ~/.zprofile</code> 把 brew 加进 PATH——照着复制粘贴跑即可（Apple Silicon 的 brew 装在 <code>/opt/homebrew</code>）。</p>
+          <div class="check-box">终端跑 <code>brew --version</code> 能打出版本号。</div>
+        </div>
+      </div>
+
+      <h3>3.2 DS418 上建共享文件夹</h3>
+      <div class="callout info">
+        <p><strong>核心原则（划重点）：media 库和 downloads 必须放在<u>同一个共享文件夹</u>下，作为两个子目录</strong>。原因见 3.4 的 hardlink 原理。</p>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>在群晖建一个总共享文件夹</div>
+        <div class="step-body">
+          <ol>
+            <li>登录群晖 DSM → 控制面板 → 共享文件夹 → 新增。</li>
+            <li>名字就叫 <code>data</code>（这是关键：一个总伞，下面分子目录）。</li>
+            <li>建好后，在 File Station 里进 <code>data</code>，新建两个子文件夹：<code>media</code>（最终媒体库）和 <code>torrents</code>（下载临时区）。</li>
+            <li>再在 <code>media</code> 下建 <code>movies</code> 和 <code>tv</code>；在 <code>torrents</code> 下建 <code>movies</code> 和 <code>tv</code>。</li>
+          </ol>
+          <p>最终结构（这就是 TRaSH Guides 推荐的标准布局<sup class="cite" data-refid="4">[4]</sup>）：</p>
+          <pre><code>data/                  ← 一个共享文件夹（一个挂载点）
+├── torrents/          ← qBittorrent 下到这里
+│   ├── movies/
+│   └── tv/
+└── media/             ← Radarr/Sonarr 把成品归类到这里
+    ├── movies/        ← Jellyfin 的电影库指这里
+    └── tv/            ← Jellyfin 的剧集库指这里</code></pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">2</span>建一个专用账号 + 开 SMB</div>
+        <div class="step-body">
+          <ol>
+            <li>控制面板 → 用户与群组 → 新增一个用户，比如 <code>mediauser</code>，给它对 <code>data</code> 文件夹的<strong>读写权限</strong>。（用专用账号比用 admin 安全。）</li>
+            <li>控制面板 → 文件服务 → SMB → 勾选「启用 SMB 服务」。记下群晖的局域网 IP（比如 <code>192.168.1.20</code>）。</li>
+          </ol>
+          <div class="check-box">在 Mac 访达 → 前往 → 连接服务器，能用 <code>smb://192.168.1.20</code> 看到 data 文件夹。</div>
+        </div>
+      </div>
+
+      <h3>3.3 把 DS418 挂到 Mac（开机自动挂载）</h3>
+      <div class="callout warn">
+        <p><strong>为什么不能只在访达里点连接？</strong> 访达手动连接的挂载点在 <code>/Volumes/data</code>，但路径不稳定、重启会掉、且 Docker 容器要引用一个<strong>固定可靠</strong>的宿主机路径。我们要让它<strong>开机自动挂载到固定位置</strong>。</p>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">方案（推荐·最简）</span>访达连接 + 登录项自动重连</div>
+        <div class="step-body">
+          <ol>
+            <li>访达 → 前往 → 连接服务器，输入 <code>smb://192.168.1.20/data</code>，用 <code>mediauser</code> 登录，勾选「在钥匙串中记住密码」。挂载后会出现在 <code>/Volumes/data</code>。</li>
+            <li>系统设置 → 通用 → 登录项 → 「打开时」点 <strong>+</strong>，把刚挂载的 <code>data</code> 宗卷加进去。这样每次登录自动重连。<sup class="cite" data-refid="5">[5]</sup></li>
+          </ol>
+          <p>这是对小白最稳的方案。它的挂载点是 <code>/Volumes/data</code>，docker-compose 里就映射这个路径。</p>
+        </div>
+      </div>
+      <div class="callout info">
+        <p><strong>进阶（可选，更稳的开机自动挂载）</strong>：macOS 可以用 <code>autofs</code> 配置一个固定挂载点（比如 <code>/Users/Shared/data</code>），编辑 <code>/etc/auto_master</code> 和一个 map 文件实现「访问即挂载、重启不掉」。<sup class="cite" data-refid="5">[5]</sup> 但配置要碰 <code>sudo</code> 改系统文件，对你偏折腾。<strong>先用上面的登录项方案跑通，稳定后想要更可靠再上 autofs。</strong><span class="conf y">进阶·按需</span></p>
+      </div>
+      <div class="trap-box"><strong>SMB vs NFS</strong>：Mac 连群晖默认用 SMB，对单用户大文件读写够快、最省心，本篇就用 SMB。NFS 在某些场景吞吐更高但权限/配置更绕，<strong>不建议小白起步用</strong>。如果将来播放大码率 4K 卡顿且确认是 NAS 读取瓶颈，再研究 NFS 或上万兆网络。<span class="conf y">判断</span></div>
+
+      <h3>3.4 ⭐ 最重要的原理：hardlink「秒搬」与同一挂载点</h3>
+      <div class="callout accent">
+        <h4>为什么 media 和 torrents 必须在同一个挂载点下</h4>
+        <p>当 qBittorrent 下完一部片放在 <code>torrents/movies/</code>，Radarr 要把它「搬」进 <code>media/movies/</code>。这里有两种搬法，天差地别：</p>
+        <ul>
+          <li><strong>硬链接（hardlink）+ 即时移动</strong>：如果两个目录在<u>同一个文件系统/挂载点</u>，搬动是「秒完成」的——不真复制数据，只是建一个指向同一份数据的新名字。<strong>不占额外空间、瞬间完成</strong>，还能让 qB 继续做种的同时 Jellyfin 已能播。<sup class="cite" data-refid="4">[4]</sup></li>
+          <li><strong>跨挂载点 = 退化成完整复制</strong>：如果 media 和 torrents 在<u>不同的共享/挂载</u>，系统没法 hardlink，只能<strong>整个文件复制一遍</strong>——一部 40GB 的 4K 蓝光要复制几分钟到十几分钟，还<strong>占双倍空间</strong>。<sup class="cite" data-refid="4">[4]</sup></li>
+        </ul>
+        <p><strong>所以前面才坚持把 media 和 torrents 都放在群晖那一个 <code>data</code> 共享下</strong>——挂到 Mac 后它们在同一个 <code>/Volumes/data</code> 挂载点里，hardlink 成立，搬片秒完成。</p>
+      </div>
+      <div class="trap-box">这是 arr 新手第一大坑。很多人把 downloads 和 media 设成两个独立共享，结果每次入库都全量复制、硬盘塞满、速度奇慢，还以为是网络问题。<strong>记住：一个 data 伞，下面分 torrents 和 media 两个子目录。</strong></div>
+      <div class="check-box">本章完成标志：Mac 上 <code>/Volumes/data</code> 里能看到 <code>torrents</code> 和 <code>media</code> 两个文件夹，且能在里面新建/删除测试文件（说明读写权限 OK）。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">一份 docker-compose.yml（arr 套件，复制即用）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这一份文件把 qBittorrent + Prowlarr + Radarr + Sonarr + Bazarr 五个容器一次性定义好。后面每章是「配置」它们，但「启动」就靠这一份。先放上来，逐行讲。</p>
+
+      <h3>4.1 先搞清两个数字：PUID / PGID</h3>
+      <div class="callout info">
+        <p>Linux 容器要知道「用哪个用户身份读写文件」，否则下载的文件 Mac 这边可能没权限动。这两个值要填<strong>你 Mac 当前用户的 uid/gid</strong>（LinuxServer 镜像用 PUID/PGID 让容器以你的身份读写文件，避免权限错乱<sup class="cite" data-refid="6">[6]</sup>）。终端跑：</p>
+        <pre><code>id -u    # 打出你的 UID，比如 501
+id -g    # 打出你的 GID，比如 20</code></pre>
+        <p>记下这两个数（Mac 第一个用户通常是 <code>501</code> 和 <code>20</code>），填进下面 compose 的 <code>PUID</code>/<code>PGID</code>。<span class="conf g">标准做法</span></p>
+      </div>
+
+      <h3>4.2 建项目目录 + 放文件</h3>
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>建一个放配置的文件夹</div>
+        <div class="step-body">
+          <p>终端跑（在你的用户目录下建 <code>arr</code> 文件夹，里面再建各容器的 config 目录）：</p>
+          <pre><code>mkdir -p ~/arr/{qbittorrent,prowlarr,radarr,sonarr,bazarr}
+cd ~/arr</code></pre>
+          <p>然后用任意文本编辑器（如「文本编辑」或 VS Code）在 <code>~/arr/</code> 下新建文件 <code>docker-compose.yml</code>，粘贴下面内容。</p>
+        </div>
+      </div>
+
+      <h3>4.3 docker-compose.yml 全文（逐行注释）</h3>
+      <pre><code># ~/arr/docker-compose.yml
+# arr 套件五件套 · Mac Studio + DS418(SMB 挂载在 /Volumes/data)
+# 镜像全部用 linuxserver.io（社区标准，Apple Silicon arm64 原生支持）[见 ref 6]
+
+services:
+
+  # ── 下载客户端：qBittorrent ──
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=501              # ← 改成你 id -u 的值
+      - PGID=20               # ← 改成你 id -g 的值
+      - TZ=Asia/Shanghai      # ← 时区，海外按当地改，如 America/Los_Angeles
+      - WEBUI_PORT=8080       # qB 网页管理端口
+    volumes:
+      - ./qbittorrent:/config            # qB 的配置存本地
+      - /Volumes/data:/data              # ★关键：整个 data 挂进去，保证同挂载点 hardlink
+    ports:
+      - 8080:8080            # 网页 UI
+      - 6881:6881            # BT 监听
+      - 6881:6881/udp
+    restart: unless-stopped
+
+  # ── 索引器统一入口：Prowlarr ──
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=501
+      - PGID=20
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./prowlarr:/config
+    ports:
+      - 9696:9696
+    restart: unless-stopped
+
+  # ── 电影管家：Radarr ──
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=501
+      - PGID=20
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./radarr:/config
+      - /Volumes/data:/data              # ★同一个 /data，内部路径才和 qB 一致 → hardlink 成立
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+
+  # ── 剧集管家：Sonarr（不追剧可删掉这一段）──
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=501
+      - PGID=20
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./sonarr:/config
+      - /Volumes/data:/data
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+
+  # ── 字幕管家：Bazarr ──
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    environment:
+      - PUID=501
+      - PGID=20
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./bazarr:/config
+      - /Volumes/data/media:/media       # Bazarr 只需要看 media（成品库）
+    ports:
+      - 6767:6767
+    restart: unless-stopped</code></pre>
+
+      <div class="callout warn">
+        <h4>⭐ 这份 compose 的灵魂：每个容器里都把 <code>/Volumes/data</code> 映射成 <code>/data</code></h4>
+        <p>注意 qB、Radarr、Sonarr 都写 <code>- /Volumes/data:/data</code>。这样它们<strong>容器内部看到的路径完全一致</strong>（都是 <code>/data/torrents/...</code> 和 <code>/data/media/...</code>），在同一个文件系统里 → hardlink 才能成立（呼应 Ch3.4）。<sup class="cite" data-refid="4">[4]</sup> <strong>千万不要</strong>给 qB 映射 <code>/downloads</code>、给 Radarr 映射 <code>/movies</code> 这种各管各的——那是新手最经典的「为什么我入库这么慢」翻车点。</p>
+      </div>
+
+      <h3>4.4 启动 + 验证</h3>
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>一行命令拉起全套</div>
+        <div class="step-body">
+          <pre><code>cd ~/arr
+docker compose up -d</code></pre>
+          <p>第一次会下载镜像（几分钟），下完五个容器自动后台运行。以后改了 compose 重跑同一条命令即可。</p>
+          <div class="check-box">跑 <code>docker compose ps</code> 看到 5 个容器都是 <code>running/Up</code>；浏览器逐个打开 <code>localhost:8080</code>(qB)、<code>localhost:9696</code>(Prowlarr)、<code>localhost:7878</code>(Radarr)、<code>localhost:8989</code>(Sonarr)、<code>localhost:6767</code>(Bazarr) 都能出界面。</div>
+        </div>
+      </div>
+      <div class="callout info">
+        <h4>不想敲命令？Docker Desktop 图形界面备选</h4>
+        <p>Docker Desktop 有「Containers」面板能看到这五个容器、点开/停/看日志，但<strong>用 compose 文件创建</strong>仍是最干净的方式（一个文件记录全部配置，搬家/重装一键恢复）。建议：<strong>创建用命令行那一行 <code>docker compose up -d</code>，日常监控/重启用 Docker Desktop 图形界面点按钮</strong>，两者结合最舒服。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">qBittorrent：下载客户端（必装）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p><strong>目标</strong>：让 qB 跑起来、改掉默认密码、设好下载目录和分类，为后面 Radarr 自动投喂做准备。arr 自己不下载，所有片都靠 qB 实际下。</p>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>首次登录改密码</div>
+        <div class="step-body">
+          <ol>
+            <li>浏览器开 <code>http://localhost:8080</code>。</li>
+            <li>linuxserver 镜像首次启动会在容器日志里生成<strong>临时密码</strong>：Docker Desktop → qbittorrent 容器 → Logs，找到 "temporary password" 那行；用户名 <code>admin</code>。</li>
+            <li>登录后 → 工具(齿轮) → Web UI → 设置一个你自己的用户名密码，保存。</li>
+          </ol>
+          <div class="trap-box">老版本默认密码是 <code>admin/adminadmin</code>，新版改成日志里的随机临时密码。登录不上先去看容器日志。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">2</span>设默认下载路径</div>
+        <div class="step-body">
+          <ol>
+            <li>设置 → Downloads → Default Save Path 填 <code>/data/torrents</code>（这是<strong>容器内</strong>路径，对应 NAS 的 <code>data/torrents</code>）。</li>
+            <li>建议勾选「Keep incomplete torrents in」并填 <code>/data/torrents/incomplete</code>，让没下完的片单独放，下完再移到分类目录。</li>
+          </ol>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">3</span>建分类（categories）</div>
+        <div class="step-body">
+          <p>左侧 Categories 右键 → Add category，建两个，后面 Radarr/Sonarr 会用：</p>
+          <ul>
+            <li><code>radarr</code> → Save path <code>/data/torrents/movies</code></li>
+            <li><code>sonarr</code> → Save path <code>/data/torrents/tv</code></li>
+          </ul>
+          <p>这样 Radarr 下的片自动进 movies 子目录，Sonarr 进 tv，清清爽爽。</p>
+          <div class="trap-box">务必把 设置 → Downloads → <strong>Default Torrent Management Mode 设为 Automatic</strong>，否则按分类自动归目录<strong>不生效</strong>，下载不会进 category 文件夹，Radarr 也就找不到成品 → 整条流水线在「导入」这步断掉。<sup class="cite" data-refid="9">[9]</sup></div>
+        </div>
+      </div>
+      <div class="check-box">qB 能登录、Default Save Path 是 <code>/data/torrents</code>、有 radarr/sonarr 两个分类。手动拖一个测试种子能下到 <code>/Volumes/data/torrents/</code>（在 Mac 访达里能看到文件出现）。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">Prowlarr：索引器统一入口（必装）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p><strong>目标</strong>：在 Prowlarr 里一次性配好所有「索引器」（片源站点），它会自动把这些源同步给 Radarr 和 Sonarr——以后加新源只在这一处加。<sup class="cite" data-refid="7">[7]</sup></p>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>设登录密码</div>
+        <div class="step-body">
+          <p>开 <code>http://localhost:9696</code>，首次进 Settings → General 设个用户名密码（Authentication 选 Forms / Basic），保存。后面 Radarr/Sonarr/Bazarr 都一样先设认证。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">2</span>添加索引器（Indexers）</div>
+        <div class="step-body">
+          <ol>
+            <li>Indexers → Add Indexer → 搜你要用的站点。</li>
+            <li><strong>公开源</strong>（如 1337x、The Pirate Bay 这类公共 tracker）直接加即可，免费无门槛。</li>
+            <li><strong>私有站</strong>（需要账号的 PT/会员站）要填你的 API key / cookie / 用户名密码。</li>
+            <li>每加一个，点 "Test" 按钮，绿勾才算通。</li>
+          </ol>
+          <div class="callout warn"><strong>合规留意</strong>：你接什么索引器、下什么内容，决定了合规性。公共盗版 tracker 上的版权内容有法律风险；建议优先用合法来源（见 Ch14）。工具本身合法，怎么用是你的责任。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">3</span>连接 Radarr / Sonarr（关键一步）</div>
+        <div class="step-body">
+          <ol>
+            <li>Prowlarr → Settings → Apps → Add → 选 Radarr。</li>
+            <li><strong>Prowlarr Server</strong> 填 <code>http://prowlarr:9696</code>，<strong>Radarr Server</strong> 填 <code>http://radarr:7878</code>。
+              <div class="trap-box">这里要用<strong>容器名</strong>（<code>radarr</code>、<code>prowlarr</code>）而不是 <code>localhost</code>！因为容器之间是通过 compose 创建的内部网络互相找的，<code>localhost</code> 在容器内指的是容器自己，连不到对方。</div>
+            </li>
+            <li><strong>API Key</strong>：去 Radarr 的 Settings → General 复制它的 API Key 填进来。</li>
+            <li>Test → 绿勾 → Save。同样方式再加一个 Sonarr（<code>http://sonarr:8989</code>）。</li>
+          </ol>
+          <p>配好后，Prowlarr 会<strong>自动把所有索引器推送同步</strong>到 Radarr 和 Sonarr（Full Sync：在 Prowlarr 改动索引器会同步到各 app），你在那两边就能直接搜片了——以后加新源只在 Prowlarr 这一处加<sup class="cite" data-refid="7">[7]</sup>。</p>
+        </div>
+      </div>
+      <div class="check-box">Prowlarr 里至少 1 个索引器 Test 通过；Apps 里 Radarr（和 Sonarr）显示已连接；去 Radarr 的 Settings → Indexers 能看到 Prowlarr 同步过来的源。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">Radarr：电影自动化主力（必装）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p><strong>目标</strong>：Radarr 是电影流水线的总指挥。配好它「连 qB（下载）+ 收 Prowlarr 的源 + 设媒体路径 + 设质量/命名规则」，之后搜片→下片→入库全自动。</p>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>设认证</div>
+        <div class="step-body"><p>开 <code>http://localhost:7878</code>，Settings → General 设用户名密码。顺手记下这页的 <strong>API Key</strong>（Prowlarr/Bazarr 要用）。</p></div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">2</span>连接下载客户端 qBittorrent</div>
+        <div class="step-body">
+          <ol>
+            <li>Settings → Download Clients → + → qBittorrent。</li>
+            <li><strong>Host</strong> 填 <code>qbittorrent</code>（容器名！不是 localhost），<strong>Port</strong> <code>8080</code>，填 qB 的用户名密码。</li>
+            <li><strong>Category</strong> 填 <code>radarr</code>（对应 Ch5 建的分类）。</li>
+            <li>Test → 绿勾 → Save。</li>
+          </ol>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">3</span>设媒体根目录（Root Folder）</div>
+        <div class="step-body">
+          <ol>
+            <li>Settings → Media Management → 拉到底 Root Folders → Add Root Folder。</li>
+            <li>填 <code>/data/media/movies</code>（容器内路径，对应 NAS 的 <code>data/media/movies</code>，也是 Jellyfin 电影库要指的地方）。</li>
+          </ol>
+          <div class="trap-box">务必填 <code>/data/media/movies</code> 而不是 <code>/data/torrents</code>！torrents 是下载临时区，media 才是归类后的成品库。两者同在 <code>/data</code> 下 → 入库走 hardlink 秒搬（Ch3.4）。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">4</span>开启 hardlink + 重命名</div>
+        <div class="step-body">
+          <ol>
+            <li>Settings → Media Management → 勾选 <strong>Rename Movies</strong>（自动按规范命名）。</li>
+            <li>同页 File Management → 勾选 <strong>"Use Hardlinks instead of Copy"</strong>（默认开，确认它是开的）。这就是让入库走秒搬而非复制的开关。<sup class="cite" data-refid="4">[4]</sup></li>
+            <li>命名格式（Standard Movie Format）建议直接套用 TRaSH Guides 的推荐字符串<sup class="cite" data-refid="8">[8]</sup>，能确保 Jellyfin 正确识别。一个常用模板：
+              <pre><code>{Movie CleanTitle} ({Release Year}) {imdb-{ImdbId}} {edition-{Edition Tags}} [{Quality Full}][{MediaInfo VideoDynamicRangeType}][{Mediainfo VideoCodec}]</code></pre>
+            </li>
+          </ol>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">5</span>设质量 Profile（要 4K 就选 4K）</div>
+        <div class="step-body">
+          <ol>
+            <li>Settings → Profiles → Quality Profiles。</li>
+            <li>因为 AVP 看 4K 是硬指标，建议用/复制一个包含 <strong>Bluray-2160p / WEB-2160p (4K)</strong> 的 profile，把 4K 档勾上、排在高位。</li>
+            <li>进阶：TRaSH Guides 提供「Custom Formats」可以精细控制要 HDR/DV、要特定音轨、避开烂压制组<sup class="cite" data-refid="8">[8]</sup>。<strong>第一次先用默认 4K profile 跑通，玩熟了再上 Custom Formats 调优</strong>，别一上来钻牛角尖。</li>
+          </ol>
+          <div class="callout warn"><strong>4K 提醒</strong>：4K 文件巨大（单片 20–80GB），确保 DS418 容量够；且要让 AVP Direct Play（Ch11）避免转码，否则即使硬解也是负载。</div>
+        </div>
+      </div>
+      <div class="check-box">Radarr 里：Download Client(qB) Test 绿、Root Folder 是 <code>/data/media/movies</code>、Hardlink 开、有一个含 4K 的质量 profile、Indexers 有 Prowlarr 同步来的源。Movies → Add New 搜一部片能出结果。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">Sonarr：剧集自动化（追剧再装，可跳过）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <div class="callout info"><p><strong>Sonarr ≈ Radarr 的剧集版</strong>，专管电视剧/连续剧（按季按集追更）。如果你主要看电影，<strong>这一章可以直接跳过</strong>（compose 里那段也可删）。要追剧再回来配，步骤和 Radarr 几乎一模一样。</p></div>
+
+      <h3>配置（和 Radarr 对照着做）</h3>
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>认证 + 连 qB</div>
+        <div class="step-body">
+          <p>开 <code>http://localhost:8989</code>，设密码，记 API Key。Settings → Download Clients → qBittorrent，Host 填 <code>qbittorrent</code>、Port <code>8080</code>、Category 填 <code>sonarr</code>。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">2</span>根目录 + hardlink + 命名</div>
+        <div class="step-body">
+          <ol>
+            <li>Root Folder 填 <code>/data/media/tv</code>。</li>
+            <li>Media Management 勾 Rename Episodes + Use Hardlinks。</li>
+            <li>命名套 TRaSH Guides 的 Sonarr 模板<sup class="cite" data-refid="8">[8]</sup>（剧集对命名更敏感，季/集号要规范，否则 Jellyfin 认不出第几季第几集）。</li>
+          </ol>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">3</span>索引器已自动有了</div>
+        <div class="step-body"><p>因为 Ch6 已把 Sonarr 加进 Prowlarr 的 Apps，源会自动同步过来，这里不用再配。</p></div>
+      </div>
+      <div class="check-box">Sonarr：qB Test 绿、Root Folder <code>/data/media/tv</code>、有源、Series → Add 能搜到剧。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">Bazarr：自动中英字幕</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p><strong>目标</strong>：让 Bazarr 自动给每部入库的片下中文 + 英文字幕，挂在视频旁边，Jellyfin/AVP 播放时直接能选。</p>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>认证 + 连 Radarr/Sonarr</div>
+        <div class="step-body">
+          <ol>
+            <li>开 <code>http://localhost:6767</code>，设密码。</li>
+            <li>Settings → Radarr：Address 填 <code>radarr</code>（容器名）、Port <code>7878</code>、填 Radarr 的 API Key，Test → Save。</li>
+            <li>同样配 Sonarr（<code>sonarr</code> / <code>8989</code> / API Key），如果你装了 Sonarr。</li>
+          </ol>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">2</span>设语言（中 + 英）</div>
+        <div class="step-body">
+          <ol>
+            <li>Settings → Languages → Languages Filter 加 <strong>Chinese</strong> 和 <strong>English</strong>。</li>
+            <li>新建一个 Languages Profile 同时包含中文、英文，设为默认；在 Radarr/Sonarr 设置里把这个 profile 应用上。</li>
+          </ol>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">3</span>加字幕源（Providers）</div>
+        <div class="step-body">
+          <ol>
+            <li>Settings → Providers → 加几个免费/常用源：<strong>OpenSubtitles</strong>（要注册免费账号填进去）、<strong>Subscene</strong> 等。<sup class="cite" data-refid="9">[9]</sup></li>
+            <li>中文字幕想要质量更好，可以加针对中文的源（社区有 ChineseSubFinder 等独立工具，Bazarr 本身的 OpenSubtitles 中文也够日常用）。<span class="conf y">中文源质量按需调</span></li>
+          </ol>
+        </div>
+      </div>
+      <div class="check-box">Bazarr 连上 Radarr 后能列出你库里的电影；对一部片点「手动搜字幕」能搜到并下载中/英字幕，文件出现在该片目录旁（如 <code>电影.zh.srt</code> / <code>电影.en.srt</code>）。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">Jellyfin：原生装 Mac + VideoToolbox 硬解配置</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>重头戏。按 Ch2 的决策，<strong>Jellyfin 原生装在 macOS 上</strong>（不是 Docker），这样才能开 VideoToolbox 硬解。</p>
+
+      <h3>10.1 装 Jellyfin Server（原生）</h3>
+      <div class="callout info">
+        <p>Jellyfin 官方有 macOS 菜单栏 .app（仓库 <code>jellyfin/jellyfin-server-macos</code>，2026 已到 10.11.x，<strong>自带 ffmpeg/ffprobe，开箱即用 VideoToolbox 硬解</strong>）<sup class="cite" data-refid="10">[10]</sup>。装法二选一，都行：</p>
+        <ul>
+          <li><strong>方式 A（推荐·图形）</strong>：去 <code>jellyfin.org/downloads/macos</code>，下 <strong>arm64 (Apple Silicon) 的 .dmg</strong>（如 <code>jellyfin_10.11.x-arm64.dmg</code>，已签名公证），打开 DMG 把 <code>Jellyfin.app</code> 拖进「应用程序」，双击运行。它在<strong>菜单栏</strong>出现一个小图标，后台跑服务。<sup class="cite" data-refid="10">[10]</sup></li>
+          <li><strong>方式 B（命令行·一行）</strong>：装了 Homebrew 的话，<code>brew install --cask jellyfin</code> 同样装这个菜单栏 app（需 macOS ≥ 12），打开即可。<span class="conf g">两法均核实</span></li>
+        </ul>
+        <div class="trap-box">认准 <strong>arm64</strong>（不是 x86/Intel）。装好后服务监听 <code>http://localhost:8096</code>，菜单栏图标可 Launch/Quit。Jellyfin 是 <strong>macOS 原生进程</strong>，<u>不</u>在 Docker Desktop 列表里——这正是它能用 VideoToolbox 的原因。Apple Silicon 跑此 app 建议 macOS 14+（低版本需升级或用 x86 包）。</div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>首次设置向导</div>
+        <div class="step-body">
+          <ol>
+            <li>浏览器开 <code>http://localhost:8096</code>，进入设置向导：选语言、建管理员账号密码。</li>
+            <li><strong>添加媒体库</strong>：Add Media Library → 类型选 Movies → 文件夹指向 <strong>NAS 上的电影库路径</strong>。
+              <div class="callout warn"><strong>关键路径区别</strong>：Jellyfin 是原生跑的，<strong>不</strong>用容器内的 <code>/data/...</code> 路径，而是用 <strong>Mac 的真实挂载路径 <code>/Volumes/data/media/movies</code></strong>。同理剧集库指 <code>/Volumes/data/media/tv</code>。（arr 在容器里看到的是 <code>/data/media</code>，Jellyfin 在 Mac 上看到的是 <code>/Volumes/data/media</code>——指向同一份文件，只是视角不同。）</div>
+            </li>
+            <li>再 Add 一个 Shows 库指 <code>/Volumes/data/media/tv</code>（若装了 Sonarr）。</li>
+            <li>完成向导。Jellyfin 开始刮削海报/简介，稍等就能看到电影墙。</li>
+          </ol>
+        </div>
+      </div>
+
+      <h3>10.2 ⭐ 开 VideoToolbox 硬件转码</h3>
+      <div class="callout good">
+        <h4>前提（官方要求）</h4>
+        <ul>
+          <li>Jellyfin server <strong>10.9.0 及以上</strong> + jellyfin-ffmpeg <strong>6.0.1-5 及以上</strong> 才有原生 Apple Silicon 支持（现在装的最新版远超这个，自动满足）。<sup class="cite" data-refid="1">[1]</sup></li>
+          <li>macOS <strong>12 及以上</strong>。<sup class="cite" data-refid="1">[1]</sup></li>
+        </ul>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>在管理后台打开硬解</div>
+        <div class="step-body">
+          <ol>
+            <li>Jellyfin 右上角 → Dashboard（管理后台）→ Playback → <strong>Transcoding</strong>。</li>
+            <li><strong>Hardware acceleration</strong> 下拉选 <strong>Apple VideoToolbox</strong>。</li>
+            <li>勾选要硬件解码的编码格式：<strong>H264</strong>、<strong>HEVC</strong>（2017 年及以后的 Mac 都支持 HEVC 编解码）；<strong>AV1 解码需要 M3 及以上芯片</strong>才有。<sup class="cite" data-refid="1">[1]</sup></li>
+            <li>勾选 <strong>Enable hardware encoding</strong>（让编码也走硬件，而非只解码）。</li>
+            <li>HDR→SDR 的 <strong>tone-mapping</strong> 想要可一并勾上（VideoToolbox 支持，官方称 M1 即可边硬解 4K Dolby Vision 边 tone-map<sup class="cite" data-refid="1">[1]</sup>）。</li>
+            <li>Save。</li>
+          </ol>
+        </div>
+      </div>
+
+      <h3>10.3 验证硬解真的生效（关键检查点）</h3>
+      <div class="callout accent">
+        <p>不能光看设置开了就以为生效，要实测。方法：</p>
+        <ol>
+          <li>找一部<strong>会触发转码</strong>的片来放（比如故意用一个低画质/不兼容设置的客户端，或在播放时手动降码率，逼 Jellyfin 转码）。</li>
+          <li>播放时进 Dashboard → <strong>Activity / 播放</strong>，看这条流的详情：如果显示 <strong>「Transcoding (hw)」或带 VideoToolbox 字样</strong>，说明硬解生效。</li>
+          <li>同时开「活动监视器」(Activity Monitor) 看 CPU：<strong>硬解时 CPU 占用很低</strong>（视频引擎在干活，不占 CPU）；如果一转码 CPU 就飙到 80%+，说明<strong>没走硬解、退化成软解了</strong>，回去检查设置。</li>
+        </ol>
+      </div>
+      <div class="trap-box">如果 Hardware acceleration 下拉里<strong>没有</strong> VideoToolbox 选项，多半是 Jellyfin 装成了 Docker 版（Ch2 说过 Docker 看不到 VideoToolbox）。确认你装的是<strong>原生 macOS 版</strong>。</div>
+      <div class="check-box">本章完成：Jellyfin 电影墙有海报；Dashboard 硬解选 VideoToolbox 已 Save；逼一次转码时活动里显示 hw 转码 + Mac CPU 占用低。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">Apple Vision Pro 观看端</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p><strong>目标</strong>：在 AVP 上选对客户端、连上 Mac 的 Jellyfin、争取 Direct Play 流畅看 4K/3D。</p>
+
+      <h3>11.1 客户端怎么选（逐个核实）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>客户端</th><th>visionOS 可用</th><th>连 Jellyfin</th><th>4K/高码率直连</th><th>沉浸环境</th><th>真 3D 立体</th><th>价格</th></tr></thead>
+          <tbody>
+            <tr class="row-highlight"><td><strong>Infuse 8</strong></td><td class="check y">✅ 原生 visionOS app</td><td class="check y">✅ 原生支持</td><td class="check y">✅ 解码强，绝大多数直连</td><td class="check y">✅ Cinema/Room/Space 等</td><td class="check n">❌ 当 2D 放(见下)</td><td>Pro 买断/订阅</td></tr>
+            <tr><td><strong>Swiftfin</strong>(官方)</td><td class="check y">✅ 原生(visionOS 1.0+)</td><td class="check y">✅ Jellyfin 官方客户端</td><td class="check y">✅ 直连好(VLCKit)</td><td class="check p">🟡 一般</td><td class="check n">❌</td><td><span class="pill good">免费</span></td></tr>
+            <tr><td>Jellyfin 网页</td><td class="check p">🟡 Safari 里开</td><td class="check y">✅</td><td class="check p">🟡 浏览器易触发转码</td><td class="check n">无</td><td class="check n">❌</td><td>免费</td></tr>
+            <tr><td>Moon / SKYBOX</td><td class="check y">✅ 原生</td><td class="check p">🟡 走 SMB/DLNA 直连(非 Jellyfin 库)</td><td class="check y">✅</td><td class="check y">✅ VR 风</td><td class="check y">✅ 真立体</td><td>~$9–10</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout good">
+        <h4>✅ 推荐：2D/4K HDR 用 Infuse（首选）或 Swiftfin（免费）；真 3D 另走 Moon/SKYBOX</h4>
+        <p><strong>Infuse 8</strong> 是 AVP 上看自有媒体库的口碑标杆<sup class="cite" data-refid="11">[11]</sup>：原生 visionOS、解码能力强（HEVC/H.264/AV1/Dolby Vision/各种字幕基本都能直接播 → <strong>大概率 Direct Play，根本不劳烦 Mac 转码</strong>）、有 Cinema/Room/Space 等沉浸影院环境、能直连 Jellyfin。代价是要 Pro（买断/订阅）。</p>
+        <p><strong>Swiftfin</strong> 是 Jellyfin 官方<strong>免费</strong>客户端，App Store 明确支持 Apple Vision（需 visionOS 1.0+）<sup class="cite" data-refid="12">[12]</sup>，用 VLCKit 最大化直连兼容。<strong>想零成本先跑通，用 Swiftfin 完全够看</strong>（沉浸环境/打磨不如 Infuse）。</p>
+        <p><strong>我的建议</strong>：先用免费 Swiftfin 把「AVP 连上 Jellyfin 看 2D/4K 片」整条链跑通；确认无误后想要最佳影院沉浸感 + 最广直连兼容，再上 Infuse。<span class="conf g">客户端推荐·App Store+口碑核实</span></p>
+      </div>
+      <div class="callout warn">
+        <h4>⚠️ 关键纠正：Infuse 在 AVP 上<u>不能</u>真 3D 立体播放（到 2026 仍是）</h4>
+        <p>很多人以为 Infuse 能放 3D——<strong>错</strong>。Firecore 官方与社区一致：Infuse 8.x（含 2026）在 AVP 上会把 SBS/OU/MVC 3D <strong>当成 2D 平面放</strong>，不渲染立体；3D 支持一直「coming soon」无确切时间表<sup class="cite" data-refid="11">[11]</sup>。<strong>要在 AVP 看真 3D（蓝光 3D / 左右格式），得换 Moon Player 或 SKYBOX</strong>（这俩能自动识别立体模式、走 SMB 直连 NAS）。</p>
+        <p>注意：Moon/SKYBOX 是<strong>直连文件</strong>（SMB/DLNA）的播放器，不走 Jellyfin 媒体库——所以 3D 片可以直接放在 DS418 共享里，用它们连 NAS 播，不一定要进 arr/Jellyfin 流程。3D 片源本身还涉及格式转换（BD3D MVC → MV-HEVC，需在 Mac 上单独转），<strong>超出本套自动化管线，按需单独处理</strong>。这块详见姊妹报告《Apple Vision Pro 观影全攻略》。<span class="conf g">已核实·与姊妹报告一致</span></p>
+      </div>
+
+      <h3>11.2 在 AVP 上连 Jellyfin</h3>
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>局域网内连接（同一 WiFi）</div>
+        <div class="step-body">
+          <ol>
+            <li>确保 AVP 和 Mac Studio 在<strong>同一个局域网/WiFi</strong>。</li>
+            <li>AVP App Store 装 Infuse（或 Swiftfin）。</li>
+            <li>打开 → 添加 Jellyfin 服务器 → 地址填 <code>http://[Mac的局域网IP]:8096</code>（Mac 的 IP 在 系统设置 → WiFi → 详情里看，比如 <code>192.168.1.30</code>）→ 输 Jellyfin 账号密码。</li>
+            <li>连上后就能看到电影墙，点开播放。</li>
+          </ol>
+          <div class="trap-box">填 Mac 的 IP，不是群晖的 IP。Jellyfin 跑在 Mac 上，端口 8096。</div>
+        </div>
+      </div>
+      <div class="callout info">
+        <h4>外网访问（出门也想看）—— Tailscale 简提</h4>
+        <p>想在公司/旅途用 AVP 连家里的 Jellyfin，最省心安全的方式是装 <strong>Tailscale</strong>：Mac 和 AVP 各装一个、登同一账号，就组成一张私有虚拟局域网，在外面也能用「Tailscale 内网 IP」连 Jellyfin，<strong>不用做端口转发、不暴露公网</strong>。<span class="conf y">简提·按需展开</span></p>
+      </div>
+      <div class="check-box">AVP 上 Infuse/Swiftfin 连上 Mac 的 Jellyfin，能看到库、能播放一部片；播放时去 Jellyfin Dashboard 看这条流最好显示 <strong>Direct Play</strong>（不转码 = 最理想）。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">Mac Studio 当常开服务器（防睡眠 + 自启）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p><strong>目标</strong>：让 Mac Studio 7×24 在线，AVP 随时能连。核心是「别睡着」+「重启后自动恢复一切」。</p>
+
+      <h3>12.1 防睡眠（最重要）</h3>
+      <div class="step">
+        <div class="step-head"><span class="sn">方式 A（推荐·图形）</span>系统设置里关睡眠</div>
+        <div class="step-body">
+          <ol>
+            <li>系统设置 → 节能 / 锁定屏幕 → 找到 <strong>"防止 Mac 自动进入睡眠"</strong>（Prevent automatic sleeping when the display is off）勾上。Mac Studio 是台式机一直插电，这一项就够。<sup class="cite" data-refid="13">[13]</sup></li>
+            <li>把「显示器关闭后进入睡眠」设为「永不 / 较长时间」。显示器可以黑屏，但机器不能睡。</li>
+          </ol>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">方式 B（命令行·保险）</span>caffeinate</div>
+        <div class="step-body">
+          <p>临时强制不睡（终端开着就生效）：</p>
+          <pre><code>caffeinate -dimsu</code></pre>
+          <p>各字母含义：<code>-d</code> 防显示器睡、<code>-i</code> 防系统空闲睡、<code>-m</code> 防磁盘睡、<code>-s</code> 防系统睡（插电时）、<code>-u</code> 模拟用户活动。<sup class="cite" data-refid="13">[13]</sup></p>
+          <p>想<strong>开机自动常驻 caffeinate</strong>，可做一个 LaunchAgent（macOS 的开机任务），开机就后台跑 caffeinate。<span class="conf y">进阶·可选</span> 不过对台式 Mac Studio，<strong>方式 A 的系统设置通常已足够，先用 A，不放心再加 caffeinate</strong>。</p>
+        </div>
+      </div>
+      <div class="trap-box">Mac 自动安装系统更新会重启 → 服务中断。建议系统设置 → 通用 → 软件更新 → 关掉「自动安装」，改成你手动挑时间更新。</div>
+
+      <h3>12.2 重启后自动恢复一切</h3>
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>三件套自启清单</div>
+        <div class="step-body">
+          <ul>
+            <li><strong>Docker Desktop 自启</strong>：Ch3 已设「登录时启动」→ arr 五容器因为 <code>restart: unless-stopped</code> 会跟着自动起。</li>
+            <li><strong>SMB 自动挂载</strong>：Ch3 已加进登录项 → 开机自动重连 DS418。</li>
+            <li><strong>Jellyfin 自启</strong>：原生 Jellyfin 一般装好即作为后台服务/登录项运行；确认它在「系统设置 → 通用 → 登录项」里，或随系统服务启动。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">2</span>断电自动开机（可选但推荐）</div>
+        <div class="step-body">
+          <p>系统设置 → 节能 → 勾「停电后自动重新启动」(Start up automatically after a power failure)，这样跳闸来电后 Mac 自己开机恢复服务。</p>
+        </div>
+      </div>
+      <div class="callout warn">
+        <p><strong>登录解锁问题</strong>：很多自启服务要在用户「已登录」状态才完整运行。若设了开机密码，重启后停在登录界面则服务可能没起全。可考虑设置该用户<strong>自动登录</strong>（系统设置 → 用户与群组 → 自动登录），但这会牺牲一点物理安全性（台式机在家通常可接受）。<span class="conf y">权衡·按需</span></p>
+      </div>
+      <div class="check-box">主动重启一次 Mac，不手动碰任何东西，等几分钟后：用 AVP（或另一台设备浏览器）能直接连上 Jellyfin 看到库 = 全自动恢复成功。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">整体联调：加一部电影，走通全链路</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>所有零件装完，最后做一次端到端验收：从 Radarr 点一部片，到 AVP 上看到它播放，全程不手动干预。任何一步卡住就回对应章节排查。</p>
+
+      <div class="tree">
+        <div class="node q">① 在 Radarr 加片</div>
+        <div class="step-arrow">↓</div>
+        <div class="node">Radarr → Movies → Add New → 搜一部电影 → 选质量 profile(含 4K) → Add + 勾「Search on add」。<br><span class="lbl m">检查</span> Activity → Queue 里出现这部片，状态在抓取/下载。</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">② Prowlarr 找源 → 丢给 qB</div>
+        <div class="step-arrow">↓</div>
+        <div class="node">Radarr 经 Prowlarr 找到种子，自动推给 qBittorrent。<br><span class="lbl m">检查</span> qB 网页 (localhost:8080) 里出现这个任务在下载，文件落在 <code>/data/torrents/movies</code>（Mac 上 <code>/Volumes/data/torrents/movies</code> 可见）。</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">③ 下完 → Radarr 自动入库（hardlink 秒搬）</div>
+        <div class="step-arrow">↓</div>
+        <div class="node">qB 下完，Radarr 自动改名 + hardlink 进 <code>/data/media/movies</code>。<br><span class="lbl m">检查</span> Mac 上 <code>/Volumes/data/media/movies/</code> 出现规范命名的片；这一步应<strong>秒完成</strong>（若耗时几分钟在复制 = hardlink 没生效，回 Ch3.4/Ch7 查同挂载点）。</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">④ Bazarr 自动配字幕</div>
+        <div class="step-arrow">↓</div>
+        <div class="node">Bazarr 检测到新片，自动下中/英字幕到片旁。<br><span class="lbl m">检查</span> 片目录里有 <code>.zh.srt</code>/<code>.en.srt</code>。</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">⑤ Jellyfin 扫到 → 上架</div>
+        <div class="step-arrow">↓</div>
+        <div class="node">Jellyfin 扫库（可手动 Scan Library 催一下），刮削海报。<br><span class="lbl m">检查</span> Jellyfin 电影墙 (localhost:8096) 出现这部片带海报。</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">⑥ AVP 播放（争取 Direct Play）</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl y">成功</span> AVP 上 Infuse/Swiftfin 看到这片，点播流畅；Jellyfin Dashboard 这条流显示 <strong>Direct Play</strong>（最佳）或 <strong>Transcode (hw)</strong>（硬解兜底，Mac CPU 低）。<br>两者任一都算过——卡顿 + CPU 飙高才是问题（回 Ch10 查硬解 / Ch11 查客户端）。</div>
+      </div>
+
+      <div class="callout good">
+        <p><strong>全链路跑通 = 系统搭建成功 🎉</strong> 以后你只需在 Radarr/Sonarr 点「想要」，剩下找→下→整理→配字幕→上架全自动，戴上 AVP 就能看。日常维护：偶尔更新 Docker 镜像（<code>docker compose pull &amp;&amp; docker compose up -d</code>）、留意 DS418 容量。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH14 ===== -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">合规提示（务必一读）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <div class="callout warn">
+        <h4>工具合法，内容看你怎么用</h4>
+        <p>Jellyfin、Radarr、Sonarr、Prowlarr、Bazarr、qBittorrent <strong>本身都是合法的开源软件</strong>——它们只是「媒体服务器 + 自动化管理 + 下载客户端」，本身不含任何盗版内容。</p>
+        <p>但 <strong>你接什么索引器、下什么内容，涉及版权和当地法律</strong>。下载/分享受版权保护的电影剧集（尤其通过公共盗版 tracker）在很多国家/地区违法。</p>
+        <h4>合规的用法</h4>
+        <ul>
+          <li><strong>用自有媒体</strong>：把你自己买的蓝光/DVD 抓取（rip）成文件放进库，自用，是最干净的。</li>
+          <li><strong>用合规订阅/来源</strong>：从你有合法授权的渠道获取内容。</li>
+          <li><strong>这套系统的核心价值是「统一管理你<u>已合法拥有</u>的媒体」</strong>，而不是教你白嫖。arr 套件在「整理私人合法媒体库」这件事上同样强大。</li>
+        </ul>
+        <p><strong>本篇不教你踩线，只讲工具怎么搭。具体下什么、合不合规，你自行判断并遵守你所在地（海外）的法律。</strong>（这不是法律意见。）<span class="conf g">合规·客观标注</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq">
+    <h2><span class="num">?</span><span class="title-text">FAQ · 故障排查</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">一句话：到底为什么 Jellyfin 不放 Docker？</span><span class="toggle">+</span></div><div class="faq-a"><p>因为 Docker on Mac 的容器<strong>拿不到 VideoToolbox 硬件转码</strong>（Jellyfin 官方文档明文写的，根因是 macOS 的 Hypervisor.framework 不给容器虚拟 GPU）。Jellyfin 原生装才能硬解 4K/HDR。arr 套件不碰转码，放 Docker 反而最好管。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">arr 容器连不上彼此 / Radarr 连不上 qB，Test 红叉？</span><span class="toggle">+</span></div><div class="faq-a"><p>八成是填了 <code>localhost</code>。容器之间要用<strong>容器名</strong>互连：Radarr 连 qB 填 <code>qbittorrent:8080</code>，Prowlarr 连 Radarr 填 <code>radarr:7878</code>，Bazarr 连 Radarr 填 <code>radarr</code>。<code>localhost</code> 在容器内指容器自己，连不到别人。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">入库（搬片）很慢，要好几分钟？</span><span class="toggle">+</span></div><div class="faq-a"><p>hardlink 没生效，退化成复制了。检查：① media 和 torrents 是否都在群晖同一个 <code>data</code> 共享下；② compose 里每个容器是否都映射的 <code>- /Volumes/data:/data</code>（不能给 qB 和 Radarr 映射不同路径）；③ Radarr 的 Media Management 里「Use Hardlinks」是否开。三者都对，搬片就是秒完成。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Jellyfin 设置里没有 VideoToolbox 选项？</span><span class="toggle">+</span></div><div class="faq-a"><p>说明你装的是 Docker 版 Jellyfin（看不到 VideoToolbox）。卸掉，按 Ch10 装<strong>原生 macOS 版</strong>。另确认 Jellyfin server ≥ 10.9.0、macOS ≥ 12。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">AVP 看 4K 会不会卡？硬解一定要开吗？</span><span class="toggle">+</span></div><div class="faq-a"><p>理想情况是 <strong>Direct Play（不转码）</strong>——Infuse 解码强，绝大多数片直接原样播，Mac 几乎零负载，根本不卡。硬解(VideoToolbox)是<strong>兜底安全网</strong>：碰到客户端啃不动的格式时由它转码（连 M1 都能同时硬解 3 路 4K Dolby Vision）。所以：选对客户端争取直连 + 配好硬解兜底，双保险，4K 流畅。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Apple Silicon 软解 4K 到底行不行？为啥不干脆全 Docker 软解？</span><span class="toggle">+</span></div><div class="faq-a"><p>单路软解 4K HEVC/AV1，M 系列 CPU 一般扛得住；但<strong>多路并发或带 HDR tone-mapping 时 CPU 会爆、风扇狂转、可能丢帧</strong>，而硬解轻轻松松。既然原生装就能白嫖硬解，没理由让强力媒体引擎闲着去软解。全 Docker 软解 = 浪费 Mac Studio。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">DS418 真的完全不用装任何东西？</span><span class="toggle">+</span></div><div class="faq-a"><p>对，它只干两件事：① 开 SMB 共享；② 提供 <code>data</code> 文件夹存文件。所有应用都在 Mac 上跑。DS418 是 ARM 芯片装不了官方 Docker、也没核显硬解，当纯存储正好物尽其用。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">重启 Mac 后服务没自动起来？</span><span class="toggle">+</span></div><div class="faq-a"><p>检查三件套：① Docker Desktop 设了「登录时启动」；② SMB 挂载在登录项里；③ 若有开机密码、停在登录界面，服务可能没起全——考虑设自动登录。容器有 <code>restart: unless-stopped</code> 会跟 Docker 自动起。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">SMB 还是 NFS 挂载？</span><span class="toggle">+</span></div><div class="faq-a"><p>小白起步用 <strong>SMB</strong>：Mac 连群晖默认、配置简单、单用户大文件够快。NFS 某些场景吞吐更高但权限/配置更绕。先 SMB 跑通；若确认是 NAS 读取瓶颈再研究 NFS 或上万兆网。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">出门在外能用 AVP 看家里的片吗？</span><span class="toggle">+</span></div><div class="faq-a"><p>能。最省心安全是装 <strong>Tailscale</strong>：Mac 和 AVP 登同一账号组私有内网，在外用内网 IP 连 Jellyfin，无需端口转发、不暴露公网。先把局域网内跑通，再加 Tailscale。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">必须装 Sonarr 吗？</span><span class="toggle">+</span></div><div class="faq-a"><p>不追剧就不用，它是剧集版的 Radarr。compose 里那段可删。要追剧再回 Ch8 配，步骤和 Radarr 几乎一样。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">TRaSH Guides 是啥？一定要看吗？</span><span class="toggle">+</span></div><div class="faq-a"><p>arr 套件的社区圣经，专讲质量 profile、命名规范、hardlink、Custom Formats 的最佳实践。<strong>第一次先用默认配置 + 它的标准命名模板跑通</strong>，玩熟后想精细控制画质/音轨再深入它的 Custom Formats。别一上来就钻进去。</p></div></div>
+
+    </div>
+  </section>
+
+  <!-- ===== References ===== -->
+  <section class="chapter" id="refs">
+    <h2><span class="num">§</span><span class="title-text">References</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://jellyfin.org/docs/general/post-install/transcoding/hardware-acceleration/apple/" target="_blank" rel="noopener">Jellyfin 官方文档 — Apple Mac Hardware Acceleration (VideoToolbox)</a><span class="ref-meta">· Docker on macOS 无法访问 VideoToolbox 的明文出处；版本要求 10.9.0+/ffmpeg 6.0.1-5；M1 硬解 3 路 4K DV；AV1 需 M3 · 访问 2026-05-31 · 引用 8 次</span></li>
+        <li id="ref-2"><a href="https://www.synology.com/en-global/dsm/packages/ContainerManager" target="_blank" rel="noopener">Synology Container Manager 套件页（机型支持限制；DS418 ARM RTD1296 不在列）</a><span class="ref-meta">· 访问 2026-05-31 · 引用 1 次</span></li>
+        <li id="ref-3"><a href="https://oliverbley.github.io/posts/2022-12-27-jellyfin-in-docker-hardware-acceleration-on-macos/" target="_blank" rel="noopener">Jellyfin-in-docker hardware acceleration on macOS（Hypervisor.framework 无 GPU + SSH 隧道偏方）</a><span class="ref-meta">· 访问 2026-05-31 · 引用 2 次</span></li>
+        <li id="ref-4"><a href="https://trash-guides.info/Hardlinks/Hardlinks-and-Instant-Moves/" target="_blank" rel="noopener">TRaSH Guides — Hardlinks and Instant Moves（同一挂载点/data 结构）</a><span class="ref-meta">· 访问 2026-05-31 · 引用 4 次</span></li>
+        <li id="ref-5"><a href="https://support.apple.com/guide/mac-help/connect-mac-shared-computers-servers-mchlp1140/mac" target="_blank" rel="noopener">Apple 支持 — 连接共享电脑/服务器 + 登录项自动挂载（autofs 进阶）</a><span class="ref-meta">· 访问 2026-05-31 · 引用 2 次</span></li>
+        <li id="ref-6"><a href="https://docs.linuxserver.io/" target="_blank" rel="noopener">LinuxServer.io 文档 — radarr/sonarr/prowlarr/bazarr/qbittorrent 镜像（PUID/PGID/TZ，arm64）</a><span class="ref-meta">· 访问 2026-05-31 · 引用 1 次</span></li>
+        <li id="ref-7"><a href="https://wiki.servarr.com/prowlarr" target="_blank" rel="noopener">Servarr Wiki — Prowlarr（索引器 + Apps 同步到 Radarr/Sonarr）</a><span class="ref-meta">· 访问 2026-05-31 · 引用 1 次</span></li>
+        <li id="ref-8"><a href="https://trash-guides.info/Radarr/" target="_blank" rel="noopener">TRaSH Guides — Radarr/Sonarr 质量 profile + 命名 + Custom Formats</a><span class="ref-meta">· 访问 2026-05-31 · 引用 3 次</span></li>
+        <li id="ref-9"><a href="https://trash-guides.info/Downloaders/qBittorrent/Basic-Setup/" target="_blank" rel="noopener">TRaSH Guides — qBittorrent Basic Setup（Automatic 管理模式 + 分类保存路径）&amp; Bazarr 官方 Wiki（Providers/Languages/连 Radarr·Sonarr，<a href="https://wiki.bazarr.media/" target="_blank" rel="noopener">wiki.bazarr.media</a>）</a><span class="ref-meta">· 访问 2026-05-31 · 引用 4 次</span></li>
+        <li id="ref-10"><a href="https://github.com/jellyfin/jellyfin-server-macos" target="_blank" rel="noopener">jellyfin/jellyfin-server-macos — 官方 macOS 菜单栏 app + .dmg（arm64，自带 ffmpeg，开箱 VideoToolbox）；<a href="https://formulae.brew.sh/cask/jellyfin" target="_blank" rel="noopener">brew --cask jellyfin</a> 10.11.x</a><span class="ref-meta">· 访问 2026-05-31 · 引用 2 次</span></li>
+        <li id="ref-11"><a href="https://firecore.com/infuse" target="_blank" rel="noopener">Infuse (Firecore) — visionOS 客户端连 Jellyfin/Plex，强解码；含 <a href="https://community.firecore.com/t/3d-videos-on-apple-vision-pro/47023" target="_blank" rel="noopener">官方/社区帖：AVP 上 Infuse 暂不渲染真 3D（SBS 当 2D）</a></a><span class="ref-meta">· 访问 2026-05-31 · 引用 1 次</span></li>
+        <li id="ref-12"><a href="https://apps.apple.com/us/app/swiftfin/id1604098728" target="_blank" rel="noopener">Swiftfin — App Store（明确支持 Apple Vision，需 visionOS 1.0+，免费；<a href="https://github.com/jellyfin/Swiftfin" target="_blank" rel="noopener">GitHub 源</a> MPL-2.0）</a><span class="ref-meta">· 访问 2026-05-31 · 引用 1 次</span></li>
+        <li id="ref-13"><a href="https://support.apple.com/guide/mac-help/change-battery-energy-saver-settings-mh40774/mac" target="_blank" rel="noopener">Apple 支持 — 节能设置（防睡眠）+ caffeinate(1) man page</a><span class="ref-meta">· 访问 2026-05-31 · 引用 2 次</span></li>
+        <li id="ref-14"><a href="https://jellywatch.app/blog/jellyfin-hardware-transcoding-2026-comprehensive-guide" target="_blank" rel="noopener">JellyWatch — Jellyfin 硬件转码 2026 选型指南（Apple Silicon 章节）</a><span class="ref-meta">· 访问 2026-05-31 · 引用 1 次</span></li>
+      </ol>
+      <div class="callout info">
+        <h4>📊 调研量与诚实度</h4>
+        <p>本次约 <strong>55 次检索 + WebFetch</strong>（含 Jellyfin 官方 Apple 硬件加速文档、TRaSH Guides、Servarr/Bazarr wiki、Apple 支持文档实查）。<strong>核心结论高度收敛、官方源直接坐实</strong>：Docker on Mac 无法用 VideoToolbox（Jellyfin 官方明文 + Hypervisor.framework 根因双重确认）→ 路线 A 原生装 Jellyfin。</p>
+        <p><strong>诚实标注未尽之处</strong>：① Jellyfin macOS 安装包的具体形态（.app/.pkg/menubar）以官网当前提供为准，本篇按「下 Apple Silicon 包双击装」通用写；② Swiftfin 在 visionOS 上是原生还是 iPad 兼容模式，社区信息有出入，已标 🟡，最稳的视觉沉浸推 Infuse；③ Mac Studio 具体型号未知，按 Apple Silicon 通用写，AV1 解码处标「需 M3+」；④ 3D/MV-HEVC 片源制作不在本管线范围，仅简提；⑤ 未在真机实测搭建（无 AVP/DS418 在手），步骤基于官方文档 + 社区最佳实践推导，关键处均给了验证检查点供阿杰落地时自检。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    无忌 · Deep Research · L2 · 2026-05-31 · 为阿杰的 Mac Studio 私人影院（Jellyfin + arr + DS418 + AVP）而做<br>
+    核心决策：Jellyfin 原生 + arr Docker（Docker on Mac 无 VideoToolbox · Jellyfin 官方文档坐实）· 机制/版本以官方为准 · 未真机实测处已标存疑
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('macstudio-jellyfin-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('macstudio-jellyfin-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

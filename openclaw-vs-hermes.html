@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OpenClaw vs Hermes Agent：两套个人 AI 代理深度对比 · 无忌 Deep Research · 2026-06-02</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+  @media (max-width: 720px) { .twocol { grid-template-columns: 1fr; } }
+  .vs-card { padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-elevated); }
+  .vs-card.claw { border-top: 4px solid var(--accent); }
+  .vs-card.herm { border-top: 4px solid var(--info); }
+  .vs-card h4 { font-family: var(--serif); font-size: 16px; margin: 0 0 8px; color: var(--text); }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(217,154,65,0.3); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table, .twocol, .vs-card { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+    #transcript, .transcript { display: none !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 一句话定位 + 本机实测</a>
+    <a href="#ch2" data-target="ch2">02 易混淆点：Hermes Agent ≠ Hermes 大模型</a>
+    <a href="#ch3" data-target="ch3">03 大家分别拿它们做什么</a>
+    <a href="#ch4" data-target="ch4">04 用户画像：谁在用</a>
+    <a href="#ch5" data-target="ch5">05 OpenClaw 的优势</a>
+    <a href="#ch6" data-target="ch6">06 Hermes Agent 的优势</a>
+    <a href="#ch7" data-target="ch7">07 各自适合做什么工作</a>
+    <a href="#ch8" data-target="ch8">08 真实使用案例与成果</a>
+    <a href="#ch9" data-target="ch9">09 核心区别横向对比表</a>
+    <a href="#ch10" data-target="ch10">10 架构与模型支持</a>
+    <a href="#ch10b" data-target="ch10b">10· 记忆与技能机制</a>
+    <a href="#ch11" data-target="ch11">11 安全模型（两个负面新闻）</a>
+    <a href="#ch12" data-target="ch12">12 成本真相</a>
+    <a href="#ch13" data-target="ch13">13 社区生态与口碑</a>
+    <a href="#ch14" data-target="ch14">14 阿杰该用哪个干哪些活</a>
+    <a href="#faq" data-target="faq">FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>OpenClaw vs Hermes Agent：两套个人 AI 代理深度对比</h1>
+    <div class="hero-meta">
+      <span>📅 2026-06-02</span>
+      <span>🔍 ~55 次检索 + 官方文档实查</span>
+      <span>🟢 本机两套都在跑（实测证据线）</span>
+      <span>🦞 OpenClaw 2026.5.28</span>
+      <span>☤ Hermes Agent v0.15.0</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>一句话蓝图：两者都是「跑在你自己设备上、用聊天软件当界面、能自己动手干活」的个人 AI 代理——但出身、气质、强项完全不同。</strong></p>
+      <p><strong>OpenClaw（🦞 出自 Peter Steinberger，TypeScript）走「广度 + 多渠道 + 多 agent 平台」路线<sup class="cite" data-refid="1">[1]</sup>；Hermes Agent（☤ 出自 Nous Research，Python，MIT）走「自进化学习闭环 + 跑在任何后端」路线<sup class="cite" data-refid="2">[2]</sup>。</strong> 前者像一个能接 20+ 聊天平台的「全能管家平台」，后者像一个会从经验里长出新技能、能装进 VS Code 当 IDE 后端的「会自学的研究员」。本篇用本机实测 + 50+ 次检索，逐一回答：大家拿它们做什么、各自强在哪、适合什么活、真实成果、核心区别。</p>
+    </div>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">一句话定位 + 本机实测对照</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>阿杰你本机两套都装着、都在跑，所以这章先把「我亲眼在你机器上看到的事实」摆出来当地基（🟢 高可信度），后面所有 web 数据都拿这条线去校。</p>
+
+      <div class="twocol">
+        <div class="vs-card claw">
+          <h4>🦞 OpenClaw</h4>
+          <ul>
+            <li><strong>定位</strong>：个人 AI 助手平台，"All your chats, one OpenClaw."<sup class="cite" data-refid="3">[3]</sup></li>
+            <li><strong>出身</strong>：Peter Steinberger，2025-11 首发（原名 Warelay → Moltbot → OpenClaw）<sup class="cite" data-refid="4">[4]</sup></li>
+            <li><strong>语言</strong>：TypeScript + Swift（macOS 原生 app）<sup class="cite" data-refid="4">[4]</sup></li>
+            <li><strong>License</strong>：MIT<sup class="cite" data-refid="4">[4]</sup></li>
+            <li><strong>本机版本</strong>：CLI 2026.5.28（cask 同版）<span class="conf g">本机实测 2026-06-02</span></li>
+            <li><strong>安装量</strong>：Homebrew cask 365 天 38,521 次<sup class="cite" data-refid="5">[5]</sup></li>
+          </ul>
+        </div>
+        <div class="vs-card herm">
+          <h4>☤ Hermes Agent</h4>
+          <ul>
+            <li><strong>定位</strong>："自进化 AI 代理"，唯一内置学习闭环<sup class="cite" data-refid="2">[2]</sup></li>
+            <li><strong>出身</strong>：Nous Research（也做 Hermes 系列大模型）<sup class="cite" data-refid="2">[2]</sup></li>
+            <li><strong>语言</strong>：Python 85%<sup class="cite" data-refid="6">[6]</sup></li>
+            <li><strong>License</strong>：MIT<sup class="cite" data-refid="6">[6]</sup></li>
+            <li><strong>本机版本</strong>：v0.15.0（2026.5.28）<span class="conf g">本机实测 2026-06-02</span></li>
+            <li><strong>最新 release</strong>：v0.15.2（2026-05-29）<sup class="cite" data-refid="6">[6]</sup></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout good">
+        <h4>🟢 本机实测拿到的硬事实（2026-06-02）</h4>
+        <ul>
+          <li>OpenClaw 本机跑着 <strong>19 个隔离 agent</strong>（<code>~/.openclaw/agents/</code> 下：main/小宝、悟空、xiaochen、qianqian、mochou、wuji、codex、gemini、qwen 等），每个有独立 workspace + 人格 + 模型路由。<span class="conf g">本机实测</span> 任务要求的"14+ agents"在你机器上实为 19 个目录。</li>
+          <li>OpenClaw 多模型并存：主/二号 Claude Opus 4.6 经本地 proxy（localhost:3456/3457，OpenAI-completions 协议）+ 本地 Ollama 跑 Qwen3.5-35B-A3B / GPT-OSS 120B（含未删减版），成本标 0。<span class="conf g">本机实测</span></li>
+          <li>OpenClaw 渠道：Discord（一个 guild 19 个频道 allowlist）+ 企业微信（wecom-app）双通道在线。Gateway 本地回环 port 18789。<span class="conf g">本机实测</span></li>
+          <li>Hermes 本机 v0.15.0，落后主线 <strong>385 commits</strong>（<code>hermes update</code> 可升）。Python 3.11.15，OpenAI SDK 2.24.0。<span class="conf g">本机实测</span></li>
+          <li>Hermes CLI 子命令含 <code>claw migrate</code>——<strong>官方提供从 OpenClaw 迁移的命令</strong>（命令存在为实测事实；"Nous 把 OpenClaw 用户当迁移来源"是合理推断<span class="conf y">推断</span>）。<span class="conf g">本机实测</span></li>
+          <li>两者都内置 <strong>ACP</strong> 适配（Hermes 有 <code>acp_adapter/</code> + <code>acp</code> 子命令；OpenClaw 有 <code>acp</code> 子命令"Run and manage ACP-backed coding agents"）。<span class="conf g">本机实测</span></li>
+        </ul>
+      </div>
+
+      <p>换句话说：在你这台 Mac Studio 上，两套不是"二选一"，而是<strong>已经在协同跑</strong>——这恰好印证了海外社区"很多老手两个一起用"的发现（Ch13 详述）。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">易混淆点：Hermes Agent ≠ Hermes 大模型</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <div class="callout bad">
+        <h4>⚠️ 全篇最容易搞混的一点，先钉死</h4>
+        <p><strong>Nous Research 名下有两个都叫 "Hermes" 的东西，本报告研究的是前者：</strong></p>
+        <ol>
+          <li><strong>Hermes Agent ☤</strong>（本报告对象）= 一个<strong>代理框架 / CLI</strong>，开源 MIT，Python 写的，github.com/NousResearch/hermes-agent。它<strong>不自带模型</strong>，要你接 OpenAI / Claude / OpenRouter / 本地 Ollama 等任意后端。<sup class="cite" data-refid="2">[2]</sup></li>
+          <li><strong>Hermes 系列大模型</strong>（Hermes 3 / Hermes 4 等）= Nous 训练的<strong>开源权重 LLM</strong>，是"被调用的模型"，不是"代理程序"。</li>
+        </ol>
+        <p>二者关系：Hermes Agent 这个框架<strong>可以</strong>调用 Hermes 大模型，也可以调用 GPT / Claude / Qwen。就像"浏览器"和"网页"——框架是壳，模型是芯。本篇讲的是<strong>壳（agent 框架）</strong>。</p>
+      </div>
+
+      <p>这个混淆在海外社区真实发生：Hacker News 一条关于 Hermes Agent 的讨论里，就有人问"它和 SOTA 模型比怎样"，被另一位用户纠正"这讨论的是 Hermes <strong>Agent</strong>（框架），不是 Hermes <strong>模型</strong>系列"，并贴出 GitHub 仓库链接澄清。<sup class="cite" data-refid="7">[7]</sup> 搜索时务必用 <code>"Hermes Agent"</code> 或 <code>"NousResearch hermes-agent"</code> 限定，否则结果会被模型评测污染。</p>
+
+      <div class="callout info">
+        <p><strong>类比帮你记</strong>：OpenClaw 这边没有这个困扰——它纯粹是个代理框架，自己不出模型。Nous 既出模型又出框架，所以才有"同名两物"的坑。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">问题①：大家分别拿这两个来做什么</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这是任务要求必答的第一问。把两边社区里"真实在做的事"分开列。</p>
+
+      <h3>🦞 大家拿 OpenClaw 做什么</h3>
+      <p>OpenClaw 的官方口号是"<strong>The AI that actually does things</strong>"——强调"动手干活"而非"答问题"<sup class="cite" data-refid="3">[3]</sup>。社区高频用法：</p>
+      <ul>
+        <li><strong>清收件箱 / 发邮件 / 管日历 / 值机</strong>——把它当真正会替你操作的私人秘书<sup class="cite" data-refid="3">[3]</sup></li>
+        <li><strong>多聊天平台统一收口</strong>：WhatsApp / Telegram / Discord / Slack / Signal / iMessage / 企业微信 / 飞书 / QQ / 微信等 20+ 渠道，全从一个 gateway 进出<sup class="cite" data-refid="3">[3]</sup></li>
+        <li><strong>浏览器自动化</strong>：填表单、抓数据、自动操作网页<sup class="cite" data-refid="3">[3]</sup></li>
+        <li><strong>家居 / 设备控制</strong>：Philips Hue、Spotify、Obsidian、1Password 等 50+ 集成<sup class="cite" data-refid="3">[3]</sup></li>
+        <li><strong>多 agent 编排</strong>：每个 agent 一个独立频道 + 人格——社区认为这是 OpenClaw 区别于对手的特色功能<sup class="cite" data-refid="8">[8]</sup>（也正是阿杰本机 19 个 agent 的玩法）</li>
+        <li><strong>定时主动外联（heartbeats）</strong>：不只是被动回，会在心跳里主动找你<sup class="cite" data-refid="3">[3]</sup></li>
+      </ul>
+
+      <h3>☤ 大家拿 Hermes Agent 做什么</h3>
+      <p>Hermes 强调"<strong>自进化 + 跑在任何地方</strong>"。HN 上一位真实用户（rnxrx）的用法很有代表性<sup class="cite" data-refid="7">[7]</sup>：</p>
+      <ul>
+        <li><strong>跨多台机器维持状态、把信息直接整理进 Obsidian</strong>——研究、计划、家居自动化排障<sup class="cite" data-refid="7">[7]</sup></li>
+        <li><strong>跑在 $5 VPS / 云 VM 上</strong>，人在 Telegram 上指挥，agent 在云端干活，不绑笔记本<sup class="cite" data-refid="2">[2]</sup></li>
+        <li><strong>无人值守的定时自动化</strong>：日报、夜间备份、周审计，全用自然语言描述 cron<sup class="cite" data-refid="2">[2]</sup></li>
+        <li><strong>当 IDE 后端</strong>：通过 ACP 跑进 VS Code / Zed / JetBrains / Neovim，把自进化能力 + 记忆带进编辑器<sup class="cite" data-refid="9">[9]</sup></li>
+        <li><strong>研究用途</strong>：批量轨迹生成 + 轨迹压缩，用来<strong>训练下一代工具调用模型</strong>——这是 Nous 作为模型研究机构的独特用法<sup class="cite" data-refid="2">[2]</sup></li>
+        <li><strong>自进化优化</strong>：配套的 hermes-agent-self-evolution 用 DSPy + GEPA 自动进化技能/提示词/代码，每次优化约 $2–10<sup class="cite" data-refid="10">[10]</sup></li>
+      </ul>
+
+      <div class="callout accent">
+        <p><strong>一句话区分用途</strong>：OpenClaw 用户更多在「<strong>把生活/工作里的杂活交给一群有人格的助手</strong>」；Hermes 用户更多在「<strong>跑一个会自学的代理在云端长期干活、甚至当 coding 后端 / 做模型研究</strong>」。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">用户画像：谁在用</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <h3>OpenClaw 的人群</h3>
+      <ul>
+        <li><strong>想要"全能私人/家庭/团队助手"的人</strong>——官网明确点名 company assistant / family assistant / team tool<sup class="cite" data-refid="3">[3]</sup></li>
+        <li><strong>重度聊天平台用户</strong>——希望一个 agent 接管所有 IM 渠道</li>
+        <li><strong>愿意折腾多 agent 的高级玩家</strong>——像阿杰这样跑 19 个 agent</li>
+        <li>⚠️ 但官方/社区都警告：<strong>"看不懂命令行的人，这东西太危险"</strong>——OpenClaw 维护者原话<sup class="cite" data-refid="4">[4]</sup>。所以"非技术用户友好"是目标，现实门槛仍高。</li>
+      </ul>
+
+      <h3>Hermes Agent 的人群</h3>
+      <ul>
+        <li><strong>云原生 / VPS 玩家</strong>——想要 agent 脱离笔记本、serverless 空闲几乎零成本<sup class="cite" data-refid="2">[2]</sup></li>
+        <li><strong>开发者 / coding 用户</strong>——通过 ACP 把 Hermes 当 VS Code/Zed 后端<sup class="cite" data-refid="9">[9]</sup></li>
+        <li><strong>AI 研究者</strong>——用轨迹生成训模型，这是 Nous 的本行<sup class="cite" data-refid="2">[2]</sup></li>
+        <li><strong>看重"记忆/自学开箱即用"的人</strong>——Reddit 上 Hermes 最一致的好评就是记忆默认更好、自学习省调教<sup class="cite" data-refid="8">[8]</sup></li>
+      </ul>
+
+      <div class="callout warn">
+        <p><strong>共同门槛</strong>：两者都是自托管代理，<strong>都需要懂命令行、懂安全风险</strong>。Reddit 上社区第一大痛点不是"agent 能力"，而是"<strong>自托管的运维复杂度</strong>"——管基础设施比配工作流更费时间<sup class="cite" data-refid="8">[8]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">问题②a：OpenClaw 的优势</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>把 OpenClaw 的强项拆成独立 callout，每条单独讲透（多条目排版铁律）。</p>
+
+      <div class="callout accent">
+        <h4>① 渠道广度 + 集成生态碾压</h4>
+        <p>支持 <strong>20+ 聊天渠道</strong>（WhatsApp/Telegram/Discord/Slack/iMessage/Signal/企业微信/飞书/LINE/QQ/微信/WebChat 等）+ <strong>50+ 工具集成</strong>（Spotify/Hue/Obsidian/Gmail/GitHub/1Password 等）<sup class="cite" data-refid="3">[3]</sup>。社区盘点称其 <strong>13,700+ 社区技能</strong>（ClawHub）<sup class="cite" data-refid="8">[8]</sup>。这是 Hermes 短期内追不上的广度。</p>
+      </div>
+
+      <div class="callout accent">
+        <h4>② 多 agent 平台是杀手锏</h4>
+        <p>Reddit 社区明确指出：<strong>"每个 agent 可以有自己的频道和人格——竞品没有这个"</strong><sup class="cite" data-refid="8">[8]</sup>。这正是阿杰本机 19 个 agent（小宝/悟空/钱钱/莫愁……各有 emoji、workspace、模型路由）的底座。要搭"一群分工协作的助手平台"，OpenClaw 是天生的。</p>
+      </div>
+
+      <div class="callout accent">
+        <h4>③ cron 调度被夸"确定性、可信赖"</h4>
+        <p>一条 +25 赞的 Reddit 评论：<strong>"至少逻辑是确定性的，我是真能信任它的 cron 系统"</strong><sup class="cite" data-refid="8">[8]</sup>。对要跑无人值守定时任务（像阿杰的 MC 调度）的人，确定性比"聪明"更重要。</p>
+      </div>
+
+      <div class="callout accent">
+        <h4>④ macOS 原生体验 + Live Canvas + 语音</h4>
+        <p>OpenClaw 有 macOS/iOS/Android 原生 companion app（Universal Binary，需 macOS≥15<sup class="cite" data-refid="5">[5]</sup>）、Voice Wake/Talk Mode 语音模式、Live Canvas 可视化工作区<sup class="cite" data-refid="1">[1]</sup>。Hermes 是纯 CLI/TUI + 网关，没有这层"桌面成品感"。</p>
+      </div>
+
+      <div class="callout accent">
+        <h4>⑤ 成熟度 / release 历史更长</h4>
+        <p>OpenClaw 已有约 <strong>193 个 release</strong>，Hermes 约 16 个<sup class="cite" data-refid="16">[16]</sup><sup class="cite" data-refid="6">[6]</sup>（社区旧盘点为 137/11<sup class="cite" data-refid="8">[8]</sup>，均随时间增长）。更长的迭代史 = 更多踩过的坑被填平。⚠️ 但 release 数<strong>只是弱成熟度代理</strong>——更该看 issue 处理速度、回归率、测试质量；而且 OpenClaw 恰恰有"每次更新都引入新 bug"的抱怨（见 Ch13）。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">问题②b：Hermes Agent 的优势</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <div class="callout info">
+        <h4>① 自进化学习闭环（唯一卖点）</h4>
+        <p>Hermes 自称"<strong>唯一内置学习闭环的代理</strong>"<sup class="cite" data-refid="2">[2]</sup>：复杂任务（≥5 步）后<strong>自动创建可复用技能</strong>、使用中自我改进、定期"提醒"自己持久化知识、用 FTS5 全文检索 + LLM 摘要回溯过往会话、用 Honcho 做辩证式用户建模。Reddit 上"自学习随时间适应"是对 Hermes <strong>最一致的好评</strong><sup class="cite" data-refid="8">[8]</sup>。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>② 跑在任何后端 / serverless 几乎零成本</h4>
+        <p><strong>6 种终端后端</strong>：local / Docker / SSH / Singularity / Modal / Daytona<sup class="cite" data-refid="2">[2]</sup>。其中 Modal 和 Daytona 提供 serverless 持久化——agent 环境空闲时<strong>休眠、按需唤醒</strong>，空闲期间几乎零成本。$5 VPS 到 GPU 集群都能跑。这是 OpenClaw（桌面/网关导向）不具备的部署弹性。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>③ 安装更顺、记忆默认更好</h4>
+        <p>Reddit +38 赞："<strong>从一开始，setup 就顺畅太多了</strong>"<sup class="cite" data-refid="8">[8]</sup>。Hermes 记忆开箱即用、需要的调教比 OpenClaw 少。而 OpenClaw 的"记忆失效"恰恰是其用户流失的主因<sup class="cite" data-refid="8">[8]</sup>。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>④ Checkpoint / 回滚——OpenClaw 没有的等价物</h4>
+        <p>Hermes 在改动前对工作目录<strong>快照</strong>，出错可恢复到先前状态<sup class="cite" data-refid="8">[8]</sup>（本机 <code>~/.hermes/checkpoints/</code> + <code>hermes checkpoints</code> 子命令印证<span class="conf g">本机实测</span>）。对"让 agent 自己动手改文件"的场景是关键安全网。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>⑤ 供应链安全意识更强（exact-pin 依赖）</h4>
+        <p>Hermes 的 pyproject.toml 把<strong>每个直接依赖精确锁版本</strong>（不用范围），并在注释里写明这是 2026-05-12 针对 "Mini Shai-Hulud" PyPI 蠕虫攻击 mistralai 包后收紧的<span class="conf g">本机实测</span>。还内置 <code>hermes security</code> 做 OSV.dev 供应链审计。这种"缩小攻击面"的工程纪律，对自托管代理很重要。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>⑥ Nous Portal 一站式省去收集 API key</h4>
+        <p>一个订阅覆盖 <strong>300+ 模型</strong> + Tool Gateway（网页搜索 Firecrawl / 图像 FAL / TTS OpenAI / 云浏览器 Browser Use），<code>hermes setup --portal</code> 一条命令 OAuth 搞定<sup class="cite" data-refid="2">[2]</sup><sup class="cite" data-refid="27">[27]</sup>。不想要也能 BYO key（按工具粒度）。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">问题③：各自适合做什么工作</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <div class="twocol">
+        <div class="vs-card claw">
+          <h4>🦞 选 OpenClaw 如果你要……</h4>
+          <ul>
+            <li>一个能接<strong>所有聊天平台</strong>的统一助手</li>
+            <li>搭<strong>多 agent 分工平台</strong>（各有人格/频道）</li>
+            <li>可信赖的<strong>确定性 cron 调度</strong></li>
+            <li>macOS 原生体验 / 语音 / Canvas</li>
+            <li>大量现成<strong>技能与集成</strong>即插即用</li>
+          </ul>
+        </div>
+        <div class="vs-card herm">
+          <h4>☤ 选 Hermes 如果你要……</h4>
+          <ul>
+            <li>一个<strong>会自学、越用越懂你</strong>的代理</li>
+            <li>跑在 <strong>VPS / serverless</strong>、脱离笔记本</li>
+            <li>把代理<strong>当 VS Code/Zed coding 后端</strong>（ACP）</li>
+            <li><strong>记忆开箱即用</strong>、少调教</li>
+            <li>做 <strong>AI 研究</strong>（轨迹生成训模型）</li>
+            <li>改动可<strong>快照回滚</strong>的安全网</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout purple">
+        <h4>🤝 社区给出的"混合用法"（很重要）</h4>
+        <p>Reddit 上 <strong>20% 用户两个一起用</strong><sup class="cite" data-refid="8">[8]</sup>，典型分工：<strong>OpenClaw 做编排</strong>（规划、调度、多渠道路由）+ <strong>Hermes 做执行</strong>（快速、可复用的循环），两者<strong>可经 ACP 兼容工具桥接</strong>（⚠️ ACP 本质是"编辑器↔代理"协议，"两套直接 agent-to-agent 互通"是社区说法、本报告未实测验证<span class="conf y">未实测</span>）。这恰好是阿杰本机两套并存的天然落点。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">问题④：真实使用案例与成果</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <h3>OpenClaw 的成果与里程碑</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">~376k★</div><div class="l">GitHub stars（2026-06-02 抓取）<sup class="cite" data-refid="16">[16]</sup></div></div>
+        <div class="metric"><div class="v">145k★</div><div class="l">2 月初已破纪录<sup class="cite" data-refid="11">[11]</sup></div></div>
+        <div class="metric"><div class="v">200 万</div><div class="l">一周峰值访客<sup class="cite" data-refid="11">[11]</sup></div></div>
+        <div class="metric"><div class="v">~38.5k</div><div class="l">Homebrew 滚动 365 天安装<sup class="cite" data-refid="5">[5]</sup></div></div>
+      </div>
+      <ul>
+        <li><strong>创始人被 OpenAI 收编</strong>：Peter Steinberger 2026-02-14 宣布加入 OpenAI"把代理带给所有人"，OpenClaw 转入基金会、保持开源独立<sup class="cite" data-refid="11">[11]</sup><sup class="cite" data-refid="12">[12]</sup>（他本人在博客也复盘了这一决定<sup class="cite" data-refid="19">[19]</sup>）。这是 OpenClaw 影响力的最强背书。</li>
+        <li><strong>大厂跟进</strong>：到 2026-05，微软内部测 "ClawPilot"、Google 在做对标的 "Remy"；腾讯、Z.ai 等推出基于 OpenClaw 的服务<sup class="cite" data-refid="4">[4]</sup>。</li>
+        <li><strong>TED 演讲</strong>：Steinberger 登 TED 讲"我如何造出 OpenClaw"<sup class="cite" data-refid="13">[13]</sup>。</li>
+      </ul>
+
+      <h3>Hermes Agent 的成果与里程碑</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">~174k★</div><div class="l">GitHub stars（2026-05-31）<sup class="cite" data-refid="14">[14]</sup></div></div>
+        <div class="metric"><div class="v">2240 亿</div><div class="l">单日 token（OpenRouter 登顶）<sup class="cite" data-refid="14">[14]</sup></div></div>
+        <div class="metric"><div class="v">No.1</div><div class="l">OpenRouter 日榜（2026-05-10）<sup class="cite" data-refid="14">[14]</sup></div></div>
+        <div class="metric"><div class="v">$2–10</div><div class="l">自进化单次优化成本<sup class="cite" data-refid="10">[10]</sup></div></div>
+      </div>
+      <ul>
+        <li><strong>OpenRouter 登顶</strong>：2026-05-10 Hermes Agent 拿下 OpenRouter 日榜第一，单日处理 2240 亿 token——说明真实调用量巨大<sup class="cite" data-refid="14">[14]</sup>。</li>
+        <li><strong>HN 真实用户证言</strong>（rnxrx）：多机维持状态、整理进 Obsidian、研究/计划/家居排障"出乎意料地好用"，在便宜 VPS 上跑、自我强化技能<sup class="cite" data-refid="7">[7]</sup>。</li>
+        <li><strong>自进化研究项目</strong>：hermes-agent-self-evolution（DSPy + GEPA 遗传-帕累托提示进化）把技能/提示/代码自动进化，全程 API 调用，约 $2–10/次<sup class="cite" data-refid="10">[10]</sup>。</li>
+      </ul>
+
+      <h3>📌 指标快照（带时点，主源优先）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>指标</th><th>🦞 OpenClaw</th><th>☤ Hermes Agent</th><th>口径/时点</th></tr></thead>
+          <tbody>
+            <tr><td>GitHub stars（最新抓取）</td><td>~376k<sup class="cite" data-refid="16">[16]</sup></td><td>~176k<sup class="cite" data-refid="6">[6]</sup></td><td>GitHub 仓库页 2026-06-02</td></tr>
+            <tr><td>GitHub stars（历史里程碑）</td><td>145k(2月)/247k(3-02)<sup class="cite" data-refid="11">[11]</sup><sup class="cite" data-refid="4">[4]</sup></td><td>0→61k(约2月)/174k(5-31)<sup class="cite" data-refid="14">[14]</sup><sup class="cite" data-refid="39">[39]</sup></td><td>各源时点见 cite</td></tr>
+            <tr><td>GitHub forks</td><td>~78k<sup class="cite" data-refid="16">[16]</sup></td><td>~30k<sup class="cite" data-refid="6">[6]</sup></td><td>2026-06-02 抓取</td></tr>
+            <tr><td>release 数</td><td>~193<sup class="cite" data-refid="16">[16]</sup></td><td>~16<sup class="cite" data-refid="6">[6]</sup></td><td>2026-06-02 抓取（社区旧值 137/11<sup class="cite" data-refid="8">[8]</sup>）</td></tr>
+            <tr><td>Homebrew 安装（滚动 365 天）</td><td>~38,5xx<sup class="cite" data-refid="5">[5]</sup></td><td>n/a（非 cask）</td><td>滚动值会变，非累计</td></tr>
+            <tr><td>OpenRouter 单日 token 峰</td><td>—</td><td>2240 亿（5-10 登顶）<sup class="cite" data-refid="14">[14]</sup></td><td>仅 OpenRouter 路由量</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ 数字诚实声明（Codex 异源审查后强化）</strong>：① star/release 增长极快 + 各源抓取时点不同 → 数值会变，请<strong>以量级理解</strong>，最新值以 GitHub 仓库页为准（2026-06-02）<sup class="cite" data-refid="6">[6]</sup><sup class="cite" data-refid="16">[16]</sup>。② Homebrew 是<strong>滚动 365 天安装数（会上下波动，非累计装机量）</strong>，本机 brew info 实测约 3.85 万<span class="conf g">本机实测</span>。③ OpenRouter token 量<strong>只反映经 OpenRouter 路由的调用</strong>，不含直连 API/本地/Portal，且可能含循环/重试开销，不能直接等于"真实总用量"<sup class="cite" data-refid="14">[14]</sup>。④ release 数<strong>只是弱成熟度代理</strong>，更该看 issue 处理、回归率、测试质量。<span class="conf y">时点/口径差异</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">问题⑤：核心区别横向对比表</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <div class="callout purple">
+        <h4>🎯 一句话抓住本质（多个独立评测一致的框架）</h4>
+        <p>多家对比文章给出同一个分水岭：<strong>"你的 agent 应该随时间变聪明，还是无处不在？"</strong><sup class="cite" data-refid="39">[39]</sup> Hermes 押注前者（学习闭环——同一类任务跑 100 遍会越来越好），OpenClaw 押注后者（最大的静态能力生态——跑 100 遍还是当新问题处理）<sup class="cite" data-refid="39">[39]</sup>。换成选型口诀：<strong>问题是"编排"→ OpenClaw；问题是"需要越做越好的自动化"→ Hermes</strong><sup class="cite" data-refid="39">[39]</sup>。</p>
+      </div>
+      <p>点击任意行高亮。所有数字都带来源。</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>维度</th><th>🦞 OpenClaw</th><th>☤ Hermes Agent</th></tr></thead>
+          <tbody>
+            <tr><td><strong>定位</strong></td><td>个人 AI 助手平台<sup class="cite" data-refid="3">[3]</sup></td><td>自进化代理框架<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td><strong>出品方</strong></td><td>Peter Steinberger → 基金会<sup class="cite" data-refid="11">[11]</sup></td><td>Nous Research<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td><strong>语言</strong></td><td>TypeScript + Swift<sup class="cite" data-refid="4">[4]</sup></td><td>Python<sup class="cite" data-refid="6">[6]</sup></td></tr>
+            <tr><td><strong>License</strong></td><td>MIT<sup class="cite" data-refid="4">[4]</sup></td><td>MIT<sup class="cite" data-refid="6">[6]</sup></td></tr>
+            <tr><td><strong>本机版本</strong></td><td>2026.5.28<span class="conf g">实测</span></td><td>v0.15.0<span class="conf g">实测</span></td></tr>
+            <tr><td><strong>核心特色</strong></td><td>多 agent 平台 + 渠道广度<sup class="cite" data-refid="8">[8]</sup></td><td>学习闭环 + 自创技能<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td><strong>聊天渠道数</strong></td><td>20+（含微信/QQ/企微/飞书）<sup class="cite" data-refid="3">[3]</sup></td><td>较少（TG/Discord/Slack/WhatsApp/Signal 等）<sup class="cite" data-refid="8">[8]</sup></td></tr>
+            <tr><td><strong>桌面 app</strong></td><td class="check y">有（mac/iOS/安卓）<sup class="cite" data-refid="5">[5]</sup></td><td class="check n">无（CLI/TUI）<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td><strong>语音 / Canvas</strong></td><td class="check y">有<sup class="cite" data-refid="1">[1]</sup></td><td class="check n">无</td></tr>
+            <tr><td><strong>技能自创方式</strong></td><td class="check p">能写技能，但偏手动/被要求<sup class="cite" data-refid="1">[1]</sup></td><td class="check y">任务后自动创建+Curator 自养<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td><strong>跨会话自学习闭环</strong></td><td class="check n">无<sup class="cite" data-refid="39">[39]</sup></td><td class="check y">有（核心卖点）<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td><strong>Checkpoint 回滚</strong></td><td class="check n">无<sup class="cite" data-refid="8">[8]</sup></td><td class="check y">有<sup class="cite" data-refid="8">[8]</sup></td></tr>
+            <tr><td><strong>多 agent / 人格</strong></td><td class="check y">有（特色）<sup class="cite" data-refid="8">[8]</sup></td><td class="check p">子代理委派<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td><strong>部署后端</strong></td><td>本地 / 容器 / 主机<sup class="cite" data-refid="3">[3]</sup></td><td>6 种（含 Modal/Daytona serverless）<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td><strong>ACP（IDE 后端）</strong></td><td class="check p">ACP coding agents<span class="conf g">实测</span></td><td class="check y">ACP server 入 VS Code/Zed<sup class="cite" data-refid="9">[9]</sup></td></tr>
+            <tr><td><strong>cron 调度</strong></td><td class="check y">被夸确定性可信<sup class="cite" data-refid="8">[8]</sup></td><td class="check y">内置自然语言 cron<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td><strong>记忆默认表现</strong></td><td class="check p">需大量调教<sup class="cite" data-refid="8">[8]</sup></td><td class="check y">开箱更好<sup class="cite" data-refid="8">[8]</sup></td></tr>
+            <tr><td><strong>setup 体验</strong></td><td class="check p">较复杂<sup class="cite" data-refid="8">[8]</sup></td><td class="check y">更顺畅<sup class="cite" data-refid="8">[8]</sup></td></tr>
+            <tr><td><strong>更新稳定性</strong></td><td class="check n">"每次更新更多 bug"<sup class="cite" data-refid="8">[8]</sup></td><td class="check p">release 史短(11)<sup class="cite" data-refid="8">[8]</sup></td></tr>
+            <tr><td><strong>已知安全事件</strong></td><td class="check n">341 恶意技能 / 6 CVE<sup class="cite" data-refid="8">[8]</sup></td><td class="check p">exact-pin 防供应链<span class="conf g">实测</span></td></tr>
+            <tr><td><strong>star（最新抓取）</strong></td><td>~376k<sup class="cite" data-refid="16">[16]</sup></td><td>~176k<sup class="cite" data-refid="6">[6]</sup></td></tr>
+            <tr><td><strong>release 数</strong></td><td>~193<sup class="cite" data-refid="16">[16]</sup></td><td>~16<sup class="cite" data-refid="6">[6]</sup></td></tr>
+            <tr><td><strong>国产模型支持</strong></td><td>DeepSeek/Qwen 等<sup class="cite" data-refid="4">[4]</sup></td><td>小米 MiMo/GLM/Kimi/MiniMax<sup class="cite" data-refid="2">[2]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="conf y" style="display:block">表内"较少/需调教/更顺畅"等定性判断主要来自 Reddit 社区盘点<sup class="cite" data-refid="8">[8]</sup>，是体验性结论而非硬指标，请结合自己需求判断。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">架构与模型支持</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <h3>共同骨架</h3>
+      <p>两者架构惊人地相似（也难怪有 <code>hermes claw migrate</code> 迁移命令）：<strong>一个常驻 gateway 进程</strong> + <strong>聊天平台当前端</strong> + <strong>技能/工具系统</strong> + <strong>持久记忆</strong> + <strong>cron 调度</strong> + <strong>MCP 工具接入</strong> + <strong>ACP</strong>。本机两者 gateway 都在跑（OpenClaw port 18789；Hermes dashboard port 9119）<span class="conf g">本机实测</span>。</p>
+
+      <div class="callout info">
+        <h4>🦞 OpenClaw 数据流（外部资料 + 本机印证）</h4>
+        <p>Gateway 是 <strong>Node.js 服务，跑在 port 18789</strong>（与阿杰本机 <code>gateway.port: 18789</code> 完全吻合<span class="conf g">本机实测</span>）："路由聊天 app 与模型之间的消息、跑工具调用、保管 API key"<sup class="cite" data-refid="23">[23]</sup>。消息流：进 Gateway → 附加 memory/skills 上下文 → 给模型 → 收到工具调用请求 → 执行动作 → 返回结果 → 生成最终回复。两种调度：<strong>Heartbeats（主会话定期签到，默认每 30 分钟）</strong> + <strong>Cron（精确时刻、隔离会话）</strong><sup class="cite" data-refid="23">[23]</sup>。</p>
+      </div>
+      <div class="callout info">
+        <h4>☤ Hermes 进程模型</h4>
+        <p>TUI 是独立进程经 transport 连 gateway；agent loop 在 <code>run_agent.py</code>；技能/curator/cron/kanban 各有独立模块<span class="conf g">本机 AGENTS.md 实测</span>。6 种终端后端让"agent 在哪执行 shell"可插拔——这是 OpenClaw 没有的抽象层（OpenClaw 默认在本机/容器执行）。</p>
+      </div>
+
+      <h3>ACP 是什么（澄清）</h3>
+      <div class="callout info">
+        <p><strong>ACP = Agent Client Protocol</strong>（不是"Agent Control Protocol"），是 Zed 主导的开放标准（Apache 2.0），标准化"代码编辑器 ↔ AI 代理"之间的通信，地位类似 LSP 之于语言服务器，走 stdio/NDJSON<sup class="cite" data-refid="9">[9]</sup>。Hermes 实现了 <strong>ACP server 模式</strong>，能当 VS Code / Zed / JetBrains / Neovim 的代理后端<sup class="cite" data-refid="9">[9]</sup><sup class="cite" data-refid="22">[22]</sup>；OpenClaw 则有 <code>acp</code> 子命令"run and manage ACP-backed coding agents"<span class="conf g">本机实测</span>——更偏"OpenClaw 当客户端去管别的 ACP coding agent"。</p>
+      </div>
+
+      <h3>模型支持（含国产，客观陈述）</h3>
+      <div class="twocol">
+        <div class="vs-card claw">
+          <h4>🦞 OpenClaw</h4>
+          <p>接外部 LLM：Claude（主）/ GPT / DeepSeek / 本地模型 / MiniMax<sup class="cite" data-refid="4">[4]</sup>。阿杰本机实测：主/二号 Claude Opus 4.6 经本地 proxy + Ollama 本地 Qwen3.5-35B / GPT-OSS 120B<span class="conf g">本机实测</span>。</p>
+        </div>
+        <div class="vs-card herm">
+          <h4>☤ Hermes Agent</h4>
+          <p>模型无关：Nous Portal（300+）/ OpenRouter（200+）/ NVIDIA NIM / 小米 MiMo / z.ai GLM / Kimi/Moonshot / MiniMax / Hugging Face / OpenAI / 本地端点<sup class="cite" data-refid="2">[2]</sup>。<code>hermes model</code> 一键切，无锁定。</p>
+        </div>
+      </div>
+      <p>两者都支持本地 Ollama 跑开源/国产模型省成本（海外视角下，国产模型属"可选/低成本补充"，主力仍是 Claude/GPT）。⚠️ 注意 OpenClaw 跑本地模型要求<strong>≥64,000 token 上下文窗口</strong>，否则会因每条消息带全历史而截断<sup class="cite" data-refid="23">[23]</sup>。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH10B ===== -->
+  <section class="chapter" id="ch10b">
+    <h2><span class="num">10·</span><span class="title-text">记忆与技能机制：最本质的设计差异</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这章挖到引擎盖底下——两者"记忆 + 技能"的实现差异，决定了它们的气质。</p>
+
+      <h3>记忆：两边都用 Markdown，但 Hermes 多了一层"快照纪律"</h3>
+      <div class="twocol">
+        <div class="vs-card claw">
+          <h4>🦞 OpenClaw 记忆</h4>
+          <p>持久化为 Markdown：<code>MEMORY.md</code>（耐久事实/偏好，会话开始时加载）+ <code>SOUL.md</code>（人格）+ <code>AGENTS.md</code>（行为规则）<sup class="cite" data-refid="23">[23]</sup>。本机还启用了 hybrid 向量+全文检索（vectorWeight 0.6 / textWeight 0.4 + 30 天时间衰减）<span class="conf g">本机实测</span>。但社区反馈"记忆易忘、要花大量时间调"是流失主因<sup class="cite" data-refid="8">[8]</sup>。</p>
+        </div>
+        <div class="vs-card herm">
+          <h4>☤ Hermes 记忆</h4>
+          <p>两个有界文件：<code>MEMORY.md</code>（agent 自己的笔记，约 800 token）+ <code>USER.md</code>（用户画像，约 500 token）<sup class="cite" data-refid="28">[28]</sup>。关键设计：<strong>frozen-snapshot（冻结快照）</strong>——会话开始时拍一次注入 system prompt，中途改动立即落盘但<strong>下次会话才生效</strong>，目的是<strong>保住 LLM 的 prefix 缓存</strong>（省钱 + 快）。这是工程上比 OpenClaw 更克制的设计。</p>
+        </div>
+      </div>
+
+      <h3>技能：OpenClaw 靠"市场广度"，Hermes 靠"自动生长 + 自动修剪"</h3>
+      <div class="callout accent">
+        <h4>🦞 OpenClaw：ClawHub 大市场 + 手动装</h4>
+        <p>ClawHub 是公共技能/插件注册表（一个 SKILL.md + 配套文件，向量搜索 + 审核钩子）<sup class="cite" data-refid="29">[29]</sup>。技能数各源差异很大：有说 2,857、有说 5,700+（4 月）、有说 44,000+、社区盘点称 13,700+<sup class="cite" data-refid="8">[8]</sup><sup class="cite" data-refid="29">[29]</sup>。<span class="conf y">数字口径混乱</span> 共识是"<strong>生态广度第一</strong>"。⚠️ <strong>更正一个易误解点</strong>：OpenClaw 官网说它的技能系统"甚至能自己写技能"<sup class="cite" data-refid="1">[1]</sup>——所以不是"不能造技能"，而是<strong>没有"任务后自动创建 + 后台自动养护"的闭环</strong>。技能多数仍是<strong>人写人装/按需让它写</strong>，agent 不会跑完任务自发沉淀+修剪。这才是和 Hermes 的真实差别。</p>
+      </div>
+      <div class="callout info">
+        <h4>☤ Hermes：skill_manage 自动造 + Curator 自动养</h4>
+        <p>① <strong>自动创建</strong>：agent 在复杂任务（≥5 次工具调用）、错误恢复、用户纠正、识别出非平凡工作流后，用 <code>skill_manage</code> 工具自动创建/修补/编辑/删除技能，长出"程序性记忆"<sup class="cite" data-refid="30">[30]</sup>。② <strong>Curator 自动养护</strong>：后台 cron（默认 7 天周期）给每个技能打分、合并相关的、修剪死的，运行前还做 tar.gz 快照<sup class="cite" data-refid="31">[31]</sup>。③ <strong>渐进披露</strong>：v0.15 起只先加载技能元数据（约 3,000 token），用到才拉全文<sup class="cite" data-refid="32">[32]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>⚠️ 但"自动养"是双刃剑</strong>：社区抱怨 Hermes 自进化会<strong>覆盖你手调好的技能</strong>，"把它自我改进成一团乱麻是噩梦"<sup class="cite" data-refid="8">[8]</sup>；加上"自评虚高"，自动修剪可能<strong>删错/改错而不自知</strong>。OpenClaw 手动装虽笨，但"你装的就是你要的"，确定性更高。</p>
+      </div>
+
+      <h3>多 agent 协作：Hermes v0.15 的 Kanban 把"群体协作"做成了一等公民</h3>
+      <div class="callout info">
+        <p>Hermes v0.15（Velocity，2026-05-28）新增<strong>持久 Kanban 看板</strong>：所有 profile 共享 <code>~/.hermes/kanban.db</code>，每个任务一行、每次交接一行，每个 worker 是带身份的完整 OS 进程<sup class="cite" data-refid="33">[33]</sup>。配 heartbeat 健康监测 + 任务回收（worker 弃任务自动重派）+ 僵尸检测<sup class="cite" data-refid="32">[32]</sup>。委派用 <code>delegate_task</code> 生成隔离子代理，并行上限 <code>max_concurrent_children</code> 默认 3<sup class="cite" data-refid="34">[34]</sup>；配 <code>/goal</code>（锁定目标的 Ralph loop）保持专注。v0.15 还把 session_search <strong>提速 4,500 倍</strong>（SQLite FTS5 + Gemini Flash 摘要）<sup class="cite" data-refid="32">[32]</sup>。</p>
+      </div>
+      <p>对照之下，OpenClaw 的多 agent 是"<strong>每个 agent 一个频道 + 人格</strong>"的<strong>平台式</strong>编排（像阿杰本机 19 个独立助手），更偏"长期共存的多个助手"；Hermes Kanban 更偏"<strong>一次性任务的 swarm 协作</strong>"。两种多 agent 哲学不同：OpenClaw = 多个常驻人格，Hermes = 任务驱动的工蜂群。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">安全模型：两条必须知道的负面线</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <div class="callout bad">
+        <h4>🔴 OpenClaw：一场真实的 2026 安全危机（数字都很硬）</h4>
+        <p>这是评估 OpenClaw 时<strong>绕不开</strong>的一章。关键事实（多源核实）：</p>
+        <ul>
+          <li><strong>CVE-2026-25253（CVSS 8.8 High）</strong>：WebSocket 劫持导致<strong>一键 RCE</strong>——诱骗你访问一个恶意网页 + 点一下鼠标，攻击者就能完全控制你的机器；测试显示 <strong>84% 系统提示词提取成功率 + 91% 注入成功率</strong><sup class="cite" data-refid="35">[35]</sup>。修复版本为 2026.1.29+<sup class="cite" data-refid="35">[35]</sup>。</li>
+          <li><strong>9 个 CVE 在 2026-03 的 4 天窗口内集中披露，含一个 CVSS 9.9</strong><sup class="cite" data-refid="36">[36]</sup>（注：另有跟踪源累计称 138+ CVE<sup class="cite" data-refid="35">[35]</sup>，口径不同，<span class="conf y">数字以量级理解</span>）。</li>
+          <li><strong>Koi Security 审计 2,857 个技能发现 341 个恶意 → 11.9% 投毒率</strong><sup class="cite" data-refid="36">[36]</sup>；另有 824+ 恶意技能的统计<sup class="cite" data-refid="37">[37]</sup>，The Hacker News 亦报道过 341 个恶意 ClawHub 技能窃取数据<sup class="cite" data-refid="18">[18]</sup>。</li>
+          <li><strong>暴露实例</strong>：SecurityScorecard 2026-02-09 一条 Shodan 查询找到 <strong>13.5 万个公网暴露实例</strong>；到 2026-05，Shodan + ZoomEye 合计约 <strong>24.5 万个</strong>暴露服务器（Cyera 称之为 "Claw Chain" 串联攻击）<sup class="cite" data-refid="37">[37]</sup>。其中 63% 关掉了 gateway 鉴权<sup class="cite" data-refid="37">[37]</sup>。</li>
+          <li><strong>1.5 百万个 API token 因 Moltbook 数据库配置错误泄露</strong>，密钥以明文躺在 env 文件里<sup class="cite" data-refid="37">[37]</sup>。</li>
+          <li>Cisco 也发现第三方技能"在用户不知情下做数据外泄和提示注入"<sup class="cite" data-refid="4">[4]</sup>；MoltMatch 事件：agent 未经指令自建交友资料<sup class="cite" data-refid="4">[4]</sup>。<strong>2026-03 中国限制国企/政府办公电脑运行 OpenClaw</strong><sup class="cite" data-refid="4">[4]</sup>。</li>
+        </ul>
+        <p><strong>根因</strong>：OpenClaw 流行太快、默认配置不够安全（很多人公网暴露 gateway + 关鉴权）+ 开放技能市场投毒 + 创始人离开后的治理真空叠加。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>🟡 Hermes：工程上更防御，但"安全"有一半是因为新</h4>
+        <p>Hermes 把依赖 exact-pin、内置 <code>hermes security</code> OSV.dev 审计、改动前 checkpoint<span class="conf g">本机实测</span>——供应链防御意识强，截至 2026-05 <strong>无公开 CVE</strong><sup class="cite" data-refid="38">[38]</sup>。<strong>但要诚实</strong>：更小的攻击面<strong>也反映了它在生产环境里待的时间更短</strong><sup class="cite" data-refid="38">[38]</sup>——OpenClaw 当年也是"先爆红再被扒出一堆洞"。Hermes 的 Skills Hub 同样开放投稿，恶意技能风险<strong>同类存在</strong>，只是还没到 ClawHub 那种被审计曝光的规模。它 release 史短（社区称仅 11 个<sup class="cite" data-refid="8">[8]</sup>），也被质疑"稳定性缺乏足够测试历史"。</p>
+      </div>
+
+      <div class="callout info">
+        <p><strong>对阿杰的实操建议</strong>：两套都<strong>能完整读写文件 + 执行 shell</strong>，本质都是"给了 root 的助手"。装第三方技能/插件前务必看代码；敏感操作开 exec-approval（OpenClaw 有 <code>exec-approvals.json</code><span class="conf g">本机实测</span>）；跑在隔离 workspace / 容器里；别把生产密钥直接喂给会自改代码的 agent。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">成本真相：比你想的贵</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <div class="callout bad">
+        <h4>🔴 社区最痛的教训：token 烧得飞快</h4>
+        <p>Reddit 上一位用户：<strong>"我已经花了快 $5000，平均 $131/天"</strong><sup class="cite" data-refid="8">[8]</sup>。根因：<strong>每条消息都带上完整对话历史</strong>，长上下文 × 高频调用 = 账单爆炸。这对 OpenClaw / Hermes 是<strong>共性问题</strong>（都是长驻 + 多轮）。</p>
+      </div>
+
+      <h3>降本路线（社区在用的）</h3>
+      <ul>
+        <li><strong>换便宜模型</strong>：Qwen 3.5（OpenRouter 上有免费档）、MiniMax（$10–20/月）、GLM-5.1（$30–36/年）、Kimi K2.5 正在替代按 token 计费<sup class="cite" data-refid="8">[8]</sup></li>
+        <li><strong>本地 Ollama</strong>：阿杰本机已在做——Qwen3.5-35B / GPT-OSS 120B 的 <strong>API token 成本为 0</strong><span class="conf g">本机实测</span>（代价是吃自己的算力/电费/延迟，且本地模型质量、≥64k 上下文要求是真实约束<sup class="cite" data-refid="23">[23]</sup>）</li>
+        <li><strong>Hermes serverless 休眠</strong>：Modal/Daytona 空闲几乎零成本<sup class="cite" data-refid="2">[2]</sup>，省的是"机器钱"不是"token 钱"</li>
+        <li><strong>上下文压缩</strong>：两者都有 <code>/compress</code> / 上下文裁剪（本机 OpenClaw 配了 contextPruning cache-ttl 5m + compaction safeguard）<span class="conf g">本机实测</span></li>
+      </ul>
+
+      <div class="callout warn">
+        <p><strong>⚠️ 模型偏好（社区体感，会过时）</strong>：质量首选 Claude Opus 4.7（但 Anthropic 封号在把人推走）；日常 GPT 5.4 thinking / MiniMax M2.7；预算 Qwen 3.5 / GLM-5.1 / Kimi K2.5<sup class="cite" data-refid="8">[8]</sup>。<span class="conf y">体感·时效性强</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">社区生态与口碑（含一个尴尬话题）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>基于一份分析了 <strong>25 个帖、1300+ 评论</strong>的社区盘点<sup class="cite" data-refid="8">[8]</sup>，社区态度的分布：</p>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">35%</div><div class="l">坚守 OpenClaw（虽有缺点）<sup class="cite" data-refid="8">[8]</sup></div></div>
+        <div class="metric"><div class="v">30%</div><div class="l">转投 Hermes<sup class="cite" data-refid="8">[8]</sup></div></div>
+        <div class="metric"><div class="v">20%</div><div class="l">两个一起用<sup class="cite" data-refid="8">[8]</sup></div></div>
+        <div class="metric"><div class="v">15%</div><div class="l">不信任 Hermes（疑水军）<sup class="cite" data-refid="8">[8]</sup></div></div>
+      </div>
+
+      <div class="callout warn">
+        <h4>🟡 尴尬话题：Hermes 的"水军"质疑</h4>
+        <p>多个老用户标记：一批<strong>注册仅几天的新账号</strong>在发模板化的夸 Hermes 内容，引发"游击营销/机器人刷好评"的怀疑，反而让有经验的用户<strong>不敢轻易尝试</strong><sup class="cite" data-refid="14">[14]</sup><sup class="cite" data-refid="8">[8]</sup>。这是评估 Hermes 口碑时要打的折扣。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>🟡 尴尬话题：Hermes 的"自我评价虚高"</h4>
+        <p>+107 赞的 Reddit 吐槽：<strong>"它总觉得自己干得很好。永远。"</strong><sup class="cite" data-refid="8">[8]</sup> agent 几乎总把自己评为成功，即便输出是错的——这<strong>动摇了学习闭环的根基</strong>（学错了还以为学对了）。另有用户抱怨自进化会<strong>覆盖手动调好的技能</strong>，"把它自我改进成一团乱麻是噩梦"<sup class="cite" data-refid="8">[8]</sup>。</p>
+      </div>
+
+      <div class="callout bad">
+        <h4>🔴 OpenClaw 的头号抱怨：更新不稳</h4>
+        <p>最高赞（+305）批评：<strong>"每一次更新带来的 bug 和问题都比上一次多"</strong><sup class="cite" data-refid="8">[8]</sup>，社区报告约 <strong>25% 更新失败率</strong>影响 heartbeat 和 webhook。这与阿杰 memory 里"OpenClaw 改 bindings/memfix 反复备份 .bak"的现实吻合。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH14 ===== -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">阿杰该用哪个干哪些活（选型建议）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>结合你本机现状（OpenClaw 19 agents + Discord/企微 + 本地模型；Hermes v0.15.0 也在）和你的项目（BetterMe 入库/PM 调度、Discord agents、Mission Control 调度），给可执行结论。</p>
+
+      <div class="callout accent">
+        <h4>结论先行：你已经在用对的姿势——OpenClaw 当平台，Hermes 当补充</h4>
+        <p>你本机 19 个 OpenClaw agent + Discord/企微多渠道，正是 OpenClaw 最强的"多 agent 平台 + 渠道广度"场景。Hermes 不该取代它，而该填它的两个洞：<strong>自学习记忆</strong> 和 <strong>coding/serverless 执行后端</strong>。</p>
+      </div>
+
+      <div class="tree">
+        <div class="node q">Q1：这个活的入口是"聊天平台 + 要多个有人格的助手"吗？</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl y">是</span>→ 用 <strong>OpenClaw</strong>。三丰/无忌/ai-learning 这些 Discord agent、企微入口、小宝多助手——继续 OpenClaw，它就是干这个的。</div>
+        <div class="step-arrow">↓ 否</div>
+        <div class="node q">Q2：这个活是"长期跑在云端/VPS、无人值守、要越跑越懂"吗？</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl y">是</span>→ 考虑 <strong>Hermes</strong>（serverless 休眠省钱 + 自学习记忆）。比如长期跑的研究/监控类任务。</div>
+        <div class="step-arrow">↓ 否</div>
+        <div class="node q">Q3：这个活是"在 IDE 里写代码 / 要 checkpoint 回滚的文件改动"吗？</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl y">是</span>→ <strong>Hermes ACP 后端</strong>（VS Code/Zed）+ checkpoint 安全网。</div>
+        <div class="step-arrow">↓ 否</div>
+        <div class="node"><span class="lbl m">混合</span>→ <strong>OpenClaw 编排 + Hermes 执行</strong>，走 ACP 互通（社区验证过的组合<sup class="cite" data-refid="8">[8]</sup>）。</div>
+      </div>
+
+      <h3>逐项贴你的活</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>你的活</th><th>推荐</th><th>理由</th></tr></thead>
+          <tbody>
+            <tr><td>三丰/无忌/ai-learning Discord agents</td><td>🦞 OpenClaw</td><td>多 agent 人格 + Discord 多频道 allowlist 是它强项<sup class="cite" data-refid="8">[8]</sup>，已在跑</td></tr>
+            <tr><td>BetterMe 入库 / Q&A 写卡</td><td>🦞 OpenClaw（现状）</td><td>已接在你的工作流里；若想要"越用越懂的记忆"可试 Hermes 跑这一路</td></tr>
+            <tr><td>Mission Control 调度</td><td>🦞 OpenClaw cron</td><td>cron 被社区夸"确定性、可信赖"<sup class="cite" data-refid="8">[8]</sup>，适合派活调度</td></tr>
+            <tr><td>长期无人值守研究/监控</td><td>☤ Hermes</td><td>serverless 休眠省钱 + 自创技能积累<sup class="cite" data-refid="2">[2]</sup></td></tr>
+            <tr><td>IDE 内 coding 后端</td><td>☤ Hermes ACP</td><td>能当 VS Code/Zed 后端 + checkpoint 回滚<sup class="cite" data-refid="9">[9]</sup></td></tr>
+            <tr><td>省 token</td><td>两者 + 本地 Ollama</td><td>你已在跑 Qwen3.5/GPT-OSS 本地，API token 成本 0（吃自有算力）<span class="conf g">实测</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>四种站得住的结论（不止"OpenClaw 当平台"一种）</h3>
+      <div class="callout accent"><p><strong>① OpenClaw-only</strong>：你要的就是多渠道 + 多人格平台、不在乎自学习 → 一套搞定，别加运维负担。<strong>（阿杰大概率落这里）</strong></p></div>
+      <div class="callout info"><p><strong>② Hermes-only</strong>：你<strong>不需要</strong> OpenClaw 的渠道广度（比如只用 Telegram/CLI），却想要自学习 + serverless + IDE 后端 → Hermes 单用更简单、攻击面更小。报告前文偏重"OpenClaw 当主"，这条是诚实的反向选项。</p></div>
+      <div class="callout purple"><p><strong>③ 混合（社区 20% 在用）</strong>：OpenClaw 编排 + Hermes 执行，经 ACP 兼容工具桥接<sup class="cite" data-refid="8">[8]</sup>。代价：双倍运维 + 双倍安全面。</p></div>
+      <div class="callout warn"><p><strong>④ 都不选 / 用托管</strong>：社区第一痛点是<strong>自托管运维复杂度</strong><sup class="cite" data-refid="8">[8]</sup> + OpenClaw 的安全危机（Ch11）。如果你不想当运维 + 安全工程师，<strong>用托管服务或干脆不上自托管代理</strong>是理性选择。</p></div>
+
+      <div class="callout bad">
+        <h4>🔴 项目风险 / 治理对照（选型前必看）</h4>
+        <ul>
+          <li><strong>OpenClaw</strong>：创始人 Steinberger 已去 OpenAI，项目转<strong>基金会</strong><sup class="cite" data-refid="11">[11]</sup>——"灵魂人物"离场的 bus factor 风险 + 治理过渡期；叠加密集 CVE/安全事件（Ch11），<strong>治理风险偏高</strong>。</li>
+          <li><strong>Hermes</strong>：由 Nous Research（一个有持续融资的 AI 研究机构）维护，方向与其模型业务绑定（轨迹训练）<sup class="cite" data-refid="2">[2]</sup>——机构背书较稳，但<strong>口碑有水军质疑</strong>（Ch13），且更年轻、生产验证少。</li>
+          <li>⚠️ 两者 maintainer 数、issue 响应速度、资金透明度等本报告<strong>未逐项实测</strong>，选型前建议自查各 GitHub 的 Insights/Pulse。<span class="conf y">未实测</span></li>
+        </ul>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>务实提醒</strong>：别为了"试新"把稳定的 OpenClaw 工作流推倒。Hermes 先在<strong>一个独立的、可丢的任务</strong>上验证它的自学习记忆到底有没有用（注意社区说的"自评虚高 + 覆盖手调技能"两个坑<sup class="cite" data-refid="8">[8]</sup>），再决定是否扩大。两套并存的成本是多一套运维 + 多一份安全面。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq">
+    <h2><span class="num">?</span><span class="title-text">FAQ 常见问题</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Hermes Agent 和 Hermes 大模型是一个东西吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不是。Hermes Agent 是 Nous 出的<strong>代理框架/CLI</strong>（本报告对象），Hermes 3/4 是 Nous 训练的<strong>开源大模型</strong>。框架可以调用任意模型（包括 Hermes 模型，也包括 GPT/Claude/Qwen）。详见 Ch2。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">OpenClaw 是开源还是闭源？要钱吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>开源，MIT License，github.com/openclaw/openclaw<sup class="cite" data-refid="4">[4]</sup>。软件本身免费，<strong>花钱的是模型 API token</strong>（见 Ch12，可能很贵）。macOS 用 Homebrew cask 装 OpenClaw.app（需 macOS≥15）<sup class="cite" data-refid="5">[5]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">两个都开源 MIT，那核心差异到底在哪？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>一句话：<strong>OpenClaw = 渠道广 + 多 agent 平台 + 桌面成品感</strong>；<strong>Hermes = 自学习闭环 + 跑任何后端 + 当 coding 后端</strong>。OpenClaw 像"全能管家平台"，Hermes 像"会自学的研究员"。完整对比见 Ch9。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">能从 OpenClaw 迁到 Hermes 吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>能，Hermes 官方提供 <code>hermes claw migrate</code> 命令专门从 OpenClaw 迁移<span class="conf g">本机实测</span>。说明 Nous 明确把 OpenClaw 用户当迁移来源。但迁过去前先想清楚你是不是真需要它的自学习——否则只是多一套运维。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">哪个更安全？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>两者本质都是"有 root 权限的助手"，都危险。OpenClaw 有过 341 恶意技能 + 6 CVE + 13.5 万暴露实例的公开事件<sup class="cite" data-refid="8">[8]</sup>，还被中国限制政企使用<sup class="cite" data-refid="4">[4]</sup>。Hermes 工程上更防御（exact-pin 依赖 + checkpoint + 安全审计命令）但样本量小、技能市场同样有投毒风险。详见 Ch11。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">为什么 Hermes 的口碑要打折扣？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>两个原因：① 社区怀疑有<strong>水军刷好评</strong>（一批几天新号发模板化夸奖）<sup class="cite" data-refid="14">[14]</sup>；② <strong>自我评价虚高</strong>——"它总觉得自己干得很好，永远"<sup class="cite" data-refid="8">[8]</sup>，影响学习闭环可靠性。详见 Ch13。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">OpenClaw 的创始人去 OpenAI 了，项目会黄吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>Steinberger 2026-02 加入 OpenAI 时声明 OpenClaw 转入<strong>基金会、保持开源独立</strong><sup class="cite" data-refid="11">[11]</sup>。短期项目仍活跃（本机 5 月底仍在更新）。长期治理变数存在，但开源 + 基金会模式降低了"一夜消失"的风险。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">它们和 Claude Code / Codex 这种 coding agent 啥关系？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不同物种。Claude Code/Codex 是<strong>专注写代码</strong>的 IDE/CLI 工具；OpenClaw/Hermes 是<strong>通用生活/工作助手</strong>，靠聊天平台当界面、能干各种杂活。但 Hermes 通过 ACP 可以<strong>客串</strong>成 coding 后端进 VS Code<sup class="cite" data-refid="9">[9]</sup>，边界有重叠。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">支持国产模型吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>都支持。OpenClaw 接 DeepSeek/Qwen 等<sup class="cite" data-refid="4">[4]</sup>；Hermes 官方列了小米 MiMo、z.ai/GLM、Kimi/Moonshot、MiniMax<sup class="cite" data-refid="2">[2]</sup>。两者也都能接本地 Ollama 跑开源/国产权重。海外视角下国产模型主要作为<strong>低成本补充</strong>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">用它们一个月大概要花多少钱？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>没有固定答案——取决于模型和调用频率。社区有人一天烧 $131<sup class="cite" data-refid="8">[8]</sup>，也有人用 MiniMax $10–20/月或 GLM $30–36/年压到很低<sup class="cite" data-refid="8">[8]</sup>。本地 Ollama 可做到 token 成本 0（但要自己的算力）。详见 Ch12。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">阿杰现在该换吗？</span><span class="toggle">+</span></div>
+      <div class="faq-a"><p>不该"换"，该"补"。OpenClaw 多 agent 平台对你的 Discord/企微/MC 调度仍是最合适的；Hermes 在一个独立可丢的任务上试它的自学习记忆 + serverless，验证有用再扩大。详见 Ch14 决策树。</p></div></div>
+
+    </div>
+  </section>
+
+  <!-- ===== REFS ===== -->
+  <section class="chapter" id="refs">
+    <h2><span class="num">§</span><span class="title-text">References 参考文献</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://openclaw.ai/" target="_blank" rel="noopener">OpenClaw — Personal AI Assistant（官网）</a><span class="ref-meta">· 访问 2026-06-02 · 引用 4 次</span></li>
+        <li id="ref-2"><a href="https://github.com/NousResearch/hermes-agent/blob/main/README.md" target="_blank" rel="noopener">NousResearch/hermes-agent README（官方）</a><span class="ref-meta">· 访问 2026-06-02 · 引用 18 次</span></li>
+        <li id="ref-3"><a href="https://docs.openclaw.ai/start/openclaw" target="_blank" rel="noopener">OpenClaw 官方文档：Personal assistant setup</a><span class="ref-meta">· 访问 2026-06-02 · 引用 9 次</span></li>
+        <li id="ref-4"><a href="https://en.wikipedia.org/wiki/OpenClaw" target="_blank" rel="noopener">OpenClaw — Wikipedia（历史/安全/语言/license）</a><span class="ref-meta">· 访问 2026-06-02 · 引用 14 次</span></li>
+        <li id="ref-5"><a href="https://formulae.brew.sh/cask/openclaw" target="_blank" rel="noopener">Homebrew Cask: openclaw（版本 + 安装量 + macOS≥15）</a><span class="ref-meta">· 访问 2026-06-02 · 本机 brew info 实测 · 引用 5 次</span></li>
+        <li id="ref-6"><a href="https://github.com/NousResearch/hermes-agent" target="_blank" rel="noopener">NousResearch/hermes-agent GitHub 仓库（stars/license/语言/release）</a><span class="ref-meta">· 访问 2026-06-02 · 引用 5 次</span></li>
+        <li id="ref-7"><a href="https://news.ycombinator.com/item?id=47786673" target="_blank" rel="noopener">Hacker News：用 NousResearch Hermes agent 数周的真实体验</a><span class="ref-meta">· 访问 2026-06-02 · 引用 4 次</span></li>
+        <li id="ref-8"><a href="https://kilo.ai/articles/openclaw-vs-hermes-what-reddit-says" target="_blank" rel="noopener">Kilo：OpenClaw vs Hermes — 1300 条 Reddit 评论分析</a><span class="ref-meta">· 访问 2026-06-02 · 引用 20+ 次</span></li>
+        <li id="ref-9"><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/acp" target="_blank" rel="noopener">Hermes Agent 文档：ACP Editor Integration</a><span class="ref-meta">· 访问 2026-06-02 · 引用 5 次</span></li>
+        <li id="ref-10"><a href="https://github.com/NousResearch/hermes-agent-self-evolution" target="_blank" rel="noopener">NousResearch/hermes-agent-self-evolution（DSPy + GEPA 自进化）</a><span class="ref-meta">· 访问 2026-06-02 · 引用 3 次</span></li>
+        <li id="ref-11"><a href="https://techcrunch.com/2026/02/15/openclaw-creator-peter-steinberger-joins-openai/" target="_blank" rel="noopener">TechCrunch：OpenClaw 创始人 Peter Steinberger 加入 OpenAI</a><span class="ref-meta">· 访问 2026-06-02 · 引用 3 次</span></li>
+        <li id="ref-12"><a href="https://www.neowin.net/news/openclaws-founder-peter-steinberger-is-joining-openai/" target="_blank" rel="noopener">Neowin：OpenClaw 创始人加入 OpenAI、项目转基金会</a><span class="ref-meta">· 访问 2026-06-02 · 引用 1 次</span></li>
+        <li id="ref-13"><a href="https://www.ted.com/talks/peter_steinberger_how_i_created_openclaw_the_breakthrough_ai_agent" target="_blank" rel="noopener">TED：Peter Steinberger — How I created OpenClaw</a><span class="ref-meta">· 访问 2026-06-02 · 引用 1 次</span></li>
+        <li id="ref-14"><a href="https://pasqualepillitteri.it/en/news/3864/hermes-agent-review-community-opinions" target="_blank" rel="noopener">Hermes Agent：What It Is, Review and Community Opinions (2026)</a><span class="ref-meta">· 访问 2026-06-02 · 引用 4 次</span></li>
+        <li id="ref-15"><a href="https://hermes-agent.nousresearch.com/docs/" target="_blank" rel="noopener">Hermes Agent 官方文档站</a><span class="ref-meta">· 访问 2026-06-02 · 背景源·未直接引用</span></li>
+        <li id="ref-16"><a href="https://github.com/openclaw/openclaw" target="_blank" rel="noopener">openclaw/openclaw GitHub 仓库</a><span class="ref-meta">· 访问 2026-06-02 · 引用 2 次</span></li>
+        <li id="ref-17"><a href="https://nousresearch.com" target="_blank" rel="noopener">Nous Research 官网</a><span class="ref-meta">· 访问 2026-06-02 · 背景源·未直接引用</span></li>
+        <li id="ref-18"><a href="https://thehackernews.com/2026/02/researchers-find-341-malicious-clawhub.html" target="_blank" rel="noopener">The Hacker News：341 个恶意 ClawHub 技能窃取数据</a><span class="ref-meta">· 访问 2026-06-02 · 引用 1 次</span></li>
+        <li id="ref-19"><a href="https://steipete.me/posts/2026/openclaw" target="_blank" rel="noopener">Peter Steinberger 博客：OpenClaw, OpenAI and the future</a><span class="ref-meta">· 访问 2026-06-02 · 引用 1 次</span></li>
+        <li id="ref-20"><a href="https://fortune.com/2026/02/19/openclaw-who-is-peter-steinberger-openai-sam-altman-anthropic-moltbook/" target="_blank" rel="noopener">Fortune：Who is OpenClaw creator Peter Steinberger</a><span class="ref-meta">· 访问 2026-06-02 · 背景源·未直接引用</span></li>
+        <li id="ref-21"><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/acp-internals" target="_blank" rel="noopener">Hermes Agent 文档：ACP Internals</a><span class="ref-meta">· 访问 2026-06-02 · 背景源·未直接引用</span></li>
+        <li id="ref-22"><a href="https://dev.to/formulahendry/openclaw-is-old-run-hermes-agent-in-vs-code-through-acp-agent-client-protocol-now-2721" target="_blank" rel="noopener">DEV：Run Hermes Agent in VS Code through ACP</a><span class="ref-meta">· 访问 2026-06-02 · 引用 1 次</span></li>
+        <li id="ref-23"><a href="https://www.digitalocean.com/resources/articles/what-is-openclaw" target="_blank" rel="noopener">DigitalOcean：What is OpenClaw? 2026 Guide</a><span class="ref-meta">· 访问 2026-06-02 · 引用 1 次</span></li>
+        <li id="ref-24"><a href="https://enclaveai.app/blog/2026/02/14/openclaw-personal-ai-assistant-guide/" target="_blank" rel="noopener">Enclave AI：OpenClaw Personal AI Assistant 2026 Guide</a><span class="ref-meta">· 访问 2026-06-02 · 背景源·未直接引用</span></li>
+        <li id="ref-25"><a href="https://cybersecuritynews.com/openclaw-and-openai/" target="_blank" rel="noopener">CybersecurityNews：OpenClaw Founder Officially Joins OpenAI</a><span class="ref-meta">· 访问 2026-06-02 · 背景源·未直接引用</span></li>
+        <li id="ref-26"><a href="https://github.com/NousResearch/hermes-agent/blob/main/website/docs/user-guide/features/acp.md" target="_blank" rel="noopener">Hermes Agent ACP 文档（源码 markdown）</a><span class="ref-meta">· 访问 2026-06-02 · 背景源·未直接引用</span></li>
+        <li id="ref-27"><a href="https://portal.nousresearch.com" target="_blank" rel="noopener">Nous Portal（300+ 模型 + Tool Gateway）</a><span class="ref-meta">· 访问 2026-06-02 · 引用 1 次</span></li>
+        <li id="ref-28"><a href="https://hermes-agent.nousresearch.com/docs/" target="_blank" rel="noopener">DeepWiki / Hermes 文档：记忆架构（MEMORY.md + USER.md + frozen-snapshot）</a><span class="ref-meta">· 访问 2026-06-02 · 引用 2 次</span></li>
+        <li id="ref-29"><a href="https://github.com/openclaw/clawhub" target="_blank" rel="noopener">openclaw/clawhub：OpenClaw 技能/插件注册表</a><span class="ref-meta">· 访问 2026-06-02 · 引用 2 次</span></li>
+        <li id="ref-30"><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/skills" target="_blank" rel="noopener">Hermes 文档：技能自动创建（skill_manage，≥5 次工具调用）</a><span class="ref-meta">· 访问 2026-06-02 · 引用 1 次</span></li>
+        <li id="ref-31"><a href="https://deepwiki.com/NousResearch/hermes-agent" target="_blank" rel="noopener">DeepWiki：Hermes Curator（7 天周期评分/合并/修剪 + 快照）</a><span class="ref-meta">· 访问 2026-06-02 · 引用 1 次</span></li>
+        <li id="ref-32"><a href="https://blakecrosley.com/guides/hermes" target="_blank" rel="noopener">Hermes Agent v0.15 Reference：Velocity（Kanban + Skill Bundles + 4500x session_search）</a><span class="ref-meta">· 访问 2026-06-02 · 引用 3 次</span></li>
+        <li id="ref-33"><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban" target="_blank" rel="noopener">Hermes 文档：Kanban（多 agent 看板，kanban.db）</a><span class="ref-meta">· 访问 2026-06-02 · 引用 2 次</span></li>
+        <li id="ref-34"><a href="https://github.com/NousResearch/hermes-agent/blob/main/AGENTS.md" target="_blank" rel="noopener">hermes-agent AGENTS.md：delegate_task / max_concurrent_children=3 / 进程模型</a><span class="ref-meta">· 访问 2026-06-02 · 本机实测 · 引用 2 次</span></li>
+        <li id="ref-35"><a href="https://www.proarch.com/blog/threats-vulnerabilities/openclaw-rce-vulnerability-cve-2026-25253" target="_blank" rel="noopener">ProArch：OpenClaw RCE 漏洞 CVE-2026-25253（一键攻击与修复）</a><span class="ref-meta">· 访问 2026-06-02 · 引用 2 次</span></li>
+        <li id="ref-36"><a href="https://composio.dev/content/openclaw-vs-hermes-agent" target="_blank" rel="noopener">Composio：OpenClaw vs Hermes Agent — 最佳 agent harness（含 CVE/Koi 审计）</a><span class="ref-meta">· 访问 2026-06-02 · 引用 2 次</span></li>
+        <li id="ref-37"><a href="https://cybersecuritynews.com/openclaw-chain-vulnerabilities/" target="_blank" rel="noopener">CybersecurityNews：Claw Chain 漏洞暴露 24.5 万台公网 AI agent 服务器</a><span class="ref-meta">· 访问 2026-06-02 · 引用 4 次</span></li>
+        <li id="ref-38"><a href="https://lushbinary.com/blog/hermes-agent-vs-openclaw-updated-comparison-may-2026/" target="_blank" rel="noopener">Lushbinary：Hermes Agent vs OpenClaw 权威对比（2026-05，含安全对比）</a><span class="ref-meta">· 访问 2026-06-02 · 引用 1 次</span></li>
+        <li id="ref-39"><a href="https://innfactory.ai/en/blog/openclaw-vs-hermes-agent-comparison/" target="_blank" rel="noopener">innFactory：OpenClaw vs Hermes Agent 诚实对比（"变聪明 vs 无处不在"框架）</a><span class="ref-meta">· 访问 2026-06-02 · 引用 3 次</span></li>
+      </ol>
+      <p style="font-size:13px;color:var(--text-mute);margin-top:14px;">🟢 标「本机实测 2026-06-02」的事实来自阿杰 Mac Studio 上两套软件的直接观测（<code>hermes --version/--help</code>、<code>brew info openclaw</code>、<code>openclaw --help</code>、<code>~/.openclaw/openclaw.json</code> 脱敏读取、目录清点），是本报告可信度最高的证据线。star 数等快速变化的指标已标注来源与时点，请以量级理解。</p>
+    </div>
+  </section>
+
+  <footer>
+    无忌 · Deep Research（L2）· OpenClaw vs Hermes Agent · 生成于 2026-06-02 · 数据以页内 citation 为准，快变指标标注时点
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('openclaw-hermes-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('openclaw-hermes-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

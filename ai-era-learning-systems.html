@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI 时代的英语 / 通用学习系统 — 行为追踪 + 学习路径规划怎么做 · 无忌 Deep Research · 2026-06-01</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .check-box::before { content: "✓ 落地要点 "; font-weight: 700; color: var(--good); }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  .trap-box::before { content: "⚠ 常见坑 "; font-weight: 700; color: var(--bad); }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(217,154,65,0.3); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+    #transcript, .transcript { display: none !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L4</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 一张图看懂行业格局</a>
+    <a href="#ch2" data-target="ch2">02 两大流派：语言 app vs 通用平台</a>
+    <a href="#ch3" data-target="ch3">03 行为追踪：采集哪些信号</a>
+    <a href="#ch4" data-target="ch4">04 路径规划：五条技术路线</a>
+    <a href="#ch5" data-target="ch5">05 间隔重复：SM-2 → HLR → FSRS</a>
+    <a href="#ch6" data-target="ch6">06 LLM 浪潮：边界在哪</a>
+    <a href="#ch7" data-target="ch7">07 规模、定价与效果证据</a>
+    <a href="#ch8" data-target="ch8">08 产品全景（16 款逐个拆）</a>
+    <a href="#ch9" data-target="ch9">09 知识追踪算法深挖</a>
+    <a href="#ch10" data-target="ch10">10 口语/发音类的特殊性</a>
+    <a href="#ch11" data-target="ch11">11 效果证据分级（别被忽悠）</a>
+    <a href="#ch12" data-target="ch12">12 banmi 路线建议（决策树）</a>
+    <a href="#ch13" data-target="ch13">13 banmi 可执行清单</a>
+    <a href="#faq" data-target="faq">FAQ 常见疑问</a>
+    <a href="#refs" data-target="refs">References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>AI 时代的英语 / 通用学习系统 — 行为追踪 + 学习路径规划怎么做</h1>
+    <div class="hero-meta">
+      <span>📅 2026-06-01</span>
+      <span>🔍 16 款产品横评 + 学术原始论文实查</span>
+      <span>🧠 行为追踪 + 知识追踪 + 路径规划</span>
+      <span>🎯 给 banmi 的工程选型建议</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>一句话定调：AI 学习系统已经从「题库 + 固定课程」进化到「实时建模学习者状态 + 动态规划路径」，但真正能打的产品都遵守同一条铁律——LLM 管对话、讲解、纠错、内容生成；而「这个学生现在能力多少、下一步练什么、什么时候复习」交给确定性模型（IRT / BKT / DKT / 知识图谱 / 间隔重复）。</strong></p>
+      <p>对 banmi 最值钱的启示先抛在这里：<strong>先用轻量 IRT/BKT 建立「能力—难度」双向估计，叠加开源 FSRS 做复习调度，用 LLM 做对话和讲解，但绝不让 LLM 全权规划路径。</strong> Quizlet 把纯 LLM 的 Q-Chat 在 2025 年 6 月停用<sup class="cite" data-refid="35">[35]</sup>，是这条铁律最有力的反证。全文 13 章把每条路线讲透。</p>
+    </div>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">一张图看懂行业格局</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>阿杰要做 banmi（英语 / 通用学习系统），第一步得先知道「别人都怎么做的、哪些是真本事、哪些是营销话术」。这章把整个行业的骨架摆出来，后面每章再钻进细节。</p>
+
+      <h3>整个行业其实只在干两件事</h3>
+      <div class="callout accent">
+        <h4>🎯 AI 学习系统的两个核心动作</h4>
+        <ol>
+          <li><strong>行为追踪（建模学习者状态）</strong>：实时回答「这个学生现在到底掌握到什么程度」。靠采集答题对错、作答用时、间隔时间、点击流、语音/音素数据等信号喂进知识追踪模型。</li>
+          <li><strong>路径规划（决定下一步）</strong>：基于当前状态回答「接下来该练什么、什么时候复习」。靠 IRT 估能力难度、BKT/DKT/Transformer 追踪掌握度、知识图谱做先修依赖、间隔重复排复习。</li>
+        </ol>
+        <p>所有产品——无论英语 app 还是通用平台——都是这两件事的不同组合。看懂这点，下面 16 款产品就只是「同一套乐高的不同拼法」。</p>
+      </div>
+
+      <h3>关键指标定位行业头部</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">52.7M</div><div class="l">Duolingo Q4 2025 日活（DAU）<sup class="cite" data-refid="17">[17]</sup></div></div>
+        <div class="metric"><div class="v">$10.4 亿</div><div class="l">Duolingo FY2025 年营收<sup class="cite" data-refid="18">[18]</sup></div></div>
+        <div class="metric"><div class="v">$1B</div><div class="l">Speak 2024.12 估值（半年翻倍）<sup class="cite" data-refid="7">[7]</sup></div></div>
+        <div class="metric"><div class="v">3400 万+</div><div class="l">ELSA 用户量<sup class="cite" data-refid="9">[9]</sup></div></div>
+        <div class="metric"><div class="v">68K→700K</div><div class="l">Khanmigo 一年用户增长<sup class="cite" data-refid="20">[20]</sup></div></div>
+        <div class="metric"><div class="v">~130 分</div><div class="l">Santa 学 20h TOEIC 提分（厂商口径）<sup class="cite" data-refid="13">[13]</sup></div></div>
+      </div>
+
+      <div class="callout info">
+        <h4>这份报告怎么读</h4>
+        <ul>
+          <li><strong>Ch2-7 是分析章</strong>：把行业拆成 6 个主题（两大流派、行为追踪、路径规划、间隔重复、LLM 边界、规模与效果）逐一讲透。</li>
+          <li><strong>Ch8 是产品全景</strong>：16 款主流产品逐个列「干什么 / AI 机制 / 定价 / 规模 / 可信度」。</li>
+          <li><strong>Ch9-11 是深挖章</strong>：知识追踪算法、口语类特殊性、效果证据分级。</li>
+          <li><strong>Ch12-13 是给 banmi 的落地建议</strong>：决策树 + 可执行清单，这两章是阿杰真正要看的。</li>
+        </ul>
+      </div>
+
+      <div class="callout purple">
+        <p><strong>海外视角说明</strong>：阿杰本人在海外，LLM 首选 Gemini / Claude / GPT-4o 这类国际模型。但 <strong>banmi 学习者的地域要按场景判断</strong>，不默认国内——若面向海外华人/留学生用国际模型与支付，若面向国内则另算合规与模型可用性。本报告涉及 LLM 选型时默认国际模型，但会在 banmi 建议章提醒这一点。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">两大流派：语言 app 路线 vs 通用平台路线</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>技术上整个行业分成两条清晰的技术血脉，banmi 该借鉴哪条取决于它最终更像「语言 app」还是「通用学科平台」。</p>
+
+      <h3>流派一：语言 / 英语类 app —— 「LLM 对话 + 语音评分 + 间隔重复」</h3>
+      <div class="callout info">
+        <p>这条路线的代表是 <strong>Duolingo / Speak / ELSA / Praktika / Busuu / Babbel</strong>。它的技术配方是：</p>
+        <ul>
+          <li><strong>底层调度</strong>：Duolingo 用自研 <strong>Birdbrain</strong>（IRT 逻辑回归同时估计题目难度与学习者能力）+ <strong>Half-Life Regression</strong>（预测遗忘半衰期）做内容调度<sup class="cite" data-refid="6">[6]</sup><sup class="cite" data-refid="1">[1]</sup>。</li>
+          <li><strong>对话层</strong>：Duolingo Max / Speak / Praktika / Busuu / Babbel 在底层之上叠加 GPT-4o 等 LLM 做开放式口语对话<sup class="cite" data-refid="3">[3]</sup>。</li>
+          <li><strong>语音评分</strong>：ELSA 用<strong>专为非母语者训练的语音识别引擎</strong>做音素级（phoneme）发音打分<sup class="cite" data-refid="9">[9]</sup>。</li>
+        </ul>
+      </div>
+
+      <h3>流派二：通用自适应平台 —— 「知识图谱 + 知识追踪」</h3>
+      <div class="callout info">
+        <p>代表是 <strong>ALEKS / Knewton Alta / Carnegie MATHia / Squirrel AI / Riiid Santa</strong>。技术配方更偏「学科结构化」：</p>
+        <ul>
+          <li><strong>ALEKS</strong> 用知识空间理论（Knowledge Space Theory）<sup class="cite" data-refid="24">[24]</sup>。</li>
+          <li><strong>Knewton Alta</strong> 用 IRT + 贝叶斯知识图谱做能力传播（proficiency propagation）<sup class="cite" data-refid="26">[26]</sup>。</li>
+          <li><strong>Carnegie MATHia</strong> 用认知导师的 model tracing + knowledge tracing<sup class="cite" data-refid="27">[27]</sup>。</li>
+          <li><strong>Squirrel AI</strong> 把知识点拆到「纳米级」（初中数学 300→30000 个）配知识图谱<sup class="cite" data-refid="14">[14]</sup>。</li>
+          <li><strong>Riiid / Santa</strong> 用 Transformer 知识追踪（SAINT+，含答题用时/间隔时间特征）<sup class="cite" data-refid="19">[19]</sup>。</li>
+        </ul>
+      </div>
+
+      <div class="callout purple">
+        <p><strong>对 banmi 的定位判断</strong>：如果 banmi 主打英语口语/词汇，借鉴流派一（LLM 对话 + 语音评分 + 间隔重复）；如果想做结构化的语法/分级阅读体系，把流派二的「知识图谱 + 知识追踪」也融进来。<strong>两条路线在底层共享同一套追踪算法（下两章）</strong>，所以不必二选一，可以组合。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">行为追踪：采集哪些信号、怎么采</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这一章是 banmi 工程上最该先抄的——因为行为追踪的「埋点」几乎零成本，但事后补采无法回溯。AI 学习系统采集的行为信号可分四类。</p>
+
+      <h3>四类行为信号</h3>
+      <div class="callout accent">
+        <h4>第一类：答题对错（correctness）</h4>
+        <p>最基础，几乎所有系统都用，是 IRT/BKT/DKT 的核心输入。但只看对错信息量有限——区分不了「真懂」和「蒙对」。</p>
+      </div>
+      <div class="callout accent">
+        <h4>第二类：时序信号（最被低估、性价比最高）</h4>
+        <p>Riiid 的 SAINT+ 模型明确把 <strong>elapsed time（单题作答用时）</strong>与 <strong>lag time（两次学习的时间间隔）</strong>作为<u>独立特征</u>喂进 Transformer<sup class="cite" data-refid="19">[19]</sup>，因为「答得快且对」与「磨了很久才对」代表完全不同的掌握状态；Knewton 也对近期作答加权高于旧作答<sup class="cite" data-refid="26">[26]</sup>。<span class="conf g">原始论文核实</span></p>
+      </div>
+      <div class="callout accent">
+        <h4>第三类：细粒度交互 / 点击流</h4>
+        <p>Carnegie MATHia 用 model tracing 检查学生解题的<strong>每一步动作</strong>（输入数值、点按钮）<sup class="cite" data-refid="27">[27]</sup>；DreamBox 明确记录<strong>每次 click、keystroke、对错答案、每题停留时长</strong>并据此判断学生用了哪种解题策略<sup class="cite" data-refid="32">[32]</sup>——这比只看最终答案信息量大得多，能区分「蒙对」和「真懂」。<span class="conf g">官方文档核实</span></p>
+      </div>
+      <div class="callout accent">
+        <h4>第四类：模态特有信号</h4>
+        <p>ELSA 采集<strong>音素级（phoneme）语音数据</strong>，逐词逐音标出哪个具体发音错了，而非给二元对错<sup class="cite" data-refid="9">[9]</sup><sup class="cite" data-refid="11">[11]</sup>；语言 app 还普遍记录见词次数、放弃点。Duolingo 把这些信号存进一个「<strong>每秒更新约 3000 次</strong>」的庞大行为库<sup class="cite" data-refid="5">[5]</sup>。<span class="conf g">官方博客</span></p>
+      </div>
+
+      <div class="callout good">
+        <h4>给 banmi 的直接启示</h4>
+        <p>不要只存「对/错」。至少要存：<strong>作答用时、两次学习的间隔、是否用过提示、是否中途放弃</strong>，口语场景再加音素级评分。这些是后续做精细知识追踪和 A/B 实验的「弹药」，且采集成本极低（前端埋点即可），但<strong>事后补采无法回溯</strong>。</p>
+      </div>
+
+      <div class="trap-box">最常见的工程后悔：MVP 阶段图省事只记对错，等想做精细知识追踪或 A/B 实验时才发现历史数据里没有时序/过程信号，只能从零重新积累几个月。富埋点要从第一天做。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">学习路径规划：IRT / BKT / DKT / 知识图谱 / 间隔重复 五条路线</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>路径规划的核心是「估计学习者当前知识状态 → 选下一个最该练的内容」。市面上有五条主流技术路线，且常被组合使用。banmi 该用哪条，关键看数据量。</p>
+
+      <h3>五条路线一览</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>路线</th><th>核心思想</th><th>代表产品</th><th>banmi 适用性</th></tr></thead>
+          <tbody>
+            <tr><td><strong>IRT 项目反应理论</strong></td><td>逻辑回归同时估「题目难度」和「学习者能力」，答错时同时下调能力、上调难度，保持「最优挑战区」</td><td>Duolingo Birdbrain、Knewton</td><td class="check y">✅ 中小数据量首选</td></tr>
+            <tr><td><strong>KST 知识空间理论</strong></td><td>把课程建成知识地图，只推送处于「知识边界」的题目，纯数学模型</td><td>ALEKS</td><td class="check p">🟡 适合强结构化学科</td></tr>
+            <tr><td><strong>BKT 贝叶斯知识追踪</strong></td><td>隐马尔可夫/贝叶斯方法，用进度条估计每项技能掌握度</td><td>Carnegie MATHia（Skillometer）</td><td class="check y">✅ 可解释、好调试</td></tr>
+            <tr><td><strong>DKT 深度知识追踪</strong></td><td>LSTM/Transformer 建模知识随时间演化</td><td>Riiid SAKT/SAINT/SAINT+</td><td class="check p">🟡 数据上量后再上</td></tr>
+            <tr><td><strong>知识图谱 + 间隔重复</strong></td><td>拆知识点连成图做先修依赖与补救，间隔重复排复习</td><td>Squirrel AI、Knewton</td><td class="check y">✅ 轻量手工版即可起步</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>逐条核实</h3>
+      <div class="callout info">
+        <p><strong>IRT</strong>：Duolingo Birdbrain 用 IRT 启发的逻辑回归同时建模题目难度与学习者能力，每次交互后更新，把学习者维持在「最优挑战区」<sup class="cite" data-refid="6">[6]</sup>。<span class="conf g">IEEE Spectrum</span></p>
+      </div>
+      <div class="callout info">
+        <p><strong>KST</strong>：ALEKS 基于知识空间理论（数学家 Jean-Claude Falmagne 1996 提出），开场诊断 25-30 题动态定位知识状态，只推送知识边界上的题目<sup class="cite" data-refid="24">[24]</sup>。<span class="conf g">已核实</span></p>
+      </div>
+      <div class="callout info">
+        <p><strong>知识图谱 + proficiency propagation</strong>：Knewton Proficiency Model 以 IRT 为基础并加时序加权，知识图谱用贝叶斯框架实现掌握度在图谱中传播，从而定位先修知识缺口并精准补救<sup class="cite" data-refid="26">[26]</sup>。<span class="conf y">厂商技术博客</span></p>
+      </div>
+      <div class="callout info">
+        <p><strong>DKT 起源</strong>：DKT 由 Piech 等 2015 年在 Stanford 提出，用 LSTM 建模学生知识随时间演化<sup class="cite" data-refid="16">[16]</sup>；Transformer 知识追踪（SAINT+）在大数据上超越传统 BKT 与协同过滤<sup class="cite" data-refid="13">[13]</sup><sup class="cite" data-refid="19">[19]</sup>。<span class="conf g">NeurIPS 论文</span></p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ 反直觉的关键发现：深度模型不总是更优</h4>
+        <p>学界发现在<strong>低维输入下，IRT 与改进版 BKT 有时反而超越原始版 DKT</strong>，深度模型并非总是更好<sup class="cite" data-refid="13">[13]</sup>。这对 banmi 是个省钱信号——别一上来追深度模型。<span class="conf y">学术争议，证据中等</span></p>
+      </div>
+
+      <div class="callout good">
+        <h4>给 banmi 的启示</h4>
+        <p>不必一上来就上 DKT/Transformer。<strong>IRT + BKT 在中小数据量下性价比更高、可解释性更强</strong>，等数据量上来（万级用户/百万级作答）再考虑深度模型。Squirrel AI 把知识点拆到「纳米级」（初中数学 300→30000）<sup class="cite" data-refid="14">[14]</sup> 那是巨头打法，banmi 初期手工标几百个节点即可。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">间隔重复算法演进：从 SM-2 到 HLR 再到 FSRS</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>对语言/记忆类学习，「什么时候复习」和「练什么」同等重要，这由间隔重复（spaced repetition）算法决定。这一章给 banmi 的结论极明确：<strong>直接用开源 FSRS，别自研。</strong></p>
+
+      <h3>三代算法</h3>
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>SM-2（1987）—— 老祖宗，但「一刀切」</div>
+        <div class="step-body">
+          <p>SM-2 由 Piotr Wozniak 1987 年为 SuperMemo 创建，是 Anki 2023 年前的默认调度器，也是 RemNote 至今的默认<sup class="cite" data-refid="39">[39]</sup>。<strong>缺陷</strong>：所有学习者用同一套调度曲线，且有「ease hell」问题（反复评 Hard 会让间隔卡死）。<span class="conf g">已核实</span></p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">2</span>HLR（Duolingo, 2016）—— 把心理语言学塞进机器学习</div>
+        <div class="step-body">
+          <p>Duolingo 2016 年在 ACL 发表 Half-Life Regression，估计每个词在长期记忆中的「半衰期」（召回概率降到 50% 的时间点），用词本身做回归变量<sup class="cite" data-refid="1">[1]</sup>。<strong>在约 1300 万条学习记录上比 Leitner 系统预测误差减半，上线后练习留存约 +9.5%、整体活跃约 +12%</strong><sup class="cite" data-refid="2">[2]</sup><sup class="cite" data-refid="5">[5]</sup>。<span class="conf g">ACL 论文 + 官方开源</span></p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">3</span>FSRS（2022, 开源）—— 最新一代，banmi 应直接用</div>
+        <div class="step-body">
+          <p>FSRS 由 Jarrett Ye 于 2022 年开源，Anki 自 23.10（2023 年 11 月）起内置支持、后续版本对新用户默认启用<sup class="cite" data-refid="39">[39]</sup>。对每个用户的真实复习历史拟合统计模型、按预测召回概率调度。<strong>基于 5 亿+条 Anki 复习的基准显示，同等留存下比 SM-2 少需 20-30% 复习量，且对 99.5% 用户的召回预测比 SM-2 更准</strong><sup class="cite" data-refid="39">[39]</sup>。<span class="conf g">大规模基准</span></p>
+        </div>
+      </div>
+
+      <div class="callout good">
+        <h4>给 banmi 的启示（最高性价比的第一步）</h4>
+        <p>间隔重复是「即插即用」模块。<strong>直接用开源 FSRS（Python/Rust 多语言实现都有）比自研 HLR 更省事且效果更好</strong>——有 5 亿+复习数据验证，接入一两天的事。词汇/句型记忆场景应优先接入。这是 banmi 性价比最高的第一个功能。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">LLM 浪潮：对话/讲解归 LLM，评分/路径决策仍归确定性模型</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>2023 年后几乎所有产品都接了大模型，但接入方式分两派，且边界非常清晰。这是整篇报告对 banmi 最重要的架构启示。</p>
+
+      <h3>第一派：把 LLM 放在「交互层」</h3>
+      <div class="callout info">
+        <ul>
+          <li><strong>Duolingo Max</strong> 2023 年 3 月与 OpenAI 合作推出（基于 GPT-4），做 Roleplay 对话与 Explain My Answer 语法讲解；2024 年 Duocon 进一步推出基于 GPT-4o 的 Video Call with Lily 口语功能<sup class="cite" data-refid="3">[3]</sup><sup class="cite" data-refid="4">[4]</sup>。</li>
+          <li><strong>Speak / Praktika / Busuu Conversations / Babbel Speak</strong> 用 LLM 做开放式口语对话与即时反馈。</li>
+          <li><strong>Quizlet Magic Notes</strong> 用 LLM 把笔记自动转卡片。</li>
+          <li><strong>Khanmigo</strong> 用 GPT-4 做苏格拉底式引导，刻意设计成<strong>「绝不直接给答案」</strong><sup class="cite" data-refid="20">[20]</sup>。</li>
+        </ul>
+      </div>
+
+      <h3>第二派（及第一派的底层）：评分/路径决策仍归确定性模型</h3>
+      <div class="callout accent">
+        <p>Duolingo 的路径仍由 <strong>Birdbrain + HLR</strong> 决定而非 GPT；Khanmigo 的课程结构仍是可汗已有的知识地图。工程逻辑是：<strong>LLM 擅长生成自然语言，但不可靠地输出校准的概率与稳定的路径；而 IRT/BKT/知识图谱给的是可解释、可复现、可 A/B 的决策。</strong></p>
+      </div>
+
+      <div class="callout bad">
+        <h4>🔴 有力反证：Quizlet 把纯 LLM 的 Q-Chat 停用了</h4>
+        <p>Quizlet 的纯 LLM 产品 Q-Chat 于 <strong>2025 年 6 月 30 日停用</strong>，转而保留确定性的 Learn 模式 + Magic Notes 等 LLM 工具组合<sup class="cite" data-refid="33">[33]</sup><sup class="cite" data-refid="35">[35]</sup>。这侧面印证「LLM 全权当导师」尚不成熟。<span class="conf g">已核实</span></p>
+      </div>
+
+      <div class="callout warn">
+        <p>多模型混用也是趋势：<strong>Praktika 底层混用 GPT-4、Gemini、Claude、Mistral</strong> 多个 LLM 驱动虚拟人对话<sup class="cite" data-refid="36">[36]</sup>。对 banmi 而言，交互层用哪家 LLM 可以灵活切换/降级，决策层则保持单一确定性模型不动。<span class="conf y">厂商自述</span></p>
+      </div>
+
+      <div class="callout good">
+        <h4>给 banmi 的启示</h4>
+        <p>用 LLM 做<strong>对话、讲解、纠错、内容生成</strong>（性价比最高、用户体感最强），但把「这个学生现在能力多少、下一步练什么、什么时候复习」这类决策<strong>留给 IRT/BKT/FSRS</strong>，既省 token 又稳定可解释。这是 banmi 的核心架构原则。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">规模、定价与效果证据：谁真有效、谁是营销话术</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这一章帮 banmi 定价、定效果验证方法，同时教阿杰怎么识别厂商吹的牛。</p>
+
+      <h3>规模与商业化</h3>
+      <div class="callout info">
+        <p><strong>头部</strong>：Duolingo Q4 2025 DAU 52.7M（+30% YoY）、MAU 133.1M、付费 12.2M、FY2025 营收 10.4 亿美元、毛利率 72.8%<sup class="cite" data-refid="17">[17]</sup><sup class="cite" data-refid="18">[18]</sup>。<br><strong>新锐</strong>：Speak 2024 年 12 月 Series C 融 $78M、估值 10 亿美元、年化营收破 1 亿美元、下载 1000 万+<sup class="cite" data-refid="7">[7]</sup><sup class="cite" data-refid="8">[8]</sup>；ELSA 3400 万+用户、累计融资约 6000 万<sup class="cite" data-refid="9">[9]</sup>。<br><strong>通用平台</strong>：DreamBox 近 600 万学生<sup class="cite" data-refid="32">[32]</sup>、Carnegie 产品 550 万学生<sup class="cite" data-refid="29">[29]</sup>、Quizlet 6000 万月活<sup class="cite" data-refid="35">[35]</sup>、Khanmigo 一年从 6.8 万涨到 70 万<sup class="cite" data-refid="20">[20]</sup>。</p>
+      </div>
+
+      <h3>定价分层（banmi 可直接参考）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>类别</th><th>定价区间</th><th>代表</th></tr></thead>
+          <tbody>
+            <tr><td>B2C 语言 app（基础）</td><td>$7-13/月 或 ~$84-160/年</td><td>Duolingo Super、ELSA Pro、Busuu</td></tr>
+            <tr><td>B2C 含 LLM 口语对话（溢价）</td><td>$20-30/月</td><td>Speak $20、Duolingo Max $29.99</td></tr>
+            <tr><td>B2school / 学区授权</td><td>$15/学生/年（有用的锚点）</td><td>Khanmigo 学区版<sup class="cite" data-refid="20">[20]</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>效果证据分级</h3>
+      <div class="callout good">
+        <h4>🟢 高质量证据（随机对照/前后测）</h4>
+        <p>ALEKS：2018 两项研究显示<strong>通过率 +15 个百分点；达 75% 掌握度的学生在州代数测验达标概率高 2.7 倍</strong><sup class="cite" data-refid="25">[25]</sup>。Carnegie Learning：DOE 资助、<strong>18000+ 学生、147 校随机试验显示混合式使成绩增长近翻倍</strong><sup class="cite" data-refid="28">[28]</sup>。<span class="conf g">可信</span></p>
+      </div>
+      <div class="callout warn">
+        <h4>🟡 中等证据（厂商口径/小样本）</h4>
+        <p>Santa 厂商称用户学 20 小时 TOEIC 平均提分约 130 分（厂商口径，非独立验证）<sup class="cite" data-refid="13">[13]</sup>；CENTURY 与 UCL 涉及 11,000 名学生的研究称对某主题理解平均提升约 30%（厂商引用研究）<sup class="cite" data-refid="30">[30]</sup>；大量 ELSA 学术研究是小样本课堂实验<sup class="cite" data-refid="11">[11]</sup>。<span class="conf y">需谨慎</span></p>
+      </div>
+      <div class="callout bad">
+        <h4>🔴 营销话术（数字口径不一致）</h4>
+        <p>Squirrel AI 宣称 <strong>2400 万+注册学生、约 100 亿条学习行为数据</strong>，但两个数字均为厂商自述、口径未公开（注册/活跃、行为定义、时间窗口均未披露），无法独立验证<sup class="cite" data-refid="14">[14]</sup><sup class="cite" data-refid="22">[22]</sup>。<span class="conf r">高度警惕</span></p>
+      </div>
+
+      <div class="callout good">
+        <h4>给 banmi 的启示</h4>
+        <p>做效果验证时优先用<strong>随机对照或前后测</strong>，别只报留存；对外宣传用「可复现的提分/达标率」比「用户量」更可信。定价上 B2C 参考 $7-15/月，口语对话功能可溢价到 $20-30/月对标 Duolingo Max/Speak。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">产品全景：16 款主流系统逐个拆</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>下面把 16 款主流产品逐个列「干什么 / AI 机制 / 定价 / 规模 / 可信度」。可信度用 emoji：🟢 证据扎实 / 🟡 部分厂商口径 / 🔴 营销话术需警惕。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>产品</th><th>干什么</th><th>核心 AI 机制</th><th>定价</th><th>规模</th><th>可信</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Duolingo</strong><br>(Birdbrain+HLR)</td><td>全球最大语言 app，40+ 语言</td><td>Birdbrain（IRT 逻辑回归估难度+能力）+ HLR（预测遗忘半衰期）<sup class="cite" data-refid="6">[6]</sup><sup class="cite" data-refid="1">[1]</sup></td><td>Super ~$84/年；Max $168/年</td><td>DAU 52.7M、付费 12.2M、营收 $10.4 亿<sup class="cite" data-refid="17">[17]</sup></td><td>🟢</td></tr>
+            <tr><td><strong>Duolingo Max</strong></td><td>顶级订阅层，LLM 对话</td><td>GPT-4（2023 Max）做 Roleplay / Explain My Answer；GPT-4o（2024）做 Video Call with Lily；路径仍由 Birdbrain 定<sup class="cite" data-refid="3">[3]</sup><sup class="cite" data-refid="4">[4]</sup></td><td>$29.99/月 或 $168/年</td><td>部分语言开放，Max 付费数未单独披露</td><td>🟢</td></tr>
+            <tr><td><strong>Speak</strong></td><td>OpenAI 投资的口语导师，韩国起家</td><td>重度依赖 OpenAI LLM+语音做开放式口语对话与即时纠错，偏端到端<sup class="cite" data-refid="7">[7]</sup></td><td>$20/月 或 $99/年</td><td>下载 1000 万+、估值 $1B、年化营收破 1 亿<sup class="cite" data-refid="8">[8]</sup></td><td>🟢</td></tr>
+            <tr><td><strong>ELSA Speak</strong></td><td>AI 发音教练，音素级反馈</td><td>非母语者语料训练的语音识别做音素级发音评分，自适应加练常错音<sup class="cite" data-refid="9">[9]</sup><sup class="cite" data-refid="11">[11]</sup></td><td>年付约 $159.99（~$13.33/月）</td><td>下载 2500 万+/用户 3400 万+，195 国<sup class="cite" data-refid="9">[9]</sup></td><td>🟢</td></tr>
+            <tr><td><strong>Santa</strong><br>(Riiid)</td><td>韩国 TOEIC/TOEFL 备考 app</td><td>Transformer 知识追踪 SAKT→SAINT→SAINT+（加 elapsed/lag time），EdNet 数据集<sup class="cite" data-refid="19">[19]</sup><sup class="cite" data-refid="15">[15]</sup></td><td>免费+应用内课程包</td><td>EdNet 全量约 78 万用户/1.31 亿交互；学 20h 提分约 130<sup class="cite" data-refid="13">[13]</sup></td><td>🟢</td></tr>
+            <tr><td><strong>Khanmigo</strong><br>(Khan Academy)</td><td>GPT-4 辅导助手，学生+教师两端</td><td>GPT-4 微调，苏格拉底式提问、绝不直接给答案；教师端 dashboard<sup class="cite" data-refid="20">[20]</sup></td><td>个人 $4/月；学区 $15/生/年</td><td>一年 6.8 万→70 万+，380+ 学区<sup class="cite" data-refid="20">[20]</sup></td><td>🟢</td></tr>
+            <tr><td><strong>Squirrel AI</strong><br>(松鼠AI)</td><td>中国 K12 自适应，软硬结合</td><td>知识点拆到纳米级（300→30000）+知识图谱+MCM 图谱，号称 LAM 大自适应模型<sup class="cite" data-refid="14">[14]</sup><sup class="cite" data-refid="21">[21]</sup></td><td>线下中心+订阅</td><td>宣称 2400 万+学生/100 亿行为（厂商自述，口径未公开）<sup class="cite" data-refid="22">[22]</sup></td><td>🟡</td></tr>
+            <tr><td><strong>ALEKS</strong><br>(McGraw Hill)</td><td>老牌自适应平台，数学/化学等</td><td>知识空间理论 KST，诊断 25-30 题定位状态，只推知识边界题<sup class="cite" data-refid="24">[24]</sup></td><td>机构/课程授权制</td><td>通过率 +15pp、达标概率 2.7 倍<sup class="cite" data-refid="25">[25]</sup></td><td>🟢</td></tr>
+            <tr><td><strong>Knewton Alta</strong><br>(Wiley)</td><td>全自适应教材平台，高校为主</td><td>IRT+时序加权 Proficiency Model，贝叶斯知识图谱 proficiency propagation<sup class="cite" data-refid="26">[26]</sup></td><td>教材授权制</td><td>宣称数十亿数据点；在校规模未单独披露</td><td>🟡</td></tr>
+            <tr><td><strong>Carnegie MATHia</strong><br>/ LiveHint AI</td><td>中学数学智能辅导（6-12 年级）</td><td>认知导师 model tracing + BKT 类 knowledge tracing；LiveHint AI 用 25 年数据训练的生成式导师<sup class="cite" data-refid="27">[27]</sup><sup class="cite" data-refid="29">[29]</sup></td><td>机构/学区授权制</td><td>550 万+用户、12 亿+道题；随机试验成绩近翻倍<sup class="cite" data-refid="28">[28]</sup></td><td>🟢</td></tr>
+            <tr><td><strong>CENTURY Tech</strong></td><td>英国 AI 平台，AI+神经科学</td><td>内容拆成数千 nuggets，持续算强弱项推荐；偏自适应推荐引擎，算法未充分公开<sup class="cite" data-refid="30">[30]</sup></td><td>机构订阅制</td><td>UCL 11,000 学生研究称理解 +30%（厂商引用）<sup class="cite" data-refid="31">[31]</sup></td><td>🟡</td></tr>
+            <tr><td><strong>DreamBox</strong><br>(Discovery Ed)</td><td>K-8 数学/阅读自适应</td><td>Intelligent Adaptive Learning：捕获每次 click/keystroke/停留时长，评估解题策略<sup class="cite" data-refid="32">[32]</sup></td><td>机构授权+家庭订阅</td><td>近 600 万学生、60 万+教师、4000+ 学区<sup class="cite" data-refid="32">[32]</sup></td><td>🟢</td></tr>
+            <tr><td><strong>Quizlet</strong><br>(Magic Notes)</td><td>全球最大记忆卡平台</td><td>Learn 模式自适应刷题；Magic Notes LLM 转卡片；Q-Chat 已 2025.6 停用<sup class="cite" data-refid="33">[33]</sup><sup class="cite" data-refid="35">[35]</sup></td><td>Plus ~$7.99/月 或 $35.99/年</td><td>6000 万月活、5 亿+学习集<sup class="cite" data-refid="35">[35]</sup></td><td>🟢</td></tr>
+            <tr><td><strong>Praktika</strong></td><td>伦敦 AI 虚拟人语言导师</td><td>AI 虚拟人对话（多口音），多模态；底层混用 GPT-4/Gemini/Claude/Mistral<sup class="cite" data-refid="36">[36]</sup></td><td>应用内订阅</td><td>宣称月活 120 万、下载 1400 万+（厂商自述）<sup class="cite" data-refid="36">[36]</sup></td><td>🟡</td></tr>
+            <tr><td><strong>Babbel</strong> / <strong>Busuu</strong></td><td>欧洲主流语言订阅 app</td><td>间隔重复+课程式教学，2025 加 AI 口语模块（Babbel Speak / Busuu Conversations 按 CEFR 生成对话）<sup class="cite" data-refid="37">[37]</sup><sup class="cite" data-refid="38">[38]</sup></td><td>Babbel ~$10/月；Busuu ~$6.95/月</td><td>Busuu Google Play 5000 万+下载；Babbel 千万级<sup class="cite" data-refid="37">[37]</sup></td><td>🟡</td></tr>
+            <tr><td><strong>Memrise</strong><br>(MemBot)</td><td>词汇/语言 app，AI 聊天伙伴</td><td>MemBot LLM 对话伙伴，结合自有间隔重复词汇系统<sup class="cite" data-refid="40">[40]</sup></td><td>应用内订阅</td><td>规模随来源，量级千万级</td><td>🟡</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <p><strong>怎么读这张表</strong>：竖着看「核心 AI 机制」列，会发现 16 款产品其实只在重复 Ch4 的五条路线 + Ch6 的 LLM 交互层。banmi 不需要发明新东西，只需挑对组合。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">知识追踪算法深挖：BKT → DKT → Transformer</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这一章给想理解技术细节的人，banmi 工程师可当作选型参考读。知识追踪（Knowledge Tracing, KT）就是「根据历史作答序列，预测学生对每个知识点的掌握概率」。</p>
+
+      <h3>三代知识追踪</h3>
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>BKT（贝叶斯知识追踪）—— 经典、可解释</div>
+        <div class="step-body">
+          <p>把每个技能建成隐马尔可夫模型，有四个参数（初始掌握、学习率、猜对率、失误率）。Carnegie MATHia 的 Skillometer 进度条就是 BKT 类方法的可视化<sup class="cite" data-refid="27">[27]</sup>。<strong>优点</strong>：参数少、可解释、小数据量好用；<strong>缺点</strong>：每个技能独立建模，不捕获技能间关系。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">2</span>DKT（深度知识追踪）—— 2015 Stanford 起点</div>
+        <div class="step-body">
+          <p>Piech 等 2015 年用 LSTM 一次性建模所有技能随时间的演化<sup class="cite" data-refid="16">[16]</sup>，能隐式捕获技能间关系。<strong>缺点</strong>：黑盒、需要更多数据、训练成本高。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">3</span>Transformer KT（SAKT/SAINT/SAINT+）—— Riiid 推到极致</div>
+        <div class="step-body">
+          <p>Riiid 的演进路线：<strong>SAKT</strong>（首个自注意力知识追踪）→ <strong>SAINT</strong>（encoder-decoder 分流处理题目与作答）→ <strong>SAINT+</strong>（加入两个时序特征：elapsed time 作答用时、lag time 两次学习间隔）<sup class="cite" data-refid="19">[19]</sup>。早期 Riiid 还用 Collaborative Filtering 预测每题正确概率来推荐题目<sup class="cite" data-refid="13">[13]</sup>。数据来自自建 <strong>EdNet 数据集</strong>（全量约 78 万用户、1.31 亿条交互、16,175 个内容项）<sup class="cite" data-refid="15">[15]</sup>。</p>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>再次提醒（Ch4 已说过）</strong>：学界发现在低维输入下，IRT 与改进版 BKT 有时反而超越原始 DKT<sup class="cite" data-refid="13">[13]</sup>。算法越复杂≠效果越好，要看数据量和输入维度。<span class="conf y">学术争议</span></p>
+      </div>
+
+      <div class="callout good">
+        <h4>给 banmi 的选型路线</h4>
+        <p><strong>阶段一</strong>：IRT + BKT（数据量小、可解释、好调试）。<strong>阶段二</strong>：数据上万用户/百万作答后，再评估上 DKT/Transformer KT（参考 Riiid SAINT+ 加 elapsed/lag time 特征）。EdNet 是公开数据集，可用来预训练或做基准对比。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">口语 / 发音类的特殊性：音素级评分 + LLM 对话</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>如果 banmi 主打英语口语，这一章的机制要特别留意——口语类的行为信号和评分方式跟刷题完全不同。</p>
+
+      <h3>发音评分 ≠ 简单对错</h3>
+      <div class="callout accent">
+        <p>ELSA 的核心是<strong>专门用「非母语英语者语料」训练的语音识别引擎</strong>做音素级（phoneme-level）发音评分——逐词逐音标出哪个具体音发错（非简单对错），给可视化反馈，并根据用户长期发音错误模式自适应加练常错音素<sup class="cite" data-refid="9">[9]</sup><sup class="cite" data-refid="11">[11]</sup>。它还提供 ELSA API 给第三方<sup class="cite" data-refid="10">[10]</sup>。<span class="conf g">官方+API</span></p>
+      </div>
+
+      <h3>口语对话靠 LLM 端到端</h3>
+      <div class="callout info">
+        <p>Speak 重度依赖 OpenAI LLM + 语音技术做开放式口语对话与即时纠错，偏端到端，公开的确定性知识追踪机制较少<sup class="cite" data-refid="7">[7]</sup>；Praktika 用 AI 虚拟人 avatar（带语气/情绪、多口音）做拟真对话，支持多模态（上传照片/音频/视频/文档作为对话素材）<sup class="cite" data-refid="36">[36]</sup>；Busuu Conversations 按 CEFR 等级动态生成对话、角色扮演真实场景<sup class="cite" data-refid="37">[37]</sup>。</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ banmi 做口语要权衡的取舍</h4>
+        <p>口语类天然偏「LLM 端到端」，确定性追踪较弱。如果 banmi 想兼顾「可量化进步」，建议<strong>把发音评分（音素级，确定性）和对话流利度（LLM）分开追踪</strong>：发音用类 ELSA 的确定性评分喂进 BKT（哪些音素掌握了），对话用 LLM 给定性反馈但不直接当能力分。否则容易陷入「学生爽聊但没量化进步」的困境。</p>
+      </div>
+
+      <div class="callout good">
+        <h4>给 banmi 的启示</h4>
+        <p>口语场景的「富埋点」要包含<strong>音素级评分数据</strong>——这是后续做发音知识追踪的弹药。第三方语音评分 API（如 ELSA API，或 Azure/Google 的发音评估）可直接接入，不必自研语音识别引擎。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">效果证据分级：别被厂商数字忽悠</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>这一章单独把「效果证据」拎出来分级，因为 banmi 将来既要看竞品宣传、又要设计自己的效果验证，必须有判断力。</p>
+
+      <h3>三个等级</h3>
+      <div class="callout good">
+        <h4>🟢 第一级：随机对照试验 / 大样本前后测（最可信）</h4>
+        <ul>
+          <li>Carnegie Learning：DOE 资助、18000+ 学生、147 校<strong>随机试验</strong>，混合式成绩增长近翻倍<sup class="cite" data-refid="28">[28]</sup>。</li>
+          <li>ALEKS：2018 两项研究，通过率 +15 个百分点，达 75% 掌握度者州测达标概率高 2.7 倍<sup class="cite" data-refid="25">[25]</sup>。</li>
+        </ul>
+        <p>这类有对照组、大样本、第三方/政府资助，是 banmi 该对标的金标准。</p>
+      </div>
+      <div class="callout warn">
+        <h4>🟡 第二级：厂商口径 / 小样本学术研究（需谨慎）</h4>
+        <ul>
+          <li>Santa：学 20 小时 TOEIC 提分约 130（厂商口径，无独立验证）<sup class="cite" data-refid="13">[13]</sup>。</li>
+          <li>CENTURY：UCL 研究称理解 +30%，但属厂商引用研究<sup class="cite" data-refid="30">[30]</sup>。</li>
+          <li>ELSA：多项 2025 学术研究证实提升发音，但多为<strong>小样本课堂实验</strong><sup class="cite" data-refid="11">[11]</sup>。</li>
+        </ul>
+        <p>方向性参考可以，但别当铁证。</p>
+      </div>
+      <div class="callout bad">
+        <h4>🔴 第三级：营销话术 / 口径不一致（高度警惕）</h4>
+        <p>Squirrel AI 的「2400 万+学生 / 约 100 亿条学习行为」——两个数字均为厂商自述、口径未公开，无法独立验证<sup class="cite" data-refid="14">[14]</sup><sup class="cite" data-refid="22">[22]</sup>。遇到「巨大用户量 + 巨大数据量」但没有对照试验佐证效果的，一律打折看。</p>
+      </div>
+
+      <div class="callout purple">
+        <h4>给 banmi 的效果验证原则</h4>
+        <p>对外宣传和内部优化都优先用「<strong>前后测提分 / 目标达标率 / 留存对照</strong>」，对标 ALEKS（通过率提升百分点）和 Carnegie（随机对照）的做法，而非只报 DAU/用户量。哪怕样本小，<strong>有对照组的小实验</strong>也比没对照的大数字可信。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">banmi 路线建议（决策树）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>前面 11 章都是行业分析，这一章和下一章才是给阿杰的真正答案。先用一棵决策树定架构，下章给可执行清单。</p>
+
+      <h3>核心架构：分层（这是整篇最重要的一条建议）</h3>
+      <div class="tree">
+        <div class="node q">banmi 系统架构怎么分？</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl y">LLM 交互层</span> 用 GPT-4o / Claude / Gemini 做：对话练习、发音/语法纠错、Explain-My-Answer 式讲解、自动生成例句/题目。<strong>用户体感最强、最省自研成本。</strong></div>
+        <div class="step-arrow">+</div>
+        <div class="node"><span class="lbl y">确定性决策层</span> 用轻量 IRT（估能力-难度）+ BKT（追踪每个知识点掌握度）决定下一题练什么；用 FSRS 排复习。<strong>可解释、可复现、可 A/B。</strong></div>
+        <div class="step-arrow">⛔</div>
+        <div class="node"><span class="lbl n">绝不</span>让 LLM 直接输出「学生能力分」或「下一步路径」——它不可靠且不可复现（Quizlet Q-Chat 停用就是反证<sup class="cite" data-refid="35">[35]</sup>）。</div>
+      </div>
+
+      <h3>技术路线分阶段决策树</h3>
+      <div class="tree">
+        <div class="node q">现在数据量多少？</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl m">阶段一</span> 用户/作答量小 → <strong>IRT + BKT + FSRS</strong>。数据量小、可解释、好调试。先把闭环跑通。</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">数据上万用户 / 百万作答了吗？</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl y">是</span><span class="lbl m">阶段二</span> 评估上 <strong>DKT / Transformer 知识追踪</strong>（参考 Riiid SAINT+ 加 elapsed/lag time 特征<sup class="cite" data-refid="19">[19]</sup>）。但先做 A/B 对比，因为低数据量下传统模型可能更优<sup class="cite" data-refid="13">[13]</sup>。</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl n">否</span> 留在阶段一，别一上来追深度模型。</div>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠️ banmi 学习者地域提醒</h4>
+        <p>LLM 交互层选型要看 banmi 面向谁：<strong>面向海外华人/留学生</strong>，直接用 GPT-4o/Claude/Gemini + 国际支付；<strong>面向国内用户</strong>，要评估国际模型可用性与合规，可能需用国内模型（如通义/豆包/DeepSeek）替代交互层，但<strong>分层架构不变</strong>——决策层始终是自研的确定性模型，不依赖任何特定 LLM。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">banmi 可执行清单（按优先级排序）</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <p>把上一章的架构落成具体的「先做什么、再做什么」。按性价比和依赖关系排序，阿杰可以照单子推进。</p>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>立刻接入开源 FSRS 做复习调度（最高性价比）</div>
+        <div class="step-body">
+          <p>不要自研 Half-Life Regression。FSRS 有成熟开源实现（Python/Rust 多语言）、有 5 亿+复习数据验证<sup class="cite" data-refid="39">[39]</sup>，接入一两天的事，效果即超过自研。词汇/句型记忆场景优先接入。<strong>这是 banmi 性价比最高的第一步。</strong></p>
+          <div class="check-box">词卡/句型的「下次复习时间」由 FSRS 算，而不是固定间隔或 SM-2。</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">2</span>从第一天起做「富埋点」</div>
+        <div class="step-body">
+          <p>每次答题不仅记对错，还记：<strong>作答用时、两次学习的间隔、是否点过提示/看过答案、是否中途放弃</strong>，口语场景加<strong>音素级评分</strong>。这些是后续做精细知识追踪和 A/B 实验的弹药，采集成本几乎为零，但事后补采无法回溯<sup class="cite" data-refid="19">[19]</sup><sup class="cite" data-refid="32">[32]</sup>。</p>
+          <div class="check-box">数据库里每条作答记录有 elapsed_time、lag_time、used_hint、abandoned 等字段。</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">3</span>搭分层架构：LLM 交互层 + 确定性决策层</div>
+        <div class="step-body">
+          <p>LLM 层用 GPT-4o/Claude 做对话、纠错、讲解、生成例句/题目；决策层用轻量 IRT + BKT 决定下一题练什么。<strong>绝不让 LLM 直接输出能力分或路径。</strong></p>
+          <div class="check-box">「下一题练什么」的接口由确定性模型返回，LLM 只负责把内容包装成对话/讲解。</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">4</span>建一张轻量知识图谱 + 先修依赖</div>
+        <div class="step-body">
+          <p>仿 Knewton 的 proficiency propagation<sup class="cite" data-refid="26">[26]</sup>——把语法点/词汇/技能连成有向图标注先修关系，当某节点掌握度低时能向上游定位「是不是先修知识没打好」并精准补救，而不是机械推下一课。<strong>初期手工标几百个节点即可，不必学 Squirrel AI 拆到「纳米级」</strong><sup class="cite" data-refid="14">[14]</sup>。</p>
+          <div class="check-box">某知识点反复出错时，系统会检查并提示其先修节点是否未掌握。</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">5</span>效果验证用可复现指标 + 定价分层</div>
+        <div class="step-body">
+          <p>对外宣传和内部优化都优先用「前后测提分/目标达标率/留存对照」，对标 ALEKS<sup class="cite" data-refid="25">[25]</sup> 和 Carnegie<sup class="cite" data-refid="28">[28]</sup> 的做法，而非只报 DAU。定价 B2C 参考 $7-15/月，口语对话功能可溢价到 $20-30/月对标 Duolingo Max/Speak；若做 B2school 参考 Khanmigo 的 $15/生/年锚点<sup class="cite" data-refid="20">[20]</sup>。</p>
+          <div class="check-box">有一组带对照的前后测数据，而不是只有留存曲线。</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">6</span>（数据上量后）评估上 DKT/Transformer</div>
+        <div class="step-body">
+          <p>数据上万用户/百万作答后，再评估上 DKT/Transformer 知识追踪（参考 Riiid SAINT+<sup class="cite" data-refid="19">[19]</sup>）。但先做 A/B 对比——学界证据显示低数据量下传统模型反而更优<sup class="cite" data-refid="13">[13]</sup>。<strong>别一上来追深度模型。</strong></p>
+          <div class="check-box">上深度模型前有一份「DKT vs IRT+BKT」的离线 A/B 对比报告。</div>
+        </div>
+      </div>
+
+      <div class="callout good">
+        <p><strong>一句话总纲</strong>：FSRS 先上（第 1 步）→ 富埋点同步做（第 2 步）→ 分层架构定调（第 3 步）→ 轻量知识图谱补强（第 4 步）→ 用对照试验验证效果（第 5 步）→ 数据上量再上深度模型（第 6 步）。前五步都是「一两周内能动手」的，第六步是远期。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq">
+    <h2><span class="num">?</span><span class="title-text">FAQ · 常见疑问</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">一句话：banmi 该先做什么？</span><span class="toggle">+</span></div><div class="faq-a"><p>接入开源 <strong>FSRS</strong> 做复习调度（一两天的事、5 亿+数据验证、比自研 HLR 强），同时从第一天做<strong>富埋点</strong>（除对错，还记作答用时、间隔、是否用提示/放弃）。这两件性价比最高、最不该拖。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">能不能干脆让 GPT-4o/Claude 全权当导师，路径也让它规划？</span><span class="toggle">+</span></div><div class="faq-a"><p>不建议。LLM 不可靠地输出校准概率和稳定路径，不可复现、不可 A/B。<strong>Quizlet 把纯 LLM 的 Q-Chat 在 2025 年 6 月停用</strong>就是反证<sup class="cite" data-refid="35">[35]</sup>。让 LLM 管对话/讲解/纠错，路径决策交给 IRT/BKT/FSRS。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">IRT、BKT、DKT 到底选哪个？</span><span class="toggle">+</span></div><div class="faq-a"><p>中小数据量下 <strong>IRT + BKT</strong>，可解释、好调试、性价比高。等数据上万用户/百万作答后再评估 DKT/Transformer，且要先 A/B 对比——学界发现低维输入下 IRT/改进 BKT 有时反而超过原始 DKT<sup class="cite" data-refid="13">[13]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">FSRS 和 SM-2、HLR 有什么区别？</span><span class="toggle">+</span></div><div class="faq-a"><p>SM-2（1987）一刀切、有 ease hell 问题；HLR（Duolingo 2016）按词估遗忘半衰期、要自研；<strong>FSRS（2022 开源，Anki 2023.11 设默认）</strong>按每个用户复习历史拟合，同等留存下比 SM-2 少需 20-30% 复习量、对 99.5% 用户预测更准<sup class="cite" data-refid="39">[39]</sup>。banmi 直接用 FSRS。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">行为追踪到底要采哪些数据？</span><span class="toggle">+</span></div><div class="faq-a"><p>四类：① 对错；② 时序（作答用时 elapsed time、间隔时间 lag time）；③ 点击流/过程（是否用提示、是否放弃、每步动作）；④ 模态特有（口语的音素级评分）。Riiid SAINT+、DreamBox、MATHia 都靠后三类区分「真懂」和「蒙对」<sup class="cite" data-refid="19">[19]</sup><sup class="cite" data-refid="32">[32]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">做英语口语，发音怎么评分？</span><span class="toggle">+</span></div><div class="faq-a"><p>用<strong>音素级（phoneme-level）</strong>评分，逐音标出哪个具体音发错，而非二元对错（ELSA 的做法<sup class="cite" data-refid="9">[9]</sup>）。可直接接第三方语音评估 API（ELSA API / Azure / Google），不必自研语音识别。发音评分喂 BKT，对话流利度由 LLM 给定性反馈，两者分开追踪。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">知识图谱要做到 Squirrel AI 那种「纳米级」吗？</span><span class="toggle">+</span></div><div class="faq-a"><p>不用。Squirrel AI 把初中数学拆到约 30000 个组件<sup class="cite" data-refid="14">[14]</sup> 是巨头打法。banmi <strong>初期手工标几百个节点</strong>、标好先修依赖即可，做到「掌握度低时能向上游定位先修缺口」就够了。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">banmi 定价定多少合理？</span><span class="toggle">+</span></div><div class="faq-a"><p>B2C 基础参考 <strong>$7-15/月</strong>（对标 Duolingo Super、ELSA、Busuu）；含 LLM 口语对话可溢价到 <strong>$20-30/月</strong>（对标 Speak $20、Duolingo Max $29.99）；若做 B2school 参考 Khanmigo 学区版 <strong>$15/生/年</strong><sup class="cite" data-refid="20">[20]</sup>。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">怎么验证 banmi 真的有效，而不是自嗨？</span><span class="toggle">+</span></div><div class="faq-a"><p>用<strong>有对照组的前后测</strong>，对标 ALEKS（通过率提升百分点）和 Carnegie（随机对照、成绩近翻倍）<sup class="cite" data-refid="25">[25]</sup><sup class="cite" data-refid="28">[28]</sup>。哪怕样本小，有对照的小实验也比没对照的大数字可信。别只报 DAU/留存。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">面向国内用户，LLM 用不了 GPT/Claude 怎么办？</span><span class="toggle">+</span></div><div class="faq-a"><p>分层架构帮你解耦：交互层可换国内模型（通义/豆包/DeepSeek 等），<strong>决策层始终是自研确定性模型，不依赖任何特定 LLM</strong>。所以换 LLM 不影响核心能力追踪与路径规划。Praktika 就混用 GPT-4/Gemini/Claude/Mistral 多模型<sup class="cite" data-refid="36">[36]</sup>，可灵活切换。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">为什么 Duolingo 要自研 Birdbrain 和 HLR，banmi 不用？</span><span class="toggle">+</span></div><div class="faq-a"><p>Duolingo 2016 年起就在做、有 1300 万+学习记录<sup class="cite" data-refid="1">[1]</sup>，自研是历史包袱也是护城河。banmi 起步阶段没必要——<strong>FSRS 开源且更新、IRT/BKT 有成熟库</strong>，直接站在巨人肩上，把精力放在内容和体验上。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">EdNet 这类公开数据集对 banmi 有用吗？</span><span class="toggle">+</span></div><div class="faq-a"><p>有用。EdNet（全量约 78 万用户、1.31 亿条交互<sup class="cite" data-refid="15">[15]</sup>）是 Riiid 开源的，可用来<strong>预训练知识追踪模型、做基准对比</strong>，或在 banmi 自己数据还少时冷启动。但注意它是 TOEIC 备考场景，迁移到 banmi 的内容体系要做适配。</p></div></div>
+
+    </div>
+  </section>
+
+  <!-- ===== References ===== -->
+  <section class="chapter" id="refs">
+    <h2><span class="num">§</span><span class="title-text">References</span><span class="caret">▼</span></h2>
+    <div class="chapter-body">
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://research.duolingo.com/papers/settles.acl16.pdf" target="_blank" rel="noopener">A Trainable Spaced Repetition Model for Language Learning (Settles &amp; Meeder, ACL 2016)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 4 次</span></li>
+        <li id="ref-2"><a href="https://github.com/duolingo/halflife-regression" target="_blank" rel="noopener">duolingo/halflife-regression (GitHub)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 1 次</span></li>
+        <li id="ref-3"><a href="https://blog.duolingo.com/duolingo-max/" target="_blank" rel="noopener">Duolingo Max Uses OpenAI's GPT-4 For New Learning Features (Duolingo Blog)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 4 次</span></li>
+        <li id="ref-4"><a href="https://www.techmeme.com/240924/p31" target="_blank" rel="noopener">Duolingo unveils AI 'video call' with Lily mascot, $30/mo Max tier, GPT-4o (Techmeme/Forbes)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 2 次</span></li>
+        <li id="ref-5"><a href="https://blog.duolingo.com/how-we-learn-how-you-learn/" target="_blank" rel="noopener">How we learn how you learn (Duolingo Blog - HLR explainer)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 3 次</span></li>
+        <li id="ref-6"><a href="https://spectrum.ieee.org/duolingo" target="_blank" rel="noopener">How Duolingo's AI Learns What You Need to Learn (IEEE Spectrum - Birdbrain/IRT)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 3 次</span></li>
+        <li id="ref-7"><a href="https://techcrunch.com/2024/12/10/openai-backed-speak-raises-78m-at-1b-valuation-to-help-users-learn-languages-by-talking-out-loud/" target="_blank" rel="noopener">OpenAI-backed Speak raises $78M at $1B valuation (TechCrunch)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 3 次</span></li>
+        <li id="ref-8"><a href="https://www.speak.com/blog/series-c" target="_blank" rel="noopener">Raising $78M Series C at a $1B valuation (Speak Blog)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 2 次</span></li>
+        <li id="ref-9"><a href="https://elsaspeak.com/en/product/" target="_blank" rel="noopener">ELSA Speak Pricing &amp; Features (ELSA official product page)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 6 次</span></li>
+        <li id="ref-10"><a href="https://elsaspeak.com/en/elsa-api/" target="_blank" rel="noopener">ELSA API (ELSA official)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 1 次</span></li>
+        <li id="ref-11"><a href="https://pubmed.ncbi.nlm.nih.gov/39787153/" target="_blank" rel="noopener">English major students' satisfaction with ELSA Speak in pronunciation courses (PubMed)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 4 次</span></li>
+        <li id="ref-12"><a href="https://techcrunch.com/2023/09/12/elsa-series-c/" target="_blank" rel="noopener">English learning platform ELSA lands $23M Series C (TechCrunch)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 1 次</span></li>
+        <li id="ref-13"><a href="https://www.aitutorsanta.com/performance-management/" target="_blank" rel="noopener">Performance Management - Santa by Riiid (official)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 7 次</span></li>
+        <li id="ref-14"><a href="https://en.wikipedia.org/wiki/Squirrel_AI" target="_blank" rel="noopener">Squirrel AI (Wikipedia)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 6 次</span></li>
+        <li id="ref-15"><a href="https://github.com/riiid/ednet" target="_blank" rel="noopener">riiid/ednet: EdNet dataset (GitHub)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 3 次</span></li>
+        <li id="ref-16"><a href="https://stanford.edu/~cpiech/bio/papers/deepKnowledgeTracing.pdf" target="_blank" rel="noopener">Deep Knowledge Tracing (Piech et al., Stanford, NeurIPS 2015)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 3 次</span></li>
+        <li id="ref-17"><a href="https://investors.duolingo.com/static-files/961ce633-3cee-49d0-bd7a-2c63731d45fb" target="_blank" rel="noopener">Duolingo Q4/FY2025 Shareholder Letter (investors.duolingo.com)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 3 次</span></li>
+        <li id="ref-18"><a href="https://www.sec.gov/Archives/edgar/data/1562088/000162828026012246/q4fy25duolingo12-31x25shar.htm" target="_blank" rel="noopener">Duolingo Inc. Q4/FY2025 8-K (SEC EDGAR)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 2 次</span></li>
+        <li id="ref-19"><a href="https://arxiv.org/pdf/2010.12042" target="_blank" rel="noopener">SAINT+: Integrating Temporal Features for EdNet Correctness Prediction (Riiid, arXiv)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 8 次</span></li>
+        <li id="ref-20"><a href="https://aiforcause.org/stories/khanmigo-ai-tutor" target="_blank" rel="noopener">Khanmigo Went from 68,000 Users to 700,000 in One Year (AI for Cause)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 7 次</span></li>
+        <li id="ref-21"><a href="https://time.com/collections/best-inventions-2025/7318298/squirrel-ai-intelligent-adaptive-learning-system/" target="_blank" rel="noopener">Squirrel Ai Intelligent Adaptive Learning System (TIME Best Inventions 2025)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 1 次</span></li>
+        <li id="ref-22"><a href="https://hundred.org/en/innovations/squirrel-ai-learning" target="_blank" rel="noopener">Squirrel AI Learning (HundrED Foundation profile)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 2 次</span></li>
+        <li id="ref-23"><a href="https://pitchbook.com/profiles/company/230036-41" target="_blank" rel="noopener">Squirrel Ai Learning funding &amp; valuation (PitchBook)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 1 次</span></li>
+        <li id="ref-24"><a href="https://beginnersinai.org/aleks-explained/" target="_blank" rel="noopener">ALEKS Explained: McGraw Hill's Knowledge Space Math (Beginners in AI)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 2 次</span></li>
+        <li id="ref-25"><a href="https://www.prnewswire.com/news-releases/two-new-research-studies-show-positive-results-for-mcgraw-hills-aleks-adaptive-learning-technology-300697285.html" target="_blank" rel="noopener">Two New Research Studies Show Positive Results for McGraw-Hill's ALEKS (PR Newswire)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 4 次</span></li>
+        <li id="ref-26"><a href="https://www.wiley.com/en-us/grow/teach-learn/teacher-resources/courseware/knewton-alta/resources/alta-blog-how-does-knewton-proficiency-model-estimate/" target="_blank" rel="noopener">How does Knewton's Proficiency Model estimate student knowledge in alta (Wiley/Knewton)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 4 次</span></li>
+        <li id="ref-27"><a href="https://www.carnegielearning.com/blog/mathia-ai" target="_blank" rel="noopener">How does MATHia use AI? (Carnegie Learning Blog)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 5 次</span></li>
+        <li id="ref-28"><a href="https://www.businesswire.com/news/home/20190416005618/en/MATHia-Carnegie-Learning-Named-%E2%80%9CBest-Artificial-Intelligence" target="_blank" rel="noopener">MATHia by Carnegie Learning Named Best AI Solution in 2019 EdTech Awards (Business Wire)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 4 次</span></li>
+        <li id="ref-29"><a href="https://carnegielearning.medium.com/carnegie-learning-announces-livehint-ai-the-first-generative-ai-math-tutor-trained-to-think-like-517a910615e0" target="_blank" rel="noopener">Carnegie Learning Announces LiveHint AI (Medium / Carnegie Learning)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 2 次</span></li>
+        <li id="ref-30"><a href="https://www.unesco.org/en/articles/century-ai-powered-teaching-and-learning-platform" target="_blank" rel="noopener">CENTURY, an AI-powered teaching and learning platform (UNESCO)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 3 次</span></li>
+        <li id="ref-31"><a href="https://www.century.tech/" target="_blank" rel="noopener">CENTURY Online Learning (official site)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 1 次</span></li>
+        <li id="ref-32"><a href="https://dreamboxlearning.zendesk.com/hc/en-us/articles/27281843188243-How-Does-DreamBox-Math-Work" target="_blank" rel="noopener">How Does DreamBox Math Work? (DreamBox/Discovery Education support)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 4 次</span></li>
+        <li id="ref-33"><a href="https://quizlet.com/blog/meet-q-chat" target="_blank" rel="noopener">Introducing Q-Chat, the world's first AI tutor built with OpenAI's ChatGPT (Quizlet Blog)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 2 次</span></li>
+        <li id="ref-34"><a href="https://fortune.com/education/articles/quizlet-ai-powered-tools-q-chat-magic-notes-quick-summary-gpt/" target="_blank" rel="noopener">Quizlet uses AI: Q-Chat, Magic Notes, Quick Summary (Fortune Education)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 1 次</span></li>
+        <li id="ref-35"><a href="https://aiflowreview.com/quizlets-review-2025/" target="_blank" rel="noopener">Quizlets Review for 2025 (AI Flow Review - Q-Chat discontinuation, 60M MAU)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 5 次</span></li>
+        <li id="ref-36"><a href="https://techcrunch.com/2024/05/22/praktika-raises-35-5m-to-use-ai-avatars-to-make-learning-languages-feel-more-natural/" target="_blank" rel="noopener">Praktika raises $35.5M to use AI avatars for language learning (TechCrunch)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 4 次</span></li>
+        <li id="ref-37"><a href="https://www.busuu.com/en/languages/language-learning-with-busuu-conversations" target="_blank" rel="noopener">AI Language Learning with Busuu Conversations (Busuu official)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 3 次</span></li>
+        <li id="ref-38"><a href="https://guide2fluency.com/comparisons/babbel-vs-memrise/" target="_blank" rel="noopener">Babbel vs Memrise language app comparison 2025 (Guide2Fluency)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 1 次</span></li>
+        <li id="ref-39"><a href="https://www.neurako.com/blog/fsrs-vs-sm2-spaced-repetition-algorithms-compared" target="_blank" rel="noopener">FSRS vs SM-2: Why the Algorithm Behind Your Flashcard App Matters (Neurako)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 5 次</span></li>
+        <li id="ref-40"><a href="https://www.memrise.com/blog/introducing-membot" target="_blank" rel="noopener">Memrise: Introducing MemBot (Memrise Blog)</a><span class="ref-meta">· 访问 2026-06-01 · 引用 1 次</span></li>
+      </ol>
+      <div class="callout info">
+        <h4>📊 调研量与诚实度</h4>
+        <p>本次横评 <strong>16 款主流 AI 学习产品 + 40 篇来源</strong>（含 ACL/NeurIPS/arXiv 原始论文、Duolingo 股东信 + SEC 8-K、各厂官方文档、TechCrunch 融资报道、Wikipedia/PitchBook 交叉核实）。<strong>核心结论高度收敛</strong>：分层架构（LLM 交互层 + 确定性决策层）是行业共识，Quizlet 停用纯 LLM 的 Q-Chat 是有力反证。</p>
+        <p><strong>诚实标注未尽之处</strong>：① 多数厂商「效果数字」是自述口径，已在 Ch7/Ch11 分级标 🟢🟡🔴，Squirrel AI 的「2400 万学生/100 亿行为」明确标为厂商自述、未独立验证；② ELSA、CENTURY 的学术研究多为小样本课堂实验，方向性参考；③ Knewton/Babbel/Memrise 的在校/用户规模随分发渠道，未单独披露处已注明；④ Praktika 的月活/营收为厂商自述未独立验证；⑤ 各产品定价随地区/促销浮动，以本报告访问日为准；⑥ banmi 建议为基于行业最佳实践的工程推导，具体实现需结合 banmi 实际场景与数据落地验证。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    无忌 · Deep Research · L4 · 2026-06-01 · 为阿杰的 banmi（AI 时代英语/通用学习系统）而做<br>
+    核心结论：分层架构（LLM 管对话/讲解 + 确定性模型管评分/路径）· FSRS 优先 · 富埋点从第一天做 · 效果用对照试验验证 · 厂商数字已分级标注
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('ai-era-learning-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('ai-era-learning-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

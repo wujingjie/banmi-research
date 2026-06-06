@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GitHub 上的英语学习开源生态：能抄什么进半米 · 无忌 Deep Research · 2026-06-06</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 16px 0; }
+  .demo-card { padding: 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); cursor: pointer; transition: transform .15s, box-shadow .15s; }
+  .demo-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+  .demo-card .dc-icon { font-size: 26px; }
+  .demo-card .dc-title { font-family: var(--serif); font-weight: 700; font-size: 15.5px; margin: 6px 0 2px; color: var(--text); }
+  .demo-card .dc-tag { font-size: 11px; color: var(--text-mute); }
+  .demo-card .dc-body { font-size: 13px; color: var(--text-soft); margin-top: 8px; max-height: 0; overflow: hidden; transition: max-height .3s; }
+  .demo-card.open .dc-body { max-height: 600px; }
+  .demo-card .dc-bar { height: 8px; border-radius: 999px; background: var(--bg-soft); margin-top: 8px; overflow: hidden; }
+  .demo-card .dc-bar > span { display: block; height: 100%; border-radius: 999px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .demo-card .dc-body { max-height: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table, .demo-card { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 全景：开源英语学习生态地图</a>
+    <a href="#ch2" data-target="ch2">02 行为/习惯引擎：FSRS &amp; SRS 全家桶</a>
+    <a href="#ch3" data-target="ch3">03 内容管线①：沉浸式阅读器</a>
+    <a href="#ch4" data-target="ch4">04 内容管线②：字幕精读开源栈</a>
+    <a href="#ch5" data-target="ch5">05 内容管线③：词频 / CEFR 分级数据</a>
+    <a href="#ch6" data-target="ch6">06 AI 个性化①：发音/口语评测</a>
+    <a href="#ch7" data-target="ch7">07 AI 个性化②：LLM 私教 / TTS·STT</a>
+    <a href="#ch8" data-target="ch8">08 操作系统式开放架构：词典/插件标准</a>
+    <a href="#ch9" data-target="ch9">09 方法论体系：CI / Refold / 四股</a>
+    <a href="#ch10" data-target="ch10">10 二语习得经典书</a>
+    <a href="#ch11" data-target="ch11">11 四维度横切对比大表</a>
+    <a href="#ch12" data-target="ch12">12 K12 儿童适配性专章</a>
+    <a href="#ch13" data-target="ch13">13 半米可借鉴路线决策树 ★</a>
+    <a href="#ch14" data-target="ch14">14 诚实标注：未尽与存疑</a>
+    <a href="#demo" data-target="demo">🎮 Mini Demo</a>
+    <a href="#faq" data-target="faq">FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>GitHub 上的英语学习开源生态：能抄什么进半米</h1>
+    <div class="hero-meta">
+      <span>📅 2026-06-06</span>
+      <span>🔍 ~30 次检索 + 13 次 repo/README 实查</span>
+      <span>🧩 筛子：半米能借鉴什么</span>
+      <span>🧒 终端是东南亚 K12</span>
+      <span>🌏 海外视角默认</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>一句话定调：英语学习开源生态里，<u>「算法」和「数据」可以直接拿，「整套 app」基本都不能直接用</u>。</strong>最该抄的三样是 <strong>FSRS 间隔算法</strong>（数学+多语言 port 全开源、MIT、半米的 Roam SRS 该升级到它）、<strong>wav2vec2 发音逐音素打分栈</strong>（Echoic/speechocean762 把「儿童英语发音评分」这件难事开源了，含一半儿童语料）、<strong>CEFR 分级词表数据</strong>（A1–C2 现成、可商用）。整套 app（Lute / LinguaCafe / LibreLingo）只值得「抄架构 / 抄 UX」，不值得 fork——它们要么 GPL 传染、要么成人自学向、要么已停更。</p>
+      <p>本篇按半米的<strong>四个维度</strong>组织：行为引擎（Ch2 FSRS）→ 内容管线（Ch3–5 阅读器/字幕/分级数据）→ AI 个性化（Ch6–7 发音评测/LLM 私教）→ 开放架构（Ch8 词典/插件标准）；再覆盖方法论（Ch9）与经典书（Ch10），横切对比（Ch11），<strong>K12 儿童适配性专章（Ch12）</strong>，最后是给阿杰的<strong>可借鉴路线决策树（Ch13，最重要）</strong>+ 可玩 mini demo。每个项目都标了 star / 活跃度 / license / 借鉴方式。规模/星数为查证当日快照，已尽量双源核对。</p>
+    </div>
+  </div>
+
+  <div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+    <p style="margin:0"><strong>📌 三条最关键发现（先扫这个）：</strong></p>
+    <ul style="margin:8px 0 0">
+      <li><strong>FSRS 不是「Anki 的一个插件」，是一套语言无关的开源记忆调度算法</strong>——已有 10+ 语言 port（py/rs/go/ts/dart/swift…）<sup class="cite" data-refid="3">[3]</sup>，半米完全可以把 Roam-based 间隔复习的「固定 1/2/4/7/15…天」升级成 FSRS 的「按每个孩子的回忆表现自适应」。<span class="conf g">🟢</span></li>
+      <li><strong>儿童英语发音逐音素打分，开源已经把管线跑通了「不靠云 API」</strong>——Echoic（wav2vec2 + WhisperX，MIT，2026 仍有 commit）做出了逐音素颜色打分 + 练习热力图<sup class="cite" data-refid="9">[9]</sup>；训练/评测语料 speechocean762 半数是儿童、可商用<sup class="cite" data-refid="10">[10]</sup>。这是半米「AI 个性化」维度最大的现成杠杆。<strong>但两个要点别忽略</strong>：Echoic 是 37★ 单人原型(0 正式 release)、宜「读思路自己重搭」而非直接当生产后端<sup class="cite" data-refid="38">[38]</sup>;speechocean762 说话人母语全是中文(Mandarin-L1),<u>不代表印尼/马来/泰/越口音</u>,上线前需自建 SEA L1 小样本校准集（详见 Ch6）。<span class="conf y">🟡</span></li>
+      <li><strong>HiKid 几乎就是「banmi 的开源近亲」</strong>——给非英语国家儿童的本地 AI 英语口语 pal（Qwen3 + 本地 ASR/TTS，MIT，2026 活跃）<sup class="cite" data-refid="13">[13]</sup>。不是竞品威胁，是「同一命题的另一种实现」，最值得逐文件读它的交互设计与 prompt。<span class="conf g">🟢</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">全景：开源英语学习生态长什么样，半米站在哪</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>先把地图铺开。GitHub 上的英语/语言学习开源生态，可以干净地切成「<strong>三类东西</strong>」——这个切分直接决定了哪些能拿、哪些只能看：</p>
+
+      <div class="callout accent">
+        <p><strong>① 算法 / 模型（最该拿）。</strong>FSRS 间隔算法、wav2vec2 发音打分、Whisper ASR、本地 TTS（Piper 等）。这些是<strong>数学和权重</strong>，没有 UI 包袱、没有「成人 vs 儿童」之分，license <strong>多数</strong>宽松（MIT/Apache/BSD）可以直接嵌进任何产品。<strong>半米最大的红利在这一类。</strong>但「宽松」不能想当然——本轮复核就抓到几个反例：WhisperX 是 BSD-2 不是 MIT、其 diarization 模型权重另有 CC-BY-4.0 门控;Piper 已归档、续作 piper1-gpl 转成了 GPL-3;voice/diarization 等<strong>模型权重的 license 经常和代码 license 不是一回事,要分开核</strong>（详见 Ch7/Ch11）。</p>
+      </div>
+      <div class="callout good">
+        <p><strong>② 数据 / 标准（第二该拿）。</strong>CEFR 分级词表、词频表、发音语料、词典格式标准。这些是<strong>静态资产</strong>，下载即用，关键只看 license 能不能商用。半米的「内容管线」维度可以靠这些省掉大量人工分级。</p>
+      </div>
+      <div class="callout warn">
+        <p><strong>③ 整套 App（基本只能看，不能 fork）。</strong>Lute、LinguaCafe、LibreLingo、asbplayer、jidoujisho……每一个都是「为某一类成人自学者、某一种学习流程」打磨的完整产品。它们的<strong>价值在「架构 / UX / 交互范式」</strong>，不在代码本身——要么 license 传染（GPL/AGPL），要么形态是「一个人戴耳机自学」，下沉到东南亚 K12 小孩需要推倒重做。</p>
+      </div>
+
+      <h3>用半米的四个维度重新排一遍</h3>
+      <p>把生态里所有项目，按半米自己的四维度归位，地图立刻清晰：</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>半米维度</th><th>开源生态里对应什么</th><th>能拿的层级</th><th>本报告章节</th></tr></thead>
+        <tbody>
+          <tr><td><strong>行为/习惯引擎</strong></td><td>FSRS 间隔算法、Anki 调度、Duolingo 式 streak/游戏化设计</td><td><span class="pill good">抄算法</span> 直接嵌</td><td>Ch2</td></tr>
+          <tr><td><strong>内容管线</strong></td><td>沉浸式阅读器（Lute/LinguaCafe/openkoto）、字幕精读栈（asbplayer/subs2srs）、词频+CEFR 数据</td><td><span class="pill warn">抄架构 / 拿数据</span></td><td>Ch3–5</td></tr>
+          <tr><td><strong>AI 个性化</strong></td><td>发音逐音素评测（Echoic/GOP）、LLM 私教（HiKid/companion）、TTS/STT</td><td><span class="pill good">抄算法 / 直接集成</span></td><td>Ch6–7</td></tr>
+          <tr><td><strong>操作系统式开放架构</strong></td><td>Yomitan 词典/popup 标准、AnkiConnect、开放词表格式、插件生态</td><td><span class="pill info">抄标准 / 互操作</span></td><td>Ch8</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout info">
+        <p><strong>一个反直觉的全景判断：开源英语学习生态，几乎全部是「日语学习者」推动的。</strong>asbplayer、Yomitan、jidoujisho、mokuro、manga-ocr、subs2srs、sentence mining 这套「沉浸 + 挖句子」方法论和工具链，最初都是英语母语者学日语的社区造出来的<sup class="cite" data-refid="20">[20]</sup>。对半米的含义是：<strong>这些工具的「方向」是反的</strong>（母语英语→学外语），半米要的是「东南亚小孩→学英语」，但<strong>引擎和交互范式可以完整借用</strong>，只是把语言对调过来、把人群从成人换成儿童。</p>
+      </div>
+
+      <h3>避免复述半米已有的</h3>
+      <div class="callout purple">
+        <p>半米已有：SciShow Kids 视频词表管线、Roam-based 词汇间隔复习、Language Reactor 字幕精读工作流。<strong>本报告刻意不重复这些</strong>，专挑「半米还没有但值得抄」的：① 把固定间隔升级成 <strong>FSRS 自适应</strong>（Ch2）；② <strong>发音/口语评测</strong>这一整块半米目前是空白（Ch6）；③ <strong>CEFR 自动分级</strong>替代人工选词（Ch5）；④ <strong>LLM 对话私教</strong>（Ch7）。这四块是增量，不是复述。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">行为/习惯引擎：FSRS &amp; SRS 全家桶（半米最该抄的算法）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是整份报告里<strong>投入产出最高</strong>的一章。半米已经在做间隔复习（Roam SRS、间隔 1/2/4/7/15/30/60/90 天），但那是<strong>固定间隔</strong>——不管这个孩子昨天答得多顺、还是卡了三次，下次复习时间都一样。FSRS 干的事就是把这个「一刀切日历」换成「按每个孩子每张卡的真实记忆状态动态算」。</p>
+
+      <h3>FSRS 到底是什么</h3>
+      <div class="callout accent">
+        <p><strong>FSRS（Free Spaced Repetition Scheduler）= 一个基于「DSR 记忆模型」的开源间隔调度算法。</strong>它对每张卡片建模三个量<sup class="cite" data-refid="2">[2]</sup>：<strong>Difficulty（难度）</strong>、<strong>Stability（稳定性，记忆能撑多久不忘）</strong>、<strong>Retrievability（可提取性，此刻还能想起来的概率）</strong>。每次复习你给一个反馈（忘了/难/一般/简单），算法更新这三个量，再把「下次复习时间」精确算到「你恰好快要忘、但还没忘」的那个点——这正是记忆科学里最高效的复习时机。FSRS-6 用 21 个可优化参数，optimizer 会用机器学习从你的历史复习记录里拟合出最适合你的参数<sup class="cite" data-refid="1">[1]</sup>。</p>
+      </div>
+
+      <h3>关键：FSRS 是「算法」不是「Anki 的功能」</h3>
+      <p>这是最容易被误解、也最关键的一点。很多人以为 FSRS 是 Anki 里的一个开关，其实<strong>核心算法是一个独立的、语言无关的开源库</strong>，Anki 只是它最有名的一个调用方。证据是它的 port 矩阵：</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>仓库 / port</th><th>语言</th><th>star</th><th>license</th><th>活跃度</th><th>对半米的意义</th></tr></thead>
+        <tbody>
+          <tr><td><code>free-spaced-repetition-scheduler</code></td><td>算法原始定义</td><td>~666<sup class="cite" data-refid="3">[3]</sup></td><td class="check"><span class="pill good">MIT</span></td><td>活跃</td><td>读它理解 DSR 数学</td></tr>
+          <tr><td><code>fsrs4anki</code></td><td>Jupyter（调度+optimizer）</td><td>~4.0k<sup class="cite" data-refid="1">[1]</sup></td><td class="check"><span class="pill good">MIT</span></td><td>v6.1.3（2025-09）</td><td>抄 optimizer 训练逻辑</td></tr>
+          <tr><td><code>py-fsrs</code> / <code>fsrs-rs</code> / <code>go-fsrs</code> / <code>ts-fsrs</code> 等</td><td>Py / Rust / Go / TS / Dart / Swift / Ruby…（10+）<sup class="cite" data-refid="3">[3]</sup></td><td>各自数百</td><td class="check"><span class="pill good">MIT</span></td><td>多数活跃</td><td><strong>直接选半米后端语言的那个 port 集成</strong></td></tr>
+          <tr><td><code>AnkiDroid</code>（参考实现）</td><td>Kotlin</td><td>~11.2k<sup class="cite" data-refid="11">[11]</sup></td><td class="check"><span class="pill warn">GPL-3</span></td><td>v2.24.0（2026-05）</td><td>看「FSRS 在真实 app 里怎么落」，但 GPL 别抄码</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout good">
+        <p><strong>借鉴方式（明确）：<span class="pill good">抄算法 / 直接集成</span>。</strong>半米要做的不是 fork 任何 app，而是 <code>pip install fsrs</code>（或对应语言 port），把 Roam SRS 里「固定间隔」那一层换成「调 FSRS 算下次复习时间」。MIT license 商用零障碍。当前算法代是 <strong>FSRS-6</strong>。版本号要分清三条线，别混为一谈：</p>
+        <ul style="margin:6px 0 0">
+          <li><strong>官方 Python 库 <code>py-fsrs</code></strong>：最新 release <strong>v6.3.1（2026-03-10）</strong><sup class="cite" data-refid="37">[37]</sup>——这是半米 <code>pip install fsrs</code> 实际会装到的那个，v6.0 起为「同一天复习两次以上」新增了 2 个参数。</li>
+          <li><strong>Anki 配套的 <code>fsrs4anki</code></strong>：最新 release <strong>v6.1.3（2025-09-08）</strong><sup class="cite" data-refid="1">[1]</sup>，对应 FSRS-6 已进 <strong>Anki 25.09</strong>。注意它和 py-fsrs 的版本号<strong>不是一回事</strong>（两个独立仓库各自打 tag），别看到「6.1.3 vs 6.3.1」就以为有矛盾。</li>
+          <li><strong>「进 Anki 主线」要拆成三处分别看</strong>：FSRS-6 已是 <strong>Anki Desktop（25.09）</strong>内置调度器；<strong>AnkiDroid</strong>（v2.24.0, 2026-05<sup class="cite" data-refid="11">[11]</sup>）也已内置；底层算法库（py-fsrs / fsrs-rs）独立维护。三者成熟度都足够，但分属不同发布节奏。</li>
+        </ul>
+      </div>
+
+      <div class="callout purple">
+        <p><strong>落地要点（FSRS 用在儿童身上,几个非显然的工程坑）:</strong>FSRS 的输入是「每次复习的评分(Again/Hard/Good/Easy)」,但<strong>小孩没有稳定的元认知自评能力</strong>——你不能指望 6 岁孩子准确说「我对这词记得有点难」。所以半米要把「评分」从「让孩子自评」改成「系统从行为代理推断」:</p>
+        <ul style="margin:6px 0 0">
+          <li><strong>用「对错 + 作答延迟」当 rating 代理</strong>:答对且快→Good/Easy;答对但慢/犹豫→Hard;答错→Again。让系统替孩子生成 FSRS 输入,孩子只管答题。</li>
+          <li><strong>冷启动</strong>:新卡没有历史,先用 FSRS 默认参数;积累足够复习记录后再用 optimizer 按这个孩子(或这个群体)拟合参数,别一开始就追求个性化参数。</li>
+          <li><strong>家长代答 / 多人同设备</strong>:低龄场景常是家长帮点、或一台设备多个孩子——要能识别/隔离「谁在答」,否则 FSRS 的记忆状态会被污染(家长替答的「会」不等于孩子会)。</li>
+          <li><strong>入队对象分三类</strong>:不只是「词」——<strong>phoneme(发音弱项,接 Ch6)/ word / sentence</strong> 都可以是独立的「待复习对象」,各自有 stability。发音错音天然 stability 低 → FSRS 自动让它更频繁出现,这正是「行为引擎驱动发音练习」的接口。</li>
+        </ul>
+      </div>
+
+      <h3>游戏化 / streak：行为引擎的另一半（向 Duolingo 抄设计而非代码）</h3>
+      <p>FSRS 解决「<strong>什么时候复习</strong>」，但解决不了「<strong>孩子今天愿不愿意打开</strong>」。后者是 Duolingo 封神的地方，而且它的机制是公开拆解过的、可以直接借设计思路：</p>
+      <ul>
+        <li><strong>streak（连续天数）的本质是「损失厌恶」而非「成就感」</strong>——用户不是在「推进」连胜，是在「保护」它不断<sup class="cite" data-refid="22">[22]</sup>。Duolingo 靠 streak 把次日留存从 12% 拉到 55%<sup class="cite" data-refid="22">[22]</sup>。<span class="conf g">🟢</span></li>
+        <li><strong>Streak Freeze（连胜冻结）反而降低流失</strong>——给焦虑用户一个「断一天也没事」的缓冲，churn 降约 21%<sup class="cite" data-refid="22">[22]</sup>。对小孩尤其重要：别让「断签」变成「干脆放弃」。</li>
+        <li><strong>每天一节短课 + 联赛 + 角色 + 通知</strong>构成习惯回路<sup class="cite" data-refid="22">[22]</sup>。</li>
+      </ul>
+      <div class="callout warn">
+        <p>⚠️ <strong>K12 适配警告：把 streak 重构成「复原力机制」，别照搬「损失厌恶 + 留存数字」。</strong>上面那些 Duolingo 数字（12%→55%、churn-21%）是<strong>成人产品的留存指标，不能直接当半米的设计依据</strong>——它们证明的是「损失厌恶能拉成人留存」，而对儿童，「保护连胜」的损失框架恰恰可能把「断一天」放大成「挫败 → 干脆放弃」，还可能触发不健康的强迫性打卡。给半米的设计转向：<span class="conf y">🟡 判断</span></p>
+        <ul style="margin:6px 0 0">
+          <li><strong>叙事用成就框架不用损失框架</strong>：「你已经坚持了 N 天，真棒」而非「别让连胜断了」。</li>
+          <li><strong>用周目标替代纯日连胜</strong>（如「本周练 4 天」），天然容错，不会因为某一天落空就归零。</li>
+          <li><strong>内置宽限 / Streak Freeze</strong>：给「断一天也没事」的缓冲，配无羞辱文案（不出现红叉、哭脸、责备）。</li>
+          <li><strong>把「掉线/disengagement」当一类一等指标来监测</strong>（连续未登录、单次时长骤降、放弃率），用来触发「降难度 / 换形式 / 通知家长」，而不是用来惩罚孩子。</li>
+        </ul>
+        <p style="margin:8px 0 0">这条在 Ch12 还会展开。核心：streak 对半米的价值是「帮孩子建立可持续的学习节律（复原力）」，不是「用焦虑把留存数字做上去」。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">内容管线①：沉浸式阅读器（Lute / LinguaCafe / openkoto）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>「沉浸式阅读器」是开源生态里最成熟的一类：导入任意文本/电子书/字幕 → 点词查义 → 标记「认识/不认识」→ 生词进复习。它们都源自一个老祖宗 <strong>LWT（Learning With Texts）</strong>，再各自现代化重写。对半米的价值是<strong>「点读 + 生词追踪 + 已知词率统计」这套交互范式</strong>，不是代码。</p>
+
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>项目</th><th>star</th><th>license</th><th>技术栈</th><th>活跃度</th><th>特点</th><th>借鉴方式</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Lute v3</strong></td><td>~1.5k<sup class="cite" data-refid="4">[4]</sup></td><td class="check"><span class="pill good">MIT</span></td><td>Python/Flask</td><td>v3.10.1（2025-03）活跃</td><td>LWT 现代重写、纯核心、UI 老派</td><td><span class="pill warn">抄架构</span>（MIT 也可商用借码）</td></tr>
+          <tr><td><strong>LinguaCafe</strong></td><td>~1.4k<sup class="cite" data-refid="5">[5]</sup></td><td class="check"><span class="pill bad">GPL-3</span></td><td>Vue + PHP</td><td>v0.14.1（2025-03）活跃</td><td>27 语言、日历/dashboard、导入源最多（文本/epub/YouTube字幕/Jellyfin）</td><td><span class="pill info">只抄 UX</span>（GPL 传染，别 fork 进闭源产品）</td></tr>
+          <tr><td><strong>openkoto</strong>（TextLingo）</td><td>~380<sup class="cite" data-refid="6">[6]</sup></td><td class="check"><span class="pill warn">Apache-2*附加</span></td><td>Tauri + React + Rust</td><td>v0.6.6（2026-04）活跃</td><td><strong>AI 原生</strong>：高亮即问、上下文释义、语法拆解（中日英）、接 OpenAI 兼容 API</td><td><span class="pill warn">抄交互范式 · 商用前法务审</span></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout good">
+        <p><strong>最值得半米读的是 openkoto。</strong>它是这三个里唯一「AI 原生」的——不是「点词查静态词典」，而是「高亮任意句子，问 LLM 这是什么意思 / 语法怎么拆」<sup class="cite" data-refid="6">[6]</sup>。这正是半米「AI 个性化 + 内容管线」交叉点的形态。技术栈 Tauri+Rust 偏桌面，半米若是 Web/移动可只借「LLM 即时释义」的交互设计与 prompt 模式。</p>
+      </div>
+      <div class="callout warn">
+        <p>⚠️ <strong>license 更正（原报告说「Apache-2 最干净可借码」是错的）：openkoto 的 LICENSE 不是纯 Apache-2.0，而是「Apache-2.0 + 附加条款」</strong><sup class="cite" data-refid="6">[6]</sup>。实查 LICENSE 文件，附加条款包括：① <strong>未经书面授权不得运营多租户(multi-tenant)环境</strong>；② 不得移除/修改 console 与应用里的 <strong>LOGO 及版权信息</strong>（除非完全不使用其前端）；③ 交互设计声明有外观专利、版权归作者(hikariming, 2024)。<strong>对半米的含义</strong>：当「交互范式 / prompt 模式」的灵感来源完全没问题（设计思路不受版权约束），但<strong>别直接 fork 它的前端代码进商业产品</strong>——半米恰恰是「多租户 SaaS」形态，正好踩在它限制的点上。要借码必须先做法律审查或联系作者拿商用授权。<span class="conf y">🟡</span></p>
+      </div>
+
+      <div class="callout warn">
+        <p>⚠️ <strong>license 红线：LinguaCafe 是 GPL-3</strong><sup class="cite" data-refid="5">[5]</sup>——如果半米是闭源商业产品，<strong>不能 fork 它的代码</strong>（GPL 会传染要求你也开源）。但「看它的 dashboard 怎么做、已知词率怎么可视化、导入源怎么组织」是完全合法的——UX 不受版权约束。Lute（MIT）反而可以借码，但它 UI 老派、形态成人自学向，对 K12 要重做交互。</p>
+      </div>
+
+      <h3>对半米的净判断</h3>
+      <div class="callout accent">
+        <p>半米已有 Language Reactor 字幕精读工作流，<strong>阅读器这块不是空白，所以优先级中等</strong>。真正的增量是 openkoto 式的「<strong>LLM 即时释义/语法拆解</strong>」——把「孩子读绘本/分级读物时点一个不懂的句子，AI 用孩子能懂的话解释 + 给个例句」做进半米。这比自建一个完整阅读器划算得多：借交互范式，不重造轮子。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">内容管线②：字幕精读 / sentence mining 开源栈</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是 Language Reactor 的开源世界。核心方法叫 <strong>sentence mining（挖句子）</strong>：看带字幕的视频 → 遇到「刚好能懂大部分、只差一两个词」的句子 → 一键把「视频片段 + 截图 + 字幕 + 音频」做成一张复习卡。半米已有 LR 工作流，所以这章重点是<strong>「LR 的开源替代品长什么样、能不能把这条管线自有化」</strong>。</p>
+
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>项目</th><th>star</th><th>license</th><th>是什么</th><th>活跃度</th><th>对半米</th></tr></thead>
+        <tbody>
+          <tr><td><strong>asbplayer</strong></td><td>~1.3k<sup class="cite" data-refid="7">[7]</sup></td><td class="check"><span class="pill good">MIT</span></td><td>浏览器媒体播放器 + Chrome 扩展，字幕挖句子；支持 Netflix/YouTube 自动字幕；condensed playback、auto-pause</td><td>v1.17.0（2026-05）很活跃</td><td><strong>LR 最强开源替代</strong>，MIT 可借</td></tr>
+          <tr><td><strong>subs2srs</strong>（含 mpvacious 等变体）</td><td>方法/工具族</td><td class="check"><span class="pill good">多为宽松</span></td><td>从视频/音频批量生成 Anki 卡的鼻祖工具<sup class="cite" data-refid="8">[8]</sup></td><td>经典稳定</td><td>抄「片段→卡」批处理逻辑</td></tr>
+          <tr><td><strong>voracious</strong></td><td>数百</td><td class="check"><span class="pill good">宽松</span></td><td>带语言学习功能的视频播放器<sup class="cite" data-refid="8">[8]</sup></td><td>维护放缓</td><td>只参考</td></tr>
+          <tr><td><strong>jidoujisho</strong></td><td>数千</td><td class="check"><span class="pill bad">GPL-3</span></td><td>移动端全功能沉浸套件（Flutter/Dart）：播放器+词典+造卡<sup class="cite" data-refid="20">[20]</sup></td><td>活跃（日语向）</td><td><span class="pill info">只抄移动 UX</span>（GPL）</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout good">
+        <p><strong>asbplayer 是这一类的标杆替代品。</strong>MIT、TypeScript、2026 年还在密集发版（v1.17.0）<sup class="cite" data-refid="7">[7]</sup>，能在 Netflix/YouTube 上叠字幕并一键造卡（通过 AnkiConnect）。它和 Yomitan（Ch8 popup 词典）+ Anki（FSRS 调度）三件套，就是<strong>「Language Reactor + Anki 订阅」的完全免费开源版</strong>。半米若想把 LR 这条外部依赖换成自有可控管线，asbplayer 的字幕对齐 / condensed playback / 片段造卡逻辑值得逐模块借鉴。</p>
+      </div>
+
+      <div class="callout warn">
+        <p>⚠️ <strong>K12 适配性低。</strong>整条 sentence mining 方法论是<strong>成人自学者</strong>的产物——它假设学习者会自己判断「哪句话该挖」、会管理 Anki deck、有元认知去经营自己的复习。东南亚 K12 小孩做不到。所以对半米：<strong>抄「片段→卡」的技术管线（机器能做的部分），但「挑哪句」要由半米的 AI/课程体系自动替孩子决定</strong>，不能指望孩子自己挖句子。这是「成人向需游戏化/自动化改造」的典型例子（Ch12 详述）。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">内容管线③：词频 / CEFR 分级数据（拿来即用的静态资产）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这一章全是「数据」不是「代码」——下载即用，关键只看 license。对半米的价值：<strong>把「这个词适合 A1 还是 B1 的孩子」「这个词常不常用」从「人工拍脑袋」变成「查表」</strong>。半米现在的词表（SciShow Kids 词表等）若能挂上 CEFR 等级 + 词频，分级和排序就自动化了。</p>
+
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>数据集</th><th>star</th><th>license</th><th>内容</th><th>能商用?</th><th>对半米</th></tr></thead>
+        <tbody>
+          <tr><td><strong>olp-en-cefrj</strong>（Open Language Profiles）</td><td>~192<sup class="cite" data-refid="14">[14]</sup></td><td class="check"><span class="pill warn">分层混合*</span></td><td>CEFR-J Vocabulary Profile + Octanove C1/C2 + 语法 Profile，词→A1-C2</td><td class="check p">分层看↓</td><td><strong>首选分级词表（含<u>权威标注</u>的 A1-B2 核心）</strong></td></tr>
+          <tr><td><strong>Words-CEFR-Dataset</strong>（+cefrpy）</td><td>~75<sup class="cite" data-refid="15">[15]</sup></td><td class="check"><span class="pill good">MIT</span></td><td><strong>计算/推断</strong>得来的词→CEFR（非权威标注，见下↓）+ lemma/stem/POS + Google N-gram 词频；配 spaCy 集成包 cefrpy</td><td class="check y">是</td><td><span class="pill warn">当辅助特征/候选标签</span>，别当主分级依据</td></tr>
+          <tr><td><strong>wordfreq</strong></td><td>~1.7k<sup class="cite" data-refid="16">[16]</sup></td><td class="check"><span class="pill good">Apache+CC</span></td><td>40+ 语言词频，zipf 对数刻度</td><td class="check y">是</td><td>词频排序，<strong>但已冻结</strong>↓</td></tr>
+          <tr><td><strong>COCA-WordFrequency</strong></td><td>数百</td><td class="check"><span class="pill warn">学术转载</span></td><td>COCA Top 5000 词频<sup class="cite" data-refid="17">[17]</sup></td><td class="check p">看原始来源条款</td><td>美式英语高频核心</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:var(--text-mute);padding:0 12px">* olp-en-cefrj 的 license <strong>不是一个,要分三层分别合规</strong>（实查 README）<sup class="cite" data-refid="14">[14]</sup>：① <strong>CEFR-J Vocabulary Profile (v1.5)</strong> 版权属东京外大(TUFS) Tono Lab,「可研究+商用,免费,但须正确引用数据集」；② <strong>Octanove Vocabulary Profile C1/C2 (v1.0)</strong> 为 <strong>CC-BY-SA 4.0</strong>——<u>再分发会触发 ShareAlike</u>（衍生作品须同样以 CC-BY-SA 开放,对闭源商业产品是个坑,要么隔离这部分数据、要么接受传染）；③ <strong>CEFR-J Grammar Profile (20180315)</strong> 同 TUFS 条款,且<strong>仅部分从日文原版翻译</strong>。</p>
+      </div>
+
+      <div class="callout warn">
+        <p>⚠️ <strong>provenance 警告：Words-CEFR-Dataset 的 CEFR 等级是「算出来/推断」的,不是权威人工标注。</strong>实查作者 README:它的等级是把 <strong>CEFR-J 词表</strong>当种子,再用 <strong>Google N-gram 词频做插值</strong>、结合同词其它词性的平均等级、lemma/stem 的等级与频率<strong>计算</strong>出来的,覆盖 30 万+词<sup class="cite" data-refid="15">[15]</sup>。这意味着:① 大多数词的等级是<strong>频率代理推断值</strong>,不是语言学家判定;② 作者自己在「可改进项」里也承认需要叠 Octanove 等数据「才更精确」。<strong>给半米</strong>:把它当<strong>辅助特征 / 候选标签</strong>用（参与排序、做初筛、给人工复核打底）,<u>别把它当孩子分级的唯一/主依据</u>——主分级应以 olp-en-cefrj 里<strong>权威标注的 CEFR-J/Octanove</strong> 为准,Words-CEFR 用来补它没覆盖的长尾词。<span class="conf y">🟡</span></p>
+      </div>
+
+      <div class="callout bad">
+        <p>🔴 <strong>关键概念区分：CEFR 等级 ≠ 适龄(age suitability)。</strong>CEFR 衡量的是<strong>语言难度</strong>（A1 的词「简单」），但<strong>不保证话题适合儿童</strong>——A1/A2 词表里照样有 war、kill、beer、divorce 这类语言简单但话题不适龄的词;反过来,适合低龄孩子的话题（动物、颜色、家庭）也可能用到 B1 的词。<strong>所以半米拿 CEFR 数据时,必须再叠一层独立的「年龄/年级 + 话题适龄」过滤</strong>,不能用「A1 = 适合低龄」这个错误等式直接驱动给孩子推什么。这一层 CEFR 数据本身给不了,得半米自己建（或借儿童分级读物的 leveling 体系）。</p>
+      </div>
+
+      <div class="callout bad">
+        <p>🔴 <strong>freshness 警报：wordfreq 已被作者主动冻结（2022 年停更）。</strong>原因很硬核也很有时代意味——作者明确说「AI 生成文本污染了网络语料，可靠采集词频的方法已经不存在了」<sup class="cite" data-refid="16">[16]</sup>。<strong>这不影响半米使用</strong>：它的数据是 2021 年前的真人语言快照，对「常用词分级」这种慢变量足够好，Apache/CC license 也允许商用。但要知道：<strong>它不会再更新，别指望它收录 2023 年后的新词。</strong></p>
+      </div>
+
+      <div class="callout good">
+        <p><strong>借鉴方式：<span class="pill good">分层拿数据</span>（修正版）。</strong>给半米的具体做法——<strong>主分级</strong>用 olp-en-cefrj 里<strong>权威标注</strong>的 CEFR-J(A1-B2)+Octanove(C1/C2) 给词打等级,<strong>长尾/未覆盖词</strong>用 Words-CEFR-Dataset 的推断值<strong>当候选标签补位</strong>（标记为「推断,待复核」）;再用 <strong>wordfreq/COCA 给词频排序</strong>（决定「先教哪个」）。最后<strong>务必叠一层「话题适龄」过滤</strong>（CEFR 只管难度不管适龄,见上方红框）。几张表 join 一下,半米的词表分级就从「人工拍脑袋」变成「权威标注为主 + 推断补位 + 适龄兜底」。仍是「内容管线」里最便宜的一次升级——零模型、零训练,但合规与适龄这两层别省。<strong>注意 Octanove 部分是 CC-BY-SA,若直接随产品再分发要处理 ShareAlike</strong>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">AI 个性化①：发音 / 口语评测（半米最大的现成杠杆）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是半米目前的<strong>空白维度</strong>，也是本报告认为<strong>第二该抓的杠杆</strong>（仅次于 FSRS）。「孩子读一句英语，AI 告诉他哪个音发错了、错在哪」——这件事过去要么靠云 API（科大讯飞/微软/SpeechSuper，按次收费、数据出境），要么很难自建。现在开源已经能端到端做到。</p>
+
+      <h3>底层原理：GOP（Goodness of Pronunciation）</h3>
+      <div class="callout accent">
+        <p><strong>发音打分的经典方法叫 GOP。</strong>思路：让语音模型（过去是 Kaldi DNN，现在是 wav2vec2/HuBERT/WhisperX 这类自监督模型）去识别学习者每个<strong>音素（phoneme）</strong>，比对「学习者实际发的音」和「标准应该发的音」的概率差，差越大 = 发得越不准。最终输出可以细到<strong>逐音素的 0–2 分</strong>，也能聚合成单词级、句子级的准确度/流利度/完整度分<sup class="cite" data-refid="10">[10]</sup>。</p>
+      </div>
+
+      <h3>能直接用的开源栈</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>项目</th><th>star</th><th>license</th><th>是什么</th><th>活跃度</th><th>对半米</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Echoic</strong></td><td>~37<sup class="cite" data-refid="9">[9]</sup></td><td class="check"><span class="pill good">MIT</span></td><td>自托管发音练习：导入任意音频→逐句练→<strong>逐音素打分</strong>（颜色标）+ 单词级拆解 + 准确/流利/完整三分；WhisperX(ASR)+wav2vec2(对齐/打分)+phonemizer；React+FastAPI+Postgres</td><td>commit 到 2026-05、<strong>0 正式 release</strong><sup class="cite" data-refid="38">[38]</sup></td><td><span class="pill warn">参考实现/原型,非生产就绪</span>（见下 checklist）</td></tr>
+          <tr><td><strong>speechocean762</strong>（语料）</td><td>语料集<sup class="cite" data-refid="10">[10]</sup></td><td class="check"><span class="pill good">可商用</span></td><td>5000 句非母语英语,<strong>说话人母语全部为 Mandarin(L1=中文)</strong>、半数儿童半数成人,逐音素/单词/句子标注,含 Kaldi GOP recipe；OpenSLR #101</td><td>稳定经典</td><td><strong>儿童 Mandarin-L1 基线语料</strong>,<u>不代表 SEA 口音</u>↓</td></tr>
+          <tr><td><strong>gop-dnn-epadb</strong></td><td>~35</td><td class="check"><span class="pill warn">看仓库</span></td><td>Kaldi GOP 实现，专做非母语者评估</td><td>2024 更新</td><td>研究参考</td></tr>
+          <tr><td><strong>HiPAMA</strong> / ConPCO</td><td>~40 / 数十</td><td class="check"><span class="pill warn">论文码</span></td><td>多维度发音评估的论文实现（ICASSP/Interspeech）</td><td>2024 前后</td><td>想做 SOTA 时参考</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>发音评测栈是「分层」的:别把 Echoic 当一个黑盒,要逐层选型</h3>
+      <p>「逐音素打分」不是单一模型,是一条<strong>由 5 层拼起来的管线</strong>。Echoic 只是把这几层拼好的一种参考组合。半米要自建可靠评分服务,应该按层独立选型——每层都有更稳的替代件:</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>层</th><th>干什么</th><th>开源选型</th><th>许可 / 备注</th><th>给半米</th></tr></thead>
+        <tbody>
+          <tr><td><strong>① ASR / 声学模型</strong></td><td>把录音转成音素后验概率</td><td>wav2vec2 / HuBERT (transformers)、WhisperX<sup class="cite" data-refid="36">[36]</sup>、SpeechBrain<sup class="cite" data-refid="43">[43]</sup>(无现成 GOP)、(NeMo / ESPnet / Kaldi 重型可选)</td><td>wav2vec2/HuBERT 多为 MIT/Apache;WhisperX=BSD-2;SpeechBrain=Apache-2</td><td>本地推理首选 wav2vec2/HuBERT;别只盯 Echoic 的那一个</td></tr>
+          <tr><td><strong>② 强制对齐 (forced alignment)</strong></td><td>把音素对齐到音频时间轴</td><td><strong>Montreal Forced Aligner (MFA)</strong><sup class="cite" data-refid="42">[42]</sup>、wav2vec2 CTC 对齐、(Kaldi)</td><td>MFA=MIT、~1.8k★、2026 活跃</td><td>MFA 是「对齐层」最成熟选项,比自己用 CTC 拼更稳</td></tr>
+          <tr><td><strong>③ G2P（字→音素）</strong></td><td>给目标句生成标准音素序列</td><td><strong>CMUdict + g2p-en</strong><sup class="cite" data-refid="44">[44]</sup>、phonemizer / eSpeak-NG</td><td>CMUdict=BSD-2/公有领域;phonemizer/eSpeak=GPL,注意传染</td><td>查表用 CMUdict;OOV 词用 g2p-en;eSpeak 是 GPL,商用要隔离</td></tr>
+          <tr><td><strong>④ 打分模型 (GOP / scoring)</strong></td><td>比对实际 vs 标准音素,出 0-2 分</td><td>Kaldi GOP recipe、gop-dnn-epadb、HiPAMA/ConPCO(论文码)、Echoic 的 wav2vec2-GOP</td><td>多为研究级,无生产保证</td><td>这层最不成熟,半米要自己封装 + 做 benchmark</td></tr>
+          <tr><td><strong>⑤ 校准数据 (calibration)</strong></td><td>把分数对齐到「人类老师怎么看」</td><td>speechocean762(儿童 Mandarin-L1)<sup class="cite" data-refid="10">[10]</sup> + <strong>半米自建 SEA L1 小样本</strong></td><td>speechocean 可商用,但 L1 不匹配</td><td><strong>最关键、也最缺的一层</strong>;开源给不了 SEA 校准集,必须自建</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="callout info">
+        <p><strong>这张矩阵对半米的真正用处:把「要不要用 Echoic」这个二元问题,换成「每一层各用什么」。</strong>Echoic 的价值是<strong>第 ①②③④ 层的一个参考接线图</strong>;但生产里第 ② 层换 MFA、第 ③ 层用 CMUdict+g2p-en(避开 GPL 的 eSpeak)、第 ④ 层自己封装并 benchmark、第 ⑤ 层必须自建 SEA 校准集——这样拼出来的才是半米能维护、能上线的评分服务,而不是押在一个 37★ 单人原型上。</p>
+      </div>
+
+      <div class="callout good">
+        <p><strong>为什么 Echoic + speechocean762 仍是半米最好的起点组合（但要降温,见下）：</strong></p>
+        <ul style="margin:6px 0 0">
+          <li><strong>Echoic 把最难的工程拼通了</strong>——逐音素颜色打分、单词级拆解、可调权重（准确 0.5/流利 0.3/完整 0.2）、甚至 365 天练习<strong>热力图</strong>（这本身就是「行为引擎」资产！）<sup class="cite" data-refid="9">[9]</sup>。MIT license 可直接借码。<strong>但它是参考实现/原型,不是生产组件</strong>（见下方 checklist）。</li>
+          <li><strong>speechocean762 半数语料是儿童</strong><sup class="cite" data-refid="10">[10]</sup>——这是它最大的价值:儿童语音的声学特征（音高高、共振峰偏移、发音不稳定）和成人差很多,用成人语料训出来的打分器套小孩会乱评,有含儿童的可商用标注语料是稀缺资源。<strong>但有个硬限制:它的说话人母语全部是 Mandarin(中文 L1)</strong>。</li>
+          <li><strong>全本地可跑</strong>——wav2vec2/WhisperX 都能本地推理,不必把孩子的录音传给第三方云（数据合规对 K12 是硬要求,见 Ch13 第 0 步）。</li>
+        </ul>
+      </div>
+
+      <div class="callout warn">
+        <p>⚠️ <strong>speechocean762 是「儿童 Mandarin-L1 基线语料」,不是「东南亚儿童语料」。</strong>它的说话人母语<u>全部是中文</u><sup class="cite" data-refid="10">[10]</sup>——而半米的孩子母语是<strong>印尼语 / 马来语 / 泰语 / 越南语</strong>。不同 L1 的母语干扰模式完全不同（比如泰语没有词尾辅音连缀、印尼语元音系统更小、越南语是声调语言),用 Mandarin-L1 训出的打分阈值直接套在 SEA 孩子身上,会把「不同 L1 的正常发音模式」误判成错误。<strong>给半米:把 speechocean762 当「冷启动基线 + 工程验证语料」,但<u>上线前必须自建一个 SEA L1 小样本校准集</u></strong>（每个目标母语收一批儿童读标准句,人工标注,用来校准/微调阈值）。这是发音评测能不能真用的关键一步,别跳过。<span class="conf y">🟡</span></p>
+      </div>
+
+      <div class="callout info">
+        <p>🎯 <strong>口音偏见 framing（必须前置想清楚）:发音评测的目标是 intelligibility(可懂度) + classroom English,不是 native accent。</strong>二语发音研究的共识:重口音不等于难懂,native-like 发音也不是沟通成功的前提<sup class="cite" data-refid="45">[45]</sup>。而像 speechocean 这类打分体系,常把「heavy accent」直接降到最低分(1 分),量表本身带 <strong>native-bias</strong>（低分挂在口音、高分才谈可懂度）<sup class="cite" data-refid="45">[45]</sup>。对半米这层尤其要警惕:<strong>目标不该是「把 SEA 孩子的英语磨成美音」,而是「让他说得清楚、别人听得懂、能在课堂用」</strong>。落地准则:① 评分内核盯「这个音会不会造成误解/混淆」,不盯「像不像母语者」;② <strong>前端避免任何「纠正口音」式的羞辱文案</strong>（不要「你的口音很重」),改成「这个词试试这样说会更清楚」;③ 把多样化 L1 语音纳入校准集(接上一条),减少量表偏见。<span class="conf y">🟡 判断</span></p>
+      </div>
+
+      <div class="callout warn">
+        <p>⚠️ <strong>Echoic 是「参考实现/原型」,不是「拿来即上线的生产组件」——别把它当黄金标准照搬。</strong>实查:它<strong>0 个正式 GitHub Release</strong>（只有 7 个 git tag）、无可见测试目录、37★、单人项目、无公开 benchmark<sup class="cite" data-refid="38">[38]</sup>。它的价值是「<u>让你看懂逐音素打分这条管线怎么拼</u>」,半米应<strong>逐文件读它的思路,然后用更稳的组件自己重搭评分服务</strong>,而不是直接把它当后端跑生产。半米选型前过一遍这个 production-readiness checklist:</p>
+        <ul style="margin:6px 0 0">
+          <li><strong>release / 版本管理</strong>:有没有正式 release、语义化版本、changelog?（Echoic:无正式 release）</li>
+          <li><strong>测试</strong>:有没有单元/集成测试、CI?（Echoic:未见测试目录）</li>
+          <li><strong>benchmark</strong>:打分与人类老师评分的相关系数有没有公开?（Echoic/多数开源:无）</li>
+          <li><strong>issue velocity / bus factor</strong>:维护者几个人、issue 响应快不快?（Echoic:单人、低星,弃坑风险高）</li>
+          <li><strong>模型下载与体量</strong>:依赖哪些模型、多大、能不能离线缓存?（Echoic:WhisperX+wav2vec2 ~1GB,首次自动下载）</li>
+          <li><strong>CPU/GPU 延迟</strong>:目标端(平板/低端机)上一句话的打分要几秒?有没有量化/CPU 路径?（需自测,Echoic 未给）</li>
+        </ul>
+      </div>
+
+      <div class="callout accent">
+        <p>⚠️ <strong>诚实标注:发音打分准确度本身是个难题。</strong>逐音素 GOP 在儿童、口音重、背景噪音场景下误判率不低,学界仍在用 LLM/多模态模型刷榜<sup class="cite" data-refid="10">[10]</sup>。给半米的建议:<strong>先把发音评测做成「鼓励性反馈」而非「严格判分」</strong>——告诉孩子「这个 /θ/ 音再试试,舌头放牙齿中间」,而不是冷冰冰打「62 分」。打分用于内部驱动复习调度（哪些音该多练）,对孩子展示的是正向引导。<span class="conf y">🟡 判断</span></p>
+      </div>
+
+      <h3>MVP 评测协议:怎么验证「评分对半米的孩子准不准」</h3>
+      <div class="callout purple">
+        <p>「开源能跑」≠「对半米的孩子准」(Ch14 也标了)。半米上线发音评测前,应跑一个轻量但严谨的评测协议,把误判风险量化出来:</p>
+        <ul style="margin:6px 0 0">
+          <li><strong>小样本设计</strong>:SEA 目标人群儿童(如 50 人 × 30 句),覆盖主要母语(印尼/马来/泰/越)、年龄段、性别。</li>
+          <li><strong>人类老师双评分(double-rating)</strong>:每条录音至少 2 名英语老师独立评分,算评分者间一致性(inter-rater agreement)作为「人类天花板」。</li>
+          <li><strong>模型-人类相关系数</strong>:把模型分与人类均分做相关(Pearson/Spearman),低于阈值就别上线给孩子看分。</li>
+          <li><strong>误判(false positive)阈值</strong>:重点盯「孩子发对了却被判错」——这种打击信心,比「发错了没抓到」更伤,要单独设容忍上限。</li>
+          <li><strong>噪音 / 设备分层</strong>:分安静/嘈杂、好麦/廉价平板麦分别测——SEA 真实环境噪音大、设备杂,音频质量本身会引入偏差<sup class="cite" data-refid="45">[45]</sup>。</li>
+        </ul>
+        <p style="margin:8px 0 0">这套协议也是「自建 vs 云 API」对比的实验底座:同一批录音同时喂自建栈和云 API,谁的「模型-人类相关」高、误判低,数据说话。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">AI 个性化②：LLM 私教 / 对话练习 + TTS·STT</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>「跟 AI 用英语聊天练口语」——这是 2024 年后冒出来的一整类开源项目。对半米的价值：<strong>「AI 陪练」的交互设计与 prompt 模式</strong>（不是代码，因为这类项目大多是 demo 级、且有 license 坑）。</p>
+
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>项目</th><th>star</th><th>license</th><th>是什么</th><th>对半米</th></tr></thead>
+        <tbody>
+          <tr><td><strong>HiKid</strong></td><td>~909<sup class="cite" data-refid="13">[13]</sup></td><td class="check"><span class="pill good">MIT</span></td><td><strong>给非英语国家儿童</strong>的桌面 AI 英语 pal：纯语音对话（不用打字）、本地 ASR+TTS、Ollama+Qwen3、单词游戏+讲故事；TypeScript</td><td><strong>★ banmi 的开源近亲，必读交互</strong></td></tr>
+          <tr><td><strong>Discute</strong></td><td>数百<sup class="cite" data-refid="18">[18]</sup></td><td class="check"><span class="pill good">宽松</span></td><td>AI 口语练习：Whisper 转写 + Groq LLM 对话 + Kokoro 语音克隆反馈</td><td>抄对话纠错流程</td></tr>
+          <tr><td><strong>companion</strong></td><td>~178<sup class="cite" data-refid="12">[12]</sup></td><td class="check"><span class="pill bad">CC-BY-NC</span></td><td>AI 私教：ChatGPT+Whisper+Google TTS/翻译，读写听说四模态、错误纠正</td><td><span class="pill bad">不可商用</span>，只看设计</td></tr>
+          <tr><td><strong>local-talking-llm</strong></td><td>数百</td><td class="check"><span class="pill good">宽松</span></td><td>本地语音 LLM：Whisper + Langchain + Ollama/云</td><td>本地语音回路脚手架</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout good">
+        <p><strong>HiKid 必须逐文件读。</strong>它的定位和半米几乎重合——「给非英语母语国家的孩子练英语口语和听力」<sup class="cite" data-refid="13">[13]</sup>。它做对的几件事：① <strong>纯语音、不用打字</strong>（小孩还不会打字）；② <strong>全本地</strong>（Qwen3 + 本地 ASR/TTS，隐私 + 离线 + 零 API 成本）；③ <strong>把对话包装成游戏和故事</strong>（不是「来对话练习」而是「来玩」）。这三点正是半米做 AI 陪练时该照搬的产品哲学。MIT license 也允许借码。<strong>它不是竞品威胁——它证明了「这条路有人走通了一个本地原型」，半米的优势在课程体系/行为引擎/分级内容这些 HiKid 没有的层。</strong></p>
+      </div>
+
+      <h3>TTS / STT：给陪练配「嘴」和「耳朵」</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>组件</th><th>license</th><th>能商用?</th><th>对半米</th></tr></thead>
+        <tbody>
+          <tr><td><strong>OpenAI Whisper</strong>（STT）</td><td class="check"><span class="pill good">MIT</span></td><td class="check y">是</td><td>事实标准 ASR 核心,本地可跑</td></tr>
+          <tr><td><strong>WhisperX</strong>（STT 增强）</td><td class="check"><span class="pill good">BSD-2</span></td><td class="check p">代码可,模型另算</td><td>词级时间戳+对齐;<strong>diarization 用 pyannote 模型(CC-BY-4.0+HF门控),与代码许可分开</strong><sup class="cite" data-refid="36">[36]</sup></td></tr>
+          <tr><td><strong>Piper</strong>（旧 rhasspy/piper）</td><td class="check"><span class="pill warn">MIT·已归档</span></td><td class="check p">能,但停更</td><td><strong>2025-10 被作者归档(read-only)</strong>,开发已迁至 piper1-gpl<sup class="cite" data-refid="34">[34]</sup></td></tr>
+          <tr><td><strong>piper1-gpl</strong>（维护续作）</td><td class="check"><span class="pill bad">GPL-3</span></td><td class="check p">GPL 传染,需评估</td><td>OHF 维护、活跃,但<strong>许可证已从 MIT 变 GPL-3</strong>;语音模型(voice models)各自单独授权,要逐个核<sup class="cite" data-refid="35">[35]</sup></td></tr>
+          <tr><td><strong>Coqui XTTS-v2</strong>（TTS）</td><td class="check"><span class="pill bad">Coqui PML</span></td><td class="check n">否（非商用）</td><td>音质好但 <strong>license 禁商用</strong>，且公司已倒闭<sup class="cite" data-refid="19">[19]</sup>，别依赖</td></tr>
+          <tr><td><strong>edge-tts</strong></td><td class="check"><span class="pill warn">灰区</span></td><td class="check p">慎用</td><td>调微软 Edge 在线 TTS，免费但非正式商用授权、依赖外部服务</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout warn">
+        <p>⚠️ <strong>TTS 选型避坑(已更正旧报告的 Piper 描述)：</strong></p>
+        <ul style="margin:6px 0 0">
+          <li><strong>Piper 的 license 状态变了,别再当「Apache-2 随便用」。</strong>原 <code>rhasspy/piper</code> 确实是 MIT,但<strong>已于 2025-10-06 被作者归档(read-only)</strong>,仓库顶部公告开发已迁到 <code>OHF-Voice/piper1-gpl</code><sup class="cite" data-refid="34">[34]</sup>;<strong>而续作 piper1-gpl 的许可证是 GPL-3.0</strong>(顾名思义)<sup class="cite" data-refid="35">[35]</sup>。对闭源/SaaS 半米的含义:用旧 MIT 版=吃停更风险,用新版=吃 GPL 传染评估。<strong>另外:piper 的语音模型(voice models)是单独授权的</strong>,不随代码许可走,选哪个嗓音都要单独核对那个 voice 的 license。<span class="conf y">🟡</span></li>
+          <li><strong>Coqui XTTS-v2 音质口碑最好,但禁商用且公司已倒。</strong>它是 Coqui Public Model License(禁止商用),母公司 2024 初关停<sup class="cite" data-refid="19">[19]</sup>——别把商业产品压在它身上。</li>
+          <li><strong>给半米的净建议</strong>:本地 TTS 若要 Piper 嗓音,先确认具体 voice model 的 license 可商用,并就「MIT 旧版(停更) vs GPL 新版」做一次取舍;同时<strong>把商业云 TTS(OpenAI/Google/ElevenLabs/Azure)当一等候选</strong>——儿童+海外场景,云 TTS 音质更好、维护成本低,<u>单人团队不该默认「自建本地 TTS 一定更优」</u>(见下方云 vs 自建对比)。</li>
+        </ul>
+      </div>
+
+      <h3>云 API vs 自建:单人团队别默认自建更优</h3>
+      <p>报告前面在「数据合规/零边际成本」上偏向自建,这里必须给一个<strong>诚实的对照</strong>——对阿杰单人全栈来说,<strong>很多场景买云 API 反而是更理性的起点</strong>。下面把「发音评测」和「对话/TTS-STT」两类的云选项摊开:</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>方案</th><th>类型</th><th>成本</th><th>延迟</th><th>SEA 口音/儿童</th><th>隐私/合规</th><th>准确度/音质</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Azure Pronunciation Assessment</strong></td><td>云·发音评测</td><td>按调用计费</td><td>低(云往返)</td><td>多语言,但对 SEA 儿童需自测</td><td class="check p">录音出境,需走合规</td><td>成熟:准确/流利/完整/<strong>韵律</strong>+音素级+miscue<sup class="cite" data-refid="41">[41]</sup></td></tr>
+          <tr><td><strong>SpeechSuper / ELSA</strong></td><td>云·发音评测(专做 L2)</td><td>按调用</td><td>低</td><td>ELSA 专攻 L2 学习者发音</td><td class="check p">出境</td><td>专业发音评测,儿童效果需自测</td></tr>
+          <tr><td><strong>科大讯飞</strong>(可选,非首选)</td><td>云·发音评测</td><td>按调用</td><td>低</td><td>中文母语者数据厚</td><td class="check n">数据出境到国内,海外合规更敏感</td><td>成熟,但海外视角列为可选</td></tr>
+          <tr><td><strong>OpenAI Realtime / TTS / gpt-4o-transcribe</strong></td><td>云·语音对话+TTS+STT</td><td>按 token/分钟</td><td>Realtime 低延迟语音对话</td><td>多语言强</td><td class="check p">出境</td><td>对话自然度/音质高</td></tr>
+          <tr><td><strong>Google STT/TTS</strong></td><td>云·TTS+STT</td><td>按调用</td><td>低</td><td>多语言含部分 SEA</td><td class="check p">出境</td><td>稳定,音质好</td></tr>
+          <tr><td><strong>自建</strong>(Echoic 栈 / Whisper+Piper)</td><td>本地</td><td>前期工程大</td><td>取决于端侧算力</td><td>需自建 SEA 校准集</td><td class="check y">数据不出设备(K12 强项)</td><td>评分准确度需自测校准</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="callout accent">
+        <p><strong>净判断(军师视角):MVP 阶段先用云 API 验证产品价值,确认值得做、且合规路径清楚后,再迁自建省成本 + 解数据出境。</strong>自建的两大卖点是「零边际成本」和「数据不出设备」——但前者只在<u>规模上来后</u>才划算,后者可以用「云 API + 录音不留存/即用即删 + COPPA 合规设计」部分替代(见 Ch13 第 0 步)。<strong>阿杰是单人全栈,自建一整套 ASR/对齐/GOP/校准是个大坑;别让「自建更纯粹」的直觉绑架了排期。</strong>这条 trade-off 值得单独出一份成本/合规对比子报告(Ch14 已标)。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">操作系统式开放架构：词典 popup 标准 / 插件 / 互操作</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>半米自我定位是「学习<strong>操作系统</strong>」，所以这一维度看的不是单个功能，而是<strong>「生态怎么互操作、用了什么开放标准」</strong>。开源世界这里有两个事实标准值得半米学习架构。</p>
+
+      <h3>标准一：Yomitan —— popup 词典 + 开放词典格式</h3>
+      <div class="callout accent">
+        <p><strong>Yomitan</strong>（~2.6k star，GPL-3，JS，2026-05 仍密集发版）<sup class="cite" data-refid="21">[21]</sup>是 Yomichan 的继任者，是「<strong>悬停即查词</strong>」浏览器扩展的事实标准。对半米最有价值的不是它的扩展本身，而是它定义的<strong>开放词典格式</strong>——任何人都能把词典转成 Yomitan 格式，于是一个词典能被整个生态复用<sup class="cite" data-refid="21">[21]</sup>。它还通过 AnkiConnect 把「查到的词」一键变成 Anki 卡。<strong>这就是「操作系统式」的精髓：定义格式，让组件可插拔。</strong></p>
+      </div>
+
+      <h3>标准二：AnkiConnect —— 让一切都能往 Anki 喂卡</h3>
+      <p>asbplayer、Yomitan、jidoujisho、vocabsieve 全都通过 <strong>AnkiConnect</strong>（Anki 的本地 HTTP 插件）把卡片送进 Anki<sup class="cite" data-refid="7">[7]</sup>。这是整个开源语言学习生态的「中央车站」——<strong>Anki(+FSRS) 当复习引擎，所有内容工具当生产前端，AnkiConnect 当总线。</strong></p>
+
+      <div class="callout good">
+        <p><strong>对半米的架构启示（这是本章真正的价值）：</strong>开源生态用「<strong>开放格式 + 本地 API 总线</strong>」实现了 Yomitan / asbplayer / Anki 三个独立项目的无缝协作。半米要做「学习操作系统」，应该学这个解耦思路：</p>
+        <ul style="margin:6px 0 0">
+          <li><strong>把「复习调度」独立成服务</strong>（内部就是 FSRS），任何内容模块（视频词表、阅读生词、发音弱项）都往它喂「待复习项」——就像所有工具都往 Anki 喂卡。</li>
+          <li><strong>定义半米自己的「学习对象」开放格式</strong>（一个词/一个句/一个音素弱项长什么样），让 SciShow 管线、LR 字幕、发音评测都产出同一种对象——而不是每个功能各做各的数据结构。</li>
+          <li><strong>词典/释义层抽象成可替换组件</strong>（今天用 Wiktionary，明天换 LLM 释义），像 Yomitan 的可插拔词典。</li>
+        </ul>
+      </div>
+      <div class="callout warn">
+        <p>⚠️ Yomitan/jidoujisho 都是 <strong>GPL-3</strong>，<strong>别 fork 进闭源半米</strong>；学的是它们的<strong>架构思想和格式设计</strong>，不是抄码。开放格式本身（如何描述一个词条）不受版权约束，可以自由参考。</p>
+      </div>
+
+      <h3>标准三：Kolibri —— 东南亚低带宽场景的「离线内容操作系统」</h3>
+      <div class="callout accent">
+        <p><strong>Kolibri</strong>（learningequality/kolibri，~1.1k★，<strong>MIT</strong>，Python/Vue，v0.19.4 / 2026-05 活跃,机构 Learning Equality 维护)<sup class="cite" data-refid="40">[40]</sup>是<strong>离线优先(offline-first)的 K12 教育平台</strong>,专为<u>低带宽 / 低连通地区</u>设计——而这正是半米东南亚终端的真实网络环境(乡镇学校、家庭流量有限、网络不稳)。前面 Yomitan/AnkiConnect 解决的是「组件互操作」,Kolibri 解决的是另一个半米绕不开的问题:<strong>内容怎么在「时好时坏甚至没网」的环境里分发、缓存、同步</strong>。它的几个架构点直接对口半米:</p>
+        <ul style="margin:6px 0 0">
+          <li><strong>内容包 / 频道(content channels)</strong>:把课程内容打包成可离线分发的「频道」,U 盘/局域网/偶发联网都能装——半米的 SciShow 词表、分级读物、发音练习句库都可以照这个思路做成「内容包」。</li>
+          <li><strong>设备间离线同步</strong>:学习进度/成绩在没有持续互联网时也能在本地服务器与设备间同步,等有网再回传——对半米的 FSRS 复习状态、发音弱项数据如何「断网也不丢、有网才上云」是现成参考。</li>
+          <li><strong>教师(coach) + 学习者 + 家长工作流</strong>:Kolibri 区分了教师布置/批改、学习者练习、管理者看板的角色——半米要进东南亚学校/家庭,这套多角色 + 离线的工作流模型很值得抄架构。</li>
+        </ul>
+      </div>
+      <div class="callout good">
+        <p><strong>对半米的净判断:Kolibri 是「内容分发 + 离线同步」这一层最该对照的开源样本,MIT 还可借码。</strong>半米不必 fork 整个平台(它是个大系统),但「内容包格式 + 离线优先同步 + 多角色工作流」这三件,是半米作为「学习 OS」在 SEA 落地时<u>迟早要解决</u>的工程,而 Kolibri 已经把这条路在低带宽场景验证过多年。建议放进 backlog,等核心学习闭环(FSRS/发音)跑通后,做分发层时回头读它。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">方法论体系：可理解输入 / Refold / 四股 / shadowing</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这一层不是代码也不是数据，是<strong>「教学法的算法」</strong>——决定半米「教什么顺序、用什么方式」的底层逻辑。半米的「行为驱动 AI 学习」如果有理论靠山，就是这些。</p>
+
+      <h3>① 可理解输入（Comprehensible Input, Krashen）—— 一切的地基</h3>
+      <div class="callout accent">
+        <p><strong>Krashen 的输入假说：语言是「习得」的，不是「学」的——靠接触「<u>比你当前水平略高一点（i+1）、但你能听懂大部分</u>」的输入<sup class="cite" data-refid="23">[23]</sup>。</strong>配套还有「情感过滤假说」：焦虑、自我怀疑、无聊会像一道滤网，挡住输入<sup class="cite" data-refid="23">[23]</sup>——这对儿童尤其重要。Refold 把它量化成一个可操作的数字：<strong>当你能懂 70–90% 时，大脑能用上下文补出剩下的 10–30%，习得就发生在这里</strong><sup class="cite" data-refid="24">[24]</sup>。</p>
+      </div>
+      <div class="callout good">
+        <p><strong>对半米的直接含义：「难度自适应」不只是 SRS 的事，是内容推送的事。</strong>半米给孩子推的视频/读物/句子，应该始终卡在「这个孩子能懂 ~80%」的甜区——太简单无聊（情感过滤升高）、太难挫败（同样升高）。结合 Ch5 的 CEFR 分级 + Ch6 的发音弱项数据，半米可以<strong>给每个孩子算一个「可理解输入难度档」并动态调整推送</strong>。这是把 Krashen 工程化成产品的核心机会。</p>
+      </div>
+
+      <h3>② Refold / MIA / AJATT —— 沉浸法的工程化谱系</h3>
+      <p>开源工具链（asbplayer/Yomitan/sentence mining）背后的方法论就是这一支。谱系：<strong>Antimoon → AJATT（Khatzumoto）→ MIA（Matt vs Japan）→ Refold</strong><sup class="cite" data-refid="25">[25]</sup>。核心主张：大量听/读母语内容 + 挖句子做 Anki，输出（说/写）推迟到有强基础后，显式语法可选<sup class="cite" data-refid="24">[24]</sup>。</p>
+      <div class="callout warn">
+        <p>⚠️ <strong>Refold 是成人自学者的方法，下沉到 K12 要大改。</strong>它假设学习者有超强自驱、会自己经营 Anki、能忍受「沉默期」。小孩没有这些。半米能借的是<strong>「可理解输入 + 间隔复习 + 推迟强制输出」的内核</strong>，但「自己挖句子、自己管复习」这些必须由半米的 AI/课程替孩子做掉（呼应 Ch4）。</p>
+      </div>
+
+      <h3>③ Paul Nation 的「四股」(Four Strands) —— 课程配比的标尺</h3>
+      <div class="callout info">
+        <p><strong>Nation 主张一门语言课的时间应均分到四股（各约 25%）</strong><sup class="cite" data-refid="26">[26]</sup>：<strong>意义聚焦输入</strong>（听/读，其中一半应是泛读）、<strong>意义聚焦输出</strong>（说/写）、<strong>语言聚焦学习</strong>（刻意学词汇/语法/发音）、<strong>流利度发展</strong>（在已会的范围内提速）。还有两条硬指标：泛读材料应让学习者<strong>认识 95–98% 的词</strong>；高频词靠刻意学、低频词靠教「学习策略」<sup class="cite" data-refid="26">[26]</sup>。</p>
+      </div>
+      <div class="callout good">
+        <p><strong>对半米：四股是一把现成的「课程体检尺」。</strong>半米现在偏重「输入 + 词汇刻意学」（SciShow 词表、SRS），<strong>四股提醒它别漏了「输出」（说/写，正好接 Ch6 发音 + Ch7 LLM 陪练）和「流利度」（限时已会内容的提速练习）</strong>。「95–98% 已知词」这条还能直接驱动 Ch5 的分级推送逻辑。</p>
+      </div>
+
+      <h3>④ Shadowing（影子跟读）/ 泛读 / 窄听</h3>
+      <ul>
+        <li><strong>Shadowing</strong>：边听边几乎同步复述，练韵律、工作记忆、发音肌肉<sup class="cite" data-refid="27">[27]</sup>。对半米：<strong>和 Ch6 发音评测天然咬合</strong>——孩子 shadow 一句，AI 评分 + 标错音，是一个完整的口语训练闭环。</li>
+        <li><strong>TPRS（用故事教，Total Physical Response Storytelling）</strong>：专为<strong>课堂儿童</strong>设计的可理解输入法——限制词汇、不停提问、用故事承载目标结构<sup class="cite" data-refid="28">[28]</sup>。<strong>这是本章对 K12 最对口的方法</strong>，半米的「讲故事 + 提问」式内容可以直接参照（HiKid 也用了讲故事）。</li>
+        <li><strong>泛读 / 窄听</strong>：大量易懂材料（泛读）、围绕同一话题反复听不同材料（窄听），都是把可理解输入「量」做上去的手段。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">二语习得 / 认知科学经典书：给半米机制找理论靠山</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这些书是上面方法论的「原始论文」。对半米的用途：<strong>当要解释「为什么半米这么设计」时，引用这些是最硬的背书；也是给阿杰本人补 SLA 内功的书单。</strong></p>
+
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>书 / 作者</th><th>核心主张</th><th>半米能用在哪</th></tr></thead>
+        <tbody>
+          <tr><td><strong>《Principles and Practice in SLA》</strong> Krashen</td><td>可理解输入 i+1、习得 vs 学习、情感过滤<sup class="cite" data-refid="23">[23]</sup>（原文全本作者官网免费）</td><td>「难度自适应推送」的理论根</td></tr>
+          <tr><td><strong>《Fluent Forever》</strong> Gabriel Wyner</td><td>先学发音、用图像不用翻译、重度用 SRS、几分钟/天背几百词<sup class="cite" data-refid="29">[29]</sup></td><td><strong>「发音优先 + 图像化 + SRS」三件直接对应半米 Ch2/Ch6</strong></td></tr>
+          <tr><td><strong>《Make It Stick》</strong> Brown/Roediger/McDaniel</td><td>提取练习 > 重读、间隔、交错、「合意困难」<sup class="cite" data-refid="30">[30]</sup></td><td>SRS/测验机制的认知科学背书；「交错」可指导排课</td></tr>
+          <tr><td><strong>Paul Nation 词汇研究</strong>（《Teaching & Learning Vocabulary》等）</td><td>四股、词频指导选词、95–98% 已知词、学习负担<sup class="cite" data-refid="26">[26]</sup></td><td>选词/分级/课程配比（接 Ch5/Ch9）</td></tr>
+          <tr><td><strong>《Word Power Made Easy》</strong> Norman Lewis</td><td>用词根/词源做脚手架，一个 root 带出一串词<sup class="cite" data-refid="31">[31]</sup></td><td><strong>词根教学法</strong>：半米可做「学一个词根解锁一组词」的机制</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout good">
+        <p><strong>三本对半米最实用的：</strong></p>
+        <ul style="margin:6px 0 0">
+          <li><strong>《Make It Stick》</strong>——给半米的 SRS/测验/复习一切机制提供「为什么有效」的硬证据，写产品文档/对家长解释时引它最权威。「<strong>提取练习强于重读、合意困难</strong>」直接背书「让孩子主动回忆而非被动看」。<sup class="cite" data-refid="30">[30]</sup></li>
+          <li><strong>《Fluent Forever》</strong>——它本身就是「SRS + 发音优先 + 图像化」的产品化方法论，几乎是半米某些模块的设计蓝本（且 Wyner 后来真做了 app）。<sup class="cite" data-refid="29">[29]</sup></li>
+          <li><strong>《Word Power Made Easy》</strong>——词根法对<strong>稍大的 K12（小学高年级+）</strong>是高 ROI 的扩词手段，可做成「词根解锁树」的游戏化机制。<sup class="cite" data-refid="31">[31]</sup></li>
+        </ul>
+      </div>
+      <div class="callout warn">
+        <p>⚠️ <strong>诚实：Krashen 的输入假说不是无争议的「定律」。</strong>近年有神经-生态学视角的批评，认为「纯可理解输入」不足以解释习得、忽视了输出和互动的作用<sup class="cite" data-refid="24">[24]</sup>。所以半米别把「只要输入就够了」当教条——Nation 的「四股」（含输出）和「互动」是必要补充。把可理解输入当地基、不当全部。<span class="conf y">🟡</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">四维度横切对比大表：所有项目一张表看完</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把前面所有开源项目，按半米四维度 + star/活跃度/license/借鉴方式/K12 适配，压成一张总表。<strong>点行可高亮</strong>。这是给阿杰扫一眼做取舍用的。</p>
+
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>项目</th><th>维度</th><th>star</th><th>license</th><th>2026 活跃?</th><th>借鉴方式</th><th>K12 适配</th><th>维护风险<br><span style="font-weight:400;font-size:11px">(last commit / archived / maintainers / release / open issues)</span></th></tr></thead>
+        <tbody>
+          <tr><td><strong>FSRS</strong>（算法+ports）</td><td>行为引擎</td><td>666 / 4k<sup class="cite" data-refid="3">[3]</sup></td><td class="check"><span class="pill good">MIT</span></td><td class="check y">✓</td><td><span class="pill good">直接集成</span></td><td class="check y">高（透明）</td><td><span class="pill good">低</span> 多 port 活跃、py-fsrs v6.3.1(2026-03)<sup class="cite" data-refid="37">[37]</sup>、社区维护</td></tr>
+          <tr><td><strong>AnkiDroid</strong></td><td>行为引擎</td><td>11.2k<sup class="cite" data-refid="11">[11]</sup></td><td class="check"><span class="pill warn">GPL-3</span></td><td class="check y">✓</td><td><span class="pill info">参考实现</span></td><td class="check p">中（需游戏化）</td><td><span class="pill good">低</span> v2.24.0(2026-05)、多人维护、大项目</td></tr>
+          <tr><td><strong>Duolingo</strong>（设计参考）</td><td>行为引擎</td><td>闭源</td><td class="check"><span class="pill bad">闭源</span></td><td class="check y">✓</td><td><span class="pill info">只抄设计</span></td><td class="check y">高</td><td>n/a（闭源,只借设计）</td></tr>
+          <tr><td><strong>Lute v3</strong></td><td>内容管线</td><td>1.5k<sup class="cite" data-refid="4">[4]</sup></td><td class="check"><span class="pill good">MIT</span></td><td class="check y">✓</td><td><span class="pill warn">抄架构</span></td><td class="check n">低（成人向）</td><td><span class="pill warn">中</span> v3.10.1(2025-03)、主要单人维护</td></tr>
+          <tr><td><strong>LinguaCafe</strong></td><td>内容管线</td><td>1.4k<sup class="cite" data-refid="5">[5]</sup></td><td class="check"><span class="pill bad">GPL-3</span></td><td class="check y">✓</td><td><span class="pill info">只抄 UX</span></td><td class="check n">低</td><td><span class="pill warn">中</span> v0.14.1(2025-03)、单人主导</td></tr>
+          <tr><td><strong>openkoto</strong></td><td>内容管线+AI</td><td>380<sup class="cite" data-refid="6">[6]</sup></td><td class="check"><span class="pill warn">Apache-2*附加</span></td><td class="check y">✓</td><td><span class="pill warn">抄交互·法务审</span></td><td class="check p">中</td><td><span class="pill warn">中</span> v0.6.6(2026-04) 活跃,但单人 + 多租户/LOGO 附加条款</td></tr>
+          <tr><td><strong>asbplayer</strong></td><td>内容管线</td><td>1.3k<sup class="cite" data-refid="7">[7]</sup></td><td class="check"><span class="pill good">MIT</span></td><td class="check y">✓</td><td><span class="pill warn">抄架构</span></td><td class="check n">低（成人向）</td><td><span class="pill good">低</span> v1.17.0(2026-05) 密集发版</td></tr>
+          <tr><td><strong>olp-en-cefrj</strong></td><td>内容管线</td><td>192<sup class="cite" data-refid="14">[14]</sup></td><td class="check"><span class="pill warn">分层混合</span></td><td class="check p">稳定</td><td><span class="pill good">拿数据</span></td><td class="check y">高</td><td><span class="pill good">低</span> 静态数据集、无「弃坑」概念,但 Octanove 部分 CC-BY-SA</td></tr>
+          <tr><td><strong>wordfreq</strong></td><td>内容管线</td><td>1.7k<sup class="cite" data-refid="16">[16]</sup></td><td class="check"><span class="pill good">Apache+CC</span></td><td class="check n">冻结(2022)</td><td><span class="pill good">拿数据</span></td><td class="check y">高</td><td><span class="pill warn">中</span> 作者主动冻结、不再更新,但数据快照仍可用</td></tr>
+          <tr><td><strong>Echoic</strong></td><td>AI 个性化</td><td>37<sup class="cite" data-refid="9">[9]</sup></td><td class="check"><span class="pill good">MIT</span></td><td class="check y">✓(commit)</td><td><span class="pill warn">读思路·别当后端</span></td><td class="check p">中（工具,非儿童项目）</td><td><span class="pill bad">高</span> 37★ 单人、<strong>0 正式 release</strong>、无可见测试/benchmark<sup class="cite" data-refid="38">[38]</sup>,弃坑风险大</td></tr>
+          <tr><td><strong>speechocean762</strong></td><td>AI 个性化</td><td>语料<sup class="cite" data-refid="10">[10]</sup></td><td class="check"><span class="pill good">可商用</span></td><td class="check p">稳定</td><td><span class="pill good">拿语料</span></td><td class="check p">含儿童语音(母语全 Mandarin)</td><td><span class="pill good">低</span> 静态语料、OpenSLR 托管,但 L1 不匹配 SEA</td></tr>
+          <tr><td><strong>HiKid</strong></td><td>AI 个性化</td><td>909<sup class="cite" data-refid="13">[13]</sup></td><td class="check"><span class="pill good">MIT</span></td><td class="check y">✓</td><td><span class="pill good">抄交互+借码</span></td><td class="check y">高（专为儿童）</td><td><span class="pill warn">中</span> v0.1.0(2026-04) 早期、主力单人,但定位极对口</td></tr>
+          <tr><td><strong>companion</strong></td><td>AI 个性化</td><td>178<sup class="cite" data-refid="12">[12]</sup></td><td class="check"><span class="pill bad">CC-BY-NC</span></td><td class="check p">中</td><td><span class="pill bad">不可商用</span></td><td class="check p">中</td><td><span class="pill warn">中</span> 单人、CC-BY-NC 锁死商用</td></tr>
+          <tr><td><strong>Whisper</strong>(STT 核心)</td><td>AI 个性化</td><td>大量</td><td class="check"><span class="pill good">MIT</span></td><td class="check y">✓</td><td><span class="pill good">直接集成</span></td><td class="check y">高</td><td><span class="pill good">低</span> 事实标准、生态厚</td></tr>
+          <tr><td><strong>WhisperX</strong>(STT 增强)</td><td>AI 个性化</td><td>22.3k<sup class="cite" data-refid="36">[36]</sup></td><td class="check"><span class="pill good">BSD-2</span></td><td class="check y">✓</td><td><span class="pill warn">集成·模型另核</span></td><td class="check y">高</td><td><span class="pill warn">中</span> 代码活跃,但 diarization 模型 CC-BY-4.0 + HF 门控,需额外接受协议</td></tr>
+          <tr><td><strong>Piper</strong>(TTS)</td><td>AI 个性化</td><td>11.1k / 4.3k<sup class="cite" data-refid="34">[34]</sup></td><td class="check"><span class="pill warn">MIT→GPL-3</span></td><td class="check p">旧版归档/新版活跃</td><td><span class="pill warn">集成·先核 voice license</span></td><td class="check y">高</td><td><span class="pill bad">高(变动中)</span> rhasspy/piper <strong>2025-10 已归档</strong>、续作 piper1-gpl 转 GPL-3 且「找维护者」<sup class="cite" data-refid="35">[35]</sup>;voice 模型各自授权</td></tr>
+          <tr><td><strong>Yomitan</strong></td><td>开放架构</td><td>2.6k<sup class="cite" data-refid="21">[21]</sup></td><td class="check"><span class="pill bad">GPL-3</span></td><td class="check y">✓</td><td><span class="pill info">抄标准/架构</span></td><td class="check p">中</td><td><span class="pill good">低</span> v26.5.x(2026-05) 密集发版、社区维护</td></tr>
+          <tr><td><strong>Kolibri</strong></td><td>开放架构/内容管线</td><td>1.1k<sup class="cite" data-refid="40">[40]</sup></td><td class="check"><span class="pill good">MIT</span></td><td class="check y">✓</td><td><span class="pill good">抄离线/内容包架构</span></td><td class="check y">高（K12 离线）</td><td><span class="pill good">低</span> v0.19.4(2026-05)、机构(Learning Equality)维护、153 个 release</td></tr>
+          <tr><td><strong>LibreLingo</strong></td><td>整 app</td><td>2.6k<sup class="cite" data-refid="32">[32]</sup></td><td class="check"><span class="pill bad">AGPL-3</span></td><td class="check n">停滞(2022)</td><td><span class="pill info">只看课程结构</span></td><td class="check p">中</td><td><span class="pill bad">高</span> 末次 release 2022、停滞,慎依赖</td></tr>
+          <tr><td><strong>Antura</strong></td><td>整 app（游戏）</td><td>113<sup class="cite" data-refid="33">[33]</sup></td><td class="check"><span class="pill good">BSD-2+CC-BY</span></td><td class="check y">✓(v3 开发中)</td><td><span class="pill good">抄游戏机制</span></td><td class="check y">高（专为儿童）</td><td><span class="pill warn">中</span> 2026-03 仍有 tag、机构(vgwb)维护,但 126 open issues、v3 重写中</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">MIT/Apache</div><div class="l">FSRS·Echoic·HiKid·asbplayer·Piper·Whisper·openkoto 都是可商用宽松许可</div></div>
+        <div class="metric"><div class="v">GPL/AGPL</div><div class="l">LinguaCafe·Yomitan·jidoujisho·LibreLingo 传染许可，闭源产品别 fork</div></div>
+        <div class="metric"><div class="v">3 个停更/归档</div><div class="l">wordfreq(数据仍可用)·LibreLingo(慎依赖)·Piper(已归档→GPL 续作)</div></div>
+        <div class="metric"><div class="v">儿童向 ≠ 含儿童数据</div><div class="l"><strong>2 个儿童向产品/游戏</strong>:HiKid·Antura;<strong>1 个含儿童语音语料</strong>:speechocean762(母语全 Mandarin);Echoic 是中性工具(非儿童项目)、olp-cefrj 是分级数据(非儿童数据集)——别混为一谈</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">K12 儿童适配性专章：哪些能直接下沉、哪些要改造</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是半米和所有这些开源项目最大的<strong>断层</strong>：<strong>绝大多数开源语言学习工具，是「高自驱成人自学者」造给「高自驱成人自学者」的</strong>。东南亚 K12 小孩既没有那个自驱，也没有那个元认知。这章把每类机制判一遍「能不能下沉」。</p>
+
+      <h3>判定总表</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>机制</th><th>原始人群</th><th>能直接下沉?</th><th>给 K12 要做的改造</th></tr></thead>
+        <tbody>
+          <tr><td><strong>FSRS 间隔调度</strong></td><td>中性（算法）</td><td class="check y">能</td><td>算法不变；前端把「评分」从「忘/难/一般/易」改成小孩能懂的（如表情/星星），别让孩子做元认知自评</td></tr>
+          <tr><td><strong>发音逐音素打分（Echoic）</strong></td><td>中性偏成人</td><td class="check p">引擎能，UI 要改</td><td>用含儿童语料(speechocean762)校准阈值；输出改「鼓励性引导」不是冷数字分</td></tr>
+          <tr><td><strong>CEFR/词频分级</strong></td><td>中性（数据）</td><td class="check y">能</td><td>直接用，再叠一层「年龄/年级」映射（A1 不等于「适合低龄」，话题也要适龄）</td></tr>
+          <tr><td><strong>sentence mining（自己挖句子）</strong></td><td>成人自学</td><td class="check n">不能</td><td>「挑哪句」由半米 AI 自动决定，孩子只负责「看/读/复述」，不经营 deck</td></tr>
+          <tr><td><strong>沉浸式阅读器（点读）</strong></td><td>成人自学</td><td class="check p">部分</td><td>点读交互可下沉；但要绘本化、配图、配音、配 TTS 朗读，纯文字小孩读不下去</td></tr>
+          <tr><td><strong>streak / 游戏化</strong></td><td>成人（Duolingo）</td><td class="check p">要小心(重构)</td><td>当「复原力机制」做,不照搬「损失厌恶+留存数字」:用<strong>周目标</strong>替日连胜、配<strong>宽限/Streak Freeze</strong>、<strong>成就框架不用损失框架</strong>、无羞辱文案、把 disengagement 当一等监测指标(触发降难度/换形式/通知家长而非惩罚)、引入家长视角</td></tr>
+          <tr><td><strong>LLM 对话陪练（HiKid 式）</strong></td><td>HiKid 已专为儿童</td><td class="check y">能（已是儿童向）</td><td>照搬「纯语音不打字 + 游戏/故事包装」；严格内容安全护栏（儿童 + AI 的合规红线）</td></tr>
+          <tr><td><strong>TPRS 故事教学法</strong></td><td>课堂儿童</td><td class="check y">能（天生儿童向）</td><td>最对口；用 AI 生成「限词汇 + 多提问」的故事</td></tr>
+          <tr><td><strong>Antura 游戏机制</strong></td><td>难民/低龄儿童</td><td class="check y">能</td><td>BSD license 可借；学它「把字母/拼读做成游戏关卡」</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>一条贯穿全章的铁律：把「学习者要做的元认知」全部转移给半米的 AI/系统。</strong>成人自学工具的隐藏前提是「学习者会自己决定学什么、何时复习、挑哪句、判断难度」。<strong>K12 产品的核心增值，恰恰是替孩子做完这些决策</strong>——孩子只需要「来玩 / 来读 / 来说」，难度、选材、复习时机、弱项追踪全部由半米后台用 FSRS + CEFR + 发音评测算好。<strong>这正是半米相对这些开源工具的护城河：开源工具给了引擎，半米给了「不需要自驱也能跑」的外壳。</strong></p>
+      </div>
+
+      <div class="callout good">
+        <p><strong>两个「天生儿童向」的开源样本，半米必须研究：</strong></p>
+        <ul style="margin:6px 0 0">
+          <li><strong>HiKid</strong>（MIT）——非英语国家儿童的本地 AI 口语 pal。学它怎么把「练口语」伪装成「和 AI 玩」<sup class="cite" data-refid="13">[13]</sup>。</li>
+          <li><strong>Antura</strong>（BSD-2，Unity）——给（含难民）儿童的识字游戏，多语言含英语，靠迷你游戏关卡教字母/拼读<sup class="cite" data-refid="33">[33]</sup>。学它的<strong>游戏化关卡设计</strong>——这是半米目前相对薄弱、而 Antura 已验证有效（拿过 EduApp4Syria 奖）的部分。</li>
+        </ul>
+      </div>
+
+      <div class="callout bad">
+        <p>🔴 <strong>儿童语音合规(COPPA/FTC)是半米的「第 0 步」,不是后续——因为半米要收儿童语音。</strong>发音评测和 AI 口语陪练的<u>输入就是孩子的录音</u>,一旦上线就落进美国 COPPA(以及各地等价法规)的射程,<strong>儿童语音录音被明确视为个人信息</strong>。FTC 2017 执法政策给了一个<strong>狭窄豁免</strong>:仅当「① 语音<u>只</u>用作书面文字的替代(如语音指令/搜索) ② 不作他用(不做行为画像、不做声纹识别、不卖不分享给第三方) ③ 用完<u>只</u>短暂保留并立即删除 ④ 隐私政策明确告知收集与删除策略」四条<u>全部满足</u>时,FTC 才不追究「未取得可验证家长同意」;而<strong>一旦录音里带姓名等其它个人信息,或要长期保留用于训练/追踪,豁免立即失效,必须走可验证家长同意</strong><sup class="cite" data-refid="39">[39]</sup>。给半米的硬动作(必须前置):</p>
+        <ul style="margin:6px 0 0">
+          <li><strong>可验证家长同意(parental consent)</strong>:若要保留/训练儿童语音,先有家长同意流程,别先收了再补。</li>
+          <li><strong>本地处理优先 + 即用即删</strong>:能在设备/本地完成评分就别上云;非留不可的录音设短保留期、用完即删(呼应 HiKid 全本地路线)。</li>
+          <li><strong>保留 / 删除策略 + 数据最小化</strong>:明确「存什么、存多久、谁能看、怎么删」,默认只存「评分结果/弱项标签」而非原始录音。</li>
+          <li><strong>audit log + 数据出境地图</strong>:记录儿童数据的访问与流向;画清楚「哪条数据从印尼/泰国的设备,经过哪个云,落到哪个区域的存储」——SEA 多国也有本地数据法。</li>
+          <li><strong>内容安全护栏</strong>:LLM 陪练要防「孩子说了不该说的 / AI 生成不适宜内容」,这层所有开源陪练项目都没认真做,半米必须自建。</li>
+        </ul>
+        <p style="margin:8px 0 0"><strong>这一步在 Ch13 决策树里被前置为「第 0 步」,先于所有功能。</strong>它不是法律意见(具体合规请律师过),但方向明确:<u>儿童 + 语音 + 商业产品,合规是地基不是补丁</u>。<span class="conf y">🟡</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">★ 半米可借鉴路线决策树：按优先级排，每条标投入产出</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是全报告最重要的一章。把前面所有发现，收敛成<strong>「阿杰下一步具体做什么、按什么顺序、投多少、得多少」</strong>。分档：第 0 步合规地基 → 直接集成 → 抄算法 → 抄方法论 → 只看 UX。</p>
+
+      <div class="step" style="border-color:var(--bad)">
+        <div class="step-head" style="background:var(--bad-soft)"><span class="sn" style="background:var(--bad)">0</span>先于一切 · 儿童合规 &amp; 数据架构（地基,不是后续）</div>
+        <div class="step-body">
+          <p><strong>为什么排第 0:半米要收儿童语音(发音评测/口语陪练的输入就是孩子录音),这让它一上线就进 COPPA/FTC 等儿童隐私法规的射程,儿童语音录音被明确视为个人信息</strong><sup class="cite" data-refid="39">[39]</sup>。这一步没搭好,后面第 3/4 步(发音、陪练)就是合规地雷。<strong>必须前置的设计(先于功能):</strong></p>
+          <ul style="margin:6px 0 0">
+            <li><strong>可验证家长同意(parental consent)</strong>:要保留/训练儿童语音前先有同意流程;若只把语音当「文字替代、用完即删、不作他用、隐私政策告知」可走 FTC 狭窄豁免,但带姓名等其它个人信息即失效<sup class="cite" data-refid="39">[39]</sup>。</li>
+            <li><strong>本地处理优先</strong>:能本地/端侧评分就别上云(呼应 HiKid 全本地);默认只存「评分结果/弱项标签」,不存原始录音。</li>
+            <li><strong>保留 &amp; 删除策略 + 数据最小化</strong>:明确存什么、存多久、谁能看、怎么删。</li>
+            <li><strong>audit log + 数据出境地图</strong>:记录儿童数据访问与流向,画清从 SEA 设备经哪个云落到哪个区域(SEA 多国有本地数据法)。</li>
+          </ul>
+          <p style="margin-top:8px"><strong>投入：</strong><span class="pill warn">中(设计+流程,非纯代码)</span>。<strong>产出：</strong><span class="pill accent">不做就别上线</span>(它是「能不能合法运营」的前提,不是加分项)。<strong>非法律意见,具体请律师过</strong>;但方向明确:儿童+语音+商业产品,合规是地基。</p>
+        </div>
+      </div>
+
+      <div class="tree">
+        <div class="node q">Q1：这件事半米已经有了吗？（SciShow 管线 / Roam SRS / LR 工作流）</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl y">否 → 优先</span>发音评测、LLM 陪练、CEFR 自动分级 = 三个增量空白，进下面的优先级排序</div>
+        <div class="node"><span class="lbl m">是但可升级</span>Roam 固定间隔 → 升级成 FSRS 自适应（投入小、收益大，排第 1）</div>
+      </div>
+
+      <h3>优先级排序（投入产出）</h3>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>立刻做 · 把 SRS 升级成 FSRS（直接集成）</div>
+        <div class="step-body">
+          <p><strong>做什么：</strong>选半米后端语言的 FSRS port（py-fsrs / fsrs-rs / ts-fsrs…），把 Roam-based 间隔复习的「固定 1/2/4/7…天」换成「调 FSRS 按孩子表现算下次时间」。</p>
+          <p><strong>投入：</strong><span class="pill good">小</span>（一个库 + 改调度层，无需训练，MIT 零授权成本）。<strong>产出：</strong><span class="pill accent">大</span>（每个孩子的复习从一刀切变自适应，是「行为引擎」的根本升级）。<strong>K12 适配：</strong>算法中性，只需把「评分 UI」改成小孩友好。</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">2</span>立刻做 · CEFR + 词频自动分级（直接拿数据）</div>
+        <div class="step-body">
+          <p><strong>做什么：</strong>主分级用 olp-en-cefrj 里<u>权威标注</u>的 CEFR-J/Octanove,长尾词用 Words-CEFR-Dataset 推断值当候选标签补位(标「待复核」),再用 wordfreq/COCA 排词频,给半米现有词表/内容自动打「难度档 + 教学顺序」。</p>
+          <p><strong>投入：</strong><span class="pill good">很小</span>（几张表 join，纯查表，零模型）。<strong>产出：</strong><span class="pill good">中-大</span>（选词分级从人工变自动，且为 Ch9 的「可理解输入难度自适应」打地基）。<strong>三个别省的兜底：</strong>① CEFR 等级要再叠一层「话题适龄」过滤(<u>CEFR≠适龄</u>);② Words-CEFR 是<u>推断非权威标注</u>,只当辅助;③ Octanove 部分是 CC-BY-SA,直接随产品再分发要处理 ShareAlike。</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">3</span>重点投入 · 发音评测 MVP（抄算法 + 借 Echoic 码）</div>
+        <div class="step-body">
+          <p><strong>做什么：</strong>把 Echoic（MIT）当<u>参考接线图读懂思路</u>(它是 37★ 单人原型、0 正式 release,别直接当生产后端<sup class="cite" data-refid="38">[38]</sup>),按发音栈 5 层分别选型自建评分服务(对齐层用 MFA、G2P 用 CMUdict+g2p-en 避开 GPL eSpeak、打分层自封装+benchmark,见 Ch6 矩阵);用 speechocean762 当冷启动基线,但<strong>务必自建 SEA L1 小样本校准集</strong>(它母语全是 Mandarin,不代表印尼/马来/泰/越口音)。framing 定死:<strong>目标是 intelligibility(可懂度)不是 native accent,前端不做口音羞辱</strong>。这是半米<strong>最大的能力空白 + 最高的差异化</strong>。</p>
+          <p><strong>投入：</strong><span class="pill warn">中-大</span>（有参考实现和基线语料，但分层重搭 + SEA 校准集 + 反馈设计要打磨，比「直接 fork Echoic」更实在）。<strong>产出：</strong><span class="pill accent">很大</span>（口语/发音是半米目前完全没有、且家长极在意的能力）。<strong>先做成「鼓励引导」不是「严格判分」</strong>;<strong>评测前先确认第 0 步合规到位</strong>(收的就是儿童录音)。<strong>替代起点:MVP 可先用云发音评测 API(Azure/ELSA)验证产品价值,再迁自建——单人团队别默认自建更优(见 Ch7)。</strong></p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">4</span>验证性投入 · AI 口语陪练（抄 HiKid 交互 + 借码）</div>
+        <div class="step-body">
+          <p><strong>做什么：</strong>逐文件读 HiKid（MIT，专为非英语国家儿童），照搬「纯语音不打字 + 故事/游戏包装 + 本地 ASR/TTS」的产品哲学；TTS 用 Piper（Apache-2）打底。和第 3 步的发音评测合成「shadow 一句 → 评分 → 对话」完整口语训练。</p>
+          <p><strong>投入：</strong><span class="pill warn">中</span>。<strong>产出：</strong><span class="pill good">中-大</span>（但儿童+AI 的内容安全护栏是硬成本，必须前置）。<strong>建议：</strong>先窄——一个话题、一个固定角色，跑通安全和趣味，再扩。</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">5</span>抄方法论（零代码，改产品逻辑）</div>
+        <div class="step-body">
+          <ul style="margin:0">
+            <li><strong>可理解输入 i+1 / 70–90% 懂</strong>（Krashen/Refold）→ 内容推送始终卡「孩子能懂 ~80%」的甜区，结合第 2 步分级数据实现。</li>
+            <li><strong>Nation 四股</strong> → 当「课程体检尺」，补齐半米偏弱的「输出（接第 3/4 步）」和「流利度」。</li>
+            <li><strong>TPRS 故事法</strong> → 用 AI 生成「限词汇 + 多提问」的适龄故事（最 K12 对口）。</li>
+            <li><strong>Duolingo streak（带宽容机制）</strong> → 习惯回路，但用成就框架、配 Streak Freeze。</li>
+          </ul>
+          <p style="margin-top:8px"><strong>投入：</strong><span class="pill good">小</span>（改逻辑/prompt）。<strong>产出：</strong><span class="pill good">中</span>（让半米的机制有 SLA 理论靠山、配比更合理）。</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">6</span>只看 UX / 不投入码（参考即可）</div>
+        <div class="step-body">
+          <ul style="margin:0">
+            <li><strong>openkoto</strong>（Apache-2）→ 抄「LLM 即时释义/语法拆解」交互（这条若做，可并进第 4 步）。</li>
+            <li><strong>LinguaCafe / Lute</strong> → 看「已知词率可视化、导入源组织、dashboard」UX，<strong>不 fork</strong>（GPL）。</li>
+            <li><strong>asbplayer</strong> → 半米若想把 LR 这条外部依赖自有化，参考其字幕对齐/片段造卡（MIT 可借，但优先级低，因 LR 工作流已能用）。</li>
+            <li><strong>Yomitan / AnkiConnect</strong> → 抄「开放格式 + 本地 API 总线」的<strong>操作系统式解耦架构</strong>（Ch8），这是半米作为「学习 OS」该内化的思想。</li>
+            <li><strong>Antura</strong>（BSD-2）→ 抄游戏化关卡设计（半米相对薄弱的一环）。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout good">
+        <p><strong>如果只能做一件事：第 1 步（FSRS）。</strong>投入最小、收益最确定、零授权风险、立刻提升半米「行为引擎」这个核心定位。<strong>如果想要最大差异化：第 3 步（发音评测）</strong>——这是半米完全空白、家长最在意、开源已把管线和基线语料备好的一块（但要分层自建 + SEA 校准,不是直接 fork）。两者不冲突，第 1 步本周可起，第 3 步排进下个迭代。<strong>注意:第 3/4 步(任何收儿童语音的功能)启动前,第 0 步合规地基必须先到位。</strong></p>
+      </div>
+      <div class="callout warn">
+        <p>⚠️ <strong>一句军师的拉回：</strong>第 0 步(合规)是<u>前置门槛</u>不是可选项,但它和第 1 步并行准备即可;<strong>其余六档别同时开。</strong>半米是阿杰单人全栈——<strong>先把第 1 步 FSRS 跑通上线（一个窄而确定的胜利），再启动第 3 步发音评测的窄 MVP（一个话题、鼓励性反馈,且第 0 步合规先就位）</strong>。其余当 backlog。先窄、跑通、再宽。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH14 ===== -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">诚实标注：本报告的未尽、存疑与数据边界</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>诚实大于权威。把查得不够实、只能估、或没空间深挖的地方一次摊开。</p>
+      <div class="callout warn">
+        <p>🟡 <strong>star 数 / 版本是查证当日（2026-06-06）快照。</strong>GitHub star 每天在动，本报告数字来自 repo 页面实查，但属单点采样；AnkiDroid 11.2k、Refold 谱系做了第二源交叉<sup class="cite" data-refid="11">[11]</sup><sup class="cite" data-refid="25">[25]</sup>，其余多为单源。当量级看，别当精确值。</p>
+      </div>
+      <div class="callout warn">
+        <p>🟡 <strong>license 判断是「读 repo 声明 / LICENSE 文件」，不是法律意见。</strong>GPL/AGPL 传染的具体边界（动态链接 vs 静态、SaaS 是否触发 AGPL）、CC-BY-SA 的 ShareAlike 触发条件有法律细节，半米真要 fork/再分发任何相关项目前应让懂行的人过一遍。本报告的「能/不能商用」是方向性提示。</p>
+      </div>
+      <div class="callout good">
+        <p>🟢 <strong>本轮(2026-06-06 修订)逐个 WebFetch/GitHub-API 复核过的 license / 状态(旧→新):</strong></p>
+        <ul style="margin:6px 0 0">
+          <li><strong>Piper</strong>:旧报告「Apache-2 可商用」→ 实为 <strong>rhasspy/piper 是 MIT 且 2025-10 已归档</strong>,续作 <strong>piper1-gpl 转 GPL-3</strong>;voice 模型单独授权。<sup class="cite" data-refid="34">[34]</sup><sup class="cite" data-refid="35">[35]</sup></li>
+          <li><strong>WhisperX</strong>:旧报告与 Whisper 并列标「MIT」→ 实为 <strong>BSD-2-Clause</strong>;diarization 用的 pyannote 模型权重 <strong>CC-BY-4.0 + HF 门控</strong>,与代码许可分开。<sup class="cite" data-refid="36">[36]</sup></li>
+          <li><strong>openkoto</strong>:旧报告「Apache-2 最干净可借码」→ 实为 <strong>Apache-2 + 附加条款</strong>(多租户限制、LOGO 保留、外观专利),商用/fork 前需法务审。<sup class="cite" data-refid="6">[6]</sup></li>
+          <li><strong>olp-en-cefrj</strong>:确认<strong>分三层</strong>——CEFR-J(TUFS,可商用需引用) / Octanove C1-C2(<strong>CC-BY-SA,再分发触发 ShareAlike</strong>) / grammar profile;且 <strong>CEFR ≠ 适龄</strong>。<sup class="cite" data-refid="14">[14]</sup></li>
+          <li><strong>Words-CEFR-Dataset</strong>:确认 CEFR 等级是 <strong>CEFR-J + 词频插值「计算/推断」</strong>得来,非权威标注 → 降级为辅助特征。<sup class="cite" data-refid="15">[15]</sup></li>
+          <li><strong>speechocean762</strong>:确认说话人<strong>母语全部 Mandarin(L1)</strong>,半数儿童 → 仅作基线,需自建 SEA L1 校准集。<sup class="cite" data-refid="10">[10]</sup></li>
+          <li><strong>Echoic</strong>:确认 <strong>0 正式 GitHub Release</strong>(7 个 git tag)、单人 37★ → 降为「读思路的原型」非生产后端。<sup class="cite" data-refid="38">[38]</sup></li>
+          <li><strong>FSRS 版本</strong>:统一为 py-fsrs v6.3.1(2026-03) / fsrs4anki v6.1.3(2025-09),两库各自打 tag,「进 Anki 主线」拆 Desktop/AnkiDroid/库 三处。<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="37">[37]</sup></li>
+        </ul>
+      </div>
+      <div class="callout warn">
+        <p>🟡 <strong>仍存疑 / 未独立深核的:</strong>① Piper 各<strong>具体 voice model</strong>的单独 license(只确认了代码归档与续作转 GPL,未逐个嗓音核);② pyannote diarization 模型在「商用闭源 + 儿童语音」下的实际使用条款细则(只确认 CC-BY-4.0+门控);③ 部分项目(gop-dnn-epadb / HiPAMA / Discute / COCA 转载)license 仍为「看仓库/看原始来源」,未逐一拉 LICENSE;④ wordfreq 标「Apache+CC」是聚合表述,具体数据子集的 CC 变体未细拆。这些在真要集成对应组件时再逐个落实。</p>
+      </div>
+      <div class="callout info">
+        <p>🟡 <strong>发音打分的「准确度」没实测。</strong>本报告确认了 Echoic/GOP 技术可行、语料可得，但<strong>没有在东南亚儿童口音上实跑评测</strong>。儿童 + 东南亚口音 + 噪音环境下的真实误判率，必须半米自己用第 3 步 MVP 测出来——别假设「开源能跑」=「对半米的孩子准」。<span class="conf y">🟡</span></p>
+      </div>
+      <div class="callout purple">
+        <p>🟡 <strong>没深挖的子问题（留给后续）：</strong>① 这些开源项目在<strong>东南亚语言（印尼语/越南语/泰语…）作为母语</strong>时的支持度（本报告聚焦「学英语」，没核母语侧）；② 自建发音评测 vs 商业云 API（Azure/SpeechSuper/ELSA/OpenAI…）的<strong>成本/质量/合规对比</strong>——本轮已在 Ch7 给了<u>方向性对照表</u>,但<strong>真实价格、SEA 儿童口音上的准确度实测仍需单独出一份量化报告</strong>；③ Antura/游戏化机制的具体落地工作量；④ LLM 陪练的<strong>儿童内容安全护栏</strong>完整设计;⑤ 发音评测的 <strong>MVP 评测协议</strong>(SEA 儿童小样本、人类老师双评分、模型-人类相关系数、误判阈值、噪音/设备分层)——见下方新增。这些建议在第 0/1/3 步跑通后单独出子报告。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MINI DEMO ===== -->
+  <section class="chapter" id="demo">
+    <h2><span class="num">🎮</span><span class="title-text">Mini Demo：5 张项目卡 + 两段真代码（点开看）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>点卡片展开它的「半米借鉴速记」。下面五张卡是把本报告最该抄的五个东西做成可玩速览（数据为真实 repo，叙述为半米视角浓缩）。再附两段真代码片段：FSRS 调度伪代码 + 发音打分流程。</p>
+
+      <div class="demo-grid">
+        <div class="demo-card" onclick="this.classList.toggle('open')">
+          <div class="dc-icon">🧠</div>
+          <div class="dc-title">FSRS</div>
+          <div class="dc-tag">行为引擎 · MIT · ★666/4k</div>
+          <div class="dc-bar"><span style="width:96%;background:var(--good)"></span></div>
+          <div class="dc-body"><p><strong>抄什么：</strong>整套自适应间隔算法。<strong>怎么用：</strong><code>pip install fsrs</code>，替换 Roam 固定间隔。<strong>ROI：</strong>极高。本周可起。</p></div>
+        </div>
+        <div class="demo-card" onclick="this.classList.toggle('open')">
+          <div class="dc-icon">🎙️</div>
+          <div class="dc-title">Echoic + speechocean762</div>
+          <div class="dc-tag">AI 个性化 · MIT/可商用 · ★37+语料</div>
+          <div class="dc-bar"><span style="width:90%;background:var(--accent)"></span></div>
+          <div class="dc-body"><p><strong>抄什么：</strong>逐音素打分管线的<u>接线思路</u> + 含儿童的基线语料。<strong>怎么用：</strong>读 Echoic 思路、分层自建评分服务(Echoic 是 37★ 原型别当后端);speechocean 母语全 Mandarin,<u>必须自建 SEA L1 校准集</u>。<strong>ROI：</strong>差异化最大,但工程比「直接 fork」实在。</p></div>
+        </div>
+        <div class="demo-card" onclick="this.classList.toggle('open')">
+          <div class="dc-icon">🧒</div>
+          <div class="dc-title">HiKid</div>
+          <div class="dc-tag">AI 个性化 · MIT · ★909</div>
+          <div class="dc-bar"><span style="width:82%;background:var(--purple)"></span></div>
+          <div class="dc-body"><p><strong>抄什么：</strong>「纯语音不打字 + 故事/游戏包装 + 全本地」儿童口语 pal 的交互哲学。<strong>怎么用：</strong>逐文件读，照搬产品设计。<strong>ROI：</strong>高（banmi 近亲）。</p></div>
+        </div>
+        <div class="demo-card" onclick="this.classList.toggle('open')">
+          <div class="dc-icon">📊</div>
+          <div class="dc-title">olp-en-cefrj</div>
+          <div class="dc-tag">内容管线 · 可商用 · ★192</div>
+          <div class="dc-bar"><span style="width:78%;background:var(--info)"></span></div>
+          <div class="dc-body"><p><strong>抄什么：</strong>词→CEFR A1-C2 现成分级数据。<strong>怎么用：</strong>join 词频表，自动给词表打难度档。<strong>ROI：</strong>很高（零模型，纯查表）。</p></div>
+        </div>
+        <div class="demo-card" onclick="this.classList.toggle('open')">
+          <div class="dc-icon">🕹️</div>
+          <div class="dc-title">Antura</div>
+          <div class="dc-tag">游戏化 · BSD-2 · ★113</div>
+          <div class="dc-bar"><span style="width:64%;background:var(--good)"></span></div>
+          <div class="dc-body"><p><strong>抄什么：</strong>把字母/拼读做成迷你游戏关卡（拿过 EduApp4Syria 奖）。<strong>怎么用：</strong>借游戏机制设计。<strong>ROI：</strong>中（补半米游戏化短板）。</p></div>
+        </div>
+      </div>
+
+      <h3>代码片段 ① · FSRS 调度伪代码（半米怎么调）</h3>
+      <pre><code># 伪代码 — 把 Roam 固定间隔换成 FSRS 自适应（py-fsrs 风格）
+from fsrs import Scheduler, Card, Rating
+
+scheduler = Scheduler()            # 内置 FSRS-6 默认参数（可用孩子历史复习记录优化）
+card = Card()                      # 一张词卡的记忆状态：difficulty / stability / due
+
+# 孩子复习后，给一个反馈（K12 前端把它包装成 表情/星星，别让孩子做元认知自评）
+#   Rating.Again=忘了  Hard=有点难  Good=会  Easy=太简单
+card, review_log = scheduler.review_card(card, Rating.Good)
+
+print(card.due)        # → FSRS 算出的「下次该复习的时间」（不是固定 1/2/4/7 天）
+print(card.stability)  # → 记忆稳定性，越大代表记得越牢、间隔可拉越长
+
+# 半米后台：把所有 due 已到的卡聚成今天的复习队列 → 推给孩子
+#   弱项（发音错音/常忘的词）天然 stability 低 → FSRS 自动让它们更频繁出现
+</code></pre>
+
+      <h3>代码片段 ② · 发音逐音素打分流程（Echoic 思路）</h3>
+      <pre><code># 伪代码 — 孩子读一句英语，输出逐音素分（Echoic = WhisperX + wav2vec2 + phonemizer）
+audio   = record_child_voice()                 # 孩子的录音（全本地，不上云）
+target  = "the cat sat on the mat"             # 标准句子
+ref_ph  = phonemize(target)                    # 标准音素序列: ð ə  k æ t  s æ t ...
+
+# 1) wav2vec2 对录音做音素级识别 + 与标准对齐（forced alignment）
+hyp_ph, align = wav2vec2_align(audio, ref_ph)
+
+# 2) GOP：逐音素比对「实际发音概率」vs「标准音素概率」，差越大=越不准
+scores = []
+for ph, post in zip(ref_ph, align.posteriors):
+    gop = goodness_of_pronunciation(ph, post)  # 0~1
+    scores.append((ph, gop))
+
+# 3) 聚合 + 加权（Echoic 默认 准确0.5 / 流利0.3 / 完整0.2）
+word_scores, sentence_score = aggregate(scores, weights=(0.5, 0.3, 0.2))
+
+# 4) ★K12 关键：不展示冷冰冰数字，转成鼓励性引导
+#    /θ/ 偏低 → "这个 th 音再试试，舌头轻轻放牙齿中间~ 你刚才已经很接近啦！"
+#    低分音素 → 喂回 FSRS（stability 调低）→ 之后这个音的练习会更频繁出现
+feedback = to_kid_friendly(word_scores)
+</code></pre>
+      <p style="font-size:12.5px;color:var(--text-mute)">⚠️ 以上为<strong>演示性伪代码</strong>，用于说明调用形态与思路，非可直接运行的源码；真实 API 以各 repo 文档为准。发音打分准确度需在东南亚儿童口音上实测校准（见 Ch14）。</p>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq">
+    <h2><span class="num">FAQ</span><span class="title-text">常见问题（11 条）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">如果只能抄一样进半米，抄哪个？</span><span class="toggle">＋</span></div><div class="faq-a"><p>FSRS（Ch2/Ch13 第 1 步）。投入最小、收益最确定、MIT 零授权风险，直接把半米「行为引擎」核心定位升一级——从 Roam 固定间隔升到「按每个孩子表现自适应」。一个库 + 改调度层就能上。想要最大差异化则选发音评测（第 3 步），但那个工程量更大。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">FSRS 不就是 Anki 里的一个开关吗，半米能单独用？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能。这是最大的误解——FSRS 核心是一个<strong>独立的、语言无关的开源算法库</strong>，Anki 只是它最有名的调用方。它有 py/rust/go/ts/dart/swift 等 10+ 个 port（MIT）<sup class="cite" data-refid="3">[3]</sup>，半米选后端语言对应的那个直接 import 即可，完全不依赖 Anki。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">这些整套 app（Lute / LinguaCafe / LibreLingo）能不能直接 fork 改成半米？</span><span class="toggle">＋</span></div><div class="faq-a"><p>基本都不建议。原因两层：① <strong>license</strong>——LinguaCafe(GPL)、LibreLingo(AGPL)、Yomitan/jidoujisho(GPL) 都是传染许可，fork 进闭源商业产品会要求你也开源；② <strong>形态</strong>——它们都是成人自学者的完整产品，下沉到 K12 要推倒交互重做。Lute(MIT)/asbplayer(MIT)/openkoto(Apache) 可借码，但价值主要在「架构/交互范式」，不在整 app。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">发音评测能不能不自建，直接买云 API？</span><span class="toggle">＋</span></div><div class="faq-a"><p>可以，而且短期更省事（微软/科大讯飞/SpeechSuper 都有成熟发音评测 API）。权衡：云 API <strong>上手快但按次收费、数据要出境</strong>（K12 录音的合规风险）；自建（Echoic 路线）<strong>前期工程量大但全本地、零边际成本、数据不出设备</strong>。建议：MVP 阶段可先用云 API 验证产品价值，确认值得做后再迁到自建省成本 + 解合规。这个 trade-off 值得单独出一份成本对比（Ch14 已标）。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">HiKid 已经做了「儿童 AI 英语口语」，半米还有戏吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>有，而且 HiKid 是利好不是威胁。它证明了「本地 AI 儿童口语 pal」这条路一个开源原型走通了，但它<strong>只是一个口语对话玩具</strong>——没有课程体系、没有 FSRS 行为引擎、没有 CEFR 分级内容管线、没有发音评测的弱项追踪。半米的护城河恰恰在这些「让不自驱的孩子也能系统进步」的层。把 HiKid 当「免费的交互设计参考实现」逐文件读<sup class="cite" data-refid="13">[13]</sup>，而不是当对手。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">为什么说成人自学工具不能直接给 K12 小孩用？</span><span class="toggle">＋</span></div><div class="faq-a"><p>因为它们的隐藏前提是「学习者会自己做元认知」——自己决定学什么、何时复习、挑哪句挖、判断难度。小孩没有这个自驱和元认知（Ch12）。K12 产品的核心增值就是<strong>替孩子把这些决策全做掉</strong>，孩子只负责「来玩/来读/来说」。所以借的是引擎（FSRS/发音/分级），不是「让用户自己经营 Anki deck」那套自学流程。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">streak / 游戏化对小孩有没有副作用？</span><span class="toggle">＋</span></div><div class="faq-a"><p>有。Duolingo 的 streak 靠「损失厌恶」驱动（保护连胜不断）<sup class="cite" data-refid="22">[22]</sup>，对成人是动机，对小孩断签可能直接变成挫败和放弃。半米抄 streak 必须同时抄<strong>宽容机制（Streak Freeze）</strong>、把叙事从「别搞砸」改成「你已坚持 N 天真棒」（成就框架），并引入家长视角。游戏化是好工具，但 K12 要用「鼓励」而非「惩罚断签」的版本（Ch12）。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">wordfreq 停更了，词频数据还能用吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能用。作者 2022 年主动冻结，原因是「AI 生成文本污染了网络语料、可靠采集词频的方法不存在了」<sup class="cite" data-refid="16">[16]</sup>——这是个时代性的好理由。但它的数据是 2021 年前的真人语言快照，对「常用词分级」这种慢变量足够好，Apache/CC license 允许商用。唯一限制：它不会再更新，不收 2023 年后的新词。要更新的词频可补 COCA 等其他源。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">这套东西用国产模型/工具行不行？</span><span class="toggle">＋</span></div><div class="faq-a"><p>本报告默认海外视角（阿杰在海外，Claude/GPT/Gemini 当首选，ASR/TTS 用 Whisper/Piper 等开源）。国产可作「可选补充」：发音评测云 API 科大讯飞成熟、Qwen3 本地小模型（HiKid 就用了）适合离线陪练。但「学英语」这件事上，英语母语数据/模型/语料的生态更厚，开源栈也更全，海外开源优先更稳。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">「操作系统式架构」具体指半米该怎么做？</span><span class="toggle">＋</span></div><div class="faq-a"><p>学开源生态的解耦思路（Ch8）：把「复习调度」独立成服务（内部就是 FSRS），任何内容模块（视频词表/阅读生词/发音弱项）都往它喂「待复习项」——就像 asbplayer/Yomitan 都往 Anki 喂卡、AnkiConnect 当总线。再定义半米自己的「学习对象」开放格式，让所有功能产出同一种对象。这样半米才是真的「学习 OS」而不是一堆各做各的功能。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">阿杰单人开发，这么多能不能一起上？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不能，也不该。六档按优先级排好了（Ch13），别同时开。先把第 1 步 FSRS 跑通上线（一个窄而确定的胜利），再启动第 3 步发音评测的窄 MVP（一个话题、鼓励性反馈），其余进 backlog。先窄、跑通、再宽——这也是军师一贯的拉回。</p></div></div>
+
+    </div>
+  </section>
+
+  <!-- ===== REFERENCES ===== -->
+  <section class="chapter" id="refs">
+    <h2><span class="num">REF</span><span class="title-text">References · 参考来源</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13px;color:var(--text-mute)">访问日期均为 2026-06-06。鼠标悬停正文 <sup class="cite" data-refid="1">[1]</sup> 可弹窗查看来源并点击外链。star/版本为查证当日 repo 页快照。</p>
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://github.com/open-spaced-repetition/fsrs4anki/releases" target="_blank" rel="noopener">fsrs4anki — Modern Anki scheduling based on FSRS（最新 release v6.1.3, 2025-09-08）</a><span class="ref-meta">· 引用 5 次 · ~4k★ MIT、FSRS-6 21参数+optimizer、DSR模型；release 实查 tag v6.1.3 / 2025-09-08，对应 FSRS-6 已进 Anki 25.09</span></li>
+        <li id="ref-2"><a href="https://github.com/open-spaced-repetition/fsrs4anki/wiki/abc-of-fsrs" target="_blank" rel="noopener">ABC of FSRS / The Metric — Difficulty·Stability·Retrievability</a><span class="ref-meta">· 引用 2 次 · DSR 三量定义、记忆建模原理</span></li>
+        <li id="ref-3"><a href="https://github.com/open-spaced-repetition/free-spaced-repetition-scheduler" target="_blank" rel="noopener">free-spaced-repetition-scheduler — 算法原始定义 + 多语言 port 矩阵</a><span class="ref-meta">· 引用 6 次 · ~666★ MIT、py/rs/go/ts/dart/swift/ruby 等 10+ ports</span></li>
+        <li id="ref-4"><a href="https://github.com/LuteOrg/lute-v3" target="_blank" rel="noopener">Lute v3 — Learning Using Texts</a><span class="ref-meta">· 引用 3 次 · ~1.5k★ MIT、Python/Flask、v3.10.1(2025-03)活跃、LWT 现代重写</span></li>
+        <li id="ref-5"><a href="https://github.com/simjanos-dev/LinguaCafe" target="_blank" rel="noopener">LinguaCafe — 自托管阅读学习</a><span class="ref-meta">· 引用 3 次 · ~1.4k★ GPL-3、Vue+PHP、v0.14.1(2025-03)、27语言、导入源多</span></li>
+        <li id="ref-6"><a href="https://github.com/hikariming/openkoto" target="_blank" rel="noopener">openkoto (TextLingo) — AI 兴趣驱动外语阅读</a><span class="ref-meta">· 引用 4 次 · ~380★ Apache-2、Tauri+React+Rust、v0.6.6(2026-04)、LLM 即时释义/语法拆解</span></li>
+        <li id="ref-7"><a href="https://github.com/killergerbah/asbplayer" target="_blank" rel="noopener">asbplayer — 字幕 sentence mining 媒体播放器</a><span class="ref-meta">· 引用 4 次 · ~1.3k★ MIT、TS、v1.17.0(2026-05)、Netflix/YouTube字幕、AnkiConnect、LR 开源替代</span></li>
+        <li id="ref-8"><a href="https://github.com/Vuizur/awesome-language-learning" target="_blank" rel="noopener">awesome-language-learning — 语言学习项目聚合 list</a><span class="ref-meta">· 引用 2 次 · subs2srs/voracious/mpvacious/vocabsieve/trunk/KOReader 等索引</span></li>
+        <li id="ref-9"><a href="https://github.com/xialeistudio/echoic" target="_blank" rel="noopener">Echoic — 自托管逐音素发音打分</a><span class="ref-meta">· 引用 5 次 · ~37★ MIT、WhisperX+wav2vec2+phonemizer、React+FastAPI、逐音素颜色打分+练习热力图、更新到2026-05</span></li>
+        <li id="ref-10"><a href="https://github.com/jimbozhang/speechocean762" target="_blank" rel="noopener">speechocean762 — 非母语英语发音评测语料 (OpenSLR #101)</a><span class="ref-meta">· 引用 4 次 · 5000句/250学习者(一半儿童)、逐音素/词/句标注、Kaldi GOP recipe、可商用</span></li>
+        <li id="ref-11"><a href="https://github.com/ankidroid/Anki-Android" target="_blank" rel="noopener">AnkiDroid — Anki 安卓客户端（内置 FSRS）</a><span class="ref-meta">· 引用 3 次 · ~11.2k★ GPL-3、Kotlin、v2.24.0(2026-05)、FSRS 已内置、第二源确认 11k</span></li>
+        <li id="ref-12"><a href="https://github.com/shakedzy/companion" target="_blank" rel="noopener">companion — Generative-AI 外语私教</a><span class="ref-meta">· 引用 2 次 · ~178★ CC-BY-NC(禁商用)、ChatGPT+Whisper+Google TTS、四模态纠错</span></li>
+        <li id="ref-13"><a href="https://github.com/xiaochong/hi-kid" target="_blank" rel="noopener">HiKid — 给非英语国家儿童的本地 AI 英语 pal</a><span class="ref-meta">· 引用 5 次 · ~909★ MIT、TS、v0.1.0(2026-04)、纯语音不打字、Ollama+Qwen3、本地ASR/TTS、单词游戏+讲故事</span></li>
+        <li id="ref-14"><a href="https://github.com/openlanguageprofiles/olp-en-cefrj" target="_blank" rel="noopener">olp-en-cefrj — Open Language Profiles CEFR-J 数据集</a><span class="ref-meta">· 引用 3 次 · ~192★、CEFR-J词表(可研究+商用需引用)+Octanove C1/C2(CC-BY-SA)、词→A1-C2</span></li>
+        <li id="ref-15"><a href="https://github.com/Maximax67/Words-CEFR-Dataset" target="_blank" rel="noopener">Words-CEFR-Dataset (+cefrpy) — 词→CEFR + 词频</a><span class="ref-meta">· 引用 2 次 · ~75★ MIT、含lemma/stem/POS/Google N-gram词频、配 spaCy 集成 cefrpy</span></li>
+        <li id="ref-16"><a href="https://github.com/rspeer/wordfreq" target="_blank" rel="noopener">wordfreq — 多语言词频库（已冻结）</a><span class="ref-meta">· 引用 4 次 · ~1.7k★ Apache+CC、40+语言、v3.0.2(2022)后冻结、原因:AI文本污染语料、数据仍可商用</span></li>
+        <li id="ref-17"><a href="https://github.com/brucewlee/COCA-WordFrequency" target="_blank" rel="noopener">COCA-WordFrequency — COCA Top 5000 词频</a><span class="ref-meta">· 引用 1 次 · 美式英语高频核心、学术转载、看原始来源条款</span></li>
+        <li id="ref-18"><a href="https://github.com/5uru/Discute" target="_blank" rel="noopener">Discute — AI 口语练习</a><span class="ref-meta">· 引用 1 次 · Whisper 转写 + Groq LLM 对话 + Kokoro 语音克隆反馈</span></li>
+        <li id="ref-19"><a href="https://www.bentoml.com/blog/exploring-the-world-of-open-source-text-to-speech-models" target="_blank" rel="noopener">Open-Source TTS 对比 (Piper vs Coqui XTTS) 2026</a><span class="ref-meta">· 引用 4 次 · Piper Apache-2 可商用边缘可跑；Coqui XTTS-v2 禁商用且公司2024关停</span></li>
+        <li id="ref-20"><a href="https://github.com/nakopylov/awesome-immersion" target="_blank" rel="noopener">awesome-immersion — 沉浸/sentence mining 工具聚合</a><span class="ref-meta">· 引用 2 次 · Yomitan/jidoujisho/mokuro/manga-ocr/memento、生态由日语学习者推动</span></li>
+        <li id="ref-21"><a href="https://github.com/yomidevs/yomitan" target="_blank" rel="noopener">Yomitan — popup 词典浏览器扩展（Yomichan 继任）</a><span class="ref-meta">· 引用 3 次 · ~2.6k★ GPL-3、JS、v26.5.19(2026-05)、开放词典格式、AnkiConnect 造卡</span></li>
+        <li id="ref-22"><a href="https://yukaichou.com/gamification-study/master-the-art-of-streak-design-for-short-term-engagement-and-long-term-success/" target="_blank" rel="noopener">Yu-kai Chou / Trophy — Duolingo streak 设计与损失厌恶</a><span class="ref-meta">· 引用 3 次 · streak=损失厌恶非成就、次日留存12%→55%、Streak Freeze 降churn~21%</span></li>
+        <li id="ref-23"><a href="https://www.sdkrashen.com/content/books/principles_and_practice.pdf" target="_blank" rel="noopener">Krashen《Principles and Practice in SLA》全本 + Wikipedia 输入假说</a><span class="ref-meta">· 引用 4 次 · 可理解输入 i+1、习得vs学习、情感过滤、自然顺序</span></li>
+        <li id="ref-24"><a href="https://refold.la/roadmap/library/comprehensible-input" target="_blank" rel="noopener">Refold — Comprehensible Input 路线 + 神经-生态批评</a><span class="ref-meta">· 引用 3 次 · 懂70-90%是习得甜区、沉浸+挖句子、含对纯CI的学术批评</span></li>
+        <li id="ref-25"><a href="https://learnanylanguage.fandom.com/wiki/All_Japanese_All_The_Time" target="_blank" rel="noopener">AJATT / MIA / Refold 谱系（Antimoon→AJATT→MIA→Refold）</a><span class="ref-meta">· 引用 1 次 · 沉浸法工程化谱系、Khatzumoto/Matt vs Japan、第二源确认</span></li>
+        <li id="ref-26"><a href="https://www.victoria.ac.nz/__data/assets/pdf_file/0019/1626121/2007-Four-strands.pdf" target="_blank" rel="noopener">Paul Nation《The Four Strands》(2007) + 词汇研究</a><span class="ref-meta">· 引用 4 次 · 四股各25%、95-98%已知词、词频指导选词、学习负担</span></li>
+        <li id="ref-27"><a href="https://gianfrancoconti.com/2025/07/26/shadowing-for-fluency-prosody-and-listening-comprehension-the-what-why-and-how-according-to-sla-research/" target="_blank" rel="noopener">The Language Gym — Shadowing 的 SLA 研究</a><span class="ref-meta">· 引用 1 次 · 边听边复述练韵律/工作记忆/发音肌肉、纯/文本辅助/韵律三型</span></li>
+        <li id="ref-28"><a href="https://en.wikipedia.org/wiki/TPR_Storytelling" target="_blank" rel="noopener">TPR Storytelling (TPRS) — 儿童课堂可理解输入故事法</a><span class="ref-meta">· 引用 1 次 · Blaine Ray、限词汇+不停提问+故事承载结构、流利优先于准确</span></li>
+        <li id="ref-29"><a href="https://www.penguinrandomhouse.com/books/224541/fluent-forever-by-gabriel-wyner/" target="_blank" rel="noopener">Gabriel Wyner《Fluent Forever》</a><span class="ref-meta">· 引用 2 次 · 先学发音、用图像不用翻译、重度SRS、几分钟/天背几百词</span></li>
+        <li id="ref-30"><a href="https://www.hup.harvard.edu/file/feeds/PDF/9780674729018_sample.pdf" target="_blank" rel="noopener">Brown/Roediger/McDaniel《Make It Stick》</a><span class="ref-meta">· 引用 2 次 · 提取练习>重读、间隔、交错、合意困难</span></li>
+        <li id="ref-31"><a href="https://www.goodreads.com/book/show/827597.Word_Power_Made_Easy" target="_blank" rel="noopener">Norman Lewis《Word Power Made Easy》</a><span class="ref-meta">· 引用 2 次 · 词根/词源做脚手架、一个root带一串词、主题分章+测验</span></li>
+        <li id="ref-32"><a href="https://github.com/LibreLingo/LibreLingo" target="_blank" rel="noopener">LibreLingo — 开源 Duolingo 替代</a><span class="ref-meta">· 引用 1 次 · ~2.6k★ AGPL-3、Python、最后 release 2022(停滞)、社区拥有课程平台</span></li>
+        <li id="ref-33"><a href="https://github.com/vgwb/Antura" target="_blank" rel="noopener">Antura — 获奖开源儿童识字游戏</a><span class="ref-meta">· 引用 2 次 · ~113★ 代码 BSD-2 / 美术资产 CC-BY-4.0、Unity 6.x、活跃(v3.0 2026开发中,最近 tag 2026-03)、EduApp4Syria奖、英/阿/法+多语言、迷你游戏教拼读</span></li>
+        <li id="ref-34"><a href="https://github.com/rhasspy/piper" target="_blank" rel="noopener">Piper (rhasspy/piper) — 轻量本地神经 TTS（已归档）</a><span class="ref-meta">· ~11.1k★、license MIT、<strong>2025-10-06 被作者归档(read-only)</strong>、仓库顶部公告「Development has moved → OHF-Voice/piper1-gpl」；语音模型(voice models)在 VOICES 中各自单独授权,需逐个核对</span></li>
+        <li id="ref-35"><a href="https://github.com/OHF-Voice/piper1-gpl" target="_blank" rel="noopener">piper1-gpl (OHF-Voice) — Piper 的维护续作</a><span class="ref-meta">· ~4.3k★、<strong>license GPL-3.0（不再是 MIT）</strong>、Open Home Foundation 维护、2026-04 仍活跃、README 标「looking for maintainers」；与旧 piper 同源但许可证已变,闭源商用需评估 GPL 传染</span></li>
+        <li id="ref-36"><a href="https://github.com/m-bain/whisperX" target="_blank" rel="noopener">WhisperX — 带词级时间戳与说话人分离的 Whisper</a><span class="ref-meta">· ~22.3k★、<strong>license BSD-2-Clause</strong>（非 MIT）；diarization 用 pyannote speaker-diarization-community-1 模型,该<strong>模型权重 CC-BY-4.0 + HuggingFace 门控(需 token+接受协议)</strong>,与代码许可分开</span></li>
+        <li id="ref-37"><a href="https://github.com/open-spaced-repetition/py-fsrs/releases" target="_blank" rel="noopener">py-fsrs — FSRS 官方 Python 实现（release 实查）</a><span class="ref-meta">· 引用 2 次 · 最新 tag v6.3.1 / 2026-03-10、实现 FSRS-6（v6.0 起新增 same-day 复习的 2 个参数）；正文 Ch2「v6.3.1 / 2026-03」指的是本库,非 fsrs4anki</span></li>
+        <li id="ref-38"><a href="https://github.com/xialeistudio/echoic/releases" target="_blank" rel="noopener">Echoic — releases 页实查（无正式 Release）</a><span class="ref-meta">· 引用 2 次 · releases 页显示「There aren't any releases here」=<strong>0 个正式 GitHub Release</strong>；有 7 个 git tag(v1.0.0–v1.6.0)但未发布 release;0 open issues、无可见测试目录、模型(WhisperX+wav2vec2 ~1GB)首次运行自动下载</span></li>
+        <li id="ref-39"><a href="https://www.ftc.gov/news-events/news/press-releases/2017/10/ftc-provides-additional-guidance-coppa-voice-recordings" target="_blank" rel="noopener">FTC — COPPA 与儿童语音录音执法政策声明 (2017-10)</a><span class="ref-meta">· 引用 3 次 · 儿童语音录音属个人信息;仅当「纯作书面文字替代(如语音指令/搜索)+不作他用+用完立即删除+隐私政策明确告知」四条件全满足时 FTC 不追究未取得家长同意;一旦含姓名等其他个人信息即不适用</span></li>
+        <li id="ref-40"><a href="https://github.com/learningequality/kolibri" target="_blank" rel="noopener">Kolibri (Learning Equality) — 离线优先 K12 教育平台</a><span class="ref-meta">· 引用 2 次 · ~1.1k★ MIT、Python/Vue、v0.19.4(2026-05)活跃、离线优先(无需联网)、内容频道/内容包、设备间同步、教师(coach)+学习者工作流;广泛用于低带宽/低连通地区</span></li>
+        <li id="ref-41"><a href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-pronunciation-assessment" target="_blank" rel="noopener">Azure AI Speech — Pronunciation Assessment</a><span class="ref-meta">· 引用 2 次 · 云端付费 API、按调用计费;评分维度:准确度/流利度/完整度/<strong>韵律(prosody)</strong>+音素与音节级,另有 miscue 检测与 content assessment(语法/词汇/话题);多语言;数据出境需走合规</span></li>
+        <li id="ref-42"><a href="https://github.com/MontrealCorpusTools/Montreal-Forced-Aligner" target="_blank" rel="noopener">Montreal Forced Aligner (MFA) — 强制对齐</a><span class="ref-meta">· 引用 1 次 · ~1.8k★ MIT、基于 Kaldi、v3.x(2026-02 活跃);把音频对齐到音素时间边界,是发音评测「对齐层」的常用选型</span></li>
+        <li id="ref-43"><a href="https://github.com/speechbrain/speechbrain" target="_blank" rel="noopener">SpeechBrain — PyTorch 语音工具箱</a><span class="ref-meta">· 引用 1 次 · ~11.6k★ Apache-2.0;ASR/说话人/分离全栈 recipe,但<strong>无现成 GOP 发音评测 recipe</strong>,做评分需自行拼装</span></li>
+        <li id="ref-44"><a href="https://en.wikipedia.org/wiki/CMU_Pronouncing_Dictionary" target="_blank" rel="noopener">CMU Pronouncing Dictionary (CMUdict) + g2p-en</a><span class="ref-meta">· 引用 1 次 · 13.4万词 ARPABET 音标、license BSD-2(早期公有领域);G2P(字→音)训练语料与查询表,g2p-en 等工具基于它</span></li>
+        <li id="ref-45"><a href="https://par.nsf.gov/servlets/purl/10531394" target="_blank" rel="noopener">Pronunciation Assessment Criteria and Intelligibility（学界综述）</a><span class="ref-meta">· 引用 2 次 · 二语发音评测应以 intelligibility/comprehensibility 为目标而非 native accent;评分量表常把「重口音」与「可懂度」混淆,带 native-bias;需纳入多样化语音数据以求公平</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <footer>
+    无忌 · Deep Research · L2 · 2026-06-06 · GitHub 英语学习开源生态：能抄什么进半米<br>
+    核心结论：算法/数据可直接拿·整套app只看架构 → 优先级：①FSRS自适应间隔(MIT直接集成) ②CEFR+词频自动分级(拿数据) ③发音逐音素评测(Echoic+含儿童语料·最大差异化) ④HiKid式AI口语陪练 · star/license/活跃度已逐项标注 · 单人开发先窄后宽
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('github-english-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('github-english-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>中国算力卖欧洲：假设验证研究 · 无忌 Deep Research · 2026-06-10</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 01 全景三问三答</a>
+    <a href="#ch2" data-target="ch2">02 02 电价账本证伪</a>
+    <a href="#ch3" data-target="ch3">03 03 过剩的真相</a>
+    <a href="#ch4" data-target="ch4">04 04 玩家地图</a>
+    <a href="#ch5" data-target="ch5">05 05 GDPR与主权云</a>
+    <a href="#ch6" data-target="ch6">06 06 美国管制夹击</a>
+    <a href="#ch7" data-target="ch7">07 07 中国侧合规</a>
+    <a href="#ch8" data-target="ch8">08 08 跨境网络现实</a>
+    <a href="#ch9" data-target="ch9">09 09 四档交付形态</a>
+    <a href="#ch10" data-target="ch10">10 10 活案例拆解</a>
+    <a href="#ch11" data-target="ch11">11 11 需求与窗口期</a>
+    <a href="#ch12" data-target="ch12">12 12 获客现实排序</a>
+    <a href="#ch13" data-target="ch13">13 13 支付与结算</a>
+    <a href="#ch14" data-target="ch14">14 14 反方陈述</a>
+    <a href="#ch15" data-target="ch15">15 15 给阿杰的建议</a>
+    <a href="#faq" data-target="faq">16 FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">17 References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>中国算力卖欧洲：假设验证研究</h1>
+    <div class="hero-meta">
+      <span>📅 2026-06-10</span>
+      <span>🔍 5 路并行搜证 + 60+ 次检索 + 10 次补充核查</span>
+      <span>⚖️ 经济账 × 合规 × 玩家地图 × 需求获客 × 技术形态</span>
+      <span>🌏 立场：人在马来西亚的个人开发者/创业者</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>一句话定调：「中国电力便宜 → 把中国大模型算力卖到欧洲」这条假设链，经五路证据交叉验证后大体不成立——电费只占 GPU 算力总成本的 7–12%，套利空间被折旧碾压；裸算力（IaaS）从中国卖到欧洲，2026 年市面上没有任何一家做成的公司，行业巨头在反向操作（把 GPU 搬去马来西亚）；GDPR + 欧盟主权云 + 美国出口管制构成三重结构性死结。但「算力的成品形态」——token、API、异步任务结果——出海是真实存在且年入数亿美元的活路径，可灵就是活案例。</strong></p>
+      <p>报告按"假设链逐环检验"展开：先把三问三答放在最前（Ch1），然后拆电价套利账本（Ch2，假设证伪的核心章）、看中国算力过剩的真相（Ch3）、画玩家地图（Ch4）；中段把三重合规死结查透——GDPR 与欧盟主权云（Ch5）、美国出口管制（Ch6）、中国侧监管（Ch7）；后段转向"如果仍想做"的工程与商业现实：跨境网络（Ch8）、四档交付形态（Ch9）、活案例拆解（Ch10）、需求侧与窗口期（Ch11）、获客渠道（Ch12）、支付结算（Ch13），最后给阿杰一棵决策树和明确的 verdict（Ch14）。所有价格与政策标注访问日期 2026-06-10，关键数据标 🟢多源 / 🟡单源 / ⚠️估算。</p>
+    </div>
+  </div>
+
+  <div class="callout bad">
+    <h3>核心发现一（证伪主轴）：电价套利的算术不成立——电费只占算力成本 7–12%，且中国 H100 租价已涨到与欧洲 neo-cloud 持平</h3>
+    <p>假设的第一环"电便宜 → 算力便宜"在账本上断裂。Epoch AI 对 1GW AI 数据中心的 TCO 拆解：服务器硬件占 60%，能源仅占 7%<sup class="cite" data-refid="1">[1]</sup>；CloudRift 对 8×H100 服务器的实测运营账：折旧 35.9% + 资本成本 20.7%，电费只有 11.6%<sup class="cite" data-refid="2">[2]</sup>。这意味着即使中国电价是德国的 1/6.5<sup class="cite" data-refid="11">[11]</sup>，传导到最终算力价格上的优势也只有 6–10 个百分点——而 2026 年 4 月 TrendForce 报告显示，因 token 需求暴涨，中国 H100 月租已涨 20–30% 至 ¥8–9 万/月/8卡（约 $1.53–1.72/GPU/hr）<sup class="cite" data-refid="4">[4]</sup>，与欧洲 neo-cloud Nebius 的 $2.95/hr、美国 Vast.ai 的 $1.49/hr 相比<sup class="cite" data-refid="13">[13]</sup><sup class="cite" data-refid="14">[14]</sup>，已无价差可套。<span class="conf g">🟢</span></p>
+  </div>
+
+  <div class="callout warn">
+    <h3>核心发现二（回答问题①）：模式 B「中国境内算力卖海外」没人做成，行业在反向操作；做成的是「成品形态」——token/API 出海年入数亿美元</h3>
+    <p>五路搜证均未找到任何一家公司把中国境内 GPU 算力以 IaaS 形态卖给欧洲客户的公开产品或价目表（负证据，多轮交叉确认）<sup class="cite" data-refid="6">[6]</sup><sup class="cite" data-refid="18">[18]</sup>。产业的真实方向恰好相反：字节跳动经马来西亚云商使用 36,000 张 B200<sup class="cite" data-refid="22">[22]</sup>、GDS 拆出国际品牌 DayOne 落地新马泰<sup class="cite" data-refid="24">[24]</sup>——巨头在用脚投票"把 GPU 搬出去"，而非"把海外流量引进来"。魔形智能 CEO 徐凌杰一句话点破："token 出海没考虑算力成本，当下不现实……我们自己算力都不够用"<sup class="cite" data-refid="5">[5]</sup>。但同一时间，快手可灵以"前端海外 + GPU 在中国"的异步架构做到年化营收 $2.4 亿<sup class="cite" data-refid="7">[7]</sup>，中国模型 API 在 OpenRouter 的 token 占比突破 50%<sup class="cite" data-refid="8">[8]</sup>——算力以<strong>成品（token / 任务结果）</strong>形态出海是被验证的，以<strong>原料（GPU 小时）</strong>形态出海基本不存在。<span class="conf g">🟢</span></p>
+  </div>
+
+  <div class="callout info">
+    <h3>核心发现三（回答问题②③）：欧洲需求真实存在、GPU 溢价 30–70%、窗口期到 2027——但从中国能卖进去的只有异步批处理，获客唯一现实入口是 marketplace</h3>
+    <p>需求侧不是问题：美国超大规模云控制欧洲云市场约 70%<sup class="cite" data-refid="61">[61]</sup>，欧洲 H100 均价 $4.12/hr、比北美贵 30–70%<sup class="cite" data-refid="15">[15]</sup>，欧盟自建的 AI Gigafactory 要 2027–2028 年才投运<sup class="cite" data-refid="36">[36]</sup>，缺口窗口真实存在。但中欧 RTT 170–400ms + GFW 干扰把实时推理判了死刑，能从中国境内卖进欧洲的 workload 只剩异步批处理（训练、fine-tune、离线推理、视频生成）<sup class="cite" data-refid="53">[53]</sup>；而欧洲买家"合规 > 价格"的采购逻辑（Gartner：61% 西欧 CIO 已把本地供应商优先写进云策略<sup class="cite" data-refid="37">[37]</sup>）意味着 ToB 直销对个人操作者关门，现实获客入口只剩 Vast.ai/RunPod 类 marketplace 挂单和开发者社区——而中国节点能否在这些平台上架，至今没有公开成功记录，需实测验证。<span class="conf g">🟢</span></p>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1" data-nav="01 全景三问三答">
+    <h2><span class="num">01</span><span class="title-text">全景：假设链怎么断的，三问三答</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>阿杰的原始假设是一条三环链条：<strong>中国电力便宜 → 所以中国算力便宜 → 所以可以把中国境内的大模型算力卖给欧洲等电价高的国家</strong>。这份报告对三个环节逐一检验，结论是：第一环成立但权重极小（电价确实便宜，但电费只占算力成本 7–12%<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>）；第二环已被市场反转（中国 NVIDIA 系算力 2026 年不便宜了，便宜的是卖不掉的国产芯片算力<sup class="cite" data-refid="4">[4]</sup><sup class="cite" data-refid="16">[16]</sup>）；第三环被三重合规死结封死（GDPR、欧盟主权云、美国出口管制，Ch5–7 详拆）。</p>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">问①</div><div class="l">现在市面上有人做吗？——裸算力（IaaS）形态：没有；成品（token/API）形态：有，且年入数亿美元</div></div>
+        <div class="metric"><div class="v">问②</div><div class="l">要如何找客户？——ToB 直销对个人关门；现实入口只有 marketplace 挂单 + 开发者社区，且中国节点可行性未经验证</div></div>
+        <div class="metric"><div class="v">问③</div><div class="l">需求量大不大？——大（欧洲 GPU 溢价 30–70%，2027 年前供给缺口真实），但能从中国卖进去的品类极窄</div></div>
+      </div>
+      <h3>先把术语钉死：三种容易混淆的"算力出海"</h3>
+      <p>媒体话语里"中国算力出海"至少混着三件完全不同的事，证据包里多次发现媒体把它们混用、标题夸大<sup class="cite" data-refid="65">[65]</sup>。本报告全程区分：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>模式</th><th>定义</th><th>GPU 物理位置</th><th>2026 年现状</th></tr></thead>
+        <tbody>
+          <tr><td><strong>模式 A</strong></td><td>中国云厂商在海外建机房卖算力</td><td>海外（法兰克福/柔佛等）</td><td class="check y">真实存在：阿里云/腾讯云/华为云欧洲 Region<sup class="cite" data-refid="19">[19]</sup><sup class="cite" data-refid="20">[20]</sup></td></tr>
+          <tr><td><strong>模式 B（阿杰的假设）</strong></td><td>中国<u>境内</u>算力以 IaaS 卖给海外客户</td><td>中国境内</td><td class="check n">无成熟商业产品，多轮搜索零命中<sup class="cite" data-refid="6">[6]</sup><sup class="cite" data-refid="18">[18]</sup></td></tr>
+          <tr><td><strong>Token/API 出海</strong></td><td>境内 GPU 跑模型，向全球卖推理结果</td><td>中国境内</td><td class="check y">真实且高速增长：可灵 $240M ARR<sup class="cite" data-refid="7">[7]</sup>、SiliconFlow<sup class="cite" data-refid="58">[58]</sup>、OpenRouter 中国模型占比 &gt;50%<sup class="cite" data-refid="8">[8]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <h3>这份报告为什么敢下"大体不成立"的结论</h3>
+      <p>三个独立证据线收敛到同一个方向：<strong>账本线</strong>——电费在 TCO 里的权重（7–12%）乘以中欧电价差，撬不动最终售价（Ch2 算给你看）；<strong>市场线</strong>——零正面案例 + 巨头反向流动 + 业内人现身说法（Ch3–4）；<strong>合规线</strong>——三个法域（欧盟、美国、中国）各自独立地堵住这条路，且 2025–2026 年的立法方向全部是收紧而非放松（Ch5–7）。当账本、市场、法律三条线都指向同一边时，这不是"有风险"，是"结构性不成立"。</p>
+      <p>但"大体不成立"不等于"全盘没机会"。可灵和 SiliconFlow 证明了一件事：<strong>把算力包装成异步任务结果或 OpenAI 兼容 API，合规暴露面和网络敏感度都骤降一个量级</strong>（Ch9–10 拆解机制）。报告最后一章（Ch15）会给出：原始假设建议放弃的理由清单、如果仍想做的窄路径、动手前必须先验证的三件事，以及不做的话这份研究的副产品价值。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2" data-nav="02 电价账本证伪">
+    <h2><span class="num">02</span><span class="title-text">电价套利账本：把每一分钱拆开看</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是假设证伪的核心章。结论先行：<strong>GPU 算力的成本大头是硬件折旧，不是电费</strong>。电费便宜 6 倍，传导到每 GPU 小时的成本上只省 $0.33 左右——而这个差额，早已被中国 H100 租金上涨、跨境网络成本、合规成本三项中的任何一项单独吃掉。</p>
+      <h3>2.1 成本结构：电费只占 7–12%</h3>
+      <p>两个独立来源给出一致的结构。Epoch AI 对 1GW AI 数据中心的年化 TCO（总计约 $85 亿/年）拆解：<strong>服务器硬件 60%（约 $50 亿/年），能源仅 7%（约 $6 亿/年）</strong>，其余为土建、网络与运维<sup class="cite" data-refid="1">[1]</sup>。<span class="conf g">🟢</span> CloudRift 用一台 8×H100 服务器的实测账本给出微观版本：全部持有成本约 $15.26/服务器小时（合每卡约 $1.91/hr ⚠️估算换算），其中折旧 35.9%（$5.48/hr）、资本成本 20.7%、托管 16.9%、电费 11.6%（$1.78/hr）、备件 7.2%、运营 7.6%<sup class="cite" data-refid="2">[2]</sup>。<span class="conf g">🟢</span></p>
+      <div class="callout bad"><p><strong>套利杠杆的天花板一句话算完：</strong>电费占总成本 11.6%，即使电价砍半，总成本也只降 11.6% × 50% ≈ <strong>5.8%</strong><sup class="cite" data-refid="2">[2]</sup>。一个只能撬动总成本个位数百分比的变量，撑不起一门跨境套利生意——这是整份报告最重要的一个数字。</p></div>
+      <h3>2.2 单卡年账：电费 vs 折旧</h3>
+      <p>统一用一个功率模型（全报告下同）：H100 满载 700W × 服务器配套开销 1.8×（机内 CPU/内存/风扇）× 机房 PUE 1.3 = 约 1,638W，全口径年耗电约 <strong>14,321 kWh</strong><sup class="cite" data-refid="3">[3]</sup>。<span class="conf y">🟡</span> ⚠️ 注意：1.8× 与 PUE 1.3 的口径边界在来源中不完全一致、可能存在部分重叠，本表取<strong>全口径上限</strong>——即对电费占比是偏高估计，对"电价套利"假设是偏有利的算法。折旧用整机 $28 万–35 万/8 卡（即 $3.5 万–4.4 万/卡）、36 个月直线折旧的区间口径。按三档电价算年电费，并与折旧并排：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>项目</th><th>低电价区（$0.04/kWh）</th><th>美国均值（$0.12/kWh）</th><th>德国/加州（$0.20/kWh）</th></tr></thead>
+        <tbody>
+          <tr><td>H100 单卡年电费（14,321 kWh 全口径）</td><td>$573</td><td>$1,719</td><td>$2,864<sup class="cite" data-refid="3">[3]</sup></td></tr>
+          <tr><td>H100 单卡年折旧（$3.5–4.4 万/卡 ÷ 3 年）</td><td colspan="3" style="text-align:center"><strong>$11,667–14,583</strong><sup class="cite" data-refid="3">[3]</sup></td></tr>
+          <tr><td>电费 / 折旧之比</td><td>4–5%</td><td>12–15%</td><td>20–25%</td></tr>
+        </tbody>
+      </table></div>
+      <p>也就是说：<strong>即使在电费最贵的德国、即使把功率按对假设最有利的全口径上限算，一张 H100 一年电费也只有折旧的 1/4 到 1/5</strong>。把机器放在地球上电费最便宜的地方，一年最多帮你省下约一张卡价值 5–7% 的钱——折旧时钟不管你在哪里，每年都走掉 33%。⚠️ 一个例外留到 Ch3.5 讨论：对已折旧完的旧卡/消费级卡（4090/3090），折旧项趋近零，电费权重会显著上升——那才是电价差真正可能起作用的角落。</p>
+      <h3>2.3 两边电价的真实数字</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>地区</th><th>电价</th><th>折美元</th><th>备注</th></tr></thead>
+        <tbody>
+          <tr><td>内蒙古（代理购电均价，2025-05）</td><td>0.3356 元/kWh</td><td>~$0.046</td><td>官方公告类数据<sup class="cite" data-refid="9">[9]</sup> <span class="conf y">🟡</span></td></tr>
+          <tr><td>内蒙古（绿电交易到手价）</td><td>0.24–0.28 元/kWh</td><td>~$0.033–0.038</td><td>乌兰察布示范案例 0.28 元<sup class="cite" data-refid="10">[10]</sup> <span class="conf y">🟡</span></td></tr>
+          <tr><td>EU 非住宅均价（H2 2025）</td><td>€0.1837/kWh</td><td>~$0.20</td><td>Eurostat 官方<sup class="cite" data-refid="11">[11]</sup> <span class="conf g">🟢</span></td></tr>
+          <tr><td>德国非住宅</td><td>€0.2264/kWh</td><td>~$0.25</td><td>Eurostat<sup class="cite" data-refid="11">[11]</sup> <span class="conf g">🟢</span></td></tr>
+          <tr><td>芬兰非住宅</td><td>€0.0748/kWh</td><td>~$0.082</td><td>Eurostat，欧盟最低<sup class="cite" data-refid="11">[11]</sup> <span class="conf g">🟢</span></td></tr>
+          <tr><td>瑞典非住宅</td><td>€0.0970/kWh</td><td>~$0.106</td><td>Eurostat<sup class="cite" data-refid="11">[11]</sup> <span class="conf g">🟢</span></td></tr>
+        </tbody>
+      </table></div>
+      <p>名义价差确实存在：内蒙古绿电价 vs 德国是 <strong>6.5 倍</strong>，vs EU 均值是 <strong>4.3 倍</strong><sup class="cite" data-refid="11">[11]</sup><sup class="cite" data-refid="10">[10]</sup>。但注意两个削弱因素：</p>
+      <div class="callout warn"><p><strong>削弱因素一：北欧是电价套利的最强反证。</strong>芬兰非住宅电价 $0.082/kWh，只比内蒙古标准电价（$0.046）高 1.8 倍、比绿电价高 2.5 倍<sup class="cite" data-refid="11">[11]</sup>——而欧洲 neo-cloud 恰恰大量建在北欧（Nebius 的主力机房就在芬兰<sup class="cite" data-refid="13">[13]</sup>）。换句话说，<strong>欧洲人自己已经在欧洲境内做完了"找便宜电"这件事</strong>，而且不带任何跨境合规成本。和北欧机房比，中国的电价优势乘以 7–12% 权重后趋近于零。</p></div>
+      <div class="callout warn"><p><strong>削弱因素二：中国的低价电附带"国产芯片"条件。</strong>2024 年 8 月《公平竞争审查条例》施行后，内蒙古已取消针对特定产业的专项优惠电价<sup class="cite" data-refid="69">[69]</sup>；目前甘肃/贵州/内蒙古等枢纽省份的"最高 50% 电费补贴"政策<strong>仅限使用国产 AI 芯片（华为昇腾、寒武纪等）的数据中心，用 NVIDIA 芯片的项目不享受</strong><sup class="cite" data-refid="68">[68]</sup>。<span class="conf g">🟢</span> 也就是说，政策红利绑定的恰恰是欧洲客户没法用的芯片生态（CUDA 兼容性问题见 Ch3），想卖欧洲就拿不到补贴，拿补贴就卖不动欧洲。</p></div>
+      <h3>2.4 综合速算：把节省额放进完整账本</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>成本项（H100 单卡/年）</th><th>中国内蒙古</th><th>德国数据中心</th><th>差额</th></tr></thead>
+        <tbody>
+          <tr><td>年耗电（11,016 kWh × PUE 1.3 = 14,321 kWh）</td><td>$0.046 × 14,321 = <strong>$659</strong></td><td>$0.25 × 14,321 = <strong>$3,580</strong></td><td>省 $2,921</td></tr>
+          <tr><td>年硬件折旧（$3.5–4.4 万/卡 ÷ 3 年，口径同 Ch2.2）</td><td><strong>$11,667–14,583</strong></td><td><strong>$11,667–14,583</strong></td><td>持平</td></tr>
+          <tr><td>年合计（含托管/运维等）</td><td>~$15,000 ⚠️估算</td><td>~$25,000 ⚠️估算</td><td>电费节省只解释总差距的 <strong>~29%</strong></td></tr>
+        </tbody>
+      </table></div>
+      <p>注意最后一行：中德两地总成本差距里，电费只解释约 29%（⚠️估算，基于上表口径推算<sup class="cite" data-refid="3">[3]</sup><sup class="cite" data-refid="11">[11]</sup>），其余来自土地、人力、资金成本等——而这些项目上中国的优势同样能被东欧/北欧部分复制。折成每 GPU 小时，电费优势约 <strong>$0.33/hr</strong>。对比一下市场价差的噪音幅度：Vast.ai 上 H100 spot 价一天内的波动就常超过这个数<sup class="cite" data-refid="14">[14]</sup>。</p>
+      <h3>2.5 把假设推到最有利的极端，也救不回来</h3>
+      <p>为了不被指控"挑对自己有利的数字"，这里做一次反向压力测试：把每个变量都取对假设<strong>最有利</strong>的值——电价用内蒙古绿电下限 $0.033/kWh<sup class="cite" data-refid="10">[10]</sup>、对手用全欧最贵的德国 $0.25/kWh<sup class="cite" data-refid="11">[11]</sup>、PUE 取 1.2、再慷慨地假设托管与人力成本也比德国低一半：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>情形</th><th>电费差/卡/年</th><th>折每 GPU 小时</th><th>对比基准</th></tr></thead>
+        <tbody>
+          <tr><td>最乐观情形（绿电 vs 德国，PUE 1.2）</td><td>~$2,870 ⚠️估算</td><td>~$0.33/hr</td><td rowspan="2">Vast.ai H100 spot 价区间宽达 $1.03–2.00/hr<sup class="cite" data-refid="14">[14]</sup>；中国 H100 拿货价已 $1.53–1.72/hr<sup class="cite" data-refid="4">[4]</sup></td></tr>
+          <tr><td>叠加托管/人力优势（全部兑现）</td><td>—</td><td>~$0.7–1.0/hr ⚠️估算</td></tr>
+        </tbody>
+      </table></div>
+      <p>即使在"全部变量取最优"的虚构情形下，每小时 $0.7–1.0 的总成本优势仍然小于三项确定要付的代价：① 信任折价——marketplace 上的无名中国节点必须比同规格欧美节点低 20–30% 才可能成交 ⚠️估算（参照 marketplace 上低评级节点的折价规律，无中国节点专项数据）；② 利用率风险——McKinsey 测算 GPU 租赁业务利用率跌破 80% 回报即归零<sup class="cite" data-refid="64">[64]</sup>，而跨境节点的网络不稳定（Ch8）直接压低可实现利用率；③ 拿货价现实——这一切推演的前提"按电费成本价拿到 NVIDIA 算力"在 2026 年的中国市场上根本不存在，市场租价 $1.53–1.72/hr 已经把所有成本优势定价进去了<sup class="cite" data-refid="4">[4]</sup>。<strong>套利空间在批发环节就已经被中国市场自己吃掉了——这是整个假设最致命的一点：你不是第一个发现中国电费便宜的人，国内算力平台早就把它变成了自己的毛利。</strong></p>
+      <div class="trap-box"><strong>⚠️ 坑：</strong>不要被"中国电价是德国 1/6"这种标题数字带跑。套利生意的可行性取决于<strong>价差 × 该成本项的权重 − 摩擦成本</strong>。这里是 6.5× 的价差 × 7–12% 的权重 − （跨境带宽 + 合规 + 信任折价），三项摩擦成本每一项都大于电费节省额（Ch5–8 逐项展开）。算式的符号是负的。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3" data-nav="03 过剩的真相">
+    <h2><span class="num">03</span><span class="title-text">中国算力过剩的真相：过剩的不是你想卖的那种</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>"中国算力过剩、闲着也是闲着，卖给欧洲不是双赢吗？"——这是假设的隐含前提。证据显示：过剩是真的，但<strong>过剩的是国产芯片算力，紧缺的恰恰是欧洲客户唯一能用的 NVIDIA 系算力</strong>。这是一个结构性错配，不是简单的供大于求。</p>
+      <h3>3.1 过剩侧：32% 利用率与 70–80% 空置</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">32%</div><div class="l">全国已投运智算中心整体利用率（中国信通院 2024）<sup class="cite" data-refid="16">[16]</sup></div></div>
+        <div class="metric"><div class="v">70–80%</div><div class="l">部分国产芯片智算中心的 GPU 空置率<sup class="cite" data-refid="16">[16]</sup></div></div>
+        <div class="metric"><div class="v">1,000+</div><div class="l">2024 年规划中的智算中心数量，产能已超当前需求<sup class="cite" data-refid="17">[17]</sup></div></div>
+      </div>
+      <p>这些数字来自观察者网与新浪财经的多源报道<sup class="cite" data-refid="16">[16]</sup><sup class="cite" data-refid="17">[17]</sup>。<span class="conf g">🟢</span> 地方政府主导建设的智算中心大量采用昇腾 910B/C、寒武纪等国产芯片（电费补贴政策也只给它们<sup class="cite" data-refid="68">[68]</sup>），建成后发现租不出去——"智算中心卖卡求生"成了 2025 年的行业新闻关键词<sup class="cite" data-refid="17">[17]</sup>。</p>
+      <h3>3.2 紧缺侧：NVIDIA 系供需已反转，H100 租金一年涨 20–30%</h3>
+      <p>DeepSeek 引爆推理需求后，字节、腾讯、百度等大厂的高性能 NVIDIA 算力严重短缺<sup class="cite" data-refid="17">[17]</sup>。TrendForce 2026 年 4 月报告：中国大模型日均 token 调用量从 2024 年的 1,000 亿暴涨至 2026 年 3 月的 140 万亿，推动 H100 月租同比上涨 <strong>20–30%</strong>，目前含机架费用约 <strong>¥80,000–90,000/月/8卡</strong>，折合 $1.53–1.72/GPU/hr<sup class="cite" data-refid="4">[4]</sup>。<span class="conf y">🟡</span>（单源，但与租价表多条目互相印证）</p>
+      <h3>3.3 把两边租价摆在一张表上</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>平台</th><th>GPU</th><th>标价</th><th>折合美元</th></tr></thead>
+        <tbody>
+          <tr><td>AutoDL / 恒源云 / 晨涧云（CN）</td><td>A100 40GB</td><td>2.8–4.0 元/hr</td><td>$0.39–0.55/hr<sup class="cite" data-refid="12">[12]</sup></td></tr>
+          <tr><td>阿里云/腾讯云（CN 公有云）</td><td>A100</td><td>~12 元/hr</td><td>~$1.65/hr<sup class="cite" data-refid="12">[12]</sup></td></tr>
+          <tr><td>中国平台月包（CN）</td><td>H100 ×8</td><td>¥8–9 万/月</td><td>~$1.53–1.72/GPU/hr<sup class="cite" data-refid="4">[4]</sup></td></tr>
+          <tr><td>Vast.ai（US，marketplace）</td><td>H100</td><td>—</td><td>$1.49–1.87/hr<sup class="cite" data-refid="14">[14]</sup></td></tr>
+          <tr><td>RunPod（US）</td><td>H100 SXM</td><td>—</td><td>$1.99/hr<sup class="cite" data-refid="14">[14]</sup></td></tr>
+          <tr><td>Nebius（EU，芬兰/荷兰）</td><td>H100 HGX</td><td>—</td><td>$2.95/hr<sup class="cite" data-refid="13">[13]</sup></td></tr>
+          <tr><td>Lambda Labs（US）</td><td>H100 PCIe</td><td>—</td><td>$2.99–3.29/hr<sup class="cite" data-refid="14">[14]</sup></td></tr>
+          <tr><td>OVHcloud（EU，法/德）</td><td>H100</td><td>—</td><td>~$4.10/hr<sup class="cite" data-refid="13">[13]</sup></td></tr>
+          <tr><td>CoreWeave（EU，阿姆斯特丹）</td><td>H100</td><td>—</td><td>$6.15/hr<sup class="cite" data-refid="13">[13]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <p>读法（把数学算诚实）：中国 H100 月包（$1.53–1.72/hr）对欧洲大云（OVH $4.10、CoreWeave $6.15）名义便宜 58–75%，对欧洲 neo-cloud（Nebius $2.95）名义仍便宜 <strong>42–48%</strong>——这个名义价差并不"微弱"<sup class="cite" data-refid="4">[4]</sup><sup class="cite" data-refid="13">[13]</sup>。问题在于三点：① 它是<strong>摩擦前</strong>价差，marketplace 抽成、跨境带宽、利用率折损、以及买家对"中国节点"的风险折价（要求更低的价格才肯下单）每项都在啃这 40%；② 对真正的价格敏感买家，对标项不是 Nebius 而是美国 marketplace spot（Vast.ai $1.49 起<sup class="cite" data-refid="14">[14]</sup>）——对这个锚，中国月包价已经<strong>不便宜甚至为负</strong>；③ 2026 年中国 H100 租价还在涨（+20–30%<sup class="cite" data-refid="4">[4]</sup>），价差在收窄方向上。RTX 4090 消费卡的情况更直白：中国专业云 $0.19–0.30/hr vs Vast.ai $0.31/hr——名义差距本身就小到覆盖不了跨境摩擦<sup class="cite" data-refid="12">[12]</sup>。</p>
+      <div class="callout bad"><p><strong>业内人的判词：</strong>魔形智能 CEO 徐凌杰（前壁仞科技高管）在钛媒体专访中直接否定了这个方向："token 出海没考虑算力成本，当下不现实"——算力成本中 <strong>80% 是服务器采购</strong>，中国算力没有竞争优势，而且"<strong>我们自己算力都不够用</strong>"<sup class="cite" data-refid="5">[5]</sup>。<span class="conf y">🟡</span>（单源访谈，但与 TrendForce 涨价数据、大厂缺卡报道方向一致）这句话同时打掉了假设的两个前提：成本优势不存在，可卖余量也不存在。</p></div>
+      <h3>3.4 那过剩的国产芯片算力能卖欧洲吗？</h3>
+      <p>不能，卡在生态。昇腾用 CANN 替代 CUDA，PyTorch 支持存在兼容性问题、调试工具原始，华为自己的研究员都公开抱怨"difficult and unstable to use"<sup class="cite" data-refid="50">[50]</sup><sup class="cite" data-refid="51">[51]</sup>；寒武纪/壁仞/摩尔线程/沐曦的 CUDA 迁移工具链成熟度落后数年、算子覆盖不完整<sup class="cite" data-refid="52">[52]</sup>。<span class="conf g">🟢</span> 对一个习惯了 CUDA 全家桶的欧洲 ML 团队来说，迁移成本本身就是劝退项——华为给中东客户推的也是"远程访问 CloudMatrix 384"这种把算力留在境内只卖接口的模式<sup class="cite" data-refid="51">[51]</sup>，而这条路对欧洲又撞上 GDPR 数据位置问题（Ch5）。便宜但用不了的算力，等于不存在的算力。⚠️ 一个未被证伪的窄口子：<strong>推理（而非训练）场景</strong>对生态依赖浅得多——如果模型已被移植（昇腾跑通了 DeepSeek/Qwen 等主流开源模型的推理栈），以"每百万 token 成本"卖推理产出而非卖卡，生态问题被屏蔽在接口后面。这条路本质上又回到了"Token/API 出海"形态，且缺公开的 CANN vs CUDA 推理成本基准，可行性标 🔴估算。</p>
+      <h3>3.5 例外角落：折旧归零的旧卡，电费权重才真正上升</h3>
+      <p>Ch2 的"电费只占 7–12%"是<strong>新购 H100</strong> 的账。换一个持有口径结论会松动：对已折旧完/二手购入的 A100、3090、4090 集群（沉没成本资产），折旧项趋近零，电费在<strong>边际运营成本</strong>里的占比可升至 40–60% ⚠️估算（边际成本 ≈ 电费 + 托管 + 带宽）。这意味着"电价套利"在一个特定角落是真实的：<strong>手里已有闲置旧卡、放在低电价省份、追求"只要边际成本能覆盖就开机"的玩家</strong>。这正好对应 Ch4.2 的 marketplace 路径——但注意它的天花板：消费级旧卡的国际市场时价本身就低（4090 $0.31/hr<sup class="cite" data-refid="12">[12]</sup>），这是个"零花钱生意"的量级，不是创业题（Ch14 的分级判词详述）。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4" data-nav="04 玩家地图">
+    <h2><span class="num">04</span><span class="title-text">玩家地图：四个象限，你想去的那格是空的</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把"中国算力 × 海外市场"的所有玩家放进四个象限，地图长这样：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>象限</th><th>玩家</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td><strong>模式 A：出去建机房卖算力</strong></td><td>阿里云（法兰克福 2016 / 伦敦 2018<sup class="cite" data-refid="19">[19]</sup>）、腾讯云（欧洲节点，德国 C5 + GDPR 审计<sup class="cite" data-refid="20">[20]</sup>）、华为云（欧洲节点<sup class="cite" data-refid="21">[21]</sup>）</td><td class="check p">存在但渗透率极低；37% 欧洲企业极度担心外国政府数据访问 ⚠️（证据包引 SDxCentral 2025，未附原文链接）</td></tr>
+          <tr><td><strong>模式 B：境内算力卖海外（阿杰的假设）</strong></td><td>——</td><td class="check n">零玩家。无任何公司有公开产品页/价目表；"东数西算"无出口案例<sup class="cite" data-refid="6">[6]</sup><sup class="cite" data-refid="18">[18]</sup></td></tr>
+          <tr><td><strong>Token/API 出海：境内 GPU 卖成品</strong></td><td>可灵（$240M ARR<sup class="cite" data-refid="7">[7]</sup>）、DeepSeek/Qwen/Kimi/GLM/MiniMax API<sup class="cite" data-refid="8">[8]</sup>、SiliconFlow<sup class="cite" data-refid="58">[58]</sup></td><td class="check y">真实、高增长；但欧洲监管开始点名（意大利封禁 DeepSeek<sup class="cite" data-refid="31">[31]</sup>）</td></tr>
+          <tr><td><strong>反向流动：把 GPU 搬出中国</strong></td><td>字节跳动（柔佛 36,000 张 B200，$2.5B + $2.1B 扩建<sup class="cite" data-refid="22">[22]</sup><sup class="cite" data-refid="23">[23]</sup>）、GDS「DayOne」（新/马/泰/印尼，国际收入同比 +636%<sup class="cite" data-refid="24">[24]</sup>）、秦淮数据（柔佛 MYO6 110MW<sup class="cite" data-refid="23">[23]</sup>）</td><td class="check y">产业主流方向；Goldman Sachs 估中国 AI 厂商海外数据中心投资达 $700 亿<sup class="cite" data-refid="25">[25]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <h3>4.1 模式 B 为什么连一个玩家都没有</h3>
+      <p>负证据本身就是强证据，因为它不是"没人想到"，而是"想到的人都绕开了"。中国官方在推进的"全国一体化算力网"和算力共享网络，Tom's Hardware 报道其核心障碍是延迟和异构硬件（CUDA + CANN 难以统一调度），且定位完全是<strong>国内调度</strong>，没有对境外开放的计划<sup class="cite" data-refid="6">[6]</sup>。中国信通院《算力中心服务商分析报告（2025）》列出的头部服务商（万国数据、润泽科技、世纪互联等）无一有跨境零售算力业务记录<sup class="cite" data-refid="18">[18]</sup>。<span class="conf g">🟢</span> 政策侧也找不到任何"算力出口鼓励"文件——监管方向是"数据不出境"优先于"服务出海"（Ch7 详述）。</p>
+      <h3>4.1.5 模式 A 的十年成绩单：为什么它对模式 B 也是坏消息</h3>
+      <p>值得停一拍看模式 A 的成绩：阿里云法兰克福 Region 开了十年（2016 年至今<sup class="cite" data-refid="19">[19]</sup>），腾讯云拿下了"中国超大规模云中最重视主权合规"的德国 C5 审计<sup class="cite" data-refid="20">[20]</sup>，华为云专门做了 GDPR 合规中心<sup class="cite" data-refid="21">[21]</sup>——硬件在欧洲、合规证书齐全、价格有竞争力，渗透率仍然极低。机制很说明问题：欧洲企业对"中国公司控制的基础设施"的顾虑不在服务器位置，而在<strong>母公司受中国法律管辖</strong>这一点本身（这正是 CADA Tier 3/4 用"无第三国政府干预能力"来定义主权的原因<sup class="cite" data-refid="33">[33]</sup>）。<strong>推论很冷：如果"GPU 在法兰克福的中国云"都卖不动，"GPU 在呼和浩特的个人节点"在信任曲线上的位置可想而知。</strong>模式 A 十年的天花板，就是模式 B 信任问题的下界。<span class="conf y">🟡</span>（渗透率"极低"为多源定性结论，缺公开市占数字）</p>
+      <h3>4.2 去中心化 marketplace 上有中国节点吗</h3>
+      <p>这是个人玩家理论上最容易切入的口子，所以专门查了：<strong>Vast.ai</strong> 官方文档未明文禁止中国 host，但 marketplace 上实际无"中国大陆"位置选项的公开记录<sup class="cite" data-refid="26">[26]</sup>；<strong>Clore.ai</strong> 的 bare metal 节点列表里最接近的是香港<sup class="cite" data-refid="27">[27]</sup>；<strong>Akash</strong> 整个网络 Q4 2025 只剩 587 张 GPU，规模小到不构成渠道<sup class="cite" data-refid="28">[28]</sup>。<span class="conf y">🟡</span>（平台政策为单源文档，中国节点的存在性属于"查无记录"而非"确认禁止"）即使平台不拦，买家端的现实问题——180–250ms RTT、GFW 抖动、平台不支持中国侧合规——比平台政策更根本（Ch8）。</p>
+      <div class="callout purple"><p><strong>巨头用脚投票的方向值得反复看：</strong>字节跳动不缺钱、不缺工程师、不缺政府关系，它解决"中国算力服务全球"的方案是<strong>花 46 亿美元把 Blackwell 集群放在马来西亚</strong><sup class="cite" data-refid="22">[22]</sup><sup class="cite" data-refid="23">[23]</sup>——在出口管制允许的窗口内买卡出海，而不是把境内算力接出去。GDS 干脆把国际业务拆成独立品牌 DayOne 以隔离中国主体色彩<sup class="cite" data-refid="24">[24]</sup>。当最有能力做模式 B 的玩家集体选择了物理搬迁，说明他们算过的账和本报告 Ch2 的结论一致。<span class="conf g">🟢</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5" data-nav="05 GDPR与主权云">
+    <h2><span class="num">05</span><span class="title-text">欧盟侧死结：GDPR 过不去，主权云在关门</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>就算经济账成立，这一章和下一章的内容也足以单独否决模式 B。欧盟侧有两道墙：GDPR 是现在就撞上的墙，主权云立法是正在砌高的墙。</p>
+      <h3>5.1 GDPR：TIA 是结构性死结，不是文书工作</h3>
+      <p>机制链条：欧洲客户把含个人数据的任何东西（用户对话、日志、训练集）发到中国机房 = GDPR 意义上的跨境传输。中国不在欧盟充分性认定名单上，且欧委会无推进计划<sup class="cite" data-refid="29">[29]</sup><sup class="cite" data-refid="30">[30]</sup>，所以唯一合法路径是 GDPR Art.46 的 SCC（标准合同条款）+ Schrems II 判决后强制的 TIA（传输影响评估）。</p>
+      <div class="callout bad"><p><strong>为什么 TIA 过不了——这是法律冲突，不是流程慢：</strong>EDPB 委托研究（2021）的直接结论是"中国政府数据访问权限与 SCC 义务存在法律冲突，TIA 结论很可能是中国法律无法满足 SCC 要求"<sup class="cite" data-refid="29">[29]</sup>。中国《网络安全法》《数据安全法》要求境内数据对当局可及，这与 GDPR 的数据主体权利保障正面相撞。理论补救是端到端加密叠加技术措施——但数据要在中国 GPU 上<strong>跑计算</strong>就必须解密，密钥归属是个悖论；当前的全同态/零知识计算性能离生产可用差几个数量级。<span class="conf g">🟢</span> 这就是"结构性死结"四个字的含义：没有一份写得更好的合同能解开它。</p></div>
+      <p>执法不是假设而是现在进行时：noyb（Schrems 的组织）2025 年已就 6 家中国公司向希腊/意大利/比利时/荷兰/奥地利 DPA 提起投诉，监管机构可下令"临时或永久禁止向中国传输"<sup class="cite" data-refid="29">[29]</sup>；意大利 Garante 2025-01-30 直接封禁 DeepSeek，理由就是"数据存储在中国"<sup class="cite" data-refid="31">[31]</sup>，法/比/克/爱/德/荷六国跟进调查<sup class="cite" data-refid="32">[32]</sup>。<span class="conf g">🟢</span> 对阿杰的含义：你的欧洲客户的法务在尽调第一轮就会问"数据物理上在哪"，答案是"中国"的话对话基本结束。</p>
+      <h3>5.2 EU AI Act：不禁止，但合规负担落在你的客户头上</h3>
+      <p>AI Act 的适用条件是"输出在欧盟境内使用"，与算力位置无关；它不禁止从非欧供应商买算力<sup class="cite" data-refid="38">[38]</sup>。但高风险系统的存档、可解释、人工监督义务落在欧洲买家头上，要求对算力环境可审计——中国监管环境的不透明直接抬高客户的合规成本<sup class="cite" data-refid="38">[38]</sup>。<span class="conf y">🟡</span> 这不是红灯，是给每个潜在客户加一笔"选你就要多花的钱"。</p>
+      <h3>5.3 主权云：CADA + InvestAI 是 5–10 年的结构性逆风</h3>
+      <p>欧委会 2026-06-03 正式发布 Cloud and AI Development Act（CADA）立法提案，建立四层主权框架：高层级要求欧盟所有权、运营控制、人员国籍、且"无第三国政府干预能力"——分层说更准确：<strong>Tier 4（最高级）中国供应商结构性不可能满足；Tier 3 在条文上保留了承认第三国供应商的口径，但对受中国法律管辖的母公司而言政治上极难</strong>，且欧委会同时强调市场整体保持开放（即 CADA 不是对非欧供应商的全面禁令，而是分级挤压）<sup class="cite" data-refid="33">[33]</sup><sup class="cite" data-refid="34">[34]</sup>。<span class="conf g">🟢</span> 配套的 InvestAI 计划动员 €2,000 亿、其中 €200 亿专建 4–5 座 AI Gigafactory（各 10 万张新一代 AI 芯片），明确目标是"减少对非欧供应商的依赖"<sup class="cite" data-refid="35">[35]</sup><sup class="cite" data-refid="36">[36]</sup>。Gartner 2025 年末数据：<strong>61% 西欧 CIO 已把"优先本地供应商"写进云采购策略</strong><sup class="cite" data-refid="37">[37]</sup>。</p>
+      <p>CADA 尚未完成立法、直接约束的是公共采购，但银行、医疗、保险等受监管行业的私有客户会同步跟进采购预期<sup class="cite" data-refid="33">[33]</sup><sup class="cite" data-refid="34">[34]</sup>——也就是说，欧洲市场里"对数据位置不敏感"的客户池正在被立法逐年抽干。方向上，这扇门是在关闭而不是打开。唯一的缓冲是时间差：主权算力 2027–2028 年才上线（Ch11），这两年里私有部门的小客户仍是理论可触达的（如果你能解决前面所有问题）。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6" data-nav="06 美国管制夹击">
+    <h2><span class="num">06</span><span class="title-text">美国出口管制：你卖的卡本身就是问题</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>第二道独立死结来自美国。逻辑很冷：欧洲客户的法务尽调会问"这些 H100 是怎么进入中国的？"——而这个问题在 2026 年<strong>没有合法答案</strong>。先看时间线：</p>
+      <div class="step"><div class="step-head"><span class="sn">1</span>2023-10：H100/H800 对华禁售</div><div class="step-body">BIS 将所有超过性能阈值的芯片纳入对华管制，H800（特供版）同步停售；NVIDIA 随后推出合规设计的 H20（算力约为 H200 的 15%）<sup class="cite" data-refid="40">[40]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>2025-04：H20 也被禁</div><div class="step-body">Trump 政府禁止 H20 对华出口，NVIDIA 确认 $5.5B 损失<sup class="cite" data-refid="40">[40]</sup>。2025-07 政策逆转、允许恢复销售但加征 15% 出口费<sup class="cite" data-refid="39">[39]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>2025-08：中国侧反向关门</div><div class="step-body">中国政府要求国有数据中心 50%+ 采购须为国产芯片、并对 H20 提出安全质疑；NVIDIA 随即停止 H20 生产，通知 Amkor/三星停工<sup class="cite" data-refid="39">[39]</sup>。<span class="conf g">🟢</span> 至此中国数据中心的 NVIDIA 主力变成：H800 历史存量 + 灰色渠道流入的 H100/Blackwell。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>2026-05-31：第三地中转被"终极母公司测试"封堵</div><div class="step-body">此前中国企业经新加坡/马来西亚子公司采购受控芯片（典型案例 Megaspeed，"数十万台"受控芯片经此进入中国控制实体<sup class="cite" data-refid="43">[43]</sup>）。BIS 正式确认管制适用于"任何终极母公司在中国/澳门的企业"，<strong>不论采购子公司注册在哪里</strong><sup class="cite" data-refid="44">[44]</sup>。马来西亚也已于 2025-09 对高性能芯片出口/转运/过境实施强制许可<sup class="cite" data-refid="45">[45]</sup>。<span class="conf g">🟢</span></div></div>
+      <h3>6.1 对模式 B 的三个直接打击</h3>
+      <div class="callout bad"><p><strong>打击一：溯源不可证明。</strong>中国机房现有的 H100 集群均依赖管制前库存或走私渠道<sup class="cite" data-refid="46">[46]</sup><sup class="cite" data-refid="66">[66]</sup>，无法向欧洲客户出具"所有 GPU 经合规渠道获得"的证明——Morrison Foerster 将其定性为<strong>不可消除的合规尽调障碍</strong><sup class="cite" data-refid="41">[41]</sup>。<span class="conf g">🟢</span> 这不是"客户介意不介意"的问题：受监管行业的采购流程里，过不了尽调就是过不了。</p></div>
+      <div class="callout bad"><p><strong>打击二：客户自己有二级责任风险。</strong>2026-01 一家欧洲公司因其中国子公司向实体清单工厂"境内转让"受控设备，与 BIS 和解、罚款 $150 万<sup class="cite" data-refid="42">[42]</sup>。公司结构与时间流逝都不隔绝出口管制责任；事后暴露还可能引发证券欺诈索赔<sup class="cite" data-refid="42">[42]</sup>。欧洲企业虽不直接受美国法管，但靠美元结算、美国软件许可、美国审计这些链条被实质管辖<sup class="cite" data-refid="42">[42]</sup>。<span class="conf g">🟢</span> 「使用灰色渠道流入中国的算力」对客户来说是一个会出现在风控报告里的词条。</p></div>
+      <div class="callout warn"><p><strong>打击三：连"远程访问"都在被立法瞄准。</strong>Remote Access Security Act 把云端访问受控芯片视同出口管制项，已于 2026-01 通过美国众议院、参议院待审 ⚠️（证据包记录，本报告未独立核实法案最新进度）。现行版本主要约束美国用户访问中国境内受控算力，欧洲暂无同等法规——但欧盟在出口管制上跟随美国的历史记录（对俄制裁、对华芯片设备管制）意味着这是一个移动中的靶子。<span class="conf y">🟡</span></p></div>
+      <p>合并 Ch5–6：欧盟法律管你的<strong>数据</strong>，美国法律管你的<strong>芯片</strong>——模式 B 的两个生产要素各被一个法域锁死，而且两边的执法在 2025–2026 年都在加码而非放松。这就是"三重死结"里的前两重。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7" data-nav="07 中国侧合规">
+    <h2><span class="num">07</span><span class="title-text">中国侧：没有禁令，也没有欢迎</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>第三个法域是中国自己。结论：<strong>没有显性禁止，但有三层反向摩擦，且找不到任何鼓励政策</strong>。</p>
+      <h3>7.1 监管口径：法无禁止，但也法无授权</h3>
+      <p>《生成式 AI 服务管理暂行办法》（2023-08 生效）规制的是"向中国公众提供服务"的提供商，对向境外客户出租纯算力没有直接规定<sup class="cite" data-refid="47">[47]</sup>。<span class="conf y">🟡</span> 但搜遍商务部/工信部文件，<strong>不存在"算力出海"专项鼓励政策</strong>——产业出海的官方叙事全部指向中国云商在海外自建机房（模式 A），而非开放境内算力对外销售<sup class="cite" data-refid="25">[25]</sup>。监管的优先级排序很清楚：数据不出境 &gt; 服务出海。指望政策松动没有任何可见迹象。</p>
+      <h3>7.2 PIPL 的反向触发：欧洲数据进中国，中国法也要管</h3>
+      <p>容易被忽略的一层。把链条拆成四步看才准确（PIPL 的跨境条款本身规制的是<strong>从中国向境外</strong>的传输，不要笼统说"数据进中国要安评"）：<strong>① 入境接收</strong>——欧洲数据传入中国机房，PIPL 跨境条款不直接管这一步；<strong>② 境内处理</strong>——中国侧服务商成为 PIPL 意义上的"境内个人信息处理者"，告知同意、安全保障等全套境内义务即刻适用；<strong>③ 结果回传</strong>——把输出/模型/日志传回欧洲客户，这才是触发 CAC 安全评估/SCC 备案/认证三条路径的环节（年传输超 100 万人即强制安评）<sup class="cite" data-refid="48">[48]</sup><sup class="cite" data-refid="49">[49]</sup>；<strong>④ 境外远程访问</strong>——欧洲客户远程查看境内存储的个人数据，实务上同样按出境对待 ⚠️（监管口径，律所综合意见）。2025-09 上海已有执法案例：某欧洲奢侈品牌中国子公司把客户数据传至法国被处罚<sup class="cite" data-refid="48">[48]</sup>。<span class="conf g">🟢</span> 净效果：同一份数据要<strong>同时过 GDPR（出欧盟）和 PIPL（境内处理 + 回传出境）</strong>——双层合规，每层都有否决权，且第 ③ 步几乎不可避免（客户总要拿回结果）。</p>
+      <h3>7.3 ICP 许可：外资主体拿不到牌照</h3>
+      <p>在中国大陆服务器上提供互联网服务需要 ICP 许可，外资主体无法直接持牌，必须通过中国合作方或 VIE 架构；向境外用户提供服务的监管解释尚不明确，但服务器在境内即受管辖 ⚠️（证据包综合结论，监管解释属灰区）。对人在马来西亚的阿杰，这意味着要么找境内持牌合作方（增加一层分成与控制权风险），要么裸奔在监管灰区里。</p>
+      <div class="trap-box"><strong>⚠️ 坑：</strong>不要把"中国法律没禁止"读成"中国监管会放行"。GFW 对入向流量的干预（Ch8）、跨境数据的安评要求、ICP 的持牌门槛，组合起来的实际效果接近"未经设计的禁止"。一门生意如果需要三个监管灰区同时保持沉默才能运转，它的政策风险敞口是乘法不是加法。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8" data-nav="08 跨境网络现实">
+    <h2><span class="num">08</span><span class="title-text">跨境网络现实：RTT、GFW 与买不起的专线</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>抛开法律，物理层自己就能否决一半的产品形态。三个硬约束：</p>
+      <h3>8.1 延迟：170ms 起步，晚高峰 250–400ms</h3>
+      <p>北京/上海至法兰克福的 baseline RTT 约 170–195ms（中国联通 ~171ms、中国电信 ~200ms<sup class="cite" data-refid="53">[53]</sup>）；北京时间 19:00–23:00 出口拥塞时可飙至 250–400ms+ ⚠️（证据包引 Teridion/JET Services 2025 实测，未附原文链接）。<span class="conf y">🟡</span> 所有国际流量必须过有限的受管制网关，CN2 GIA 是最稳路由但同样受网关总带宽上限制约。对比：欧洲用户连美国服务器 100–150ms 已被评为实时语音 AI 的"deal-breaker"（Ch11）——中国节点比这还差一截。</p>
+      <h3>8.2 GFW：对"外→内"连接的真实干扰</h3>
+      <p>GFW 对海外客户连入境内服务器的流量有记录在案的干预：2025 年 8 月曾对 port 443 发动无差别 RST 注入事件<sup class="cite" data-refid="67">[67]</sup>；对 SSH 大流量可识别并干扰，实际体感是"交互式开发可用但不稳定，API 高频调用在峰值时段体验差" ⚠️（证据包引 gfw.report 2025 分析与 x-cmd blog 实测）。<span class="conf y">🟡</span> 对一门 SLA 生意来说，"你的客户连不连得上取决于一个不发公告的防火墙"是无法写进合同的风险。</p>
+      <h3>8.3 专线：IPLC 报价不公开，但量级足以吃掉全部电费优势</h3>
+      <p>三大运营商（中国电信欧洲/联通欧洲/移动国际）均提供中欧 IPLC/IEPL 专线（2Mbps–10Gbps），全部询价制、无公开价格表 ⚠️（多方确认无公开报价，这是证据包明确标注的"没查到"项）。参照系：全球竞争市场 IP transit 低至 $0.03–0.09/Mbps/月，而 Cloudflare 在带宽成本分析中明确把中国大陆排除在外——"mainland China dynamics are entirely unique"<sup class="cite" data-refid="54">[54]</sup>；行业流传的中欧 IPLC 引述价为 $500–2,000/Mbps/月 ⚠️估算（无 2025 年后公开一手来源）。<span class="conf y">🟡</span> 取下限 $500/Mbps/月：一条 100Mbps 专线月费 $5 万，相当于约 76 张 H100 的全年电费节省额（$659/卡/年，Ch2）——<strong>专线一个月吃掉电价套利一年的成果</strong>。</p>
+      <h3>8.4 不走专线走公网行不行？算一笔带宽账</h3>
+      <p>异步任务形态确实可以不用专线、走普通公网出口——但带宽账还是要算。一个典型<strong>全量</strong> fine-tune 任务：上传 50GB 数据集 + 下载 140GB 模型权重（70B 模型 fp16）≈ 190GB 流量 ⚠️估算——但注意这是带宽账的<strong>上界</strong>：LoRA/adapter 微调只需回传几百 MB 的增量权重、基座模型可在境内预缓存、批量推理/评测的产物也很小，这些 workload 的流量成本可低一到两个数量级（这也是形态②里最该优先卖的任务类型）。国内云服务器公网出口按流量计费约 0.5–0.8 元/GB ⚠️估算（各云价格页区间），单任务流量成本 ¥95–152（$13–21）——对一个跑 20 小时、毛利可能只有每小时 $0.2–0.3 的任务来说，<strong>流量成本就能吃掉 2–5 小时的毛利</strong>。再叠加 GFW 抖动导致的重传、晚高峰吞吐下降（实际可用带宽远低于名义值<sup class="cite" data-refid="54">[54]</sup>），公网交付的隐性成本远比"不用买专线"的直觉要高。这笔账在 Ch15 的验证清单第 ③ 项里要求实测，原因就在这里。</p>
+      <div class="callout info"><p><strong>但注意这组约束的形状：它杀死的是"同步"，不是"异步"。</strong>RTT 和抖动对交互式 SSH、实时 API 是毒药；对"提交任务 → 等几分钟到几小时 → 取回结果"的批处理形态几乎无感——上传数据集和下载模型权重只吃带宽不吃延迟，且流量可走普通公网出口而非专线。这是 Ch9 四档交付形态分析和可灵案例（Ch10）成立的物理基础。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9" data-nav="09 四档交付形态">
+    <h2><span class="num">09</span><span class="title-text">四档交付形态：只有异步任务这条缝</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把"中国境内 GPU 服务欧洲客户"的所有技术形态排成四档，逐档过网络与合规两道闸：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>形态</th><th>网络可行性</th><th>合规暴露</th><th>结论</th></tr></thead>
+        <tbody>
+          <tr><td><strong>① 裸 GPU / SSH / Jupyter</strong></td><td class="check p">技术可用但 170–400ms 交互体感差，GFW 干扰 SSH 大流量<sup class="cite" data-refid="67">[67]</sup></td><td class="check n">客户环境完全进入中国管辖；ICP 持牌问题；出口管制尽调直接暴露</td><td>⛔ 体验差 + 暴露面最大</td></tr>
+          <tr><td><strong>② 容器 / 异步 Job 提交</strong></td><td class="check y">异步不在乎 RTT，只吃上传/下载带宽</td><td class="check p">数据出境仍触发 PIPL/GDPR，但可限定"无个人数据"任务收窄暴露</td><td>✅ 唯一务实形态</td></tr>
+          <tr><td><strong>③ API 推理（同步/实时）</strong></td><td class="check p">按产品分级：实时语音/IDE 补全（预算 &lt;100ms）即死；普通 chat 首 token +170ms 在容忍边缘 ⚠️；长生成（视频/图像，本就等数十秒）几乎无感</td><td class="check n">用户提示词/输出进中国 → PIPL+GDPR 双触发；意大利封 DeepSeek 即此理由<sup class="cite" data-refid="31">[31]</sup></td><td>⛔ 合规杀死个人数据场景；网络只杀低延迟预算产品（长生成类是可灵活下来的原因，见 Ch10）</td></tr>
+          <tr><td><strong>④ 模型托管 / fine-tune</strong></td><td class="check y">训练异步，可行</td><td class="check n">客户训练数据整体传入中国 = 欧洲法务最大的单项顾虑</td><td>⚠️ 技术可行，商业上被合规折价</td></tr>
+        </tbody>
+      </table></div>
+      <h3>9.1 形态②的白标架构长什么样</h3>
+      <p>如果非要落地，证据包推导出的最简可行架构是：<strong>新加坡/马来西亚注册实体 + 海外 API 网关（LiteLLM/nginx）+ 中国境内 GPU（CN2 接入）+ 异步任务队列（Celery/Ray）</strong>。注意工具链现实：SkyPilot 支持 AWS/GCP/RunPod/Vast.ai 等十余家云，但<strong>明确不支持阿里云、腾讯云、华为云</strong><sup class="cite" data-refid="60">[60]</sup>——主流多云调度生态默认把中国云排除在外，混合调度只能自建。<span class="conf y">🟡</span> K8s 跨境集群理论可行，但网络抖动影响 kubelet 心跳，高可用代价大。</p>
+      <div class="callout warn"><p><strong>架构能搭 ≠ 生意成立。</strong>这套白标架构解决的只有网络问题；它不解决 GDPR（TIA 看数据实际所在地，不看网关在哪、不看公司注册在哪，Ch5）、不解决出口管制溯源（卡还是那些卡，Ch6）、不解决货源成本（中国 H100 租金已与欧洲 neo-cloud 持平，Ch3）。把它理解为"技术上的最后一块拼图"而不是"绕过监管的方法"。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10" data-nav="10 活案例拆解">
+    <h2><span class="num">10</span><span class="title-text">活案例拆解：可灵、SiliconFlow、EUrouter</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>假设的"窄路径"不是纸上推演——有三个真实运转的案例，每个都精确踩在 Ch9 形态②/③ 的可行区里。值得逐一拆它们为什么活着。</p>
+      <h3>10.1 可灵（快手）：模式 B 精神上的成功者，但你复制不了它的货源</h3>
+      <p>数据：全球 6,000 万创作者，海外收入贡献过半，2025 年 12 月单月营收破 $2,000 万、年化 $2.4 亿，距发布仅 19 个月<sup class="cite" data-refid="7">[7]</sup>。<span class="conf g">🟢</span> 架构：GPU 算力在中国境内（快手自有基础设施），通过 Cloudflare 全球 CDN + 第三方 API 分发平台（fal.ai 上有官方模型位<sup class="cite" data-refid="57">[57]</sup>）做前端，重计算在中国完成 ⚠️（架构细节为证据包推断 + 公开分发渠道佐证，快手未公开技术文档）。<span class="conf y">🟡</span></p>
+      <p><strong>它为什么能活：</strong>视频生成是天然的异步任务——用户提交 prompt、等数十秒、取结果，170ms 的 RTT 完全消失在数十秒的生成时间里（形态②的教科书案例）；卖的是"视频文件"这个成品而非 GPU 访问权，出口管制尽调无从下手；面向创作者而非受监管企业，GDPR 敏感度低（但并非为零——同类逻辑下 DeepSeek 已被意大利封禁<sup class="cite" data-refid="31">[31]</sup>，监管风险是递延而非豁免）。<strong>你复制不了的部分：</strong>快手有自有万卡集群（货源成本是自家折旧而非市场租金）、有模型本身（可灵是产品，算力只是它的成本项）。可灵证明的不是"中国算力能卖欧洲"，而是"<strong>中国算力的产出物能卖全球</strong>"——这两句话差一个商业模式。</p>
+      <h3>10.2 SiliconFlow：API 形态出海的标准件</h3>
+      <p>注册地新加坡，运营实体在中国 + 意大利；GPU 以中国境内昇腾 + NVIDIA 混合为主；向全球开发者提供 OpenAI 兼容 API，DeepSeek V4 Pro 约 $2.17/1M tokens<sup class="cite" data-refid="58">[58]</sup>。<span class="conf y">🟡</span>（矛盾点如实记录：其意大利分支是否有 GPU、是否真用中国境内 GPU 服务欧洲用户，未公开确认——可能仅为销售/支持办公室。）它展示了离岸主体 + 境内算力 + API 形态的完整模板，也展示了这个模板的天花板：在 OpenRouter 这类聚合平台上，它和所有中国系 API 一起接受"数据去哪了"的拷问。</p>
+      <h3>10.3 EUrouter：需求信号本身成了生意</h3>
+      <p>EUrouter.ai 把 DeepSeek R1 做成"EU Routed"中转 API 卖给欧洲用户<sup class="cite" data-refid="59">[59]</sup>——这个产品的存在本身就是双重信号：<strong>欧洲开发者想用中国模型（需求真实），但不敢直连中国端点（合规顾虑真实）</strong>。配合大盘数据：中国模型 API 在 OpenRouter 的 token 占比从 2024 年末的 ~1% 涨到 2026 年突破 50%<sup class="cite" data-refid="8">[8]</sup>，47% 的调用来自美国开发者、仅 6% 来自中国本土<sup class="cite" data-refid="65">[65]</sup>；价格差是驱动力——中国 API 约 $0.3/1M tokens vs Claude Opus $5/1M，差价约 16 倍<sup class="cite" data-refid="65">[65]</sup>。<span class="conf g">🟢</span></p>
+      <div class="callout good"><p><strong>三个案例合起来读出一条规律：算力出海被验证的形态是「成品」，不是「原料」。</strong>token、生成的视频、训练完的权重——这些东西跨境时不携带 GPU 的管制属性、不需要客户把环境搬进中国、对延迟的容忍度由产品形态自己定义。真正的套利空间也在成品层：16 倍的 token 价差<sup class="cite" data-refid="65">[65]</sup>，比 6.5 倍电价差 × 12% 权重大两个数量级。如果阿杰要从这份报告里带走一个商业方向，是这个，不是 IaaS。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11" data-nav="11 需求与窗口期">
+    <h2><span class="num">11</span><span class="title-text">需求侧画像：缺口是真的，窗口期到 2027</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>回答问题③"需求量大不大"：大，而且结构性地大——但要看清"大"的需求里哪一块是你能碰的。</p>
+      <h3>11.1 缺口量化</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">~70%</div><div class="l">美国超大规模云（AWS/Azure/GCP）占欧洲云市场份额；欧洲最大本土提供商仅约 2%<sup class="cite" data-refid="61">[61]</sup><sup class="cite" data-refid="62">[62]</sup></div></div>
+        <div class="metric"><div class="v">&lt;5%</div><div class="l">欧洲控制的全球前沿 AI 基础设施占比；Meta 单个 24,576 卡集群超过任何欧洲 AI factory 10 倍以上<sup class="cite" data-refid="62">[62]</sup></div></div>
+        <div class="metric"><div class="v">30–70%</div><div class="l">欧洲 H100 租价溢价：均价 $4.12/hr（区间 $2.00–6.39）vs 北美 $2.40–3.00<sup class="cite" data-refid="15">[15]</sup></div></div>
+        <div class="metric"><div class="v">$17.5B</div><div class="l">2025 年欧洲 AI 初创融资额，AI 首次成为欧洲 VC 第一大赛道<sup class="cite" data-refid="63">[63]</sup></div></div>
+      </div>
+      <p>供给痛感的细节：2023–2024 年超大规模云的 H100 预留池售罄、等待名单 8–12 个月，neo-cloud spot 成为拿不到预留容量团队的主要入口，2025 年底缓解但仍紧张<sup class="cite" data-refid="15">[15]</sup>。<span class="conf y">🟡</span> 早期 AI 初创月均算力支出 $2,000–8,000、研究密集型 $15,000–50,000/月，GPU 开销占头两年技术预算 40–60% ⚠️估算（行业估算区间，非欧洲专项调研）。</p>
+      <h3>11.2 窗口期：Gigafactory 级主权算力 2027–2028 才到货</h3>
+      <p>欧盟侧要分两层说清（此前媒体常混为一谈）：<strong>AI Factories</strong>（基于 EuroHPC 超算中心的小型设施，欧委会口径已有 19 座投入运营）是现在时；而真正能改变供给格局的 <strong>AI Gigafactory</strong>（每座 10 万+ 张新一代 AI 芯片，规模比前者大一个量级）——InvestAI €200B / Gigafactory €20B，收到 76 份申请、来自 16 个成员国、提议总额超 €230B——预计 <strong>2027–2028 年才投入运营</strong><sup class="cite" data-refid="36">[36]</sup><sup class="cite" data-refid="35">[35]</sup>。<span class="conf g">🟢</span> 已运营的 AI Factories 面向科研/初创配额制，不改变商业市场的供需。 矛盾点如实记录：有分析质疑 InvestAI 宣传数字里大量是既有项目重新贴标、实际新增算力远低于宣称 ⚠️（证据包引 Polytechnique Insights 分析，未附原文链接）——这意味着窗口期可能比官方时间表更长，对供给方是利好。<strong>2026–2027 年存在一个真实的、约两年的缺口窗口</strong>，这是整份报告里对假设最友好的一条证据。</p>
+      <h3>11.3 谁在买便宜算力：四类画像</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>买家</th><th>典型 workload</th><th>决策排序</th><th>中国节点可触达？</th></tr></thead>
+        <tbody>
+          <tr><td>独立研究者/学术用户</td><td>批量实验、超参扫描</td><td>价格 &gt; 可靠性</td><td class="check p">异步任务可行，信任是变量</td></tr>
+          <tr><td>个人开发者/小团队</td><td>LLM fine-tune、SD 推理</td><td>价格 &gt; 生态</td><td class="check p">同上<sup class="cite" data-refid="26">[26]</sup></td></tr>
+          <tr><td>成本受限早期初创</td><td>开发阶段全栈</td><td>价格 &gt; 数据位置 &gt; 可靠性（训练）；延迟 &gt; 数据位置 &gt; 价格（推理）</td><td class="check p">仅训练侧；一旦融资/接企业客户即流失</td></tr>
+          <tr><td>渲染农场/批处理推理</td><td>时间不敏感批任务</td><td>价格</td><td class="check y">最匹配的画像</td></tr>
+        </tbody>
+      </table></div>
+      <p>关键的分水岭在 workload 类型：训练/fine-tune 对外网延迟几乎不敏感（上传数据集 → 跑完 → 下载权重，只吃带宽）；实时推理则相反，欧洲用户连美国服务器的 100–150ms 已被视为实时语音/交互编码助手的 deal-breaker，中国节点的 180–250ms 直接出局 ⚠️（RTT 为证据包推算区间，无中国—欧洲专项实测报告）。<span class="conf y">🟡</span> 所以"需求量大不大"的诚实答案是：<strong>总盘子大，你能吃的切片是"价格敏感 + 异步 + 不含个人数据"三个条件的交集</strong>——存在，但是利基。</p>
+      <h3>11.4 价格弹性的残酷真相：你的目标客户已经有更便宜的选项</h3>
+      <p>把三层市场的价格梯度排开看：超大规模云 H100 $6.88–12.29/hr → neo-cloud $1.99–2.95/hr → marketplace spot $1.03–2.00/hr<sup class="cite" data-refid="14">[14]</sup><sup class="cite" data-refid="15">[15]</sup>——marketplace 已经比大云便宜 <strong>40–85%</strong> ⚠️（证据包记录区间）。这个梯度揭示了需求侧的真实分层：价格弹性最高的客户（独立研究者、indie hacker）<strong>早就完成了向 marketplace 的迁移</strong>，他们眼里的"市场价"就是 $1.03–2.00；而还留在大云付 $6.88+ 的客户，留下的原因恰恰是合规、SLA、生态绑定——这些正是中国节点最弱的维度。所以"中国算力便宜 30%"瞄准的客户群是一个逻辑上的空集：<strong>对价格敏感到愿意承担额外风险的人已经在更便宜的地方，愿意付溢价的人付的就是你提供不了的那部分。</strong>唯一的例外是供给短缺期（排队 8–12 个月时"有卡就是正义"<sup class="cite" data-refid="15">[15]</sup>），但 2025 年底起短缺已缓解，窗口逻辑详见 11.2。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12" data-nav="12 获客现实排序">
+    <h2><span class="num">12</span><span class="title-text">获客渠道：按现实可操作性排序</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>回答问题②"要如何找客户"。按"个人/小团队、人在马来西亚、无销售团队"的约束排序：</p>
+      <div class="step"><div class="step-head"><span class="sn">1</span>GPU Marketplace 挂单（唯一推荐的第一步）</div><div class="step-body">Vast.ai 有 120K+ 活跃开发者，平台托管结算与客服，host 自定价<sup class="cite" data-refid="26">[26]</sup>；RunPod Community Cloud 同模式。<strong>前置疑问未解：</strong>平台无明文禁止中国 host，但也无任何中国节点公开记录<sup class="cite" data-refid="26">[26]</sup>；host 抽成比例未公开；中国 IP 连通性、收款（国际卡/加密货币）、KYC 是否过得去——全部需要实测。<span class="conf y">🟡</span> 价格竞争的标尺：Vast.ai H100 spot 已到 $1.03–2.00/hr<sup class="cite" data-refid="14">[14]</sup>，按 Ch3 的中国 H100 拿货成本（$1.53–1.72/hr），<strong>挂单价可能低于成本价</strong>——这一条就可能在实测前否决整个方案。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>开发者社区直销（免费但低效）</div><div class="step-body">r/MachineLearning（290 万成员）、r/LocalLLaMA、HuggingFace 论坛（有 QuickPod 等小平台发帖拉客的先例）、EleutherAI 等 Discord ⚠️（社区规模数字为证据包记录，单源）。有"谁有便宜 GPU"的真实讨论，但没有任何"中介卖中国算力"的成功记录。适合做需求验证访谈，不适合做主渠道。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>算力经纪/转售（毛利诱人，净利残酷）</div><div class="step-body">McKinsey 对 neo-cloud 的拆解：裸金属 as-a-service 毛利 55–65%（折旧前），但扣完人力/电费/折旧净利只剩 <strong>14–16%</strong>，低于很多零售业；利用率跌破 80% 或租价小幅下滑，回报即归零<sup class="cite" data-refid="64">[64]</sup>。<span class="conf g">🟢</span> 这是资本密集 + 薄安全边际的生意，个人玩家没有规模化采购价和利用率保障，broker 模式不成立。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>ToB 直销欧洲中小 AI 公司（不要做）</div><div class="step-body">欧洲买家采购排序"合规 &gt; 价格"，法德主权云溢价 30–50% 仍有人买单 ⚠️（证据包多源一致的定性结论）；61% 西欧 CIO 本地供应商优先<sup class="cite" data-refid="37">[37]</sup>。没有任何个人/小团队把中国境内算力卖给欧洲企业的公开成功案例（五路搜证交叉确认的负证据）。合规尽调、VAT 发票、时区、信任背书，每一项都是个人操作者迈不过去的。</div></div>
+      <div class="trap-box"><strong>⚠️ 坑：</strong>"比欧洲便宜 30% 就有人买"是错误直觉。Marketplace 模式本来就比超大规模云便宜 40–85% ⚠️（证据包记录区间），价格敏感客户早已在 Vast.ai 上；你要打动的不是"想省钱的人"（他们已有更便宜且无合规包袱的选项），而是"愿意为省钱承担中国节点额外风险的人"——这个集合可能是空集。切换的真实变量是可靠性（训练中断重来的成本）、生态（CUDA 工具链）、发票合规，而不是单价。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13" data-nav="13 支付与结算">
+    <h2><span class="num">13</span><span class="title-text">支付结算：钱怎么收得回来</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>假如前面所有关都过了，最后一公里是收款。结论明确：<strong>收款主体必须离岸，中国大陆主体此路不通</strong>。</p>
+      <ul>
+        <li><strong>Stripe：</strong>不支持中国大陆主体开户——大陆不在 Stripe 支持国家列表中，无法收境外卡款<sup class="cite" data-refid="55">[55]</sup>。<span class="conf g">🟢</span></li>
+        <li><strong>香港主体 + Wise Business：</strong>Wise Business 2025 年 3 月在香港上线，提供 9 种货币（EUR/GBP/USD 等）的本地收款账号，欧洲 B2B 客户可按本地转账付款，费率接近中间汇率<sup class="cite" data-refid="56">[56]</sup>。<span class="conf g">🟢</span> 这是中国背景算力/SaaS 公司的主流路径；Airwallex 为同类替代。</li>
+        <li><strong>加密货币：</strong>香港有受监管交易所（OSL 等），理论可行，但 B2B 入账合规复杂，非主流 ⚠️（证据包定性结论）。</li>
+        <li><strong>对阿杰的特殊利好：</strong>人已在马来西亚——<strong>马来西亚 Sdn Bhd 或香港公司 + Wise/Airwallex</strong> 是现成组合，这一环对他反而是全报告摩擦最小的一环。欧洲企业客户还需要 VAT 合规发票，离岸主体开 invoice 的流程要在报价时就设计好 ⚠️（实操要点，定性）。</li>
+      </ul>
+      <p>注意支付结构对商业模式的反向暗示：收款主体离岸 + 算力在境内 = 收入留在境外、成本发生在境内，跨境利润汇回与转移定价是下一层问题。对个人规模可暂忽略，但这正是 SiliconFlow 们选择"新加坡注册 + 中国运营"结构的原因<sup class="cite" data-refid="58">[58]</sup>。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH14 ===== -->
+  <section class="chapter" id="ch14" data-nav="14 反方陈述">
+    <h2><span class="num">14</span><span class="title-text">反方陈述：什么条件下这门生意会成立</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>一份敢下结论的报告必须自己当自己的反方。这一章认真回答：<strong>要让"中国境内算力卖欧洲"成立，世界需要变成什么样？</strong>四个翻盘条件，按现实程度排序：</p>
+      <h3>条件一：拿到"沉没成本价"的 NVIDIA 算力（个案存在，无公开市场）</h3>
+      <p>Ch2 的账本全部基于市场租价。但如果某个智算中心因错配采购砸在手里一批 NVIDIA 卡、愿意按边际成本（电费 + 微薄运维）甩卖——比如 $0.4–0.6/hr 的 H100 ⚠️估算——那么转售到 Vast.ai（$1.03–2.00/hr<sup class="cite" data-refid="14">[14]</sup>）就有毛利空间。问题在于：闲置率 70–80% 的是国产芯片集群<sup class="cite" data-refid="16">[16]</sup>，NVIDIA 系正在涨价缺货<sup class="cite" data-refid="4">[4]</sup>，"闲置的 NVIDIA 集群"是个案不是市场。<strong>这个条件能不能满足，取决于阿杰有没有特殊的货源关系——这正是 Ch15 决策树 Q4 的含义。</strong></p>
+      <h3>条件二：执法时间差（真实存在，但这是经营策略不是合规路径）</h3>
+      <p>CADA 尚未完成立法<sup class="cite" data-refid="33">[33]</sup>、noyb 的投诉对象是 DeepSeek 级别的大目标<sup class="cite" data-refid="29">[29]</sup>、BIS 的执法资源盯着数十万张芯片的走私网络<sup class="cite" data-refid="43">[43]</sup>——一个在 marketplace 上挂十几张卡的匿名节点，确实在所有监管雷达的分辨率以下。诚实地说：<strong>小规模灰色经营在执法上大概率没人管</strong>。但这意味着生意被锁死在"不可规模化、不可宣传、不可对接企业客户"的形态里，而且规模化的那一天就是暴露的那一天。可以当零花钱实验，不能当事业。</p>
+      <h3>条件三：欧洲被迫"去美国化"且饥不择食（方向相反，概率低）</h3>
+      <p>理论上，如果欧美关系恶化到欧洲被美国云断供，欧洲买家会被迫多元化到任何非美供给——包括中国。但 2025–2026 年的所有证据指向相反方向：欧洲在"主权化"（自建 + 本地优先<sup class="cite" data-refid="37">[37]</sup>），不是"去美国化拥抱中国"；CADA 的 Tier 3/4 把中美供应商<strong>一起</strong>排除在外<sup class="cite" data-refid="33">[33]</sup><sup class="cite" data-refid="34">[34]</sup>。押注这个条件等于押注地缘政治剧本大改写。</p>
+      <h3>条件四：先成品后原料——唯一有现实路径的翻盘剧本</h3>
+      <p>可灵和 SiliconFlow 的路径有一个常被忽略的延伸：当 API 形态做出客户基础后，大客户会自然提出"专属容量"（dedicated capacity）需求——这时"托管在中国/马来西亚的专属推理集群"就能作为低价选项进入菜单，客户因为已有信任关系和已验证的数据处理协议，合规摩擦大幅降低。<strong>这是"中国算力服务欧洲客户"唯一可能规模化的顺序：先卖成品建立信任，再顺着客户需求下沉到容量层——而不是反过来一上来就卖裸算力。</strong>对个人玩家，这意味着正确的第一步永远是轻资产的 API/任务层（Ch15），IaaS 是第三年的选项，不是第一个月的。</p>
+      <div class="callout warn"><p><strong>反方陈述的诚实结论：</strong>四个翻盘条件里，条件三靠运气、条件二有天花板且带尾部风险、条件一取决于阿杰拿不拿得到特殊货源（拿不到则全盘否决）、只有条件四有可执行的现实路径——而条件四的起点恰恰<strong>不需要任何中国境内的 GPU</strong>。换句话说：即使按对假设最友好的剧本推演，第一步的动作也和"放弃原始假设"的建议完全一致。这是本报告对自己结论最有力的压力测试。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH15 ===== -->
+  <section class="chapter" id="ch15" data-nav="15 给阿杰的建议">
+    <h2><span class="num">15</span><span class="title-text">给阿杰的路线建议：verdict 与决策树</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="callout bad"><p><strong>Verdict：原始假设（中国境内裸算力 IaaS 套利卖欧洲）建议放弃。</strong>三个独立否决理由，任何一个单独成立都足够：① <strong>账算不过来</strong>——电费仅占成本 7–12%<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>，中国 H100 拿货价（$1.53–1.72/hr<sup class="cite" data-refid="4">[4]</sup>）已高于你要竞争的 Vast.ai spot 价（$1.03–2.00/hr<sup class="cite" data-refid="14">[14]</sup>），毛利可能为负；② <strong>合规三重死结</strong>——GDPR TIA 结构性过不了<sup class="cite" data-refid="29">[29]</sup>、GPU 溯源对欧洲客户法务不可证明<sup class="cite" data-refid="41">[41]</sup>、第三地中转已被 BIS 终极母公司测试封堵<sup class="cite" data-refid="44">[44]</sup>；③ <strong>市场用脚投票</strong>——零成功案例，最有资源的玩家（字节/GDS）全部反向操作<sup class="cite" data-refid="22">[22]</sup><sup class="cite" data-refid="24">[24]</sup>，业内人明说"自己算力都不够用"<sup class="cite" data-refid="5">[5]</sup>。</p></div>
+      <div class="callout warn"><p><strong>分级判词（把话说全）：</strong>① 作为<strong>创业题/规模化生意</strong>：⛔ 放弃，三线全红；② 作为<strong>零花钱级灰色实验</strong>（手里恰好有沉没成本旧卡 + 低电价机位，挂 marketplace 赚边际差价）：🟡 可测试——折旧归零后电费权重确实上升（Ch3.5），且小节点在执法雷达分辨率以下（Ch14 条件二），但天花板锁死在"不可规模化、不可宣传"；③ 作为<strong>成品形态（API/任务层）切入</strong>：✅ 这是唯一被验证的方向（Ch10/Ch14 条件四）。三个判词对应三种完全不同的投入预期，别混着算。</p></div>
+      <h3>15.1 决策树：如果仍想在这个方向上做点什么</h3>
+      <div class="tree">
+        <div class="node q">Q1 · 你想卖的是 GPU 小时（原料）还是任务结果/token（成品）？</div>
+        <div class="node"><span class="lbl n">GPU 小时（IaaS）</span>⛔ 即上文 verdict，放弃——账本、合规、案例三线全红（Ch2/5/6）</div>
+        <div class="node"><span class="lbl y">成品形态</span>✅ 被可灵/SiliconFlow 验证的活路径（Ch10）→ 继续 Q2</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q2 · workload 是异步的吗（用户能接受秒级-小时级等待）？</div>
+        <div class="node"><span class="lbl n">实时推理/交互</span>⛔ 170–400ms RTT + GFW 判死刑（Ch8）→ 除非 GPU 在境外，那是另一门生意</div>
+        <div class="node"><span class="lbl y">批处理/生成类</span>✅ 视频生成、批量推理、fine-tune → 继续 Q3</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q3 · 负载里有欧盟个人数据吗？</div>
+        <div class="node"><span class="lbl n">有</span>⛔ TIA 死结（Ch5）→ 只接"无个人数据"任务：合成数据训练、开源权重 fine-tune、内容生成</div>
+        <div class="node"><span class="lbl y">无/可剥离</span>✅ GDPR 理论上不触发（路径窄但存在）→ 继续 Q4</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q4 · 你有低于市场价的稳定 NVIDIA 货源吗？</div>
+        <div class="node"><span class="lbl n">没有（市场价租）</span>⛔ $1.53–1.72/hr 的拿货价没有转售空间（Ch3）→ 改做轻资产：模型 API 聚合/转售（EUrouter 模式）</div>
+        <div class="node"><span class="lbl m">有（如闲置集群关系）</span>⚠️ 马来西亚/香港主体 + 海外网关 + 异步任务形态 + marketplace 验证（Ch9/13）→ 先做下面三件验证</div>
+      </div>
+      <h3>15.2 动手前必须先验证的 3 件事（合计成本 &lt; 2 周 + 几百美元）</h3>
+      <div class="check-box">
+        <strong>① Vast.ai 中国节点实测</strong>：租一台国内带公网的 GPU 机器，尝试注册 Vast.ai host 并挂单一周——验证平台接受度、连通稳定性、收款路径。这是全链条最便宜的证伪实验：挂不上或没人租，方案直接终结<sup class="cite" data-refid="26">[26]</sup>。<br>
+        <strong>② 真实拿货成本询价</strong>：向 2–3 家国内算力平台询 H100/4090 月包价，对照 Vast.ai spot（H100 $1.03 起<sup class="cite" data-refid="14">[14]</sup>）算毛利——并把账算全：平台抽成、利用率假设（多少 % 出租率保本）、宕机赔付、流量费、退款摩擦，做一张"每 GPU 小时 P&L + 保本利用率"小表。如果毛利为负或保本利用率高于 60%，不用再看合规问题了。<br>
+        <strong>③ 出口网络实测</strong>：从目标机房向法兰克福/阿姆斯特丹打 7×24 的 RTT/丢包/吞吐监测（晚高峰必测），同时向运营商询一次 IPLC 真实报价——把 Ch8 的 ⚠️估算 换成你自己的一手数据。
+      </div>
+      <h3>15.3 如果不做：这份研究的副产品价值</h3>
+      <ul>
+        <li><strong>真正的套利标的已经找到了，只是不在 IaaS 层：</strong>中国模型 API 与西方旗舰模型 16 倍的 token 价差<sup class="cite" data-refid="65">[65]</sup>、EUrouter 验证的"合规中转"需求<sup class="cite" data-refid="59">[59]</sup>——面向出海开发者的<strong>模型 API 聚合/路由/合规包装</strong>是轻资产、无 GPU、可个人启动的同主题生意。</li>
+        <li><strong>地理牌在手上：</strong>阿杰人在马来西亚——全球算力反向流动的目的地（字节/GDS/秦淮都在柔佛<sup class="cite" data-refid="22">[22]</sup><sup class="cite" data-refid="23">[23]</sup><sup class="cite" data-refid="24">[24]</sup>）。围绕"中国算力出海到马来西亚"的服务生态（本地合规、运维、转售马来西亚境内 GPU 给全球——物理位置在马来就没有 GDPR-中国问题和 GFW 问题）是比原假设合理一个量级的方向，且马来西亚 2025-09 起的芯片转运许可制度<sup class="cite" data-refid="45">[45]</sup>恰恰抬高了这个生态的专业服务需求。</li>
+        <li><strong>欧洲不是唯一也未必是最优市场：</strong>本报告按题设聚焦欧洲——GDPR/主权云恰恰是全球摩擦最大的市场。东南亚/中东/拉美没有 GDPR 级别的数据出境壁垒、价格敏感度更高、与中国节点的 RTT 也短得多 ⚠️（方向性判断，未做专项调研），如果真要测试"中国算力的成品形态出海"，先打这些市场比先打欧洲合理。</li>
+        <li><strong>马来西亚方向若要认真做，需要一份独立研究：</strong>本报告只确认了"算力在流向马来西亚"这个事实，没有覆盖马来当地的电力供给与排队、数据中心审批、芯片进口许可执行细节、本地云竞争格局——这些是另一份报告的题目，别拿本报告的结论直接开工。</li>
+        <li><strong>认知资产：</strong>对 GPU 成本结构（折旧主导）、欧洲主权云时间表（2027–2028）、跨境交付四形态的理解，可直接复用于任何 AI infra 相关的决策。</li>
+      </ul>
+      <div class="callout accent"><p><strong>一段话总结给阿杰：</strong>你的直觉对了一半——中欧之间确实存在跟"算力"相关的真实价差和真实需求，但价差不在电费（权重太小）也不在 GPU 小时（中国不便宜了），而在<strong>成品 token 和合规包装</strong>；需求真实存在但被三重法律死结圈在"异步 + 无个人数据 + 价格敏感"的窄缝里。裸算力套利这门生意，账本、法律、市场三方面证据一致说不要做；如果想留在这个赛道，做轻资产的 API 聚合/路由，或者把目光从"中国境内的 GPU"移到"流向马来西亚的 GPU"——你恰好站在它们的登陆点上。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq" data-nav="FAQ 常见问题">
+    <h2><span class="num">16</span><span class="title-text">FAQ：你大概率会追问的 12 个问题</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">北欧电价不是也很低吗？那欧洲内部不就自己解决了？</span><span class="toggle">＋</span></div><div class="faq-a"><p>正是如此，这是电价套利假设的最强单点反证。芬兰非住宅电价 €0.0748/kWh（$0.082），只比内蒙古标准电价高约 1.8 倍<sup class="cite" data-refid="11">[11]</sup>，而 Nebius 等 neo-cloud 已经把机房建在芬兰、把 H100 卖到 $2.95/hr<sup class="cite" data-refid="13">[13]</sup>——零跨境合规成本、零 GFW、欧盟境内数据主权。"找便宜电"这件事欧洲人已经在境内做完了，留给中国电价的差异化空间乘以 7–12% 的成本权重后所剩无几。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">国产芯片（昇腾）那边过剩得厉害、还有电费补贴，卖那个行不行？</span><span class="toggle">＋</span></div><div class="faq-a"><p>货源端确实又多又便宜（空置率 70–80%<sup class="cite" data-refid="16">[16]</sup>，电费补贴专门给它<sup class="cite" data-refid="68">[68]</sup>），但需求端接不住：昇腾的 CANN 替代 CUDA，PyTorch 兼容性问题连华为研究员都公开抱怨<sup class="cite" data-refid="50">[50]</sup>，迁移工具链落后数年<sup class="cite" data-refid="52">[52]</sup>。让一个欧洲 ML 团队为了省钱重写整个 CUDA 工作流，省下的钱远覆盖不了迁移成本。华为自己卖昇腾的方式也是面向中东主权客户的整柜方案 + 远程 API<sup class="cite" data-refid="51">[51]</sup>，不是零售算力。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">只接"不含个人数据"的任务，是不是就没 GDPR 问题了？</span><span class="toggle">＋</span></div><div class="faq-a"><p>理论上是——纯非个人数据（开源模型权重、合成数据、客户自有的工业数据）跨境不触发 GDPR。但三个现实收窄了这条缝：① 实操中 AI 负载几乎都混着用户数据，"保证无个人数据"的审查成本落在客户头上；② EU Data Act（2025-09 生效）对非个人工业数据也有主权要求，细则未明 ⚠️（证据包记录，执行细节待观察）；③ 客户为了"省 30%"去做这套数据分类审查，动力存疑。缝存在，但窄。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">我在马来西亚注册公司转售中国算力，能洗掉合规问题吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不能，两个法域都看穿注册地。GDPR 的 TIA 评估的是数据<strong>实际所在地</strong>的法律环境，不是合同主体注册地<sup class="cite" data-refid="29">[29]</sup>；美国 BIS 2026-05-31 的"终极母公司测试"明确管制适用于任何终极母公司在中国/澳门的企业，采购子公司注册在哪都一样<sup class="cite" data-refid="44">[44]</sup>。马来西亚自己也于 2025-09 对高性能芯片转运实施强制许可<sup class="cite" data-refid="45">[45]</sup>。离岸主体解决的只有收款（Ch13），不解决数据和芯片。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">可灵能做，凭什么我不能做？</span><span class="toggle">＋</span></div><div class="faq-a"><p>可灵的护城河不在跨境架构（那部分可以抄：CDN + 异步队列），而在三样你没有的东西：自有万卡集群（货源成本=自家折旧，不是 $1.5+/hr 的市场租金）、自研模型（用户为可灵的生成效果付费，算力只是成本项）、快手的资金与法务（监管风险兜得住）<sup class="cite" data-refid="7">[7]</sup>。可灵验证的命题是"中国算力的<strong>产出物</strong>能卖全球"，个人能复用的是这个命题，而不是它的资产负债表。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">中国机房的 H100 到底是哪来的？我转卖它犯法吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>2023-10 后 H100 对华禁售，现存集群依赖管制前库存或灰色渠道<sup class="cite" data-refid="46">[46]</sup>；2025-08 后连合规特供的 H20 都停产了<sup class="cite" data-refid="39">[39]</sup>。你在中国境内租用它本身不直接违反美国法（你不是美国人、不在美国），但把它的算力卖给欧洲客户时，<strong>客户</strong>会面临二级责任评估（已有欧洲公司被 BIS 罚款 $150 万的先例<sup class="cite" data-refid="42">[42]</sup>）——所以问题不是"你会不会被抓"，是"客户的法务会不会让这单成交"。大概率不会。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">GFW 真会干扰我客户的连接吗？还是想多了？</span><span class="toggle">＋</span></div><div class="faq-a"><p>有记录在案：2025 年 8 月 GFW 对 port 443 的入向连接发动过无差别 RST 注入<sup class="cite" data-refid="67">[67]</sup>，对 SSH 大流量有识别和干扰能力。日常体感是"能用但不稳，晚高峰差"。关键不在频率而在性质：这是一个<strong>不发公告、不可申诉、不可写进 SLA</strong> 的风险源。异步任务形态对此免疫力最强（断了重试就行），这也是 Ch9 把形态②列为唯一务实路径的原因之一。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">那我直接在 Vast.ai 挂中国节点试试水，最坏能怎样？</span><span class="toggle">＋</span></div><div class="faq-a"><p>这正是 Ch15 建议的第一个验证实验，最坏结果就是损失一两周时间和一台机器的月租。但先想清楚定价：Vast.ai H100 spot 已到 $1.03–2.00/hr<sup class="cite" data-refid="14">[14]</sup>，你的拿货价 $1.53–1.72/hr<sup class="cite" data-refid="4">[4]</sup>——除非有低于市场的货源，否则挂单即亏损。4090 类消费卡价差更小（中国 $0.19–0.30 vs Vast $0.31<sup class="cite" data-refid="12">[12]</sup>），扣掉平台抽成后所剩无几。实验值得做，预期要管理。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">欧洲客户真愿意为"主权"多付 30–50%？价格战打不动吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>打不动有数据支撑：61% 西欧 CIO 已把本地供应商优先写进采购策略<sup class="cite" data-refid="37">[37]</sup>，意大利监管直接封禁了便宜 16 倍的 DeepSeek<sup class="cite" data-refid="31">[31]</sup>。机制在于买家结构：会为价格切换的个人开发者已经在用 marketplace（那里比大云便宜 40–85%，轮不到你再便宜）；预算大的企业客户的成本函数里有"合规罚款期望值"和"尽调通过率"两项，GDPR 罚款上限是全球营收 4%，再便宜的算力也对冲不了这个尾部风险。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">窗口期 2026–2027 这两年，难道没有快进快出的机会？</span><span class="toggle">＋</span></div><div class="faq-a"><p>窗口是真的（Gigafactory 级主权算力 2027–2028 才投运，已运营的 19 座 AI Factories 是科研配额制小设施、不改变商业供需<sup class="cite" data-refid="36">[36]</sup>，且 InvestAI 有注水争议、可能更晚 ⚠️），但窗口期的需求同样被三重死结过滤——窗口缓解的只是"供给紧张"，不缓解 GDPR 和出口管制。真想吃窗口红利，更合理的姿势是在<strong>欧洲或马来西亚</strong>持有/转售算力（窗口期溢价 30–70%<sup class="cite" data-refid="15">[15]</sup>是给所有供给方的，不只给中国算力），而不是从中国境内往外卖。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">所以这个主题里真正值得个人做的生意是什么？</span><span class="toggle">＋</span></div><div class="faq-a"><p>报告的答案是"成品层套利"：中国模型 API 价格约 $0.3/1M tokens vs Claude Opus $5/1M（16 倍价差），且中国模型已占 OpenRouter token 量 50%+、47% 调用来自美国开发者<sup class="cite" data-refid="8">[8]</sup><sup class="cite" data-refid="65">[65]</sup>——需求已被验证。EUrouter 展示了最小形态：做合规包装/路由中转<sup class="cite" data-refid="59">[59]</sup>。个人可启动的版本：面向特定垂直场景（如批量内容生成、代码批处理）的中国模型 API 聚合服务，主体放马来西亚/香港，收款走 Wise<sup class="cite" data-refid="56">[56]</sup>。无 GPU、无折旧、无 IaaS 合规包袱。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q12</span><span class="qtext">中国政府以后会不会鼓励"算力出口"，到时候再入场？</span><span class="toggle">＋</span></div><div class="faq-a"><p>短期看不到迹象。现行政策方向是"数据不出境"强于"服务出海"，搜遍政策文件不存在算力出口鼓励机制（证据包明确标注的"没查到"项）；官方支持的出海形态是云商在海外自建（Goldman Sachs 估 $700 亿投资规模<sup class="cite" data-refid="25">[25]</sup>）。就算未来口径放开，欧盟侧的 GDPR/CADA 和美国侧的出口管制不会因此消失——三把锁开了一把还有两把。把"政策松动"当期权而不是计划。</p></div></div>
+    </div>
+  </section>
+
+  <!-- ===== REFS ===== -->
+  <section class="chapter" id="refs" data-nav="References">
+    <h2><span class="num">17</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+    <div class="chapter-body"><ol class="ref-list">
+      <li id="ref-1"><a href="https://epoch.ai/data-insights/ai-datacenter-cost-breakdown" target="_blank" rel="noopener">Epoch AI — Total cost of ownership of a 1GW AI data center</a><span class="ref-meta">· 访问 2026-06-10 · 引用 4 次</span></li>
+      <li id="ref-2"><a href="https://www.cloudrift.ai/blog/the-true-cost-of-gpu-ownership" target="_blank" rel="noopener">CloudRift — The True Cost of GPU Ownership</a><span class="ref-meta">· 访问 2026-06-10 · 引用 5 次</span></li>
+      <li id="ref-3"><a href="https://www.spheron.network/blog/ai-inference-power-electricity-cost-2026/" target="_blank" rel="noopener">Spheron — AI Inference Power & Electricity Cost 2026</a><span class="ref-meta">· 访问 2026-06-10 · 引用 4 次</span></li>
+      <li id="ref-4"><a href="https://www.trendforce.com/news/2026/04/17/news-nvidia-h100-rentals-in-china-reportedly-up-20-30-as-token-demand-surges-h-series-also-rises/" target="_blank" rel="noopener">TrendForce — NVIDIA H100 Rentals in China Up 20–30% as Token Demand Surges</a><span class="ref-meta">· 访问 2026-06-10 · 引用 10 次</span></li>
+      <li id="ref-5"><a href="https://www.tmtpost.com/7960107.html" target="_blank" rel="noopener">钛媒体 — 专访魔形智能 CEO 徐凌杰：Token 出海当下不现实</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-6"><a href="https://www.tomshardware.com/desktops/servers/china-is-developing-nation-spanning-network-to-sell-surplus-data-center-compute-power-latency-disparate-hardware-are-key-hurdles" target="_blank" rel="noopener">Tom's Hardware — China is developing nation-spanning network to sell surplus data center compute</a><span class="ref-meta">· 访问 2026-06-10 · 引用 4 次</span></li>
+      <li id="ref-7"><a href="https://ir.kuaishou.com/news-releases/news-release-details/kling-ai-annualized-revenue-run-rate-hits-usd240-million/" target="_blank" rel="noopener">Kuaishou IR — Kling AI Annualized Revenue Run Rate Hits USD240 Million (Dec 2025)</a><span class="ref-meta">· 访问 2026-06-10 · 引用 5 次</span></li>
+      <li id="ref-8"><a href="https://abit.ee/en/artificial-intelligence/minimax-moonshot-ai-kimi-k25-openrouter-tokens-ai-china-glm-5-deepseek-llm-en" target="_blank" rel="noopener">abit.ee — Chinese AI Models Capture Majority of Global Token Usage on OpenRouter</a><span class="ref-meta">· 访问 2026-06-10 · 引用 5 次</span></li>
+      <li id="ref-9"><a href="https://m.bjx.com.cn/mnews/20250430/1439676.shtml" target="_blank" rel="noopener">北极星电力网 — 内蒙古电力集团 2025 年 5 月代理购电价格</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-10"><a href="https://finance.sina.com.cn/jjxw/2025-05-07/doc-inevtyiu6182702.shtml?froms=ggmp" target="_blank" rel="noopener">新浪财经 — 争入电价洼地：某央企最赚钱的数据中心在内蒙古</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-11"><a href="https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Electricity_price_statistics" target="_blank" rel="noopener">Eurostat — Electricity price statistics（H2 2025 非住宅电价）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 10 次</span></li>
+      <li id="ref-12"><a href="https://www.mornai.cn/news/gpu/a100-gpu-rent-trend/" target="_blank" rel="noopener">mornai.cn — A100/GPU 租赁价格趋势（中国平台）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 4 次</span></li>
+      <li id="ref-13"><a href="https://deploybase.ai/articles/cheapest-h100-in-europe-provider-pricing-ranked" target="_blank" rel="noopener">deploybase.ai — Cheapest H100 in Europe: Provider Pricing Ranked</a><span class="ref-meta">· 访问 2026-06-10 · 引用 7 次</span></li>
+      <li id="ref-14"><a href="https://intuitionlabs.ai/articles/h100-rental-prices-cloud-comparison" target="_blank" rel="noopener">IntuitionLabs — H100 Rental Prices: Cloud Comparison</a><span class="ref-meta">· 访问 2026-06-10 · 引用 13 次</span></li>
+      <li id="ref-15"><a href="https://www.silicondata.com/blog/geography-of-gpu-pricing-a100-vs-h100" target="_blank" rel="noopener">Silicon Data — The Geography of GPU Pricing: A100 vs H100</a><span class="ref-meta">· 访问 2026-06-10 · 引用 6 次</span></li>
+      <li id="ref-16"><a href="https://user.guancha.cn/main/content?id=1431856" target="_blank" rel="noopener">观察者网 — 部分国产芯片智算中心闲置率高达 80%</a><span class="ref-meta">· 访问 2026-06-10 · 引用 6 次</span></li>
+      <li id="ref-17"><a href="https://finance.sina.com.cn/tech/roll/2025-04-21/doc-inetwvfy8867681.shtml" target="_blank" rel="noopener">新浪财经 — 互联网大厂算力荒，智算中心卖卡求生</a><span class="ref-meta">· 访问 2026-06-10 · 引用 4 次</span></li>
+      <li id="ref-18"><a href="https://www.smartcity.team/reports/%E7%AE%97%E5%8A%9B%E4%B8%AD%E5%BF%83%E6%9C%8D%E5%8A%A1%E5%95%86%E5%88%86%E6%9E%90%E6%8A%A5%E5%91%8A2025/" target="_blank" rel="noopener">中国信通院 — 算力中心服务商分析报告（2025）摘要</a><span class="ref-meta">· 访问 2026-06-10 · 引用 4 次</span></li>
+      <li id="ref-19"><a href="https://www.alibabacloud.com/en/global-locations" target="_blank" rel="noopener">Alibaba Cloud — Global Infrastructure Locations</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-20"><a href="https://www.tencentcloud.com/document/product/301/59018" target="_blank" rel="noopener">Tencent Cloud — 德国 C5 / GDPR 合规认证文档</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-21"><a href="https://www.huaweicloud.com/eu/securecenter/privacy/gdpr.html" target="_blank" rel="noopener">Huawei Cloud EU — GDPR Compliance</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-22"><a href="https://www.tomshardware.com/pc-components/gpus/chinas-bytedance-to-access-36-000-blackwell-gpu-cluster-through-malaysia-cloud-operator-nvidia-confirms-no-objections-deal-is-in-line-with-us-export-controls" target="_blank" rel="noopener">Tom's Hardware — ByteDance to access 36,000 Blackwell GPU cluster through Malaysia cloud operator</a><span class="ref-meta">· 访问 2026-06-10 · 引用 5 次</span></li>
+      <li id="ref-23"><a href="https://www.datacenterdynamics.com/en/news/tiktok-owner-bytedance-to-expand-malaysia-data-center-footprint-in-21bn-ai-deal/" target="_blank" rel="noopener">DCD — ByteDance to expand Malaysia data center footprint in $2.1bn AI deal</a><span class="ref-meta">· 访问 2026-06-10 · 引用 4 次</span></li>
+      <li id="ref-24"><a href="https://www.stcn.com/article/detail/1523526.html" target="_blank" rel="noopener">证券时报 — 万国数据国际业务独立品牌 DayOne</a><span class="ref-meta">· 访问 2026-06-10 · 引用 5 次</span></li>
+      <li id="ref-25"><a href="https://www.goldmansachs.com/insights/articles/chinas-ai-providers-expected-to-invest-70-billion-dollars-in-data-centers-amid-overseas-expansion/" target="_blank" rel="noopener">Goldman Sachs — China's AI providers expected to invest $70bn in data centers amid overseas expansion</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-26"><a href="https://docs.vast.ai/documentation/host/hosting-overview" target="_blank" rel="noopener">Vast.ai — Hosting Overview（host 政策文档）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 5 次</span></li>
+      <li id="ref-27"><a href="https://docs.clore.ai/gpu-marketplace/bare-metal" target="_blank" rel="noopener">Clore.ai — GPU Marketplace Bare Metal 节点文档</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-28"><a href="https://messari.io/report/state-of-akash-q4-2025" target="_blank" rel="noopener">Messari — State of Akash Q4 2025</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-29"><a href="https://www.taylorwessing.com/en/insights-and-events/insights/2025/01/data-transfers-to-china-under-the-scrutiny-of-data-protection-authorities" target="_blank" rel="noopener">Taylor Wessing — Data transfers to China under the scrutiny of data protection authorities</a><span class="ref-meta">· 访问 2026-06-10 · 引用 6 次</span></li>
+      <li id="ref-30"><a href="https://www.edpb.europa.eu/sme-data-protection-guide/international-data-transfers_en" target="_blank" rel="noopener">EDPB — International Data Transfers（SME Guide）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-31"><a href="https://www.euronews.com/next/2025/01/31/deepseek-ai-blocked-by-italian-authorities-as-others-member-states-open-probes/" target="_blank" rel="noopener">Euronews — DeepSeek AI blocked by Italian authorities as other member states open probes</a><span class="ref-meta">· 访问 2026-06-10 · 引用 5 次</span></li>
+      <li id="ref-32"><a href="https://ai-regulation.com/deepseek-one-year-later-regulatory-storm-global-surge/" target="_blank" rel="noopener">MIAI — DeepSeek One Year Later: Regulatory Storm & Global Surge</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-33"><a href="https://digital-strategy.ec.europa.eu/en/policies/cloud-and-ai-development-act" target="_blank" rel="noopener">European Commission — Cloud and AI Development Act（CADA）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 5 次</span></li>
+      <li id="ref-34"><a href="https://www.raconteur.net/global-business/eu-cloud-and-ai-development-act-what-sovereign-cloud-means-in-new-laws" target="_blank" rel="noopener">Raconteur — EU Cloud and AI Development Act: what sovereign cloud means</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-35"><a href="https://www.eib.org/en/press/all/2025-491-eib-group-and-european-commission-join-forces-to-finance-ai-gigafactories" target="_blank" rel="noopener">EIB — EIB Group and European Commission join forces to finance AI gigafactories</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-36"><a href="https://digital-strategy.ec.europa.eu/en/policies/ai-factories" target="_blank" rel="noopener">European Commission — AI Factories / AI Gigafactories（76 份申请与时间表）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 4 次</span></li>
+      <li id="ref-37"><a href="https://introl.com/blog/sovereign-cloud-ai-infrastructure-data-residency-requirements-2025" target="_blank" rel="noopener">Introl — Sovereign Cloud & AI Infrastructure Data Residency Requirements 2025（Gartner 61% 数据）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 5 次</span></li>
+      <li id="ref-38"><a href="https://www.mondaq.com/china/new-technology/1787216/legal-considerations-for-eu-businesses-using-china-based-ai-services-part-i-ai-governance" target="_blank" rel="noopener">Mondaq — Legal Considerations for EU Businesses Using China-Based AI Services (Part I)</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-39"><a href="https://www.cnbc.com/2025/08/22/nvidia-halt-h20-chip-production-china-cracks-down.html" target="_blank" rel="noopener">CNBC — Nvidia halts H20 chip production as China cracks down</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-40"><a href="https://www.cnn.com/2025/04/16/tech/nvidia-plunge-h20-chip-china-export-intl-hnk/index.html" target="_blank" rel="noopener">CNN — Nvidia plunges on H20 China export restrictions（$5.5B 损失）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-41"><a href="https://www.mofo.com/resources/insights/260209-managing-export-control-risks-in-the-ai-chip-ecosystem" target="_blank" rel="noopener">Morrison Foerster — Managing Export Control Risks in the AI Chip Ecosystem</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-42"><a href="https://www.csis.org/analysis/understanding-us-allies-current-legal-authority-implement-ai-and-semiconductor-export" target="_blank" rel="noopener">CSIS — Understanding US Allies' Legal Authority to Implement AI and Semiconductor Export Controls</a><span class="ref-meta">· 访问 2026-06-10 · 引用 4 次</span></li>
+      <li id="ref-43"><a href="https://www.indoneo.com/tech-ai/us-nvidia-export-controls-china-southeast-asia-loophole/" target="_blank" rel="noopener">Indoneo — US Nvidia export controls: the Southeast Asia loophole（Megaspeed 案例）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-44"><a href="https://www.abhs.in/blog/us-bis-closes-chinese-overseas-subsidiary-nvidia-blackwell-chip-loophole-june-2026" target="_blank" rel="noopener">ABHS — US BIS closes Chinese overseas subsidiary chip loophole（ultimate parent test，2026-05-31）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-45"><a href="https://techwireasia.com/2025/09/malaysia-tightens-oversight-of-data-centres-amid-ai-chip-controls/" target="_blank" rel="noopener">TechWire Asia — Malaysia tightens oversight of data centres amid AI chip controls</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-46"><a href="https://www.zhonglun.com/research/articles/54896.html" target="_blank" rel="noopener">中伦律师事务所 — GPU 出口管制合规分析</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-47"><a href="https://www.whitecase.com/insight-our-thinking/ai-watch-global-regulatory-tracker-china" target="_blank" rel="noopener">White & Case — AI Watch: Global Regulatory Tracker — China</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-48"><a href="https://www.arnoldporter.com/en/perspectives/advisories/2025/10/china-data-privacy-enforcement-cross-border-data-transfer" target="_blank" rel="noopener">Arnold & Porter — China Data Privacy Enforcement: Cross-Border Data Transfer（上海执法案例）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-49"><a href="https://www.china-briefing.com/news/china-cross-border-data-transfer-certification/" target="_blank" rel="noopener">China Briefing — China Cross-Border Data Transfer Certification（2026-01 生效新规）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-50"><a href="https://xpu.pub/2025/04/22/huawei-ascend/" target="_blank" rel="noopener">XPU.pub — Huawei Ascend 平台技术评估（CANN 生态问题）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-51"><a href="https://www.chinatalk.media/p/can-huawei-compete-with-cuda" target="_blank" rel="noopener">ChinaTalk — Can Huawei Compete with CUDA?</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-52"><a href="https://restofworld.org/2025/china-chip-startups-nvidia-us-export/" target="_blank" rel="noopener">Rest of World — China's chip startups race to replace Nvidia（CUDA 迁移工具链现状）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-53"><a href="https://lowendtalk.com/discussion/161775/china-telecom-now-using-trans-russian-low-latency-route-to-europe" target="_blank" rel="noopener">LowEndTalk — China Telecom trans-Russian low latency route to Europe（实测 RTT）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-54"><a href="https://blog.cloudflare.com/bandwidth-costs-around-the-world/" target="_blank" rel="noopener">Cloudflare — Bandwidth Costs Around the World（明确排除中国大陆）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-55"><a href="https://stripe.com/global" target="_blank" rel="noopener">Stripe — Global Availability（支持国家列表，不含中国大陆）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-56"><a href="https://newsroom.wise.com/en-CAS/247447-wise-launches-wise-business-account-in-hong-kong-for-local-smes-to-streamline-their-multi-currency-payments-in-a-few-clicks/" target="_blank" rel="noopener">Wise Newsroom — Wise Business 香港上线（2025-03，9 币种本地收款）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-57"><a href="https://fal.ai/models/fal-ai/kling-video" target="_blank" rel="noopener">fal.ai — Kling Video 官方模型分发页（可灵海外分发渠道佐证）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-58"><a href="https://www.siliconflow.com/" target="_blank" rel="noopener">SiliconFlow — 官网（新加坡注册，OpenAI 兼容 API）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 4 次</span></li>
+      <li id="ref-59"><a href="https://www.eurouter.ai/models/deepseek-r1" target="_blank" rel="noopener">EUrouter — DeepSeek R1 (EU Routed) API</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-60"><a href="https://docs.skypilot.co/" target="_blank" rel="noopener">SkyPilot — 官方文档（支持云列表，不含阿里云/腾讯云/华为云）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-61"><a href="https://www.bruegel.org/analysis/europe-needs-strategy-close-artificial-intelligence-compute-gap" target="_blank" rel="noopener">Bruegel — Europe needs a strategy to close the AI compute gap</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-62"><a href="https://thenextweb.com/news/europes-cloud-dependency-political-risk" target="_blank" rel="noopener">The Next Web — Europe's cloud dependency is a political risk</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-63"><a href="https://news.crunchbase.com/venture/european-funding-nudged-higher-ai-led-2025/" target="_blank" rel="noopener">Crunchbase News — European Venture Funding 2025: AI Led for the First Time（$17.5B）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-64"><a href="https://www.mckinsey.com/capabilities/tech-and-ai/our-insights/the-evolution-of-neoclouds-and-their-next-moves" target="_blank" rel="noopener">McKinsey — Neoclouds' challenges and next moves（BMaaS 毛利与净利数据）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-65"><a href="https://www.21jingji.com/article/20260302/herald/4f83c46ba1c964118e284a24da8e9599.html" target="_blank" rel="noopener">21 世纪经济报道 — Token 出海：中国模型 API 全球扩张（OpenRouter 占比与价差数据）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 6 次</span></li>
+      <li id="ref-66"><a href="http://commerce.shandong.gov.cn/art/2025/1/24/art_250176_10349144.html" target="_blank" rel="noopener">山东省商务厅 — 美国 AI 扩散规则贸易预警</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-67"><a href="https://gfw.report/" target="_blank" rel="noopener">GFW Report — 防火长城技术分析（2025 年 RST 注入事件研究）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-68"><a href="https://caifuhao.eastmoney.com/news/20251104222232685398290" target="_blank" rel="noopener">东方财富 — 中国补贴数据中心高达 50% 电费（仅限国产芯片项目）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-69"><a href="https://www.cspplaza.com/article-22070-1.html" target="_blank" rel="noopener">CSPPLAZA — 内蒙古取消优惠电价，各方解读（公平竞争审查影响）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+    </ol></div>
+  </section>
+  <footer>
+    无忌 · Deep Research（L2）· 2026-06-10 · 仅供阿杰个人决策参考；数据与判例以原始来源为准。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('china-compute-export-europe-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('china-compute-export-europe-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

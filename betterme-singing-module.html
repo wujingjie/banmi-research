@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BetterMe 练歌模块：KTV 技术与竞品研究 · 无忌 Deep Research · 2026-06-10</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 01 全景与核心判断</a>
+    <a href="#ch2" data-target="ch2">02 02 歌词格式选型</a>
+    <a href="#ch3" data-target="ch3">03 03 Web 渲染路线</a>
+    <a href="#ch4" data-target="ch4">04 04 人声分离</a>
+    <a href="#ch5" data-target="ch5">05 05 ASR 与强制对齐</a>
+    <a href="#ch6" data-target="ch6">06 06 中文歌专项</a>
+    <a href="#ch7" data-target="ch7">07 07 伴奏四条路线</a>
+    <a href="#ch8" data-target="ch8">08 08 节奏引导交互</a>
+    <a href="#ch9" data-target="ch9">09 09 USDX 评分拆解</a>
+    <a href="#ch10" data-target="ch10">10 10 浏览器 pitch 检测</a>
+    <a href="#ch11" data-target="ch11">11 11 竞品地图</a>
+    <a href="#ch12" data-target="ch12">12 12 开源深度借鉴</a>
+    <a href="#ch13" data-target="ch13">13 13 BetterMe 架构</a>
+    <a href="#ch14" data-target="ch14">14 14 分阶段路线图</a>
+    <a href="#ch15" data-target="ch15">15 15 路线决策树</a>
+    <a href="#faq" data-target="faq">FAQ FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">≡ References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>BetterMe 练歌模块：KTV 技术与竞品研究</h1>
+    <div class="hero-meta">
+      <span>📅 2026-06-10</span>
+      <span>🔍 5 个搜证 agent · ~60 个来源核查</span>
+      <span>🎤 KTV 渲染 × 歌词提取 × 跟唱评分</span>
+      <span>🖥️ 立场：Mac Studio 128GB 本地算力的个人开发者</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>一句话定调：BetterMe 练歌模块的五个需求（逐句练习 / KTV 模式 / 智能提取 / 节奏引导 / 评分）全部有成熟开源方案可落地，没有一个需要发明新技术——真正的工程难点不在"做不做得出来"，而在"中文歌的提取精度"和"伴奏没有人声可对齐"这两个数据问题上。</strong></p>
+      <p>本报告按"格式 → 渲染 → 提取 → 中文专项 → 伴奏 → 评分 → 竞品 → 架构 → 路线图"的顺序展开：Ch2-3 讲 KTV 逐字效果怎么存怎么画；Ch4-6 拆上传 MV 自动出词级时间戳的完整链路（含 Apple Silicon 实测数据）；Ch7-8 解决"只有伴奏没有人声"的节奏引导问题；Ch9-10 把 UltraStar Deluxe 的评分算法拆到可以照抄的程度；Ch11-12 盘点商业竞品和开源项目（重点：nightingale 和 allkaraoke 两个直接可借鉴的仓库）；Ch13-15 给出嵌入现有 Next.js + FastAPI 架构的具体分工、分阶段路线图和决策树。</p>
+    </div>
+  </div>
+
+  <div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+    <p style="margin:0"><strong>📌 四条最关键发现（先扫这个）：</strong></p>
+    <ul style="margin:8px 0 0">
+      <li><strong>全链路本地化在 Mac Studio 上完全可行，且预计很快：一首歌从 MV 到词级时间戳全自动预计 1-3 分钟——注意这是从 M4 Max 实测推算的预期值，不是 M2 Ultra 实测。</strong>Demucs 的 MLX 移植版在 M4 Max 上跑出约 34× 实时的人声分离速度（6 分钟音频 10.7 秒）<sup class="cite" data-refid="18">[18]</sup>，Whisper large-v3-turbo 经 Metal 加速约 4-6× 实时<sup class="cite" data-refid="29">[29]</sup>——整条"人声分离 → ASR → 强制对齐"链路完全不需要云服务，128GB 统一内存绰绰有余。MLX 性能未必按核心数线性外推到 M2 Ultra，开工首日先跑基准实测（Ch14 实验 A）。<span class="conf g">🟢</span>（速度数据本身多源）/ <span class="conf y">🟡</span>（目标机型为推算）</li>
+      <li><strong>BetterMe 想做的事，开源项目 nightingale 已经端到端做出来了，而且上周还在更新。</strong>nightingale（1,148⭐，v0.8.0 / 2026-06-08）实现了"上传任意音视频 → UVR 人声分离 → WhisperX 词级时间戳 → 实时 pitch 评分 + 星级"全管道，self-hosted web 模式，还支持 CJK + 拼音显示<sup class="cite" data-refid="41">[41]</sup>。它是架构参考的最佳答案，甚至可以先自托管一份当体验基准。<span class="conf g">🟢</span></li>
+      <li><strong>智能提取不能全自动信任：Whisper 对唱歌的词错率约 20%（普通演讲只有 2.7%），而且系统性漏掉"oh / la"类非词汇发声；中文流行歌更是没找到可用的公开基准。</strong>Jam-ALT 基准上 Whisper large-v3 的歌词 WER ≈ 20%<sup class="cite" data-refid="21">[21]</sup>，且评测只覆盖英/法/德/西/日。结论：提取管道必须配一个人工校对界面（tap-to-sync 式微调），这不是可选项，是产品设计的一部分。<span class="conf g">🟢</span></li>
+      <li><strong>评分千万别从"实时逐字"起步：逐句录一句评一句的模式工程量约低 3-5 倍，且两个开源项目验证过完整可行。</strong>逐句模式只需"录音 → 后端 SwiftF0 提取音高曲线 → DTW 对比参考线 → 出分"，没有实时线程管理；实时逐字则要 AudioWorklet + WASM + 低延迟算法 + 实时可视化全部同步<sup class="cite" data-refid="42">[42]</sup>。SwiftF0 在 CPU 上 132ms 处理 5 秒音频，比 CREPE 快 42 倍<sup class="cite" data-refid="37">[37]</sup>，评分连 GPU 都不用。<span class="conf g">🟢</span>（"3-5 倍"为工程经验估算 ⚠️估算）</li>
+    </ul>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1" data-nav="01 全景与核心判断">
+    <h2><span class="num">01</span><span class="title-text">全景与核心判断：五个需求各自卡在哪里</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>先把阿杰的五个需求摊开，逐个标注"技术成熟度"和"真正的难点在哪"：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>需求</th><th>技术成熟度</th><th>真正的难点</th><th>对应章节</th></tr></thead>
+        <tbody>
+          <tr><td><strong>(a) 逐句练习</strong></td><td class="check y">✅ 最成熟</td><td>几乎没有——半米的逐句跟读交互直接复用，只差"按词级时间戳切句"的数据</td><td>Ch13-14</td></tr>
+          <tr><td><strong>(b) KTV 模式</strong></td><td class="check y">✅ 成熟</td><td>格式选型（Enhanced LRC）+ 渲染方案选档（CSS 伪元素起步即可），有现成库</td><td>Ch2-3</td></tr>
+          <tr><td><strong>(c) 智能提取</strong></td><td class="check p">⚠️ 可用但有精度天花板</td><td>Whisper 唱歌 WER ~20%<sup class="cite" data-refid="21">[21]</sup>、中文歌未找到公开基准——必须配人工校对兜底</td><td>Ch4-6</td></tr>
+          <tr><td><strong>(d) 节奏引导（纯伴奏）</strong></td><td class="check p">⚠️ 数据问题而非算法问题</td><td>伴奏里没有人声可对齐，时间戳必须外源引入，四条路线各有失败模式</td><td>Ch7-8</td></tr>
+          <tr><td><strong>(e) 评分</strong></td><td class="check y">✅ 算法公开（USDX 源码）</td><td>参考音高线从哪来（中文歌 USDB 覆盖差，需 UltraSinger 自动生成）</td><td>Ch9-10</td></tr>
+        </tbody>
+      </table></div>
+      <h3>核心判断一：这是一个"管道工程"项目，不是算法项目</h3>
+      <p>五个需求没有任何一个需要训练模型或发明算法。人声分离（Demucs）、ASR（Whisper）、强制对齐（WhisperX / wav2vec2）、pitch 检测（SwiftF0 / pitchy）、评分逻辑（USDX 源码公开）全部是拿来即用的组件<sup class="cite" data-refid="22">[22]</sup><sup class="cite" data-refid="31">[31]</sup>。工程的本体是：把这些组件接成一条 FastAPI 管道，把输出统一成一种内部格式（Enhanced LRC），再在 Next.js 里画出来。这正好是个人开发者 phase by phase 最舒服的形态——每个 phase 接一段管道，每段都能独立验证。</p>
+      <h3>核心判断二：两个"数据缺口"决定产品设计，必须提前认账</h3>
+      <div class="callout warn"><p><strong>缺口 1：中文歌的自动提取精度是未知数。</strong>唱歌 ASR 的公开基准（Jam-ALT）只测了英/法/德/西/日<sup class="cite" data-refid="21">[21]</sup>；中文有专项论文方案（LyricAlignment，人声茎字符错误率 9.1%<sup class="cite" data-refid="27">[27]</sup>）但不是开箱即用的产品级工具。<strong>缺口 2：原唱↔伴奏跨版本对齐的成功率没人验证过。</strong>BBC audio-offset-finder 的 0.01s 精度是"同一段音频嵌在不同位置"场景的数字<sup class="cite" data-refid="60">[60]</sup>，"原唱 vs 另一个录音室版本的伴奏"这种内容不同、节奏相同的场景没有专项数据。这两个缺口的共同解法是同一个：<strong>把人工校对（tap-to-sync 微调界面）做成一等公民功能，AI 出初稿、人修终稿。</strong>商业 KTV 平台（全民K歌）的底层答案其实也是这个——闭源谱面库 + 用户手动敲空格标注兜底<sup class="cite" data-refid="66">[66]</sup>。</p></div>
+      <h3>核心判断三：竞品空白恰好在 BetterMe 的定位上</h3>
+      <p>商业 K 歌 App（全民K歌 / Smule / StarMaker）有评分但没有"逐句循环练习"；声乐教学 App（Yousician / Singing Carrots）有实时 pitch 但不支持用户自传内容；语言学习×唱歌的交叉品类（LyricsTraining / Lirica）全是填词游戏，没有一家做 pitch 评分 + 逐句练习<sup class="cite" data-refid="53">[53]</sup><sup class="cite" data-refid="54">[54]</sup>。"自传内容 + 逐句精练 + 评分"这个组合在市场上接近空白（详见 Ch11）——当然 BetterMe 是自用项目，这一条的意义不是商机，而是<strong>没有现成产品可以直接拿来用，自建是合理的</strong>。<span class="conf g">🟢</span></p>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2" data-nav="02 歌词格式选型">
+    <h2><span class="num">02</span><span class="title-text">KTV 逐字效果的原理与格式选型：内部标准定 Enhanced LRC</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>KTV"文字覆盖 + 逐字染色"的本质是：每个字（词）有自己的开始时间和持续时长，播放器按时间轴驱动一个"已唱/未唱"的颜色边界从左往右扫过去。所以第一个决策是：<strong>用什么格式存"词级时间戳"</strong>。候选格式六种，结论先行：</p>
+      <div class="callout good"><p><strong>内部标准定 Enhanced LRC（A2 扩展）。</strong>语法 <code>[mm:ss.xx]&lt;word_time&gt;word &lt;word_time&gt;word</code>：行时间戳用方括号、词时间戳用角括号，精度到厘秒（可扩展到毫秒）<sup class="cite" data-refid="1">[1]</sup>。三个决定性优点：① 完全纯文本，FastAPI 后端生成、LanceDB 存储、前端解析都零摩擦；② 向后兼容标准 LRC——不支持词级的播放器会自动忽略角括号<sup class="cite" data-refid="2">[2]</sup>；③ 有现成 JS 解析库（liricle，见 Ch3）。<span class="conf g">🟢</span> <strong>一个定位边界：</strong>Enhanced LRC 适合做<em>交换/渲染格式</em>，但它表达不了参考音高线、提取置信度、编辑版本这些系统需要的元数据——真正的 single source of truth 应是 Ch13 的歌卡数据模型（结构化 JSON），Enhanced LRC 是它的一种导出视图，UltraStar txt（带音符）是另一种。⚠️估算（架构判断）</p></div>
+      <h3>六种候选格式逐个排除</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>格式</th><th>词级时间戳</th><th>开放性</th><th>判定</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Enhanced LRC</strong></td><td class="check y">✅ 角括号词级</td><td class="check y">✅ 纯文本开放</td><td>✅ <strong>选它</strong>——简单、开放、有库<sup class="cite" data-refid="1">[1]</sup></td></tr>
+          <tr><td><strong>KRC（酷狗）</strong></td><td class="check y">✅ <code>[行起,行长]&lt;0,字长,0&gt;字</code></td><td class="check n">⛔ 压缩+字节混淆，记事本打开是乱码</td><td>⛔ 加密私有格式，无公开规范<sup class="cite" data-refid="3">[3]</sup></td></tr>
+          <tr><td><strong>QRC（QQ音乐）</strong></td><td class="check y">✅ 词级</td><td class="check n">⛔ "比 KRC 更封闭"，腾讯明确不支持转换</td><td>⛔ 同上<sup class="cite" data-refid="3">[3]</sup><sup class="cite" data-refid="4">[4]</sup></td></tr>
+          <tr><td><strong>TTML（AMLL 方言）</strong></td><td class="check y">✅ 每词一个 <code>&lt;span begin end&gt;</code></td><td class="check y">✅ 开放（W3C + Apple 扩展）</td><td>⚠️ 功能最全但 XML 复杂度高；W3C Karaoke 模块自己承认"无法完整表达颜色扫描等复杂效果"<sup class="cite" data-refid="5">[5]</sup><sup class="cite" data-refid="6">[6]</sup>——若以后接 AMLL 生态再转</td></tr>
+          <tr><td><strong>ASS/SSA</strong></td><td class="check y">✅ <code>\kf</code> 标签原生左→右扫色</td><td class="check y">✅ Aegisub 规范公开</td><td>⚠️ 为桌面渲染器设计，Web 端无原生渲染器<sup class="cite" data-refid="7">[7]</sup>；适合作为导出格式而非内部格式</td></tr>
+          <tr><td><strong>WebVTT</strong></td><td class="check p">⚠️ cue 内嵌 <code>&lt;HH:MM:SS.mmm&gt;</code></td><td class="check y">✅ W3C 标准</td><td>⛔ 浏览器渲染能力不够（下一节专门拆）<sup class="cite" data-refid="8">[8]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <h3>为什么 WebVTT + &lt;track&gt; 这条"看起来最 Web 原生"的路走不通</h3>
+      <p>WebVTT 确实有逐词时间戳语法，配合 <code>:past</code>/<code>:future</code> 伪类理论上可以给"已唱/未唱"分别着色。但三个硬伤把它判了死刑：① <code>:past</code>/<code>:future</code> 伪类在非 Chromium 浏览器支持不完整；② <code>::cue-region</code> 在所有浏览器都不支持<sup class="cite" data-refid="10">[10]</sup>；③ 即使在 Chromium，时间精度也不保证完美同步，无法做"颜色扫色"这种连续动画——W3C 规范原文承认 TTML2 的样式属性"无法表达用颜色扫过文字的连续动画"<sup class="cite" data-refid="6">[6]</sup><sup class="cite" data-refid="9">[9]</sup>。<strong>结论：生产级 KTV 效果必须用 JS 自己控制时间轴 + CSS/Canvas/WebGL 自绘</strong>，<code>&lt;track&gt;</code> 元素只配做普通字幕。<span class="conf g">🟢</span></p>
+      <div class="trap-box"><strong>⚠️ 坑：</strong>不要被"全民K歌用 KRC，我也解析 KRC"的思路带偏。KRC/QRC 是 XOR 加密 + 无公开规范的私有格式<sup class="cite" data-refid="65">[65]</sup>，社区解析代码是逆向产物，格式随时可能变；而且 BetterMe 的歌词来自自己的提取管道，根本不需要碰这两个格式。唯一值得借鉴的是 KRC 的数据结构思想——<code>[行开始ms,行持续ms]&lt;0,字持续ms,0&gt;字</code> 的"行+字两级时长"模型<sup class="cite" data-refid="65">[65]</sup>，这个模型 Enhanced LRC 同样表达得了。</div>
+      <h3>没查到的：YRC 格式</h3>
+      <p>网易云的 YRC 格式仅通过 AMLL 文档知道语法为 <code>(sylStart,sylDur,0)text</code><sup class="cite" data-refid="14">[14]</sup>，无独立规范文档。<span class="conf y">🟡</span>单源——但既然不选它，影响为零。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3" data-nav="03 Web 渲染路线">
+    <h2><span class="num">03</span><span class="title-text">Web 渲染技术路线：CSS / Canvas / WebGL 三档 + 两个现成库</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>定了格式，下一个问题是怎么画。"逐字染色 + 平滑滚动"在 Web 上有三档实现，复杂度和效果天花板递增：</p>
+      <h3>第一档：纯 CSS（MVP 推荐起步）</h3>
+      <p>三种纯 CSS 路线<sup class="cite" data-refid="11">[11]</sup>：</p>
+      <div class="step"><div class="step-head"><span class="sn">A</span><code>background-clip:text</code> + 渐变位移</div><div class="step-body">文字填充透明、背景渐变随时间位移。效果最像"扫色"，但<strong>仅 Webkit 系可靠</strong>（需 <code>-webkit-</code> 前缀；Firefox 2024+ 的确切支持状态证据包未能确认 <span class="conf y">🟡</span>）。自用项目若只跑 Chrome/Safari 可以接受。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">B</span><code>::after</code> 伪元素 + <code>overflow:hidden</code> + <code>width: 0→100%</code> 动画 ⭐</div><div class="step-body">每行歌词渲染两层：底层未唱色，上层 <code>::after</code> 复制同样文字用已唱色，宽度按当前播放进度从 0 长到 100%。<strong>所有现代浏览器兼容，是跨浏览器最可靠方案</strong><sup class="cite" data-refid="11">[11]</sup>。词级精度做法：把每个词包成 span，当前词内部做宽度动画，之前的词整体已唱色。性能注意：宽度/背景类动画触发 browser paint，而 <code>transform</code>/<code>opacity</code> 走 compositor 线程更稳<sup class="cite" data-refid="11">[11]</sup>——一屏只有几行歌词时 paint 通常扛得住。⚠️估算（性能判断为工程常识推断，证据包中 Canvas vs CSS 的 2024+ 量化基准数据未找到；长句换行、中英混排、移动端窄屏是未测的 worst case，P3 用 2-3 首最长句的歌做一次帧率冒烟测试即可定论）</div></div>
+      <div class="step"><div class="step-head"><span class="sn">C</span>SVG <code>&lt;mask&gt;</code> / <code>stroke-dashoffset</code> 动画</div><div class="step-body">最灵活、全浏览器兼容、效果天花板最高（描边生长、异形遮罩都能做），但实现复杂度也最高<sup class="cite" data-refid="11">[11]</sup>。不建议 MVP 用，留给以后做"花式效果"。</div></div>
+      <h3>平滑滚动 + 当前句高亮：不需要任何库</h3>
+      <p>React 标准模式：当前词/句用 <code>useRef</code> 绑 DOM 节点，<code>useEffect</code> 在 currentLine 变化时调 <code>scrollIntoView({behavior:'smooth', block:'center'})</code>；相邻句用透明度梯度（当前句满色、前后 1-2 句半透明）做出全民K歌式的"焦点感"<sup class="cite" data-refid="12">[12]</sup>。<span class="conf y">🟡</span>（此来源主 URL 返回 429，内容来自搜索摘要二手转述——但这个模式本身是 React 常识，风险极低。）</p>
+      <h3>第二/三档：Canvas 与 WebGL（什么时候才需要）</h3>
+      <p>Canvas 自绘适合"一屏几十行 + 复杂粒子效果"的场景；量化对比数据缺失（两个相关 CodePen POC 返回 403 无法核实，只有 2015 年的旧数据显示 Canvas offscreen 缓存可把 fillText 从 10ms 降到 1ms ⚠️估算）。WebGL 档的代表是 <strong>AMLL（applemusic-like-lyrics）</strong>——目前最完整的开源 React/Vue 歌词组件，2,000⭐，用 PixiJS（WebGL）做流体背景、Web Animation API 做词渐变高亮，支持 9 种歌词格式（TTML / LRC A2 / YRC / QRC / KRC / Lyricify Syllable 等），有 npm 包 <code>@applemusic-like-lyrics/react</code><sup class="cite" data-refid="13">[13]</sup><sup class="cite" data-refid="14">[14]</sup>。<span class="conf g">🟢</span></p>
+      <div class="callout warn"><p><strong>AMLL 的活跃度警示：</strong>GitHub releases 显示最新版 v3.1.0 发布于 2024-02-21，证据包未找到 2025 年后的新版本证据<sup class="cite" data-refid="13">[13]</sup>。<span class="conf y">🟡</span> 引入前先确认仓库近期 commit 状态；它适合当"Phase 后期的效果升级选项"而非地基。</p></div>
+      <h3>轻量库选项：liricle</h3>
+      <p><strong>liricle</strong>（72⭐，v4.2.0，last commit 2024-07-29）是最轻量的 Enhanced LRC 逐词同步库：<code>npm install liricle</code>，sync 回调同时返回 line 和 word 两级对象，LRC 非增强格式时 word 为 null<sup class="cite" data-refid="15">[15]</sup>。<span class="conf y">🟡</span>单源（官方 README；word 对象的具体字段结构 README 未展开，引入前花 10 分钟读一下源码）。它解决的是"解析 + 时间轴驱动"，染色动画还是要自己写——但加起来也就一两百行。</p>
+      <div class="callout good"><p><strong>Ch3 结论：MVP 用 liricle（解析+同步）+ CSS ::after 宽度动画（染色）+ scrollIntoView（滚动），零重型依赖，预计 1-2 天出全民K歌式效果的可用版。</strong>⚠️估算 效果不满意再升级 AMLL。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4" data-nav="04 人声分离">
+    <h2><span class="num">04</span><span class="title-text">智能提取链路（上）：人声分离选型与 Apple Silicon 实测</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>"上传 MV → 自动出逐句歌词"的链路是三段：<strong>① 人声分离 → ② ASR 转录 → ③ 强制对齐出词级时间戳</strong>。本章讲第一段。</p>
+      <h3>模型质量排序：BS-RoFormer &gt; htdemucs_ft &gt; htdemucs &gt; Spleeter</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">≈9.8 dB</div><div class="l">BS-RoFormer 人声 SDR（MUSDB18-HQ，SDX23 冠军）<sup class="cite" data-refid="17">[17]</sup> 🟢</div></div>
+        <div class="metric"><div class="v">≈8.9 dB</div><div class="l">htdemucs_ft 人声 SDR<sup class="cite" data-refid="16">[16]</sup> 🟢</div></div>
+        <div class="metric"><div class="v">≈8.1 dB</div><div class="l">htdemucs 人声 SDR<sup class="cite" data-refid="16">[16]</sup> 🟢</div></div>
+        <div class="metric"><div class="v">≈5.9 dB</div><div class="l">Spleeter 人声 SDR（2019 年后无实质更新，听感可分辨地差）<sup class="cite" data-refid="16">[16]</sup> 🟢</div></div>
+      </div>
+      <p>BS-RoFormer 质量最高但最慢（3 分钟歌曲 GPU 60-120 秒 vs htdemucs 30-45 秒）<sup class="cite" data-refid="16">[16]</sup>，且——关键限制——<strong>截至 2026-06-10 未在调研中找到成熟的 MLX 实现（现有 MLX port 均针对 htdemucs），Apple Silicon 上现阶段需走 PyTorch MPS，速度约慢 2-3 倍</strong>。<span class="conf y">🟡</span>（"未找到"≠"不存在"，引入前再搜一次）基准来源自称 2026 benchmark<sup class="cite" data-refid="16">[16]</sup>，结论"htdemucs 是几乎所有产品的正确默认值"与 arXiv 论文数据交叉一致<sup class="cite" data-refid="17">[17]</sup>。</p>
+      <h3>Apple Silicon 上的决定性数据：Demucs MLX 移植版 ≈34× 实时</h3>
+      <div class="callout info"><p><strong>M4 Max + MLX 实测：6 分钟音频 → 10.7 秒（≈34× 实时）；同机 CPU PyTorch 要 2 分 15 秒（≈2.7× 实时）；PyTorch MPS 比 MLX 慢约 2.6×</strong><sup class="cite" data-refid="18">[18]</sup><sup class="cite" data-refid="19">[19]</sup>。两个 MLX port 仓库可选：<code>ssmall256/demucs-mlx</code>（README 宣称最高 73× 实时）和 <code>lextoumbourou/mlx-demucs</code>，均 2024-2025 年发布<sup class="cite" data-refid="19">[19]</sup>。<span class="conf g">🟢</span>（速度数字多源）</p></div>
+      <div class="callout warn"><p><strong>⚠️ 诚实声明：阿杰的 Mac Studio 是 M2 Ultra，上面的实测来自 M4 Max。</strong>证据包没有 M2 Ultra 的直接 Demucs 实测数据，"M2 Ultra 应在 M4 Max 同量级或以上"是基于核心规模的推算 ⚠️估算。即便保守打对折，一首 4 分钟歌的人声分离也在 30 秒内——对离线管道完全够用。建议 Phase 2 第一天先跑一次基准实测，把真实数字写进沟通日志。</p></div>
+      <h3>UVR5 怎么定位：是 GUI 前端，不是 API 依赖</h3>
+      <p>Ultimate Vocal Remover（UVR5，v5.6）本质是带多模型后端（MDX-Net / VR Arch / RoFormer）的桌面 GUI，2025 年社区推荐其内部最优模型是 RoFormer 系<sup class="cite" data-refid="20">[20]</sup>。<span class="conf y">🟡</span>单源。对 FastAPI 后端来说 GUI 层没有价值——<strong>直接 pip 装 <code>demucs</code> 调 Python API 更干净</strong>。值得注意的是 nightingale 用的是 UVR Karaoke Model 的 ONNX 导出版做分离<sup class="cite" data-refid="41">[41]</sup>，说明"UVR 模型 + 无 GUI 推理"也是一条验证过的路。</p>
+      <div class="callout good"><p><strong>Ch4 结论：默认 htdemucs_ft（MLX 版跑分离），追求极致质量的歌单独用 BS-RoFormer（PyTorch MPS）重跑。</strong>内存占用：Demucs MLX 统一内存约 2-4GB ⚠️估算，128GB 机器毫无压力。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5" data-nav="05 ASR 与强制对齐">
+    <h2><span class="num">05</span><span class="title-text">智能提取链路（下）：ASR 转录与强制对齐的真实精度</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>先泼冷水：Whisper 对唱歌的 WER 是演讲的 7 倍</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">20.35%</div><div class="l">Whisper large-v3 歌词 WER（Jam-ALT 基准，含人声分离）<sup class="cite" data-refid="21">[21]</sup> 🟢</div></div>
+        <div class="metric"><div class="v">20.07%</div><div class="l">同基准不做分离的 WER——分离与否几乎没差<sup class="cite" data-refid="21">[21]</sup> 🟢</div></div>
+        <div class="metric"><div class="v">≈2.7%</div><div class="l">Whisper 普通演讲 WER（官方测试集）<sup class="cite" data-refid="21">[21]</sup> 🟢</div></div>
+        <div class="metric"><div class="v">&gt;50%</div><div class="l">非词汇发声（oh/la 类）被 Whisper 删除的比例——即使给完美人声茎<sup class="cite" data-refid="21">[21]</sup> 🟢</div></div>
+      </div>
+      <div class="callout bad"><p><strong>重要矛盾点，如实呈现："先人声分离再 ASR 会更准"这个直觉是错的——裸分离可能反而劣化。</strong>早期社区报告称"分离后 Whisper 反而下降"；2025-06 的论文（arXiv 2506.15514）给出更细的结论：Whisper 对分离产生的噪声 artifacts 敏感，<strong>裸输入分离人声可能更差；配合 RMS-VAD 分段后分离才真正减少替换错误</strong><sup class="cite" data-refid="21">[21]</sup>。落地含义：管道里 VAD（静音切分）和分离要组合用，不是简单串联。另外 Whisper 系统性跳过"oh""la"等非词汇发声——对练歌场景这恰好常是高潮段落，校对界面必须让用户能手动补行。<span class="conf g">🟢</span></p></div>
+      <h3>词级时间戳：WhisperX 是当前默认答案</h3>
+      <p><strong>WhisperX</strong>（22.4k⭐，v3.8.6 / 2026-05-25，活跃维护）用 wav2vec2 强制对齐把词级时间戳精度做到 ±50ms（vanilla Whisper 只有 ±500ms）<sup class="cite" data-refid="22">[22]</sup>。学术对比里 MFA（Montreal Forced Aligner）在 ≤10ms 误差界内比 WhisperX 更准<sup class="cite" data-refid="23">[23]</sup>，但 MFA 对唱歌有致命缺陷：<strong>把 melisma（一字多音的连音）识别为静音</strong><sup class="cite" data-refid="24">[24]</sup>，唱歌场景直接出局。KTV 染色对 ±50ms 完全无感（人眼对字幕同步的容忍远高于此 ⚠️估算），WhisperX 够用。<span class="conf g">🟢</span></p>
+      <div class="trap-box"><strong>⚠️ 坑：stable-ts 已死，别用。</strong>这个曾经流行的词级时间戳库已于 2026-05-30 正式存档，仓库声明"Development indefinitely paused"<sup class="cite" data-refid="25">[25]</sup>。它曾经的卖点（含中文标点分割）现在由 WhisperX 覆盖。教程文章里还会大量推荐它——一律忽略。</div>
+      <h3>已知歌词时走强制对齐，显著优于裸 ASR</h3>
+      <p>练歌场景有一个巨大的作弊空间：<strong>歌词文本往往是已知的</strong>（网上搜得到、或用户自己粘贴）。已知文本 + 音频做 lyrics alignment 比裸 ASR 可靠得多（"可靠得多"的锚点是 LyricAlignment 论文条件下人声茎 CER 9.1%，见 Ch6——但在 BetterMe 自己的链路上提升多少需实测）：NUS AutoLyrixAlign 是 MIREX 2019 歌词对齐冠军<sup class="cite" data-refid="26">[26]</sup>（但仓库仅 7 commits、模型挂在 Google Drive、2020 年后无更新，能否开箱即用存疑 <span class="conf y">🟡</span>）；更实用的是 WhisperX 自身支持传入固定文本走 forced alignment 路径——注意这是 issue #1308 确认的用法而非官方文档化 API，按原型级能力对待，落地前用 5 首歌验证一遍时间戳质量<sup class="cite" data-refid="22">[22]</sup>。<strong>管道设计：有歌词文本 → WhisperX 对齐模式；没有 → Whisper 转录 + 人工校对。</strong></p>
+      <h3>端到端参考实现：karaoke-gen</h3>
+      <p><strong>nomadkaraoke/karaoke-gen</strong>（v0.176.2 / 2026-06-09 发布，1,592 commits，528 releases）是目前最活跃的端到端开源 karaoke 生成管道：Demucs/MDX 分离 → AudioShake API 或本地 Whisper（whisper-timestamped）词级时间戳 → Genius/Spotify 在线歌词校对 → 输出 MP4 4K / CDG+MP3 / LRC / ASS<sup class="cite" data-refid="28">[28]</sup>。本地 Whisper 路径明确支持 Apple Silicon。它的输出就包含 LRC——<strong>BetterMe 的提取管道可以直接对照它的源码搭，甚至先用它本体跑通流程再抽取需要的部分</strong>。<span class="conf g">🟢</span></p>
+      <h3>速度账：Mac Studio 单首歌全链路 1-3 分钟</h3>
+      <p>whisper.cpp + Metal 基准：M2 Pro ≈2.5× 实时、M4 ≈2.6×<sup class="cite" data-refid="29">[29]</sup>；large-v3-turbo（809M 参数 / 1.6GB）速度约为 large-v3 的 4-8 倍、精度接近<sup class="cite" data-refid="30">[30]</sup>。一首 4 分钟歌：large-v3 约 1.5 分钟，turbo 约 20-30 秒。加上 Demucs MLX 的十几秒，<strong>串行总时长 1-3 分钟（Mac Studio 推算 ⚠️估算）</strong>——做成"上传后台处理、完成后通知"的异步任务体验完全可接受。内存：Whisper large-v3 PyTorch 约 6GB RAM<sup class="cite" data-refid="21">[21]</sup>，加 Demucs 总占用 &lt;10GB。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6" data-nav="06 中文歌专项">
+    <h2><span class="num">06</span><span class="title-text">中文歌专项问题：没有基准、但有专项方案</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>阿杰练歌大概率中英文歌都有，中文歌是整条提取链路里证据最薄弱的一环，单独拆一章。</p>
+      <h3>问题 1：中文唱歌 ASR 未找到公开、可复现的实用基准</h3>
+      <p>Jam-ALT 基准只覆盖英/法/德/西/日<sup class="cite" data-refid="21">[21]</sup>。中文<em>演讲</em>的 Whisper large-v3 CER 约 2.9%（证据包数字，无独立 URL 来源 <span class="conf y">🟡</span>），但<strong>本次调研未找到 Whisper 系模型在中文流行歌真实场景上的公开可复现基准</strong>——最接近的是 MIR-1K 学术数据集上的 LyricAlignment 结果（见问题 3），它与"用户上传的真实 MV"在曲风、混音、年代上的差距未知。"中文歌 Whisper 错多少"这个问题目前没有现成答案，落地时只能自己实测。</p>
+      <h3>问题 2：WhisperX 的中文对齐不是内置的</h3>
+      <p>WhisperX 的 wav2vec2 强制对齐默认模型不含中文，需要自定义 <code>--align_model</code>，社区常用 <code>jonatasgrosman/wav2vec2-large-xlsr-53-chinese-zh-cn</code>（Hugging Face）<sup class="cite" data-refid="22">[22]</sup>。注意这是为<em>语音</em>训练的模型，对唱歌的对齐质量同样无基准 <span class="conf y">🟡</span>。另外 Gentle（Kaldi 系老牌对齐器）仅支持英文，中文歌直接排除。</p>
+      <h3>问题 3：中文有专项学术方案，但不是产品级工具</h3>
+      <div class="callout info"><p><strong>LyricAlignment</strong>（navi0105，ASRU 2023 论文实现）：基于 Whisper-medium 做普通话歌词转录 + 对齐，MIR-1K 数据集上字符错误率<strong>混合音 17.8%、人声茎 9.1%</strong><sup class="cite" data-refid="27">[27]</sup>。<span class="conf g">🟢</span> 这两个数字给了中文链路一个<strong>基准锚点</strong>：先分离出人声茎再做对齐，论文条件下中文字符错误率可到 10% 以内。但注意这是特定模型 + 特定数据集（MIR-1K）+ 特定任务的数字，<strong>不等于 BetterMe 的 Demucs + WhisperX + 用户随机上传歌曲能达到同样水平</strong>——它证明的是方向可行，预期值必须由 Ch14 实验 B 的本地实测给出。配合已知歌词的强制对齐模式，方向上足够支撑"AI 初稿 + 人工微调"的产品形态。</p></div>
+      <h3>中文还带来两个英文歌没有的工程细节</h3>
+      <p><strong>① 分词粒度：</strong>中文 KTV 染色按"字"而非"词"驱动（KRC 的设计就是逐字时长<sup class="cite" data-refid="65">[65]</sup>），Enhanced LRC 的角括号时间戳直接打在每个汉字前即可，反而比英文按词切分更规整。<strong>② 参考音高线：</strong>USDB 谱面库 18,000+ 首以英语/德语流行歌为主，中文覆盖率不明（推测极低 ⚠️估算）<sup class="cite" data-refid="35">[35]</sup>——中文歌的评分参考线基本只能靠 UltraSinger 自动生成（Ch9）。</p>
+      <div class="callout good"><p><strong>Ch6 结论：中文链路 = Demucs 人声茎 + 已知歌词 WhisperX 强制对齐（中文 wav2vec2 模型）+ 必配校对界面。</strong>第一周先拿 10 首常练的中文歌实测错误率，数字落地之前不要对"全自动"抱期望。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7" data-nav="07 伴奏四条路线">
+    <h2><span class="num">07</span><span class="title-text">伴奏场景四条路线：没有人声可对，时间戳必须外源引入</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>需求 (d) 的本质困境：<strong>纯伴奏里没有任何人声可做自动对齐</strong>。MIREX 歌词对齐任务的标准输入定义就是"混音演唱音频 + 歌词文本"，纯伴奏根本不在任务范围内<sup class="cite" data-refid="59">[59]</sup>。<span class="conf g">🟢</span> 所以"什么时候开口"的时间戳必须从外部来，四条路线按优先级排：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>优先级</th><th>路线</th><th>适用场景</th><th>难度</th><th>精度</th></tr></thead>
+        <tbody>
+          <tr><td>①</td><td><strong>LRClib API 直接拿现成 LRC</strong></td><td>主流（英文）歌</td><td>极低</td><td>行级~字级</td></tr>
+          <tr><td>②</td><td><strong>USDB 谱面</strong></td><td>有 UltraStar 谱的歌</td><td>低</td><td>音符级（最高）</td></tr>
+          <tr><td>③</td><td><strong>原唱分离对齐 → 偏移迁移到伴奏</strong></td><td>能搞到原唱音频</td><td>中</td><td>词级（~0.1s 误差 ⚠️估算）</td></tr>
+          <tr><td>④</td><td><strong>tap-to-sync 手动打点</strong></td><td>兜底全部情况</td><td>高（UX 成本）</td><td>用户自己控制</td></tr>
+        </tbody>
+      </table></div>
+      <h3>路线 ①：LRClib——免费、无 Key、无速率限制</h3>
+      <p>LRClib.net 是免费公开的同步歌词 API：2M+ 条目、无需 API Key、公共 API 无速率限制，返回 <code>syncedLyrics</code> 字段（LRC 逐行时间戳）<sup class="cite" data-refid="68">[68]</sup>。2025 年一次 5,000 首实测的成功率 97.5%<sup class="cite" data-refid="69">[69]</sup>——<strong>但注意这是英文曲库测试，且 LRClib 整体只覆盖约 8% 的数字音乐库（靠社区贡献），中文歌覆盖率大概率更低</strong>。<span class="conf g">🟢</span>（API 本身）/ <span class="conf y">🟡</span>（中文覆盖率未测）。集成成本接近零，永远先查它。</p>
+      <h3>路线 ②：USDB——音符级精度，还附送评分参考线</h3>
+      <p>usdb.animux.de 自 2009 年运营，18,000+ 首 UltraStar txt 谱面（最近更新 2024-11-20）<sup class="cite" data-refid="35">[35]</sup>。UltraStar 格式里 <code>#GAP</code> 字段直接就是"第一个音符前有多少毫秒空白"<sup class="cite" data-refid="62">[62]</sup>——<strong>这正是节奏引导要的核心数字</strong>；note 行还带音符音高，评分参考线一并解决。只存 TXT 不含音频，法律风险低。短板：中文歌覆盖极少，需用户自己匹配曲目。配套下载工具 usdb_syncer（168⭐）可自动同步谱面<sup class="cite" data-refid="58">[58]</sup>。<span class="conf g">🟢</span></p>
+      <h3>路线 ③：原唱迁移——技术上最有趣，但有未验证的风险点</h3>
+      <div class="step"><div class="step-head"><span class="sn">1</span>原唱 → htdemucs 分离人声</div><div class="step-body">SDR ~8-9 dB 的人声茎（Ch4）。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>人声茎 + 歌词 → WhisperX 强制对齐</div><div class="step-body">出词级时间戳（Ch5）。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>原唱 ↔ 用户伴奏 → audio-offset-finder 算偏移</div><div class="step-body">BBC 的 <code>audio-offset-finder</code>（v0.5.5 / 2024-06，Python 3.8-3.12）用 MFCC 跨相关算两段音频的时间偏移，典型精度 0.01 秒；相关峰 standard score &gt;10 可信、&lt;5 需人工复核<sup class="cite" data-refid="60">[60]</sup><sup class="cite" data-refid="61">[61]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>时间戳整体平移到伴奏时间轴</div><div class="step-body">完成。全程自动。</div></div>
+      <div class="callout bad"><p><strong>⚠️ 重要未验证点，如实呈现：这条路线的成功率没有专项数据。</strong>BBC 工具的 0.01s 精度是"同一段音频嵌在不同母带里"的场景<sup class="cite" data-refid="60">[60]</sup>；"原唱 vs 另行录制的商业伴奏"是声音内容差异大、只有节奏结构一致的场景，MFCC 跨相关在此场景的表现<strong>没有任何公开测试</strong>。理论上同源混音（原曲减人声的 minus-one 伴奏）应该工作，跨版本（重新编曲、变调、变速的伴奏）很可能 score &lt;5 直接失败。<span class="conf y">🟡</span> 落地策略：把 standard score 当置信门槛，低分自动降级到路线④，并在 UI 上明示"自动对齐置信度低，请手动校准"。</p></div>
+      <h3>路线 ④：tap-to-sync——不是耻辱柱，是商业平台的正规做法</h3>
+      <p>手动打点工具生态成熟：subtitletools 的 Timed Lyrics Editor 按 R 键逐行打时间戳<sup class="cite" data-refid="64">[64]</sup>；iOS 的 Karaoke Sync 支持逐字 tap + 波形微调 0.1s。别觉得手动丢人——<strong>全民K歌官方的用户上传伴奏流程，就是"系统自动匹配时间轴"失败后让用户单击鼠标或敲空格逐行标注</strong><sup class="cite" data-refid="66">[66]</sup>；Smule 的用户上传流程更是全手动 tap 对齐<sup class="cite" data-refid="44">[44]</sup>。商业平台的底层答案是闭源谱面库 + 手动兜底，不是实时音频魔法。<span class="conf g">🟢</span> BetterMe 的 tap 界面同时服务两个场景：伴奏路线④兜底 + 提取管道（Ch5-6）的校对界面——<strong>一个组件两处复用，这是整个产品里性价比最高的一个功能</strong>。</p>
+      <h3>明确不推荐：纯 beat tracking 推断开口时刻</h3>
+      <p>beat tracking（librosa / madmom）只能给出"节拍在哪"，给不出"歌词在哪个节拍开口"；librosa 的 beat 估计还有 0.02-0.06 秒系统性延迟<sup class="cite" data-refid="63">[63]</sup>。<span class="conf y">🟡</span> 它唯一的用途是 Ch8 的"前奏节拍闪烁"辅助 UI，不能当对齐手段。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8" data-nav="08 节奏引导交互">
+    <h2><span class="num">08</span><span class="title-text">节奏引导交互设计：倒计时、预亮、节拍闪烁三件套</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>拿到时间戳之后，"动态提示何时开口"是纯前端交互问题。行业现成模式三种，按信息量递增：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>模式</th><th>需要的数据</th><th>传递的信息</th><th>实现成本</th></tr></thead>
+        <tbody>
+          <tr><td><strong>进度条倒计时</strong>（"还有 N 秒开口"）</td><td>GAP 或首句时间戳</td><td>开口绝对时刻</td><td>极低</td></tr>
+          <tr><td><strong>节拍闪烁</strong>（beat indicator）</td><td>仅 beat tracking</td><td>节奏感（不知开口点）</td><td>低</td></tr>
+          <tr><td><strong>歌词预亮</strong>（下一句提前 1-2 拍淡入）</td><td>词/行级时间戳</td><td>开口时刻 + 内容预告</td><td>低</td></tr>
+        </tbody>
+      </table></div>
+      <p><strong>UltraStar 格式的 <code>#GAP</code> 字段（毫秒，首音符前空白时长）就是为倒计时设计的数据</strong><sup class="cite" data-refid="62">[62]</sup>；UltraStar Deluxe 社区从 2015 年就有人要求加 Rock Band 式开场倒计时（issue #417："有些歌没有前奏直接开唱——感觉很怪"）<sup class="cite" data-refid="67">[67]</sup>，Android 的 Glass_Karaoke 和 karaoke-for-jellyfin 都实现了 3 秒倒计时。商业 KTV 惯例是"前奏剩余 X 秒"进度条——<strong>具体秒数的行业标准值没有找到文档</strong>，推测 5-10 秒内显示为常见做法 ⚠️估算。<span class="conf y">🟡</span></p>
+      <div class="callout good"><p><strong>BetterMe 建议组合拳：</strong>① 前奏 &gt;5 秒时显示倒计时进度条（数据来自首句时间戳）；② 开口前 2 拍当前句淡入 + 首字上方加跳动小球（卡拉OK传统的 bouncing ball，本质就是预亮的变体）；③ 若该曲只有 beat 数据没有词级时间戳（路线④还没打完点），降级为节拍闪烁。三种模式共享同一个时间轴驱动器，增量成本各半天。⚠️估算</p></div>
+      <h3>逐句练习模式下的节奏引导有个隐藏福利</h3>
+      <p>逐句循环时播放器本来就知道"这句的 start 时间"，把 start 前 1-2 秒设为预备区、视觉倒数 3-2-1——这正是半米逐句跟读"播一句、停、跟读"节奏的歌唱版，交互骨架可以整个搬过来。⚠️估算（基于半米现有交互的推断，无外部来源）</p>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9" data-nav="09 USDX 评分拆解">
+    <h2><span class="num">09</span><span class="title-text">评分原理：把 UltraStar Deluxe 的算法拆到可以照抄</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>KTV 评分听起来玄学，拆开 USDX 源码（UNote.pas）之后是一套异常朴素的逻辑，四步：</p>
+      <div class="step"><div class="step-head"><span class="sn">1</span>实时检测用户音高（tone）</div><div class="step-body">USDX 用 Circular AMDF 算法（2019 年 PR #461 从自相关切换过来，"AMDF 与自相关相似但不同"）<sup class="cite" data-refid="32">[32]</sup>，纯 CPU 实时可跑。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>八度折叠（octave folding）</div><div class="step-body">比对前先把检测音高折算到参考音符 ±6 半音以内：<code>while (CurrentSound.Tone - CurrentLineFragment.Tone &gt; 6) do Tone := Tone - 12</code><sup class="cite" data-refid="31">[31]</sup>。<strong>这一行是整个评分体验的灵魂</strong>——男声唱女声歌（或反之）差一两个八度照样得分，否则评分对普通人毫无可玩性。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>按难度容忍偏差</div><div class="step-body">容忍带 <code>range = 2 − level</code>：简单难度差 2 个半音内算对，中等 1 个，困难必须全中<sup class="cite" data-refid="31">[31]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>计分</div><div class="step-body">每个命中音符得 <code>(MaxSongPoints / ScoreValue) × ScoreFactor[noteType]</code>——普通音符和黄金音符权重不同；音准总分上限 9000，另有 1000 分行完成奖励，合计 10000<sup class="cite" data-refid="31">[31]</sup>。<span class="conf g">🟢</span>（一手源码）</div></div>
+      <h3>参考音高线从哪来：两个来源</h3>
+      <p><strong>来源 A：USDB 谱面</strong>——18,000+ 首现成音符级谱面（Ch7），英文歌优先查它<sup class="cite" data-refid="35">[35]</sup>。<strong>来源 B：UltraSinger 自动生成</strong>——rakuri255/UltraSinger（598 commits，开发中）输入任意 MP3，内部跑 htdemucs 分离 → Whisper 转录 → SwiftF0 提取音高 → 输出 UltraStar txt 谱面<sup class="cite" data-refid="36">[36]</sup>。<span class="conf g">🟢</span> <strong>注意 UltraSinger 的管道和 BetterMe 的提取管道（Ch4-5）重叠度极高</strong>——同一次处理顺手把音高线也提了，评分数据几乎是提取管道的免费副产品。中文歌走来源 B（Ch6 已述 USDB 中文覆盖差）。<strong>但要防"坏参考线"失败模式</strong>：自动生成的参考线本身可能错（分离残留、转录错位、和声干扰），那评分系统会"理直气壮地冤枉唱对的人"——参考线应带置信度标记，低置信段落降级为参考性评分（不计入总分），并允许在 SyncEditor 里手动修音符/整体移调。⚠️估算（失败模式推演，无专项来源）</p>
+      <h3>对照：全民K歌的评分进化到了哪</h3>
+      <p>腾讯技术社区文章披露：全民K歌 1.0 只比对旋律匹配度（≈USDX 思路）；2.0 升级为基于参考音频的<strong>五维评分：音准、节奏、技巧、气息、情感</strong>，全部实时计算<sup class="cite" data-refid="34">[34]</sup>。<span class="conf y">🟡</span>（技术社区文章非官方文档，具体算法未核实）。这说明天花板很高，但对 BetterMe：音准 + 节奏两维（USDX 级别）已覆盖练歌反馈的 80% 价值 ⚠️估算，气息/情感属于"永远的 Phase N+1"。</p>
+      <h3>商用评分 API：基本指望不上</h3>
+      <p>对海外个人开发者：讯飞语音评测文档面向国内开发者（海外可用性无明确文档）；TME 无公开歌唱评测 API；ACRCloud 只做音乐识别没有评分产品线。唯一确认存在的是<strong>声网 Agora 的 KTV 歌词评分组件（逐行 100 分制）——但绑死在其 KaraokeView RTC SDK 内不能独立调用</strong>，按分钟计费（Voice Calling $0.99/1000 分钟，每月 10,000 分钟免费——定价为 2026-06-10 时点数据，SDK 打包方式和价格易变，真要用前需复核），文档显示可实现 IScoreAlgorithm 接口替换默认算法<sup class="cite" data-refid="40">[40]</sup>。<span class="conf y">🟡</span> 自用项目套一个 RTC SDK 纯属杀鸡用牛刀——自建 USDX 式评分是正解。</p>
+      <h3>学术视角的提醒</h3>
+      <p>2026 年 1 月的歌唱自动评估 30 年综述指出，该领域"缺乏标准化评估框架"是核心挑战<sup class="cite" data-refid="42">[42]</sup>——换句话说连学术界都没有"评分准不准"的统一标尺。<strong>给 BetterMe 的启示：评分的产品目标是"反馈一致、可感知进步"，不是"绝对准确"</strong>，USDX 这种朴素算法用了十几年恰恰证明了游戏化反馈不需要科研级精度。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10" data-nav="10 浏览器 pitch 检测">
+    <h2><span class="num">10</span><span class="title-text">浏览器端 pitch 检测：架构、库选型、逐句 vs 实时</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>标准架构：AudioWorklet + WASM，延迟 16-20ms</h3>
+      <p>浏览器实时 pitch 检测的标准架构已经定型：<strong>AudioWorklet</strong> 让音频处理脱离主线程、以 128 samples/帧接收音频；算法核心编译成 <strong>WASM</strong> 在 worklet 线程内跑；UI 以 60 FPS（≈16.7ms/帧）更新音高曲线<sup class="cite" data-refid="39">[39]</sup>。<span class="conf g">🟢</span> 两个完整实现验证过工程可行性：allkaraoke（纯 TypeScript 浏览器端）和 Frank Karaoke（Flutter）。</p>
+      <h3>算法/库选型：前后端分开选</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>位置</th><th>推荐</th><th>关键数字</th></tr></thead>
+        <tbody>
+          <tr><td><strong>浏览器实时</strong></td><td><strong>pitchy</strong>（npm v4.1.0，McLeod Pitch Method，纯 ES module）</td><td>为调音器类实时应用设计，适配 AudioWorklet<sup class="cite" data-refid="38">[38]</sup> 🟢</td></tr>
+          <tr><td><strong>浏览器实时（参考实现）</strong></td><td>YIN + 带通滤波 200-3500Hz + 自适应 RMS 基线（allkaraoke 的配方）</td><td>USDX 用 AMDF、Frank Karaoke 用 YIN（confidence 阈值 0.70）<sup class="cite" data-refid="33">[33]</sup><sup class="cite" data-refid="32">[32]</sup> 🟢</td></tr>
+          <tr><td><strong>后端离线（评分+谱面生成）</strong></td><td><strong>SwiftF0</strong>（2025 新模型，<code>pip install swift-f0</code>）</td><td>95,842 参数；CPU 处理 5 秒音频 132ms（≈26× 实时 ⚠️估算换算）；比 CREPE 快 42 倍；10dB SNR 下调和均值 91.8% vs CREPE ≈79%<sup class="cite" data-refid="37">[37]</sup> 🟢</td></tr>
+        </tbody>
+      </table></div>
+      <p>SwiftF0 有官方 live demo 页（swift-f0.github.io）暗示 Web 可行，但<strong>没有正式 WASM npm 包</strong>，浏览器端直接用它需自己编译，不值——浏览器用 pitchy、后端用 SwiftF0 的分工最省事。<span class="conf y">🟡</span>（WASM 版状态未实测）另外 RVC 社区的默认选择 RMVPE（噪声环境优于 CREPE，ONNX 支持 CPU/GPU）是后端备选。</p>
+      <h3>逐句评分 vs 实时逐字：再强调一次顺序</h3>
+      <div class="callout good"><p><strong>逐句模式（先做）：</strong>录完一句 → 上传后端 → SwiftF0 提取音高曲线 → DTW 对齐参考线 → 返回分数。没有实时线程、没有 WASM、没有延迟补偿，FastAPI 一个 endpoint 搞定。nightingale 和 allkaraoke 都验证了这条路线的完整可行性<sup class="cite" data-refid="41">[41]</sup><sup class="cite" data-refid="33">[33]</sup>。<strong>实时逐字模式（后做）：</strong>AudioWorklet + WASM + 低延迟算法 + 实时音高轨迹可视化全部同步，工程量约 3-5 倍 ⚠️估算。逐句模式还有个被低估的优点：它和"逐句练习"需求 (a) 是同一个交互——录一句、评一句、循环——<strong>评分是逐句练习的自然延伸而不是独立功能</strong>。</p></div>
+      <h3>录音链路的两个工程暗礁（证据包未覆盖，提前标记）</h3>
+      <p>⚠️估算（以下为工程常识提示，证据包无专项来源）：① <strong>回声/串音</strong>——用户外放伴奏 + 麦克风录音时，麦克风会录进伴奏本身，污染 pitch 检测；浏览器 <code>getUserMedia</code> 的 <code>echoCancellation</code> 约束对音乐场景效果有限，戴耳机是最简单的产品级解法（KTV App 全都提示戴耳机）。② <strong>播放-录音时钟偏移</strong>——评分时"用户第 N 毫秒唱的音"要对到"伴奏第 N 毫秒的参考音"，浏览器播放延迟 + 录音缓冲延迟合计可达几十毫秒且设备相关，逐句模式下建议加一次性"延迟标定"（播一声哔、录回来算环回延迟）。这两点在 Phase 5 动工前需要专项验证。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11" data-nav="11 竞品地图">
+    <h2><span class="num">11</span><span class="title-text">竞品地图：商业 K 歌、声乐教学、语言学习交叉品类</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>第一象限：商业 K 歌 App——有评分，无逐句练习，自传内容靠手动</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>产品</th><th>评分</th><th>逐句练习</th><th>用户自传内容</th><th>可信度</th></tr></thead>
+        <tbody>
+          <tr><td><strong>全民K歌 / WeSing</strong></td><td class="check y">✅ 行级反馈 + AI 练唱模式</td><td class="check n">⛔</td><td class="check n">⛔（曲库制）<sup class="cite" data-refid="43">[43]</sup></td><td>🟡 App 商店描述非技术文档</td></tr>
+          <tr><td><strong>Smule</strong></td><td class="check p">⚠️</td><td class="check n">⛔</td><td class="check y">✅ 但全手动：上传伴奏→粘歌词→敲空格逐行对时间戳<sup class="cite" data-refid="44">[44]</sup></td><td>🟢 官方帮助文档</td></tr>
+          <tr><td><strong>唱鸭</strong></td><td class="check n">⛔（弹唱/说唱社区，UGC 1.3 亿作品）</td><td class="check n">⛔</td><td class="check p">⚠️<sup class="cite" data-refid="45">[45]</sup></td><td>🟡</td></tr>
+          <tr><td><strong>StarMaker</strong></td><td class="check y">✅ 升级版演唱评分</td><td class="check n">⛔</td><td class="check p">⚠️ 可传录音，无自动字幕<sup class="cite" data-refid="46">[46]</sup></td><td>🟡</td></tr>
+        </tbody>
+      </table></div>
+      <p><strong>关键观察：Smule 的手动上传流程（tap 空格逐行对齐）就是 BetterMe 智能提取要自动化掉的那个流程</strong><sup class="cite" data-refid="44">[44]</sup>——大厂都没做自动提取。最合理的解释是 UGC 平台的版权模式不允许（自动提取等于鼓励上传侵权内容），但也不排除质量/审核成本、客服负担、需求量低等平凡原因 ⚠️估算（归因为推断，平台未公开说明）。无论哪种解释，自用工具都没有这些约束——这是个人项目的结构性优势。</p>
+      <h3>第二象限：声乐教学 App——有实时 pitch，无 KTV / 自传内容</h3>
+      <p><strong>Yousician</strong>：实时音准/节奏反馈，Premium+ 解锁 10,000+ 歌曲逐句跟唱（绿色=正确/红色=偏），有分段练习模式和"Chase the Notes"短旋律练习<sup class="cite" data-refid="47">[47]</sup>——<strong>它的逐句 pitch 可视化交互（音高块 + 实时轨迹线）是 BetterMe 评分 UI 最值得抄的参考</strong>。<span class="conf g">🟢</span> <strong>Singing Carrots</strong>：纯 Web 端实时 pitch 训练，即时可视化 + 积分榜<sup class="cite" data-refid="48">[48]</sup>，证明浏览器端方案产品级可行；SingSharp 的差异化是呼吸检测<sup class="cite" data-refid="49">[49]</sup>。三者都不支持用户自传歌曲。</p>
+      <h3>第三象限：语言学习 × 唱歌——全是填词游戏，没人做 pitch</h3>
+      <p><strong>LyricsTraining</strong>（13 种语言，填词游戏 + Karaoke 模式，无 pitch 检测）<sup class="cite" data-refid="53">[53]</sup>、<strong>Lirica</strong>（流行歌教语言，$7.99/月，拿过 Sony Music $1M 投资）<sup class="cite" data-refid="54">[54]</sup>、LingoClip（同类填空）——<strong>这个交叉品类里没有一家做"pitch 评分 + 逐句跟唱练习"</strong>。<span class="conf g">🟢</span>（产品页核实）"通过唱歌练语言/练歌"这个 BetterMe 定位附近接近空白。传闻中的 LingoTunes / SingLanguage 查无可靠产品页，可能不存在或已停运 <span class="conf r">🔴</span>。</p>
+      <h3>外包选项：商用分离/字幕 API 报价单</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">$15/月</div><div class="l">LALAL.AI Pro（250 分钟，公开 REST API，Phoenix 模型 vocals SDR ~10.4dB）<sup class="cite" data-refid="50">[50]</sup> 🟢</div></div>
+        <div class="metric"><div class="v">$9.99/月</div><div class="l">Youka Basic（100 积分≈20 首，REST API+CLI+SDK，上传音视频自动出 KTV 字幕）<sup class="cite" data-refid="52">[52]</sup> 🟢</div></div>
+        <div class="metric"><div class="v">$14.99/月起</div><div class="l">Kits.AI 人声分离 API（API 档具体限额未能获取）<sup class="cite" data-refid="51">[51]</sup> 🟢</div></div>
+        <div class="metric"><div class="v">仅合作伙伴</div><div class="l">Moises API（$9.99/月 Pro 是 App 价；API 开放状态存在矛盾信息，官网未明示）<sup class="cite" data-refid="50">[50]</sup> 🟡</div></div>
+      </div>
+      <p>Youka 是"最省力外包"路线：上传音视频直接吐同步歌词<sup class="cite" data-refid="52">[52]</sup>。但 Mac Studio 的本地算力让自建管道的边际成本为零、无月费无配额、数据不出门——<strong>对阿杰，商用 API 的合理角色是"自建管道出问题时的对照组"</strong>，不是主路线。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12" data-nav="12 开源深度借鉴">
+    <h2><span class="num">12</span><span class="title-text">开源项目地图 + nightingale / allkaraoke 深度借鉴点</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>开源 KTV 项目全景（数据均经 gh api 核实，2026-06-10）</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>项目</th><th>Stars</th><th>最新活动</th><th>技术栈</th><th>对 BetterMe 的借鉴点</th></tr></thead>
+        <tbody>
+          <tr><td><strong>nightingale</strong> ⭐</td><td>1,148</td><td>2026-06-08（v0.8.0）</td><td>TypeScript + Rust + Python</td><td>全管道架构参考（下详）<sup class="cite" data-refid="41">[41]</sup></td></tr>
+          <tr><td><strong>allkaraoke</strong> ⭐</td><td>233</td><td>2026-06-10</td><td>TypeScript（React+Vite+Tailwind）</td><td>纯浏览器 pitch 评分逻辑（下详）<sup class="cite" data-refid="33">[33]</sup></td></tr>
+          <tr><td><strong>UltraStar Deluxe</strong></td><td>1,200</td><td>2026-06（v2026.6.0）</td><td>Pascal</td><td>评分算法源码（Ch9 已拆）+ txt 谱面生态<sup class="cite" data-refid="31">[31]</sup></td></tr>
+          <tr><td>KaraokeEternal</td><td>821</td><td>2026-02（v2.0.2）</td><td>Node + React + SQLite</td><td>派对 KTV 系统，无 pitch/评分，参考价值低<sup class="cite" data-refid="55">[55]</sup></td></tr>
+          <tr><td>PiKaraoke</td><td>830</td><td>2026-03</td><td>Python + HTML</td><td>YouTube 下载播放；评分是随机数（非技术性），跳过<sup class="cite" data-refid="56">[56]</sup></td></tr>
+          <tr><td>Vocaluxe</td><td>334</td><td>2024-11（仅文档）</td><td>C#</td><td>SingStar 风格游戏化评分，桌面端，间接参考<sup class="cite" data-refid="57">[57]</sup></td></tr>
+          <tr><td>usdb_syncer</td><td>168</td><td>2026-02</td><td>Python + PyQt</td><td>USDB 谱面批量下载工具（路线②配套）<sup class="cite" data-refid="58">[58]</sup></td></tr>
+          <tr><td>karaoke-gen</td><td>—</td><td>2026-06-09（v0.176.2）</td><td>Python</td><td>提取管道端到端参考（Ch5 已述）<sup class="cite" data-refid="28">[28]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <h3>nightingale：服务端管道的参考答案</h3>
+      <div class="callout info"><p><strong>nightingale 完整实现了 BetterMe 需求 (b)(c)(e) 的并集</strong>：上传任意音频/视频 → UVR Karaoke Model（ONNX）分离人声 → WhisperX 词级时间戳 → 实时 pitch 检测评分 + 星级排行 → self-hosted web 模式，支持 CJK + 拼音/罗马字显示<sup class="cite" data-refid="41">[41]</sup>。<span class="conf g">🟢</span> 五个具体借鉴点：① 它选 WhisperX 而非 whisper-timestamped，与本报告 Ch5 结论互相印证；② UVR ONNX 推理证明"不装 GUI 用 UVR 模型"可行；③ CJK + 拼音渲染对中文歌直接相关；④ Rust 做实时音频、Python 做管道的分工思路（BetterMe 对应：浏览器 JS 实时 + FastAPI 管道）；⑤ <strong>动手前先自托管跑一周</strong>，它的体验就是 BetterMe Phase 2-3 的活原型——哪里不顺手，哪里就是 BetterMe 该做得不一样的地方。</p></div>
+      <h3>allkaraoke：浏览器端评分的参考答案</h3>
+      <div class="callout info"><p><strong>allkaraoke 证明了"零后端做 KTV 评分"在浏览器里完全可行</strong>：纯 TypeScript 实现 pitch 频率计算（带通滤波 200-3500Hz → YIN → confidence gate → 自适应 RMS 基线校准）、normal/star/rap 三类音符评分、还有 WebRTC 把手机变遥控麦克风的骚操作；React+Vite+Tailwind 部署在 Cloudflare Workers，2,679 commits，在线 demo 直接可玩<sup class="cite" data-refid="33">[33]</sup>。<span class="conf g">🟢</span> 对 BetterMe 的直接价值：它的技术栈和 BetterMe 前端几乎同构（React + TS），<strong>pitch 检测和评分模块的源码可以逐文件对照着抄</strong>；它的 UltraStar txt 解析器也现成。</p></div>
+      <h3>两个项目合起来 = BetterMe 的完整拼图</h3>
+      <p>nightingale 给服务端管道（FastAPI 这一半），allkaraoke 给浏览器端评分（Next.js 这一半），UltraSinger 给参考音高线生成，karaoke-gen 给 LRC 输出格式的工程惯例。<strong>四个仓库全部活跃（最旧的更新也在 2026 年内），全部开源可读</strong>——这个领域的开源成熟度显著高于预期，是本次调研最大的正面惊喜。</p>
+      <div class="trap-box"><strong>⚠️ 动手抄之前先做一次 license 体检（半小时省后患）：</strong>逐个确认四个仓库的开源协议、署名要求、copyleft 传染性（GPL 系协议下"逐文件对照着抄"可能把传染性带进 BetterMe，即使自用也影响以后开源/分发的自由度），以及它们依赖链里的模型权重许可（Demucs/Whisper 权重各有自己的 license）。证据包未覆盖各仓库的具体协议条款 <span class="conf y">🟡</span>，这一步必须自己查。另一个值得正经评估的选项：<strong>fork nightingale 加逐句练习功能 vs 自建</strong>——如果它的代码结构和协议都合适，fork 可能比从零搭管道更省；判断标准是"要加的功能（逐句循环/练习记录/卡片打通）侵入它核心架构的深度"。⚠️估算</div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13" data-nav="13 BetterMe 架构">
+    <h2><span class="num">13</span><span class="title-text">BetterMe 技术架构建议：嵌入现有 Next.js + FastAPI</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>BetterMe 现状：Next.js 前端（:3003）+ FastAPI 后端（:8000）+ LanceDB，跑在 Mac Studio 上自用。练歌模块的分工按"实时性"切：<strong>毫秒级的归浏览器，分钟级的归 FastAPI</strong>。</p>
+      <h3>FastAPI 后端：一条异步提取管道 + 一个评分 endpoint</h3>
+      <div class="step"><div class="step-head"><span class="sn">1</span><code>POST /songs/ingest</code>（异步任务）</div><div class="step-body">收 MV/音频文件 → ffmpeg 抽音轨 → Demucs htdemucs_ft（MLX）分离 → 有歌词文本则 WhisperX 强制对齐（中文挂 <code>jonatasgrosman/wav2vec2-large-xlsr-53-chinese-zh-cn</code>），无文本则 Whisper large-v3-turbo 转录 + 对齐 → 生成 Enhanced LRC + 按行切句的句卡数据 → 同一次顺手跑 SwiftF0 出参考音高线（UltraStar txt 风格存储）。单首 1-3 分钟 ⚠️估算。任务管理别用裸 FastAPI BackgroundTasks 长期跑——进程一死任务就无影无踪、没有进度/重试/恢复；正确姿势是「任务表（含状态/进度/错误）+ 单 worker 进程」，自用场景不需要 Celery 那么重，但持久化任务记录从第一天就要有。⚠️估算（工程判断）依赖：<code>demucs</code>（MLX 版）、<code>whisperx</code>、<code>swift-f0</code>、<code>ffmpeg</code>。内存峰值 &lt;10GB<sup class="cite" data-refid="21">[21]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span><code>POST /songs/{id}/score-line</code>（同步）</div><div class="step-body">收一句录音（webm/wav）→ SwiftF0 提取音高曲线（5 秒音频 132ms<sup class="cite" data-refid="37">[37]</sup>）→ 八度折叠 + 容忍带 + DTW 对齐参考线（USDX 逻辑，Ch9）→ 返回分数 + 音高曲线数据（前端画对比图）。响应 &lt;1 秒。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span><code>GET /lyrics/search</code>（外源歌词）</div><div class="step-body">代理 LRClib API（免 Key 免限流<sup class="cite" data-refid="68">[68]</sup>）+ 可选 USDB 查询；伴奏场景的路线①②入口。原唱迁移（路线③）作为 ingest 的一个模式：传"原唱+伴奏"两个文件，后端跑 audio-offset-finder 出偏移<sup class="cite" data-refid="60">[60]</sup>，score &lt;5 时返回"需手动校准"标记。</div></div>
+      <h3>Next.js 前端：四个组件</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>组件</th><th>职责</th><th>技术</th></tr></thead>
+        <tbody>
+          <tr><td><strong>KaraokeRenderer</strong></td><td>KTV 染色 + 滚动</td><td>liricle 解析/同步 + CSS ::after 宽度动画 + scrollIntoView（Ch3）</td></tr>
+          <tr><td><strong>SentencePractice</strong></td><td>逐句循环：播一句→录→回放→评分</td><td>半米交互移植 + MediaRecorder + score-line endpoint</td></tr>
+          <tr><td><strong>SyncEditor</strong></td><td>tap-to-sync 打点 + AI 结果校对</td><td>按键打点（参考 subtitletools 的 R 键模式<sup class="cite" data-refid="64">[64]</sup>）+ 波形微调；一个组件服务路线④兜底和提取校对两个场景</td></tr>
+          <tr><td><strong>PitchVisualizer</strong>（Phase 后期）</td><td>实时音高轨迹 vs 参考线</td><td>pitchy + AudioWorklet（Ch10），UI 抄 Yousician 音高块</td></tr>
+        </tbody>
+      </table></div>
+      <h3>数据模型：歌卡是 single source of truth，LRC 只是导出视图</h3>
+      <p>每首歌一张"歌卡"（对齐 BetterMe 现有的卡片模型 ⚠️估算——具体以现有 schema 为准）：元信息 + 句列表（start/end/文本/逐字时间戳/<strong>提取置信度/来源标记（AI 提取 or 人工校对 or LRClib）/编辑版本</strong>）+ 参考音高线段 + 用户练习记录（每句最近 N 次得分，天然支持"哪句最弱练哪句"）。Enhanced LRC / UltraStar txt 都从歌卡按需导出生成，不反向当存储。音频/视频文件留文件系统，数据库只存路径 + 文件 hash（重复上传去重、重处理时知道源文件有没有变）——和半米的本地文件模式一致。练歌歌卡是纯结构化数据，若 LanceDB 用着别扭（它的主场是向量检索），元数据退到 SQLite 也只是半天的事 ⚠️估算。<strong>本地服务卫生三件套</strong>：服务绑 127.0.0.1、上传做大小/类型校验、临时文件（分离出的 stem、转码中间件）定期清理。⚠️估算（工程常识）</p>
+      <div class="trap-box"><strong>⚠️ 版权提醒（自用红线）：</strong>上传的 MV / 原唱 / 伴奏全部留在本地 Mac Studio、不对外提供访问，是这个模块版权安全的全部前提。BetterMe 保持单用户自用、不做分享/导出功能，性质等同于"自己给自己做练习笔记"。一旦未来想开放给他人用，Ch11 里 Smule/全民K歌全靠曲库授权 + UGC 协议的原因就会立刻变成你的问题——那是完全不同量级的合规工程，本报告所有建议均以"自用"为前提。⚠️（法律定性为常识判断，非法律意见）</div>
+    </div>
+  </section>
+
+  <!-- ===== CH14 ===== -->
+  <section class="chapter" id="ch14" data-nav="14 分阶段路线图">
+    <h2><span class="num">14</span><span class="title-text">分阶段路线图：五个 phase，每个都独立可验证</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>按阿杰的 phase by phase 习惯排列，每个 phase 结束都有一个能用的东西。工作量均为 ⚠️估算（按"熟练个人开发者 + AI 辅助"口径）：</p>
+      <div class="step"><div class="step-head"><span class="sn">P1</span>逐句练习 MVP（2-4 天）</div><div class="step-body"><strong>做：</strong>半米逐句跟读交互移植 + 手动/LRClib 行级 LRC + ffmpeg 抽音轨 + MediaRecorder 录音回放（不评分）。<strong>录音链路的兼容性验证放在 P1 而不是 P5</strong>：mic 权限首次请求的 UX、Safari 的 MediaRecorder 格式支持、蓝牙/有线设备切换——这些坑在"录音回放"功能里就会暴露，别等评分时才发现 ⚠️估算。<strong>验收：</strong>拿一首 LRClib 有词的英文歌，能逐句循环跟唱并回放自己的录音。<strong>价值：</strong>核心练习闭环最快上线，后面所有 phase 都往这个骨架上挂。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">P2</span>智能提取管道（1-2 周）</div><div class="step-body"><strong>做：</strong>ingest 管道（Demucs MLX + WhisperX）+ SyncEditor 校对界面。<strong>第一天先跑两个基准实测：</strong>① M2 Ultra 的 Demucs/Whisper 真实速度；② 10 首常练中文歌的提取错误率（Ch6 的未知数，门槛见下方实验 B）。<strong>验收：</strong>上传一个 MV，5 分钟内出可校对的逐句歌词（"3 分钟"以实验 A 实测为准），校对后进 P1 的练习流程。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">P3</span>KTV 模式（3-5 天）</div><div class="step-body"><strong>做：</strong>KaraokeRenderer（liricle + CSS ::after + 滚动）+ 词级 Enhanced LRC 接 P2 输出。<strong>验收：</strong>全民K歌式逐字染色 + 平滑滚动，整首连唱模式可用。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">P4</span>伴奏节奏引导（3-5 天）</div><div class="step-body"><strong>做：</strong>四路线降级链（LRClib → USDB → 原唱迁移 → tap）+ 倒计时/预亮三件套（Ch8）。原唱迁移那条先用 2-3 首歌验证 audio-offset-finder 的跨版本成功率（Ch7 的未知数）——失败就果断砍掉，靠①②④活。<strong>验收：</strong>上传一个纯伴奏，能在正确时刻提示开口。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">P5</span>逐句评分（1-2 周）</div><div class="step-body"><strong>做：</strong>score-line endpoint（SwiftF0 + 八度折叠 + DTW）+ 参考线生成（UltraSinger 思路并入 P2 管道）+ 句末分数/音高对比图 UI。动工前先做 Ch10 说的延迟标定和耳机提示。<strong>验收：</strong>逐句录音出分，分数对"故意唱跑调"敏感、对"换八度唱"不敏感。<strong>实时逐字评分（P6+）：</strong>等 P5 用顺了再说，allkaraoke 源码到时候直接抄。</div></div>
+      <div class="callout good"><p><strong>总量级：全部五个 phase 约 5-8 周个人开发时间 ⚠️估算。</strong>P1 和 P3 之间、P4 和 P5 之间没有依赖，顺序可按兴趣调换；唯一的硬依赖是 P2 → P3（词级染色需要词级时间戳）和 P2 → P5（评分参考线来自提取管道）。</p></div>
+      <div class="check-box">
+        <strong>① 开工第一周的三个验证实验</strong>（每个半天，决定后面所有计划的置信度；<strong>每个实验带 go/no-go 门槛</strong>，不达标就改路线而不是硬扛）：<br>
+        <strong>实验 A</strong>：M2 Ultra 跑 demucs-mlx + whisper.cpp 基准，得到真实速度数字（替换本报告所有 ⚠️ 推算）。<em>门槛：单首全链路 &gt;10 分钟 ⇒ 异步体验崩，查瓶颈或换 turbo/小模型。</em><br>
+        <strong>实验 B</strong>：10 首中文歌过 WhisperX 强制对齐，人工数错误率 + 记录每首校对耗时（10 首是冒烟测试，过门槛后再扩到 30+ 首按曲风/年代分层才算基准 ⚠️估算）。<em>门槛：平均每首校对时间 &gt; 纯手动 tap 打点时间 ⇒ 提取管道对中文歌降级为"可选辅助"，主路线改 tap。</em><br>
+        <strong>实验 C</strong>：自托管 nightingale 跑 3 首歌（中英文各有），体验它的完整流程，记录"哪里不顺手"清单 + 顺手查它的 license（Ch12）。<em>门槛：如果体验已覆盖 80% 需求且协议允许 ⇒ 认真评估 fork 而不是自建。</em>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH15 ===== -->
+  <section class="chapter" id="ch15" data-nav="15 路线决策树">
+    <h2><span class="num">15</span><span class="title-text">阿杰路线决策树：四个问题定完整方案</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="tree">
+        <div class="node q">Q1 · 歌的素材是什么形态？</div>
+        <div class="node"><span class="lbl y">MV / 原唱音频</span>✅ 走提取管道（P2）：分离→对齐→词级 LRC，全自动 + 校对兜底</div>
+        <div class="node"><span class="lbl m">纯伴奏</span>⚠️ 走外源四路线（P4）：LRClib → USDB → 原唱迁移 → tap 打点</div>
+        <div class="node"><span class="lbl m">只有歌词文本没有时间戳</span>⚠️ 找到原唱就回到提取管道（强制对齐模式，比裸 ASR 准）；找不到就 tap</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q2 · 这首是中文歌还是英文歌？</div>
+        <div class="node"><span class="lbl y">英文</span>✅ 全链路证据充分：LRClib 命中率高、Jam-ALT 有基准、USDB 有谱面</div>
+        <div class="node"><span class="lbl m">中文</span>⚠️ 提取挂中文 wav2vec2 对齐模型 + 默认进校对界面；参考音高线只能 UltraSinger 自动生成；对自动化期望调低一档</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q3 · 这个 phase 要不要做评分？</div>
+        <div class="node"><span class="lbl y">先不做（P1-P4）</span>✅ 逐句循环 + KTV 染色 + 节奏引导已覆盖练歌核心价值</div>
+        <div class="node"><span class="lbl y">做逐句评分（P5）</span>✅ SwiftF0 + USDX 算法，后端一个 endpoint，无实时复杂度</div>
+        <div class="node"><span class="lbl n">做实时逐字评分</span>⛔ 现在不做——工程量 3-5 倍，等 P5 验证"评分真的有用"之后再上</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q4 · 自建管道还是外包 API？</div>
+        <div class="node"><span class="lbl y">自建（Demucs MLX + WhisperX 本地）</span>✅ Mac Studio 算力免费、无配额、数据不出门——默认选它</div>
+        <div class="node"><span class="lbl m">Youka / LALAL API</span>⚠️ 只在两种情况用：自建质量出问题时当对照组；或者某天在没有 Mac Studio 的环境跑</div>
+      </div>
+      <h3>一句话版本</h3>
+      <div class="callout accent"><p><strong>先把半米的逐句跟读骨架搬过来（P1），第一周跑完三个验证实验（实测速度 / 中文错误率 / nightingale 体验），然后按 P2 提取 → P3 KTV → P4 伴奏 → P5 评分的顺序，每个 phase 一个沟通日志一个验收标准。全程零云依赖、零月费，5-8 周量级 ⚠️估算。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq" data-nav="FAQ 常见问题">
+    <h2><span class="num">FAQ</span><span class="title-text">常见问题</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">能不能直接解析全民K歌/酷狗的 KRC 文件，省掉自己提取？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不建议。KRC/QRC 是压缩 + 字节混淆的加密私有格式，无公开规范，腾讯明确表示不支持转换<sup class="cite" data-refid="3">[3]</sup>；社区解析代码全是逆向产物，随时失效。而且获取 KRC 文件本身就要从酷狗客户端缓存里抠，来源不稳定。它唯一的价值是"行+字两级时长"的数据模型思想<sup class="cite" data-refid="65">[65]</sup>，这个 Enhanced LRC 同样能表达。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">上传 MV 自己处理，有版权问题吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>分层看，且声明在先：<strong>以下是工程师的风险排序，不是法律意见。</strong>① <strong>MV/音频文件本身</strong>：自用、单用户、留在本地、不分发——暴露面接近零，是各层里风险最低的；② <strong>歌词文本</strong>：歌词本身有独立版权，从网上抓取存进自己数据库自用，风险同样低但不是零；③ <strong>生成的派生数据</strong>（LRC 时间轴、音高线）：基于受版权保护作品生成的衍生数据，自用无人主张，但不要公开分发；④ <strong>真正的红线是对外提供任何一层</strong>——一旦做分享、多用户、公网访问，就进入 Smule/全民K歌靠曲库授权 + UGC 协议解决的领域（Ch13 trap-box），合规量级完全不同。实操纪律：不做导出/分享功能、服务只绑本机、备份也别同步到公开仓库。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">Whisper 识别出来的歌词错一堆怎么办？</span><span class="toggle">＋</span></div><div class="faq-a"><p>两层解法：① 优先走"已知歌词 + 强制对齐"而不是裸转录——歌词文本网上几乎都搜得到，WhisperX 支持固定文本对齐模式<sup class="cite" data-refid="22">[22]</sup>，错误率显著低于裸 ASR（论文锚点：中文人声茎字符错误率 9.1%<sup class="cite" data-refid="27">[27]</sup>——特定数据集数字，BetterMe 链路需实测）；② SyncEditor 校对界面是产品的一等公民，AI 出初稿、人修终稿——商业平台（全民K歌）的兜底方案也是手动标注<sup class="cite" data-refid="66">[66]</sup>。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">为什么不用 HTML5 &lt;track&gt; + WebVTT，那不是浏览器原生的吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>原生但残废：<code>::cue-region</code> 全浏览器不支持<sup class="cite" data-refid="10">[10]</sup>，<code>:past</code>/<code>:future</code> 伪类非 Chromium 支持不完整，且时间精度不保证、做不了连续扫色动画——W3C 自己的 Karaoke 模块规范都承认这一点<sup class="cite" data-refid="6">[6]</sup>。生产级 KTV 效果必须 JS 自控时间轴 + 自绘（Ch2-3）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">评分需要 GPU 吗？会不会很吃机器？</span><span class="toggle">＋</span></div><div class="faq-a"><p>完全不需要。后端 SwiftF0 只有 95,842 个参数，CPU 处理 5 秒音频 132ms<sup class="cite" data-refid="37">[37]</sup>；浏览器端 pitchy 是为实时调音器设计的纯 JS 库<sup class="cite" data-refid="38">[38]</sup>。评分是整个模块里最轻的计算，重的是提取管道（Demucs + Whisper），而那个也只是分钟级离线任务。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">浏览器录音的延迟会不会把评分搞砸？</span><span class="toggle">＋</span></div><div class="faq-a"><p>逐句模式天然容忍：整句录完再评，只要知道录音相对伴奏的固定偏移即可。建议加一次性延迟标定（播一声哔、录回来算环回延迟）⚠️估算（工程常识，证据包无专项来源）。真正的敌人是外放串音——伴奏被麦克风录进去会污染 pitch 检测，最省事的产品解法是提示戴<strong>有线</strong>耳机（所有 KTV App 都提示戴耳机；蓝牙耳机自带几十到上百毫秒且不稳定的额外延迟，评分场景要么提示换有线、要么把延迟标定做成每设备一次）；坚持外放时把评分降级为"参考性提示"而非计分。实时逐字模式对延迟敏感得多（AudioWorklet 链路 16-20ms<sup class="cite" data-refid="39">[39]</sup>），这也是它排在 P6+ 的原因之一。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">中文歌的参考音高线哪里来？USDB 上找不到中文歌。</span><span class="toggle">＋</span></div><div class="faq-a"><p>对，USDB 18,000+ 首以英语/德语流行歌为主<sup class="cite" data-refid="35">[35]</sup>，中文覆盖推测极低。中文歌走 UltraSinger 的思路：原唱 → htdemucs 分离 → SwiftF0 提取人声音高 → 自动生成 UltraStar 式谱面<sup class="cite" data-refid="36">[36]</sup>。BetterMe 的提取管道（P2）本来就要跑分离，顺手把音高线也提了——评分参考线几乎是免费副产品（Ch9）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">直接自托管 nightingale 不就完了，为什么还要自建？</span><span class="toggle">＋</span></div><div class="faq-a"><p>确实应该先自托管跑一周（P1 前的实验 C）——它免费验证了整条技术路线。但它是"K 歌派对"产品：没有逐句循环精练、没有练习记录/弱句追踪、不和 BetterMe 的卡片/复习体系打通。BetterMe 练歌模块的差异化恰恰在"练"而不在"唱"<sup class="cite" data-refid="41">[41]</sup>。正确用法：nightingale 当架构参考和体验基准，代码按需借鉴（注意它的开源协议条款），产品自己做。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">LRClib 对中文歌的覆盖率怎么样？</span><span class="toggle">＋</span></div><div class="faq-a"><p>未知，且大概率不乐观。97.5% 成功率的实测来自英文曲库（5,000 首测试）<sup class="cite" data-refid="69">[69]</sup>，而 LRClib 整体只覆盖约 8% 的数字音乐库、靠社区贡献<sup class="cite" data-refid="69">[69]</sup>。中文同步歌词的社区生态在 KRC/QRC 私有格式那边（Ch2），开放生态薄弱。实操：查询成本为零所以永远先查，查不到不意外，降级到提取管道或 tap。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">Demucs 和 Whisper 在我的 Mac Studio 上到底要跑多久？</span><span class="toggle">＋</span></div><div class="faq-a"><p>诚实回答：没有 M2 Ultra 的直接实测数据，只有 M4 Max（Demucs MLX 34× 实时<sup class="cite" data-refid="18">[18]</sup>）和 M2 Pro（whisper.cpp 2.5× 实时<sup class="cite" data-refid="29">[29]</sup>）的数字。按此推算一首 4 分钟歌全链路 1-3 分钟 ⚠️估算。P2 第一天的实验 A 就是去拿真实数字——半天工作量，值得。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">实时逐字评分（全民K歌那种边唱边亮星星）到底什么时候做？</span><span class="toggle">＋</span></div><div class="faq-a"><p>等两个条件同时满足：① P5 的逐句评分被你真实用了一个月以上（证明评分对练习有用，而不是新鲜三天）；② P3 的 KTV 渲染稳定（实时评分的可视化要叠在它上面）。届时 allkaraoke 的浏览器端实现（YIN + AudioWorklet + 评分分类）可以逐文件对照移植<sup class="cite" data-refid="33">[33]</sup>。在那之前它是典型的"工程量 3-5 倍换体验提升 20%"⚠️估算。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q12</span><span class="qtext">什么情况下应该放弃自建、改用 Youka 这类商用 API？</span><span class="toggle">＋</span></div><div class="faq-a"><p>三个信号：① 实验 B 显示中文歌提取错误率高到校对成本超过手动打点（那提取管道的价值就崩了）；② 自建管道维护成本失控（依赖更新、模型失效频繁）；③ 需要在 Mac Studio 之外的环境用。Youka $9.99/月约 20 首<sup class="cite" data-refid="52">[52]</sup>、LALAL $15/月 250 分钟<sup class="cite" data-refid="50">[50]</sup>——按月练 10-20 首新歌的量，外包年成本一百多美元，不算贵，但失去了数据本地化和无限重跑的自由。先自建，留着这条退路。</p></div></div>
+    </div>
+  </section>
+
+  <!-- ===== REFERENCES ===== -->
+  <section class="chapter" id="refs" data-nav="References">
+    <h2><span class="num">≡</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+    <div class="chapter-body"><ol class="ref-list">
+      <li id="ref-1"><a href="https://www.quicklrc.com/subtitle-formats/enhanced-lrc" target="_blank" rel="noopener">Enhanced LRC Format Guide — quickLRC</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-2"><a href="https://easylrc.com/blog/enhanced-lrc-word-level-timing-guide-2026" target="_blank" rel="noopener">How to Create Enhanced LRC Files with Word Level Timing in 2026 — easyLRC</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-3"><a href="https://shansing.com/read/392/" target="_blank" rel="noopener">初步分析 LRC、TRC、KRC、QRC 歌词格式 — shansing</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-4"><a href="https://topic.alibabacloud.com/a/introduction-to-lyrics-files-lrc-qrc-and-krc_32206325.html" target="_blank" rel="noopener">Introduction to lyrics files (LRC, qrc, and KRC) — Alibaba Cloud Topic</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-5"><a href="https://github.com/amll-dev/amll-ttml-db/blob/main/instructions/ttml-specification-en.md" target="_blank" rel="noopener">AMLL TTML Specification — amll-dev/amll-ttml-db</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-6"><a href="https://w3c.github.io/tt-module-karaoke/" target="_blank" rel="noopener">TTML Karaoke Extension Module — W3C</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-7"><a href="https://aegisub.org/docs/latest/ass_tags/" target="_blank" rel="noopener">ASS Override Tags — Aegisub Documentation</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-8"><a href="https://developer.mozilla.org/en-US/docs/Web/API/WebVTT_API/Web_Video_Text_Tracks_Format" target="_blank" rel="noopener">WebVTT: Web Video Text Tracks Format — MDN</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-9"><a href="https://easylrc.com/blog/webvtt-format-technical-guide" target="_blank" rel="noopener">WebVTT Format Technical Guide 2026 — easyLRC</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-10"><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/::cue" target="_blank" rel="noopener">::cue — MDN CSS Reference</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-11"><a href="https://tympanus.net/codrops/2015/02/16/create-animated-text-fills/" target="_blank" rel="noopener">Create Animated Text Fills — Codrops</a><span class="ref-meta">· 访问 2026-06-10 · 引用 4 次</span></li>
+      <li id="ref-12"><a href="https://cs310.hashnode.dev/build-an-auto-karaoke-system-with-react-and-vercel" target="_blank" rel="noopener">Build an Auto Karaoke System with React and Vercel — cs310 (主 URL 429，内容来自搜索摘要)</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-13"><a href="https://github.com/Steve-xmh/applemusic-like-lyrics" target="_blank" rel="noopener">applemusic-like-lyrics (AMLL) — GitHub</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-14"><a href="https://amll.dev/en/guides/lyric/formats.html" target="_blank" rel="noopener">Supported Lyric Formats — AMLL 官方文档</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-15"><a href="https://github.com/mcanam/liricle" target="_blank" rel="noopener">liricle: LRC parser &amp; synchronizer — GitHub</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-16"><a href="https://aistemsplitter.org/blog/htdemucs-vs-bs-roformer-vs-spleeter-2026-benchmark" target="_blank" rel="noopener">htdemucs vs BS-RoFormer vs Spleeter: A 2026 Benchmark — aistemsplitter</a><span class="ref-meta">· 访问 2026-06-10 · 引用 5 次</span></li>
+      <li id="ref-17"><a href="https://arxiv.org/abs/2309.02612" target="_blank" rel="noopener">Music Source Separation with Band-Split RoPE Transformer (BS-RoFormer) — arXiv 2309.02612</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-18"><a href="https://medium.com/@andradeolivier/i-ported-demucs-to-apple-silicon-it-separates-a-7-minute-song-in-12-seconds-6c4e5cffb5c3" target="_blank" rel="noopener">I Ported Demucs to Apple Silicon — Medium</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-19"><a href="https://github.com/ssmall256/demucs-mlx" target="_blank" rel="noopener">demucs-mlx — GitHub</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-20"><a href="https://vocalremover.cloud/blog/uvr-best-model-aug-2025" target="_blank" rel="noopener">UVR Best Model (Aug 2025) — vocalremover.cloud</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-21"><a href="https://arxiv.org/html/2506.15514v1" target="_blank" rel="noopener">Exploiting Music Source Separation for Automatic Lyrics Transcription with Whisper — arXiv 2506.15514</a><span class="ref-meta">· 访问 2026-06-10 · 引用 11 次</span></li>
+      <li id="ref-22"><a href="https://github.com/m-bain/whisperX" target="_blank" rel="noopener">WhisperX — GitHub (m-bain)</a><span class="ref-meta">· 访问 2026-06-10 · 引用 5 次</span></li>
+      <li id="ref-23"><a href="https://arxiv.org/pdf/2406.19363" target="_blank" rel="noopener">Tradition or Innovation: Comparison of ASR Methods for Forced Alignment — arXiv 2406.19363</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-24"><a href="https://arxiv.org/html/2409.14619v2" target="_blank" rel="noopener">SongTrans (ISMIR) — arXiv 2409.14619</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-25"><a href="https://github.com/jianfch/stable-ts" target="_blank" rel="noopener">stable-ts（2026-05-30 已存档）— GitHub</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-26"><a href="https://github.com/chitralekha18/AutoLyrixAlign" target="_blank" rel="noopener">AutoLyrixAlign (NUS, MIREX 2019 winner) — GitHub</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-27"><a href="https://github.com/navi0105/LyricAlignment" target="_blank" rel="noopener">LyricAlignment: Mandarin lyric transcription &amp; alignment (ASRU 2023) — GitHub</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-28"><a href="https://github.com/nomadkaraoke/karaoke-gen" target="_blank" rel="noopener">karaoke-gen — GitHub (nomadkaraoke)</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-29"><a href="https://justvoice.ai/blog/whisper-benchmark-apple-silicon-m3-m4" target="_blank" rel="noopener">Whisper Benchmark on Apple Silicon M1→M4 — justvoice.ai</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-30"><a href="https://metawhisp.com/blog/whisper-large-v3-turbo/" target="_blank" rel="noopener">What Is Whisper large-v3-turbo — metawhisp</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-31"><a href="https://github.com/UltraStar-Deluxe/USDX/blob/master/src/base/UNote.pas" target="_blank" rel="noopener">UNote.pas（评分核心源码）— UltraStar-Deluxe/USDX</a><span class="ref-meta">· 访问 2026-06-10 · 引用 5 次</span></li>
+      <li id="ref-32"><a href="https://github.com/UltraStar-Deluxe/USDX/pull/461" target="_blank" rel="noopener">Enhancement of pitch detection algorithm (AMDF) — USDX PR #461</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-33"><a href="https://github.com/Asvarox/allkaraoke" target="_blank" rel="noopener">AllKaraoke — GitHub (Asvarox)</a><span class="ref-meta">· 访问 2026-06-10 · 引用 5 次</span></li>
+      <li id="ref-34"><a href="https://aijishu.com/a/1060000000403471" target="_blank" rel="noopener">音频品鉴与歌唱评价 — 音频内容理解实践（全民K歌评分）— 极术社区</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-35"><a href="https://usdb.animux.de/" target="_blank" rel="noopener">USDB — UltraStar Song Database</a><span class="ref-meta">· 访问 2026-06-10 · 引用 4 次</span></li>
+      <li id="ref-36"><a href="https://github.com/rakuri255/UltraSinger" target="_blank" rel="noopener">UltraSinger: AI 自动生成 UltraStar 谱面 — GitHub</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-37"><a href="https://arxiv.org/abs/2508.18440" target="_blank" rel="noopener">SwiftF0: Fast and Accurate Monophonic Pitch Detection — arXiv 2508.18440</a><span class="ref-meta">· 访问 2026-06-10 · 引用 4 次</span></li>
+      <li id="ref-38"><a href="https://github.com/ianprime0509/pitchy" target="_blank" rel="noopener">pitchy: McLeod Pitch Method in JS — GitHub</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-39"><a href="https://www.musicalboard.com/blog/2026-05-05-pitch-detection/" target="_blank" rel="noopener">How Browser-Based Pitch Detection Works — musicalboard</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-40"><a href="https://doc.shengwang.cn/doc/online-ktv/android/ktv-scenario/advanced-features/lyrics-scoring" target="_blank" rel="noopener">歌词打分组件 — 声网 Agora Online KTV 文档</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-41"><a href="https://github.com/rzru/nightingale" target="_blank" rel="noopener">nightingale v0.8.0 — GitHub (rzru)</a><span class="ref-meta">· 访问 2026-06-10 · 引用 6 次</span></li>
+      <li id="ref-42"><a href="https://arxiv.org/abs/2601.12153" target="_blank" rel="noopener">Survey on 30+ Years of Automatic Singing Assessment — arXiv 2601.12153</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-43"><a href="https://play.google.com/store/apps/details?id=com.tencent.wesing" target="_blank" rel="noopener">WeSing（全民K歌国际版）— Google Play</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-44"><a href="https://smule.zendesk.com/hc/en-us/articles/360037235531" target="_blank" rel="noopener">Uploading Songs to the Smule Songbook — Smule Help Center</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-45"><a href="https://spark.mwm.ai/en/apps/id/1449599979" target="_blank" rel="noopener">唱鸭 App 数据档案 — MWM Spark</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-46"><a href="https://kentamplinvocalacademy.com/reviews/singing-apps/starmaker" target="_blank" rel="noopener">StarMaker Review — Ken Tamplin Vocal Academy</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-47"><a href="https://support.yousician.com/hc/en-us" target="_blank" rel="noopener">Yousician Help Center（实时反馈与练习模式）</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-48"><a href="https://singingcarrots.com/pitch-training" target="_blank" rel="noopener">Pitch Training — Singing Carrots</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-49"><a href="https://singingcarrots.com/blog/top-7-ai-vocal-coaches/" target="_blank" rel="noopener">Top 7 AI Vocal Coaches — Singing Carrots Blog</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-50"><a href="https://chartlex.com/blog/marketing/ai-stem-separation-tools-2026" target="_blank" rel="noopener">AI Stem Separation Tools 2026（LALAL/Moises 对比含 SDR）— chartlex</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-51"><a href="https://kits.ai/api" target="_blank" rel="noopener">Kits.AI Vocal Separation API</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-52"><a href="https://youka.io" target="_blank" rel="noopener">Youka：音视频自动生成 Karaoke — 官网</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-53"><a href="https://lyricstraining.com/about" target="_blank" rel="noopener">About LyricsTraining</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-54"><a href="https://lirica.io" target="_blank" rel="noopener">Lirica: Learn Languages with Music — 官网</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-55"><a href="https://github.com/bhj/KaraokeEternal" target="_blank" rel="noopener">KaraokeEternal — GitHub</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-56"><a href="https://github.com/vicwomg/pikaraoke" target="_blank" rel="noopener">PiKaraoke — GitHub</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-57"><a href="https://github.com/Vocaluxe/Vocaluxe" target="_blank" rel="noopener">Vocaluxe — GitHub</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-58"><a href="https://github.com/bohning/usdb_syncer" target="_blank" rel="noopener">usdb_syncer — GitHub</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-59"><a href="https://music-ir.org/mirex/wiki/2024:Lyrics-to-Audio_Alignment" target="_blank" rel="noopener">2024: Lyrics-to-Audio Alignment — MIREX Wiki</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-60"><a href="https://github.com/bbc/audio-offset-finder" target="_blank" rel="noopener">audio-offset-finder — GitHub (BBC)</a><span class="ref-meta">· 访问 2026-06-10 · 引用 4 次</span></li>
+      <li id="ref-61"><a href="https://pypi.org/project/audio-offset-finder/" target="_blank" rel="noopener">audio-offset-finder — PyPI</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-62"><a href="https://usdx.eu/format/" target="_blank" rel="noopener">UltraStar Format（#BPM / #GAP 字段）— usdx.eu</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-63"><a href="https://github.com/librosa/librosa/issues/1052" target="_blank" rel="noopener">Beats are slightly late — librosa issue #1052</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-64"><a href="https://subtitletools.com/timed-lyrics-editor" target="_blank" rel="noopener">Timed Lyrics Editor — Subtitle Tools</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-65"><a href="https://blog.csdn.net/HuanWen_Cheng/article/details/147987967" target="_blank" rel="noopener">KRC 歌词解析原理及 Android 实现 K 歌动态歌词效果 — CSDN</a><span class="ref-meta">· 访问 2026-06-10 · 引用 4 次</span></li>
+      <li id="ref-66"><a href="https://kg.qq.com/html/contest/upload_comps_instruction.html" target="_blank" rel="noopener">全民K歌上传伴奏使用流程 — kg.qq.com</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+      <li id="ref-67"><a href="https://github.com/UltraStar-Deluxe/USDX/issues/417" target="_blank" rel="noopener">Timer before a song start — USDX issue #417</a><span class="ref-meta">· 访问 2026-06-10 · 引用 1 次</span></li>
+      <li id="ref-68"><a href="https://lrclib.net/docs" target="_blank" rel="noopener">LRClib API Documentation</a><span class="ref-meta">· 访问 2026-06-10 · 引用 2 次</span></li>
+      <li id="ref-69"><a href="https://www.blog.brightcoding.dev/2025/12/13/the-ultimate-guide-to-automating-synchronized-lyrics-for-your-music-library-2025/" target="_blank" rel="noopener">The Ultimate Guide to Automating Synchronized Lyrics for Your Music Library — brightcoding</a><span class="ref-meta">· 访问 2026-06-10 · 引用 3 次</span></li>
+    </ol></div>
+  </section>
+  <footer>
+    无忌 · Deep Research（L2）· 2026-06-10 · 仅供阿杰个人决策参考；数据与判例以原始来源为准。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('betterme-singing-module-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('betterme-singing-module-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

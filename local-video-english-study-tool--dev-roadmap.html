@@ -623,6 +623,70 @@
       <div class="callout good">
         <p><strong>真正能「错开」的是上线发布顺序，不是开发本身：</strong>你日常在 Mac 上开发（主力 debug 在 Mac），但目标用户 Windows 优先，这俩有张力。建议节奏：<strong>① 先发 Mac</strong>（公证便宜标准化、$99 免 DUNS、notarytool 四步，先给种子用户验证「产品到底有没有人要」）→ <strong>② Windows 紧随主攻</strong>（目标主力，但签名最贵最难，要先解决云签名 / SmartScreen 冷启动，见签名 spec），或两端同时发、Windows 先接受初期 SmartScreen 摩擦。<u>一句话：代码一起写、平台差异 CI 矩阵从第一天并行盯、上线可 Mac 先行验证 + Windows 主攻——绝不是串行做两遍。</u></p>
       </div>
+
+      <h3>🛠️ 那「同时开发」具体怎么开张？一个 repo + CI 矩阵 workflow 骨架</h3>
+      <div class="callout accent">
+        <p><strong>一个 repo，不要建两个。</strong>这是「一套代码两端构建」的直接推论——Mac 和 Windows 共用<u>同一份 Rust 后端 + 同一份前端</u>，建两个 repo＝把本来一份的代码人为劈成两半，往后每改一个功能都要同步两边，必然分裂、双倍维护，是反模式。平台差异<u>不靠分库，靠同一个 repo 里的条件编译 + 配置分段</u>解决。</p>
+      </div>
+      <p style="margin:14px 0 6px"><strong>从 0 到「两端都能出包」的最小路径：</strong></p>
+      <ol style="margin:0;padding-left:22px;line-height:1.7">
+        <li><strong>脚手架：</strong><code>npm create tauri-app@latest</code>，选前端框架（纯 HTML 也行）。直接给你 <code>src-tauri/</code>（Rust 后端）+ <code>src/</code>（前端）+ <code>tauri.conf.json</code>（配置）。</li>
+        <li><strong>一个 GitHub repo：</strong><code>git init</code> → 推到<u>一个</u> repo，完事。</li>
+        <li><strong>本地开发：</strong>在 Mac 上 <code>npm run tauri dev</code> 就能跑起 Mac 版调试，日常反馈最快。</li>
+        <li><strong>平台差异写进同一份代码：</strong>Rust 用 <code>#[cfg(target_os = "windows")]</code> / <code>#[cfg(target_os = "macos")]</code> 分支；<code>tauri.conf.json</code> 里分平台段（各自的 sidecar、签名配置等）。</li>
+      </ol>
+      <div class="callout warn">
+        <p style="margin:0"><strong>关键约束：Mac 上构建不出 Windows 的 .msi 安装包</strong>（.msi 必须 Windows + WiX；NSIS 包可从 Mac/Linux 交叉编译但有 caveat，父报告 Ch3）。但你<u>不需要为此买一台 Windows</u>——交给 CI：GitHub Actions 矩阵构建会同时租一台 macOS runner + 一台 Windows runner，各自出各自的包。你本机一台 Mac 就能驱动整条线。</p>
+      </div>
+      <p style="margin:14px 0 6px"><strong>GitHub Actions workflow 骨架</strong>（放 <code>.github/workflows/release.yml</code>，基于 Tauri 官方 <code>tauri-apps/tauri-action</code> 示例裁成 Mac+Win 两端，可直接抄改）<sup class="cite" data-refid="27">[27]</sup>：</p>
+      <pre>name: release
+on:
+  workflow_dispatch:            # 手动点按钮触发
+  push:
+    branches: [release]         # 或推到 release 分支自动触发（官方推荐法）
+
+jobs:
+  build:
+    permissions:
+      contents: write           # 让 action 能建 Release、上传安装包
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest      # Apple Silicon 包
+            args: --target aarch64-apple-darwin
+            rust_targets: aarch64-apple-darwin
+          - platform: macos-latest      # Intel Mac 包
+            args: --target x86_64-apple-darwin
+            rust_targets: x86_64-apple-darwin
+          - platform: windows-latest    # 出 .msi / .exe(NSIS)
+            args: ''
+            rust_targets: ''
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_targets }}
+      - uses: swatinem/rust-cache@v2
+      - run: npm ci               # 装前端依赖
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 签名/公证密钥后续也从 secrets 注入（见《签名公证 spec》）
+        with:
+          tagName: app-v__VERSION__       # __VERSION__ 自动取配置里的版本号
+          releaseName: 'App v__VERSION__'
+          releaseDraft: true              # 先建草稿，确认后再手动发布
+          prerelease: false
+          args: ${{ matrix.args }}</pre>
+      <div class="callout info">
+        <p style="margin:0"><strong>这段在做什么：</strong>你本机改完代码 push 到 <code>release</code> 分支（或在 Actions 页点一下手动触发）→ GitHub <u>同时</u>起 macOS 和 Windows 两台机器、各自 checkout 同一份代码、各自 <code>tauri build</code>、把 .dmg 和 .msi/.exe 自动挂到<u>同一个 Release 草稿</u>下。这就是「CI 矩阵分平台构建」的最小实操——<u>一份代码、一次 push、两端产物</u>，全程你只用一台 Mac。签名/公证密钥后续作为 GitHub Secrets 注入到 <code>env</code>（Mac notarization / Win code signing 各配各的，见《签名公证 spec》）；开发期可先留空、本地自用不签。</p>
+      </div>
     </div>
   </section>
 
@@ -928,6 +992,7 @@
         <li id="ref-24">科技项目立项（政府科技计划/高新企业）—— 指政府支持科技创新的科技计划项目审批/启动，企业与政府签「科技计划项目合同书」约定验收考核指标以换经费；与高企认定/科技型中小企业是配套政策。<u>面向中国注册、拿政府研发补贴的企业，海外单人 indie 不涉及</u>。<a href="https://zhuanlan.zhihu.com/p/571084671" target="_blank" rel="noopener">政府科技项目申报流程</a> · <a href="https://www.zjintel.com/article-item-1407.html" target="_blank" rel="noopener">高企与科技型中小企业区别</a> <span class="ref-meta">· 行业口径 🟡 · 访问 2026-06-11</span></li>
         <li id="ref-25">DMCA §1201(f) 互操作性例外 + clean-room —— 合法取得软件者为实现独立程序的互操作可规避访问控制识别必要元素（严格限于兼容性，非随便逆向）；净室逆向（分析组写规格、实现组只看规格）是行业降低著作权风险的标准做法。<a href="https://www.eff.org/issues/coders/reverse-engineering-faq" target="_blank" rel="noopener">EFF Coders' Rights 逆向 FAQ</a> · <a href="https://www.copyright.gov/policy/1201/" target="_blank" rel="noopener">U.S. Copyright Office §1201</a> <span class="ref-meta">· EFF+美版权局 🟢 · 非法律意见 · 访问 2026-06-11</span></li>
         <li id="ref-26">项目章程（project charter）—— 项目启动期产出，说明目标/范围/里程碑/成功标准/风险/预算/时间线；可从完整文件简化到「一张纸」以适应小项目；对独立开发者价值是动手前钉清范围与「不做什么」。<a href="https://www.atlassian.com/zh/work-management/project-management/project-planning/project-charter" target="_blank" rel="noopener">Atlassian·项目章程指南</a> <span class="ref-meta">· 行业方法论 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-27">Tauri 官方发布流水线（Distribute › Pipelines › GitHub Actions）—— 用 tauri-apps/tauri-action@v0 做跨平台矩阵构建：matrix include 列 macOS（aarch64 + x86_64）/ Windows / Linux 各自 runner，permissions: contents: write、env 注入 secrets.GITHUB_TOKEN、with 传 tagName/releaseName/releaseDraft/args，__VERSION__ 占位符自动取配置版本号。本报告 workflow 骨架据此裁成 Mac+Win 两端。<a href="https://v2.tauri.app/distribute/pipelines/github/" target="_blank" rel="noopener">v2.tauri.app/distribute/pipelines/github</a> <span class="ref-meta">· 官方 🟢 · 引用 1 次 · 访问 2026-06-11</span></li>
       </ol>
       <div class="callout info" style="margin-top:16px">
         <p><strong>核实声明：</strong>本报告所有开源项目的 star/license/活跃度均于 2026-06-11 逐 repo 核实（whisperX BSD-2 / glucose EUPL-1.2 / ts-fsrs MIT / fsrs-rs BSD-3 / subtitle.js MIT / aeneas AGPL-3 / gopt BSD-3 / yall-mp GPL-3 / asbplayer MIT / hi-kid MIT / tauri-plugin-libmpv MPL-2.0），<strong>license 以各仓库 LICENSE 文件为准</strong>（⚠️ EUPL/copyleft 性质、whisperX 的 pyannote 模型权重 CC-BY-4.0 与代码许可分开等已标注）。<u>工期估算（人周/月）全部为「单人+AI 辅助」的类比体感，标 🔴 非承诺</u>，真实工期由对齐/发音评分的反复次数决定，可能差 2–3 倍。法律部分（软件保护条例第十七条、反法商业秘密、EULA 效力、DMCA §1201(f)、软著流程费用周期、科技项目立项）为一般性梳理，<strong>非法律意见</strong>，有风险动作前请咨询律师。承接父报告/姐妹 spec/github-eng 报告的结论（Tauri/whisper.cpp/讯飞/欧路/FSRS/license 纠正）不重新刨证。</p>

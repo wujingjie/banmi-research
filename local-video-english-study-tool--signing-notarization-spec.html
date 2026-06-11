@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>代码签名 + 公证落地 spec：小贝桌面 App 双端签名/公证/CI 工程子规格 · 无忌 · 2026-06-11</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  .topbar-back { display:inline-flex; align-items:center; gap:5px; font-size:12.5px; font-weight:700; color:var(--accent-text); text-decoration:none; border:1px solid var(--accent); background:var(--accent-soft); border-radius:999px; padding:6px 12px; white-space:nowrap; }
+  .topbar-back:hover { background:var(--accent); color:#fff; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  .parent-link { display:inline-flex; align-items:center; gap:6px; margin:4px 0 0; font-size:13.5px; font-weight:700; color:var(--accent-text); text-decoration:none; border:1px solid var(--accent); background:var(--accent-soft); border-radius:24px; padding:6px 14px; }
+  .parent-link:hover { background:var(--accent); color:#fff; }
+  .subreport-bar { margin:14px 0 0; padding:10px 14px; border:1px dashed var(--accent); border-radius:10px; background:var(--accent-soft); font-size:13.5px; color:var(--text); }
+  .subreport-bar a { color:var(--accent-text); font-weight:700; text-decoration:none; }
+  .subreport-bar a:hover { text-decoration:underline; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 16px 0; }
+  .demo-card { padding: 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); cursor: pointer; transition: transform .15s, box-shadow .15s; }
+  .demo-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+  .demo-card .dc-icon { font-size: 26px; }
+  .demo-card .dc-title { font-family: var(--serif); font-weight: 700; font-size: 15.5px; margin: 6px 0 2px; color: var(--text); }
+  .demo-card .dc-tag { font-size: 11px; color: var(--text-mute); }
+  .demo-card .dc-body { font-size: 13px; color: var(--text-soft); margin-top: 8px; max-height: 0; overflow: hidden; transition: max-height .3s; }
+  .demo-card.open .dc-body { max-height: 900px; }
+  .sim-box { margin:14px 0; padding:16px; border:1px solid var(--border); border-radius:14px; background:var(--bg-soft); }
+  .sim-toggle { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+  .sim-btn { padding:7px 14px; border-radius:999px; border:1px solid var(--border); background:var(--bg-elevated); color:var(--text-soft); cursor:pointer; font-size:13px; font-weight:600; font-family:var(--sans); transition:all .15s; }
+  .sim-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .sim-dialog { padding:16px; border-radius:12px; border:1px solid var(--border-strong); background:var(--bg-elevated); box-shadow:var(--shadow); }
+  .sim-dialog .sd-os { font-size:11.5px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--text-mute); margin-bottom:8px; }
+  .sim-dialog .sd-icon { font-size:30px; }
+  .sim-dialog .sd-title { font-family:var(--serif); font-size:17px; font-weight:700; margin:6px 0; color:var(--text); }
+  .sim-dialog .sd-body { font-size:13.5px; color:var(--text-soft); }
+  .sim-dialog .sd-verdict { margin-top:10px; padding:8px 12px; border-radius:8px; font-size:13px; font-weight:600; }
+  .sim-dialog .sd-verdict.bad { background:var(--bad-soft); color:var(--bad); }
+  .sim-dialog .sd-verdict.warn { background:var(--warn-soft); color:var(--warn); }
+  .sim-dialog .sd-verdict.good { background:var(--good-soft); color:var(--good); }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .demo-card .dc-body { max-height: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table, .demo-card, .sim-box { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <a class="topbar-back" href="./local-video-english-study-tool.html" title="返回 小贝主报告">📄 小贝主报告</a>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 TL;DR 两端买什么/多少钱/坑</a>
+    <a href="#ch2" data-target="ch2">02 为什么必须签名公证</a>
+    <a href="#ch3" data-target="ch3">03 三条独立链路全景图 ★</a>
+    <a href="#ch4" data-target="ch4">04 Win 证书类型拍板 OV/EV/云 ★</a>
+    <a href="#ch5" data-target="ch5">05 硬件 token + CI 自动签名难题 ★</a>
+    <a href="#ch6" data-target="ch6">06 Windows 签名落地步骤</a>
+    <a href="#ch7" data-target="ch7">07 Apple 注册 + Developer ID</a>
+    <a href="#ch8" data-target="ch8">08 macOS 签名+公证+staple</a>
+    <a href="#ch9" data-target="ch9">09 Tauri 2.x 签名配置详解 ★</a>
+    <a href="#ch10" data-target="ch10">10 Tauri updater 签名（第三链路）★</a>
+    <a href="#ch11" data-target="ch11">11 GitHub Actions CI 双端矩阵</a>
+    <a href="#ch12" data-target="ch12">12 成本与时间表</a>
+    <a href="#ch13" data-target="ch13">13 中国合规附加</a>
+    <a href="#ch14" data-target="ch14">14 小贝 checklist + 阶段策略 ★</a>
+    <a href="#demo" data-target="demo">🎮 Mini Demo</a>
+    <a href="#faq" data-target="faq">FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>代码签名 + 公证落地 spec：小贝桌面 App 双端签名/公证/CI 工程子规格</h1>
+    <a class="parent-link" href="./local-video-english-study-tool.html">← 返回 小贝主报告</a>
+    <div class="subreport-bar">📎 本文是 <a href="./local-video-english-study-tool.html">《本地视频英语精学桌面 App》主报告</a> 第 4 章「好安装工程（签名/公证/SmartScreen）」的<strong>工程落地子规格</strong>——把主报告里那块结论往「真照着买证书 / 配 CI / 签名 / 公证」的颗粒度展开。结论判断不重复，只钉「怎么落地」。</div>
+    <div class="hero-meta" style="margin-top:10px">
+      <span>📅 2026-06-11</span>
+      <span>🖥️ Tauri 2.x（Win 优先 + Mac）</span>
+      <span>🔏 Authenticode + Apple 公证 + minisign</span>
+      <span>🇨🇳 中国个人开发者视角</span>
+      <span>⚙️ 可直接照做工程颗粒度</span>
+      <span>📐 技术规格 spec</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>本文是《小贝》报告的<span style="color:var(--accent-text)">代码签名 + 公证落地子规格</span>。</strong>父报告第 4 章已拍板四件事：① 微软 <strong>Azure Trusted/Artifact Signing 中国个人/组织没资格</strong>（仅 US/加/欧/英组织 + US/加个人）<sup class="cite" data-refid="3">[3]</sup>；② CA/B Forum 自 2023-06-01 起 <strong>OV 和 EV 私钥都强制存硬件 token / 云 HSM</strong><sup class="cite" data-refid="1">[1]</sup>；③ <strong>EV 已不再即时绕过 SmartScreen</strong>，与 OV 同走信誉累积<sup class="cite" data-refid="6">[6]</sup>；④ Mac 走 Apple Developer Program $99/年 + Developer ID + 公证<sup class="cite" data-refid="9">[9]</sup>。本 spec 把这四条结论<strong>往工程落地展开</strong>——买哪家证书、CI 里 token 插哪、Tauri 2.x 的每个配置键叫什么、命令怎么敲。</p>
+      <p><strong>一句话定调：</strong>小贝有<u>三条互相独立的签名链路</u>，别混——① Windows Authenticode 代码签名（OS 级，给 SmartScreen 看）；② macOS 代码签名 + Apple 公证（OS 级，给 Gatekeeper 看）；③ Tauri updater 包签名（应用级 minisign，给自动更新看）。<strong>第三条跟前两条完全是两回事</strong>：updater 签名是 Tauri 自己的 Ed25519 密钥，不需要 CA、不花钱，但忘了配会导致自动更新永远失败。每条价格/资格/命令/配置键都带 inline 引用，悬停 <sup class="cite" data-refid="1">[1]</sup> 看来源；查不实的明确标 <span class="pill warn">⚠️ 以官网为准</span>，绝不编造。</p>
+    </div>
+  </div>
+
+  <div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+    <p style="margin:0"><strong>📌 三条最关键规格（先扫这个）：</strong></p>
+    <ul style="margin:8px 0 0">
+      <li><strong>Windows 最大坑 = 硬件 token 在 CI 里插不进去。</strong>CA/B Forum 2023-06-01 起 OV+EV 私钥<u>都必须</u>存 FIPS 140-2 Level 2 / CC EAL4+ 硬件（USB token 或云 HSM）<sup class="cite" data-refid="1">[1]</sup>。GitHub Actions 的云 runner 插不了实体 U 盾 → 必须走<strong>云签名服务</strong>（SignPath OSS 免费档 / SSL.com eSigner / Certum cloud），或自托管 runner 插实体 token。这是小贝 Windows 落地单独成章的工程坑（Ch5）。<span class="conf g">🟢</span></li>
+      <li><strong>中国个人开发者的 Windows 现实路线：</strong>Azure 无资格<sup class="cite" data-refid="3">[3]</sup>；国内 CA（沃通 OV ¥3588 / EV ¥4288）<u>仅向单位签发、需营业执照</u><sup class="cite" data-refid="4">[4]</sup>；纯个人最现实是 <strong>① 国际 CA（如 Certum）的「开源 / 个人」代码签名证书走云签名</strong><sup class="cite" data-refid="5">[5]</sup>，<strong>② 或以个体工商户 / 公司主体申请 OV</strong>。MVP 阶段甚至可<u>先 Mac 公证 + Windows 暂不签</u>（接受初期 SmartScreen 警告，给官网「被拦截怎么办」图文），放量再上正规证书（Ch14）。<span class="conf g">🟢</span></li>
+      <li><strong>Tauri 2.x 三套配置键（2.x 已核实，与 1.x 有别）：</strong>Win = <code>bundle.windows.{certificateThumbprint, digestAlgorithm, timestampUrl, signCommand}</code>（<code>signCommand</code> 用 <code>%1</code> 占位走云签名）<sup class="cite" data-refid="7">[7]</sup>；Mac = <code>bundle.macOS.{signingIdentity, providerShortName, entitlements, hardenedRuntime}</code> + 一套 <code>APPLE_*</code> 环境变量<sup class="cite" data-refid="8">[8]</sup>；updater = <code>plugins.updater.pubkey</code> + 环境变量 <code>TAURI_SIGNING_PRIVATE_KEY</code><sup class="cite" data-refid="11">[11]</sup>。<span class="conf g">🟢</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">TL;DR：两端各买什么 / 多少钱 / 最大坑 / MVP 先签哪端</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>一页看完。三条链路、两端账本、一个拍板。</p>
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">3 条链路</div><div class="l">Win 签名 / Mac 签名+公证 / updater 签名</div></div>
+        <div class="metric"><div class="v">$99/年</div><div class="l">Apple Developer（Mac 端固定）</div></div>
+        <div class="metric"><div class="v">硬件 token</div><div class="l">Win OV/EV 都要（2023-06 起）</div></div>
+        <div class="metric"><div class="v">云签名</div><div class="l">CI 里不插实体 U 盾的唯一解</div></div>
+        <div class="metric"><div class="v">EV≠免警告</div><div class="l">SmartScreen 现都靠信誉累积</div></div>
+        <div class="metric"><div class="v">updater 免费</div><div class="l">minisign 自签，但忘配=更新废</div></div>
+      </div>
+
+      <h3>两端账本速览（截至 2026-06，以官网为准）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>端</th><th>买什么</th><th>价格量级</th><th>用户首装体验</th><th>最大坑</th></tr></thead>
+        <tbody>
+          <tr><td><strong>macOS</strong></td><td>Apple Developer Program + Developer ID Application 证书 + 公证（notarytool）<sup class="cite" data-refid="9">[9]</sup></td><td><strong>$99/年</strong><sup class="cite" data-refid="10">[10]</sup></td><td class="check y">公证后双击即开，无摩擦</td><td>必须 macOS runner 才能签/公证（不能跨平台编译）</td></tr>
+          <tr><td><strong>Windows</strong><br>（中国个人）</td><td>国际 CA「开源/个人」代码签名证书走云签名（如 Certum）<sup class="cite" data-refid="5">[5]</sup>；<u>或</u>个体户/公司主体走国内 CA OV<sup class="cite" data-refid="4">[4]</sup></td><td>Certum 开源版 <strong>~€49–69/年</strong><sup class="cite" data-refid="5">[5]</sup>；国内 CA OV <strong>~¥3588/年</strong>（需营业执照）<sup class="cite" data-refid="4">[4]</sup></td><td class="check p">签名后<u>仍可能</u>首发弹 SmartScreen + 「未知发布者」<sup class="cite" data-refid="6">[6]</sup></td><td>硬件 token 在 CI 里插不进 → 走云签名（Ch5）</td></tr>
+          <tr class="row-highlight"><td><strong>updater</strong></td><td>Tauri 自带 minisign 密钥对（<code>tauri signer generate</code>）<sup class="cite" data-refid="11">[11]</sup></td><td class="check y"><strong>免费</strong></td><td class="check y">透明（仅用于自动更新校验）</td><td>忘配 pubkey → 自动更新永久失败 / 私钥丢 → 老用户收不到更新</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout good">
+        <p><strong>MVP 先签哪端？拍板：先 Mac，Windows 缓一步。</strong>逻辑反直觉但成立——小贝是 Windows 优先的产品，但 <u>Windows 签名恰恰是最难、最贵、对中国个人门槛最高的一端</u>（硬件 token + CI 难题 + EV 也不免警告 + 国内 CA 要营业执照）。而 <strong>Mac 公证便宜（$99）、标准化、双击即开</strong>，正好用来发给种子用户 / 自己开发自测。所以 MVP 阶段：<strong>① Mac 走完整公证</strong>（给早期用户顺滑体验）；<strong>② Windows 先用云签名（Certum 开源版 €49–69）或暂不签 + 官网放「被拦截怎么办」图文</strong>，等放量、信誉起来或主体落定，再上正规 OV/EV（Ch14 给完整阶段表）。<span class="conf g">🟢</span></p>
+      </div>
+      <div class="callout purple">
+        <p><strong>与父报告的关系：</strong>父报告第 4 章把「Azure 中国无资格 / OV+EV 都要硬件 / EV 不再免 SmartScreen / Mac $99」这四条边界定了，并给了价格量级。本 spec <strong>不重复这些结论判断</strong>，只把「拿到这些结论后，怎么真买、真配、真签」写到能开工的颗粒度——多出来的是：云签名服务怎么选与接（Ch5）、Tauri 2.x 每个配置键的确切名字（Ch9）、updater 这条独立链路（Ch10）、双端 CI 矩阵（Ch11）、阶段化 checklist（Ch14）。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">为什么必须签名公证（不签的后果）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>签名公证不是「锦上添花」，是<strong>能不能让普通用户装上</strong>的生死线。逐端列后果。</p>
+
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>不做这件事</th><th>用户实际看到什么</th><th>后果</th></tr></thead>
+        <tbody>
+          <tr><td>Windows 不签名</td><td>下载时 SmartScreen 蓝框「Windows 已保护你的电脑 · 未知发布者」，下载按钮可能被浏览器直接拦/标红<sup class="cite" data-refid="6">[6]</sup></td><td class="check n">小白用户直接关掉，卸载率/流失率飙升</td></tr>
+          <tr><td>Windows 签了名但无信誉</td><td>仍可能弹 SmartScreen，但有发布者名字；点「更多信息 → 仍要运行」可继续<sup class="cite" data-refid="6">[6]</sup></td><td class="check p">有摩擦但可越过，靠下载量累积信誉化解</td></tr>
+          <tr><td>macOS 不签名/不公证</td><td>Gatekeeper 弹「无法打开，因为来自身份不明的开发者」/「Apple 无法检查其是否包含恶意软件」<sup class="cite" data-refid="9">[9]</sup></td><td class="check n">需右键→打开或去系统设置放行，对小白是劝退级摩擦</td></tr>
+          <tr><td>Tauri updater 不配签名</td><td>不是装机问题——而是<strong>自动更新根本跑不起来</strong>：Tauri updater <u>强制</u>校验 minisign 签名，没配 pubkey/签名直接报 <code>InvalidSignature</code><sup class="cite" data-refid="11">[11]</sup></td><td class="check n">每次发版都要用户手动重下，失去 Tauri 自动更新的核心价值</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>对小贝尤其致命的两点：</strong>① 小贝目标用户是<u>国内非技术英语学习者</u>（含 K12 家长/学生），不是开发者——他们看到「未知发布者」蓝框的第一反应是「这是病毒」然后关掉，不会去点「仍要运行」。② 国内 Windows 生态还有 360 / 腾讯电脑管家等第三方安全软件，对<strong>新签名、低下载量</strong>的 exe 也可能误报甚至直接删除<sup class="cite" data-refid="6">[6]</sup>（父报告 Ch4 已提示）。所以签名 + 信誉 + 提交各家白名单是组合拳，缺一不可。</p>
+      </div>
+      <div class="callout info">
+        <p><strong>反过来说，签名公证齐全的收益：</strong>Mac 端「双击即开」零摩擦；Win 端虽不能保证首发零警告，但<u>有发布者身份</u> + 时间戳，杀软误报申诉、信誉累积都有据可依；updater 链路通了，以后每次发版用户无感静默更新——这正是 Tauri 选型的核心价值之一（父报告 Ch3）。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">★ 签名公证全景图：三条独立链路并列</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>动手前先把<strong>「谁签什么、用什么密钥、在哪验证、花不花钱」</strong>这张总表刻进脑子。最常见的翻车是<u>把这三条混成一条</u>——以为买了代码签名证书 updater 就能自动更新，或以为 updater 签名能让 Windows 不弹警告。<strong>它们互不替代。</strong></p>
+
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>链路</th><th>签什么</th><th>用什么密钥/证书</th><th>谁来验证</th><th>要花钱吗</th></tr></thead>
+        <tbody>
+          <tr><td><strong>① Windows Authenticode</strong></td><td>.exe / .msi / NSIS 安装包</td><td>CA 签发的 OV/EV 代码签名证书（私钥存硬件 token/云 HSM）<sup class="cite" data-refid="1">[1]</sup></td><td>Windows OS + SmartScreen<sup class="cite" data-refid="6">[6]</sup></td><td class="check n">要（证书 + token/云签名）</td></tr>
+          <tr><td><strong>② macOS 签名 + 公证</strong></td><td>.app / .dmg / .pkg</td><td>Apple Developer ID Application 证书（codesign）+ 提交 Apple 公证<sup class="cite" data-refid="9">[9]</sup></td><td>macOS Gatekeeper<sup class="cite" data-refid="9">[9]</sup></td><td class="check n">要（$99/年 Program）<sup class="cite" data-refid="10">[10]</sup></td></tr>
+          <tr class="row-highlight"><td><strong>③ Tauri updater 包签名</strong></td><td>更新产物（.tar.gz / .zip / .nsis.zip / .app.tar.gz）+ <code>latest.json</code></td><td><strong>Tauri 自己的 minisign（Ed25519）密钥对</strong>，跟 CA 无关<sup class="cite" data-refid="11">[11]</sup></td><td>Tauri updater 插件（应用内，下载后比对 pubkey）<sup class="cite" data-refid="11">[11]</sup></td><td class="check y"><strong>免费</strong>（自己生成）</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>一句话记牢三条的分工：</strong>① 和 ② 是<u>给操作系统看的「这软件来自谁、没被篡改、不是恶意软件」</u>（OS 级信任，必须找 CA / Apple，要花钱）；③ 是<u>给小贝自己的自动更新机制看的「这个更新包确实是我发的」</u>（应用级信任，自己签自己验，不花钱，但是 Tauri updater 的硬性前置）。<strong>三条都得配齐，小贝才能既装得上、又能自动更新。</strong></p>
+      </div>
+
+      <h3>三链路依赖关系（小贝发一次版要做的全部签名动作）</h3>
+      <div class="tree">
+        <div class="node q">小贝 CI 构建一个 release，签名动作有哪些？</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl m">Win runner</span> 用 Authenticode 证书签 <code>小贝_x.y.z_x64-setup.exe</code>（链路①）→ Tauri 再用 minisign 私钥签更新产物 + 生成 <code>.sig</code>（链路③）</div>
+        <div class="node"><span class="lbl m">Mac runner</span> 用 Developer ID 签 <code>.app</code>（hardened runtime）→ 打包 <code>.dmg</code> → 提交 Apple 公证 → staple（链路②）→ Tauri 再用 minisign 私钥签 <code>.app.tar.gz</code>（链路③）</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">✅ 同一次发版：链路①②是 per-OS（各跑各的 runner），链路③两端共用同一把 minisign 私钥</div>
+      </div>
+      <div class="trap-box"><strong>⚠️ 最常见三个混淆：</strong>① 「我买了 EV 证书，为什么 updater 还报 InvalidSignature？」——因为 updater 用的是 minisign 不是你的 CA 证书，两码事（Ch10）；② 「updater 签名了，为什么 Windows 还弹未知发布者？」——因为 SmartScreen 看的是 Authenticode 不是 minisign（Ch6）；③ 「Mac 公证了，Windows 是不是也自动可信了？」——不，两个 OS 各管各的（Ch7/8）。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">★ Windows 证书类型拍板：OV vs EV vs 云签名</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>Windows 这端的第一个决策：买<strong>什么类型</strong>的证书、找<strong>谁</strong>买。先把选项摊开，再给中国个人开发者的现实路线。</p>
+
+      <h3>三个维度先理清</h3>
+      <ul>
+        <li><strong>证书等级：OV（组织验证）vs EV（扩展验证）。</strong>历史上 EV 的卖点是「首发即绕过 SmartScreen」——<u>这个特权已没了</u>。2024-08 起微软把 EV 代码签名 OID 从受信根程序里移除，<strong>EV 与 OV 在 SmartScreen 面前同等对待，都靠下载量/时间累积信誉</strong><sup class="cite" data-refid="6">[6]</sup>。所以现在花大价钱买 EV 也<u>买不到「首发不弹警告」</u>了 —— 这直接改变了 OV/EV 的性价比。</li>
+        <li><strong>私钥存哪：硬件 token vs 云 HSM。</strong>CA/B Forum 2023-06-01 起，<u>OV 和 EV 私钥都必须</u>存 FIPS 140-2 Level 2 / CC EAL 4+ 合规硬件——物理 USB token（U 盾）或云 HSM<sup class="cite" data-refid="1">[1]</sup>。「买个证书装本机直接签」的老路已死。这条决定了 CI 怎么签（Ch5）。</li>
+        <li><strong>云签名服务：Azure Trusted Signing。</strong>微软自己的云签名（~$10/月、直集成 CI）很香——<strong>但中国个人/组织没资格</strong>：公共信任证书目前仅向 US/加/欧/英「组织」+ US/加「个人」开放，2025-04 起对其他国家暂停新验证请求<sup class="cite" data-refid="3">[3]</sup>。<u>对小贝直接出局，别照欧美教程规划。</u></li>
+      </ul>
+
+      <h3>选项横向对比（中国个人开发者视角）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>选项</th><th>中国个人能用？</th><th>价格量级</th><th>私钥载体</th><th>CI 自动签名</th><th>SmartScreen</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Azure Trusted Signing</strong></td><td class="check n">✗ 无资格<sup class="cite" data-refid="3">[3]</sup></td><td>~$10/月（用不上）</td><td>微软云 HSM</td><td class="check y">原生集成</td><td>靠信誉累积</td></tr>
+          <tr><td>国内 CA OV（沃通等）</td><td class="check p">~ 需<u>营业执照/单位主体</u>，不向个人签发<sup class="cite" data-refid="4">[4]</sup></td><td>OV ~¥3588 / EV ~¥4288 / 年<sup class="cite" data-refid="4">[4]</sup></td><td>U 盾 / 云 HSM</td><td class="check p">U 盾要自托管 runner</td><td>靠信誉累积</td></tr>
+          <tr class="row-highlight"><td><strong>Certum「开源/个人」CS（云）</strong></td><td class="check y">✓ 面向个人/开源开发者<sup class="cite" data-refid="5">[5]</sup></td><td>开源版 <strong>~€49–69/年</strong>（~€29 续费）<sup class="cite" data-refid="5">[5]</sup></td><td>SimplySign 云卡（免实体 token）<sup class="cite" data-refid="5">[5]</sup></td><td class="check y">云签名可接 CI</td><td>靠信誉累积</td></tr>
+          <tr><td>SSL.com eSigner（云）</td><td class="check y">✓ IV/OV/EV 都支持云签<sup class="cite" data-refid="12">[12]</sup></td><td>证书 ~$249–349/年 + eSigner 订阅<sup class="cite" data-refid="12">[12]</sup></td><td>SSL.com 云 HSM</td><td class="check y">CodeSignTool/GH Action<sup class="cite" data-refid="13">[13]</sup></td><td>靠信誉累积</td></tr>
+          <tr><td>SignPath Foundation（仅开源）</td><td class="check p">~ 仅<u>合格开源项目</u>，证书+签名基础设施全免费<sup class="cite" data-refid="14">[14]</sup></td><td><strong>免费</strong>（需通过开源资格审核）<sup class="cite" data-refid="14">[14]</sup></td><td>SignPath 托管</td><td class="check y">GH Actions 原生</td><td>靠信誉累积</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>⚠️ 「个人能不能买 OV」的真相：</strong>CA/B 规则下，OV/EV 代码签名证书的验证对象本质是<u>组织/法人实体</u>。沃通等国内 CA 明确<strong>面向单位、需营业执照、不向纯个人签发</strong><sup class="cite" data-refid="4">[4]</sup>。纯个人开发者要么 ① 走 <strong>Certum 这类有「Open Source / 个人开发者」专门产品线</strong>的国际 CA（用个人身份验证即可，价格还便宜）<sup class="cite" data-refid="5">[5]</sup>；要么 ② 注册<strong>个体工商户 / 公司主体</strong>再申请标准 OV。小贝若短期内不想搞主体，Certum 开源版是性价比最高的入口。<span class="pill warn">⚠️ Certum 开源版要求软件以开源许可证发布——小贝若闭源不适用，需走个人/标准产品线，价格不同，以 shop.certum.eu 为准</span></p>
+      </div>
+
+      <h3>中国个人开发者推荐路线（决策树）</h3>
+      <div class="tree">
+        <div class="node q">小贝 Windows 端怎么签？（中国个人开发者）</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q1：小贝是开源项目吗？</div>
+        <div class="node"><span class="lbl y">是</span> 优先 <strong>SignPath Foundation</strong>（证书+签名免费，过开源审核）<sup class="cite" data-refid="14">[14]</sup>，或 <strong>Certum 开源版</strong>（~€49–69）<sup class="cite" data-refid="5">[5]</sup>。两者都走云签名，CI 友好。</div>
+        <div class="node"><span class="lbl n">否（闭源，最可能）</span> ↓</div>
+        <div class="node q">Q2：有公司/个体户主体吗？</div>
+        <div class="node"><span class="lbl y">有</span> 走 <strong>国内 CA OV（沃通 ¥3588）</strong><sup class="cite" data-refid="4">[4]</sup> 或 <strong>国际 CA OV + 云签名（SSL.com eSigner / Certum 标准版）</strong>。EV 不再值溢价（不免警告），选 OV 即可。</div>
+        <div class="node"><span class="lbl n">没有</span> ↓</div>
+        <div class="node q">Q3：MVP 阶段 / 还在验证产品？</div>
+        <div class="node"><span class="lbl m">是</span> <strong>Windows 先暂不签</strong>（接受初期 SmartScreen 警告 + 官网放「被拦截怎么办」图文），Mac 先公证；放量再补主体上 OV（Ch14）。<u>务必先把 Mac 公证做掉，那条便宜又标准</u>。</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">✅ 默认拍板：闭源个人 MVP → Mac 完整公证 + Windows 云签名（Certum 个人/开源）或暂缓；放量正式期 → 落主体上 OV + 云签名接 CI</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">★ Windows 硬件 token + CI 自动签名难题（最大工程坑）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是 Windows 落地<strong>唯一真正的工程难题</strong>，单独成章。其余都是照文档配，这块是要做架构决策的。</p>
+
+      <div class="callout bad">
+        <p><strong>问题本质：</strong>CA/B Forum 2023-06-01 起，代码签名私钥<u>必须</u>非可导出地存在 FIPS 140-2 Level 2 / CC EAL4+ 硬件里（USB token 或云 HSM）<sup class="cite" data-refid="1">[1]</sup>。而 <strong>GitHub Actions 的云 runner 是一次性虚拟机，你没法往它的 USB 口插一根实体 U 盾</strong>。于是「CI 自动构建 → 自动签名 → 自动发版」这条流水线，在 Win 端被实体 token 卡住了。这就是为什么 Mac 端 CI 签名很顺、Win 端却要专门解决。</p>
+      </div>
+
+      <h3>三条解法对比</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>解法</th><th>怎么做</th><th>CI 自动化</th><th>成本</th><th>适合谁</th></tr></thead>
+        <tbody>
+          <tr class="row-highlight"><td><strong>A. 云签名服务 ★</strong></td><td>证书私钥托管在 CA/服务商云 HSM，CI 通过 API/CLI 远程签名，不碰实体 token。SignPath OSS / SSL.com eSigner / Certum SimplySign / Azure（中国无资格）<sup class="cite" data-refid="13">[13]</sup></td><td class="check y"><strong>✓ 全自动</strong></td><td>订阅/按次（SignPath 开源免费、Certum 开源 €49–69、SSL.com eSigner Tier1 $100/月）<sup class="cite" data-refid="5">[5]</sup><sup class="cite" data-refid="12">[12]</sup></td><td><strong>小贝首选</strong>（个人/小团队、要 CI）</td></tr>
+          <tr><td>B. 自托管 runner + 实体 token</td><td>自己有台常开的 Win 机器，插着 U 盾，注册成 GitHub self-hosted runner，签名步骤在它上面跑</td><td class="check p">~ 半自动（机器要常开、token 要在位）</td><td>U 盾证书成本 + 一台机器电费</td><td>已有国内 CA U 盾、不想付云签名月费</td></tr>
+          <tr><td>C. 本地手动签名</td><td>CI 只构建不签名，下载产物到本机用 signtool + U 盾手动签，再传回发布</td><td class="check n">✗ 纯手动</td><td>仅证书成本</td><td>发版频率极低的早期 MVP</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout good">
+        <p><strong>拍板：小贝走 A（云签名）。</strong>理由：① 个人开发者不想维护一台常开插着 U 盾的机器（解法 B 的隐性运维成本高、token 还可能掉线）；② Tauri 的 <code>bundle.windows.signCommand</code> 配置项<u>就是为云签名设计的</u>——用 <code>%1</code> 占位符把待签文件路径传给任意云签名 CLI<sup class="cite" data-refid="7">[7]</sup>，集成干净；③ SignPath（若开源）直接免费、SSL.com eSigner 有成熟 GitHub Action（<code>sslcom/actions-codesigner</code>）<sup class="cite" data-refid="13">[13]</sup>、Certum SimplySign 也支持云签。<u>唯一代价</u>是月费/按次费，但省下的运维和可靠性远超这点钱。</p>
+      </div>
+
+      <h4>云签名怎么进 GitHub Actions（以 SSL.com eSigner 为例）</h4>
+      <p>eSigner 提供官方 GitHub Action，CI 里调一个 step 就把产物远程签了——<strong>不下发任何实体 token 到 runner</strong>，凭证以 4 个 secret 注入<sup class="cite" data-refid="13">[13]</sup>：</p>
+      <pre><code># GitHub Actions step（说明性，落地以 SSL.com 文档为准）
+- name: Sign Windows installer (cloud, no token)
+  uses: sslcom/actions-codesigner@develop
+  with:
+    command: sign
+    username: ${{ secrets.ES_USERNAME }}
+    password: ${{ secrets.ES_PASSWORD }}
+    credential_id: ${{ secrets.CREDENTIAL_ID }}
+    totp_secret: ${{ secrets.ES_TOTP_SECRET }}   # 自动化 OTP
+    file_path: path/to/小贝_x.y.z_x64-setup.exe
+    output_path: signed/</code></pre>
+      <p style="font-size:13px;color:var(--text-mute)">⚠️ 上为说明性片段，参数以 <a href="https://www.ssl.com/how-to/cloud-code-signing-integration-with-github-actions/" target="_blank" rel="noopener">SSL.com 官方 GitHub Actions 集成文档</a> 为准<sup class="cite" data-refid="13">[13]</sup>。SignPath / Certum SimplySign 的接法不同，思路一致（云端签、CI 注入凭证）。</p>
+
+      <div class="callout info">
+        <p><strong>两种集成模式，别搞混：</strong>① <u>独立 step 签名</u>（上例）——CI 先用 Tauri 构建出未签名 exe，再用 eSigner action 单独签，最后用 minisign 签 updater 产物。这种最稳，对 Tauri 透明。② <u>Tauri signCommand 内联</u>——把云签名 CLI 写进 <code>bundle.windows.signCommand</code>（<code>%1</code> 占位），Tauri 构建时自动调它签<sup class="cite" data-refid="7">[7]</sup>。模式②更优雅但 CLI 要能在 runner 上无交互运行（eSigner CKA / CodeSignTool 可以）。小贝建议先用①跑通，再考虑②。</p>
+      </div>
+      <div class="trap-box"><strong>⚠️ 不要做的事：</strong>① 不要把证书私钥/U 盾密码明文塞进仓库或 workflow——用 GitHub Secrets；② 不要指望「云 runner 装个驱动就能模拟 token」——合规硬件私钥不可导出，模拟不了；③ 不要因为嫌麻烦就在 Win 端跳过时间戳（Ch6）——没时间戳的签名在证书过期后全部失效。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">Windows 签名落地步骤（可照做）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>从「决定买证书」到「signtool verify 通过」的完整 step（Tauri 官方 Windows 签名指南给了整体流程框架<sup class="cite" data-refid="2">[2]</sup>，下面按小贝的云签名路线展开）。假设走云签名路线（Ch5 拍板）。</p>
+
+      <div class="step"><div class="step-head"><span class="sn">1</span>选 CA + 下单</div><div class="step-body">按 Ch4 决策树选：开源 → SignPath Foundation / Certum 开源版；闭源有主体 → 国内 CA OV 或国际 CA OV；闭源无主体 MVP → 先缓或个人产品线。下单时选<strong>云签名 / 云 HSM 版本</strong>（非实体 U 盾版），才能接 CI。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>身份验证（最耗时）</div><div class="step-body">OV：验证组织真实性（营业执照、电话回访等），<strong>1–5 个工作日</strong><sup class="cite" data-refid="4">[4]</sup>；EV：更严更久。个人/开源产品线（Certum）验证个人身份，相对快。<u>这步是周期瓶颈，提前办</u>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>拿到云签名凭证</div><div class="step-body">不是拿到一个 .pfx 文件——而是拿到<strong>云签名账号 + credential ID + API 凭证 / TOTP secret</strong>（SSL.com eSigner）或 SimplySign 账号（Certum）。证书私钥永远在服务商云 HSM 里，你只拿调用凭证。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>配置签名（Tauri 或独立 step）</div><div class="step-body">两种：① 独立 step 用云签名 CLI/Action 签构建产物（Ch5 例）；② 写进 <code>bundle.windows.signCommand</code>（<code>%1</code> 占位）让 Tauri 自动签<sup class="cite" data-refid="7">[7]</sup>。本机有 token 时也可设 <code>certificateThumbprint</code> 让 Tauri 调 signtool<sup class="cite" data-refid="7">[7]</sup>（Ch9）。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">5</span>RFC3161 时间戳（必加）</div><div class="step-body">签名时带时间戳服务器，证明「签名发生在证书有效期内」——<strong>证书过期后已签的包仍有效</strong>。signtool：<code>signtool sign /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 file.exe</code><sup class="cite" data-refid="15">[15]</sup>。Tauri 设 <code>bundle.windows.timestampUrl</code><sup class="cite" data-refid="7">[7]</sup>。可选 TSA：DigiCert <code>http://timestamp.digicert.com</code> / Sectigo <code>http://timestamp.sectigo.com</code> / Certum <code>http://time.certum.pl</code><sup class="cite" data-refid="15">[15]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">6</span>验证签名</div><div class="step-body"><code>signtool verify /pa /v 小贝_x.y.z_x64-setup.exe</code> 应显示证书链有效 + 时间戳存在。或右键 exe → 属性 → 数字签名页确认发布者名字正确。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">7</span>SmartScreen 信誉积累策略</div><div class="step-body">签名只给「身份」，不给「信誉」。信誉靠下载量+时间累积，微软不公布阈值<sup class="cite" data-refid="6">[6]</sup>。策略：① 全程用<strong>同一张证书</strong>签（换证书=信誉重置）；② 官网放统一下载入口引导量；③ 主动提交 <a href="https://www.microsoft.com/en-us/wdsi/filesubmission" target="_blank" rel="noopener">Microsoft 文件分析</a> + 360/腾讯管家白名单；④ 官网首屏给「弹 SmartScreen 怎么办」图文（点更多信息→仍要运行）。</div></div>
+
+      <div class="callout warn">
+        <p><strong>⚠️ 时间戳是隐形生死线：</strong>没加时间戳的签名，<u>证书一过期，所有已发布的包签名立即失效</u>，用户重装时全弹未知发布者。加了时间戳则永久有效。所以 Win 签名<strong>必加</strong> <code>/tr</code>，CI 里别图省事省掉。<span class="conf g">🟢</span></p>
+      </div>
+      <div class="callout info"><p><strong>关于 digest 算法：</strong>统一用 SHA256（<code>/fd SHA256 /td SHA256</code> 或 Tauri <code>digestAlgorithm: "sha256"</code>）<sup class="cite" data-refid="7">[7]</sup>。注意 DigiCert 时间戳服务器对 <code>/td SHA512/SHA384</code> 有兼容问题，SHA256 最稳<sup class="cite" data-refid="15">[15]</sup>。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">macOS：Apple Developer 注册 + Developer ID 证书</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>Mac 端比 Win 端简单、便宜、标准化。先把账号和证书办下来。</p>
+
+      <h3>个人档 vs 组织档</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>档位</th><th>需要什么</th><th>能签 Developer ID 分发吗</th><th>中国可注册？</th></tr></thead>
+        <tbody>
+          <tr class="row-highlight"><td><strong>个人 / 个体（Individual）</strong></td><td>仅一个开 2FA 的 Apple Account + 达法定年龄<sup class="cite" data-refid="16">[16]</sup>，<strong>无需 D-U-N-S</strong></td><td class="check y">✓ 可（App Store 外分发官方支持）<sup class="cite" data-refid="9">[9]</sup></td><td class="check y">✓ 中国大陆可注册，需身份验证，可用 Apple Developer app 本地支付完成<sup class="cite" data-refid="17">[17]</sup></td></tr>
+          <tr><td>组织（Organization）</td><td>需 <strong>D-U-N-S 编号</strong> + 法人实体验证<sup class="cite" data-refid="16">[16]</sup></td><td class="check y">✓ 可，且证书显示公司名</td><td class="check p">~ 需公司 + D-U-N-S</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout good">
+        <p><strong>对小贝的拍板：个人档够用，先办个人档。</strong>① 个人开发者<u>不需要 D-U-N-S</u>，只要 Apple ID + $99/年<sup class="cite" data-refid="16">[16]</sup><sup class="cite" data-refid="10">[10]</sup>；② App Store 外直接分发 DMG/PKG 官方完全支持<sup class="cite" data-refid="9">[9]</sup>，不强制上 Mac App Store；③ 中国大陆个人可注册（需身份验证，Apple Developer app 支持本地支付）<sup class="cite" data-refid="17">[17]</sup>。<strong>唯一差别：个人档证书的「开发者」显示你的个人名，组织档显示公司名</strong>——MVP 用个人名完全 OK，等品牌成熟再迁组织档。<span class="conf g">🟢</span></p>
+      </div>
+
+      <h3>创建 Developer ID Application 证书（5 步）</h3>
+      <div class="step"><div class="step-head"><span class="sn">1</span>加入 Apple Developer Program</div><div class="step-body">$99/年<sup class="cite" data-refid="10">[10]</sup>。只有 Program 成员（账号持有者）才能签发 Developer ID 证书<sup class="cite" data-refid="9">[9]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>分清两种 Developer ID 证书</div><div class="step-body"><strong>Developer ID Application</strong>（签 .app/.dmg，小贝用这个）vs <strong>Developer ID Installer</strong>（签 .pkg 安装器）。小贝分发 DMG 主要用前者；若做 .pkg 安装器再加后者。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>本机生成 CSR</div><div class="step-body">钥匙串访问 → 证书助理 → 从证书颁发机构请求证书，生成 CSR（证书签名请求）。私钥留在你的本机钥匙串。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>在 developer.apple.com 签发</div><div class="step-body">Certificates 页 → 新建 → 选 Developer ID Application → 上传 CSR → 下载 .cer → 双击导入钥匙串，和私钥配成可用签名身份。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">5</span>导出 .p12 给 CI 用</div><div class="step-body">钥匙串里选「证书+私钥」→ 导出为 .p12（设密码）。CI 里 <code>base64</code> 成字符串存进 <code>APPLE_CERTIFICATE</code> secret，密码存 <code>APPLE_CERTIFICATE_PASSWORD</code><sup class="cite" data-refid="8">[8]</sup>（Ch11）。</div></div>
+
+      <div class="callout info"><p><strong>查签名身份名：</strong><code>security find-identity -v -p codesigning</code> 列出可用身份，形如 <code>Developer ID Application: 你的名字 (TEAMID)</code>——这串就是 Tauri 的 <code>signingIdentity</code> / <code>APPLE_SIGNING_IDENTITY</code> 值<sup class="cite" data-refid="8">[8]</sup>。TEAMID 也是 <code>APPLE_TEAM_ID</code>。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">macOS：签名 + 公证 + staple（完整命令序列）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>拿到 Developer ID 证书后，分发前要走「签名 → 公证 → 订书钉」三步。Tauri 构建时<u>大部分能自动做</u>（Ch9），这里给底层命令，便于排查和理解。</p>
+
+      <div class="callout bad"><p><strong>⚠️ altool 已死，用 notarytool。</strong>旧的 <code>xcrun altool</code> 上传公证通道<u>2023-11-01 起停用</u>，必须改用 <code>xcrun notarytool</code>（Xcode 14+）<sup class="cite" data-refid="18">[18]</sup>。网上 2023 年前的教程很多还在用 altool，照抄会直接失败。</p></div>
+
+      <h3>四步命令序列</h3>
+      <div class="step"><div class="step-head"><span class="sn">1</span>codesign 签名（开 hardened runtime）</div><div class="step-body">公证<u>要求</u>开 hardened runtime（<code>--options runtime</code>），并按需附 entitlements：<br><code>codesign --force --deep --options runtime --entitlements Entitlements.plist --sign "Developer ID Application: 名字 (TEAMID)" 小贝.app</code><sup class="cite" data-refid="9">[9]</sup></div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>存公证凭证（一次性）</div><div class="step-body"><code>xcrun notarytool store-credentials "小贝-profile" --apple-id you@mail.com --team-id TEAMID --password APP_SPECIFIC_PWD</code><sup class="cite" data-refid="18">[18]</sup>。把凭证存进钥匙串，后续提交引用 profile 名即可。app-specific password 在 appleid.apple.com 生成。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>提交公证并等回执</div><div class="step-body">先把 .app 打进 .dmg 或 zip，再提交：<br><code>xcrun notarytool submit 小贝_x.y.z.dmg --keychain-profile "小贝-profile" --wait</code><sup class="cite" data-refid="18">[18]</sup>。<code>--wait</code> 阻塞到 Apple 扫描完（通常几分钟，偶尔更久），返回 <code>Accepted</code> 才算过。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>staple 订书钉 + 验证</div><div class="step-body"><code>xcrun stapler staple 小贝_x.y.z.dmg</code> 把公证票钉进包里（用户离线也能验）<sup class="cite" data-refid="18">[18]</sup>。最后 <code>spctl -a -t open --context context:primary-signature -v 小贝_x.y.z.dmg</code> 或对 .app 用 <code>spctl -a -v 小贝.app</code> 验证 Gatekeeper 放行（显示 <code>accepted · source=Notarized Developer ID</code>）。</div></div>
+
+      <div class="callout info">
+        <p><strong>两种公证凭证方式（二选一）：</strong>① <strong>app-specific password</strong>（Apple ID + 团队 ID + 专用密码）——简单，适合个人；对应 Tauri env <code>APPLE_ID</code> / <code>APPLE_PASSWORD</code> / <code>APPLE_TEAM_ID</code><sup class="cite" data-refid="8">[8]</sup>。② <strong>App Store Connect API key</strong>（Issuer ID + Key ID + .p8 私钥文件）——更适合 CI/团队，不依赖个人 Apple ID 密码；对应 Tauri env <code>APPLE_API_ISSUER</code> / <code>APPLE_API_KEY</code> / <code>APPLE_API_KEY_PATH</code><sup class="cite" data-refid="8">[8]</sup>。<strong>小贝 CI 推荐用 API key</strong>（不绑个人密码、可吊销）。</p>
+      </div>
+      <div class="callout warn"><p><strong>关于 entitlements 与 hardened runtime：</strong>hardened runtime 默认禁掉一些能力（JIT、未签名内存、dyld 注入等），<u>公证强制要求开</u><sup class="cite" data-refid="9">[9]</sup>。小贝若用到 WKWebView/某些 native 能力，可能要在 Entitlements.plist 里声明对应 entitlement（如 <code>com.apple.security.cs.allow-jit</code>）。Tauri 模板自带一份合理默认，按需改（Ch9）。<span class="pill warn">⚠️ 具体要哪些 entitlement 取决于小贝实际用到的 native API，需联调确认</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">★ Tauri 2.x 签名配置详解（键名已核实）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把上面两端的配置落到 <code>tauri.conf.json</code> + 环境变量。<strong>注意：Tauri 1.x 和 2.x 的键名/结构有变，本章全部按 2.x 官方文档核实</strong><sup class="cite" data-refid="7">[7]</sup><sup class="cite" data-refid="8">[8]</sup>，别照 1.x 老教程。</p>
+
+      <h3>bundle.windows（Windows 签名）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>键（2.x）</th><th>作用</th><th>示例值</th></tr></thead>
+        <tbody>
+          <tr><td><code>certificateThumbprint</code></td><td>本机/token 上证书的指纹（让 Tauri 调 signtool 用它签）</td><td><code>"A1B2...A0B0"</code><sup class="cite" data-refid="7">[7]</sup></td></tr>
+          <tr><td><code>digestAlgorithm</code></td><td>摘要算法</td><td><code>"sha256"</code><sup class="cite" data-refid="7">[7]</sup></td></tr>
+          <tr><td><code>timestampUrl</code></td><td>RFC3161 时间戳服务器</td><td><code>"http://timestamp.digicert.com"</code><sup class="cite" data-refid="7">[7]</sup></td></tr>
+          <tr class="row-highlight"><td><code>signCommand</code></td><td><strong>走云签名的关键</strong>：指定任意外部签名 CLI，<code>%1</code> 是待签文件占位符</td><td><code>"trusted-signing-cli ... %1"</code> / 任意云签 CLI<sup class="cite" data-refid="7">[7]</sup></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <pre><code>// tauri.conf.json —— Windows，云签名方式（小贝推荐）
+"bundle": {
+  "windows": {
+    "signCommand": "你的云签名CLI --file %1"   // %1 = Tauri 传入待签路径
+  }
+}
+// 或：本机/自托管 runner 有 token 时，走 thumbprint
+"bundle": {
+  "windows": {
+    "certificateThumbprint": "A1B2...A0B0",
+    "digestAlgorithm": "sha256",
+    "timestampUrl": "http://timestamp.digicert.com"
+  }
+}</code></pre>
+
+      <h3>bundle.macOS（macOS 签名）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>键（2.x）</th><th>作用</th><th>示例值</th></tr></thead>
+        <tbody>
+          <tr><td><code>signingIdentity</code></td><td>签名身份（钥匙串条目名）；<code>"-"</code> 为 ad-hoc 临时签</td><td><code>"Developer ID Application: 名字 (TEAMID)"</code><sup class="cite" data-refid="8">[8]</sup></td></tr>
+          <tr><td><code>providerShortName</code></td><td>多团队归属时指定 provider（一般单团队不用填）</td><td><code>"YourTeamShortName"</code><sup class="cite" data-refid="8">[8]</sup></td></tr>
+          <tr><td><code>entitlements</code></td><td>entitlements plist 路径</td><td><code>"Entitlements.plist"</code><sup class="cite" data-refid="8">[8]</sup></td></tr>
+          <tr><td><code>hardenedRuntime</code></td><td>是否开 hardened runtime（公证要求开）</td><td><code>true</code><sup class="cite" data-refid="8">[8]</sup></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h4>Apple 环境变量全清单（CI 注入，覆盖 conf 值）</h4>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>环境变量</th><th>用途</th><th>哪个场景</th></tr></thead>
+        <tbody>
+          <tr><td><code>APPLE_CERTIFICATE</code></td><td>.p12 证书的 base64 字符串</td><td>CI（机器无钥匙串）<sup class="cite" data-refid="8">[8]</sup></td></tr>
+          <tr><td><code>APPLE_CERTIFICATE_PASSWORD</code></td><td>.p12 的密码</td><td>CI<sup class="cite" data-refid="8">[8]</sup></td></tr>
+          <tr><td><code>APPLE_SIGNING_IDENTITY</code></td><td>签名身份（覆盖 conf 的 signingIdentity）</td><td>CI/本地<sup class="cite" data-refid="8">[8]</sup></td></tr>
+          <tr><td><code>APPLE_ID</code> / <code>APPLE_PASSWORD</code> / <code>APPLE_TEAM_ID</code></td><td>公证：Apple ID + app 专用密码 + 团队 ID</td><td>公证（密码方式）<sup class="cite" data-refid="8">[8]</sup></td></tr>
+          <tr><td><code>APPLE_API_ISSUER</code> / <code>APPLE_API_KEY</code> / <code>APPLE_API_KEY_PATH</code></td><td>公证：App Store Connect API key（Issuer/Key ID/.p8 路径）</td><td>公证（API key 方式，CI 推荐）<sup class="cite" data-refid="8">[8]</sup></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout good">
+        <p><strong>Tauri 的省心之处：</strong>设好上述 macOS env 后，<code>tauri build</code> 会<u>自动</u>用 Developer ID 签名（hardened runtime）→ 提交 Apple 公证 → staple，一条命令走完 Ch8 那四步<sup class="cite" data-refid="8">[8]</sup>。需要时可加 <code>--skip-stapling</code> 跳过订书钉做初次公证<sup class="cite" data-refid="8">[8]</sup>。<strong>Windows 端</strong>设好 <code>signCommand</code> 或 <code>certificateThumbprint</code> 后，<code>tauri build</code> 也会在打包时自动签<sup class="cite" data-refid="7">[7]</sup>。<span class="conf g">🟢</span></p>
+      </div>
+      <div class="trap-box"><strong>⚠️ 1.x → 2.x 易错点：</strong>① 2.x 的 macOS 配置块键是 <code>bundle.macOS</code>（注意大小写）；② updater 在 2.x 是<u>独立插件</u> <code>plugins.updater</code>（1.x 是 <code>tauri.updater</code>），键位变了（Ch10）；③ 环境变量前缀 2.x 用 <code>TAURI_SIGNING_PRIVATE_KEY</code>（1.x 是 <code>TAURI_PRIVATE_KEY</code>）<sup class="cite" data-refid="11">[11]</sup>。照 1.x 教程会找不到键。<span class="pill warn">⚠️ 以 v2.tauri.app 当前文档为准</span></div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">★ Tauri updater 签名（独立第三条链路，别和 OS 签名混）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="callout accent"><p><strong>这章讲的密钥跟 CA、跟 Apple 完全没关系。</strong>updater 签名是 Tauri 自己的 minisign（Ed25519）公私钥对，用来证明「这个更新包确实是小贝官方发的，没被中间人替换」。它是 Tauri updater 插件的<u>硬性前置</u>——没配，自动更新直接报 <code>InvalidSignature</code>，再贵的 CA 证书也救不了<sup class="cite" data-refid="11">[11]</sup>。</p></div>
+
+      <h3>四步配齐 updater 签名</h3>
+      <div class="step"><div class="step-head"><span class="sn">1</span>生成 minisign 密钥对</div><div class="step-body"><code>tauri signer generate -w ~/.tauri/小贝.key</code><sup class="cite" data-refid="11">[11]</sup>。产出两个文件：<code>小贝.key</code>（私钥，<strong>绝密、永久保管</strong>）和 <code>小贝.key.pub</code>（公钥）。可设密码保护私钥。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>公钥进 tauri.conf.json</div><div class="step-body">把 <code>.pub</code> 内容填进 <code>plugins.updater.pubkey</code>，并设 <code>active: true</code> + <code>endpoints</code>（更新源 URL，如 GitHub Release 的 latest.json）<sup class="cite" data-refid="11">[11]</sup>。这是 2.x 的插件式结构。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>私钥进 CI 环境变量</div><div class="step-body"><code>TAURI_SIGNING_PRIVATE_KEY</code>（私钥内容或路径）+ <code>TAURI_SIGNING_PRIVATE_KEY_PASSWORD</code>（若设了密码）<sup class="cite" data-refid="11">[11]</sup>。CI 里存成 GitHub Secret。构建时 Tauri 自动用它签更新产物，生成 <code>.sig</code>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>注册插件</div><div class="step-body">Rust 端 <code>lib.rs</code> 加 <code>.plugin(tauri_plugin_updater::Builder::new().build())</code><sup class="cite" data-refid="11">[11]</sup>。前端调更新 API 时，Tauri 下载更新包 → 用 conf 里的 pubkey 校验 <code>.sig</code> → 通过才安装。</div></div>
+
+      <h3>updater 工作原理（为什么签名缺一不可）</h3>
+      <div class="tree">
+        <div class="node q">小贝 App 检查更新时发生什么？</div>
+        <div class="step-arrow">↓</div>
+        <div class="node">① 请求 <code>endpoints</code> 拿 <code>latest.json</code>（含新版本号、下载 URL、对应 <code>signature</code>）</div>
+        <div class="node">② 下载更新产物（.nsis.zip / .app.tar.gz）</div>
+        <div class="node">③ <strong>用 conf 里的 pubkey 校验产物的 minisign 签名</strong>——这步就是防篡改的核心<sup class="cite" data-refid="11">[11]</sup></div>
+        <div class="node"><span class="lbl y">签名对</span> 安装更新 · <span class="lbl n">签名错/缺</span> 报 InvalidSignature，拒绝安装</div>
+      </div>
+
+      <div class="callout bad"><p><strong>⚠️ 私钥丢了 = 灾难级后果：</strong>如果你弄丢了 minisign 私钥，<u>就再也无法给「已经装了小贝的老用户」推送任何自动更新</u>——因为他们的 App 内置的是旧 pubkey，只认旧私钥签的包，换新密钥对他们一律校验失败<sup class="cite" data-refid="11">[11]</sup>。老用户只能手动重新下载安装。所以 <strong>minisign 私钥必须像命根子一样备份</strong>（密码管理器 + 离线备份），比 CA 证书还金贵（CA 证书丢了能重买，updater 私钥丢了老用户更新链就断了）。</p></div>
+      <div class="callout warn"><p><strong>再强调一次三条链路别混：</strong>① Authenticode（Win，CA 证书，给 SmartScreen）；② Apple 公证（Mac，Developer ID，给 Gatekeeper）；③ updater minisign（两端共用，给自动更新）。<u>updater 签名跟「Windows 弹不弹未知发布者」「Mac 能不能双击打开」完全无关</u>——那是①②的事。updater 只管「自动更新包是不是真的」。<span class="conf g">🟢</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">GitHub Actions CI 双端矩阵（带签名公证）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把三条链路全装进一个 CI workflow。核心约束承接父报告：<strong>不能跨平台编译</strong>——Mac 包必须 macOS runner、Win 包必须 Windows runner<sup class="cite" data-refid="9">[9]</sup>（父报告 Ch3）。所以是矩阵：两个 runner 各自构建+签名，updater 私钥两端共用。</p>
+
+      <div class="callout bad"><p><strong>⚠️ 为什么不能一个 runner 全包了：</strong>Tauri 打包依赖各 OS 的原生工具链（Win 的 NSIS/WiX、Mac 的 codesign/notarytool），且 codesign/公证<u>只能在 macOS 上跑</u>、signtool<u>只能在 Windows 上跑</u>。所以小贝的发版 CI 天然是 <code>matrix: [macos-latest, windows-latest]</code> 两路并行。</p></div>
+
+      <h3>secrets 注入清单（三链路全集）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Secret</th><th>哪条链路</th><th>哪个 runner</th></tr></thead>
+        <tbody>
+          <tr><td><code>APPLE_CERTIFICATE</code> / <code>APPLE_CERTIFICATE_PASSWORD</code></td><td>② Mac 签名（.p12 base64）</td><td>macos</td></tr>
+          <tr><td><code>APPLE_SIGNING_IDENTITY</code> / <code>APPLE_TEAM_ID</code></td><td>② Mac 签名</td><td>macos</td></tr>
+          <tr><td><code>APPLE_ID</code> / <code>APPLE_PASSWORD</code>（或 <code>APPLE_API_*</code>）</td><td>② Mac 公证</td><td>macos</td></tr>
+          <tr><td><code>ES_USERNAME</code> / <code>ES_PASSWORD</code> / <code>CREDENTIAL_ID</code> / <code>ES_TOTP_SECRET</code>（eSigner 例）</td><td>① Win 云签名</td><td>windows</td></tr>
+          <tr class="row-highlight"><td><code>TAURI_SIGNING_PRIVATE_KEY</code> / <code>TAURI_SIGNING_PRIVATE_KEY_PASSWORD</code></td><td>③ updater 签名（<strong>两端共用</strong>）</td><td>both</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>workflow.yml 骨架（说明性）</h3>
+      <pre><code>name: release
+on: { push: { tags: ['v*'] } }
+permissions: { contents: write }   # 发 Release 要写权限
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - { platform: 'macos-latest',   args: '--target universal-apple-darwin' }
+          - { platform: 'windows-latest', args: '' }
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm ci
+      # —— tauri-action：构建 + 自动签名 + 公证 + 出 updater 产物 ——
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          # 链路③ updater（两端都注入）
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          # 链路② Mac 签名+公证（仅 macos runner 用到）
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          tagName: ${{ github.ref_name }}
+          args: ${{ matrix.args }}
+      # 链路① Win 云签名：若没走 Tauri signCommand 内联，可在此加独立 step
+      #   - uses: sslcom/actions-codesigner@develop  （仅 windows runner）</code></pre>
+      <p style="font-size:13px;color:var(--text-mute)">⚠️ 上为说明性骨架（依据 tauri-action 与各服务文档结构整理<sup class="cite" data-refid="19">[19]</sup><sup class="cite" data-refid="8">[8]</sup>），<strong>非完整可运行</strong>——落地以 <a href="https://github.com/tauri-apps/tauri-action" target="_blank" rel="noopener">tauri-action</a> 当前文档为准。Win 云签名既可写进 <code>signCommand</code> 由 tauri-action 自动调，也可作独立 step；环境变量名以 v2.tauri.app 为准。</p>
+
+      <div class="callout info"><p><strong>tauri-action 帮你做什么：</strong>它在各 runner 上构建 Tauri 应用、按注入的 env 自动签名/公证、产出 updater 资源，并可上传到 GitHub Release<sup class="cite" data-refid="19">[19]</sup>。Mac 端会自动处理 .p12 导入临时钥匙串 → 签 → 公证；Win 端按 signCommand/thumbprint 签。<strong>注意</strong>：默认 GitHub Token 只读，发 Release 要在仓库设置里给 workflow「读写权限」或在 yml 写 <code>permissions: contents: write</code><sup class="cite" data-refid="19">[19]</sup>。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">成本与时间表（两档预算）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把钱和时间钉清楚。所有价格<strong>截至 2026-06，以各官网为准</strong>，多源对得上的标 🟢，单源标 🟡。</p>
+
+      <h3>年成本对比表</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>项目</th><th>价格</th><th>周期/性质</th><th>可信度</th></tr></thead>
+        <tbody>
+          <tr><td>Apple Developer Program</td><td><strong>$99/年</strong><sup class="cite" data-refid="10">[10]</sup></td><td>年费（含签名+公证全套）</td><td><span class="conf g">🟢 多源</span></td></tr>
+          <tr><td>Certum 开源/个人 代码签名（云）</td><td><strong>~€49–69/年</strong>（~€29 续费）<sup class="cite" data-refid="5">[5]</sup></td><td>年费，5000 签/月限</td><td><span class="conf y">🟡 经销商口径，以 shop.certum.eu 为准</span></td></tr>
+          <tr><td>SignPath Foundation（开源）</td><td><strong>免费</strong><sup class="cite" data-refid="14">[14]</sup></td><td>需过开源资格审核</td><td><span class="conf y">🟡 资格条款以官网为准</span></td></tr>
+          <tr><td>国内 CA OV（沃通）</td><td><strong>~¥3588/年</strong>（EV ~¥4288）<sup class="cite" data-refid="4">[4]</sup></td><td>年费，需营业执照</td><td><span class="conf g">🟢 父报告已核</span></td></tr>
+          <tr><td>SSL.com OV/EV + eSigner（云）</td><td>证书 <strong>~$249–349/年</strong> + eSigner 订阅（Tier1 $100/月起）<sup class="cite" data-refid="12">[12]</sup></td><td>年费 + 月费</td><td><span class="conf y">🟡 单源，以 ssl.com 为准</span></td></tr>
+          <tr class="row-highlight"><td>Tauri updater minisign</td><td><strong>免费</strong></td><td>自己生成，无年费</td><td><span class="conf g">🟢</span></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>首次注册/验证周期</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">即时–2 天</div><div class="l">Apple 个人档（身份验证后）</div></div>
+        <div class="metric"><div class="v">1–5 天</div><div class="l">Win OV 组织验证<sup class="cite" data-refid="4">[4]</sup></div></div>
+        <div class="metric"><div class="v">更久</div><div class="l">Win EV（验证更严）</div></div>
+        <div class="metric"><div class="v">几分钟</div><div class="l">每次 Apple 公证扫描（偶尔更久）</div></div>
+      </div>
+
+      <h3>两档预算</h3>
+      <div class="callout good"><p><strong>💰 「MVP 最省」档（≈ $99/年 + €0–69）：</strong>Mac 走 Apple $99 完整公证；Windows 走 <u>SignPath（开源免费）或 Certum 开源版 €49–69</u>，<u>或干脆 Windows 暂不签</u>（接受 SmartScreen 警告 + 官网图文指引），updater 免费。<strong>总现金：$99/年 起，最多再加 ~€69。</strong>适合验证期、种子用户。</p></div>
+      <div class="callout info"><p><strong>💼 「正规全套」档（≈ $99 + ¥3.5k 或 $99 + ~$500/年）：</strong>Mac 同上 $99；Windows 落公司/个体主体后走<u>国内 CA OV ¥3588</u> 或 <u>国际 CA OV + 云签名（约 $250 证书 + eSigner 月费）</u>，接 CI 全自动；updater 免费。<strong>总现金量级：$99 + ¥3.5k/年（国内 CA）或 $99 + $500–1500/年（国际 CA + 云签名月费）</strong>。<u>EV 不再值溢价</u>（不免 SmartScreen 警告了），选 OV 即可。</p></div>
+      <div class="callout warn"><p><strong>⚠️ 别低估「时间成本」：</strong>钱是小头，<u>OV 组织验证 1–5 天、主体注册（个体户/公司）可能数周</u>才是 Windows 端真正的前置周期。所以即便 MVP 先不正式签 Win，也建议<strong>尽早启动主体注册流程</strong>，等放量时证书已就绪，不卡发版。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">中国合规附加（只补签名相关）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>父报告 Ch4 已覆盖 FFmpeg LGPL / codec 专利 / ICP 备案的总体合规。本节<strong>只补「跟签名/上架直接相关」</strong>那部分，不重复。</p>
+
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>合规项</th><th>跟签名的关系</th><th>对小贝</th></tr></thead>
+        <tbody>
+          <tr><td><strong>软件著作权（软著）</strong></td><td>代码签名<u>不需要</u>软著；但<strong>国内应用商店上架、部分分发渠道要软著或 ICP</strong><sup class="cite" data-refid="20">[20]</sup></td><td class="check p">自分发不强制；上国内商店要办（周期 30+ 天，提前办）</td></tr>
+          <tr><td><strong>ICP 备案</strong></td><td>跟签名无关，但<u>官网（下载站）托管在大陆服务器</u>需 ICP 备案<sup class="cite" data-refid="20">[20]</sup>（父报告 Ch4）</td><td class="check p">官网放大陆要备案；放海外/CDN 视情况</td></tr>
+          <tr><td><strong>Microsoft Store 上架</strong></td><td><u>必须</u>用微软认可的签名；走 MSIX 打包可享<strong>微软免费代码签名</strong>（微软给商店应用签）<sup class="cite" data-refid="20">[20]</sup></td><td class="check y">若上 MS Store，可省自购证书（但要走 MSIX 流程）</td></tr>
+          <tr><td><strong>国内分发渠道（腾讯应用宝等）</strong></td><td>应用宝主要是<u>安卓</u>平台；其 Windows/PC 侧通过 MS Store 专区<sup class="cite" data-refid="21">[21]</sup>。安卓上架普遍要软著或 ICP<sup class="cite" data-refid="20">[20]</sup></td><td class="check p">小贝是桌面端，主走自分发 + 可选 MS Store；应用宝桌面分发非主路径</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout good"><p><strong>💡 一个省钱选项：Microsoft Store + MSIX = 免费签名。</strong>如果小贝愿意走 Microsoft Store 上架（MSIX 打包），<u>微软会用自己的证书给商店应用签名，省掉自购代码签名证书的钱</u><sup class="cite" data-refid="20">[20]</sup>，且商店分发的应用 SmartScreen 待遇更好。代价：要做 MSIX 打包、过商店审核、且上架国内商店要软著。<strong>对小贝是「自分发（要自签）vs 上 MS Store（免签但要打包+审核+软著）」的 trade-off</strong>——MVP 自分发更快，成熟后可双轨。<span class="pill warn">⚠️ MSIX 免费签名细节以微软商店文档为准</span></p></div>
+      <div class="callout warn"><p><strong>三种 Windows 分发形态的签名要求差异：</strong>① <u>官网自分发 exe/msi</u> → 自购 Authenticode 证书签（本 spec 主路径）；② <u>Microsoft Store（MSIX）</u> → 微软代签，免自购；③ <u>国内第三方（应用宝等）</u> → 多为安卓，桌面侧多经 MS Store，且要软著/ICP。小贝 MVP 走①，成熟期可补②。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH14 ===== -->
+  <section class="chapter" id="ch14">
+    <h2><span class="num">14</span><span class="title-text">★ 小贝落地 checklist + 阶段策略</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把全 spec 收敛成「先做什么、再做什么」的阶段表 + 逐项 checklist。</p>
+
+      <h3>阶段策略（MVP 先签哪端的拍板）</h3>
+      <div class="callout accent"><p><strong>核心 trade-off：小贝是 Windows 优先产品，但 Windows 签名最难最贵。</strong>结论：<strong>MVP 先把便宜标准化的 Mac 公证做掉（给种子用户/自己自测顺滑体验），Windows 先用云签名（Certum 个人/开源 €49–69）或暂时接受 SmartScreen 警告（官网放「被拦截怎么办」图文 + 提交杀软白名单），等放量、信誉起来或主体落定，再上正规 OV + 云签名接 CI。</strong>updater 签名从第一天就要配齐（不分阶段，否则自动更新废）。<span class="conf g">🟢</span></p></div>
+
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>阶段</th><th>Windows</th><th>macOS</th><th>updater</th></tr></thead>
+        <tbody>
+          <tr><td><strong>P0 内测/种子</strong></td><td>暂不签 或 Certum 个人/开源云签<sup class="cite" data-refid="5">[5]</sup>；官网放「未知发布者怎么办」图文</td><td class="check y"><strong>完整公证</strong>（$99，双击即开）</td><td class="check y"><strong>第一天就配</strong>（minisign）</td></tr>
+          <tr><td><strong>P1 公开放量</strong></td><td>落主体 → OV + 云签名接 CI；同一证书持续签积累信誉；提交 360/腾讯白名单</td><td class="check y">维持公证；CI 用 API key 方式</td><td class="check y">私钥严密备份</td></tr>
+          <tr><td><strong>P2 成熟期</strong></td><td>可选补 Microsoft Store（MSIX 免费签）双轨<sup class="cite" data-refid="20">[20]</sup></td><td class="check y">可迁组织档（证书显示公司名）</td><td class="check y">不变（密钥延续）</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>逐项 checklist（两端各一列）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Windows 端</th><th>macOS 端</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>按 Ch4 决策树选 CA（开源→SignPath/Certum；闭源有主体→OV）</td><td>加入 Apple Developer Program（$99，个人档够用）</td></tr>
+          <tr><td>2</td><td>下单<strong>云签名版</strong>证书（非实体 token 版，才能接 CI）</td><td>生成 CSR → 签发 Developer ID Application 证书</td></tr>
+          <tr><td>3</td><td>完成身份/组织验证（1–5 天，提前办）</td><td>导出 .p12 + base64 进 CI secret</td></tr>
+          <tr><td>4</td><td>配 <code>signCommand</code>（%1 占位）或云签名独立 step</td><td>conf 设 <code>bundle.macOS.hardenedRuntime: true</code> + entitlements</td></tr>
+          <tr><td>5</td><td>加 <strong>RFC3161 时间戳</strong>（<code>timestampUrl</code>，必加）<sup class="cite" data-refid="15">[15]</sup></td><td>设公证凭证（CI 推荐 API key：<code>APPLE_API_*</code>）</td></tr>
+          <tr><td>6</td><td><code>signtool verify /pa</code> 验证签名 + 时间戳</td><td><code>spctl -a -v</code> 验证 Gatekeeper 放行</td></tr>
+          <tr><td>7</td><td>提交 SmartScreen / 360 / 腾讯管家白名单</td><td>确认 <code>tauri build</code> 自动签+公证+staple 走通</td></tr>
+          <tr><td>8</td><td colspan="2" style="text-align:center"><strong>共用：updater — <code>tauri signer generate</code> 生成密钥对，pubkey 进 <code>plugins.updater</code>，私钥进 CI secret 并离线备份</strong></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="check-box"><strong>✅ 三条链路各自的「完成」判据：</strong>① Win：<code>signtool verify /pa</code> 通过 + 数字签名页显示正确发布者；② Mac：<code>spctl -a -v</code> 显示 <code>accepted · Notarized Developer ID</code>；③ updater：发个测试版，让已装的旧版 App 自动检测到更新并成功校验安装（不报 InvalidSignature）。</div>
+    </div>
+  </section>
+
+  <!-- ===== MINI DEMO ===== -->
+  <section class="chapter" id="demo">
+    <h2><span class="num">🎮</span><span class="title-text">Mini Demo：签名状态 → 用户看到什么</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>切换不同签名状态，看用户首装时<strong>实际弹出什么对话框</strong>——直观感受「不签 / OV已签无信誉 / EV已签 / Mac未公证 / Mac已公证」的差别。</p>
+
+      <div class="sim-box">
+        <div style="font-weight:700;margin-bottom:8px;color:var(--text)">选择平台 + 签名状态：</div>
+        <div class="sim-toggle" id="simToggle">
+          <button class="sim-btn active" data-state="win-none">Win · 未签名</button>
+          <button class="sim-btn" data-state="win-ov">Win · OV已签(无信誉)</button>
+          <button class="sim-btn" data-state="win-ev">Win · EV已签</button>
+          <button class="sim-btn" data-state="mac-none">Mac · 未公证</button>
+          <button class="sim-btn" data-state="mac-notarized">Mac · 已公证</button>
+        </div>
+        <div class="sim-dialog" id="simDialog">
+          <div class="sd-os">Windows · SmartScreen</div>
+          <div class="sd-icon">🛡️</div>
+          <div class="sd-title">Windows 已保护你的电脑</div>
+          <div class="sd-body">Microsoft Defender SmartScreen 阻止了无法识别的应用启动。运行此应用可能会使你的电脑面临风险。<br><span style="color:var(--text-mute)">应用：小贝_0.1.0_x64-setup.exe　发布者：<strong>未知发布者</strong></span></div>
+          <div class="sd-verdict bad">😱 小白用户大概率直接关掉 → 装不上</div>
+        </div>
+      </div>
+
+      <p style="font-size:13px;color:var(--text-mute)">⚠️ 弹窗文案为<u>示意性模拟</u>（贴近真实 SmartScreen/Gatekeeper 提示），非逐字截图；具体措辞随 OS 版本变。</p>
+
+      <h3>真实配置/命令片段（点开看）</h3>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <div class="dc-icon">🪟</div>
+          <div class="dc-title">tauri.conf.json · Windows 云签名</div>
+          <div class="dc-tag">点开看片段</div>
+          <div class="dc-body"><pre style="margin:8px 0 0"><code>"bundle": {
+ "windows": {
+   // 云签名：%1 = 待签文件路径占位
+   "signCommand":
+     "你的云签CLI --file %1",
+   // 或本机/自托管 token 方式：
+   "certificateThumbprint":"A1B2...A0B0",
+   "digestAlgorithm":"sha256",
+   "timestampUrl":
+     "http://timestamp.digicert.com"
+ }
+}</code></pre></div>
+        </div>
+        <div class="demo-card">
+          <div class="dc-icon">🍎</div>
+          <div class="dc-title">macOS 签名+公证命令序列</div>
+          <div class="dc-tag">点开看 4 步</div>
+          <div class="dc-body"><pre style="margin:8px 0 0"><code># 1 签名(开 hardened runtime)
+codesign --force --deep \
+ --options runtime \
+ --entitlements Entitlements.plist \
+ --sign "Developer ID Application: \
+   名字 (TEAMID)" 小贝.app
+# 2 存凭证(一次性)
+xcrun notarytool store-credentials \
+ "小贝-profile" --apple-id you@x.com \
+ --team-id TEAMID --password APP_PWD
+# 3 提交公证 + 等回执
+xcrun notarytool submit 小贝.dmg \
+ --keychain-profile "小贝-profile" --wait
+# 4 订书钉 + 验证
+xcrun stapler staple 小贝.dmg
+spctl -a -v 小贝.app</code></pre></div>
+        </div>
+        <div class="demo-card">
+          <div class="dc-icon">🔑</div>
+          <div class="dc-title">updater minisign（第三链路）</div>
+          <div class="dc-tag">点开看片段</div>
+          <div class="dc-body"><pre style="margin:8px 0 0"><code># 生成密钥对(私钥绝密备份!)
+tauri signer generate \
+  -w ~/.tauri/小贝.key
+# tauri.conf.json:
+"plugins": {
+ "updater": {
+   "active": true,
+   "endpoints": ["https://.../latest.json"],
+   "pubkey": "&lt;小贝.key.pub 内容&gt;"
+ }
+}
+# CI 环境变量:
+TAURI_SIGNING_PRIVATE_KEY=...
+TAURI_SIGNING_PRIVATE_KEY_PASSWORD=...</code></pre></div>
+        </div>
+        <div class="demo-card">
+          <div class="dc-icon">⚙️</div>
+          <div class="dc-title">signtool 验证 + 时间戳</div>
+          <div class="dc-tag">点开看命令</div>
+          <div class="dc-body"><pre style="margin:8px 0 0"><code># 签名 + RFC3161 时间戳(必加)
+signtool sign /fd SHA256 \
+ /tr http://timestamp.digicert.com \
+ /td SHA256 小贝_setup.exe
+# 验证
+signtool verify /pa /v 小贝_setup.exe
+# 可选 TSA:
+#  http://timestamp.digicert.com
+#  http://timestamp.sectigo.com
+#  http://time.certum.pl</code></pre></div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--text-mute)">⚠️ 以上配置/命令为<u>说明性片段</u>（依据 Tauri 2.x 官方文档与各服务文档整理<sup class="cite" data-refid="7">[7]</sup><sup class="cite" data-refid="8">[8]</sup><sup class="cite" data-refid="11">[11]</sup>），<strong>非完整可运行实现</strong>——落地代码留工程 session，键名/参数以官网为准。</p>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq">
+    <h2><span class="num">❓</span><span class="title-text">FAQ 常见问题（12 条）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">不签名会怎样？真的装不上吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能装但摩擦极大。Windows 弹 SmartScreen「未知发布者」蓝框（小白多半关掉）<sup class="cite" data-refid="6">[6]</sup>；Mac 弹 Gatekeeper「来自身份不明开发者，无法打开」<sup class="cite" data-refid="9">[9]</sup>，要右键打开/系统设置放行。对小贝的非技术国内用户，这是劝退级（Ch2）。还有 360/腾讯管家对新 exe 可能直接误删。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">OV 够不够？非得买 EV 吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>OV 够。EV 历史卖点是「首发即绕过 SmartScreen」——<strong>这个特权 2024-08 起没了</strong>，微软把 EV OID 从受信根移除，EV 与 OV 同走信誉累积<sup class="cite" data-refid="6">[6]</sup>。现在多花钱买 EV 也买不到「首发不弹警告」，所以选 OV 即可（Ch4）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">为什么签了名 Windows 还弹 SmartScreen？</span><span class="toggle">＋</span></div><div class="faq-a"><p>签名给「身份」，不给「信誉」。SmartScreen 信誉靠下载量+时间累积，微软不公布阈值<sup class="cite" data-refid="6">[6]</sup>。新 App 信誉起来前仍可能弹（点更多信息→仍要运行可继续）。化解：同一证书持续签、引导下载量、提交白名单、官网放图文指引（Ch6）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">云签名安全吗？私钥在别人那儿不怕吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>这正是 CA/B 规则的设计——私钥<u>非可导出地</u>存在服务商的 FIPS 140-2 L2/EAL4+ 云 HSM 里<sup class="cite" data-refid="1">[1]</sup>，你通过鉴权远程调用签名，私钥本身不下发。比把 U 盾插在一台常开机器上更可控（机器被黑 vs 云 HSM 审计）。CI 凭证用 GitHub Secret 管理（Ch5）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">中国个人开发者到底能怎么签 Windows？</span><span class="toggle">＋</span></div><div class="faq-a"><p>三条路：① 开源 → SignPath Foundation（免费）<sup class="cite" data-refid="14">[14]</sup> 或 Certum 开源版（~€49–69）<sup class="cite" data-refid="5">[5]</sup>；② 有公司/个体户主体 → 国内 CA OV ¥3588<sup class="cite" data-refid="4">[4]</sup> 或国际 CA OV+云签名；③ 闭源无主体 MVP → 先缓（接受警告+图文指引），放量再补主体。<strong>Azure Trusted Signing 中国无资格</strong>，别走<sup class="cite" data-refid="3">[3]</sup>（Ch4）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">硬件 token 在 GitHub Actions 里怎么插？</span><span class="toggle">＋</span></div><div class="faq-a"><p>插不了——云 runner 是一次性 VM，没法插实体 U 盾。解法是<strong>云签名服务</strong>（私钥在服务商云 HSM，CI 远程调用，如 SSL.com eSigner 的 <code>sslcom/actions-codesigner</code> action<sup class="cite" data-refid="13">[13]</sup>），或自托管一台插着 token 的 runner，或本地手动签。小贝走云签名（Ch5）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Mac 公证要多久？会卡住吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>通常几分钟，偶尔更久（Apple 服务繁忙时可能拖到几十分钟甚至更长）<sup class="cite" data-refid="18">[18]</sup>。用 <code>notarytool submit --wait</code> 阻塞等回执，返回 <code>Accepted</code> 才算过。<strong>注意 altool 已于 2023-11-01 停用</strong>，必须用 notarytool<sup class="cite" data-refid="18">[18]</sup>（Ch8）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">中国个人能注册 Apple Developer 签 Mac 吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能。个人档<u>只要 Apple ID（开 2FA）+ $99/年，无需 D-U-N-S</u><sup class="cite" data-refid="16">[16]</sup>。中国大陆个人可注册，需身份验证，且 Apple Developer app 支持本地支付完成购买<sup class="cite" data-refid="17">[17]</sup>。App Store 外直接分发 DMG 官方支持<sup class="cite" data-refid="9">[9]</sup>（Ch7）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">updater 签名忘了配会怎样？</span><span class="toggle">＋</span></div><div class="faq-a"><p>自动更新直接废。Tauri updater <strong>强制</strong>校验 minisign 签名，没配 pubkey/没签更新包，App 检查更新时报 <code>InvalidSignature</code> 拒绝安装<sup class="cite" data-refid="11">[11]</sup>。这跟 CA 证书无关，是 Tauri 自己的 Ed25519 密钥（Ch10）。所以第一天就要配齐。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">证书 / updater 私钥丢了怎么办？</span><span class="toggle">＋</span></div><div class="faq-a"><p>分两种：① CA 代码签名证书丢了 → 重新签发/重买，影响有限（新包用新证书签，信誉可能重置）；② <strong>updater minisign 私钥丢了 = 灾难</strong> → 已装的老用户内置旧 pubkey，只认旧私钥签的包，换新密钥后他们一律校验失败，<u>再也收不到自动更新</u>，只能手动重装<sup class="cite" data-refid="11">[11]</sup>。所以 updater 私钥要离线 + 密码管理器双备份（Ch10）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Tauri 2.x 配置键跟 1.x 一样吗？照老教程行吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不一样，别照 1.x。2.x 变化：① macOS 配置块是 <code>bundle.macOS</code>；② updater 是<u>独立插件</u> <code>plugins.updater</code>（1.x 是 <code>tauri.updater</code>）；③ 环境变量 <code>TAURI_SIGNING_PRIVATE_KEY</code>（1.x 是 <code>TAURI_PRIVATE_KEY</code>）<sup class="cite" data-refid="11">[11]</sup>。本 spec 全按 2.x 核实<sup class="cite" data-refid="7">[7]</sup><sup class="cite" data-refid="8">[8]</sup>（Ch9）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">能不能省钱不签 Windows？上 Microsoft Store 行吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>两个省钱选项：① MVP 阶段 Windows 暂不签，接受 SmartScreen 警告 + 官网放「被拦截怎么办」图文（Ch14）；② 走 <strong>Microsoft Store（MSIX 打包），微软免费给商店应用签名</strong><sup class="cite" data-refid="20">[20]</sup>，省自购证书钱、SmartScreen 待遇也更好。代价是要做 MSIX 打包+过审+（国内商店）软著（Ch13）。</p></div></div>
+    </div>
+  </section>
+
+  <!-- ===== REFERENCES ===== -->
+  <section class="chapter" id="refs">
+    <h2><span class="num">📚</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13px;color:var(--text-mute)">访问日期均为 2026-06-11。鼠标悬停正文 <sup class="cite" data-refid="1">[1]</sup> 可弹窗查看来源并点击外链。价格/资格/命令/配置键为查证当日快照，以各官网与实际控制台为准。Tauri 配置键按 v2.tauri.app 当前文档核实。</p>
+      <ol class="ref-list">
+        <li id="ref-1">CA/Browser Forum · 代码签名基线要求（2023-06-01 起 OV 和 EV 代码签名证书私钥<strong>都必须</strong>生成并存储于 FIPS 140-2 Level 2 / Common Criteria EAL 4+ 合规硬件 = USB token 或云 HSM，私钥不可导出；CA 须验证硬件生成）。<a href="https://cabforum.org/working-groups/code-signing/requirements/" target="_blank" rel="noopener">cabforum.org/working-groups/code-signing/requirements</a> · 佐证 <a href="https://www.globalsign.com/en/code-signing/advisory/new-requirements-related-private-key-protection-codesigning-certificates" target="_blank" rel="noopener">GlobalSign 公告</a> / <a href="https://knowledge.digicert.com/general-information/new-private-key-storage-requirement-for-standard-code-signing-certificates-november-2022" target="_blank" rel="noopener">DigiCert</a> <span class="ref-meta">· 多源 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-2">Tauri 官方文档 ·《Windows Code Signing》（v2，bundle.windows 签名配置概览）。<a href="https://v2.tauri.app/distribute/sign/windows/" target="_blank" rel="noopener">v2.tauri.app/distribute/sign/windows</a> <span class="ref-meta">· 访问 2026-06-11</span></li>
+        <li id="ref-3">Microsoft Learn ·《Artifact Signing (formerly Trusted Signing) FAQ》（公共信任证书目前仅向 USA/加拿大/欧盟/英国「组织」+ USA/加拿大「个人」开放；2025-04-09 起组织需 3 年+可验证历史；2025-04 起对其他国家暂停新验证请求 → <strong>中国个人/组织无资格</strong>）。<a href="https://learn.microsoft.com/en-us/azure/artifact-signing/faq" target="_blank" rel="noopener">learn.microsoft.com/azure/artifact-signing/faq</a> <span class="ref-meta">· 父报告已核 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-4">沃通 WoSign · 代码签名证书价格表（国内 CA：OV 专业级 ~¥3588/年、EV 顶级 ~¥4288/年，多年更便宜；<u>需营业执照/单位证明、面向组织、不向个人签发</u>；私钥存 U 盾/云 HSM）。<a href="https://www.wosign.com/price_code.htm" target="_blank" rel="noopener">wosign.com/price_code.htm</a> <span class="ref-meta">· 经父报告 Ch4 实查 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-5">Certum · 代码签名证书（产品线含 <strong>Open Source（面向开源个人开发者）/ Standard / EV</strong>；Open Source 云版 SimplySign 约 €49–69/年、续费 ~€29，云签名免实体 token，5000 签/月限）。<a href="https://www.certum.eu/en/code-signing-certificates/" target="_blank" rel="noopener">certum.eu/en/code-signing-certificates</a> · <a href="https://shop.certum.eu/open-source-code-signing-on-simplysign.html" target="_blank" rel="noopener">shop.certum.eu（开源云版）</a> <span class="ref-meta">· 经销商口径 🟡 价格以官网为准 · 访问 2026-06-11</span></li>
+        <li id="ref-6">Microsoft Learn ·《SmartScreen reputation for Windows app developers》+ Q&A（SmartScreen 信誉随分发量/时间累积、非证书类型直接决定；<strong>2024-08 起 EV 代码签名 OID 从受信根程序移除，EV 与 OV 同等对待</strong>，购 EV 不再即时去除警告，签名提升可信但首发仍可能有「未知发布者」/SmartScreen 摩擦）。<a href="https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation" target="_blank" rel="noopener">learn.microsoft.com/.../smartscreen-reputation</a> <span class="ref-meta">· 父报告已核 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-7">Tauri 官方文档 ·《Windows Code Signing》（v2，<strong>bundle.windows 配置键</strong>：<code>certificateThumbprint</code>、<code>digestAlgorithm: "sha256"</code>、<code>timestampUrl</code>、<code>signCommand</code> 用 <code>%1</code> 占位走云签名 = Azure Trusted Signing/任意云签 CLI；env AZURE_CLIENT_ID 等）。<a href="https://v2.tauri.app/distribute/sign/windows/" target="_blank" rel="noopener">v2.tauri.app/distribute/sign/windows</a> <span class="ref-meta">· 官方 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-8">Tauri 官方文档 ·《macOS Code Signing》+《Environment Variables》（v2，<strong>bundle.macOS</strong>：<code>signingIdentity</code>（<code>security find-identity -v -p codesigning</code> 查；<code>"-"</code>=ad-hoc）、<code>providerShortName</code>、<code>entitlements</code>、<code>hardenedRuntime</code>；env <code>APPLE_CERTIFICATE</code>/<code>APPLE_CERTIFICATE_PASSWORD</code>/<code>APPLE_SIGNING_IDENTITY</code>/<code>APPLE_ID</code>/<code>APPLE_PASSWORD</code>/<code>APPLE_TEAM_ID</code>/<code>APPLE_API_ISSUER</code>/<code>APPLE_API_KEY</code>/<code>APPLE_API_KEY_PATH</code>；build 自动签+公证+staple，<code>--skip-stapling</code> 可跳）。<a href="https://v2.tauri.app/distribute/sign/macos/" target="_blank" rel="noopener">v2.tauri.app/distribute/sign/macos</a> · <a href="https://v2.tauri.app/reference/environment-variables/" target="_blank" rel="noopener">环境变量参考</a> <span class="ref-meta">· 官方 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-9">Apple ·《Signing Mac Software with Developer ID》（Developer ID Application 证书让 Gatekeeper 认可信开发者、App Store 外分发官方支持 ZIP/PKG/DMG、需 Developer Program 账号持有者、公证 notarytool 自动安全扫描 + staple ticket；hardened runtime 为公证前提）。<a href="https://developer.apple.com/developer-id/" target="_blank" rel="noopener">developer.apple.com/developer-id</a> <span class="ref-meta">· 父报告已引 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-10">Apple ·《Apple Developer Program Enrollment》（年费 99 USD；个人/单人企业仅需开 2FA 的 Apple Account + 法定年龄；组织需 D-U-N-S 编号）。<a href="https://developer.apple.com/help/account/membership/program-enrollment/" target="_blank" rel="noopener">developer.apple.com/help/account/membership/program-enrollment</a> · <a href="https://developer.apple.com/programs/enroll/" target="_blank" rel="noopener">enroll</a> <span class="ref-meta">· 多源 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-11">Tauri 官方文档 ·《Updater plugin》（v2：<code>tauri signer generate -w ~/.tauri/app.key</code> 生成 minisign/Ed25519 密钥对，产出 <code>.key</code>(私钥)+<code>.key.pub</code>(公钥)；<code>plugins.updater</code> 配 <code>active</code>/<code>endpoints</code>/<code>pubkey</code>；env <code>TAURI_SIGNING_PRIVATE_KEY</code>(+<code>_PASSWORD</code>)；下载更新后用 pubkey 校验 minisign 签名，失败报 InvalidSignature；私钥丢则无法给老用户推更新）。<a href="https://v2.tauri.app/plugin/updater/" target="_blank" rel="noopener">v2.tauri.app/plugin/updater</a> <span class="ref-meta">· 官方 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-12">SSL.com · 代码签名 / eSigner 定价（IV/OV/EV 云签名；EV 证书低至 ~$249/年（多年更省，另一口径 ~$349）；eSigner 云签订阅另计，Tier1 ~$100/月含少量签名，高 Tier 按签名计费）。<a href="https://www.ssl.com/products/software-integrity/signing-service/" target="_blank" rel="noopener">ssl.com/products/software-integrity/signing-service</a> · <a href="https://www.ssl.com/guide/esigner-pricing-for-code-signing/" target="_blank" rel="noopener">eSigner pricing</a> <span class="ref-meta">· 单源 🟡 价格以 ssl.com 为准 · 访问 2026-06-11</span></li>
+        <li id="ref-13">SSL.com ·《Cloud Code Signing Integration with GitHub Actions》（eSigner CodeSignTool 云签名，无需实体 token；GitHub Action <code>sslcom/actions-codesigner@develop</code>，secrets <code>ES_USERNAME</code>/<code>ES_PASSWORD</code>/<code>CREDENTIAL_ID</code>/<code>ES_TOTP_SECRET</code>；命令 sign/batch_sign 等；可配合 signtool）。<a href="https://www.ssl.com/how-to/cloud-code-signing-integration-with-github-actions/" target="_blank" rel="noopener">ssl.com/how-to/cloud-code-signing-integration-with-github-actions</a> <span class="ref-meta">· 官方 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-14">SignPath Foundation · 开源项目免费代码签名（为合格开源项目提供赞助式代码签名服务，无成本；含自动签名 EXE/MSI 等、策略与审计、流水线完整性；资格与条款见 signpath.org）。<a href="https://signpath.io/solutions/open-source-community" target="_blank" rel="noopener">signpath.io/solutions/open-source-community</a> · <a href="https://signpath.org/terms.html" target="_blank" rel="noopener">开源资格条款</a> <span class="ref-meta">· 单源 🟡 资格以官网为准 · 访问 2026-06-11</span></li>
+        <li id="ref-15">RFC 3161 时间戳服务器（signtool <code>/tr</code> + <code>/td SHA256</code>；TSA URL：DigiCert <code>http://timestamp.digicert.com</code> / Sectigo <code>http://timestamp.sectigo.com</code> / Certum <code>http://time.certum.pl</code>；DigiCert 对 /td SHA512/384 有兼容问题，SHA256 最稳）。<a href="https://knowledge.digicert.com/general-information/rfc3161-compliant-time-stamp-authority-server" target="_blank" rel="noopener">DigiCert RFC3161 TSA</a> · <a href="https://www.sectigo.com/resource-library/time-stamping-server" target="_blank" rel="noopener">Sectigo</a> <span class="ref-meta">· 多源 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-16">Apple ·《Membership / Identity verification》（个人/单人企业仅需 Apple Account + 2FA + 法定年龄，<strong>无需 D-U-N-S</strong>；组织（除政府）需 D-U-N-S 验证法人实体与地址）。<a href="https://developer.apple.com/help/account/membership/identity-verification/" target="_blank" rel="noopener">developer.apple.com/help/account/membership/identity-verification</a> <span class="ref-meta">· 官方 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-17">Apple ·《Apple Developer App Updates for China Mainland》+《Enrolling with the Apple Developer app》（中国大陆账号持有者需身份验证；Apple Developer app 支持在中国大陆用本地支付完成会员购买）。<a href="https://developer.apple.com/news/?id=12172019b" target="_blank" rel="noopener">developer.apple.com/news（China Mainland）</a> · <a href="https://developer.apple.com/help/account/membership/enrolling-in-the-app/" target="_blank" rel="noopener">enrolling-in-the-app</a> <span class="ref-meta">· 官方 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-18">Apple ·《TN3147: Migrating to the latest notarization tool》+ notarytool man（<strong>altool 上传公证通道 2023-11-01 起停用</strong>，改 <code>xcrun notarytool</code>（Xcode 14+）；<code>store-credentials</code> 存凭证到钥匙串；<code>submit --wait</code> 等回执；<code>xcrun stapler staple</code> 订书钉，离线可验）。<a href="https://developer.apple.com/documentation/technotes/tn3147-migrating-to-the-latest-notarization-tool" target="_blank" rel="noopener">developer.apple.com/.../tn3147</a> · <a href="https://keith.github.io/xcode-man-pages/notarytool.1.html" target="_blank" rel="noopener">notarytool(1)</a> <span class="ref-meta">· 官方 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-19">tauri-action（GitHub Actions：构建 Tauri 应用为 macOS/Linux/Windows 原生二进制并可上传 GitHub Release；矩阵分平台构建（Arm/Intel Mac、Win x64 等）；macOS 签名/公证 + updater 用 env <code>APPLE_*</code>/<code>TAURI_SIGNING_PRIVATE_KEY</code> 等；GitHub Token 默认只读，发 Release 需读写权限/<code>permissions: contents: write</code>）。<a href="https://github.com/tauri-apps/tauri-action" target="_blank" rel="noopener">github.com/tauri-apps/tauri-action</a> · <a href="https://v2.tauri.app/distribute/pipelines/github/" target="_blank" rel="noopener">Tauri GitHub pipeline 文档</a> <span class="ref-meta">· 官方 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-20">Microsoft Learn · Windows 应用发布到 Microsoft Store（上架需微软认可签名；MSIX 打包可享微软免费代码签名 + 免费托管）+ 知乎/CSDN 等（国内应用商店上架普遍需软著或 ICP 备案截图）。<a href="https://learn.microsoft.com/zh-cn/windows/apps/publish/" target="_blank" rel="noopener">learn.microsoft.com/zh-cn/windows/apps/publish</a> · <a href="https://www.zhihu.com/question/313737186" target="_blank" rel="noopener">软著与上架（知乎）</a> <span class="ref-meta">· 软著/ICP 行业口径 🟡 以各商店规则为准 · 访问 2026-06-11</span></li>
+        <li id="ref-21">微软 / 腾讯 · 腾讯应用宝专区上架 Microsoft Store（应用宝主体为安卓应用平台，2025-03 起其专区全量上线微软应用商店，面向 Windows 提供移动应用下载；桌面 PC 应用分发非应用宝主路径）。<a href="https://news.microsoft.com/zh-cn/" target="_blank" rel="noopener">news.microsoft.com/zh-cn（应用宝专区）</a> <span class="ref-meta">· 背景参考 🟡 · 访问 2026-06-11</span></li>
+      </ol>
+      <div class="callout info" style="margin-top:16px">
+        <p><strong>核实声明：</strong>本 spec 的 CA/B 硬件要求、Azure 中国无资格、EV 失去 SmartScreen 即时特权、Apple $99/个人无需 D-U-N-S、altool 停用改 notarytool、时间戳服务器、Tauri 2.x 配置键（windows/macOS/updater 三套）均经官方文档（ref 1/3/6/9/10/11/16/18 + Tauri 7/8）当日核实，多源标 🟢。<u>具体价格（Certum 开源版 €49–69、SSL.com eSigner 月费、沃通 ¥3588）随官网调整，标 🟡「以官网为准」</u>；<u>WoSign 2016 distrust 仅影响 TLS/SSL 根、代码签名根独立未受影响</u>（Mozilla + WoSign 双源确认），但 MS 2017-09 起对 WoSign 新证书的信任也收紧，故 spec 推荐路线<u>不依赖</u>沃通对个人签发（其本就只向单位签发）。<u>Certum 开源版需开源许可证、SignPath 需过开源审核、小贝实际所需 entitlements、MSIX 免费签名细节</u>均标 ⚠️ 以官网/联调为准，未编造。落地代码与最终键名以 v2.tauri.app 当前文档与各服务控制台为准。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>代码签名 + 公证落地 spec · 《小贝》报告子规格 · 整理：无忌 · 2026-06-11</p>
+    <p style="font-size:12px">技术规格文档 · 价格/资格/命令/配置键以各官网与控制台为准 · 落地实现代码留工程 session</p>
+  </footer>
+</main>
+
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+<script>
+/* 阅读进度条 + back-to-top */
+(function(){
+  var prog=document.getElementById('progress');
+  var btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement;
+    var sc=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100;
+    prog.style.width=sc+'%';
+    if(h.scrollTop>500)btt.classList.add('show');else btt.classList.remove('show');
+  }
+  window.addEventListener('scroll',onScroll);onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+/* 主题切换 */
+(function(){
+  var b=document.body,t=document.getElementById('themeToggle');
+  var saved=localStorage.getItem('signing-spec-theme');if(saved)b.setAttribute('data-theme',saved);
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('signing-spec-theme',n);upd();});
+})();
+/* 章节折叠 */
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+/* FAQ 折叠 */
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+/* 表格行高亮 */
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+/* demo 卡片展开 */
+document.querySelectorAll('.demo-card').forEach(function(c){
+  c.addEventListener('click',function(){c.classList.toggle('open');});
+});
+/* 签名状态模拟器 */
+(function(){
+  var states={
+    'win-none':{os:'Windows · SmartScreen',icon:'🛡️',title:'Windows 已保护你的电脑',body:'Microsoft Defender SmartScreen 阻止了无法识别的应用启动。运行此应用可能会使你的电脑面临风险。<br><span style="color:var(--text-mute)">应用：小贝_0.1.0_x64-setup.exe　发布者：<strong>未知发布者</strong></span>',vk:'bad',vt:'😱 小白用户大概率直接关掉 → 装不上'},
+    'win-ov':{os:'Windows · SmartScreen',icon:'⚠️',title:'Windows 已保护你的电脑',body:'SmartScreen 暂未识别此应用（信誉累积中）。<br><span style="color:var(--text-mute)">应用：小贝_1.0.0_x64-setup.exe　发布者：<strong>Banmi（已签名 · OV）</strong></span><br>点「更多信息 → 仍要运行」可继续。',vk:'warn',vt:'😐 有发布者名字，仍弹但可越过；靠下载量化解'},
+    'win-ev':{os:'Windows · SmartScreen',icon:'⚠️',title:'Windows 已保护你的电脑',body:'即便 EV 签名，2024-08 起也不再即时去除警告，与 OV 同走信誉累积。<br><span style="color:var(--text-mute)">应用：小贝_1.0.0_x64-setup.exe　发布者：<strong>Banmi（已签名 · EV）</strong></span>',vk:'warn',vt:'🤔 EV 不再值溢价——和 OV 一样靠信誉，选 OV 即可'},
+    'mac-none':{os:'macOS · Gatekeeper',icon:'🚫',title:'无法打开"小贝"',body:'因为 Apple 无法检查其是否包含恶意软件。此 App 来自身份不明的开发者。<br><span style="color:var(--text-mute)">小贝.app 已被移到废纸篓 / 需右键→打开 / 系统设置放行</span>',vk:'bad',vt:'😱 对小白是劝退级摩擦'},
+    'mac-notarized':{os:'macOS · Gatekeeper',icon:'✅',title:'"小贝"已通过验证，可以打开',body:'已签名（Developer ID）+ 已公证 + staple。Gatekeeper 直接放行。<br><span style="color:var(--text-mute)">spctl -a -v → accepted · source=Notarized Developer ID</span>',vk:'good',vt:'😄 双击即开，零摩擦'}
+  };
+  var dlg=document.getElementById('simDialog'),tog=document.getElementById('simToggle');
+  if(!dlg||!tog)return;
+  function render(key){
+    var s=states[key];if(!s)return;
+    dlg.innerHTML='<div class="sd-os">'+s.os+'</div><div class="sd-icon">'+s.icon+'</div><div class="sd-title">'+s.title+'</div><div class="sd-body">'+s.body+'</div><div class="sd-verdict '+s.vk+'">'+s.vt+'</div>';
+  }
+  tog.querySelectorAll('.sim-btn').forEach(function(b){
+    b.addEventListener('click',function(){
+      tog.querySelectorAll('.sim-btn').forEach(function(x){x.classList.remove('active');});
+      b.classList.add('active');render(b.getAttribute('data-state'));
+    });
+  });
+})();
+/* 移动端抽屉导航 + scrollspy */
+(function(){
+  var nav=document.querySelector('.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(tog&&nav&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=Array.prototype.slice.call(document.querySelectorAll('.anchor-list a')),secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120,cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur)cur.a.classList.add('active');
+  }
+  window.addEventListener('scroll',spy);spy();
+})();
+/* citation popover */
+(function() {
+  var activePopover=null,activeTrigger=null,hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect();
+    var pw=Math.min(380,window.innerWidth-24);
+    pop.style.width=pw+'px';
+    var left=r.left+window.scrollX;
+    if(left+pw>window.scrollX+window.innerWidth-12)left=window.scrollX+window.innerWidth-pw-12;
+    if(left<window.scrollX+12)left=window.scrollX+12;
+    pop.style.left=left+'px';
+    pop.style.top=(r.bottom+window.scrollY+6)+'px';
+  }
+  function showPopover(trigger){
+    if(activePopover){activePopover.remove();activePopover=null;}
+    if(hideTimer)clearTimeout(hideTimer);
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  bindCites();
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);
+  window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>讯飞 ISE 接入 spec：小贝云端发音评分 WebAPI 接入子规格 · 无忌 · 2026-06-11</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  .parent-link { display:inline-flex; align-items:center; gap:6px; margin:4px 0 0; font-size:13.5px; font-weight:700; color:var(--accent-text); text-decoration:none; border:1px solid var(--accent); background:var(--accent-soft); border-radius:24px; padding:6px 14px; }
+  .parent-link:hover { background:var(--accent); color:#fff; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 16px 0; }
+  .demo-card { padding: 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); cursor: pointer; transition: transform .15s, box-shadow .15s; }
+  .demo-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+  .demo-card .dc-icon { font-size: 26px; }
+  .demo-card .dc-title { font-family: var(--serif); font-weight: 700; font-size: 15.5px; margin: 6px 0 2px; color: var(--text); }
+  .demo-card .dc-tag { font-size: 11px; color: var(--text-mute); }
+  .demo-card .dc-body { font-size: 13px; color: var(--text-soft); margin-top: 8px; max-height: 0; overflow: hidden; transition: max-height .3s; }
+  .demo-card.open .dc-body { max-height: 600px; }
+  .demo-card .dc-bar { height: 8px; border-radius: 999px; background: var(--bg-soft); margin-top: 8px; overflow: hidden; }
+  .demo-card .dc-bar > span { display: block; height: 100%; border-radius: 999px; }
+  .phone-demo { margin: 14px 0; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .phone-line { font-family: var(--serif); font-size: 26px; line-height: 1.7; letter-spacing: .5px; }
+  .ph { padding: 2px 5px; border-radius: 5px; margin: 0 1px; font-weight: 700; cursor: help; }
+  .ph.g { background: var(--good-soft); color: var(--good); }
+  .ph.m { background: var(--warn-soft); color: var(--warn); }
+  .ph.b { background: var(--bad-soft); color: var(--bad); }
+  .word-score { display:inline-flex; flex-direction:column; align-items:center; margin:0 3px; }
+  .word-score .wl { font-size:11px; color:var(--text-mute); }
+  .scoreboard { display:flex; flex-wrap:wrap; gap:10px; margin:14px 0; }
+  .sb-item { flex:1; min-width:120px; padding:12px; border:1px solid var(--border); border-radius:12px; background:var(--bg-elevated); text-align:center; }
+  .sb-item .sv { font-family:var(--serif); font-style:italic; font-size:28px; font-weight:700; color:var(--accent-text); }
+  .sb-item .sl { font-size:12px; color:var(--text-mute); margin-top:2px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+    .phone-line { font-size: 21px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .demo-card .dc-body { max-height: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table, .demo-card, .phone-demo, .scoreboard { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · 技术规格<span class="tag">spec</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 TL;DR 一句话接法</a>
+    <a href="#ch2" data-target="ch2">02 ISE 是什么 + 在小贝里的角色</a>
+    <a href="#ch3" data-target="ch3">03 接入形态拍板：WebAPI vs SDK ★</a>
+    <a href="#ch4" data-target="ch4">04 鉴权 spec：HMAC 签名握手</a>
+    <a href="#ch5" data-target="ch5">05 请求 spec：business + 音频 + 文本</a>
+    <a href="#ch6" data-target="ch6">06 返回结果 spec → UI 映射 ★</a>
+    <a href="#ch7" data-target="ch7">07 题型映射：跟读 / shadowing 选型</a>
+    <a href="#ch8" data-target="ch8">08 集成架构（Tauri 时序）</a>
+    <a href="#ch9" data-target="ch9">09 计费与配额</a>
+    <a href="#ch10" data-target="ch10">10 合规与隐私（PIPL）</a>
+    <a href="#ch11" data-target="ch11">11 错误处理 + 离线降级</a>
+    <a href="#ch12" data-target="ch12">12 Azure 对比（何时用海外）</a>
+    <a href="#ch13" data-target="ch13">13 落地 checklist</a>
+    <a href="#demo" data-target="demo">🎮 Mini Demo</a>
+    <a href="#faq" data-target="faq">FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>讯飞 ISE 接入 spec：小贝云端发音评分 WebAPI 接入子规格</h1>
+    <a class="parent-link" href="./local-video-english-study-tool.html">← 返回 小贝主报告</a>
+    <div class="hero-meta" style="margin-top:10px">
+      <span>📅 2026-06-11</span>
+      <span>🎙️ 科大讯飞 ISE 智能语音评测</span>
+      <span>🖥️ Tauri（Mac + Win）</span>
+      <span>🔌 WebAPI / WebSocket</span>
+      <span>🇨🇳 国内云首选</span>
+      <span>📐 技术规格 spec</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>本文是《小贝》报告的<span style="color:var(--accent-text)">讯飞 ISE 接入子规格</span>。</strong>父报告（<a href="./local-video-english-study-tool.html" style="color:var(--accent-text)">本地视频英语精学桌面 App</a>）第 7/8/13 章已拍板：云端发音评分<strong>主推科大讯飞 ISE</strong>（Azure 作海外/备选）、跟读录音「不含版权、属可上云那一类」、离线时降级到本地 GOP/SSL、中国用户 Windows 优先。本 spec 把「怎么接」一层层写到能开工的颗粒度——鉴权握手、business 参数、音频分帧、XML 结果如何解析成<strong>逐词逐音素颜色打分</strong>、Tauri 里 secret 为什么必须在 Rust 后端。</p>
+      <p><strong>一句话定调：</strong>小贝是 Tauri 跨平台桌面端（Mac+Win），<u>讯飞官方没有 macOS 原生 SDK</u>（平台列表只有 Android/iOS/Linux/Windows/WebAPI<sup class="cite" data-refid="6">[6]</sup>），所以<strong>接入形态写死 WebAPI（WebSocket 流式），由 Rust 后端发起握手与上传</strong>，APIKey/APISecret 只存后端、绝不进前端。每个 API 参数 / 字段 / 计费数字都带 inline 引用（讯飞官方文档为主），悬停 <sup class="cite" data-refid="1">[1]</sup> 看来源。查不到的（如超量统一单价）明确标 <span class="pill warn">⚠️ 需控制台确认</span>，绝不编造。</p>
+    </div>
+  </div>
+
+  <div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+    <p style="margin:0"><strong>📌 三条最关键规格（先扫这个）：</strong></p>
+    <ul style="margin:8px 0 0">
+      <li><strong>形态：WebAPI(WebSocket) 写死，不用 SDK。</strong>地址 <code>wss://ise-api.xfyun.cn/v2/open-ise</code><sup class="cite" data-refid="1">[1]</sup>。理由：① 讯飞无 Mac 原生 SDK（官方平台列表 = Android/iOS/Linux/Windows/WebAPI）<sup class="cite" data-refid="6">[6]</sup>，Tauri 要 Mac+Win 一致只能走 WebAPI；② SDK / WebAPI 额度归属/是否共用<u>以控制台为准</u><span class="pill warn">⚠️ 需控制台确认</span><sup class="cite" data-refid="2">[2]</sup>——统一走 WebAPI 仍是更简洁的选择（免 Mac SDK 缺位问题）；③ APISecret 必须在 Rust 后端做 HMAC 签名，绝不暴露前端。<span class="conf g">🟢</span></li>
+      <li><strong>鉴权：HMAC-SHA256 握手 URL（date/host/request-line 三段签名 → base64 → 拼 authorization）<sup class="cite" data-refid="1">[1]</sup>。</strong>每次连接前在 Rust 端现算，URL query 带 <code>authorization</code> / <code>host</code> / <code>date</code> 三个参数。签名串里 host=<code>ise-api.xfyun.cn</code>、request-line=<code>GET /v2/open-ise HTTP/1.1</code>。<span class="conf g">🟢</span></li>
+      <li><strong>结果：XML（base64 编码在 JSON 信封里），外层有 wrapper：<code>xml_result → read_sentence → rec_paper → sentence → word → syll → phone</code>；英文引擎 phone 节点用 <code>dp_message</code> 承载逐音素读对/读错标记 → 映射成小贝「逐音素颜色打分」（<code>perr_msg</code> 是中文引擎 phone 字段）。</strong>四维总分 <code>total_score / accuracy_score / fluency_score / integrity_score / standard_score</code> 挂在内层 <code>read_sentence</code>/<code>sentence</code> 上<sup class="cite" data-refid="1">[1]</sup>。<span class="conf y">🟡</span> <span class="pill warn">⚠️ wrapper 层级与 phone 字段名随引擎/版本变，落地前解码一条真实英文返回确认</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">TL;DR：一句话怎么接</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把整份 spec 压成「拍板 + 关键参数 + 五步落地 + 额度实情」四块，后面每章是展开。</p>
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">WebAPI</div><div class="l">接入形态（非 SDK）</div></div>
+        <div class="metric"><div class="v">wss://ise-api</div><div class="l">.xfyun.cn/v2/open-ise</div></div>
+        <div class="metric"><div class="v">en_vip</div><div class="l">ent（英文引擎）</div></div>
+        <div class="metric"><div class="v">16k/16bit</div><div class="l">单声道 PCM / MP3</div></div>
+        <div class="metric"><div class="v">phone 级</div><div class="l">XML 音素颜色（英文 dp_message）</div></div>
+        <div class="metric"><div class="v">1万/10万</div><div class="l">免费礼包（个人/企业认证）</div></div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>形态写死 WebAPI（WebSocket），Rust 后端发起</div>
+        <div class="step-body">连 <code>wss://ise-api.xfyun.cn/v2/open-ise</code> + 鉴权 query<sup class="cite" data-refid="1">[1]</sup>。Tauri 前端只负责录音 + 渲染分数；握手签名、上传、解析全在 Rust 后端 <code>tauri::command</code> 里做。<strong>讯飞无 Mac 原生 SDK</strong>（平台列表只有 Android/iOS/Linux/Windows/WebAPI）<sup class="cite" data-refid="6">[6]</sup>，跨平台一致 + secret 不出后端，WebAPI 是唯一干净解。</div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">2</span>鉴权：每连接前现算 HMAC-SHA256 签名</div>
+        <div class="step-body">用 APISecret 对 <code>host\ndate\nGET /v2/open-ise HTTP/1.1</code> 三行做 HMAC-SHA256 → base64 → 组 authorization 串再 base64 → 拼进 URL query（authorization/host/date）<sup class="cite" data-refid="1">[1]</sup>。APPID 进首帧 <code>common.app_id</code>。</div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">3</span>首帧发 business 参数，定题型与语种</div>
+        <div class="step-body">英文：<code>sub=ise</code>、<code>ent=en_vip</code>、<code>category=read_sentence</code>（逐句跟读）/<code>read_word</code>（单词）/<code>read_chapter</code>（篇章）、<code>aue=raw</code>(或 lame=MP3)、<code>tte=utf-8</code>、<code>cmd=ssb</code>，评测文本随首帧上传<sup class="cite" data-refid="1">[1]</sup>。</div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">4</span>分帧上传音频：aus 1→2→4 / status 0→1→2</div>
+        <div class="step-body">16k/16bit/单声道，建议每 40ms 发 1280B（不超 19200B）<sup class="cite" data-refid="1">[1]</sup>。首音频帧 <code>aus=1,status=1</code>、中间 <code>aus=2,status=1</code>、末帧 <code>aus=4,status=2</code>。讯飞返回 <code>data.status=2</code> 即评测结束。</div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">5</span>解析 XML → 四维总分 + 逐词 + 逐音素</div>
+        <div class="step-body">结果是 base64 的 XML，外层有 wrapper（<code>xml_result &gt; read_sentence &gt; rec_paper &gt; sentence</code>）：四维分 <code>total_score/accuracy/fluency/integrity/standard</code> 挂内层 sentence/read_sentence，<code>&lt;word&gt;</code> 带 <code>dp_message</code>（读对/漏读/增读/替换），英文 <code>&lt;phone&gt;</code> 的逐音素读对/读错标记走 <code>dp_message</code>（<code>perr_msg</code> 是中文引擎字段）→ 映射成 Ch6 的逐词逐音素颜色<sup class="cite" data-refid="1">[1]</sup>。</div>
+      </div>
+
+      <div class="callout good">
+        <p><strong>免费额度实情（核实当日）：</strong>新用户实名认证免费礼包 <strong>个人 1 万次 / 企业 10 万次</strong>（流式版），应用<strong>默认每日 500 次</strong>调用上限<sup class="cite" data-refid="2">[2]</sup>；SDK / WebAPI 额度是否共用<u>当前官网未明确</u><span class="pill warn">⚠️ 需控制台确认</span>。WebAPI <strong>默认 50 路并发</strong><sup class="cite" data-refid="1">[1]</sup>。超量走控制台套餐阶梯（已读到真实价目，详见 Ch9）。</p>
+      </div>
+      <div class="callout purple">
+        <p><strong>与父报告的关系：</strong>父报告第 7 章把「主推讯飞 ISE / Azure 备选 / 录音可上云 / 离线降级本地 GOP」这条边界定了，第 8 章给了「版权内容死锁本地、用户录音可选上云」的边界表，第 13 章把发音评分排在 P1。本 spec <strong>不重复结论判断</strong>，只把「讯飞这一端怎么接」写到工程颗粒度；本地 GOP 路线仍沿用父报告第 7 章选型，本文只在 Ch11 给「在线↔离线」切换策略。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">讯飞 ISE 是什么 + 在小贝里扮演什么</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>科大讯飞 ISE（Intelligent Speech Evaluation，智能语音评测 / 语音评测）是讯飞开放平台的一项「语音扩展」能力：<strong>给定一段评测文本（单词/句子/篇章）+ 用户朗读的录音，返回多维发音评分</strong>——总分、准确度、流利度、完整度，并下钻到<strong>每个单词、每个音素</strong>的得分与读对/读错标记<sup class="cite" data-refid="3">[3]</sup>。它支持中英双语（英文引擎 <code>en_vip</code>、中文 <code>cn_vip</code>），<u>专门面向中国人英语口语评测</u>，是国内发音评测的标杆能力<sup class="cite" data-refid="3">[3]</sup>。</p>
+
+      <h3>在小贝里扮演什么</h3>
+      <p>小贝的精学闭环里，「逐句跟读 / shadowing 影子跟读 + AI 打发音分」是最有学理支撑的差异化功能（父报告 Ch7/Ch10）。讯飞 ISE 就是这块的<strong>云端评分引擎</strong>：</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>小贝场景</th><th>讯飞 ISE 提供</th><th>处理位置</th></tr></thead>
+        <tbody>
+          <tr><td>逐句跟读：用户读字幕里这一句</td><td><code>read_sentence</code> → 句级四维分 + 逐词 + 逐音素</td><td class="check p">录音上云评测</td></tr>
+          <tr><td>单词卡跟读：单个生词发音</td><td><code>read_word</code> → 词级分 + 音素级</td><td class="check p">录音上云评测</td></tr>
+          <tr><td>Shadowing：跟读整段</td><td><code>read_chapter</code> → 篇章级流利度/完整度</td><td class="check p">录音上云评测</td></tr>
+          <tr><td>视频内容本体（画面/原声）</td><td>—（讯飞不碰）</td><td class="check y"><strong>死锁本地</strong></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout info">
+        <p><strong>对齐父报告「录音可上云」边界：</strong>上传给讯飞的是<u>用户自己的跟读录音 + 一小段评测文本</u>——<strong>不含视频版权内容本体</strong>，所以它属于父报告第 8 章界定的「可上云那一类」<sup class="cite" data-refid="4">[4]</sup>。版权敏感的视频/音频本体、本地转写出的字幕，<strong>永远不出设备</strong>。但「录音可上云」不等于「无声上云」：仍要在 UI 明确告知「这段录音会上传到讯飞评测」并取得同意（Ch10）。</p>
+      </div>
+      <div class="callout warn">
+        <p><strong>定位提醒：</strong>讯飞 ISE 是<u>评分</u>引擎，不是<u>识别</u>引擎——它假设用户在读「给定文本」，按文本逐音素对齐打分。它不负责「用户读了什么」的自由转写（那是语音听写 IAT 的活）。小贝的评测文本来自字幕里那一句，本来就是已知的，正好对口。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">★ 接入形态拍板：WebAPI(WebSocket) vs 各端 SDK</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是本 spec 最关键的一次拍板，决定后面所有章节的写法。<strong>结论：小贝写死 WebAPI（WebSocket 流式），由 Rust 后端发起；不集成各端 SDK。</strong></p>
+
+      <h3>讯飞提供的接入形态全景</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>形态</th><th>平台</th><th>小贝（Tauri Mac+Win）能用？</th><th>免费额度</th></tr></thead>
+        <tbody>
+          <tr class="row-highlight"><td><strong>WebAPI（WebSocket 流式）</strong></td><td>任意能发 WSS 的语言/平台</td><td class="check y"><strong>✓ 首选</strong>（Rust 后端调）</td><td>实名礼包 个人 1 万 / 企业 10 万<sup class="cite" data-refid="2">[2]</sup></td></tr>
+          <tr><td>Windows SDK</td><td>Windows 32/64 位 C/C++ DLL（msc.dll/msc_x64.dll）<sup class="cite" data-refid="7">[7]</sup></td><td class="check p">~ 仅 Win 端可，Mac 无</td><td>同上礼包（是否共用以控制台为准）<sup class="cite" data-refid="2">[2]</sup></td></tr>
+          <tr><td>Linux SDK</td><td>Linux C/C++</td><td class="check n">✗ 桌面端不适用</td><td>同上礼包</td></tr>
+          <tr><td>Android / iOS SDK</td><td>移动端<sup class="cite" data-refid="8">[8]</sup></td><td class="check n">✗ 非桌面</td><td>同上礼包</td></tr>
+          <tr><td><strong>macOS 原生 SDK</strong></td><td class="check n"><strong>✗ 讯飞不提供</strong></td><td class="check n">✗ 没有可用</td><td>—</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="callout bad">
+        <p><strong>决定性事实：讯飞官方平台列表是「Android / iOS / Linux / Windows / WebAPI」，<u>没有 macOS 原生 SDK</u></strong><sup class="cite" data-refid="6">[6]</sup>。Windows SDK 是 32/64 位 C/C++ DLL（<code>msc.dll</code> / <code>msc_x64.dll</code>）<sup class="cite" data-refid="7">[7]</sup>，能在 Win 端用，但 Mac 端无对应物。小贝要 Mac+Win 一套代码一致体验，<strong>SDK 路线在 Mac 上直接断了</strong>——只能走 WebAPI。</p>
+      </div>
+
+      <h3>三条拍板理由</h3>
+      <div class="tree">
+        <div class="node q">小贝该用 WebAPI 还是各端 SDK？</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl n">① Mac 无 SDK</span> 讯飞官方无 macOS 原生 SDK<sup class="cite" data-refid="6">[6]</sup>；Tauri 要双端一致 → SDK 路线在 Mac 上不可行，<strong>WebAPI 是唯一跨平台解</strong>。</div>
+        <div class="node"><span class="lbl m">② 额度归属以控制台为准</span> SDK / WebAPI 免费礼包（个人 1 万 / 企业 10 万）是否共用，当前官网未明确<span class="pill warn">⚠️ 需控制台确认</span><sup class="cite" data-refid="2">[2]</sup>。无论共用与否，统一走 WebAPI 仍更简洁（免 Mac SDK 缺位问题），不必两端混用。</div>
+        <div class="node"><span class="lbl n">③ secret 安全</span> WebAPI 鉴权要用 APISecret 现算 HMAC 签名；<strong>secret 绝不能进前端 JS</strong>（任何人开 DevTools 就能扒）。放 Rust 后端 + WebAPI 一举两得：签名在后端、调用在后端。SDK 反而要把 license/key 打进客户端二进制，逆向风险类似。</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">✅ 拍板：WebAPI（WebSocket），Rust 后端发起握手与上传，前端只录音 + 渲染</div>
+      </div>
+
+      <div class="callout good">
+        <p><strong>WebAPI 路线的额外好处：</strong>① Rust 生态有成熟 WebSocket（<code>tokio-tungstenite</code>）+ HMAC（<code>hmac</code>/<code>sha2</code>）+ base64 crate，握手与流式上传都好写；② 不引入 C/C++ FFI、不打包平台二进制（不像父报告里 whisper/ffmpeg 那样要 sidecar），讯飞这块<strong>零原生依赖</strong>；③ 升级讯飞协议只改后端，前端无感。<u>唯一代价</u>：必须联网（离线降级见 Ch11），且每次评测一次网络往返（国内节点延迟低）<sup class="cite" data-refid="3">[3]</sup>。</p>
+      </div>
+      <div class="trap-box"><strong>⚠️ 不要做的事：</strong>① 不要在前端 JS 里放 APIKey/APISecret 直连讯飞——secret 泄露 = 别人盗刷你的额度/账单；② 不要假设 SDK 版额度能顶 WebAPI 调用，二者是否共用以控制台为准<sup class="cite" data-refid="2">[2]</sup>；③ Win 端不要为了「省一次网络往返」单独接 Windows SDK，会让 Mac/Win 两套评分口径不一致、维护翻倍。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">鉴权 spec：APPID/APIKey/APISecret + HMAC 签名握手</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>WebAPI 用的是讯飞统一的「<strong>WebSocket 握手鉴权</strong>」：把鉴权信息算成签名，拼进 WSS URL 的 query 参数里，连接时一次性校验<sup class="cite" data-refid="1">[1]</sup>。三把钥匙在控制台创建应用后拿到。</p>
+
+      <h3>三把钥匙（控制台获取）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>凭证</th><th>用途</th><th>放哪</th></tr></thead>
+        <tbody>
+          <tr><td><code>APPID</code></td><td>应用标识，进首帧 <code>common.app_id</code></td><td class="check y">可进配置（非密钥）</td></tr>
+          <tr><td><code>APIKey</code></td><td>签名里 <code>api_key="..."</code> 字段</td><td class="check p">Rust 后端</td></tr>
+          <tr><td><code>APISecret</code></td><td>HMAC-SHA256 的密钥（最敏感）</td><td class="check n"><strong>只在 Rust 后端，绝不进前端</strong></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>HMAC-SHA256 签名握手（6 步）</h3>
+      <div class="step"><div class="step-head"><span class="sn">1</span>生成 RFC1123 时间戳</div><div class="step-body"><code>date = "Wed, 10 Jul 2019 07:35:43 GMT"</code> 格式（GMT）<sup class="cite" data-refid="1">[1]</sup>。服务器校验时钟偏差，偏太多返回 403。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>拼签名原文（三行，\n 连接）</div><div class="step-body"><code>host: ise-api.xfyun.cn</code> ＼n <code>date: {RFC1123}</code> ＼n <code>GET /v2/open-ise HTTP/1.1</code><sup class="cite" data-refid="1">[1]</sup></div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>HMAC-SHA256 + base64</div><div class="step-body"><code>signature = base64( HMAC-SHA256(signatureOrigin, APISecret) )</code><sup class="cite" data-refid="1">[1]</sup></div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>拼 authorization 原文</div><div class="step-body"><code>api_key="{APIKey}", algorithm="hmac-sha256", headers="host date request-line", signature="{signature}"</code><sup class="cite" data-refid="1">[1]</sup></div></div>
+      <div class="step"><div class="step-head"><span class="sn">5</span>authorization base64</div><div class="step-body"><code>authorization = base64(authorizationOrigin)</code><sup class="cite" data-refid="1">[1]</sup></div></div>
+      <div class="step"><div class="step-head"><span class="sn">6</span>拼进 WSS URL query</div><div class="step-body"><code>wss://ise-api.xfyun.cn/v2/open-ise?authorization={...}&amp;date={urlencoded RFC1123}&amp;host=ise-api.xfyun.cn</code><sup class="cite" data-refid="1">[1]</sup>。date 记得 URL 编码。</div></div>
+
+      <h4>签名算法伪代码（Rust 后端，说明性）</h4>
+      <pre><code>// 仅示意，落地实现留工程 session
+use hmac::{Hmac, Mac}; use sha2::Sha256; use base64::Engine;
+
+fn build_ise_ws_url(api_key:&str, api_secret:&str) -> String {
+  let host = "ise-api.xfyun.cn";
+  let path = "/v2/open-ise";
+  let date = httpdate::fmt_http_date(SystemTime::now()); // RFC1123 GMT
+
+  // step2: 三行签名原文
+  let origin = format!("host: {host}\ndate: {date}\nGET {path} HTTP/1.1");
+
+  // step3: HMAC-SHA256 + base64
+  let mut mac = Hmac::&lt;Sha256&gt;::new_from_slice(api_secret.as_bytes()).unwrap();
+  mac.update(origin.as_bytes());
+  let signature = base64::engine::general_purpose::STANDARD
+      .encode(mac.finalize().into_bytes());
+
+  // step4-5: authorization 原文 → base64
+  let auth_origin = format!(
+    "api_key=\"{api_key}\", algorithm=\"hmac-sha256\", \
+     headers=\"host date request-line\", signature=\"{signature}\"");
+  let authorization = base64::engine::general_purpose::STANDARD
+      .encode(auth_origin.as_bytes());
+
+  // step6: 拼 query（date/host 需 url-encode）
+  format!("wss://{host}{path}?authorization={}&host={host}&date={}",
+          urlencoding::encode(&authorization),
+          urlencoding::encode(&date))
+}</code></pre>
+
+      <div class="callout accent">
+        <p><strong>关键安全约束：APISecret 永远只在 Rust 后端。</strong>前端（WebView / JS）<u>拿不到也不该拿到</u> secret——它只通过 <code>tauri::invoke</code> 把「录音 + 评测文本 + 题型」交给后端，后端现算签名、连讯飞、回传分数。这样即使有人逆向前端 bundle，也扒不到密钥。这也是 Ch3 选 WebAPI-后端模式而非前端直连的核心原因。</p>
+      </div>
+      <div class="callout warn">
+        <p><strong>常见鉴权错误：</strong><code>401</code>=缺 authorization 参数或签名校验失败（多半是签名原文换行/字段拼错）；<code>403</code>=时钟偏差超限或 IP 白名单拒绝<sup class="cite" data-refid="1">[1]</sup>。先确认 ① date 是 GMT 且与服务器时间接近；② 签名原文严格三行、用 <code>\n</code>；③ headers 字段顺序 <code>host date request-line</code> 不能乱。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">请求 spec：business 参数 + 音频要求 + 评测文本格式</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>握手成功后，按「<strong>首帧（参数+文本）→ 音频帧 → 末帧</strong>」的节奏发 JSON。第一帧带 <code>common</code>（APPID）+ <code>business</code>（题型/语种）+ 评测文本；之后每帧带 <code>data</code>（音频分片 base64）<sup class="cite" data-refid="1">[1]</sup>。</p>
+
+      <h3>business 参数表（英文评测）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>参数</th><th>取值</th><th>含义 / 小贝怎么填</th></tr></thead>
+        <tbody>
+          <tr><td><code>sub</code></td><td><code>ise</code></td><td>必填，服务类型 = 语音评测<sup class="cite" data-refid="1">[1]</sup></td></tr>
+          <tr class="row-highlight"><td><code>ent</code></td><td><code>en_vip</code>（英文）/ <code>cn_vip</code>（中文）</td><td>必填，引擎/语种。小贝英语精学填 <code>en_vip</code><sup class="cite" data-refid="9">[9]</sup></td></tr>
+          <tr><td><code>category</code></td><td>英文：<code>read_word</code> / <code>read_sentence</code> / <code>read_chapter</code> / <code>simple_expression</code> 等<sup class="cite" data-refid="1">[1]</sup></td><td>必填，题型。逐句跟读用 <code>read_sentence</code>（见 Ch7）</td></tr>
+          <tr><td><code>cmd</code></td><td><code>ssb</code>(首帧参数) / <code>ttp</code>(文本) / <code>auw</code>(音频)</td><td>必填，阶段指令<sup class="cite" data-refid="1">[1]</sup></td></tr>
+          <tr><td><code>aue</code></td><td><code>raw</code>(PCM) / <code>lame</code>(MP3) / <code>speex-wb</code>(默认)</td><td>音频编码。小贝 getUserMedia 出的 PCM 用 <code>raw</code> 最省事<sup class="cite" data-refid="1">[1]</sup></td></tr>
+          <tr><td><code>auf</code></td><td><code>audio/L16;rate=16000</code></td><td>音频采样格式（16k）<sup class="cite" data-refid="1">[1]</sup></td></tr>
+          <tr><td><code>tte</code></td><td><code>utf-8</code> / <code>gbk</code></td><td>必填，评测文本编码。统一用 <code>utf-8</code><sup class="cite" data-refid="1">[1]</sup></td></tr>
+          <tr><td><code>rstcd</code> / <code>rst</code></td><td>结果编码 <code>utf8</code>/<code>gbk</code>；结果格式 <code>entirety</code>/<code>plain</code></td><td>取 <code>entirety</code> 拿完整结构化结果<sup class="cite" data-refid="1">[1]</sup></td></tr>
+          <tr><td><code>aus</code></td><td><code>1</code>首音频帧 / <code>2</code>中间帧 / <code>4</code>末帧</td><td>音频上传阶段的帧位标记<sup class="cite" data-refid="1">[1]</sup></td></tr>
+          <tr class="row-highlight"><td><code>ise_unite</code></td><td><code>1</code>（开）/ <code>0</code>（默认关）</td><td><strong>必填 <code>1</code></strong>，否则 <code>multi_dimension</code> / <code>syll_phone_err_msg</code> / 篇章全维度<u>全部不生效</u>（音素级/多维返回空）——小贝逐音素打分的总开关<sup class="cite" data-refid="1">[1]</sup></td></tr>
+          <tr><td><code>extra_ability</code></td><td><code>multi_dimension</code> / <code>syll_phone_err_msg</code> / <code>pitch</code></td><td>扩展开关：<u>开 <code>multi_dimension</code> 拿多维分、<code>syll_phone_err_msg</code> 拿音节/音素错误详情</u>——小贝逐音素打分要靠它。<strong>⚠️ 必须同时设 <code>ise_unite="1"</code> + <code>rst="entirety"</code> 才生效，否则音素/多维返回空</strong><sup class="cite" data-refid="1">[1]</sup></td></tr>
+          <tr><td><code>group</code></td><td><code>adult</code>/<code>youth</code>/<code>pupil</code></td><td>人群（讯飞文档标注主要用于中文；英文按文档为准）<span class="pill warn">⚠️ 英文是否生效需联调确认</span><sup class="cite" data-refid="1">[1]</sup></td></tr>
+          <tr><td><code>ext_curve</code></td><td>扩展曲线开关</td><td><span class="pill warn">⚠️ 文档未在英文流式版明确，需控制台/联调确认</span></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="callout warn">
+        <p><strong>⚠️ 诚实标注：</strong><code>group</code> 在讯飞文档里主要标注用于中文场景的人群区分，英文是否影响评分需<u>联调实测</u>；<code>ext_curve</code> 在英文流式版文档里未见明确说明——这两个不要凭印象当成「填了就生效」，<strong>以控制台 + 联调返回为准</strong>。小贝 MVP 不依赖这两个也能跑。</p>
+      </div>
+
+      <h3>音频要求</h3>
+      <div class="scoreboard">
+        <div class="sb-item"><div class="sv">16k</div><div class="sl">采样率（流式版固定，非 16k 报 68675）<sup class="cite" data-refid="1">[1]</sup></div></div>
+        <div class="sb-item"><div class="sv">16bit</div><div class="sl">位深 · 单声道</div></div>
+        <div class="sb-item"><div class="sv">1280B</div><div class="sl">建议每 40ms 一帧</div></div>
+        <div class="sb-item"><div class="sv">≤5min</div><div class="sl">单次会话上限</div></div>
+      </div>
+      <ul>
+        <li><strong>编码：</strong>PCM raw（<code>aue=raw</code>）/ MP3（<code>aue=lame</code>）/ Speex-wb（默认）。小贝前端录到的 PCM 直接 <code>raw</code> 上传最简单<sup class="cite" data-refid="1">[1]</sup>。</li>
+        <li><strong>分帧：</strong>建议每 40ms 发 <code>1280B</code>，<u>大小可调但单帧不超 19200B</u>（base64 后不超 26000B）<sup class="cite" data-refid="1">[1]</sup>。</li>
+        <li><strong>帧序列：</strong><code>cmd=ssb</code>(首帧/参数+文本，带 <code>ttp_skip:true</code>，<code>data.status=0</code>、不带音频) → <code>cmd=auw</code>(音频帧，<code>aus</code>=1首→2中间→4末，<code>data.status</code>=1→2)<sup class="cite" data-refid="1">[1]</sup>。</li>
+        <li><strong>时长：</strong>单会话 ≤ 5 分钟，超限报 <code>10114</code>/<code>60114</code><sup class="cite" data-refid="1">[1]</sup>。小贝逐句跟读每句几秒，远在限内。</li>
+      </ul>
+
+      <h3>评测文本格式（英文）</h3>
+      <p>英文评测文本随首帧（<code>cmd=ssb</code> 或 <code>ttp</code>）上传，<u>按题型用不同标记包裹</u><sup class="cite" data-refid="1">[1]</sup>：</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>题型</th><th>文本格式</th><th>例</th></tr></thead>
+        <tbody>
+          <tr><td>单词 <code>read_word</code></td><td>用 <code>[word]</code> 头，每词一行</td><td><code>[word]\napple\nbanana</code></td></tr>
+          <tr class="row-highlight"><td>句子 <code>read_sentence</code> / 篇章 <code>read_chapter</code></td><td>用 <code>[content]</code> 头 + 正文文本</td><td><code>[content]\nNice to meet you.</code></td></tr>
+          <tr><td>自定义音标（可选）</td><td><code>[vocabulary]</code> 段给自定义 IPA</td><td><code>word/IPA/</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="callout info">
+        <p><strong>编码注意：</strong>文本按 <code>tte</code> 指定编码（统一 <code>utf-8</code>）；讯飞文档示例里文本前会带 UTF-8 BOM（<code>﻿</code>）前缀<sup class="cite" data-refid="1">[1]</sup>——联调时若结果异常先检查 BOM 与换行。小贝的评测文本直接取字幕里那一句英文，套 <code>[content]\n{句子}</code> 即可。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">★ 返回结果 spec → 小贝 UI 映射（逐词逐音素颜色）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是把「讯飞返回」翻译成「小贝界面」的核心章。讯飞结果是 <strong>XML，base64 编码后塞在 JSON 信封的 <code>data.data</code> 里</strong>，<code>data.status=2</code> 时为最终结果<sup class="cite" data-refid="1">[1]</sup>。</p>
+
+      <h3>JSON 信封 → 解码 → XML</h3>
+      <pre><code>{
+  "code": 0, "message": "success", "sid": "ise000...",
+  "data": { "status": 2, "data": "PHJlYWRfc2VudGVuY2Ug..." }  // base64(XML)
+}</code></pre>
+      <p>Rust 后端拿到后：① 判 <code>code==0</code>；② <code>base64_decode(data.data)</code> → XML 字符串；③ 解析 XML 取分数树 → 转成小贝自定义的结构体回传前端。</p>
+
+      <h3>XML 结构（逐层下钻）</h3>
+      <p style="font-size:13.5px">官方解码 sample 外层有 wrapper：根是 <code>xml_result</code>，里面外层 <code>read_sentence</code> → <code>rec_paper</code> → 内层 <code>read_sentence</code>，再 <code>sentence &gt; word &gt; syll &gt; phone</code>。四维总分挂在内层 <code>read_sentence</code>/<code>sentence</code> 上（不是裸根）：</p>
+      <pre><code>&lt;xml_result&gt;
+ &lt;read_sentence&gt;
+  &lt;rec_paper&gt;
+   &lt;read_sentence total_score="92.5" accuracy_score="100.0"
+      fluency_score="87.6" integrity_score="100.0" standard_score="90.1"
+      is_rejected="false" beg_pos="0" end_pos="150"&gt;
+     &lt;sentence content="Nice to meet you"&gt;
+       &lt;word content="Nice" total_score="95.2" dp_message="0"&gt;
+         &lt;syll content="nice"&gt;
+           &lt;phone content="n"  dp_message="0"/&gt;   &lt;!-- 英文:dp_message 承载读对/读错 --&gt;
+           &lt;phone content="ai" dp_message="0"/&gt;
+           &lt;phone content="s"  dp_message="128"/&gt; &lt;!-- 读错/替换 --&gt;
+         &lt;/syll&gt;
+       &lt;/word&gt;
+       &lt;word content="meet" total_score="61.0" dp_message="0"&gt; ... &lt;/word&gt;
+     &lt;/sentence&gt;
+   &lt;/read_sentence&gt;
+  &lt;/rec_paper&gt;
+ &lt;/read_sentence&gt;
+&lt;/xml_result&gt;</code></pre>
+      <p style="font-size:13px;color:var(--text-mute)">注：以上为依据讯飞文档 + 解码官方 sample 整理的示意片段<span class="conf y">🟡</span>。英文引擎 phone 节点用 <code>dp_message</code> 承载逐音素读对/读错（<code>perr_msg</code> 是<u>中文</u>引擎 phone 字段）；wrapper 层级可能随版本/题型变化，<strong>解析器按 tag 名遍历定位 sentence/word/syll/phone，不要假设固定根路径</strong>；具体数值/属性/字段名以实际返回为准<sup class="cite" data-refid="1">[1]</sup>。</p>
+
+      <h3>四维总分（顶层属性）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>字段</th><th>含义</th><th>小贝展示</th></tr></thead>
+        <tbody>
+          <tr><td><code>total_score</code></td><td>综合总分</td><td>大圆环主分</td></tr>
+          <tr><td><code>accuracy_score</code></td><td>准确度（读得准不准）</td><td>四维雷达 / 进度条</td></tr>
+          <tr><td><code>fluency_score</code></td><td>流利度（节奏停顿）</td><td>四维雷达 / 进度条</td></tr>
+          <tr><td><code>integrity_score</code></td><td>完整度（有没有漏读）</td><td>四维雷达 / 进度条</td></tr>
+          <tr><td><code>standard_score</code></td><td>标准度（英文，像不像标准音）</td><td>四维雷达 / 进度条<sup class="cite" data-refid="1">[1]</sup></td></tr>
+          <tr><td><code>is_rejected</code></td><td><code>true</code>=乱读/没听清，分数不可信</td><td>触发「没听清，再读一次」</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>★ 讯飞字段 → 小贝 UI 映射表</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>讯飞字段</th><th>层级</th><th>语义</th><th>小贝 UI 渲染</th></tr></thead>
+        <tbody>
+          <tr><td><code>total_score</code> 等四维</td><td>句/篇</td><td>综合 + 准确/流利/完整/标准</td><td>顶部分数环 + 四维条</td></tr>
+          <tr class="row-highlight"><td><code>word.total_score</code></td><td>词</td><td>每个单词得分</td><td><strong>逐词底色</strong>：≥85 绿 / 60–85 黄 / &lt;60 红</td></tr>
+          <tr><td><code>word.dp_message</code></td><td>词</td><td>0 读对 / 16 漏读 / 32 增读 / 64 重复 / 128 替换</td><td>漏读划删除线、增读标灰、替换标红角标<sup class="cite" data-refid="1">[1]</sup></td></tr>
+          <tr class="row-highlight"><td><code>phone.content</code> + <code>phone.dp_message</code>（英文）</td><td><strong>音素</strong></td><td>每个音素读对(0)/读错(≠0)；<u>英文引擎用 <code>dp_message</code>，中文引擎才是 <code>perr_msg</code></u></td><td><strong>逐音素颜色</strong>：点开单词看哪个音错了 → 红色高亮该 phone <span class="pill warn">⚠️ 字段名以真实英文返回为准</span></td></tr>
+          <tr><td><code>syll.serr_msg</code> / <code>syll_accent</code></td><td>音节</td><td>音节错误 / 重音</td><td>重音标记 · 音节级反馈</td></tr>
+          <tr><td>历次 <code>total_score</code></td><td>会话</td><td>每句每次得分</td><td><strong>练习热力图</strong>：哪些句子常年低分 → 重点复练</td></tr>
+          <tr><td><code>beg_pos</code>/<code>end_pos</code></td><td>时间</td><td>帧时间边界（1 帧≈10ms）</td><td>对齐波形 / 回放该词片段<sup class="cite" data-refid="1">[1]</sup></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="callout accent">
+        <p><strong>逐音素颜色打分是小贝的杀手锏 UI，靠 <code>&lt;phone&gt;</code> 节点的逐音素错误标记字段（英文引擎为 <code>dp_message</code>）。</strong>这要求 Ch5 同时满足三件事：① <code>ise_unite="1"</code>（总开关）+ ② <code>rst="entirety"</code> + ③ <code>extra_ability</code> 开 <code>syll_phone_err_msg</code>（+ <code>multi_dimension</code>），<u>缺 <code>ise_unite=1</code> 则音素/多维全部返回空</u><sup class="cite" data-refid="1">[1]</sup>。映射逻辑：标记=0 → 绿、轻微/警示档 → 黄、明确读错 → 红；点开单词把这一串 phone 平铺成可点的色块，告诉用户「meet 的 /iː/ 读短了」。Mini Demo（Ch14）就是这个交互的可玩原型。</p>
+        <p style="margin-top:8px"><strong>⚠️ 联调验证：</strong>phone 上承载「读对/读错」的具体字段（<code>dp_message</code> vs <code>perr_msg</code>）随引擎（英文/中文）与版本不同；落地前<strong>必须 base64 解码一条真实英文返回，确认字段名后再写死解析器</strong>。<span class="conf y">🟡</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">题型映射：read_word / sentence / chapter → 小贝场景</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p><code>category</code> 选错，评分维度就对不上。小贝三个核心跟读场景对应三个 category<sup class="cite" data-refid="1">[1]</sup>：</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>小贝场景</th><th>category</th><th>评测文本</th><th>重点维度</th><th>建议时长</th></tr></thead>
+        <tbody>
+          <tr><td><strong>单词卡跟读</strong>（生词发音）</td><td><code>read_word</code></td><td><code>[word]\n{单词}</code></td><td>准确度 + 音素级</td><td>1–2 秒</td></tr>
+          <tr class="row-highlight"><td><strong>逐句跟读</strong>（字幕这一句）</td><td><code>read_sentence</code></td><td><code>[content]\n{句子}</code></td><td>四维全 + 逐词逐音素</td><td>2–8 秒</td></tr>
+          <tr><td><strong>Shadowing 影子跟读</strong>（整段）</td><td><code>read_chapter</code></td><td><code>[content]\n{多句段落}</code></td><td>流利度 + 完整度（韵律/连贯）</td><td>10–60 秒</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="callout info">
+        <p><strong>选型逻辑：</strong>① 用户在小贝里<u>点单个生词读</u> → <code>read_word</code>，重点看「这个词读没读准」；② <u>跟读字幕里的一句</u>（最高频）→ <code>read_sentence</code>，拿全套四维 + 逐词逐音素，喂 Ch6 的颜色 UI；③ <u>shadowing 整段</u> → <code>read_chapter</code>，这时<strong>流利度/完整度比单音素准确度更重要</strong>（shadowing 练的是节奏韵律，父报告 Ch10 有学理）。</p>
+      </div>
+      <div class="callout warn">
+        <p><strong>实践建议：</strong>小贝默认对「逐句跟读」用 <code>read_sentence</code> 即可覆盖 80% 场景。<code>read_chapter</code> 适合 shadowing 模式开启时；篇章评测对录音质量/完整度更敏感，UI 上要引导用户「读完整段再停」。其余英文题型（<code>simple_expression</code>/<code>topic</code>/<code>retell</code> 等开放题）<sup class="cite" data-refid="1">[1]</sup>面向口语考试，<u>小贝精学场景用不上</u>，不接。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">集成架构（小贝 Tauri）：录音 → Rust 后端 → 讯飞 → 渲染</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>整条链路一句话：<strong>前端录音 → invoke Rust command → Rust 现算签名连讯飞 WSS → 流式上传 → 解析 XML → 回传结构化分数 → 前端渲染颜色。</strong>secret 与所有讯飞调用都在 Rust 后端。</p>
+
+      <h3>时序图（文字版）</h3>
+      <pre><code>[前端 WebView]                 [Rust 后端 tauri::command]            [讯飞 ise-api]
+   │ 用户点「跟读」                   │                                      │
+   │ getUserMedia 录音 → PCM16k       │                                      │
+   │ ── invoke("ise_eval",           │                                      │
+   │      {text, category, pcm}) ──▶  │                                      │
+   │                                 │ build_ws_url(签名 HMAC-SHA256)        │
+   │                                 │ ── WSS 握手 (authz/date/host) ──────▶ │
+   │                                 │ ◀──────────── 连接 OK ──────────────  │
+   │                                 │ 首帧: common+business+[content]文本   │
+   │                                 │ ── status=0, cmd=ssb ───────────────▶ │
+   │                                 │ 音频帧: aus=1→2→4 / status=1...2      │
+   │                                 │ ── 分帧 base64 PCM 1280B/40ms ──────▶ │
+   │                                 │ ◀────── data.status=2 + base64(XML) ─ │
+   │                                 │ base64decode → 解析 XML → 结构体       │
+   │ ◀── Ok({total, words[], phones[]})│                                      │
+   │ 渲染分数环 + 逐词逐音素颜色         │                                      │
+</code></pre>
+
+      <h3>为什么调用与 secret 都在 Rust 后端</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">密钥</div><div class="l">APISecret 只在后端，前端逆向也拿不到</div></div>
+        <div class="metric"><div class="v">CORS</div><div class="l">后端发 WSS 无浏览器跨域限制</div></div>
+        <div class="metric"><div class="v">协议</div><div class="l">改讯飞协议只动后端，前端无感</div></div>
+        <div class="metric"><div class="v">复用</div><div class="l">同一 Rust 评测层 Mac/Win 完全一致</div></div>
+      </div>
+      <div class="callout accent">
+        <p><strong>前端职责收到最小：</strong>① <code>getUserMedia</code> 录音并转 16k/16bit/单声道 PCM（或交后端重采样）；② <code>invoke</code> 把 {评测文本, category, 音频} 交后端；③ 拿回结构化分数渲染。<strong>前端完全不碰讯飞域名、不碰密钥、不组签名。</strong>Rust 后端是唯一对讯飞说话的人。</p>
+      </div>
+      <div class="callout info">
+        <p><strong>录音格式落地提示：</strong>WebView 的 <code>MediaRecorder</code> 常出 webm/opus，不是讯飞要的裸 PCM。两条路：① 前端用 <code>AudioWorklet</code> 取 Float32 → 转 16k Int16 PCM 再交后端；② 前端给原始流、<strong>由 Rust 后端用 <code>symphonia</code>/<code>rubato</code> 解码重采样到 16k 单声道</strong>（更稳，推荐）。这块属落地实现，留工程 session；本 spec 只钉「最终喂讯飞的是 16k/16bit/mono PCM」这个约束<sup class="cite" data-refid="1">[1]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">计费与配额：免费额度、超量、并发</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>核实到的实情</h3>
+      <div class="scoreboard">
+        <div class="sb-item"><div class="sv">1万/10万</div><div class="sl">实名礼包：个人 / 企业<sup class="cite" data-refid="2">[2]</sup></div></div>
+        <div class="sb-item"><div class="sv">500/天</div><div class="sl">应用默认每日调用上限<sup class="cite" data-refid="2">[2]</sup></div></div>
+        <div class="sb-item"><div class="sv">50 路</div><div class="sl">WebAPI 默认并发<sup class="cite" data-refid="1">[1]</sup></div></div>
+        <div class="sb-item"><div class="sv">套餐阶梯</div><div class="sl">超量按量阶梯降价（见下）</div></div>
+      </div>
+      <ul>
+        <li><strong>免费额度：</strong>新用户实名认证免费礼包 <strong>个人 1 万次 / 企业 10 万次</strong>（流式版）<sup class="cite" data-refid="2">[2]</sup>；另外 API 文档说应用<strong>默认每日 500 次</strong>调用上限。<u>SDK / WebAPI 额度是否共用，当前官网未明确</u><span class="pill warn">⚠️ 需控制台确认</span>，不再当确定事实陈述。</li>
+        <li><strong>并发：</strong>WebAPI 默认支持 <code>50 路</code>并发连接<sup class="cite" data-refid="1">[1]</sup>。配额耗尽报 <code>11201</code>，能力未授权报 <code>11200</code><sup class="cite" data-refid="1">[1]</sup>。</li>
+        <li><strong>超量计费（已读到真实套餐阶梯）：</strong>超出免费额度在控制台买套餐，按量阶梯降价（均为 1 年有效、流式版）<sup class="cite" data-refid="2">[2]</sup>：
+          <ul style="margin:4px 0 0">
+            <li>套餐一：20 万次 → <strong>60 元/万次</strong></li>
+            <li>套餐二：150 万次 → <strong>38.7 元/万次</strong></li>
+            <li>套餐三：750 万次 → <strong>36 元/万次</strong></li>
+            <li>套餐四：5000 万次 → <strong>20 元/万次</strong></li>
+            <li>套餐五：1 亿次 → <strong>15 元/万次</strong></li>
+          </ul>
+        </li>
+      </ul>
+
+      <h3>MVP 够不够 + 放量成本测算</h3>
+      <div class="callout warn">
+        <p><strong>「1 次交互」≈ 一次完整评测请求。</strong>假设一个重度用户每天精学跟读 <u>30 句</u>（= 30 次）：</p>
+        <ul style="margin:6px 0 0">
+          <li><strong>单用户：</strong>30 次/天 × 30 天 ≈ <code>900 次/月</code>。<strong>个人礼包 1 万次 ≈ 约 1 个月重度用户，或十几个测试用户跑一个月</strong>；要更多额度走<strong>企业认证 10 万次</strong>（≈ 10 个重度用户/月）。比旧版「5 万次」紧不少，但 MVP 冷启动验证够用。</li>
+          <li><strong>放量后（有真实套餐价）：</strong>1000 个日活、人均 30 次/天 = <code>3 万次/天</code> ≈ <code>90 万次/月</code>。这时必然超免费额度，落在<strong>套餐二档（150 万次 / 38.7 元/万次）</strong>，90 万次 ≈ <code>¥3.5k/月</code>量级；继续放量到千万级走套餐四（20 元/万次）单价再降 ~half。<u>这是从官网套餐页直接读到的真实阶梯价</u><sup class="cite" data-refid="2">[2]</sup>，比横向估算可靠。</li>
+          <li><strong>横向辅证（降级）：</strong>腾讯云口语评测后付费 5 元/千次、套餐低至 3.5 元/千次（父报告 Ch7）<sup class="cite" data-refid="5">[5]</sup>——与讯飞套餐阶梯量级相近，仅作交叉验证，不再是主测算依据。</li>
+          <li><strong>成本可转嫁：</strong>父报告 Ch11 已定「云端能力按量增值」——发音评分给免费额度、超出走会员/按量，云成本和收费挂钩，不亏。</li>
+        </ul>
+      </div>
+      <div class="callout good">
+        <p><strong>给小贝的配额结论：</strong>① MVP 阶段：WebAPI 个人礼包 1 万次<u>够把功能跑通 + 十几个测试用户验证一个月</u>（比旧数紧，重度单人约 1 个月就见底，放量需企业认证 10 万次或买套餐）；② 放量阶段：已有真实套餐阶梯（套餐二 38.7 元/万次起），可据此直接测算成本拐点，再决定「继续云 / 迁本地 SSL」（父报告 Ch7「云先本地后」）；③ 并发 50 路对桌面端「一人一次评一句」的零散调用<u>远远够用</u>，不是瓶颈。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">合规与隐私：录音上云的 PIPL 最小同意</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>录音上云就触发 PIPL。讯飞 ISE 隐私政策的要点 + 小贝该做的最小合规动作如下<sup class="cite" data-refid="10">[10]</sup>。</p>
+
+      <h3>讯飞对上传数据怎么处理（文档要点）</h3>
+      <ul>
+        <li><strong>采集什么：</strong>音频、评测文本，以及设备标识（不同端：Android ID/OAID、iOS UUID、Linux MAC 等）；运行日志默认关闭<sup class="cite" data-refid="10">[10]</sup>。</li>
+        <li><strong>是否用于训练：</strong>政策允许对<u>去标识化 / 匿名化</u>后的信息做「模型算法训练」<sup class="cite" data-refid="10">[10]</sup>——这点必须知道：你的用户录音可能被（去标识后）用于改进讯飞模型。</li>
+        <li><strong>保留期：</strong>「为实现处理目的所必需的时间内」保留；日志按网络安全法至少留 6 个月<sup class="cite" data-refid="10">[10]</sup>。</li>
+        <li><strong>开发者义务：</strong>必须告知终端用户「应用使用讯飞 ISE、个人信息会共享至科大讯飞」，提供隐私政策链接，并给用户行使数据权利的便捷机制<sup class="cite" data-refid="10">[10]</sup>。</li>
+      </ul>
+
+      <h3>小贝的 PIPL 最小合规清单</h3>
+      <div class="step"><div class="step-head"><span class="sn">1</span>明示同意（单独勾选）</div><div class="step-body">首次开启「发音评分」时弹明确说明：<u>「这段跟读录音会上传到科大讯飞云端进行发音评测」</u>+ 讯飞隐私政策链接，用户单独同意后才上云。默认不开、可随时关。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>最小化</div><div class="step-body">只传<u>这一句的录音 + 这一句文本</u>，绝不传视频本体、不传整段连续录音、不夹带设备指纹之外的额外信息（对齐父报告 Ch8 边界表）。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>可删除 / 可关闭</div><div class="step-body">本地录音用户可一键删；云端评测属一次性调用（讯飞返回分数即用途完成）。在隐私设置给「关闭云评分、改用本地 GOP」开关（Ch11）。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>儿童额外同意</div><div class="step-body"><strong>讯飞明确要求：终端用户为不满 14 周岁未成年人时，开发者须取得父母/监护人对处理其个人信息的同意</strong><sup class="cite" data-refid="10">[10]</sup>，并适用《科大讯飞儿童隐私保护政策》。小贝若有 K12 / 儿童用户，<u>必须做家长同意流程</u>，否则违规。</div></div>
+
+      <div class="callout bad">
+        <p><strong>⚠️ 儿童语音是高压线。</strong>小贝目标人群含 K12（父报告定位），<u>儿童语音是 PIPL 下的敏感个人信息</u>。三条硬约束：① 14 岁以下必须监护人同意；② 适用讯飞儿童隐私政策；③ 默认把儿童账号的云评分<strong>设为关闭/需家长开启</strong>，能用本地 GOP 就别上云。这块出事代价远大于一点评分精度，宁可保守。</p>
+      </div>
+      <div class="callout info">
+        <p><strong>对齐父报告边界：</strong>父报告第 2 章脚注和第 8 章都强调——「版权内容（视频本体）绝不上传」是硬约束；「用户可选的云端文本/录音任务」是另一回事，营销话术别混为一谈。小贝「默认全本地、云评分是可选开关」相比欧路（AI 字幕/跟读评分默认走云）正是差异化卖点<sup class="cite" data-refid="4">[4]</sup>，合规上也更稳。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">错误处理 + 离线降级（在线讯飞 ↔ 离线本地 GOP）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>错误码处理（核实自官方文档）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>错误码</th><th>含义</th><th>小贝处理</th></tr></thead>
+        <tbody>
+          <tr><td><code>401</code> / <code>403</code></td><td>鉴权失败 / 时钟偏差 / IP 白名单<sup class="cite" data-refid="1">[1]</sup></td><td>后端重算签名（查 date GMT）；不暴露给用户，记日志</td></tr>
+          <tr><td><code>10160</code> / <code>10161</code> / <code>10163</code></td><td>请求非 JSON / base64 解码失败 / 参数校验失败（含数据过长）<sup class="cite" data-refid="1">[1]</sup></td><td>后端 bug，开发期修；上线后兜底「评测失败，重试」</td></tr>
+          <tr><td><code>10200</code></td><td>读取超时（≥10s 无数据）<sup class="cite" data-refid="1">[1]</sup></td><td>录音/上传卡住 → 提示「网络慢，重试」</td></tr>
+          <tr><td><code>11200</code> / <code>11201</code></td><td>能力未授权 / 配额超限<sup class="cite" data-refid="1">[1]</sup></td><td>11200 查控制台开通；<strong>11201 触发降级到本地 GOP</strong> + 提示</td></tr>
+          <tr><td><code>40007</code> / <code>40043</code> / <code>68675</code></td><td>音频解码失败 / 编码与 aue 不符 / 音频异常（查 16k/16bit/mono）<sup class="cite" data-refid="1">[1]</sup></td><td>后端校验录音格式；提示「录音有问题，重录」</td></tr>
+          <tr><td><code>68676</code> / <code>is_rejected=true</code></td><td>乱读 / 无意义语音<sup class="cite" data-refid="1">[1]</sup></td><td><u>不给分</u>，提示「没听清，再读一次」（别硬打分毁信任）</td></tr>
+          <tr><td><code>10114</code> / <code>60114</code></td><td>会话超 5 分钟<sup class="cite" data-refid="1">[1]</sup></td><td>逐句场景几乎不会触发；shadowing 段限制时长</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>在线讯飞 ↔ 离线本地 GOP 切换策略</h3>
+      <p>对齐父报告 B5（第 7 章）：发音评分<strong>在线主用讯飞 ISE、离线降级到本地 GOP/SSL</strong>。切换决策树：</p>
+      <div class="tree">
+        <div class="node q">用户点「跟读评分」时</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl y">有网 + 用户已同意上云 + 额度未耗尽</span> → <strong>走讯飞 ISE</strong>（四维 + 逐词逐音素，最准）</div>
+        <div class="node"><span class="lbl m">无网 / 用户关了云评分 / 儿童账号未开</span> → <strong>降级本地 GOP/SSL</strong>（父报告 Ch7 选型，音素级，PCC 较低但能用、不出设备）</div>
+        <div class="node"><span class="lbl n">配额超限(11201)</span> → 降级本地 + 后台提示「今日云评分额度用完，已切本地」</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">UI 标明当前评分来源（云/本地），分数口径不混淆</div>
+      </div>
+      <div class="callout warn">
+        <p><strong>切换的两个坑：</strong>① <u>口径不一致</u>——讯飞和本地 GOP 的分数分布不同，切换时 UI 要标「本次为本地评分」，别让用户以为「今天突然变严了」；② <u>降级要无感但透明</u>——网断了自动切本地继续能用（不卡死），但要让用户知道当前用的是哪套。父报告 Ch7「云先本地后」校准计划的第④条（阈值+置信度显示）在这里也适用：本地低置信时显示「不确定」而非硬给分。</p>
+      </div>
+      <div class="callout info">
+        <p><strong>本地降级引擎不在本 spec 范围：</strong>本地 GOP/SSL（Echoic·wav2vec2 路线）的选型与校准已在<u>父报告第 7 章</u>详述，本 spec 不重复。这里只钉「讯飞失败/离线时切到本地」这个降级接缝，以及两套分数的 UI 口径处理。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12">
+    <h2><span class="num">12</span><span class="title-text">Azure 对比：何时用海外备选</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>父报告已拍板「讯飞主推、Azure 海外/备选」，本章只一句话带过接入差异，详情见父报告 Ch7<sup class="cite" data-refid="4">[4]</sup>。</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>维度</th><th>讯飞 ISE（主推）</th><th>Azure Pronunciation Assessment（备选）</th></tr></thead>
+        <tbody>
+          <tr><td>接入</td><td>WebSocket 流式 + HMAC 握手（本 spec）<sup class="cite" data-refid="1">[1]</sup></td><td>Speech SDK（含 JS/REST）+ key/region 鉴权<sup class="cite" data-refid="11">[11]</sup></td></tr>
+          <tr><td>评分维度</td><td>准确/流利/完整/标准 + 逐词逐音素</td><td>准确/流利/完整 + <u>韵律 prosody</u> + 音素/音节 + miscue<sup class="cite" data-refid="11">[11]</sup></td></tr>
+          <tr><td>节点 / 延迟</td><td class="check y">国内节点，低延迟</td><td class="check p">海外往返</td></tr>
+          <tr><td>合规</td><td class="check p">音频境内云，合规更顺</td><td class="check n">音频出境，K12 录音有风险</td></tr>
+          <tr class="row-highlight"><td><strong>何时用 Azure</strong></td><td colspan="2">① 小贝出海 / 服务海外用户；② 需要 <code>prosody</code> 韵律维度（仅 en-US）；③ 已在用 Azure 生态。否则国内一律讯飞。</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="callout info">
+        <p><strong>接入差异一句话：</strong>Azure 不用自己组 HMAC 握手——它有官方 Speech SDK（含 JS），传 key+region 即可，<u>但 Tauri 里同样建议放 Rust 后端调 REST（避免 key 进前端）</u>。评分结果结构不同（Azure 是 JSON，字段名 <code>AccuracyScore</code>/<code>Phonemes</code> 等），小贝若双接要做一层<strong>统一评分模型适配</strong>，让 UI 不感知后端是讯飞还是 Azure。详细计费口径（STT 基线 + prosody add-on）见父报告 Ch7<sup class="cite" data-refid="4">[4]</sup>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">13</span><span class="title-text">落地 checklist：从注册到上线</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="step"><div class="step-head"><span class="sn">1</span>注册讯飞开放平台账号</div><div class="step-body"><a href="https://www.xfyun.cn" target="_blank" rel="noopener">www.xfyun.cn</a> 注册。<span class="pill warn">注意点</span>个人/企业主体都行，但商用上量建议企业认证（额度/合规更顺）。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>实名认证</div><div class="step-body">完成个人/企业实名。<span class="pill warn">注意点</span>未实名领不全免费额度；企业实名解锁更高配额与发票。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>创建应用 → 拿 APPID</div><div class="step-body">控制台「我的应用」新建应用。<span class="pill warn">注意点</span>APPID/APIKey/APISecret 一应用一套，<u>记到 Rust 后端的安全配置（环境变量/加密存储），别提交进仓库</u>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>开通「语音评测（流式版）」能力</div><div class="step-body">在该应用下开通 ISE 流式版 WebAPI。<span class="pill warn">注意点</span>WebAPI 与 SDK 是两个版本，<strong>额度是否共用以控制台为准</strong><span class="pill warn">⚠️ 需控制台确认</span><sup class="cite" data-refid="2">[2]</sup>——小贝只用 WebAPI 版即可。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">5</span>领免费额度（实名礼包：个人 1 万 / 企业 10 万）</div><div class="step-body">完成实名后领取流式版免费礼包（个人 1 万次 / 企业 10 万次），注意应用默认每日 500 次上限<sup class="cite" data-refid="2">[2]</sup>。<span class="pill warn">注意点</span>礼包额度比旧版「5 万次」紧，要更多额度走企业认证或控制台买套餐（Ch9 有真实阶梯价）。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">6</span>WebAPI 联调（先脱离 Tauri）</div><div class="step-body">先用脚本/Postman 跑通 <code>wss://ise-api.xfyun.cn/v2/open-ise</code> 握手 + 一句英文评测，拿到 XML 看懂字段。<span class="pill warn">注意点</span>① business 务必带 <code>ise_unite="1"</code> + <code>rst="entirety"</code> + <code>extra_ability=multi_dimension;syll_phone_err_msg</code>，否则音素/多维返回空；② 先验签名（401/403）→ 再验音频格式（68675）→ 再验文本格式（48195）→ 最后 base64 解码 XML，<strong>确认英文 phone 用 <code>dp_message</code> 还是 <code>perr_msg</code> 再写死解析器</strong>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">7</span>集成进 Tauri（Rust command）</div><div class="step-body">把联调脚本搬进 <code>tauri::command</code>，前端 invoke。<span class="pill warn">注意点</span>secret 只在后端；前端录音转 16k/16bit/mono PCM（或后端重采样）；解析 XML → 自定义结构体回传。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">8</span>合规 + 降级接好再上线</div><div class="step-body">接 Ch10 的明示同意/儿童同意 + Ch11 的离线降级到本地 GOP。<span class="pill warn">注意点</span><strong>云评分默认可关</strong>、儿童账号默认不上云；上线前过一遍 PIPL 清单。</div></div>
+      <div class="check-box"><strong>✅ 上线前自检三连：</strong>① secret 确实只在后端、grep 前端 bundle 0 命中？② 录音上云有明示同意 + 儿童家长同意？③ 拔网测过自动降级本地、UI 标明评分来源？三个都过再上。</div>
+    </div>
+  </section>
+
+  <!-- ===== DEMO ===== -->
+  <section class="chapter" id="demo">
+    <h2><span class="num">14</span><span class="title-text">🎮 Mini Demo：读一句 → 出分 + 逐词逐音素</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>下面是小贝「读一句 → 出总分 + 逐词颜色 + 音素级反馈」的<strong>可玩前端原型</strong>——纯展示讯飞结果如何渲染（数据为模拟示意）。点单词看音素，点卡片展开说明。</p>
+
+      <div class="phone-demo">
+        <div style="font-size:13px;color:var(--text-mute);margin-bottom:8px">评测句（read_sentence）：<code>Nice to meet you</code></div>
+        <div class="scoreboard">
+          <div class="sb-item"><div class="sv">86</div><div class="sl">total_score</div></div>
+          <div class="sb-item"><div class="sv">90</div><div class="sl">accuracy</div></div>
+          <div class="sb-item"><div class="sv">82</div><div class="sl">fluency</div></div>
+          <div class="sb-item"><div class="sv">100</div><div class="sl">integrity</div></div>
+        </div>
+        <div style="font-size:13px;color:var(--text-mute);margin:10px 0 4px">逐词（word.total_score 决定底色，点词看音素）：</div>
+        <div class="phone-line">
+          <span class="word-score"><span class="ph g" title="95 分，读对">Nice</span><span class="wl">95</span></span>
+          <span class="word-score"><span class="ph g" title="92 分">to</span><span class="wl">92</span></span>
+          <span class="word-score"><span class="ph m" title="61 分，元音读短了">meet</span><span class="wl">61</span></span>
+          <span class="word-score"><span class="ph g" title="88 分">you</span><span class="wl">88</span></span>
+        </div>
+        <div style="font-size:13px;color:var(--text-mute);margin:12px 0 4px">「meet」展开（英文 phone.dp_message → 颜色）：</div>
+        <div class="phone-line" style="font-size:22px">
+          <span class="ph g" title="dp_message=0 读对">m</span>
+          <span class="ph b" title="dp_message≠0：/iː/ 读成了短音 /ɪ/">iː</span>
+          <span class="ph g" title="dp_message=0 读对">t</span>
+        </div>
+        <div style="font-size:13px;color:var(--text-soft);margin-top:8px">💡 反馈：<strong>meet 的长元音 /iː/ 读短了</strong>，听起来像 "mit"。把嘴角拉开、音拖长再试一次。</div>
+      </div>
+
+      <div class="demo-grid">
+        <div class="demo-card">
+          <div class="dc-icon">🔌</div>
+          <div class="dc-title">WSS 握手 URL</div>
+          <div class="dc-tag">点开看真实参数</div>
+          <div class="dc-body"><pre style="margin:8px 0 0"><code>wss://ise-api.xfyun.cn
+  /v2/open-ise
+  ?authorization=base64(...)
+  &amp;date=Wed%2C+11+Jun+2026...GMT
+  &amp;host=ise-api.xfyun.cn</code></pre></div>
+        </div>
+        <div class="demo-card">
+          <div class="dc-icon">📤</div>
+          <div class="dc-title">首帧 business JSON</div>
+          <div class="dc-tag">点开看参数片段</div>
+          <div class="dc-body"><pre style="margin:8px 0 0"><code>{
+ "common":{"app_id":"YOUR_APPID"},
+ "business":{
+   "sub":"ise","ent":"en_vip",
+   "category":"read_sentence",
+   "cmd":"ssb","aue":"raw",
+   "auf":"audio/L16;rate=16000",
+   "tte":"utf-8","rstcd":"utf8",
+   "rst":"entirety",
+   "ise_unite":"1",       // 总开关,缺它音素/多维返回空
+   "ttp_skip":true,        // 首帧带文本,跳过 ttp 阶段
+   "extra_ability":
+     "multi_dimension;syll_phone_err_msg",
+   "text":"﻿[content]\nNice to meet you"
+ },
+ "data":{"status":0}        // 首帧只 status:0,不带音频
+}
+// 音频另起 cmd=auw 帧: data.data=base64(PCM),
+//   aus=1首→2中间→4末, data.status=1→2</code></pre></div>
+        </div>
+        <div class="demo-card">
+          <div class="dc-icon">🦀</div>
+          <div class="dc-title">Rust tauri command 伪代码</div>
+          <div class="dc-tag">点开看骨架</div>
+          <div class="dc-body"><pre style="margin:8px 0 0"><code>#[tauri::command]
+async fn ise_eval(
+  text:String, category:String,
+  pcm:Vec&lt;u8&gt;
+) -&gt; Result&lt;Score,String&gt; {
+  let url = build_ise_ws_url(
+     KEY, SECRET);          // Ch4 签名
+  let (mut ws,_) =
+     connect_async(url).await?;
+  ws.send(first_frame(      // business+text
+     &text,&category)).await?;
+  for chunk in pcm.chunks(1280){
+     ws.send(audio_frame(chunk)).await?;
+  }
+  ws.send(last_frame()).await?;
+  let xml = recv_until_status2(
+     &mut ws).await?;       // base64 decode
+  Ok(parse_ise_xml(&xml)?)  // → 四维+词+音素
+}</code></pre></div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--text-mute)">⚠️ 以上参数 JSON / 握手 URL / 伪代码为<u>说明性片段</u>（依据讯飞官方文档结构整理<sup class="cite" data-refid="1">[1]</sup>），<strong>非完整可运行实现</strong>——落地代码留工程 session。分数为模拟示意。</p>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq">
+    <h2><span class="num">15</span><span class="title-text">FAQ 常见问题</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">一句话，小贝该用 WebAPI 还是 SDK？</span><span class="toggle">＋</span></div><div class="faq-a"><p>WebAPI（WebSocket 流式），Rust 后端发起。因为讯飞<strong>没有 macOS 原生 SDK</strong>（平台列表 Android/iOS/Linux/Windows/WebAPI）<sup class="cite" data-refid="6">[6]</sup>，Tauri 要 Mac+Win 一致只能走 WebAPI；且 secret 必须在后端组 HMAC 签名，前端直连会泄密。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">APISecret 能不能放前端？</span><span class="toggle">＋</span></div><div class="faq-a"><p>绝对不能。前端 bundle 可逆向，secret 泄露=别人盗刷你账单。它只在 Rust 后端做 HMAC 签名，前端通过 invoke 把录音/文本交后端，后端对讯飞说话（Ch4/Ch8）。上线前 grep 前端产物确认 0 命中。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">逐音素颜色打分靠哪个字段？</span><span class="toggle">＋</span></div><div class="faq-a"><p>XML 里 <code>&lt;phone&gt;</code> 节点的逐音素错误标记——<strong>英文引擎是 <code>dp_message</code></strong>（0=读对），<code>perr_msg</code> 是中文引擎 phone 字段<span class="pill warn">⚠️ 字段名以真实英文返回为准</span><sup class="cite" data-refid="1">[1]</sup>。前提是 business 同时开 <strong><code>ise_unite="1"</code> + <code>rst="entirety"</code> + <code>extra_ability=...;syll_phone_err_msg</code></strong>，缺 <code>ise_unite=1</code> 音素/多维返回空。映射：0→绿、警示→黄、读错→红（Ch6）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">返回是 XML 还是 JSON？要不要 base64 解码？</span><span class="toggle">＋</span></div><div class="faq-a"><p>外层是 JSON 信封（code/message/sid/data），<strong>真正结果是 XML，base64 编码后塞在 <code>data.data</code> 里</strong>，<code>data.status=2</code> 为最终结果<sup class="cite" data-refid="1">[1]</sup>。后端先 base64 解码再解析 XML（Ch6）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">音频要什么格式？前端录的能直接传吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>要 16k/16bit/单声道 PCM（流式版固定 16k，非 16k 报 68675；编码 raw/MP3/speex-wb）<sup class="cite" data-refid="1">[1]</sup>。WebView 的 MediaRecorder 常出 webm/opus，<u>不能直传</u>——前端用 AudioWorklet 转 16k PCM，或交 Rust 后端重采样（推荐，Ch8）。每 40ms 发 1280B、单帧不超 19200B。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">逐句跟读用哪个 category？</span><span class="toggle">＋</span></div><div class="faq-a"><p><code>read_sentence</code>（拿全四维 + 逐词逐音素，覆盖 80% 场景）。单词卡用 <code>read_word</code>，shadowing 整段用 <code>read_chapter</code>（重流利/完整）。开放题 topic/retell 等小贝用不上不接（Ch7）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">免费额度多少？SDK 和 WebAPI 共用吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>新用户实名礼包 <strong>个人 1 万次 / 企业 10 万次</strong>（流式版），应用默认每日 500 次上限<sup class="cite" data-refid="2">[2]</sup>。<u>SDK / WebAPI 额度是否共用，当前官网未明确</u><span class="pill warn">⚠️ 需控制台确认</span>。超量走控制台套餐阶梯（套餐二 150 万次 38.7 元/万次起，Ch9 有完整价目）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">免费礼包够 MVP 吗？放量要花多少？</span><span class="toggle">＋</span></div><div class="faq-a"><p>够冷启动验证但比旧版紧：单重度用户约 900 次/月，<strong>个人 1 万次 ≈ 约 1 个月重度或十几个测试用户跑一个月</strong>；要更多走企业认证 10 万次。放量（1000 日活×30 次/天≈90 万次/月）落套餐二档（150 万次 / 38.7 元/万次）≈ <strong>¥3.5k/月</strong>量级——这是官网套餐页真实阶梯价<sup class="cite" data-refid="2">[2]</sup>，腾讯云 3.5–5 元/千次<sup class="cite" data-refid="5">[5]</sup>仅作辅证（Ch9）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">儿童用户上云评分有什么坑？</span><span class="toggle">＋</span></div><div class="faq-a"><p>大坑。讯飞明确要求<strong>14 岁以下须取得监护人同意</strong>，并适用其儿童隐私政策<sup class="cite" data-refid="10">[10]</sup>。儿童语音是 PIPL 敏感信息。小贝若有 K12 用户：儿童账号默认不上云、需家长开启、能用本地 GOP 就别上云（Ch10）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">没网的时候发音评分还能用吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能，降级到本地 GOP/SSL（父报告 Ch7 选型，音素级、不出设备、精度稍低）。切换由 Ch11 决策树驱动：有网+已同意+有额度走讯飞，否则走本地。UI 要标明当前评分来源，避免「分数口径突变」的困惑。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">什么时候该上 Azure 而不是讯飞？</span><span class="toggle">＋</span></div><div class="faq-a"><p>① 小贝出海/服务海外用户；② 需要 prosody 韵律维度（仅 en-US）；③ 已在 Azure 生态。否则国内一律讯飞（国内节点低延迟、音频境内云合规更顺）。详见父报告 Ch7<sup class="cite" data-refid="4">[4]</sup>。双接要做统一评分模型适配（Ch12）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">鉴权老报 401/403 怎么排查？</span><span class="toggle">＋</span></div><div class="faq-a"><p>401=签名校验失败（多半签名原文拼错），403=时钟偏差/IP 白名单<sup class="cite" data-refid="1">[1]</sup>。三查：① date 是 RFC1123 GMT 且与服务器时间接近；② 签名原文严格三行用 <code>\n</code>（host/date/request-line）；③ headers 字段顺序 <code>host date request-line</code> 不能乱（Ch4）。</p></div></div>
+    </div>
+  </section>
+
+  <!-- ===== REFERENCES ===== -->
+  <section class="chapter" id="refs">
+    <h2><span class="num">📚</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13px;color:var(--text-mute)">访问日期均为 2026-06-11。鼠标悬停正文 <sup class="cite" data-refid="1">[1]</sup> 可弹窗查看来源并点击外链。参数/字段/额度为查证当日快照，以讯飞控制台与实际返回为准。</p>
+      <ol class="ref-list">
+        <li id="ref-1">科大讯飞开放平台 ·《语音评测（流式版）API 文档》（WebSocket 接口地址、HMAC-SHA256 鉴权握手、business 参数 sub/ent/category/cmd/aue/auf/tte/rstcd/aus/<strong>ise_unite/rst</strong>/extra_ability、ttp_skip、音频 16k/1280B 分帧、文本 [word]/[content] 格式、XML 结果 xml_result&gt;...&gt;sentence&gt;word&gt;syll&gt;phone + total/accuracy/fluency/integrity/standard + word.dp_message + <strong>phone.dp_message（英文）</strong>/perr_msg（中文）、错误码、50 路并发）。<a href="https://www.xfyun.cn/doc/Ise/IseAPI.html" target="_blank" rel="noopener">www.xfyun.cn/doc/Ise/IseAPI.html</a> <span class="ref-meta">· 访问 2026-06-11</span></li>
+        <li id="ref-2">科大讯飞开放平台 ·《语音评测》服务/价目页（新用户实名免费礼包 <strong>个人 1 万次 / 企业 10 万次</strong>，应用默认每日 500 次调用上限；超量套餐阶梯：20 万次 60 元/万次、150 万次 38.7 元/万次、750 万次 36 元/万次、5000 万次 20 元/万次、1 亿次 15 元/万次，均 1 年有效流式版；SDK 版与 WebAPI 版额度是否共用官网未明确，以控制台为准）。<a href="https://www.xfyun.cn/services/ise" target="_blank" rel="noopener">www.xfyun.cn/services/ise</a> · <a href="https://console.xfyun.cn/sale/buy" target="_blank" rel="noopener">console.xfyun.cn/sale/buy</a>（套餐价目） <span class="ref-meta">· 访问 2026-06-11</span></li>
+        <li id="ref-3">科大讯飞开放平台 · 语音评测产品页（智能口语评测 / 中英双语 / 面向中国人英语评测 / 单词·句子·篇章多级评分）。<a href="https://www.xfyun.cn/service/ise" target="_blank" rel="noopener">www.xfyun.cn/service/ise</a> <span class="ref-meta">· 访问 2026-06-11</span></li>
+        <li id="ref-4">无忌 Deep Research ·《本地视频英语精学桌面 App》父报告（第 7 章发音评分主推讯飞 ISE / Azure 备选、第 8 章本地↔云边界表、第 13 章路线决策树）。<a href="./local-video-english-study-tool.html" target="_blank" rel="noopener">local-video-english-study-tool.html</a> <span class="ref-meta">· 同目录 · 2026-06-11</span></li>
+        <li id="ref-5">腾讯云 · 智聆口语评测计费说明（横向参考量级：后付费 5 元/千次、套餐低至 3.5 元/千次，用于估算讯飞超量成本量级，非讯飞官方报价）。<a href="https://cloud.tencent.com/document/product/884/19150" target="_blank" rel="noopener">cloud.tencent.com/document/product/884</a> <span class="ref-meta">· 经父报告 Ch7 引用 · 访问 2026-06-11</span></li>
+        <li id="ref-6">科大讯飞开放平台 ·《语音评测 Windows SDK 文档》（平台支持列表标注 Android/iOS/Linux/Windows/WebAPI，<strong>无 macOS</strong>）。<a href="https://www.xfyun.cn/doc/voiceservice/ise/Windows-SDK.html" target="_blank" rel="noopener">www.xfyun.cn/doc/voiceservice/ise/Windows-SDK.html</a> <span class="ref-meta">· 访问 2026-06-11</span></li>
+        <li id="ref-7">科大讯飞开放平台 ·《语音评测 Windows SDK 文档》（Windows 32/64 位 C/C++ 动态库 msc.dll / msc_x64.dll + msc.lib / msc_x64.lib）。<a href="https://www.xfyun.cn/doc/voiceservice/ise/Windows-SDK.html" target="_blank" rel="noopener">www.xfyun.cn/doc/voiceservice/ise/Windows-SDK.html</a> <span class="ref-meta">· 访问 2026-06-11</span></li>
+        <li id="ref-8">科大讯飞开放平台 ·《语音评测 Android SDK 文档》《iOS SDK 文档》（移动端 SDK 存在，桌面端不适用）。<a href="https://www.xfyun.cn/doc/Ise/Android-SDK.html" target="_blank" rel="noopener">www.xfyun.cn/doc/Ise/Android-SDK.html</a> / <a href="https://www.xfyun.cn/doc/Ise/iOS-SDK.html" target="_blank" rel="noopener">iOS-SDK</a> <span class="ref-meta">· 访问 2026-06-11</span></li>
+        <li id="ref-9">科大讯飞开放平台 ·《语音评测（流式版）API 文档》（英文引擎 ent=en_vip、中文 ent=cn_vip）。<a href="https://www.xfyun.cn/doc/Ise/IseAPI.html" target="_blank" rel="noopener">www.xfyun.cn/doc/Ise/IseAPI.html</a> <span class="ref-meta">· 访问 2026-06-11</span></li>
+        <li id="ref-10">科大讯飞开放平台 ·《语音评测 SDK 隐私政策》（采集音频/评测文本/设备标识；去标识化后用于模型训练；开发者须告知用户信息共享至讯飞并提供权利机制；<strong>14 周岁以下须监护人同意，适用儿童隐私保护政策</strong>）。<a href="https://www.xfyun.cn/doc/total_sdk_privacy/ise_privacy.html" target="_blank" rel="noopener">www.xfyun.cn/doc/total_sdk_privacy/ise_privacy.html</a> <span class="ref-meta">· 访问 2026-06-11</span></li>
+        <li id="ref-11">Microsoft Learn · Azure AI Speech 发音评测（Pronunciation Assessment：准确度/流利度/完整度 + prosody 韵律 + 音素/音节 + miscue；Speech SDK key/region 鉴权）。<a href="https://learn.microsoft.com/azure/ai-services/speech-service/how-to-pronunciation-assessment" target="_blank" rel="noopener">learn.microsoft.com/azure/ai-services/speech-service/how-to-pronunciation-assessment</a> <span class="ref-meta">· 访问 2026-06-11</span></li>
+      </ol>
+      <div class="callout info" style="margin-top:16px">
+        <p><strong>核实声明：</strong>本 spec 的 WebSocket 地址、鉴权握手、business 参数、音频要求、XML 结果结构、错误码、并发数、免费礼包额度与套餐阶梯价均经讯飞官方文档/价目页（ref 1/2/6/7）当日核实。<u>SDK 版与 WebAPI 版额度是否共用</u>官网未明确，已标 ⚠️ 需控制台确认，未编造；英文 phone 节点字段（<code>dp_message</code> vs <code>perr_msg</code>）、XML wrapper 层级随引擎/版本变，已标 ⚠️ 落地前需解码真实英文返回确认；<code>group</code>(英文是否生效)/<code>ext_curve</code> 文档未明确，已标 ⚠️ 需联调确认。Azure 接入差异为概要，详情归父报告 Ch7。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>讯飞 ISE 接入 spec · 《小贝》报告子规格 · 整理：无忌 · 2026-06-11</p>
+    <p style="font-size:12px">技术规格文档 · 参数/字段以讯飞控制台与实际返回为准 · 落地实现代码留工程 session</p>
+  </footer>
+</main>
+
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+<script>
+/* 阅读进度条 + back-to-top */
+(function(){
+  var prog=document.getElementById('progress');
+  var btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement;
+    var sc=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100;
+    prog.style.width=sc+'%';
+    if(h.scrollTop>500)btt.classList.add('show');else btt.classList.remove('show');
+  }
+  window.addEventListener('scroll',onScroll);onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+/* 主题切换 */
+(function(){
+  var b=document.body,t=document.getElementById('themeToggle');
+  var saved=localStorage.getItem('xunfei-ise-theme');if(saved)b.setAttribute('data-theme',saved);
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('xunfei-ise-theme',n);upd();});
+})();
+/* 章节折叠 */
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+/* FAQ 折叠 */
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+/* 表格行高亮 */
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+/* demo 卡片展开 */
+document.querySelectorAll('.demo-card').forEach(function(c){
+  c.addEventListener('click',function(){c.classList.toggle('open');});
+});
+/* 移动端抽屉导航 + scrollspy */
+(function(){
+  var nav=document.querySelector('.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(tog&&nav&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=Array.prototype.slice.call(document.querySelectorAll('.anchor-list a')),secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120,cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur)cur.a.classList.add('active');
+  }
+  window.addEventListener('scroll',spy);spy();
+})();
+/* citation popover */
+(function() {
+  var activePopover=null,activeTrigger=null,hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect();
+    var pw=Math.min(380,window.innerWidth-24);
+    pop.style.width=pw+'px';
+    var left=r.left+window.scrollX;
+    if(left+pw>window.scrollX+window.innerWidth-12)left=window.scrollX+window.innerWidth-pw-12;
+    if(left<window.scrollX+12)left=window.scrollX+12;
+    pop.style.left=left+'px';
+    pop.style.top=(r.bottom+window.scrollY+6)+'px';
+  }
+  function showPopover(trigger){
+    if(activePopover){activePopover.remove();activePopover=null;}
+    if(hideTimer)clearTimeout(hideTimer);
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  bindCites();
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);
+  window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

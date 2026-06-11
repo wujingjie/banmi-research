@@ -308,7 +308,7 @@
     <p style="margin:0"><strong>📌 三条最关键发现（先扫这个）：</strong></p>
     <ul style="margin:8px 0 0">
       <li><strong>工程形态选 Tauri 2.x，但「体积小」要分清「壳」和「真实占用」</strong>——Tauri <u>空壳</u>确实比 Electron 小一个数量级（同款 todo app ~8.6MiB vs 180–244MiB）<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>，但小贝的<u>真实落盘体积</u>由 sidecar（ffmpeg+whisper 二进制）、Windows 上 WebView2 离线运行时（内嵌固定版约 +127MB）<sup class="cite" data-refid="3">[3]</sup>、可选 Python/WhisperX、以及 whisper base/small 模型下载（1–2GB）主导——<strong>首启后实际可达数百 MB ~ GB 级</strong>。Tauri 的真正优势是「下载的安装器壳小、首装转化高」，不是「装完只占 8MB」。另一个必须知道的坑：<u>不能在 Mac 上交叉编译 Windows 安装包</u>，要用 CI 矩阵分平台构建<sup class="cite" data-refid="6">[6]</sup>（不是 blocker，CI 模板现成）。<span class="conf g">🟢</span></li>
-      <li><strong>本地处理栈整条链路都能跑通，普通无独显笔记本也行（但「10×实时」是有条件的）</strong>——whisper.cpp 在 Apple Silicon 用 Metal 跑 base 模型可达约 10× 实时，<u>但取决于芯片/模型/量化/beam/散热/是否真启用 Metal-CoreML</u><sup class="cite" data-refid="8">[8]</sup>；逐句/逐词时间戳用 whisperX（wav2vec2 强制对齐，<u>通常够字幕/逐句循环，精度需在目标媒体/口音/噪声实测，不当硬 SLA</u>）<sup class="cite" data-refid="11">[11]</sup>。发音评分是<u>唯一「纯本地基线达不到云端水平」的一环</u>：开源 GOP 基线与人工评分的相关性只有 PCC≈0.45<sup class="cite" data-refid="14">[14]</sup>。<strong>推荐边界：MVP 用云发音 API（主推<u>讯飞 ISE</u>，国内标杆、低延迟、面向中国人英语评测，免费 5 万次起步）验证价值，确认值得再迁自建本地栈省成本+解合规</strong><sup class="cite" data-refid="23">[23]</sup>。<span class="conf y">🟡</span></li>
+      <li><strong>本地处理栈整条链路都能跑通，普通无独显笔记本也行（但「10×实时」是有条件的）</strong>——whisper.cpp 在 Apple Silicon 用 Metal 跑 base 模型可达约 10× 实时，<u>但取决于芯片/模型/量化/beam/散热/是否真启用 Metal-CoreML</u><sup class="cite" data-refid="8">[8]</sup>；逐句/逐词时间戳用 whisperX（wav2vec2 强制对齐，<u>通常够字幕/逐句循环，精度需在目标媒体/口音/噪声实测，不当硬 SLA</u>）<sup class="cite" data-refid="11">[11]</sup>。发音评分是<u>唯一「纯本地基线达不到云端水平」的一环</u>：开源 GOP 基线与人工评分的相关性只有 PCC≈0.45<sup class="cite" data-refid="14">[14]</sup>。<strong>推荐边界：MVP 用云发音 API（主推<u>讯飞 ISE</u>，国内标杆、低延迟、面向中国人英语评测，有免费额度起步）验证价值，确认值得再迁自建本地栈省成本+解合规</strong><sup class="cite" data-refid="23">[23]</sup>。<span class="conf y">🟡</span></li>
       <li><strong>「自带本地视频做精学」的空位真实但<u>已收窄</u>，必须诚实承认有最接近的竞品</strong>——Language Reactor / Trancy 都是浏览器扩展，处理不了硬盘里的 mp4，且 LR 国内不可用<sup class="cite" data-refid="18">[18]</sup>。但国内的欧路「每日英语听力」<u>桌面版（Win/Mac）已经做到了相当多</u>：导入本地文件 + AI 字幕生成、打开任意网站视频、一键校对字幕时间轴、切音轨/内置字幕、单句精听、桌面版跟读打分<sup class="cite" data-refid="22">[22]</sup>——它<strong>就是最接近的竞品</strong>，不能再说「桌面+本地文件无人占」。小贝的差异化收敛到「<strong>系统化精学闭环（逐句跟读+shadowing+发音评分+SRS 一体）× 全本地处理 × 任意本地文件</strong>」这个组合，以及更深的精学体验，而非「无人做」。<span class="conf y">🟡</span></li>
     </ul>
   </div>
@@ -325,7 +325,7 @@
         <div class="metric"><div class="v">~10×*</div><div class="l">whisper.cpp Metal base 倍速（有条件）</div></div>
         <div class="metric"><div class="v">词级对齐</div><div class="l">whisperX 够逐句循环（需实测）</div></div>
         <div class="metric"><div class="v">PCC 0.45</div><div class="l">开源 GOP 发音评分基线相关性</div></div>
-        <div class="metric"><div class="v">讯飞 ISE</div><div class="l">云发音评分主推（免费 5 万次起）</div></div>
+        <div class="metric"><div class="v">讯飞 ISE</div><div class="l">云发音评分主推（有免费额度起步）</div></div>
       </div>
 
       <div class="step">
@@ -342,7 +342,7 @@
       </div>
       <div class="step">
         <div class="step-head"><span class="sn">4</span>发音评分：本地基线达不到云端，主推讯飞 ISE</div>
-        <div class="step-body">纯本地开源 GOP 基线与人工评分相关性只有 PCC≈0.45<sup class="cite" data-refid="14">[14]</sup>，而云 API 提供准确度/流利度/完整度多维成熟评分。结论：<strong>发音评分是「评分可上云」那一类</strong>（跟读录音是用户自己的、不含版权）。MVP 云评分<strong>主推科大讯飞 ISE</strong>——国内标杆、低延迟、专门面向中国人英语评测，单词/句子/篇章/音素多维，免费 5 万次起步、WebAPI+各端 SDK<sup class="cite" data-refid="23">[23]</sup>；Azure 作海外/备选<sup class="cite" data-refid="16">[16]</sup>。把版权敏感的「视频内容」死死锁在本地。</div>
+        <div class="step-body">纯本地开源 GOP 基线与人工评分相关性只有 PCC≈0.45<sup class="cite" data-refid="14">[14]</sup>，而云 API 提供准确度/流利度/完整度多维成熟评分。结论：<strong>发音评分是「评分可上云」那一类</strong>（跟读录音是用户自己的、不含版权）。MVP 云评分<strong>主推科大讯飞 ISE</strong>——国内标杆、低延迟、专门面向中国人英语评测，单词/句子/篇章/音素多维，有免费额度起步、WebAPI+各端 SDK<sup class="cite" data-refid="23">[23]</sup>；Azure 作海外/备选<sup class="cite" data-refid="16">[16]</sup>。把版权敏感的「视频内容」死死锁在本地。</div>
       </div>
       <div class="step">
         <div class="step-head"><span class="sn">5</span>市场空位收窄：要做「系统化精学闭环」而非「又一个本地播放器」</div>
@@ -642,7 +642,7 @@
       <table>
         <thead><tr><th>方案</th><th>评分维度</th><th>计费</th><th>延迟</th><th>隐私/合规</th></tr></thead>
         <tbody>
-          <tr class="row-highlight"><td><strong>科大讯飞 ISE【主推】</strong></td><td><u>音素/单词/句子/篇章</u>多级 + 准确度/流利度/完整度（中文另有声韵分/调型分）；中英双语、专门面向中国人英语评测<sup class="cite" data-refid="23">[23]</sup></td><td><strong>免费领 5 万次</strong>（SDK 与 WebAPI 各一次、不共用）；超出走套餐/后付费（官网未公开统一单价，控制台购买）<sup class="cite" data-refid="23">[23]</sup></td><td class="check y">国内节点低延迟</td><td class="check n">音频出境（境内云、合规更顺）</td></tr>
+          <tr class="row-highlight"><td><strong>科大讯飞 ISE【主推】</strong></td><td><u>音素/单词/句子/篇章</u>多级 + 准确度/流利度/完整度（中文另有声韵分/调型分）；中英双语、专门面向中国人英语评测<sup class="cite" data-refid="23">[23]</sup></td><td><strong>新用户实名礼包 个人 1 万 / 企业 10 万次</strong> + 默认每日 500 次/应用；超出走控制台套餐阶梯（如 150 万次约 38.7 元/万次，量大降至 15 元/万次）<sup class="cite" data-refid="23">[23]</sup></td><td class="check y">国内节点低延迟</td><td class="check n">音频出境（境内云、合规更顺）</td></tr>
           <tr><td><strong>Azure 发音评测</strong>（海外/备选）</td><td>准确度/流利度/完整度/<u>韵律(prosody)</u> + 音素/音节级 + miscue<sup class="cite" data-refid="16">[16]</sup></td><td>计费=<strong>基线 STT 价（~$1/小时）+ prosody add-on</strong>（prosody 仅 en-US、额外收费）；评测本身不另收、随 STT；短音频按秒计；区域/tier 不同价需核实<sup class="cite" data-refid="16">[16]</sup></td><td class="check p">网络往返（海外）</td><td class="check n">音频出境，K12 录音有合规风险</td></tr>
           <tr><td><strong>腾讯云口语评测</strong></td><td>单词/句子/篇章 + 发音准确/完整/流利</td><td>后付费 5 元/千次；套餐低至 3.5 元/千次（100 万次 3750 元/年）；按文本长度计次（≤20 词算 1 次）<sup class="cite" data-refid="17b">[17b]</sup></td><td class="check p">网络往返</td><td class="check n">音频出境</td></tr>
           <tr><td><strong>本地 GOP/SSL（开源）</strong></td><td>音素级（需自拼词/句聚合）</td><td class="check y">零边际成本</td><td class="check y">本机即时</td><td class="check y">音频不出设备</td></tr>
@@ -650,7 +650,11 @@
       </table>
       </div>
       <div class="callout info">
-        <p><strong>为什么主推讯飞 ISE 而非 Azure：</strong>① <u>专门面向中国人学英语</u>的评测，对中式发音的容错/反馈更贴目标用户；② 国内节点低延迟、合规更顺（音频在境内云）；③ 接入方式全（WebAPI + 各端 SDK），免费 5 万次足够 MVP 验证<sup class="cite" data-refid="23">[23]</sup>。Azure 的 prosody 韵律维度是亮点，但<u>$1.32/小时是「STT 基线 + prosody add-on」的组合口径、且 prosody 仅 en-US</u>，按区域/档位浮动——别当通用单价用<sup class="cite" data-refid="16">[16]</sup>。Azure 留作出海/海外用户或需要 prosody 时的备选。</p>
+        <p><strong>为什么主推讯飞 ISE 而非 Azure：</strong>① <u>专门面向中国人学英语</u>的评测，对中式发音的容错/反馈更贴目标用户；② 国内节点低延迟、合规更顺（音频在境内云）；③ 接入方式全（WebAPI + 各端 SDK），新用户免费礼包（个人 1 万 / 企业 10 万次）够 MVP 冷启动验证<sup class="cite" data-refid="23">[23]</sup>。Azure 的 prosody 韵律维度是亮点，但<u>$1.32/小时是「STT 基线 + prosody add-on」的组合口径、且 prosody 仅 en-US</u>，按区域/档位浮动——别当通用单价用<sup class="cite" data-refid="16">[16]</sup>。Azure 留作出海/海外用户或需要 prosody 时的备选。</p>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>🔧 讯飞 ISE 怎么接（工程细节）→</strong> 鉴权 HMAC 握手 / WebAPI vs SDK 拍板 / business 参数（含 <code>ise_unite=1</code> 总开关）/ 返回 XML 解析成逐音素分 / Tauri Rust 后端集成架构 / 计费配额 / 合规离线降级，已拆成专门子报告：<a href="./local-video-english-study-tool--xunfei-ise-spec.html"><strong>《讯飞 ISE 接入 spec》</strong></a>。</p>
       </div>
 
       <h3>四维差距总结</h3>
@@ -664,7 +668,7 @@
       <div class="callout accent">
         <p><strong>🏆 推荐边界（明确）：分阶段，MVP 云评分写死讯飞 ISE。</strong></p>
         <ul style="margin:6px 0 0">
-          <li><strong>MVP / 早期：用云 API，<u>主推科大讯飞 ISE</u>。</strong>发音评分的「准」直接决定用户信不信这个功能，开源 GOP 基线的 PCC 0.45 给出的分数容易让用户觉得「乱打分」失去信任。讯飞 ISE 多维成熟、面向中国人英语评测、国内低延迟，能让功能<u>一上来就可信</u>，免费 5 万次足够验证<sup class="cite" data-refid="23">[23]</sup>。Azure 作海外/备选（需 prosody 时），腾讯云作国内备选（3.5–5 元/千次）<sup class="cite" data-refid="16">[16]</sup><sup class="cite" data-refid="17b">[17b]</sup>。</li>
+          <li><strong>MVP / 早期：用云 API，<u>主推科大讯飞 ISE</u>。</strong>发音评分的「准」直接决定用户信不信这个功能，开源 GOP 基线的 PCC 0.45 给出的分数容易让用户觉得「乱打分」失去信任。讯飞 ISE 多维成熟、面向中国人英语评测、国内低延迟，能让功能<u>一上来就可信</u>，免费额度足够验证<sup class="cite" data-refid="23">[23]</sup>。Azure 作海外/备选（需 prosody 时），腾讯云作国内备选（3.5–5 元/千次）<sup class="cite" data-refid="16">[16]</sup><sup class="cite" data-refid="17b">[17b]</sup>。</li>
           <li><strong>关键合规前提：发音音频片段不含版权</strong>（是用户自己的跟读录音，不是视频内容），所以<u>它属于「可上云」那一类</u>（见 Ch8）。版权敏感的视频本体永远不上传；但仍要在 UI 明确告知「这段录音会上传到讯飞评测」并取得同意。</li>
           <li><strong>成长期 / 确认价值后：迁本地（SSL/Echoic·wav2vec2 路线）。</strong>动机有二：省掉按次成本、彻底消除录音出境的合规顾虑。代价是工程量大 + 要做下面的「校准计划」。</li>
         </ul>
@@ -817,7 +821,7 @@
       </ul>
       <h3>小贝适配的变现路径（按优先级）</h3>
       <div class="step"><div class="step-head"><span class="sn">A</span>本地工具一次性 / 订阅（推荐主路）</div><div class="step-body">桌面工具卖「Pro 版」license（一次性买断或年订阅）——解锁更大模型、更多片段、发音评分次数、批量处理等。全本地无服务器成本，毛利高，符合工具型产品调性。</div></div>
-      <div class="step"><div class="step-head"><span class="sn">B</span>云端能力按量增值</div><div class="step-body">发音评分（讯飞 ISE）/LLM 私教等「可上云」功能给免费额度，超出按量收费（成本可转嫁，如讯飞免费 5 万次后按套餐<sup class="cite" data-refid="23">[23]</sup>、Azure 按 STT 基线计费<sup class="cite" data-refid="16">[16]</sup>）。把云成本和收费挂钩，不亏。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">B</span>云端能力按量增值</div><div class="step-body">发音评分（讯飞 ISE）/LLM 私教等「可上云」功能给免费额度，超出按量收费（成本可转嫁，如讯飞免费额度用完后按套餐<sup class="cite" data-refid="23">[23]</sup>、Azure 按 STT 基线计费<sup class="cite" data-refid="16">[16]</sup>）。把云成本和收费挂钩，不亏。</div></div>
       <div class="step"><div class="step-head"><span class="sn">C</span>免费核心 + 去广告/会员</div><div class="step-body">最基础精学全免费做留存，靠会员（更顺手的体验、家长报告、更多内容模板）转化。</div></div>
       <div class="callout warn"><p><strong>军师提醒：</strong>别一上来就建复杂订阅体系。先做出「让人愿意天天打开」的核心精学闭环（Ch13），有了留存再谈变现——工具型产品的死法通常是「还没人爱用就急着收费」。<span class="conf y">🟡 行业体感</span></p></div>
     </div>
@@ -897,7 +901,7 @@ let (mut rx, _child) = cmd.spawn().expect("failed to spawn whisper");
           <tr><td><strong>本地转写</strong></td><td><span class="pill accent">whisper.cpp</span></td><td>单二进制零依赖、Mac 上 Metal 加速、sidecar 最佳拍档（Ch5）</td></tr>
           <tr><td><strong>逐句对齐</strong></td><td><span class="pill accent">whisperX</span></td><td>词级 ±50ms、转写对齐一条龙、多格式直出（Ch6）</td></tr>
           <tr><td><strong>媒体处理</strong></td><td><span class="pill accent">ffmpeg(sidecar)</span></td><td>抽音轨/转码标配，同走 sidecar 静态编译</td></tr>
-          <tr><td><strong>发音评分</strong></td><td><span class="pill accent">MVP 讯飞 ISE（云）→ 成长期迁本地 SSL</span></td><td>本地 GOP 基线 PCC~0.45 信任不够；讯飞 ISE 面向中国人英语、国内低延迟、免费 5 万次起；确认价值再迁本地省成本+解合规（Ch7）</td></tr>
+          <tr><td><strong>发音评分</strong></td><td><span class="pill accent">MVP 讯飞 ISE（云）→ 成长期迁本地 SSL</span></td><td>本地 GOP 基线 PCC~0.45 信任不够；讯飞 ISE 面向中国人英语、国内低延迟、有免费额度起；确认价值再迁本地省成本+解合规（Ch7）</td></tr>
           <tr><td><strong>复习调度</strong></td><td><span class="pill accent">FSRS（本地）</span></td><td>沿用上一份结论，MIT、语言无关、自适应间隔</td></tr>
           <tr><td><strong>媒体合规</strong></td><td><span class="pill accent">OS 原生解码优先 + ffmpeg LGPL build 抽音/转码</span></td><td>降 codec 专利暴露；ffmpeg 动态链接+source+notice、避开 GPL/nonfree（Ch4）</td></tr>
           <tr><td><strong>分发 + 签名</strong></td><td><span class="pill accent">官网直接下载 + CI 矩阵双端构建</span></td><td>Mac 签名公证 $99/年；<u>Win 走国内/国际 CA 的 OV/EV（¥3.5k–4.3k 或 $200–600/年，非微软 Azure，中国个人无资格）</u>；大陆托管需 ICP 备案（Ch4）</td></tr>
@@ -929,7 +933,7 @@ let (mut rx, _child) = cmd.spawn().expect("failed to spawn whisper");
 
       <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">普通笔记本（没有独显）跑得动本地转写吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>跑得动。base/small 模型只要 1–2GB 内存、不需要 GPU<sup class="cite" data-refid="9">[9]</sup>。Apple Silicon 上 whisper.cpp 走 Metal，base 约 10× 实时<sup class="cite" data-refid="8">[8]</sup>，一集 20 分钟的剧几分钟就转完。Windows 纯 CPU 也有 ~15× 实时<sup class="cite" data-refid="8">[8]</sup>。对「精学」场景 base 精度足够（清晰英语+可校正）。</p></div></div>
 
-      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">发音评分能不能纯本地做，不依赖云？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能做，但短期不建议作首发。<u>开源 GOP 基线</u>与人工评分相关性只有 PCC≈0.45<sup class="cite" data-refid="14">[14]</sup>（注意这是经典基线、不是本地天花板，SSL/wav2vec2 能更高）。建议 MVP 用云 API、<strong>主推讯飞 ISE</strong>（面向中国人英语、国内低延迟、免费 5 万次<sup class="cite" data-refid="23">[23]</sup>），确认价值后再迁本地（SSL/Echoic 路线）省成本+解合规，迁前要做口音校准集（Ch7）。发音录音是用户自己的、不含版权，属「可上云」类（Ch8）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">发音评分能不能纯本地做，不依赖云？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能做，但短期不建议作首发。<u>开源 GOP 基线</u>与人工评分相关性只有 PCC≈0.45<sup class="cite" data-refid="14">[14]</sup>（注意这是经典基线、不是本地天花板，SSL/wav2vec2 能更高）。建议 MVP 用云 API、<strong>主推讯飞 ISE</strong>（面向中国人英语、国内低延迟、有免费额度<sup class="cite" data-refid="23">[23]</sup>），确认价值后再迁本地（SSL/Echoic 路线）省成本+解合规，迁前要做口音校准集（Ch7）。发音录音是用户自己的、不含版权，属「可上云」类（Ch8）。</p></div></div>
 
       <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">「绝不上传」和「可选对接云端」会不会矛盾？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不矛盾，关键是颗粒度。硬约束是<strong>版权内容（视频/音频本体、整片字幕/转写）永不上传</strong>。可上云的只有「孤立单词释义、单句翻译、用户自己的跟读录音、对话私教」这些不含版权的文本/录音任务，且做成可选开关、明确告知（Ch8 边界表）。营销话术别把两者混为一谈。</p></div></div>
 
@@ -979,7 +983,7 @@ let (mut rx, _child) = cmd.spawn().expect("failed to spawn whisper");
         <li id="ref-20"><a href="https://www.ssl2buy.com/ev-code-signing-certificates" target="_blank" rel="noopener">Windows EV/OV 代码签名证书价格 + SmartScreen 政策</a><span class="ref-meta">· 引用 4 次 · EV 证书约 $247-581/年(FastSSL $247、DigiCert $581)；2024 起微软取消 EV 首发绕过 SmartScreen 特权、EV 与 OV 同走信誉积累过程</span></li>
         <li id="ref-21"><a href="https://textslashplain.com/2025/03/12/authenticode-in-2025-azure-trusted-signing/" target="_blank" rel="noopener">Authenticode in 2025 — Azure Trusted Signing（Eric Lawrence）</a><span class="ref-meta">· 引用 2 次 · 2023-06 起代码签名私钥强制存硬件/云 HSM 的政策背景；Azure Trusted Signing ~$10/月、直集成 CI——<u>但仅对符合资格地区（US/加等）省事，中国个人不适用，见 ref-33</u></span></li>
         <li id="ref-22"><a href="https://www.eudic.net/v4/en/app/history?appkey=eusoft_ting_en" target="_blank" rel="noopener">欧路《每日英语听力》桌面版更新日志（实查本地视频导入能力）</a><span class="ref-meta">· 引用 9 次 · <u>实查桌面版（Win/Mac）更新日志</u>：9.7.3/9.7.4「我的资源」播放本地文件 + AI 字幕生成、单句精听；26.4.2 打开任意网站视频 + 一键校对字幕时间轴 + 切换视频音轨和内置字幕；25.9.1 桌面版跟读打分向全用户免费——「桌面+本地视频导入+字幕对齐+跟读评分」已走通大半，是小贝最接近的竞品；整体仍泛听/资源库导向、AI字幕/评分走云</span></li>
-        <li id="ref-23"><a href="https://www.xfyun.cn/services/ise" target="_blank" rel="noopener">科大讯飞 — 语音评测(ISE)智能口语评测 + API 文档（实查维度/计费/接入）</a><span class="ref-meta">· 引用 12 次 · 实查：评测维度 音素/单词/句子/篇章多级 + 准确度/流利度/完整度（中文另有声韵分/调型分）；题型 read_syllable(中)/read_word/read_sentence/read_chapter；中英双语(zh_cn/en_us)、专门面向中国人英语评测；<strong>免费领 5 万次（SDK 与 WebAPI 各一次、不共用）</strong>，超出走套餐/后付费（控制台购买，官网未公开统一单价）；接入 WebAPI + 各端 SDK(Go/PHP/Java/Python/C#/Node)</span></li>
+        <li id="ref-23"><a href="https://www.xfyun.cn/services/ise" target="_blank" rel="noopener">科大讯飞 — 语音评测(ISE)智能口语评测 + API 文档（实查维度/计费/接入）</a><span class="ref-meta">· 引用 12 次 · 实查：评测维度 音素/单词/句子/篇章多级 + 准确度/流利度/完整度（中文另有声韵分/调型分）；题型 read_syllable(中)/read_word/read_sentence/read_chapter；中英双语(zh_cn/en_us)、专门面向中国人英语评测；<strong>新用户实名礼包 个人 1 万 / 企业 10 万次 + 默认每日 500 次/应用</strong>，超出走控制台套餐阶梯（20 万次 60 元/万次 … 1 亿次 15 元/万次，均 1 年有效·流式版）；SDK/WebAPI 额度归属以控制台为准；接入 WebAPI + 各端 SDK(Go/PHP/Java/Python/C#/Node)</span></li>
         <li id="ref-24"><a href="https://windowsforum.com/threads/ffmpeg-adds-whisper-audio-filter-for-on-device-transcription-asr.378722/" target="_blank" rel="noopener">FFmpeg 新增 Whisper 音频 filter（设备端 ASR）</a><span class="ref-meta">· 引用 1 次 · FFmpeg 内置 whisper filter、命令链内直出 text/SRT/JSON、完全本地；较新、稳定性需实测</span></li>
         <li id="ref-25"><a href="https://par.nsf.gov/servlets/purl/10531394" target="_blank" rel="noopener">Pronunciation Assessment Criteria & Intelligibility（学界综述）</a><span class="ref-meta">· 引用 2 次 · 二语发音评测应以 intelligibility/comprehensibility 为目标而非 native accent；量表常把「重口音」与「可懂度」混淆、带 native-bias；需多样语音数据求公平</span></li>
         <li id="ref-26"><a href="https://www.lanjinger.com/d/174316" target="_blank" rel="noopener">蓝鲸/易观 — 2021-11 外语学习 App 月活 TOP10 榜单</a><span class="ref-meta">· 引用 6 次 · 百词斩 ~1998 万(唯一千万级)、流利说 620 万、墨墨 411 万、每日英语听力 275 万、可可英语 157 万、不背单词新晋 100 万；139 家共 6072 万月活</span></li>

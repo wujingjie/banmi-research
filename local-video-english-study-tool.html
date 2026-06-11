@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>本地视频英语精学桌面 App：工程形态 + 本地处理栈选型 + 国内精学市场 · 无忌 Deep Research · 2026-06-11</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 16px 0; }
+  .demo-card { padding: 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); cursor: pointer; transition: transform .15s, box-shadow .15s; }
+  .demo-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+  .demo-card .dc-icon { font-size: 26px; }
+  .demo-card .dc-title { font-family: var(--serif); font-weight: 700; font-size: 15.5px; margin: 6px 0 2px; color: var(--text); }
+  .demo-card .dc-tag { font-size: 11px; color: var(--text-mute); }
+  .demo-card .dc-body { font-size: 13px; color: var(--text-soft); margin-top: 8px; max-height: 0; overflow: hidden; transition: max-height .3s; }
+  .demo-card.open .dc-body { max-height: 600px; }
+  .demo-card .dc-bar { height: 8px; border-radius: 999px; background: var(--bg-soft); margin-top: 8px; overflow: hidden; }
+  .demo-card .dc-bar > span { display: block; height: 100%; border-radius: 999px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .demo-card .dc-body { max-height: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table, .demo-card { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 TL;DR + 核心结论速览</a>
+    <a href="#ch2" data-target="ch2">02 产品定位与市场空位</a>
+    <a href="#ch3" data-target="ch3">03 A1：Electron vs Tauri 四维对比 ★</a>
+    <a href="#ch4" data-target="ch4">04 A2：好安装工程（签名/公证/SmartScreen）</a>
+    <a href="#ch5" data-target="ch5">05 B3：本地转写 whisper.cpp vs faster-whisper</a>
+    <a href="#ch6" data-target="ch6">06 B4：逐句对齐 whisperX/aeneas/MFA</a>
+    <a href="#ch7" data-target="ch7">07 B5：发音评分 本地 vs 云端 ★</a>
+    <a href="#ch8" data-target="ch8">08 B6：本地 vs 云端清晰边界表</a>
+    <a href="#ch9" data-target="ch9">09 C7：国内同类工具全景</a>
+    <a href="#ch10" data-target="ch10">10 C8：精学方法 真需求 vs 噱头</a>
+    <a href="#ch11" data-target="ch11">11 变现与国内付费意愿</a>
+    <a href="#demo" data-target="demo">🎮 Mini Demo</a>
+    <a href="#ch13" data-target="ch13">13 产品路线决策树 ★</a>
+    <a href="#faq" data-target="faq">FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>本地视频英语精学桌面 App：工程形态 + 本地处理栈 + 国内精学市场</h1>
+    <div class="hero-meta">
+      <span>📅 2026-06-11</span>
+      <span>🔍 ~30 次检索 + 多源核对</span>
+      <span>🖥️ Mac + Windows 桌面 App</span>
+      <span>🔒 内容只在本地处理</span>
+      <span>🇨🇳 面向中国用户</span>
+      <span>🤖 代码全由 AI 编写</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>一句话定调：<span style="color:var(--accent-text)">小贝</span> 这个产品技术上完全可行、市场空位<u>真实但收窄</u>，工程拍板是 <span style="color:var(--accent-text)">Tauri 2.x</span> + 打包 whisper.cpp/ffmpeg 为 sidecar + 发音评分「MVP 先用云 API（首选讯飞 ISE）、确认价值再迁本地」。</strong>「用户导入本地视频 → 小贝在本地转写/对齐 → 逐句跟读 + 影子跟读 + 发音评分」这条链路，每一环都有成熟开源件可由 AI 拼起来。但要把话说清醒：<strong>技术不是真风险</strong>——AI 都能写、栈都成熟；真风险在<strong>集成质量、法律打包（FFmpeg/codec/分发合规）、Windows 分发信任、以及用户工作流契合</strong>这四处。其中「好安装」（双端签名/公证/SmartScreen）尤其被低估，且<u>中国个人开发者的 Windows 签名路径和欧美完全不同</u>（见 Ch4）。</p>
+      <p>另一个清醒前提：<strong>中国用户假设 Windows 优先（不是 Mac 优先）+ 移动/云盘使用习惯重</strong>，所以小贝先要验证的窄楔子是「本地视频精听/跟读工作台」，而不是一上来就喊「全本地精学操作系统」。本篇按三条主线组织：<strong>主线 A 形态与分发</strong>（Ch3 Electron/Tauri 四维对比、Ch4 签名公证年成本 + 法律合规）→ <strong>主线 B 本地处理栈</strong>（Ch5 转写、Ch6 逐句对齐、Ch7 发音评分【重点·主推讯飞 ISE】、Ch8 本地/云边界）→ <strong>主线 C 功能与市场</strong>（Ch9 国内竞品全景、Ch10 精学方法真伪、Ch11 变现）。Ch12 是可玩 Mini Demo，Ch13 是给小贝的<strong>产品路线决策树（最重要）</strong>。每个具体数字/价格/性能都带 inline 引用，鼠标悬停 <sup class="cite" data-refid="1">[1]</sup> 可看来源。规模/价格为查证当日快照。</p>
+    </div>
+  </div>
+
+  <div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+    <p style="margin:0"><strong>📌 三条最关键发现（先扫这个）：</strong></p>
+    <ul style="margin:8px 0 0">
+      <li><strong>工程形态选 Tauri 2.x，但「体积小」要分清「壳」和「真实占用」</strong>——Tauri <u>空壳</u>确实比 Electron 小一个数量级（同款 todo app ~8.6MiB vs 180–244MiB）<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>，但小贝的<u>真实落盘体积</u>由 sidecar（ffmpeg+whisper 二进制）、Windows 上 WebView2 离线运行时（内嵌固定版约 +127MB）<sup class="cite" data-refid="3">[3]</sup>、可选 Python/WhisperX、以及 whisper base/small 模型下载（1–2GB）主导——<strong>首启后实际可达数百 MB ~ GB 级</strong>。Tauri 的真正优势是「下载的安装器壳小、首装转化高」，不是「装完只占 8MB」。另一个必须知道的坑：<u>不能在 Mac 上交叉编译 Windows 安装包</u>，要用 CI 矩阵分平台构建<sup class="cite" data-refid="6">[6]</sup>（不是 blocker，CI 模板现成）。<span class="conf g">🟢</span></li>
+      <li><strong>本地处理栈整条链路都能跑通，普通无独显笔记本也行（但「10×实时」是有条件的）</strong>——whisper.cpp 在 Apple Silicon 用 Metal 跑 base 模型可达约 10× 实时，<u>但取决于芯片/模型/量化/beam/散热/是否真启用 Metal-CoreML</u><sup class="cite" data-refid="8">[8]</sup>；逐句/逐词时间戳用 whisperX（wav2vec2 强制对齐，<u>通常够字幕/逐句循环，精度需在目标媒体/口音/噪声实测，不当硬 SLA</u>）<sup class="cite" data-refid="11">[11]</sup>。发音评分是<u>唯一「纯本地基线达不到云端水平」的一环</u>：开源 GOP 基线与人工评分的相关性只有 PCC≈0.45<sup class="cite" data-refid="14">[14]</sup>。<strong>推荐边界：MVP 用云发音 API（主推<u>讯飞 ISE</u>，国内标杆、低延迟、面向中国人英语评测，免费 5 万次起步）验证价值，确认值得再迁自建本地栈省成本+解合规</strong><sup class="cite" data-refid="23">[23]</sup>。<span class="conf y">🟡</span></li>
+      <li><strong>「自带本地视频做精学」的空位真实但<u>已收窄</u>，必须诚实承认有最接近的竞品</strong>——Language Reactor / Trancy 都是浏览器扩展，处理不了硬盘里的 mp4，且 LR 国内不可用<sup class="cite" data-refid="18">[18]</sup>。但国内的欧路「每日英语听力」<u>桌面版（Win/Mac）已经做到了相当多</u>：导入本地文件 + AI 字幕生成、打开任意网站视频、一键校对字幕时间轴、切音轨/内置字幕、单句精听、桌面版跟读打分<sup class="cite" data-refid="22">[22]</sup>——它<strong>就是最接近的竞品</strong>，不能再说「桌面+本地文件无人占」。小贝的差异化收敛到「<strong>系统化精学闭环（逐句跟读+shadowing+发音评分+SRS 一体）× 全本地处理 × 任意本地文件</strong>」这个组合，以及更深的精学体验，而非「无人做」。<span class="conf y">🟡</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">TL;DR + 核心结论速览（开头就给答案）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把一份长报告压成五条可落地判断。后面每章是这五条的证据展开。</p>
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">Tauri 2.x</div><div class="l">工程形态拍板</div></div>
+        <div class="metric"><div class="v">壳 ~8.6MB</div><div class="l">Tauri 安装器壳（真实占用数百MB~GB级）</div></div>
+        <div class="metric"><div class="v">~10×*</div><div class="l">whisper.cpp Metal base 倍速（有条件）</div></div>
+        <div class="metric"><div class="v">词级对齐</div><div class="l">whisperX 够逐句循环（需实测）</div></div>
+        <div class="metric"><div class="v">PCC 0.45</div><div class="l">开源 GOP 发音评分基线相关性</div></div>
+        <div class="metric"><div class="v">讯飞 ISE</div><div class="l">云发音评分主推（免费 5 万次起）</div></div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>工程形态：Tauri 2.x，不是 Electron</div>
+        <div class="step-body">安装器<u>壳</u>小一个数量级（~8.6MiB vs 244MiB）<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>、空载内存省一半多<sup class="cite" data-refid="1">[1]</sup>、打包本地二进制走官方 sidecar 干净<sup class="cite" data-refid="4">[4]</sup>、自带 updater 且默认签名校验<sup class="cite" data-refid="7">[7]</sup>。<strong>但别误读体积</strong>：小贝真实占用由 sidecar、WebView2 运行时、模型下载主导，首启后可达数百 MB~GB 级（Ch3 给「壳 vs 真实」两个数）。代价：Windows 渲染走系统 WebView2（Win11 预装、Win10 安装器自动拉）<sup class="cite" data-refid="3">[3]</sup>，渲染一致性略弱于 Electron<sup class="cite" data-refid="2">[2]</sup>；且必须 CI 矩阵分平台构建<sup class="cite" data-refid="6">[6]</sup>。对「代码全由 AI 写」的单人项目，下载壳小/分发体验的收益远大于这点代价。</div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">2</span>「好安装」是真正的工程税，提前预算（中国开发者路径特殊）</div>
+        <div class="step-body">Mac：Apple Developer Program $99/年 + Developer ID 签名 + 公证（notarytool），过 Gatekeeper 后用户双击即开<sup class="cite" data-refid="19">[19]</sup>。Windows：2023 年起代码签名证书私钥强制存硬件/云 HSM——<strong>注意微软 Azure Trusted/Artifact Signing 中国个人开发者<u>没资格</u></strong>（仅限 US/加/欧组织 + US/加个人）<sup class="cite" data-refid="33">[33]</sup>，中国个人/小团队现实路径是国内 CA（沃通等）或国际 CA 经销商的 OV/EV 代码签名证书<sup class="cite" data-refid="34">[34]</sup>；且 EV 已不再自动绕过 SmartScreen，新签名首发仍可能弹警告<sup class="cite" data-refid="20">[20]</sup>。国内直接下载分发可行，但要分清 ICP/APP 备案的真实门槛（Ch4 新增合规小节）。</div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">3</span>本地转写/对齐链路：成熟，普通笔记本能跑</div>
+        <div class="step-body">转写选 <strong>whisper.cpp</strong>（跨平台 + Apple Metal 加速，是 sidecar 嵌入的最佳选择）<sup class="cite" data-refid="8">[8]</sup>；逐句/逐词时间戳选 <strong>whisperX</strong>（wav2vec2 对齐，词级 ±50ms，足以支撑逐句播放 + 跟读）<sup class="cite" data-refid="11">[11]</sup>。base/small 模型 1–2GB 内存即可，无需独显<sup class="cite" data-refid="9">[9]</sup>。</div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">4</span>发音评分：本地基线达不到云端，主推讯飞 ISE</div>
+        <div class="step-body">纯本地开源 GOP 基线与人工评分相关性只有 PCC≈0.45<sup class="cite" data-refid="14">[14]</sup>，而云 API 提供准确度/流利度/完整度多维成熟评分。结论：<strong>发音评分是「评分可上云」那一类</strong>（跟读录音是用户自己的、不含版权）。MVP 云评分<strong>主推科大讯飞 ISE</strong>——国内标杆、低延迟、专门面向中国人英语评测，单词/句子/篇章/音素多维，免费 5 万次起步、WebAPI+各端 SDK<sup class="cite" data-refid="23">[23]</sup>；Azure 作海外/备选<sup class="cite" data-refid="16">[16]</sup>。把版权敏感的「视频内容」死死锁在本地。</div>
+      </div>
+      <div class="step">
+        <div class="step-head"><span class="sn">5</span>市场空位收窄：要做「系统化精学闭环」而非「又一个本地播放器」</div>
+        <div class="step-body">LR/Trancy 是在线扩展、碰不了本地文件、LR 国内不可用<sup class="cite" data-refid="18">[18]</sup>；但欧路「每日英语听力」<u>桌面版</u>已支持本地导入+AI字幕+校轴+精听+跟读打分<sup class="cite" data-refid="22">[22]</sup>，是最接近的竞品。小贝的差异化 = 任意本地文件 × 全本地处理 × <strong>把跟读/shadowing/发音评分/SRS 串成一套系统化精学闭环</strong>（比泛听 App 更深的精学体验），而不是「无人做」的真空。</div>
+      </div>
+
+      <div class="callout purple">
+        <p><strong>与上一份报告的关系：</strong>同目录《GitHub 英语学习开源生态》已覆盖 FSRS 间隔算法、发音评测开源生态、whisper 概览。<strong>本报告焦点不同</strong>——把「桌面 App 工程形态（Electron/Tauri/签名/打包本地二进制/自动更新）」和「国内精学市场全景」这两块上一份没深入的挖深。复习算法仍沿用上一份的结论（FSRS），本报告不重复。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">产品定位与市场空位：「自带本地视频精学」是真空位吗</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>先把切入点立住——如果空位是假的，后面工程做得再漂亮也没意义。结论：<strong>空位是真的，但比初稿设想的<u>更窄</u>——欧路「每日英语听力」桌面版已经占了「桌面+本地视频导入」这块大半，必须把边界诚实说清，否则容易自我感动。</strong></p>
+
+      <h3>参照物：Language Reactor / Trancy 到底是什么形态</h3>
+      <p>这俩是「视频学英语」赛道最被推崇的工具，但它们有一个共同的、结构性的限制：<strong>都是浏览器扩展，只能挂在网页流媒体上。</strong></p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>产品</th><th>形态</th><th>支持源</th><th>本地 mp4 文件</th><th>国内可用</th><th>处理位置</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Language Reactor</strong></td><td>Chrome 扩展</td><td>YouTube / Netflix 等网页</td><td class="check n">✗ 不能</td><td class="check n">✗ 不可用<sup class="cite" data-refid="18">[18]</sup></td><td>云 + 网页</td></tr>
+          <tr><td><strong>Trancy</strong></td><td>Chrome 扩展</td><td>YouTube/Netflix/Udemy/Coursera/TED 等<sup class="cite" data-refid="17">[17]</sup></td><td class="check n">✗ 不能</td><td class="check p">~ 部分可用</td><td>云 + 网页</td></tr>
+          <tr><td><strong>每日英语听力</strong>(欧路桌面版)</td><td>桌面 App(Win/Mac)</td><td>资源库 + <strong>本地/网盘视频导入</strong><sup class="cite" data-refid="22">[22]</sup></td><td class="check y">✓ 支持本地导入</td><td class="check y">✓ 国内可用</td><td class="check p">~ 本地播放本地、AI字幕/跟读评分上云</td></tr>
+          <tr class="row-highlight"><td><strong>小贝（设想）</strong></td><td>桌面 App</td><td><strong>硬盘里任意视频/播客</strong></td><td class="check y">✓ 核心卖点</td><td class="check y">✓ 直接下载分发</td><td class="check y"><strong>全本地（可选云）</strong></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="callout info">
+        <p><strong>关键差异点：</strong>扩展形态的天花板是「它只能看到浏览器里那个网页的视频」。你下载到本地的美剧、买的网课视频、播客 mp3、自己录的素材——扩展<u>看不见也碰不到</u>。而「桌面 App + 读本地文件」恰好把这个天花板掀掉。LR 在国内不可用（需要科学上网且服务在墙外）<sup class="cite" data-refid="18">[18]</sup>，更是直接让一大批国内用户用不上这条最佳实践。</p>
+      </div>
+
+      <h3>国内竞品里有没有人占了这个位（据实收紧）</h3>
+      <div class="callout warn">
+        <p><strong>诚实修订：欧路「每日英语听力」桌面版（Win/Mac）比初稿设想的能干多了，它就是最接近的竞品。</strong>实查其桌面版更新日志，已上线：通过「我的资源」<u>播放本地文件 + AI 字幕生成</u>（9.7.3/9.7.4）、<u>打开任意网站视频</u>（26.4.2）、<u>一键校对字幕时间轴</u>、<u>切换视频音轨和内置字幕</u>（26.4.2）、<u>单句精听</u>（9.7.3）、<u>桌面版跟读打分</u>（25.9.1 向全用户免费）<sup class="cite" data-refid="22">[22]</sup>。也就是说，「桌面 + 导入本地视频 + 字幕对齐 + 跟读评分」这条链路<strong>它已经走通了大半</strong>，不能再说「没人占」。</p>
+      </div>
+      <p>它的相对短板（也是小贝可切的差异化）在于：① 整体仍是<strong>泛听/资源库</strong>导向（VOA/BBC/CNN/新概念是主体），本地导入是其中一个能力而非产品核心；② 跟读评分/AI 字幕等关键能力<u>走云</u>，不是「全本地、可纯离线」；③ 没把「围绕你自己的一部剧，跟读+shadowing+发音评分+生词进 SRS」串成一套<strong>系统化精学闭环</strong>，更像「能精听的播放器」而非「精学私教」。详见 Ch9。</p>
+      <div class="callout good">
+        <p><strong>所以收窄后的差异化 = 三重组合而非「四重无人区」：① 任意本地视频/音频 × ② 全本地处理（默认离线、可选上云，把版权内容死锁本地）× ③ 系统化精学闭环（逐句跟读+shadowing+发音评分+精听+SRS 一体，比泛听 App 更深）。</strong>欧路桌面版满足了「桌面+本地导入+部分精学」，但 ②（全本地）和 ③（系统化闭环+更深精学体验）这两点尚有真实空间——这才是诚实的切入点，<u>是「做得更专、更闭环、更隐私」，不是「无人做」</u>。</p>
+      </div>
+
+      <h3>定位一句话</h3>
+      <blockquote>「把你硬盘里的任意英语视频，变成一套像私教课一样的精学材料——逐句听、跟着读、影子练、AI 打发音分、挖空听写、生词进复习——全程在你自己电脑上跑，一个字节都不上传。」</blockquote>
+      <p style="font-size:13px;color:var(--text-mute)">⚠️ 注意：「绝不上传」是小贝的产品承诺也是合规护城河，但要诚实——若用户<u>选择</u>对接云端做发音评分（讯飞 ISE）/翻译，那一小段不含版权的文本/录音会出境（见 Ch8 边界表）。「版权内容（视频本体）绝不上传」是硬约束，「用户可选的云端文本任务」是另一回事，营销话术别混为一谈。相比欧路（AI 字幕/跟读评分默认走云），小贝「默认全本地、云端是可选开关」正是可打的差异点。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">主线 A1：Electron vs Tauri 四维对比 → 明确推荐 Tauri ★</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>阿杰只关心四点，我就只答这四点，最后给拍板。<strong>结论先行：选 Tauri 2.x。</strong>四维里它赢三个半，唯一让步是渲染一致性，对一个单人 + AI 写码的本地工具项目无关痛痒。</p>
+
+      <h3>① 一套代码同时产出 Mac + Windows 安装包：成熟度与坑</h3>
+      <div class="callout warn">
+        <p><strong>这是最容易踩的认知坑，先说清楚。</strong>无论 Tauri 还是 Electron，「一套前端代码同时出 Mac + Windows 安装包」<u>都成熟</u>，但<strong>都不能在一台 Mac 上交叉编译出 Windows 安装包</strong>。Tauri 因为依赖各平台原生库和工具链，「当前阶段无法做有意义的交叉编译」，官方推荐用 <strong>CI 矩阵</strong>（GitHub Actions 等）在各平台原生 runner 上分别构建——Windows 包在 <code>windows-latest</code> 上 build、Mac 包在 <code>macos-latest</code> 上 build<sup class="cite" data-refid="6">[6]</sup>。官方提供 <code>tauri-action</code>，一键在三平台编译并上传 GitHub Release<sup class="cite" data-refid="6">[6]</sup>。</p>
+      </div>
+      <div class="check-box"><strong>✓ 对本项目的含义：</strong>这不是 blocker。CI 模板现成，AI 一次配好后每次 push 自动出双端包。但阿杰心里要有数——开发期想本机测 Windows 版，得有台 Windows（或虚机/CI artifact），不能在 Mac 上 <code>tauri build --target windows</code> 直接出 .exe（Linux/Mac 上用 NSIS 交叉编译 Windows「可行但有坑、测试少」，不建议依赖）<sup class="cite" data-refid="6">[6]</sup>。Electron 同理，也是 CI 矩阵分平台 build，这点两者打平。</div>
+
+      <h3>② 安装包体积 + 安装体验：分清「空壳基准」和「小贝真实占用」</h3>
+      <div class="callout warn">
+        <p><strong>先纠一个常见误读：「Tauri &lt;10MB」是<u>空壳 hello-world / todo benchmark</u>，不是小贝装完只占 8MB。</strong>这类对比测的是「框架本身的最小体积」，对一个要内嵌 ffmpeg+whisper、可能再带 Python/WhisperX、首启再下 1–2GB 模型的<u>媒体处理 App</u>没有直接代表性。下面给「<strong>壳 vs 真实</strong>」两个数，别拿空壳数字当卖点。</p>
+      </div>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>维度</th><th>Tauri 2.x</th><th>Electron</th><th>差距</th></tr></thead>
+        <tbody>
+          <tr><td>① 空壳 todo app 安装器（benchmark）</td><td><strong>~8.6 MiB</strong><sup class="cite" data-refid="2">[2]</sup></td><td>~180–244 MiB<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup></td><td class="check y">壳小 ~20×</td></tr>
+          <tr class="row-highlight"><td>② <strong>小贝真实落盘</strong>（壳+sidecar+WebView2+模型）</td><td colspan="2"><strong>首启后数百 MB ~ GB 级</strong>：壳几 MB + ffmpeg/whisper sidecar 数十~上百 MB + Win 内嵌 WebView2 约 +127MB<sup class="cite" data-refid="3">[3]</sup> + （若用）Python/WhisperX + whisper base/small 模型 1–2GB<sup class="cite" data-refid="9">[9]</sup></td><td class="check p">由 sidecar/模型主导，非框架</td></tr>
+          <tr><td>空载内存（idle，框架层）</td><td>~30–50MB<sup class="cite" data-refid="1">[1]</sup></td><td>~150–300MB<sup class="cite" data-refid="1">[1]</sup></td><td class="check y">省一半多</td></tr>
+          <tr><td>冷启动（实测口径不一）</td><td>更快（某基准 1.8s）<sup class="cite" data-refid="1">[1]</sup></td><td>更慢（某基准 12s）<sup class="cite" data-refid="1">[1]</sup></td><td class="check p">差距被夸大*</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p style="font-size:12.5px;color:var(--text-mute)">* 启动时间各家基准差异极大，有的测出 1.8s vs 12s，也有评测认为「小于 1.5s 的启动差异不值得作为选型依据」<sup class="cite" data-refid="2">[2]</sup>。<span class="conf y">🟡 单源/口径不一</span>。框架层体积/内存的量级差距则是多源一致的 <span class="conf g">🟢</span>。</p>
+      <div class="callout good">
+        <p><strong>Tauri 体积优势的<u>正确</u>表述</strong>：优势在「<u>下载的安装器壳小</u>」——面向中国用户、走「官网直接下载」的工具，下载一个几 MB 的壳 vs 一个 200MB 的，首装转化率有差别；模型/sidecar 可在首启时按需下载，不必塞进安装器。但<strong>装完后真实占用</strong>由 sidecar 二进制 + WebView2 运行时（Win11 预装、Win10 在线拉 bootstrapper 约几 MB；若做完全离线包内嵌 WebView2 固定版会 +127MB<sup class="cite" data-refid="3">[3]</sup>）+ whisper 模型（1–2GB<sup class="cite" data-refid="9">[9]</sup>）主导，可达 GB 级。营销文案别承诺「只占 8MB」。</p>
+      </div>
+
+      <h3>③ 打包/调用本地二进制（whisper.cpp / ffmpeg）的难易：sidecar</h3>
+      <p>这是小贝的命门——必须能可靠地内嵌并调用 whisper.cpp 和 ffmpeg。<strong>Tauri 的 sidecar 机制为此量身定做。</strong></p>
+      <div class="callout accent">
+        <p><strong>Tauri sidecar 怎么工作（实查官方文档）：</strong>在 <code>tauri.conf.json</code> 的 <code>bundle.externalBin</code> 里登记二进制路径，文件名<u>必须带平台 target triple 后缀</u>（如 <code>whisper-aarch64-apple-darwin</code> / <code>whisper-x86_64-pc-windows-msvc.exe</code>），打包时按当前平台自动挑对的那个塞进安装包；运行时用 <code>app.shell().sidecar("whisper")</code>（Rust）或 <code>Command.sidecar()</code>（JS）调起，并在 <code>capabilities</code> 里授予 <code>shell:allow-execute/spawn</code> 权限<sup class="cite" data-refid="4">[4]</sup>。已有真实案例把 ffmpeg 作为 sidecar 嵌入做媒体转码，同样路径适用于 whisper.cpp<sup class="cite" data-refid="4">[4]</sup>。</p>
+      </div>
+      <div class="trap-box"><strong>⚠️ 已知坑：</strong>macOS 上把动态链接的 ffmpeg 当 sidecar 可能遇到 dyld 库找不到的问题（社区 issue 有记录）<sup class="cite" data-refid="4">[4]</sup>。规避：用<strong>静态编译</strong>的 whisper.cpp / ffmpeg 二进制，或确保依赖库一并打包。这对 AI 写码是可处理的工程细节，不是结构性障碍。Electron 也能做（把二进制放 <code>resources</code> 外，用 <code>child_process</code> spawn），但 Tauri 的 sidecar 是「一等公民」，路径解析、权限、打包都有官方约定，更不容易出错。</div>
+
+      <h3>④ 自动更新机制成熟度</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>框架</th><th>更新方案</th><th>成熟度</th><th>签名校验</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Tauri 2.x</strong></td><td>内置 updater 插件（一等公民）<sup class="cite" data-refid="7">[7]</sup></td><td>较新但完整；GitHub/S3/自建源都支持</td><td class="check y">内置公私钥签名 + 应用前校验<sup class="cite" data-refid="7">[7]</sup></td></tr>
+          <tr><td><strong>Electron</strong></td><td>electron-updater（事实标准）<sup class="cite" data-refid="7">[7]</sup></td><td>十年生产打磨、最 battle-tested<sup class="cite" data-refid="5">[5]</sup></td><td class="check p">能做，但常被团队自己搞砸<sup class="cite" data-refid="7">[7]</sup></td></tr>
+          <tr><td>macOS 通用</td><td>Sparkle（成熟老牌）</td><td>Mac 端事实标准（两框架都可接）</td><td class="check y">支持 EdDSA 签名</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>自动更新这一维 Electron 生态更老更厚，但 <strong>Tauri 2 的内置 updater 默认就做签名校验</strong>，对单人项目反而更省心——不用像 Electron 那样自己拼装更新签名链路（这正是很多团队做错的地方）<sup class="cite" data-refid="7">[7]</sup>。判定：<span class="pill warn">Tauri 略新但够用，Electron 更稳但要自己上心</span>，平手偏 Tauri。</p>
+
+      <h3>四维总账 + 拍板</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>维度</th><th>赢家</th><th>理由</th></tr></thead>
+        <tbody>
+          <tr><td>① 双端打包成熟度</td><td class="check p">平手</td><td>都靠 CI 矩阵，都不能 Mac 上交叉编译 Windows</td></tr>
+          <tr><td>② 体积 + 安装体验</td><td class="check y">Tauri 胜（限「壳」）</td><td>安装器壳 ~8.6MB vs 244MB，利于官网下载首装转化；真实占用由 sidecar/模型主导、两者趋同</td></tr>
+          <tr><td>③ 调本地二进制 sidecar</td><td class="check y">Tauri 胜</td><td>sidecar 一等公民，whisper/ffmpeg 嵌入更干净</td></tr>
+          <tr><td>④ 自动更新</td><td class="check p">平手偏 Tauri</td><td>Electron 更老练；Tauri 内置签名校验更省心</td></tr>
+          <tr><td>渲染一致性（附）</td><td class="check n">Electron 胜</td><td>Tauri 用系统 WebView，Mac/Win 渲染可能有细微差异<sup class="cite" data-refid="2">[2]</sup></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="callout accent">
+        <p><strong>🏆 拍板：Tauri 2.x。</strong>理由：小贝是「面向中国用户、官网直接下载、要内嵌本地处理二进制」的工具——<u>安装器壳小</u>（利首装转化）、sidecar 干净、updater 自带签名，这三条正好命中痛点；而 Tauri 的唯一短板「渲染一致性」对一个功能型工具（不是像素级营销页）几乎无感。<u>反向的唯一理由</u>：如果某个关键前端库严重依赖 Chromium 独有行为、或团队对 Rust 工具链完全陌生且不想碰——但「代码全由 AI 写」把后者基本抵消了。<strong>注意：选 Tauri 不等于「装完只占 8MB」</strong>，真实占用仍是 GB 级（见上「壳 vs 真实」），这是产品体积预算时必须算进去的。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">主线 A2：好安装工程（签名 / 公证 / SmartScreen / 年成本 / FFmpeg+codec合规 / 国内备案）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是被严重低估的一块。「能 build 出安装包」和「用户双击能顺利装上、不被系统拦」是两件事。后者是<strong>持续的工程税</strong>，必须提前预算进项目。</p>
+
+      <h3>macOS：Developer ID 签名 + 公证 + Gatekeeper</h3>
+      <div class="step">
+        <div class="step-head"><span class="sn">流程</span>Mac 端三步</div>
+        <div class="step-body">
+          <ol style="margin:4px 0">
+            <li><strong>加入 Apple Developer Program（$99/年）</strong>，账号持有者才能签发 Developer ID 证书<sup class="cite" data-refid="19">[19]</sup>。</li>
+            <li><strong>用 Developer ID 证书签名</strong> app/dmg/pkg——让 Gatekeeper 认出「这是可信开发者」<sup class="cite" data-refid="19">[19]</sup>。</li>
+            <li><strong>公证（notarization）</strong>：用 <code>xcrun notarytool</code> 把签好的包传给 Apple 自动安全扫描，通过后「订书钉」一张票（staple），Gatekeeper 据此放行<sup class="cite" data-refid="19">[19]</sup>。（注意 2023-11 起 altool / Xcode 13 及更早的上传通道已停，必须 Xcode 14+ 或 notarytool。）</li>
+          </ol>
+        </div>
+      </div>
+      <div class="callout info"><p><strong>对安装体验的影响：</strong>签名+公证齐全 → 用户双击直接打开，无摩擦。<u>没公证</u> → macOS 弹「无法验证开发者、可能是恶意软件」，用户得右键→打开或去系统设置里放行，对小白是劝退级摩擦。直接下载分发（DMG/PKG，不上 Mac App Store）<strong>官方完全支持</strong>，同一个包就能给用户<sup class="cite" data-refid="19">[19]</sup>。</p></div>
+
+      <h3>Windows：代码签名 + SmartScreen（中国开发者路径与欧美不同）</h3>
+      <div class="trap-box"><strong>⚠️ 初稿硬伤已修正：Azure Trusted/Artifact Signing 中国个人开发者没资格。</strong>微软官方文档明确：Artifact Signing（原 Trusted Signing）的公共信任证书<u>目前仅向 US/加/欧/英的「组织」开放，个人开发者仅限 US 和加拿大</u>，且 2025-04 起对其他国家暂停了新验证请求<sup class="cite" data-refid="33">[33]</sup>。所以「~$10/月 Azure Trusted Signing 当默认 Win 签名路径」对<strong>中国个人/小团队不成立</strong>——别照初稿规划。</div>
+      <div class="callout warn">
+        <p><strong>政策大背景：</strong>CA/Browser Forum 自 2023-06-01 起要求所有代码签名证书（OV 和 EV）私钥<u>必须存在认证硬件</u>——物理 USB 令牌（U 盾）或云 HSM<sup class="cite" data-refid="21">[21]</sup>，传统「买个证书装本机签」的路走不通了。<strong>中国个人/小团队的现实路径</strong>是走<u>国内 CA（沃通 WoSign / 天威诚信等）或国际 CA 的经销商</u>买 OV/EV 代码签名证书：</p>
+        <ul style="margin:6px 0 0">
+          <li><strong>国内 CA 实价（沃通，查证当日）：OV 代码签名 ~¥3588/年、EV ~¥4288/年</strong>（多年更便宜）<sup class="cite" data-refid="34">[34]</sup>。<u>注意：沃通这类国内 CA 的代码签名证书面向「单位/组织」（需营业执照），不向个人签发</u><sup class="cite" data-refid="34">[34]</sup>——纯个人开发者通常得通过国际 CA 经销商找少数仍受理个人 OV 的产品，或以个体工商户/公司主体申请。</li>
+          <li><strong>国际 CA 经销商：</strong>OV/EV 证书年价区间约 $200–$600（EV ~$247–$581）<sup class="cite" data-refid="20">[20]</sup>，私钥走 U 盾或云签名服务（如经销商提供的 KeyLocker/云 HSM），可接 CI。</li>
+        </ul>
+        <p style="margin:6px 0 0">一句话：<strong>中国开发者签 Windows，要么走国内 CA（需公司主体、¥3500–4300/年量级），要么走国际 CA 经销商的 OV/EV（$200–600/年 + U 盾/云签名）</strong>——没有微软 Azure 那条 $10/月的近路。</p>
+      </div>
+      <div class="trap-box"><strong>⚠️ SmartScreen 的真相（结论不变，证据换微软官方口径）：</strong>微软已取消「EV 证书首发即绕过 SmartScreen」的特权——<u>现在 EV 签名文件和 OV 一样，要走同一个「靠下载量积累信誉（reputation）」的过程</u><sup class="cite" data-refid="20">[20]</sup>，微软官方也将 SmartScreen 信誉描述为随分发量/时间累积、而非证书类型直接决定<sup class="cite" data-refid="35">[35]</sup>。意思是：花大价钱买 EV 也<strong>买不到「首发不弹警告」</strong>了。新签名 App 在下载量起来前，Windows 仍可能弹「SmartScreen 已阻止」蓝框（用户点「仍要运行」可继续）；首装时还会经历「未知发布者」摩擦。这是新产品冷启动绕不开的，靠时间+下载量化解。</div>
+
+      <h3>双端「好安装」年成本与体验总账</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>平台</th><th>必需项</th><th>年成本</th><th>首装体验（签全后）</th><th>冷启动摩擦</th></tr></thead>
+        <tbody>
+          <tr><td><strong>macOS</strong></td><td>Developer Program + Developer ID 签名 + 公证</td><td>$99/年<sup class="cite" data-refid="19">[19]</sup></td><td class="check y">双击即开，无摩擦</td><td class="check y">公证后基本无</td></tr>
+          <tr><td><strong>Windows</strong>（中国开发者）</td><td>国内/国际 CA 的 OV/EV 代码签名证书（私钥存 U 盾/云 HSM）；<u>非微软 Azure</u></td><td>国内 CA OV ~¥3588/EV ~¥4288/年（需公司主体）<sup class="cite" data-refid="34">[34]</sup>；或国际 CA OV/EV $200–581/年<sup class="cite" data-refid="20">[20]</sup></td><td class="check p">签名后仍可能首发弹 SmartScreen + 「未知发布者」摩擦</td><td class="check p">靠下载量积累信誉<sup class="cite" data-refid="20">[20]</sup><sup class="cite" data-refid="35">[35]</sup></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">¥3.5k–4.3k/年</div><div class="l">Win 代码签名（国内 CA OV/EV，需公司主体）</div></div>
+        <div class="metric"><div class="v">$99/年</div><div class="l">Mac Developer Program（签名+公证）</div></div>
+        <div class="metric"><div class="v">$0</div><div class="l">直接下载分发渠道成本（自建官网/对象存储 CDN，须备案见下）</div></div>
+      </div>
+
+      <h3>国内直接下载分发可行性</h3>
+      <div class="callout good">
+        <p><strong>可行，是小贝的分发主路，但「直接下载」≠「零门槛、什么都不用办」。</strong>不上 Mac App Store / 微软商店，从自己的官网（或国内对象存储 + CDN）直接提供 DMG/EXE 下载——Mac 端官方支持<sup class="cite" data-refid="19">[19]</sup>，Windows 端本就是常规做法。好处：①绕开应用商店审核（小贝要读本地视频、调本地二进制，商店审核反而麻烦）；②国内用户无需账号、无需翻墙；③更新走 App 内置 updater（Tauri 自带）。分发的是「工具壳」，用户的视频内容从不上传，托管端只放无版权的 App 安装包和模型文件。<strong>但真实门槛在「托管」上——见下「国内分发合规」小节。</strong></p>
+      </div>
+      <p style="font-size:13px;color:var(--text-mute)">⚠️ 行业体感提醒：国内 Windows 生态有 360/腾讯电脑管家等第三方安全软件，对新签名、低下载量的 exe 也可能误报/拦截，建议提交各家白名单 + 官网给明确的「如被拦截怎么办」指引。<span class="conf y">🟡 行业体感</span></p>
+
+      <h3>法律与合规（闭源商业 App 必读）</h3>
+      <div class="callout bad">
+        <p><strong>FFmpeg 打包义务（版权许可，独立于专利）：</strong>FFmpeg 默认 LGPLv2.1+，但<u>若 build 中含 libx264/libx265 等 GPL 组件则整体变 GPL</u>，含 <code>--enable-nonfree</code> 时<u>二进制根本不可分发</u><sup class="cite" data-refid="36">[36]</sup>。小贝作为闭源商业 App 必须：① 用 <strong>LGPL build</strong>、避开 GPL/nonfree flags；② <strong>动态链接</strong>（用 DLL/共享库而非静态编入），并随附与二进制对应的 <strong>FFmpeg source + 你的 configure/build config</strong>；③ 在官网下载页/「关于」框/EULA 放 LGPL notice（如「This software uses code of FFmpeg licensed under the LGPLv2.1」）并声明不拥有 FFmpeg；④ <strong>EULA 不得禁止逆向工程</strong>（LGPL 要求）<sup class="cite" data-refid="36">[36]</sup>。这是 AI 写码层面看不见、但发布前必须办的合规活。</p>
+      </div>
+      <div class="callout warn">
+        <p><strong>codec / 专利风险（独立于 FFmpeg 的版权合规）：</strong>H.264/H.265/AAC/MP4 的<u>专利</u>许可与 FFmpeg 的<u>版权</u>许可是两码事——即便 FFmpeg 合规打包，使用这些编码本身仍可能触及 MPEG-LA/Access Advance/Via LA 等专利池。<strong>降暴露策略：桌面播放优先用 OS 原生解码器</strong>（macOS AVFoundation / Windows Media Foundation，专利费由系统/硬件厂商承担），<u>FFmpeg 主要用于音频提取（抽 16k 单声道喂 whisper）和转码 fallback</u>，而非作主力播放解码器。这样既能播绝大多数本地视频，又把专利暴露面压到最低。<span class="conf y">🟡 一般性合规判断，非法律意见；商业化前建议就 codec 专利单独咨询。</span></p>
+      </div>
+      <div class="callout info">
+        <p><strong>国内分发合规（据实，别写成「直接下载就行」）：</strong></p>
+        <ul style="margin:6px 0 0">
+          <li><strong>ICP 备案：</strong>只要小贝的官网/下载页/自动更新源/模型 CDN <u>托管在中国大陆</u>，对应域名就需 ICP 备案（用腾讯云/阿里云国内 CDN 的域名必须先备案）<sup class="cite" data-refid="37">[37]</sup>。规避思路：把这些放境外服务器（如香港）则不强制备案，但国内访问速度/稳定性要权衡。</li>
+          <li><strong>App 备案：</strong>工信部「App 备案」专指<u>移动 App（安卓/iOS/小程序/快应用）</u>；<u>纯下载的桌面 App 不等同于移动 App 备案</u><sup class="cite" data-refid="37">[37]</sup>。但只要网站/更新/模型 CDN 托管在大陆，触发的是 ICP 备案（上一条），别和移动 App 备案混淆。</li>
+          <li><strong>软件著作权（软著）：</strong>一般是<u>可选的所有权证据</u>，<u>非上线/备案前提</u>——软著登记并非 ICP 或 App 备案的必需条件<sup class="cite" data-refid="37">[37]</sup>。想要权属凭证/上架部分渠道时再办即可。</li>
+        </ul>
+        <p style="margin:6px 0 0">一句话：「直接下载分发」在技术上成立，但<strong>托管在大陆 = 要 ICP 备案（有公司主体更顺）</strong>；移动 App 备案对纯桌面 App 不适用；软著可选。<span class="conf y">🟡 一般性合规梳理，非法律意见。</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">主线 B3：本地转写 whisper.cpp vs faster-whisper（普通无独显笔记本）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>本地转写是整条精学链路的第一环——把视频里的英语音频变成带时间戳的文字。两个开源主力：<strong>whisper.cpp</strong>（C++，ggml）和 <strong>faster-whisper</strong>（Python，CTranslate2）。准确率两者基本一致（同一套 OpenAI 权重，WER 相差 &lt;0.1% 绝对值）<sup class="cite" data-refid="9">[9]</sup>，差别在<strong>速度、跨平台、嵌入难易</strong>。</p>
+
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>维度</th><th>whisper.cpp</th><th>faster-whisper</th></tr></thead>
+        <tbody>
+          <tr><td>实现</td><td>C++ / ggml，单二进制</td><td>Python / CTranslate2</td></tr>
+          <tr><td>CPU 速度（base，x86）</td><td>~15× 实时*<sup class="cite" data-refid="8">[8]</sup></td><td>~20× 实时*（oneMKL/AVX512 优化更激进）<sup class="cite" data-refid="8">[8]</sup></td></tr>
+          <tr><td><strong>Apple Silicon（Metal）</strong></td><td class="check y"><strong>支持 Metal，base 可达 ~10× 实时*</strong><sup class="cite" data-refid="8">[8]</sup></td><td class="check n">Mac 上只能 CPU，~3× 实时*<sup class="cite" data-refid="8">[8]</sup></td></tr>
+          <tr><td>跨平台后端</td><td class="check y">CPU/Metal/CUDA/Vulkan 全覆盖<sup class="cite" data-refid="9">[9]</sup></td><td class="check p">仅 CPU + CUDA（Mac 无 Metal）<sup class="cite" data-refid="9">[9]</sup></td></tr>
+          <tr><td>嵌入桌面 App（sidecar）</td><td class="check y">单二进制，sidecar 直塞，零运行时依赖</td><td class="check n">要带 Python 运行时，嵌入重</td></tr>
+          <tr><td>WER（large-v3 参考）</td><td colspan="2">两者一致：tiny 7.6% / base 5.0% / small 3.4% / medium 2.9% / large-v3 2.5%<sup class="cite" data-refid="9">[9]</sup></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p style="font-size:12.5px;color:var(--text-mute)">* 实时倍速是<strong>有条件的、非保证</strong>：取决于芯片代次/核数、模型大小、量化等级、beam size、散热与电池模式、以及 Mac 上是否真启用了 Metal/Core ML 后端。低端/被动散热的轻薄本、长视频、large 模型都会显著拉低倍速。<u>别向用户承诺「所有笔记本都几分钟转完」，给一个保守区间 + 进度条更可靠。</u><span class="conf y">🟡 取决于硬件/配置</span></p>
+
+      <h3>普通笔记本的硬件门槛</h3>
+      <div class="callout good">
+        <p><strong>不需要独显。</strong>模型内存占用：tiny/base ~1GB、small ~2GB、medium ~5GB<sup class="cite" data-refid="9">[9]</sup>。对「逐句精学」场景，<strong>base 或 small 已经够用</strong>（英语清晰语音、有原字幕可校正），1–2GB 内存任何近五年的笔记本都扛得住。faster-whisper 的 int8 量化能再降 ~40% 显存/内存、提速约 2×，WER 几乎不掉<sup class="cite" data-refid="9">[9]</sup>。Apple Silicon 上 whisper.cpp 走 Metal 直接拉满，是 Mac 用户的最佳体验<sup class="cite" data-refid="8">[8]</sup>。</p>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>🏆 推荐：whisper.cpp 作为嵌入式转写引擎。</strong>三个决定性理由：① <strong>单二进制、零运行时依赖</strong>，完美契合 Tauri sidecar（faster-whisper 要拖 Python 进来，嵌入桌面 App 笨重）；② <strong>跨平台后端最全</strong>，且是 Mac 上唯一能吃 Metal 加速的，而小贝 Mac 用户占比大；③ 准确率与 faster-whisper 无实质差距。<u>例外</u>：若某些重型批处理场景在纯 x86 CPU 上追求极致吞吐，可在 Windows 端额外考虑 faster-whisper，但为了一致性和嵌入简洁，首选统一用 whisper.cpp。</p>
+      </div>
+      <p style="font-size:13px;color:var(--text-mute)">📎 顺带：FFmpeg 近期已内置 whisper 音频 filter，可在 ffmpeg 命令链里直接出 SRT/JSON 转写<sup class="cite" data-refid="24">[24]</sup>——小贝反正要打包 ffmpeg 抽音轨，未来这条路可能进一步简化「抽音→转写」的工程。<span class="conf y">🟡 较新、需实测稳定性</span></p>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">主线 B4：逐句/逐词对齐 whisperX vs aeneas vs MFA</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>「逐句播放 + 跟读」要求每句话、最好每个词都有精确的起止时间戳。Whisper 原生时间戳很粗（句级 ±500ms 量级），所以要加一层<strong>强制对齐（forced alignment）</strong>。三个选项各代表一种思路。</p>
+
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>工具</th><th>方法</th><th>对齐精度</th><th>对小贝的适配</th><th>license</th></tr></thead>
+        <tbody>
+          <tr class="row-highlight"><td><strong>whisperX</strong></td><td>wav2vec2 音素强制对齐</td><td><strong>词级 ~±50ms 量级</strong>（远好于 Whisper 原生 ±500ms；具体需实测）<sup class="cite" data-refid="11">[11]</sup></td><td class="check y">转写+对齐一体、词级 SRT/VTT 直出、与 whisper 同栈</td><td class="check y">BSD-2-Clause<sup class="cite" data-refid="12">[12]</sup></td></tr>
+          <tr><td><strong>MFA</strong></td><td>Kaldi GMM-HMM</td><td>边界误差最低（TIMIT ~21.9ms，≤10ms 级最准）<sup class="cite" data-refid="10">[10]</sup></td><td class="check p">精度最高但要先有准确文本+发音词典，重，偏研究</td><td class="check y">MIT</td></tr>
+          <tr><td><strong>aeneas</strong></td><td>DTW + TTS 合成比对</td><td>句/片段级好，<u>非为词级设计</u><sup class="cite" data-refid="10">[10]</sup></td><td class="check p">轻、稳、适合「已有完整文本对齐到音频」（如字幕对轴）</td><td class="check y">AGPL/GPL（注意传染）</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout info">
+        <p><strong>一个反直觉的学术结论：</strong>论文实测里，<u>老派的 MFA（Kaldi GMM-HMM）在「严格的音素边界精度」上反而打败 whisperX 和 MMS 这些现代端到端 ASR 对齐</u>——MFA 在 ≤10ms 这种紧误差界上明显更准（mean boundary error TIMIT 21.9ms）<sup class="cite" data-refid="10">[10]</sup>。但这是「语音学研究级」的精度需求。对「让学习者逐句播放、跟读不串句」的产品需求，<strong>whisperX 的词级 ~±50ms 量级通常够用</strong>——足以支撑字幕显示和逐句循环，人耳基本感知不到这点偏差<sup class="cite" data-refid="11">[11]</sup>。<u>但别当硬 SLA</u>：实际精度随目标媒体、口音、背景噪声、模型而变，上线前应在小贝真实素材（如用户常看的美剧/网课/口音音频）上抽测，验证逐句切分不串句。</p>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>🏆 推荐：whisperX。</strong>理由：① <strong>转写 + 对齐一条龙</strong>，与 whisper 同生态，AI 拼起来最省事；② 词级 ~±50ms 量级足够支撑「逐句播放、点词跳转、跟读不串句」全部交互（需在目标素材实测）<sup class="cite" data-refid="11">[11]</sup>；③ 直出 SRT/VTT/JSON 多格式，挖空字幕/双语字幕都好做<sup class="cite" data-refid="11">[11]</sup>。<u>注意两点</u>：(a) whisperX 是 <strong>BSD-2-Clause</strong>（<u>初稿误写 BSD-4，已核实更正</u>——实查其 LICENSE 为 BSD 2-Clause，可闭源商用），其说话人分离用的 pyannote 模型权重另有 license + HuggingFace 门控，做发音/对齐其实<u>用不到分离</u>，可不引入那部分<sup class="cite" data-refid="12">[12]</sup>；(b) whisperX 基于 Python，嵌入桌面 App 比纯 whisper.cpp 重——可作为「批处理对齐服务」打包，或只在需要词级对齐时调用。MFA 留作「极致精度」的可选；aeneas 因 <strong>AGPLv3</strong> 传染 + 非词级设计，闭源 App <u>必须避开</u>，不作主力。</p>
+      </div>
+
+      <h3>开源组件 license 矩阵（小贝闭源商用速查）</h3>
+      <p>把全报告涉及的本地处理开源件 license 摊开，每行标「能否闭源商用」，发布前对照打包。<strong>核心红线：aeneas（AGPLv3）闭源 App 必须避开；FFmpeg 走 LGPL build + 动态链接 + notice（见 Ch4 合规）。</strong></p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>组件</th><th>license</th><th>能否闭源商用</th><th>备注</th></tr></thead>
+        <tbody>
+          <tr><td><strong>whisper.cpp</strong>（转写）</td><td>MIT<sup class="cite" data-refid="38">[38]</sup></td><td class="check y">✓ 可</td><td>单二进制、sidecar 首选，零传染</td></tr>
+          <tr><td><strong>faster-whisper</strong>（转写）</td><td>MIT<sup class="cite" data-refid="39">[39]</sup></td><td class="check y">✓ 可</td><td>Python/CTranslate2，嵌入重</td></tr>
+          <tr><td><strong>WhisperX</strong>（对齐）</td><td>BSD-2-Clause<sup class="cite" data-refid="12">[12]</sup></td><td class="check y">✓ 可</td><td><u>初稿 BSD-4 系笔误，已更正</u>；pyannote 分离权重另有门控，可不引入</td></tr>
+          <tr><td><strong>Kaldi</strong>（GOP 基础）</td><td>Apache-2.0<sup class="cite" data-refid="40">[40]</sup></td><td class="check y">✓ 可</td><td>需保留 NOTICE/许可声明</td></tr>
+          <tr><td><strong>MFA</strong>（强制对齐）</td><td>MIT<sup class="cite" data-refid="41">[41]</sup></td><td class="check p">~ 可但打包重</td><td>依赖 Kaldi/OpenFst/Pynini，桌面嵌入笨重，留作可选</td></tr>
+          <tr class="row-highlight"><td><strong>aeneas</strong>（对齐）</td><td>AGPLv3<sup class="cite" data-refid="42">[42]</sup></td><td class="check n">✗ 闭源避开</td><td>AGPL 网络传染条款，闭源商业 App <strong>不要用</strong></td></tr>
+          <tr><td><strong>sherpa-onnx</strong>（语音工具箱）</td><td>Apache-2.0<sup class="cite" data-refid="43">[43]</sup></td><td class="check y">✓ 可</td><td>核实后：<u>只做 ASR/TTS/VAD/说话人分离/KWS，<strong>不做发音评测</strong></u>——别指望它当本地发音评分引擎</td></tr>
+          <tr><td>ffmpeg（媒体）</td><td>LGPLv2.1+（默认）<sup class="cite" data-refid="36">[36]</sup></td><td class="check p">~ 可（有条件）</td><td>须 LGPL build + 动态链接 + source/notice；含 GPL 组件变 GPL、nonfree 不可分发（Ch4）</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">主线 B5【重点】：发音评分 本地选型 vs 云端【主推讯飞 ISE】→ 推荐边界 + 校准计划 ★</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是整份报告最需要给「清晰边界」的一章。发音评分（pronunciation assessment）是 shadowing / 跟读的灵魂功能，但它恰好是<strong>纯本地最吃力、云端最成熟</strong>的一环。先看证据，再给边界。</p>
+
+      <h3>纯本地能到什么水平：开源 GOP/Kaldi 的真实天花板</h3>
+      <div class="callout warn">
+        <p><strong>关键数字（注意口径）：</strong>发音评测的标准开源基准是 speechocean762 语料（5000 句、250 名说话人，其中 125 成人 + 125 儿童，母语全是中文）<sup class="cite" data-refid="13">[13]</sup>。在它上面跑经典 NN-GOP（Kaldi <code>gop_speechocean762</code> recipe）做<strong>音素级评分</strong>，与人工专家评分的相关性只有 <strong>PCC ≈ 0.45</strong>（MSE 0.16）<sup class="cite" data-refid="14">[14]</sup>。<u>但这个 0.45 是「经典 GOP 基线」的数，不是「本地发音评分的全景天花板」</u>——论文作者自己都说「这是不用最新技术的经典基线，结果不算强」<sup class="cite" data-refid="14">[14]</sup>。更现代的 wav2vec2/GOPT/SSL 路线能把这个数明显推高（Echoic 这类开源项目就用 WhisperX + wav2vec2 做了逐音素颜色打分原型，MIT，全本地，模型约 1GB）<sup class="cite" data-refid="15">[15]</sup>，但要拼装、要校准，不是开箱即用。<strong>本地发音评分的真实选型见下表，别只拿 GOP 0.45 给本地判死刑。</strong></p>
+      </div>
+      <h3>本地发音评分选型（GOP / GOPT / SSL / sherpa-onnx）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>路线</th><th>成熟度</th><th>能否离线</th><th>中文 L1 适配</th><th>闭源商用</th><th>一句话</th></tr></thead>
+        <tbody>
+          <tr><td><strong>经典 NN-GOP</strong>（Kaldi recipe）</td><td class="check p">~ 成熟但弱</td><td class="check y">✓ 纯本地</td><td class="check y">✓ speechocean762 即中文 L1</td><td class="check y">✓ Apache-2.0<sup class="cite" data-refid="40">[40]</sup></td><td>PCC~0.45 基线，打包重、信任不足，仅作下限参照</td></tr>
+          <tr><td><strong>GOPT</strong>（Transformer-GOP）</td><td class="check p">~ 研究级</td><td class="check y">✓ 本地</td><td class="check p">~ 需在目标人群再校准</td><td class="check p">~ 看具体实现 license</td><td>多维聚合（音素/词/句）准确度高于 GOP，但要训练/拼装</td></tr>
+          <tr class="row-highlight"><td><strong>SSL-based</strong>（wav2vec2/HuBERT，如 Echoic）</td><td class="check p">~ 原型可用</td><td class="check y">✓ 全本地（模型~1GB）</td><td class="check p">~ 需校准集</td><td class="check y">✓ Echoic MIT<sup class="cite" data-refid="15">[15]</sup></td><td><strong>本地迁移的首选方向</strong>：逐音素打分原型现成，校准后可用</td></tr>
+          <tr><td><strong>sherpa-onnx</strong></td><td class="check y">✓ 工程成熟</td><td class="check y">✓ ONNX 本地</td><td>—</td><td class="check y">✓ Apache-2.0<sup class="cite" data-refid="43">[43]</sup></td><td><u>核实：只做 ASR/TTS/VAD/分离/KWS，<strong>不含发音评测</strong></u>，别当本地评分引擎</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>云端 API：主推讯飞 ISE，Azure 作海外/备选</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>方案</th><th>评分维度</th><th>计费</th><th>延迟</th><th>隐私/合规</th></tr></thead>
+        <tbody>
+          <tr class="row-highlight"><td><strong>科大讯飞 ISE【主推】</strong></td><td><u>音素/单词/句子/篇章</u>多级 + 准确度/流利度/完整度（中文另有声韵分/调型分）；中英双语、专门面向中国人英语评测<sup class="cite" data-refid="23">[23]</sup></td><td><strong>免费领 5 万次</strong>（SDK 与 WebAPI 各一次、不共用）；超出走套餐/后付费（官网未公开统一单价，控制台购买）<sup class="cite" data-refid="23">[23]</sup></td><td class="check y">国内节点低延迟</td><td class="check n">音频出境（境内云、合规更顺）</td></tr>
+          <tr><td><strong>Azure 发音评测</strong>（海外/备选）</td><td>准确度/流利度/完整度/<u>韵律(prosody)</u> + 音素/音节级 + miscue<sup class="cite" data-refid="16">[16]</sup></td><td>计费=<strong>基线 STT 价（~$1/小时）+ prosody add-on</strong>（prosody 仅 en-US、额外收费）；评测本身不另收、随 STT；短音频按秒计；区域/tier 不同价需核实<sup class="cite" data-refid="16">[16]</sup></td><td class="check p">网络往返（海外）</td><td class="check n">音频出境，K12 录音有合规风险</td></tr>
+          <tr><td><strong>腾讯云口语评测</strong></td><td>单词/句子/篇章 + 发音准确/完整/流利</td><td>后付费 5 元/千次；套餐低至 3.5 元/千次（100 万次 3750 元/年）；按文本长度计次（≤20 词算 1 次）<sup class="cite" data-refid="17b">[17b]</sup></td><td class="check p">网络往返</td><td class="check n">音频出境</td></tr>
+          <tr><td><strong>本地 GOP/SSL（开源）</strong></td><td>音素级（需自拼词/句聚合）</td><td class="check y">零边际成本</td><td class="check y">本机即时</td><td class="check y">音频不出设备</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="callout info">
+        <p><strong>为什么主推讯飞 ISE 而非 Azure：</strong>① <u>专门面向中国人学英语</u>的评测，对中式发音的容错/反馈更贴目标用户；② 国内节点低延迟、合规更顺（音频在境内云）；③ 接入方式全（WebAPI + 各端 SDK），免费 5 万次足够 MVP 验证<sup class="cite" data-refid="23">[23]</sup>。Azure 的 prosody 韵律维度是亮点，但<u>$1.32/小时是「STT 基线 + prosody add-on」的组合口径、且 prosody 仅 en-US</u>，按区域/档位浮动——别当通用单价用<sup class="cite" data-refid="16">[16]</sup>。Azure 留作出海/海外用户或需要 prosody 时的备选。</p>
+      </div>
+
+      <h3>四维差距总结</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">准确度</div><div class="l">云端(讯飞 ISE) ＞ 本地基线（GOP 0.45 是开源基线、非本地天花板）</div></div>
+        <div class="metric"><div class="v">延迟</div><div class="l">本地 ＞ 云端（本机即时 vs 网络往返）</div></div>
+        <div class="metric"><div class="v">成本</div><div class="l">本地 ＞ 云端（零边际 vs 按次/时长）</div></div>
+        <div class="metric"><div class="v">隐私</div><div class="l">本地 ≫ 云端（不出设备 vs 音频出境）</div></div>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>🏆 推荐边界（明确）：分阶段，MVP 云评分写死讯飞 ISE。</strong></p>
+        <ul style="margin:6px 0 0">
+          <li><strong>MVP / 早期：用云 API，<u>主推科大讯飞 ISE</u>。</strong>发音评分的「准」直接决定用户信不信这个功能，开源 GOP 基线的 PCC 0.45 给出的分数容易让用户觉得「乱打分」失去信任。讯飞 ISE 多维成熟、面向中国人英语评测、国内低延迟，能让功能<u>一上来就可信</u>，免费 5 万次足够验证<sup class="cite" data-refid="23">[23]</sup>。Azure 作海外/备选（需 prosody 时），腾讯云作国内备选（3.5–5 元/千次）<sup class="cite" data-refid="16">[16]</sup><sup class="cite" data-refid="17b">[17b]</sup>。</li>
+          <li><strong>关键合规前提：发音音频片段不含版权</strong>（是用户自己的跟读录音，不是视频内容），所以<u>它属于「可上云」那一类</u>（见 Ch8）。版权敏感的视频本体永远不上传；但仍要在 UI 明确告知「这段录音会上传到讯飞评测」并取得同意。</li>
+          <li><strong>成长期 / 确认价值后：迁本地（SSL/Echoic·wav2vec2 路线）。</strong>动机有二：省掉按次成本、彻底消除录音出境的合规顾虑。代价是工程量大 + 要做下面的「校准计划」。</li>
+        </ul>
+      </div>
+      <div class="callout purple">
+        <p><strong>「云先本地后」的校准计划（迁本地前必须做的功课）：</strong>本地评分能不能上线，不取决于「跑通模型」，取决于「分数让目标用户信」。落地清单：</p>
+        <ul style="margin:6px 0 0">
+          <li><strong>① 目标口音集：</strong>收集小贝目标用户（中国 K12 / 成人 Mandarin-L1）真实跟读录音，覆盖不同年龄/水平/地域口音，别只用 speechocean762 现成集。</li>
+          <li><strong>② 评分 rubric：</strong>明确每个维度（音素准确/单词/句子流利/完整）打分定义，与讯飞云端口径对齐，保证迁移前后用户感受一致。</li>
+          <li><strong>③ 人工标注 mini-eval 集：</strong>请专家对一小批（数百句）做金标准评分，作为本地模型 vs 云 vs 人工的对照基准，量化 PCC/MSE。</li>
+          <li><strong>④ 阈值 + 置信度显示：</strong>低置信度时不硬给分，显示「这句没听清/不确定」，避免乱打分毁信任；阈值在目标口音集上调。</li>
+          <li><strong>⑤ 反馈 UX：</strong>以鼓励 + 可懂度为主（见下口音 bias），给「哪个音再练」的具体可操作建议，而非冷冰冰一个数字。</li>
+        </ul>
+        <p style="margin:6px 0 0">用 ① 在云阶段就攒数据，③ 做对照——本地模型达到「与云端 PCC 接近 + 用户主观可接受」才切换，否则继续用讯飞。</p>
+      </div>
+      <div class="trap-box"><strong>⚠️ 口音 bias 必读：</strong>speechocean762 的说话人母语全是<u>中文（Mandarin-L1）</u><sup class="cite" data-refid="13">[13]</sup>——这对「面向中国用户」的小贝是<u>利好</u>（语料人群匹配，本地校准时拿来当起点很合适）。<strong>但注意 native-accent bias</strong>：该语料的金标准评分由母语者标注，本身可能带「越像美音越高分」的倾向；学界明确提醒发音评测应以「可懂度（intelligibility）」而非「像母语者口音」为目标，许多评分量表会把「有口音」误判成「发错」<sup class="cite" data-refid="25">[25]</sup>。对 K12 / 中国学习者，小贝应给「鼓励性、以可懂度为准」的反馈，比冷冰冰追求「美音满分」更健康——这也是上面校准计划第 ⑤ 条的核心。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">主线 B6：本地 vs 云端 清晰边界表 + 桌面可靠性工程清单</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这张表是整个产品的<strong>合规与架构基石</strong>——它一句话回答「什么死锁本地、什么可以上云」。原则很简单：<strong>凡是触及版权内容（视频/音频本体、画面、原声）的处理，一律本地；凡是不含版权的纯文本任务、或用户自己的录音，可选上云。</strong></p>
+
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>任务</th><th>处理位置</th><th>为什么</th><th>对接云模型？</th></tr></thead>
+        <tbody>
+          <tr><td>视频/音频文件读取、抽音轨(ffmpeg)</td><td class="check y"><strong>必须本地</strong></td><td>版权内容本体，绝不出设备</td><td class="check n">否</td></tr>
+          <tr><td>本地转写(whisper.cpp)生成字幕</td><td class="check y"><strong>必须本地</strong></td><td>转写=版权内容的文字镜像，仍敏感</td><td class="check n">否</td></tr>
+          <tr><td>逐句/逐词对齐(whisperX)</td><td class="check y"><strong>必须本地</strong></td><td>处理的是版权音频</td><td class="check n">否</td></tr>
+          <tr><td>视频播放、跟读/影子录音 UI</td><td class="check y"><strong>必须本地</strong></td><td>版权画面 + 用户行为</td><td class="check n">否</td></tr>
+          <tr class="row-highlight"><td>生词释义 / 例句生成 / 语法解释</td><td class="check p"><strong>可上云</strong></td><td>单词/短句是孤立文本，不构成版权内容传播</td><td class="check y">是（Claude/GPT 等）</td></tr>
+          <tr class="row-highlight"><td>句子翻译（单句）</td><td class="check p"><strong>可上云</strong></td><td>孤立单句，非整片传播</td><td class="check y">是</td></tr>
+          <tr class="row-highlight"><td>发音评分（用户跟读录音）</td><td class="check p"><strong>可上云</strong></td><td>是用户自己的录音、非版权内容；但需告知+同意</td><td class="check y">是（<strong>默认讯飞 ISE</strong>，Azure/腾讯备选）</td></tr>
+          <tr class="row-highlight"><td>对话/角色扮演私教</td><td class="check p"><strong>可上云</strong></td><td>纯文本/语音对话，不含版权视频</td><td class="check y">是（LLM）</td></tr>
+          <tr><td>间隔复习调度(FSRS)</td><td class="check y">本地</td><td>纯算法，无需联网，零隐私暴露</td><td class="check n">否</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout good">
+        <p><strong>架构落地：把这条边界做成产品的「信任契约」。</strong>① 默认全本地，云端能力做成<u>可选开关</u>，用户不开就 100% 离线可用（满足最在意隐私/没网的用户）；② 任何上云的数据（单词、单句、跟读录音）在 UI 上明确标注「这一步会联网，发送的是 XX」；③ 整片字幕、整段转写<u>永不批量上传</u>——即使做云端翻译，也按「逐句、用户点哪句传哪句」的颗粒度，而非「把整集字幕甩给云 API」。这样既守住版权红线，又能用云端的强文本能力提升体验。</p>
+      </div>
+      <p style="font-size:12.5px;color:var(--text-mute)">⚠️ 注意：「单句翻译/释义可上云不构成侵权」是<u>工程与合规的常见实践判断</u>，非法律意见；商业化前若规模大，建议就「转写文本/字幕的版权边界」单独咨询专业法务。<span class="conf y">🟡 行业实践，非法律意见</span></p>
+
+      <h3>桌面可靠性工程清单（单人产品「用着可靠」的真考验）</h3>
+      <p>小贝的真风险不在「能不能跑」，而在「在各种破电脑、各种网络、各种意外下<u>稳不稳</u>」。下面这套是决定单人产品口碑的工程细节，比堆功能更重要。</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>可靠性维度</th><th>要做的事</th><th>不做会怎样</th></tr></thead>
+        <tbody>
+          <tr><td><strong>模型下载/离线缓存</strong></td><td>whisper 模型首启按需下载，断点续传 + 校验和 + 本地缓存复用；提供「离线安装包」给无网用户</td><td>下到一半断网 → App 不可用、首次体验崩</td></tr>
+          <tr><td><strong>可恢复任务</strong></td><td>转写/对齐做成可暂停可续的任务队列，分段落盘，关 App/重启后能续跑</td><td>转一半关机 → 整集白转，长视频尤其劝退</td></tr>
+          <tr><td><strong>崩溃恢复</strong></td><td>sidecar 进程崩溃要捕获、自动重试、保留已完成片段；不让一次崩溃丢全部进度</td><td>whisper 进程挂 → 用户看到转圈不动、不知所措</td></tr>
+          <tr><td><strong>进度估计</strong></td><td>给真实进度条（按音频时长/已处理秒数）+ 预计剩余时间，长任务必备</td><td>无进度 → 用户以为卡死、强退</td></tr>
+          <tr><td><strong>散热 / 电池</strong></td><td>检测笔记本电池模式，可选「省电模式」降 beam/换小模型；长转写提示插电</td><td>轻薄本满载转写 → 烫、降频、续航暴跌，体验差</td></tr>
+          <tr><td><strong>Windows 杀软误报</strong></td><td>提交 360/腾讯管家/Defender 白名单；官网给「被拦截怎么办」；签名 + 积累信誉</td><td>新 exe 被杀软删 → 装都装不上（Ch4）</td></tr>
+          <tr><td><strong>Python sidecar 打包（若用 WhisperX）</strong></td><td>用 PyInstaller/embeddable Python 冻结成独立可执行，避开用户本机 Python 环境差异</td><td>依赖用户装 Python → 99% 普通用户直接放弃</td></tr>
+          <tr><td><strong>转写纠错流</strong></td><td>允许用户改错字、导入已有字幕覆盖、低置信度词标灰让人工核对</td><td>转写有错又改不了 → 精学体验从根上崩</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="callout accent"><p><strong>军师划重点：</strong>这张表里没有一条是「新功能」，全是「让已有功能在真实环境里不掉链子」。对单人 + AI 写码的项目，<u>把这 8 条做扎实，比多上 3 个花哨功能更能决定留存</u>——用户不会因为少一个功能走，但会因为「转一半崩了/装不上/电脑烫飞」直接卸载。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">主线 C7：国内同类工具全景（功能·定价·用户量·口碑·本地视频）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把国内主流英语精学/听说工具铺开，重点回答三件事：哪些功能真有人买单、哪些被吐槽、<strong>有没有支持「自带本地视频」的、做得如何</strong>。</p>
+
+      <h3>用户量大盘（易观 2021-11 外语学习 App 月活 TOP10）</h3>
+      <div class="callout warn" style="margin:8px 0">
+        <p style="margin:0"><strong>口径声明：下表是<u>易观 2021-11 的历史数据，仅作背景量级参照</u>，不代表 2026 当前格局。</strong>2024–2026 公开 MAU/排名数据稀疏，本报告<u>不声称头部排名仍稳定</u>（无当前实证不下断言）。竞品对比以下文的「功能 + 定价现况」为准，MAU 只看个相对量级。<span class="conf y">🟡 2021 历史快照</span></p>
+      </div>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>排名</th><th>App</th><th>月活</th><th>类型</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><strong>百词斩</strong></td><td>~1998 万<sup class="cite" data-refid="26">[26]</sup></td><td>背单词（唯一千万级）</td></tr>
+          <tr><td>2</td><td>流利说-英语</td><td>~620 万<sup class="cite" data-refid="26">[26]</sup></td><td>AI 口语评测/课程</td></tr>
+          <tr><td>3</td><td>墨墨背单词</td><td>~411 万<sup class="cite" data-refid="26">[26]</sup></td><td>背单词（SRS）</td></tr>
+          <tr><td>4</td><td><strong>每日英语听力</strong>（欧路）</td><td>~275 万<sup class="cite" data-refid="26">[26]</sup></td><td>泛听+跟读（<u>沾边本地视频</u>）</td></tr>
+          <tr><td>10</td><td>可可英语</td><td>~157 万<sup class="cite" data-refid="26">[26]</sup></td><td>听说训练</td></tr>
+          <tr><td>新晋百万</td><td>不背单词</td><td>~100 万<sup class="cite" data-refid="26">[26]</sup></td><td>背单词（口碑好）</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="callout info"><p>从这份 2021 历史榜的相对量级看，背单词类（百词斩/墨墨/不背单词）当时牢牢占据头部——印证<strong>「词汇 + SRS」是中国用户最愿意持续用、愿意付费的刚需</strong>这一长期规律。流利说作为 AI 口语评测代表，彼时净亏损创新高、付费用户增长放缓<sup class="cite" data-refid="27">[27]</sup>，侧面说明「纯 AI 口语课」的付费留存比想象中难。（注：以上为 2021 前后的状况，2026 当前排名未取得新实证，此处仅取「品类规律」而非「当前座次」。）</p></div>
+
+      <h3>功能 + 定价 + 本地视频支持 横切表</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>产品</th><th>跟读</th><th>精听/听写</th><th>口语评分</th><th>双语字幕</th><th>自带本地视频</th><th>定价</th></tr></thead>
+        <tbody>
+          <tr class="row-highlight"><td><strong>每日英语听力</strong>(欧路·桌面版)</td><td class="check y">✓ 桌面版跟读打分(25.9.1)</td><td class="check y">✓ 单句精听</td><td class="check p">~ 跟读准确度(云)</td><td class="check y">✓ AI字幕</td><td class="check y"><strong>✓ 本地/网盘视频导入+AI字幕+一键校轴+切音轨</strong><sup class="cite" data-refid="22">[22]</sup></td><td>VIP 订阅制</td></tr>
+          <tr><td>可可英语</td><td class="check y">✓ 跟读准确率+排名<sup class="cite" data-refid="28">[28]</sup></td><td class="check y">✓</td><td class="check p">~</td><td class="check y">✓</td><td class="check n">✗ 仅站内资源</td><td>大部分免费<sup class="cite" data-refid="29">[29]</sup></td></tr>
+          <tr><td>流利说</td><td class="check y">✓</td><td class="check p">~</td><td class="check y">✓ AI 评分(强项)</td><td class="check p">~</td><td class="check n">✗</td><td>付费课程</td></tr>
+          <tr><td>网易有道(词典/翻译)</td><td class="check p">~</td><td class="check n">✗</td><td class="check p">~</td><td class="check y">✓ 字幕翻译</td><td class="check n">✗</td><td>免费+增值</td></tr>
+          <tr><td>百词斩/墨墨/不背单词</td><td class="check n">✗</td><td class="check n">✗</td><td class="check n">✗</td><td class="check n">✗</td><td class="check n">✗</td><td>免费+词库/会员</td></tr>
+          <tr><td>Trancy(扩展)</td><td class="check p">~</td><td class="check p">~</td><td class="check n">✗</td><td class="check y">✓(在线视频)</td><td class="check n"><strong>✗ 仅网页流媒体</strong><sup class="cite" data-refid="17">[17]</sup></td><td>免费+Pro</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>三个关键结论</h3>
+      <div class="callout good"><p><strong>① 真买单的：词汇+SRS（背单词三巨头垄断头部）、跟读打分（每日英语听力/可可的核心活跃功能）。</strong>说明「能量化进步 + 有即时反馈」的功能最黏人。</p></div>
+      <div class="callout warn"><p><strong>② 被吐槽 / 增长乏力的：纯 AI 口语课（流利说式）的长期付费留存难<sup class="cite" data-refid="27">[27]</sup>；资源型 App 的「本地导入」普遍是边角料</strong>——能导，但围绕本地文件的精学体验单薄。</p></div>
+      <div class="callout accent"><p><strong>③ 本地视频这块：欧路「每日英语听力」桌面版已经是最接近的竞品，不能再说「无人占」。</strong>它的桌面版（Win/Mac）已支持本地/网盘视频导入 + AI 字幕 + 一键校轴 + 切音轨 + 单句精听 + 跟读打分<sup class="cite" data-refid="22">[22]</sup>——「桌面 + 本地文件 + 精学」这条它走通了大半。<u>小贝真正可切的差异不是「无人做」，而是「做得更专」：</u>① <strong>全本地、默认离线</strong>（欧路 AI 字幕/跟读评分走云）；② <strong>系统化精学闭环</strong>（把逐句跟读+shadowing+发音评分+生词进 SRS 串成一套，而非泛听播放器加精听）；③ 围绕「你自己的一部剧/网课」做深度精学的产品定位，而非资源库为主。这才是诚实的锚点。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">主线 C8：精学方法与功能 真需求 vs 噱头</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把常被吹的精学功能逐个过筛：有 SLA（二语习得）证据支撑的是真需求，靠营销话术撑的是噱头。</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>功能</th><th>证据强度</th><th>真需求 or 噱头</th><th>给小贝的判断</th></tr></thead>
+        <tbody>
+          <tr class="row-highlight"><td><strong>逐句跟读</strong></td><td class="check y">强</td><td><span class="pill good">真需求 · 地基</span></td><td>精学的最小单元，逐句对齐(Ch6)直接支撑，必做</td></tr>
+          <tr class="row-highlight"><td><strong>Shadowing 影子跟读</strong></td><td class="check y">强（多项研究）</td><td><span class="pill good">真需求 · 差异化</span></td><td>Hamada 等研究证实提升流利度/韵律/可懂度，10–15 分钟×每周3–4次×6周见效<sup class="cite" data-refid="30">[30]</sup>；对分节段音改善证据不一<sup class="cite" data-refid="31">[31]</sup>。是小贝最有学理支撑的亮点功能</td></tr>
+          <tr><td><strong>AI 发音打分</strong></td><td class="check p">中</td><td><span class="pill warn">真需求但需谨慎</span></td><td>提供即时反馈很黏人，但「打分准不准」决定信任（Ch7）；要做就用云端保证质量，反馈以鼓励/可懂度为主</td></tr>
+          <tr><td><strong>精听听写(dictation)</strong></td><td class="check y">中强</td><td><span class="pill good">真需求</span></td><td>逼注意力到每个词，对听力辨音帮助大；逐句对齐+挖空可低成本实现</td></tr>
+          <tr class="row-highlight"><td><strong>双语/挖空字幕</strong></td><td class="check y">强（i+1 可理解输入）</td><td><span class="pill good">真需求 · 高频</span></td><td>Krashen 可理解输入的直接载体<sup class="cite" data-refid="30">[30]</sup>；whisperX 词级时间戳让挖空/点词查义轻松实现，是留存抓手</td></tr>
+          <tr><td><strong>角色扮演 / 对话私教</strong></td><td class="check p">中</td><td><span class="pill info">锦上添花</span></td><td>LLM 时代体验好，但属「可上云的增值层」；不是地基，别一开始就上</td></tr>
+          <tr class="row-highlight"><td><strong>SRS 间隔复习</strong></td><td class="check y">极强（记忆科学）</td><td><span class="pill good">真需求 · 留存引擎</span></td><td>把精学产出的生词/难句喂进 FSRS（沿用上一份报告结论），是「学完不忘」的闭环，留存核心</td></tr>
+          <tr><td>炫酷数据可视化/成就墙</td><td class="check n">弱</td><td><span class="pill bad">噱头倾向</span></td><td>能锦上添花，但替代不了「真的练 + 真的记住」；别本末倒置</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="callout accent"><p><strong>一句话筛子：</strong>有 SLA 证据 + 能量化反馈 + 能闭环到复习的，是真需求（逐句跟读 / shadowing / 双语挖空字幕 / 精听 / SRS）；纯靠新鲜感和视觉的，是噱头。小贝应该把前者串成闭环，而不是堆一堆漂亮但孤立的功能。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">变现与国内付费意愿（简要）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>简要给方向，不展开成商业计划。</p>
+      <h3>国内付费意愿基本盘</h3>
+      <ul>
+        <li>2020 调研：近 <strong>40% 中国 App 用户表示愿意为 App 付费</strong><sup class="cite" data-refid="32">[32]</sup>——基础付费意愿存在，但「愿意」和「真掏钱续费」之间有鸿沟（流利说付费留存下滑就是教训<sup class="cite" data-refid="27">[27]</sup>）。</li>
+        <li>主流语言 App 普遍 <strong>freemium</strong>：核心免费、高级功能/会员收费<sup class="cite" data-refid="32">[32]</sup>。年订阅常见在百元出头量级（参考类目 ~¥149/年档<sup class="cite" data-refid="32">[32]</sup>）。<span class="conf y">🟡</span></li>
+        <li>背单词三巨头证明：<strong>「持续用 + 量化进步」的工具更容易让人为词库/会员/去广告付费</strong>，比「上课式」付费更稳。</li>
+      </ul>
+      <h3>小贝适配的变现路径（按优先级）</h3>
+      <div class="step"><div class="step-head"><span class="sn">A</span>本地工具一次性 / 订阅（推荐主路）</div><div class="step-body">桌面工具卖「Pro 版」license（一次性买断或年订阅）——解锁更大模型、更多片段、发音评分次数、批量处理等。全本地无服务器成本，毛利高，符合工具型产品调性。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">B</span>云端能力按量增值</div><div class="step-body">发音评分（讯飞 ISE）/LLM 私教等「可上云」功能给免费额度，超出按量收费（成本可转嫁，如讯飞免费 5 万次后按套餐<sup class="cite" data-refid="23">[23]</sup>、Azure 按 STT 基线计费<sup class="cite" data-refid="16">[16]</sup>）。把云成本和收费挂钩，不亏。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">C</span>免费核心 + 去广告/会员</div><div class="step-body">最基础精学全免费做留存，靠会员（更顺手的体验、家长报告、更多内容模板）转化。</div></div>
+      <div class="callout warn"><p><strong>军师提醒：</strong>别一上来就建复杂订阅体系。先做出「让人愿意天天打开」的核心精学闭环（Ch13），有了留存再谈变现——工具型产品的死法通常是「还没人爱用就急着收费」。<span class="conf y">🟡 行业体感</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== MINI DEMO ===== -->
+  <section class="chapter" id="demo">
+    <h2><span class="num">🎮</span><span class="title-text">Mini Demo：模拟「导入本地视频 → 逐句 + 影子跟读 + 发音分」</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>点卡片展开，模拟用户从导入到拿到发音分的 5 步体验（数据为演示用 fake，仅示意交互形态）。下方附真实代码片段。</p>
+      <div class="demo-grid">
+        <div class="demo-card" data-bar="100" data-color="var(--info)"><div class="dc-icon">📂</div><div class="dc-title">1 · 导入本地视频</div><div class="dc-tag">friends_s01e01.mp4 · 全本地</div><div class="dc-body">拖入硬盘里的 mp4。App 用打包的 ffmpeg(sidecar) 抽出音轨——<strong>视频本体不离开你电脑</strong>。<div class="dc-bar"><span style="width:100%;background:var(--info)"></span></div>抽音轨 100%</div></div>
+        <div class="demo-card" data-bar="100" data-color="var(--accent)"><div class="dc-icon">📝</div><div class="dc-title">2 · 本地转写 + 对齐</div><div class="dc-tag">whisper.cpp + whisperX</div><div class="dc-body">本地跑 whisper.cpp(Metal)出字幕，whisperX 对齐到<strong>词级 ±50ms</strong>。base 模型，无需独显。<div class="dc-bar"><span style="width:100%;background:var(--accent)"></span></div>转写+对齐 完成</div></div>
+        <div class="demo-card" data-bar="78" data-color="var(--good)"><div class="dc-icon">🔁</div><div class="dc-title">3 · 逐句 / 影子跟读</div><div class="dc-tag">"I'll be there for you."</div><div class="dc-body">逐句循环播放→你跟读→影子模式边听边复述。本句你已练 <strong>6 遍</strong>，流利度上升中。<div class="dc-bar"><span style="width:78%;background:var(--good)"></span></div>流利度 78</div></div>
+        <div class="demo-card" data-bar="64" data-color="var(--warn)"><div class="dc-icon">🎙️</div><div class="dc-title">4 · AI 发音评分</div><div class="dc-tag">/θ/ 偏弱 · 讯飞 ISE 评测</div><div class="dc-body">准确 64 · 流利 81 · 完整 100（讯飞 ISE 多维）。<strong>there 的 /ð/、for 的 /r/</strong> 可再练。反馈走鼓励向、以可懂度为准："已经很接近啦，th 音舌尖轻碰牙齿~"<div class="dc-bar"><span style="width:64%;background:var(--warn)"></span></div>综合 64</div></div>
+        <div class="demo-card" data-bar="90" data-color="var(--purple)"><div class="dc-icon">🗂️</div><div class="dc-title">5 · 生词 / 难句进复习</div><div class="dc-tag">FSRS · 明天再见</div><div class="dc-body">"there for you" 这句 + 弱项音素 /ð/ 自动入 FSRS，按你的表现排下次复习时间。学完不忘的闭环。<div class="dc-bar"><span style="width:90%;background:var(--purple)"></span></div>已排程</div></div>
+      </div>
+
+      <h4>真实代码片段 ① · whisper.cpp 本地转写（命令行）</h4>
+      <pre><code># 用打包的 ffmpeg(sidecar) 抽 16k 单声道音轨（whisper 要求）
+ffmpeg -i friends_s01e01.mp4 -ar 16000 -ac 1 -c:a pcm_s16le audio.wav
+
+# whisper.cpp 本地转写（Apple Silicon 自动走 Metal），出带时间戳的 SRT
+./whisper-cli -m models/ggml-base.en.bin -f audio.wav \
+  --output-srt --max-len 0   # 全程离线，0 字节上传</code></pre>
+
+      <h4>真实代码片段 ② · Tauri sidecar 调起 whisper（tauri.conf.json + Rust）</h4>
+      <pre><code>// tauri.conf.json —— 登记本地二进制（注意 target-triple 后缀）
+{
+  "bundle": {
+    "externalBin": ["binaries/whisper", "binaries/ffmpeg"]
+  }
+}
+// → 实际文件：binaries/whisper-aarch64-apple-darwin
+//             binaries/whisper-x86_64-pc-windows-msvc.exe
+
+// Rust 端调起 sidecar
+use tauri_plugin_shell::ShellExt;
+let cmd = app.shell()
+    .sidecar("whisper").unwrap()
+    .args(["-m","models/ggml-base.en.bin","-f","audio.wav","--output-srt"]);
+let (mut rx, _child) = cmd.spawn().expect("failed to spawn whisper");
+// 流式读取转写进度，喂回前端进度条</code></pre>
+      <p style="font-size:12.5px;color:var(--text-mute)">⚠️ 以上为<strong>演示性片段</strong>，说明调用形态与思路；命令行参数/API 以各 repo 当前文档为准（whisper.cpp 的 CLI 名、Tauri sidecar 权限配置可能随版本调整）。发音评分一环示意为调云 API，真实集成见 Ch7。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13">
+    <h2><span class="num">★13</span><span class="title-text">小贝 产品路线决策树：优先做哪 3–5 个功能 + 形态(Tauri) + 安装体验 + 先窄后宽</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把全篇收敛成给<strong>小贝</strong>的可执行路线。先把 framing 摆正，再给「如果只做一件事」、功能优先级、技术栈拍板、安装体验。</p>
+
+      <div class="callout warn">
+        <p><strong>🧭 framing 先摆正（别被「技术可行」冲昏头）：</strong>小贝的技术全可行、AI 都能写——但<u>技术不是真风险</u>。真风险在四处：① <strong>集成质量</strong>（转写/对齐/评分串起来稳不稳，见 Ch8 可靠性清单）；② <strong>法律打包</strong>（FFmpeg LGPL + codec 专利 + ICP 备案，见 Ch4）；③ <strong>Windows 分发信任</strong>（中国开发者签名路径 + SmartScreen 冷启动，见 Ch4）；④ <strong>用户工作流契合</strong>（中国用户 <u>Windows 优先、移动/云盘习惯重</u>，欧路桌面版已是最接近竞品）。<strong>所以小贝先验证的窄楔子是「本地视频精听/跟读工作台」，跑通了再谈「全本地精学操作系统」</strong>——别一上来就喊大词。</p>
+      </div>
+
+      <div class="callout accent"><p><strong>🎯 小贝如果只做一件事：</strong>「导入一个本地视频 → 本地转写出带词级时间戳的双语字幕 → 逐句循环播放 + 跟读」。这条最小链路就做到了欧路桌面版之外更进一步的事（任意本地文件 + <u>全本地处理</u> + 逐句精学闭环起点），且每一环都有成熟开源件。<strong>先把这个跑通、能给真人用，再谈别的。</strong></p></div>
+
+      <h3>应优先做的 3–5 个功能（按上线顺序）</h3>
+      <div class="tree">
+        <div class="node q">Q：第一个版本该放什么？取「真需求 ∩ 技术成熟 ∩ 是其他功能地基」的交集</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl y">P0</span><strong>① 本地导入 + 转写 + 词级对齐 + 逐句播放</strong> —— 地基中的地基（whisper.cpp + whisperX，全本地）。没有它什么都谈不上。</div>
+        <div class="node"><span class="lbl y">P0</span><strong>② 双语 / 挖空字幕 + 点词查义</strong> —— 可理解输入的直接载体，词级时间戳让它几乎零成本<sup class="cite" data-refid="11">[11]</sup>。高频留存抓手。</div>
+        <div class="node"><span class="lbl m">P1</span><strong>③ 逐句跟读 + Shadowing 影子模式</strong> —— 最有 SLA 学理支撑的差异化功能<sup class="cite" data-refid="30">[30]</sup>。先不带评分也能上（纯录音对比）。</div>
+        <div class="node"><span class="lbl m">P1</span><strong>④ AI 发音评分（云 API · 讯飞 ISE）</strong> —— 给跟读装上即时反馈引擎。MVP 写死讯飞 ISE 保证准 + 国内低延迟（Ch7），反馈以可懂度/鼓励为主。</div>
+        <div class="node"><span class="lbl n">P2</span><strong>⑤ 生词/难句进 FSRS 间隔复习</strong> —— 把「学过」变「记住」的闭环（沿用上一份报告结论）。精听听写、角色扮演私教等留作 P2+ backlog。</div>
+      </div>
+
+      <h3>技术栈选型拍板</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>层</th><th>拍板</th><th>一句话理由</th></tr></thead>
+        <tbody>
+          <tr><td><strong>App 壳 / 形态</strong></td><td><span class="pill accent">Tauri 2.x</span></td><td>安装器壳小（利首装，真实占用仍 GB 级）、sidecar 嵌二进制干净、updater 自带签名（Ch3）</td></tr>
+          <tr><td><strong>本地转写</strong></td><td><span class="pill accent">whisper.cpp</span></td><td>单二进制零依赖、Mac 上 Metal 加速、sidecar 最佳拍档（Ch5）</td></tr>
+          <tr><td><strong>逐句对齐</strong></td><td><span class="pill accent">whisperX</span></td><td>词级 ±50ms、转写对齐一条龙、多格式直出（Ch6）</td></tr>
+          <tr><td><strong>媒体处理</strong></td><td><span class="pill accent">ffmpeg(sidecar)</span></td><td>抽音轨/转码标配，同走 sidecar 静态编译</td></tr>
+          <tr><td><strong>发音评分</strong></td><td><span class="pill accent">MVP 讯飞 ISE（云）→ 成长期迁本地 SSL</span></td><td>本地 GOP 基线 PCC~0.45 信任不够；讯飞 ISE 面向中国人英语、国内低延迟、免费 5 万次起；确认价值再迁本地省成本+解合规（Ch7）</td></tr>
+          <tr><td><strong>复习调度</strong></td><td><span class="pill accent">FSRS（本地）</span></td><td>沿用上一份结论，MIT、语言无关、自适应间隔</td></tr>
+          <tr><td><strong>媒体合规</strong></td><td><span class="pill accent">OS 原生解码优先 + ffmpeg LGPL build 抽音/转码</span></td><td>降 codec 专利暴露；ffmpeg 动态链接+source+notice、避开 GPL/nonfree（Ch4）</td></tr>
+          <tr><td><strong>分发 + 签名</strong></td><td><span class="pill accent">官网直接下载 + CI 矩阵双端构建</span></td><td>Mac 签名公证 $99/年；<u>Win 走国内/国际 CA 的 OV/EV（¥3.5k–4.3k 或 $200–600/年，非微软 Azure，中国个人无资格）</u>；大陆托管需 ICP 备案（Ch4）</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <h3>安装体验拍板（小贝首装这样设计）</h3>
+      <div class="step"><div class="step-head"><span class="sn">壳</span>安装器尽量小、模型按需下</div><div class="step-body">官网放<u>几 MB 的 Tauri 安装器壳</u>（Win 用在线 WebView2 bootstrapper），whisper 模型首启时让用户选大小（base/small）再下载 + 断点续传，别把 1–2GB 模型塞进安装包。同时提供一个「离线完整包」给无网用户。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">签</span>双端都签，但管理用户预期</div><div class="step-body">Mac 走 Developer ID + 公证（双击即开）；Win 走 CA 的 OV/EV 签名，且<u>官网首屏就放「Windows 提示未知发布者/SmartScreen 怎么办」图文指引</u>（点「仍要运行」），不要让首装用户自己懵。提交 360/腾讯管家白名单。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">启</span>首次启动给「热身」而非空白</div><div class="step-body">首启在下模型/初始化时给真实进度 + 一句话引导「拖入一个视频试试」，避免白屏等待。失败可重试、可续传（Ch8 可靠性清单）。</div></div>
+
+      <h3>先窄后宽：三个阶段</h3>
+      <div class="step"><div class="step-head"><span class="sn">阶段1</span>窄到一根针（验证「本地视频精学」体验）</div><div class="step-body">只做 P0：一个视频、本地转写、词级双语字幕、逐句循环播放。目标：让阿杰自己和几个真人用一周，验证「围绕自己的视频精学」是不是真的爽。<strong>这一步不碰发音评分、不碰云、不碰复杂 UI。</strong></div></div>
+      <div class="step"><div class="step-head"><span class="sn">阶段2</span>加上「说」和「反馈」（差异化成型）</div><div class="step-body">加 P1：跟读 + shadowing + 云端发音评分。这一步产品从「字幕精读器」升级成「会听你说、给你打分的精学私教」，差异化护城河成型。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">阶段3</span>闭环 + 变现（留存与商业化）</div><div class="step-body">加 P2：生词/难句进 FSRS 复习闭环、精听听写。同时上 Pro license / 云能力按量收费。先窄后宽的最后一公里——有留存了再认真谈钱。</div></div>
+
+      <div class="callout good"><p><strong>军师总结：</strong>小贝的可行性结论清醒版是「<u>能做、栈成熟，但空位收窄、风险在技术之外</u>」。技术 AI 都能写，真要盯紧的是四处：① <strong>集成质量 + 可靠性</strong>（转写/对齐/评分串稳，Ch8 那 8 条工程清单）；② <strong>法律打包</strong>（FFmpeg LGPL + codec 专利 + ICP 备案，Ch4）；③ <strong>Windows 分发信任</strong>（中国开发者签名路径特殊 + SmartScreen 冷启动，Ch4）；④ <strong>工作流契合</strong>（Windows 优先、欧路桌面版已是最接近竞品，小贝靠「全本地 + 系统化精学闭环 + 更深」差异化）。<strong>对策：先把「本地视频精听/跟读工作台」这根窄针扎透，再长成「全本地精学操作系统」。先窄、跑通、再宽。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq">
+    <h2><span class="num">FAQ</span><span class="title-text">常见问题（12 条）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">到底选 Tauri 还是 Electron？一句话。</span><span class="toggle">＋</span></div><div class="faq-a"><p>Tauri 2.x。小贝要官网直接下载（<u>安装器壳</u>小利首装，~8.6MB vs 244MB<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>——注意这是「壳」，装完含 sidecar+模型仍是 GB 级）+ 内嵌 whisper.cpp/ffmpeg（sidecar 干净<sup class="cite" data-refid="4">[4]</sup>）+ 单人 AI 写码（Rust 工具链不再是门槛）。唯一让步是渲染一致性，对功能型工具无感。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">「一套代码出 Mac+Windows 安装包」是不是一台 Mac 就能搞定？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不是。Tauri（和 Electron）都<strong>不能在 Mac 上交叉编译 Windows 安装包</strong>，要用 CI 矩阵在各平台原生 runner 上分别构建（Windows 包在 windows-latest 上 build）<sup class="cite" data-refid="6">[6]</sup>。官方 tauri-action 一键搞定三平台。代码是一套，但构建要分平台跑——CI 模板现成，不是 blocker，但别幻想本机一条命令出双端包。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">普通笔记本（没有独显）跑得动本地转写吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>跑得动。base/small 模型只要 1–2GB 内存、不需要 GPU<sup class="cite" data-refid="9">[9]</sup>。Apple Silicon 上 whisper.cpp 走 Metal，base 约 10× 实时<sup class="cite" data-refid="8">[8]</sup>，一集 20 分钟的剧几分钟就转完。Windows 纯 CPU 也有 ~15× 实时<sup class="cite" data-refid="8">[8]</sup>。对「精学」场景 base 精度足够（清晰英语+可校正）。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">发音评分能不能纯本地做，不依赖云？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能做，但短期不建议作首发。<u>开源 GOP 基线</u>与人工评分相关性只有 PCC≈0.45<sup class="cite" data-refid="14">[14]</sup>（注意这是经典基线、不是本地天花板，SSL/wav2vec2 能更高）。建议 MVP 用云 API、<strong>主推讯飞 ISE</strong>（面向中国人英语、国内低延迟、免费 5 万次<sup class="cite" data-refid="23">[23]</sup>），确认价值后再迁本地（SSL/Echoic 路线）省成本+解合规，迁前要做口音校准集（Ch7）。发音录音是用户自己的、不含版权，属「可上云」类（Ch8）。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">「绝不上传」和「可选对接云端」会不会矛盾？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不矛盾，关键是颗粒度。硬约束是<strong>版权内容（视频/音频本体、整片字幕/转写）永不上传</strong>。可上云的只有「孤立单词释义、单句翻译、用户自己的跟读录音、对话私教」这些不含版权的文本/录音任务，且做成可选开关、明确告知（Ch8 边界表）。营销话术别把两者混为一谈。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Windows 上签了名为什么还弹 SmartScreen 警告？</span><span class="toggle">＋</span></div><div class="faq-a"><p>因为微软已取消「EV 证书首发即绕过 SmartScreen」的特权——现在签名文件都要靠下载量/分发量积累信誉<sup class="cite" data-refid="20">[20]</sup><sup class="cite" data-refid="35">[35]</sup>。新 App 在信誉起来前仍可能弹蓝框（点「仍要运行」可继续），首装还有「未知发布者」摩擦。花大价钱买 EV 也买不到「首发不弹」了。靠时间+下载量化解，官网给「被拦截怎么办」指引（Ch4）。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">双端签名一年要花多少钱？</span><span class="toggle">＋</span></div><div class="faq-a"><p>注意中国开发者路径和欧美不同：Mac 端 Apple Developer Program $99/年<sup class="cite" data-refid="19">[19]</sup>。Windows 端<u>不能用微软 Azure Trusted/Artifact Signing（中国个人/组织没资格，仅限 US/加/欧/英）</u><sup class="cite" data-refid="33">[33]</sup>，得走<strong>国内 CA（沃通等）的 OV ~¥3588/EV ~¥4288/年（需公司主体）<sup class="cite" data-refid="34">[34]</sup>，或国际 CA 经销商的 OV/EV $200–581/年 + U 盾/云签名<sup class="cite" data-refid="20">[20]</sup></strong>。所以双端签名总成本量级是「$99 + ¥3.5k–4.3k/年」或「$99 + $200–600/年」，不是初稿设想的 ~$220/年（Ch4）。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Language Reactor / Trancy 不是已经很好用了吗，为什么还要做？</span><span class="toggle">＋</span></div><div class="faq-a"><p>它们是浏览器扩展，只能处理网页流媒体（YouTube/Netflix），<strong>碰不了你硬盘里的 mp4</strong>，且 LR 在国内不可用<sup class="cite" data-refid="18">[18]</sup>。小贝的空位正是「桌面 App 读本地任意视频 + 全本地处理 + 系统化精学」——这是扩展形态结构上做不到的事（Ch2）。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">国内有没有已经做了本地视频精学的？</span><span class="toggle">＋</span></div><div class="faq-a"><p>有，且比初稿设想的更强：欧路「每日英语听力」<u>桌面版（Win/Mac）</u>已支持本地/网盘视频导入 + AI 字幕生成 + 一键校对字幕时间轴 + 切音轨 + 单句精听 + 桌面版跟读打分<sup class="cite" data-refid="22">[22]</sup>——<strong>它就是最接近的竞品</strong>，「桌面+本地视频」这块不能说「无人占」。小贝的差异不是「无人做」，而是「做得更专」：全本地默认离线（欧路 AI 字幕/评分走云）+ 系统化精学闭环（跟读+shadowing+发音评分+SRS 一体）+ 围绕「你自己的剧」深度精学。其余竞品（可可/流利说/百词斩等）全不支持本地文件（Ch9）。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">逐句对齐用 whisperX 够准吗？要不要上 MFA？</span><span class="toggle">＋</span></div><div class="faq-a"><p>对小贝够用。whisperX 词级对齐在 ~±50ms 量级<sup class="cite" data-refid="11">[11]</sup>，足以支撑逐句播放/点词跳转，人耳基本感知不到——但<u>别当硬 SLA</u>，实际精度随媒体/口音/噪声变，上线前在目标素材抽测。MFA 在「音素边界 ≤10ms」级更准<sup class="cite" data-refid="10">[10]</sup>，但那是语音学研究级需求且更重。whisperX 与 whisper 同栈、AI 拼起来最省事（BSD-2-Clause 可闭源商用），首选它，MFA 留作可选。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">第一个版本最少做哪几个功能？</span><span class="toggle">＋</span></div><div class="faq-a"><p>就两个 P0：① 本地导入+转写+词级对齐+逐句播放；② 双语/挖空字幕+点词查义。这俩跑通就已经做到了所有竞品做不到的事（本地文件+全本地+逐句精学），且都是成熟开源件。跟读/发音评分/复习是 P1/P2，验证完核心体验再加（Ch13）。先窄后宽。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">这个产品最大的风险在哪？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不在技术（AI 都能写、栈都成熟）。真风险四处：① <strong>集成质量/可靠性</strong>（转写/对齐/评分串稳，模型下载/崩溃恢复/杀软误报，Ch8）；② <strong>法律打包</strong>（FFmpeg LGPL + codec 专利 + ICP 备案，Ch4）；③ <strong>Windows 分发信任</strong>（中国开发者签名路径特殊 + SmartScreen 冷启动，Ch4）；④ <strong>工作流契合 + 贪多</strong>（Windows 优先、欧路桌面版已是最接近竞品；别一上来做「精学操作系统」）。对策：先把「本地视频精听/跟读工作台」这根窄针扎透，再长（Ch13）。</p></div></div>
+
+    </div>
+  </section>
+
+  <!-- ===== REFERENCES ===== -->
+  <section class="chapter" id="refs">
+    <h2><span class="num">REF</span><span class="title-text">References · 参考来源</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13px;color:var(--text-mute)">访问日期均为 2026-06-11。鼠标悬停正文 <sup class="cite" data-refid="1">[1]</sup> 可弹窗查看来源并点击外链。star/版本/价格为查证当日快照，已尽量双源核对。</p>
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://johal.in/you-use-tauri-20-electron-300-desktop-apps/" target="_blank" rel="noopener">Tauri 2.0 vs Electron 30.0: Why Switch (2026)</a><span class="ref-meta">· 引用 8 次 · Tauri ~12MB vs Electron ~180MB（同款 todo）、内存 85MB vs 450MB、冷启动 1.8s vs 12s（Windows）、Win 用 WebView2；启动差异口径偏激进，体积/内存量级多源一致</span></li>
+        <li id="ref-2"><a href="https://www.gethopp.app/blog/tauri-vs-electron" target="_blank" rel="noopener">gethopp — Tauri vs Electron: performance, bundle size & trade-offs</a><span class="ref-meta">· 引用 6 次 · 实测安装包 8.6MiB vs 244MiB、6 窗口内存 172MB vs 409MB、启动差异 &lt;1.5s「不值得作为选型依据」、Tauri 用系统 WebView 渲染可能有细微差异、updater 一等公民；N=1 单机基准</span></li>
+        <li id="ref-3"><a href="https://v2.tauri.app/distribute/windows-installer/" target="_blank" rel="noopener">Tauri v2 — Windows Installer / WebView2 安装模式（官方）</a><span class="ref-meta">· 引用 3 次 · Win11 预装 WebView2、Win10 安装器默认下载 bootstrapper（联网、安装包小）、offlineInstaller 内嵌 WebView2 约 +127MB</span></li>
+        <li id="ref-4"><a href="https://v2.tauri.app/develop/sidecar/" target="_blank" rel="noopener">Tauri v2 — Embedding External Binaries (Sidecar)（官方）</a><span class="ref-meta">· 引用 5 次 · externalBin 配置、target-triple 命名（aarch64-apple-darwin / x86_64-pc-windows-msvc.exe）、shell().sidecar() 调用、capabilities 权限；ffmpeg 已有真实 sidecar 案例、macOS dyld 库依赖坑</span></li>
+        <li id="ref-5"><a href="https://www.pkgpulse.com/guides/electron-vs-tauri-2026" target="_blank" rel="noopener">PkgPulse — Electron vs Tauri 2026: Bundle/RAM/Security</a><span class="ref-meta">· 引用 3 次 · Electron 真实 app 50-150MB+ / Tauri 3-15MB；Electron 更新打包生态 battle-tested、Tauri 在 updater 等需更多 first-principles 工作</span></li>
+        <li id="ref-6"><a href="https://v1.tauri.app/v1/guides/building/cross-platform/" target="_blank" rel="noopener">Tauri — Cross-Platform Compilation（官方）+ tauri-action</a><span class="ref-meta">· 引用 6 次 · 「依赖原生库工具链，目前无法有意义地交叉编译」、推荐 CI 矩阵各平台原生 runner（windows-latest/macos-latest）、tauri-action 一键三平台、Linux/Mac 上 NSIS 交叉编译 Windows「可行但有坑、测试少」</span></li>
+        <li id="ref-7"><a href="https://blog.openreplay.com/comparing-electron-tauri-desktop-applications/" target="_blank" rel="noopener">OpenReplay — Comparing Electron and Tauri（updater 对比）</a><span class="ref-meta">· 引用 4 次 · Tauri 内置 updater 公私钥签名+应用前校验；Electron electron-updater 可行但「多数团队自己搞砸」签名链路；两者都支持 GitHub/S3/自建源</span></li>
+        <li id="ref-8"><a href="https://www.promptquorum.com/power-local-llm/local-whisper-stt-comparison-2026" target="_blank" rel="noopener">PromptQuorum — whisper.cpp vs faster-whisper 本地 STT Benchmarks 2026</a><span class="ref-meta">· 引用 6 次 · base CPU 15× vs 20× 实时；Apple Silicon Metal whisper.cpp ~10× vs faster-whisper Mac 仅 CPU ~3×；int8 量化降内存 40%/提速 2×、WER 几乎不变</span></li>
+        <li id="ref-9"><a href="https://modal.com/blog/choosing-whisper-variants" target="_blank" rel="noopener">Modal — Choosing Whisper variants（whisper.cpp/faster-whisper/whisperX）</a><span class="ref-meta">· 引用 5 次 · 同套 OpenAI 权重 WER 差&lt;0.1%；内存 tiny/base ~1GB·small ~2GB·medium ~5GB；whisper.cpp 后端 CPU/Metal/CUDA/Vulkan 全覆盖、faster-whisper 仅 CPU+CUDA(Mac 无 Metal)；WER tiny7.6/base5.0/small3.4/medium2.9/large-v3 2.5%</span></li>
+        <li id="ref-10"><a href="https://arxiv.org/html/2406.19363v1" target="_blank" rel="noopener">Tradition or Innovation: ASR Methods for Forced Alignment (Interspeech 2024)</a><span class="ref-meta">· 引用 4 次 · MFA(Kaldi GMM-HMM) 音素边界精度胜 whisperX/MMS、mean boundary error TIMIT 21.9ms/Buckeye 27.8ms、≤10ms 紧界最准；aeneas DTW+TTS 非词级设计</span></li>
+        <li id="ref-11"><a href="https://localaimaster.com/blog/whisperx-guide" target="_blank" rel="noopener">WhisperX 2026: Word Timestamps + Diarization Guide</a><span class="ref-meta">· 引用 6 次 · wav2vec2 强制对齐词级 ±50ms（vs Whisper 原生 ±500ms）、对齐步骤+10-20% 时间、输出 SRT/VTT/JSON/TSV、支持 tiny~large-v3-turbo</span></li>
+        <li id="ref-12"><a href="https://github.com/m-bain/whisperX/blob/main/LICENSE" target="_blank" rel="noopener">WhisperX — LICENSE（实查为 BSD 2-Clause）</a><span class="ref-meta">· 引用 4 次 · 实查 LICENSE 文件标题为「BSD 2-Clause License」（<u>初稿误写 BSD-4-Clause，已更正</u>），可闭源商用；diarization 用 pyannote.audio，模型权重另有 license + HuggingFace 门控，做对齐/发音用不到分离部分</span></li>
+        <li id="ref-13"><a href="https://ar5iv.labs.arxiv.org/html/2104.01378" target="_blank" rel="noopener">speechocean762: 非母语英语发音评测语料 (arXiv 2104.01378)</a><span class="ref-meta">· 引用 4 次 · 5000 句/250 说话人(125 成人+125 儿童)、母语全是中文(Mandarin-L1)、音素/词/句级专家标注、可商用、Kaldi gop_speechocean762 recipe</span></li>
+        <li id="ref-14"><a href="https://github.com/kaldi-asr/kaldi/blob/master/egs/gop_speechocean762/README.md" target="_blank" rel="noopener">Kaldi gop_speechocean762 recipe + 论文 Table 2 基线</a><span class="ref-meta">· 引用 3 次 · 音素级 GOP 基线 PCC≈0.45 / MSE 0.16；作者注「经典基线、不用最新技术、结果不算强」；word/sentence 级当时未给</span></li>
+        <li id="ref-15"><a href="https://github.com/xialeistudio/echoic" target="_blank" rel="noopener">Echoic — 自托管逐音素发音打分（开源全本地原型）</a><span class="ref-meta">· 引用 2 次 · ~37★ MIT、WhisperX+wav2vec2+phonemizer、React+FastAPI、逐音素颜色打分、全本地 Docker Compose、模型首次自动下载约 1GB、2026 活跃</span></li>
+        <li id="ref-16"><a href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-pronunciation-assessment" target="_blank" rel="noopener">Azure AI Speech — Pronunciation Assessment（功能+定价，海外/备选）</a><span class="ref-meta">· 引用 6 次 · 评分维度 准确度/流利度/完整度/韵律(prosody)+音素音节级+miscue；<u>计费=基线 STT 价(~$1/小时)+prosody add-on（prosody 仅 en-US、额外收费），评测本身不另收；常见引用的 ~$1.32/小时是含评测组合口径、按区域/tier 浮动</u>；短音频按秒计；音频出境需走合规。终版定位：海外/备选，国内主推讯飞 ISE</span></li>
+        <li id="ref-17"><a href="https://www.trancy.org/download" target="_blank" rel="noopener">Trancy — 支持平台（YouTube/Netflix/Udemy/Coursera/TED 等）</a><span class="ref-meta">· 引用 2 次 · Chrome 扩展、仅支持网页流媒体平台、双语字幕+AI 翻译；官方支持列表中无「本地 mp4 文件」</span></li>
+        <li id="ref-17b"><a href="https://cloud.tencent.com/document/product/1774/107342" target="_blank" rel="noopener">腾讯云口语评测（新版）计费概述（官方）</a><span class="ref-meta">· 引用 2 次 · 后付费 5 元/千次；套餐 100 万次 3750 元/年(3.75 元/千)、低至 3.5 元/千；按文本长度计次(≤20 词算 1 次)；并发免费 50 个、超出 30 元/个/月；终版作国内备选</span></li>
+        <li id="ref-18"><a href="https://naturallanguagejourney.com/how-to-use-language-reactor-or-trancy-to-watch-chinese-tv/" target="_blank" rel="noopener">Language Reactor / Trancy 用法与限制（扩展形态/网页流媒体）</a><span class="ref-meta">· 引用 3 次 · LR/Trancy 均为浏览器扩展、依附网页流媒体(YouTube/Netflix)、处理不了本地文件；LR 国内需翻墙、服务在墙外、实际不可用</span></li>
+        <li id="ref-19"><a href="https://developer.apple.com/developer-id/" target="_blank" rel="noopener">Apple — Signing Mac Software with Developer ID（官方）</a><span class="ref-meta">· 引用 4 次 · Developer ID 证书让 Gatekeeper 认可信开发者、App Store 外分发官方支持(ZIP/PKG/DMG)、需 Developer Program 账号持有者、公证(notarytool)自动安全扫描+staple ticket；Program $99/年</span></li>
+        <li id="ref-20"><a href="https://www.ssl2buy.com/ev-code-signing-certificates" target="_blank" rel="noopener">Windows EV/OV 代码签名证书价格 + SmartScreen 政策</a><span class="ref-meta">· 引用 4 次 · EV 证书约 $247-581/年(FastSSL $247、DigiCert $581)；2024 起微软取消 EV 首发绕过 SmartScreen 特权、EV 与 OV 同走信誉积累过程</span></li>
+        <li id="ref-21"><a href="https://textslashplain.com/2025/03/12/authenticode-in-2025-azure-trusted-signing/" target="_blank" rel="noopener">Authenticode in 2025 — Azure Trusted Signing（Eric Lawrence）</a><span class="ref-meta">· 引用 2 次 · 2023-06 起代码签名私钥强制存硬件/云 HSM 的政策背景；Azure Trusted Signing ~$10/月、直集成 CI——<u>但仅对符合资格地区（US/加等）省事，中国个人不适用，见 ref-33</u></span></li>
+        <li id="ref-22"><a href="https://www.eudic.net/v4/en/app/history?appkey=eusoft_ting_en" target="_blank" rel="noopener">欧路《每日英语听力》桌面版更新日志（实查本地视频导入能力）</a><span class="ref-meta">· 引用 9 次 · <u>实查桌面版（Win/Mac）更新日志</u>：9.7.3/9.7.4「我的资源」播放本地文件 + AI 字幕生成、单句精听；26.4.2 打开任意网站视频 + 一键校对字幕时间轴 + 切换视频音轨和内置字幕；25.9.1 桌面版跟读打分向全用户免费——「桌面+本地视频导入+字幕对齐+跟读评分」已走通大半，是小贝最接近的竞品；整体仍泛听/资源库导向、AI字幕/评分走云</span></li>
+        <li id="ref-23"><a href="https://www.xfyun.cn/services/ise" target="_blank" rel="noopener">科大讯飞 — 语音评测(ISE)智能口语评测 + API 文档（实查维度/计费/接入）</a><span class="ref-meta">· 引用 12 次 · 实查：评测维度 音素/单词/句子/篇章多级 + 准确度/流利度/完整度（中文另有声韵分/调型分）；题型 read_syllable(中)/read_word/read_sentence/read_chapter；中英双语(zh_cn/en_us)、专门面向中国人英语评测；<strong>免费领 5 万次（SDK 与 WebAPI 各一次、不共用）</strong>，超出走套餐/后付费（控制台购买，官网未公开统一单价）；接入 WebAPI + 各端 SDK(Go/PHP/Java/Python/C#/Node)</span></li>
+        <li id="ref-24"><a href="https://windowsforum.com/threads/ffmpeg-adds-whisper-audio-filter-for-on-device-transcription-asr.378722/" target="_blank" rel="noopener">FFmpeg 新增 Whisper 音频 filter（设备端 ASR）</a><span class="ref-meta">· 引用 1 次 · FFmpeg 内置 whisper filter、命令链内直出 text/SRT/JSON、完全本地；较新、稳定性需实测</span></li>
+        <li id="ref-25"><a href="https://par.nsf.gov/servlets/purl/10531394" target="_blank" rel="noopener">Pronunciation Assessment Criteria & Intelligibility（学界综述）</a><span class="ref-meta">· 引用 2 次 · 二语发音评测应以 intelligibility/comprehensibility 为目标而非 native accent；量表常把「重口音」与「可懂度」混淆、带 native-bias；需多样语音数据求公平</span></li>
+        <li id="ref-26"><a href="https://www.lanjinger.com/d/174316" target="_blank" rel="noopener">蓝鲸/易观 — 2021-11 外语学习 App 月活 TOP10 榜单</a><span class="ref-meta">· 引用 6 次 · 百词斩 ~1998 万(唯一千万级)、流利说 620 万、墨墨 411 万、每日英语听力 275 万、可可英语 157 万、不背单词新晋 100 万；139 家共 6072 万月活</span></li>
+        <li id="ref-27"><a href="https://36kr.com/p/672390855022598" target="_blank" rel="noopener">36氪 — 流利说净亏损创新高、付费用户放缓</a><span class="ref-meta">· 引用 3 次 · 2019 净收入 10.23 亿(+60.6%) 但净亏损扩大至 5.748 亿创历史新高、Q4 付费用户 70 万(同比 100 万下滑)；纯 AI 口语课付费留存难</span></li>
+        <li id="ref-28"><a href="https://m.app.mi.com/details?id=com.kekeclient_" target="_blank" rel="noopener">可可英语 — 小米应用商店（跟读准确率+排名）</a><span class="ref-meta">· 引用 1 次 · 跟读给准确率+排名可反复练、3000+ 节目/30 万有声资源、听说背读考全覆盖</span></li>
+        <li id="ref-29"><a href="https://www.woshipm.com/evaluating/1897984.html" target="_blank" rel="noopener">人人都是产品经理 — 可可英语产品分析</a><span class="ref-meta">· 引用 1 次 · 听力练习基本免费、材料多分类细更新及时；跟读功能给准确率与排名</span></li>
+        <li id="ref-30"><a href="https://migaku.com/blog/language-fun/shadowing-how-to-actually-use-it-2026-guide" target="_blank" rel="noopener">Shadowing 实用指南 + Hamada(2016) 研究</a><span class="ref-meta">· 引用 3 次 · Hamada(2016, Language Teaching Research) 低中级学习者 10-15 分钟×每周3-4次×6周显著提升；shadowing 证据基础强于多数被兜售的方法；含 Krashen 可理解输入关联</span></li>
+        <li id="ref-31"><a href="https://www.tandfonline.com/doi/full/10.1080/29984475.2025.2546827" target="_blank" rel="noopener">A Systematic Review of Shadowing for L2 Pronunciation (2025)</a><span class="ref-meta">· 引用 2 次 · shadowing 改善可懂度/可理解性/口音及超音段(流利度/韵律)；对分节段音(segmental)改善证据不一/inconclusive</span></li>
+        <li id="ref-32"><a href="https://www.statista.com/statistics/1177609/china-willingness-to-pay-for-smartphone-apps/" target="_blank" rel="noopener">Statista — China willingness to pay for mobile apps (2020)</a><span class="ref-meta">· 引用 3 次 · 2020 调研近 40% 中国 App 用户愿为 App 付费；语言 App 普遍 freemium、核心免费高级收费、年订阅参考 ~¥149 档</span></li>
+        <li id="ref-33"><a href="https://learn.microsoft.com/en-us/azure/artifact-signing/faq" target="_blank" rel="noopener">Microsoft — Azure Artifact Signing (formerly Trusted Signing) FAQ / 资格（官方）</a><span class="ref-meta">· 引用 3 次 · 公共信任证书目前仅向 US/加/欧/英「组织」开放、个人开发者仅限 US 和加拿大；2025-04 起对其他国家暂停新验证请求——<strong>中国个人/组织无资格</strong>，初稿「Azure Trusted Signing 当默认 Win 签名路径」对中国开发者不成立</span></li>
+        <li id="ref-34"><a href="https://www.wosign.com/price_code.htm" target="_blank" rel="noopener">沃通 WoSign — 代码签名证书价格表（国内 CA）</a><span class="ref-meta">· 引用 4 次 · 实查当日：OV(专业级)代码签名 ~¥3588/年(多年更便宜)、EV(顶级) ~¥4288/年；<u>需营业执照等单位证明、面向组织、不向个人签发</u>；私钥存 U 盾/云 HSM。中国个人/小团队 Windows 签名的现实路径之一（另一条是国际 CA 经销商 OV/EV）</span></li>
+        <li id="ref-35"><a href="https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/code-signing-options" target="_blank" rel="noopener">Microsoft Learn — Code signing options for Windows app developers（官方 SmartScreen 口径）</a><span class="ref-meta">· 引用 2 次 · 微软官方将 SmartScreen 信誉描述为随分发量/时间累积、非证书类型直接决定；签名提升可信度但首发仍可能有「未知发布者」/SmartScreen 摩擦</span></li>
+        <li id="ref-36"><a href="https://ffmpeg.org/legal.html" target="_blank" rel="noopener">FFmpeg — Legal / License Compliance Checklist（官方）</a><span class="ref-meta">· 引用 4 次 · 默认 LGPLv2.1+，含 libx264/libx265 等 GPL 组件则整体变 GPL、--enable-nonfree 二进制不可分发；闭源合规须：LGPL build+动态链接+随附匹配 source 与 configure 命令+官网/about/EULA 放 LGPL notice 并声明不拥有 FFmpeg+EULA 不得禁止逆向</span></li>
+        <li id="ref-37"><a href="https://help.aliyun.com/zh/icp-filing/basic-icp-service/support/basics-about-icp-filling-for-apps" target="_blank" rel="noopener">阿里云/腾讯云 — ICP 备案与 App 备案基础（境内托管要求）</a><span class="ref-meta">· 引用 3 次 · 托管于大陆境内服务器的网站/CDN 域名需 ICP 备案（境外如香港不强制）；工信部「App 备案」专指移动 App(安卓/iOS/小程序/快应用)、纯下载桌面 App 不等同；软件著作权登记非 ICP/App 备案的必需前提，仅为可选所有权证据</span></li>
+        <li id="ref-38"><a href="https://github.com/ggerganov/whisper.cpp/blob/master/LICENSE" target="_blank" rel="noopener">whisper.cpp — LICENSE（MIT）</a><span class="ref-meta">· 引用 1 次 · 实查 LICENSE 标题「MIT License」(ggml authors 2023-2026)，可闭源商用</span></li>
+        <li id="ref-39"><a href="https://github.com/SYSTRAN/faster-whisper/blob/master/LICENSE" target="_blank" rel="noopener">faster-whisper — LICENSE（MIT）</a><span class="ref-meta">· 引用 1 次 · 实查 LICENSE 标题「MIT License」(SYSTRAN 2023)，可闭源商用</span></li>
+        <li id="ref-40"><a href="https://kaldi-asr.org/doc/legal.html" target="_blank" rel="noopener">Kaldi — Legal / License（Apache-2.0）</a><span class="ref-meta">· 引用 3 次 · 代码与内容以 Apache License 2.0 发布，可闭源商用（须保留 NOTICE/许可声明）；GOP recipe 的基础工具箱</span></li>
+        <li id="ref-41"><a href="https://github.com/MontrealCorpusTools/Montreal-Forced-Aligner/blob/main/LICENSE" target="_blank" rel="noopener">Montreal Forced Aligner (MFA) — LICENSE（MIT）</a><span class="ref-meta">· 引用 1 次 · 实查 LICENSE 为 MIT，可闭源商用；但依赖 Kaldi/OpenFst/Pynini，桌面嵌入打包重</span></li>
+        <li id="ref-42"><a href="https://github.com/readbeyond/aeneas" target="_blank" rel="noopener">aeneas — GitHub（AGPLv3）</a><span class="ref-meta">· 引用 1 次 · 实查 license 为 GNU AGPL v3，含网络传染条款——<strong>闭源商业 App 必须避开</strong>；DTW+TTS 对齐、非词级设计</span></li>
+        <li id="ref-43"><a href="https://github.com/k2-fsa/sherpa-onnx" target="_blank" rel="noopener">sherpa-onnx — GitHub（Apache-2.0；功能核实）</a><span class="ref-meta">· 引用 2 次 · 实查 license Apache-2.0，可闭源商用；功能为 ASR/TTS/说话人分离与识别/VAD/语音增强/源分离/KWS/音频标注/标点——<strong>不含发音评测(pronunciation assessment)</strong>，不能当本地发音评分引擎</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <footer>
+    无忌 · Deep Research · L2 · 2026-06-11 · 小贝：本地视频英语精学桌面 App·工程形态 + 本地处理栈 + 国内精学市场<br>
+    核心结论：工程选 Tauri 2.x(安装器壳小利首装·真实占用 GB 级·sidecar 嵌 whisper/ffmpeg·updater 自带签名) · 本地栈 whisper.cpp+whisperX 普通笔记本能跑(倍速有条件) · 发音评分 MVP 主推讯飞 ISE(本地 GOP 基线 0.45 信任不够)确认价值再迁本地 · 版权内容死锁本地·录音/文本可上云 · 市场空位收窄(欧路桌面版已是最接近竞品)·小贝靠全本地+系统化精学闭环差异化 · Win 签名走国内/国际 CA(中国个人无 Azure 资格)·大陆托管需 ICP 备案·FFmpeg LGPL+codec 专利须合规 · 真风险在集成质量/法律打包/Windows 分发信任/工作流契合·先窄(本地视频精听跟读工作台)后宽
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('local-video-english-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('local-video-english-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// Demo 卡片展开 + 进度条填充
+document.querySelectorAll('.demo-card').forEach(function(c){
+  c.addEventListener('click',function(){c.classList.toggle('open');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

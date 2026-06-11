@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>小贝开发落地深度研究：开源底座 + 工期 + 三阶段 + Roadmap + 逆向 + 立项 · 无忌 · 2026-06-11</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  .topbar-back { display:inline-flex; align-items:center; gap:5px; font-size:12.5px; font-weight:700; color:var(--accent-text); text-decoration:none; border:1px solid var(--accent); background:var(--accent-soft); border-radius:999px; padding:6px 12px; white-space:nowrap; }
+  .topbar-back:hover { background:var(--accent); color:#fff; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  .parent-link { display:inline-flex; align-items:center; gap:6px; margin:4px 0 0; font-size:13.5px; font-weight:700; color:var(--accent-text); text-decoration:none; border:1px solid var(--accent); background:var(--accent-soft); border-radius:24px; padding:6px 14px; }
+  .parent-link:hover { background:var(--accent); color:#fff; }
+  .subreport-bar { margin:14px 0 0; padding:10px 14px; border:1px dashed var(--accent); border-radius:10px; background:var(--accent-soft); font-size:13.5px; color:var(--text); }
+  .subreport-bar a { color:var(--accent-text); font-weight:700; text-decoration:none; }
+  .subreport-bar a:hover { text-decoration:underline; }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 16px 0; }
+  .demo-card { padding: 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); cursor: pointer; transition: transform .15s, box-shadow .15s; }
+  .demo-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+  .demo-card .dc-icon { font-size: 26px; }
+  .demo-card .dc-title { font-family: var(--serif); font-weight: 700; font-size: 15.5px; margin: 6px 0 2px; color: var(--text); }
+  .demo-card .dc-tag { font-size: 11px; color: var(--text-mute); }
+  .demo-card .dc-body { font-size: 13px; color: var(--text-soft); margin-top: 8px; max-height: 0; overflow: hidden; transition: max-height .3s; }
+  .demo-card.open .dc-body { max-height: 900px; }
+  .sim-box { margin:14px 0; padding:16px; border:1px solid var(--border); border-radius:14px; background:var(--bg-soft); }
+  .sim-toggle { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+  .sim-btn { padding:7px 14px; border-radius:999px; border:1px solid var(--border); background:var(--bg-elevated); color:var(--text-soft); cursor:pointer; font-size:13px; font-weight:600; font-family:var(--sans); transition:all .15s; }
+  .sim-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .sim-dialog { padding:16px; border-radius:12px; border:1px solid var(--border-strong); background:var(--bg-elevated); box-shadow:var(--shadow); }
+  .sim-dialog .sd-os { font-size:11.5px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--text-mute); margin-bottom:8px; }
+  .sim-dialog .sd-icon { font-size:30px; }
+  .sim-dialog .sd-title { font-family:var(--serif); font-size:17px; font-weight:700; margin:6px 0; color:var(--text); }
+  .sim-dialog .sd-body { font-size:13.5px; color:var(--text-soft); }
+  .sim-dialog .sd-verdict { margin-top:10px; padding:8px 12px; border-radius:8px; font-size:13px; font-weight:600; }
+  .sim-dialog .sd-verdict.bad { background:var(--bad-soft); color:var(--bad); }
+  .sim-dialog .sd-verdict.warn { background:var(--warn-soft); color:var(--warn); }
+  .sim-dialog .sd-verdict.good { background:var(--good-soft); color:var(--good); }
+  /* gantt / roadmap */
+  .gantt { margin:16px 0; border:1px solid var(--border); border-radius:14px; background:var(--bg-soft); padding:14px 12px; overflow-x:auto; }
+  .gantt-row { display:grid; grid-template-columns:148px 1fr; gap:8px; align-items:center; margin:6px 0; min-width:520px; }
+  .gantt-label { font-size:12.5px; font-weight:600; color:var(--text); }
+  .gantt-track { position:relative; height:26px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:7px; }
+  .gantt-bar { position:absolute; top:3px; bottom:3px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; }
+  .gantt-bar.p1 { background:var(--accent); }
+  .gantt-bar.p2 { background:var(--good); }
+  .gantt-bar.p3 { background:var(--purple); }
+  .gantt-bar.opt { background:var(--info); }
+  .gantt-axis { display:grid; grid-template-columns:148px 1fr; gap:8px; margin-top:8px; min-width:520px; }
+  .gantt-axis .ticks { display:flex; justify-content:space-between; font-size:10px; color:var(--text-mute); border-top:1px dashed var(--border); padding-top:4px; }
+  .ms-dot { display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--accent); margin-right:6px; vertical-align:middle; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .demo-card .dc-body { max-height: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table, .demo-card, .sim-box, .gantt { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <a class="topbar-back" href="./local-video-english-study-tool.html" title="返回 小贝主报告">📄 小贝主报告</a>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 TL;DR 一页看完</a>
+    <a href="#ch2" data-target="ch2">02 功能全拆解 + 复杂度矩阵 ★</a>
+    <a href="#ch3" data-target="ch3">03 逐功能开源底座 ★</a>
+    <a href="#ch4" data-target="ch4">04 开发难度真相 + 工期估算</a>
+    <a href="#ch5" data-target="ch5">05 三阶段划分</a>
+    <a href="#ch6" data-target="ch6">06 Roadmap 节奏图 ★</a>
+    <a href="#ch7" data-target="ch7">07 哪些简单 / 哪些复杂</a>
+    <a href="#ch8" data-target="ch8">08 逆向工程能不能 ★</a>
+    <a href="#ch9" data-target="ch9">09 立项怎么搞 ★</a>
+    <a href="#ch10" data-target="ch10">10 风险与坑汇总</a>
+    <a href="#ch11" data-target="ch11">11 下一步决策树 + 第一周</a>
+    <a href="#demo" data-target="demo">🎮 Mini Demo</a>
+    <a href="#faq" data-target="faq">FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>小贝开发落地深度研究：开源底座 / 工期 / 三阶段 / Roadmap / 逆向 / 立项</h1>
+    <a class="parent-link" href="./local-video-english-study-tool.html">← 返回 小贝主报告</a>
+    <div class="subreport-bar">📎 本文是 <a href="./local-video-english-study-tool.html">《本地视频英语精学桌面 App》主报告</a> 的<strong>开发落地子报告</strong>——主报告已拍板「形态 Tauri 2.x / 本地栈 whisper.cpp+whisperX+ffmpeg / 发音评分主推讯飞 / 竞品欧路最接近」。本报告<strong>不重复这些结论</strong>，只把「<u>怎么把它开发出来</u>」展开：每个功能 fork 哪个开源、单人+AI 多久、分几阶段、先上什么、能不能逆向、怎么立项。姐妹子报告：<a href="./local-video-english-study-tool--signing-notarization-spec.html">签名公证 spec</a> · <a href="./local-video-english-study-tool--xunfei-ise-spec.html">讯飞 ISE 接入 spec</a>。</div>
+    <div class="hero-meta" style="margin-top:10px">
+      <span>📅 2026-06-11</span>
+      <span>🔍 ~26 次检索 + repo 逐个核实</span>
+      <span>🖥️ Tauri 2.x（Win 优先）</span>
+      <span>🧑‍💻 海外单人 + AI 辅助写码</span>
+      <span>🧩 开源 fork / 借鉴矩阵</span>
+      <span>⚖️ 逆向法律边界 + 立项</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>一句话定调：<span style="color:var(--accent-text)">小贝技术上没有一处是「做不出来」的——开源底座齐全，单人 + AI 完全能拼起来</span>。真正决定成败的不是「能不能写」，而是「<u>按什么顺序写、先验证哪个窄楔子、哪些坑会吃掉你三倍工期</u>」。</strong>本报告把小贝拆成 ~13 个原子功能逐一给开源底座（标 ✅可 fork / 🟡借架构 / ⛔只能看），给单人+AI 的<u>类比工期</u>（标⚠️非承诺），划三阶段，画 roadmap 节奏图，最后诚实回答「能不能逆向欧路抄码」（答案：合法的是看交互 clean-room，反编译抄码不划算）和「要不要立项/办软著」（答案：写一页项目章程＝必做；软著＝可选不急；科技项目立项＝单人 indie 不需要）。</p>
+      <p><strong>三个最关键判断（先扫这个）：</strong>① <u>没有任何一个开源 App 值得整体 fork</u>——最接近的桌面近亲（glucose_media_player / yall-mp）要么 EUPL/GPL 传染、要么形态不对，价值在「读架构」不在「抄代码」；该 fork 的是<strong>算法/库层</strong>（whisperX BSD-2、ts-fsrs/fsrs-rs MIT/BSD-3、subtitle.js MIT），整 App 层只借交互。② <u>工期瓶颈不在写代码，在集成/调参/跨端打磨/合规打包</u>——AI 几小时写完的逐句对齐逻辑，可能要花几周调精度；最该先上的是「一个本地视频能逐句精听跟读」的窄 demo（M0–M3），别一上来铺全功能。③ <u>逆向不是路</u>——中国《软件保护条例》第十七条允许「为学习设计思想/原理而研究」，但反编译抄代码超出此边界且对单人毫无收益（AI 自己能写得更干净），合法且推荐的只有「装来用、看它交互怎么设计」这一层。</p>
+    </div>
+  </div>
+
+  <div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+    <p style="margin:0"><strong>📌 与父报告/姐妹报告的边界（避免重复）：</strong></p>
+    <ul style="margin:8px 0 0">
+      <li><strong>父报告已定、本报告直接采用不重证：</strong>形态 = Tauri 2.x；本地转写 = whisper.cpp（sidecar）；逐句对齐 = whisperX；发音评分 MVP = 云（主推讯飞 ISE）、确认价值再迁本地；竞品最接近 = 欧路「每日英语听力」桌面版；复习算法 = FSRS<sup class="cite" data-refid="3">[3]</sup>。</li>
+      <li><strong>姐妹报告已展开：</strong>双端签名/公证/CI（《签名公证 spec》）、讯飞 ISE 具体接入（《讯飞 ISE spec》）。本报告里「打包签名」只作为 roadmap 的一个里程碑出现，<u>不重复其工程细节</u>。</li>
+      <li><strong>本报告独有的增量：</strong>逐功能「fork 哪个开源」矩阵（含本轮新核实的 star/license/活跃度）、单人+AI 工期估算、三阶段+roadmap 节奏图、简单/复杂功能深挖、逆向法律边界、立项（项目章程 + 软著）最小清单。</li>
+    </ul>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1">
+    <h2><span class="num">01</span><span class="title-text">TL;DR：一页看完——简单/复杂、总工期量级、三阶段、先上什么、立项、逆向</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把整份报告压成一屏。后面每章是它的证据展开。</p>
+
+      <div class="metric-grid">
+        <div class="metric"><div class="v">~13 功能</div><div class="l">小贝拆成的原子功能数</div></div>
+        <div class="metric"><div class="v">0 整 App fork</div><div class="l">没有可直接 fork 的整 App，只 fork 库</div></div>
+        <div class="metric"><div class="v">~4–6 月*</div><div class="l">单人+AI 到「精学闭环可用」现实档（⚠️类比）</div></div>
+        <div class="metric"><div class="v">3 阶段</div><div class="l">窄楔子 → 精学闭环 → 放量变现</div></div>
+        <div class="metric"><div class="v">先上 M0–M3</div><div class="l">本地视频逐句精听跟读 demo</div></div>
+        <div class="metric"><div class="v">软著可选</div><div class="l">免费办、非上线必需<sup class="cite" data-refid="21">[21]</sup></div></div>
+      </div>
+
+      <h3>① 哪些简单、哪些复杂（一句话版）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>难度</th><th>功能</th><th>为什么</th></tr></thead>
+        <tbody>
+          <tr><td><span class="pill good">🟢 简单</span></td><td>本地视频播放 / 字幕渲染 / SRS 接 FSRS / 进度数据存储</td><td>HTML5 video + WebView2 就能播；字幕渲染是纯前端；FSRS 有现成 MIT/BSD 库直接调；数据用 tauri-plugin-sql（SQLite）<sup class="cite" data-refid="2">[2]</sup><sup class="cite" data-refid="4">[4]</sup></td></tr>
+          <tr><td><span class="pill warn">🟡 中等</span></td><td>转写集成 / 录音回放 / 挖空精听交互 / updater / 打包</td><td>转写是把 whisper.cpp 当 sidecar 跑（父报告已定），工程量在「进度条/错误处理/模型下载」；录音是 getUserMedia+MediaRecorder<sup class="cite" data-refid="10">[10]</sup>；挖空多自研但逻辑不难</td></tr>
+          <tr><td><span class="pill bad">🔴 复杂</span></td><td>逐句/逐词强制对齐精度 / 发音评分集成调参 / 跨端打包签名 / 整体集成质量</td><td>对齐精度要在真实媒体/口音上调到「逐句循环不跳词」；发音评分要把云 API 的分映射成对用户友好的反馈；签名公证对中国分发是持续工程税（见姐妹 spec）</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>② 三阶段（一句话）</h3>
+      <div class="step"><div class="step-head"><span class="sn">1</span>阶段一 · 窄楔子（验证有人要）</div><div class="step-body">「导入一个本地视频 → 自动转写出字幕 → 逐句循环精听 + 逐句跟读录音回放」跑通。<strong>出口：种子用户愿意天天用这一条链路。</strong>暂不做发音评分/SRS/挖空。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>阶段二 · 核心精学闭环</div><div class="step-body">加 shadowing 影子跟读、发音评分（云·讯飞）、挖空字幕精听、生词进 SRS（FSRS）、双端签名公证正式分发。<strong>出口：留存 + 付费意愿验证。</strong></div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>阶段三 · 放量 + 变现 + 降本</div><div class="step-body">变现（订阅/买断）、把发音评分从云迁本地降成本/解合规、性能与多视频库管理、国内分发合规（ICP 备案等）。<strong>出口：单位经济成立。</strong></div></div>
+
+      <div class="callout good">
+        <p><strong>先上什么（拍板）：阶段一的 M0–M3 = 「一个本地视频能逐句精听 + 跟读回放」。</strong>理由：这是小贝的<u>不可替代内核</u>（任意本地文件 + 全本地处理），也是最便宜能验证「有没有人真的要」的窄链路。发音评分/SRS/挖空都是「锦上添花」，等内核被证明有人用再加——别在没人用的产品上先堆复杂功能。</p>
+      </div>
+
+      <h3>③ 总工期量级 <span class="conf r">🔴 类比估算/行业体感，非承诺</span></h3>
+      <p>对「海外单人 + AI 辅助写码」：<strong>乐观 ~2–3 月</strong>（只到阶段一可玩 demo）/ <strong>现实 ~4–6 月</strong>（到阶段二精学闭环 + 双端正式分发）/ <strong>悲观 ~8–10 月</strong>（对齐精度/发音评分体验/跨端打包反复打磨 + 合规）。⚠️ 这是<u>类比同复杂度单人媒体类 Tauri 项目的体感</u>，不是承诺——真实工期由「对齐和发音评分调到能用」这两处的反复次数决定，可能差 2–3 倍。详见 Ch4。</p>
+
+      <h3>④ 立项 & 逆向（一句话结论）</h3>
+      <div class="callout info"><p><strong>立项</strong>：单人 indie 的「立项」=<u>写一张一页纸项目章程</u>（愿景/范围做什么不做什么/成功指标/里程碑/预算/时间盒）——<strong>必做、半小时的事</strong>（Ch9 给模板）。<strong>软著登记</strong>：基础登记自 2017-04 起免费、周期约 30 工作日、<u>非上线必需</u><sup class="cite" data-refid="21">[21]</sup>，要权属凭证或上架部分渠道时再办，不急。<strong>科技项目立项</strong>（政府科技计划/高企）：是企业拿政府经费的审批流程<sup class="cite" data-refid="24">[24]</sup>，<u>单人 indie 完全不需要</u>。</p></div>
+      <div class="callout warn"><p><strong>逆向</strong>：能不能逆向欧路/LR 抄功能？<u>合法且推荐的只有一层</u>——装来用、研究它的交互/产品设计（中国《软件保护条例》第十七条允许「为学习设计思想和原理而使用软件」<sup class="cite" data-refid="18">[18]</sup>；trade secret 通过合法反向工程获得也不算侵权<sup class="cite" data-refid="20">[20]</sup>）。但<u>反编译它的二进制去抄代码</u>超出「学习思想原理」边界、踩著作权/EULA/反法红线，且对单人<strong>毫无收益</strong>——AI 自己写得更干净、可维护、无法律风险。结论：🟢 看交互学产品设计；⛔ 别反编译抄码。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2">
+    <h2><span class="num">02</span><span class="title-text">★ 小贝功能全拆解 + 复杂度分级矩阵</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>动手前先把「小贝」这个大词拆成<strong>能单独估时、单独找开源、单独排序</strong>的原子功能。下面这张矩阵是全报告的骨架——后面每一章都在给它的某一列填证据。</p>
+      <p style="font-size:13px;color:var(--text-mute)">难度图例：🟢 易（AI 几乎一把过）· 🟡 中（要工程打磨但路清楚）· 🔴 难（要反复调参/跨端/合规，吃工期）。「估时」为<strong>单人+AI 辅助</strong>的<u>类比人周</u>，含集成与基础打磨、不含长尾 bug。<span class="conf r">🔴 类比估算，非承诺</span></p>
+
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>原子功能</th><th>难度</th><th>估时(人周)*</th><th>主要依赖</th><th>风险/坑点</th></tr></thead>
+        <tbody>
+          <tr><td><strong>1 本地视频导入 + 播放</strong></td><td class="check y">🟢</td><td>0.5–1</td><td>HTML5 video / WebView2；可选 libmpv</td><td>WebView2 对部分 codec（H.265/某些 MKV）支持有限，优先走 OS 原生解码（父报告 Ch4）</td></tr>
+          <tr><td><strong>2 字幕加载 + 渲染 + 逐句高亮</strong></td><td class="check y">🟢</td><td>1–1.5</td><td>subtitle.js(MIT) 解析；纯前端渲染</td><td>多格式（srt/vtt/ass）兼容、时间轴漂移；ass 样式复杂可后置</td></tr>
+          <tr><td><strong>3 本地转写（无字幕时生成）</strong></td><td class="check p">🟡</td><td>1.5–2.5</td><td>whisper.cpp sidecar（父报告已定）</td><td>模型下载 UX、长视频进度、错误恢复；非算法难，是产品化难</td></tr>
+          <tr class="row-highlight"><td><strong>4 逐句/逐词强制对齐</strong></td><td class="check n">🔴</td><td>2–4</td><td>whisperX(BSD-2) wav2vec2 对齐</td><td><strong>核心难点</strong>：精度要调到「逐句循环不切错词」；口音/噪声/音乐段会崩；要在目标媒体上实测<sup class="cite" data-refid="5">[5]</sup></td></tr>
+          <tr><td><strong>5 逐句循环跟读（AB 复读）</strong></td><td class="check p">🟡</td><td>1–2</td><td>依赖 #2/#4 的句级时间戳</td><td>交互细节多（循环边界、变速、自动暂停等待跟读）；逻辑不难但体验靠打磨</td></tr>
+          <tr><td><strong>6 录音 + 回放对比</strong></td><td class="check p">🟡</td><td>1–1.5</td><td>getUserMedia + MediaRecorder<sup class="cite" data-refid="10">[10]</sup></td><td>权限/设备选择、波形可视化（Web Audio AnalyserNode）；录音格式与评分 API 对接</td></tr>
+          <tr class="row-highlight"><td><strong>7 发音评分</strong></td><td class="check n">🔴</td><td>2–3</td><td>MVP 云·讯飞 ISE（姐妹 spec）；后期本地 GOP/gopt</td><td>把多维分映射成用户友好反馈是真活；本地化(gopt/kaldi)是另一个大坑（Ch7）</td></tr>
+          <tr><td><strong>8 shadowing 影子跟读</strong></td><td class="check p">🟡</td><td>1–1.5</td><td>#5 + #6 组合 + 节奏控制</td><td>延迟跟读的节拍/原声音量渐隐等体验细节；技术上是组合既有能力</td></tr>
+          <tr><td><strong>9 挖空字幕精听（dictation）</strong></td><td class="check p">🟡</td><td>1.5–2.5</td><td>自研为主（开源多为参考）</td><td>挖哪些词（按词频/CEFR）、判对错的容错（拼写/同音）、提示梯度——交互设计活</td></tr>
+          <tr><td><strong>10 SRS 间隔复习</strong></td><td class="check y">🟢</td><td>1–1.5</td><td>ts-fsrs(MIT) / fsrs-rs(BSD-3)<sup class="cite" data-refid="6">[6]</sup><sup class="cite" data-refid="7">[7]</sup></td><td>算法直接调库；活在「生词卡怎么生成、复习入口怎么排」的产品设计</td></tr>
+          <tr><td><strong>11 进度/数据本地存储</strong></td><td class="check y">🟢</td><td>0.5–1</td><td>tauri-plugin-sql(SQLite) / tauri-plugin-store<sup class="cite" data-refid="4">[4]</sup></td><td>schema 迁移、备份/导出；量小不难</td></tr>
+          <tr><td><strong>12 自动更新 updater</strong></td><td class="check p">🟡</td><td>0.5–1</td><td>tauri-plugin-updater（父报告/签名 spec 已定）</td><td>minisign 密钥别丢、latest.json 托管；细节见签名 spec</td></tr>
+          <tr><td><strong>13 打包 + 双端签名公证</strong></td><td class="check n">🔴</td><td>1–3+</td><td>CI 矩阵 + 证书（见《签名公证 spec》）</td><td>持续工程税：中国个人 Win 签名路径特殊、SmartScreen 信誉冷启动</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>读这张矩阵的方法：</strong>🟢 的六个（1/2/10/11 + 大半个 5）是「AI 一把过、堆几天就有」的——它们<u>不构成风险</u>，不值得纠结。真正决定项目成败的是三个 🔴：<strong>#4 逐句对齐精度、#7 发音评分体验、#13 跨端打包签名</strong>。这三个的共同点是「<u>代码 AI 能写，但写完离能用还很远，要反复在真实环境里调</u>」——工期和心力都该重仓在这里（Ch4/Ch7 深挖）。中间一档 🟡 是「路清楚、按部就班做」的主体工作量。</p>
+      </div>
+      <div class="callout info">
+        <p><strong>注意 #4 和 #5 的依赖链——这决定了 roadmap 顺序：</strong>没有<u>转写（#3）</u>就没有字幕，没有<u>对齐（#4）</u>就没有可靠的句级时间戳，没有句级时间戳<u>逐句循环（#5）</u>就做不出来；没有<u>录音（#6）</u>就没法<u>发音评分（#7）</u>。所以底层链路必须按 <code>播放→字幕/转写→对齐→逐句→录音→评分</code> 的顺序搭，不能跳（Ch6 roadmap 会把这条依赖画成甘特图）。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3">
+    <h2><span class="num">03</span><span class="title-text">★ 逐功能开源借鉴底座：fork 哪个 / 借哪个 / 只能看哪个</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>核心问题：每个功能有没有现成开源可以省事？下面分两层——先给<strong>总表</strong>（每个功能对应的开源 + star + license + 活跃 + 借鉴方式），再展开几个关键项。<strong>所有 star/license/活跃度均本轮逐 repo 核实（截至 2026-06-11）。</strong></p>
+      <p style="font-size:13px;color:var(--text-mute)">借鉴方式图例：<span class="pill good">✅ 可 fork</span>（license 友好、可直接进闭源商业产品）· <span class="pill warn">🟡 借架构</span>（读思路/交互，别照搬代码）· <span class="pill bad">⛔ 只能看</span>（copyleft 传染 / 闭源 / 停更，连码都别抄进商业产品）。<span class="conf y">🟡 license 以各仓库 LICENSE 文件为准</span></p>
+
+      <h3>总表：13 功能 × 开源底座</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>功能</th><th>开源项目</th><th>★</th><th>License</th><th>活跃(最后release/commit)</th><th>借鉴方式</th></tr></thead>
+        <tbody>
+          <tr><td>视频播放(嵌入)</td><td>tauri-plugin-libmpv<sup class="cite" data-refid="9">[9]</sup></td><td>~12</td><td><span class="pill warn">MPL-2.0</span></td><td>Win 已测/小项目</td><td><span class="pill warn">🟡 借架构</span>（HTML5 video 够用就先不引）</td></tr>
+          <tr class="row-highlight"><td><strong>整 App 架构(本地视频+本地转写)</strong></td><td><strong>glucose_media_player</strong><sup class="cite" data-refid="8">[8]</sup></td><td>~99</td><td><span class="pill bad">EUPL-1.2</span></td><td>v3.6.1 / 2026-06 很活跃</td><td><span class="pill warn">🟡 借架构</span>（Tauri+Svelte+本地Whisper+字幕，<u>最像小贝的近亲</u>；EUPL 是 copyleft，<strong>别 fork 进闭源</strong>，只读结构）</td></tr>
+          <tr><td>字幕解析</td><td>subtitle.js<sup class="cite" data-refid="11">[11]</sup></td><td>~435</td><td><span class="pill good">MIT</span></td><td>v4.1.2 / 2022（停更但稳定）</td><td><span class="pill good">✅ 可 fork</span>（SRT 全/VTT 部分；停更但格式稳定，可用）</td></tr>
+          <tr><td>本地转写</td><td>whisper.cpp（父报告已定）</td><td>—</td><td><span class="pill good">MIT</span></td><td>活跃</td><td><span class="pill good">✅ 可 fork</span>（作 sidecar 嵌入）</td></tr>
+          <tr><td>(备选转写)</td><td>faster-whisper<sup class="cite" data-refid="12">[12]</sup></td><td>—</td><td><span class="pill good">MIT</span></td><td>活跃(SYSTRAN)</td><td><span class="pill good">✅ 可 fork</span>（Python 栈，重；父报告偏 whisper.cpp）</td></tr>
+          <tr class="row-highlight"><td><strong>逐句/逐词对齐</strong></td><td><strong>whisperX</strong><sup class="cite" data-refid="5">[5]</sup></td><td>~22.4k</td><td><span class="pill good">BSD-2</span></td><td>v3.8.6 / 2026-05 活跃</td><td><span class="pill good">✅ 可 fork</span>（代码 BSD-2 友好；<u>但 diarization 用的 pyannote 模型权重是 CC-BY-4.0，与代码许可分开核</u>；小贝只需对齐、用不到 diarization 反而更省事）</td></tr>
+          <tr><td>(对齐·别用)</td><td>aeneas<sup class="cite" data-refid="13">[13]</sup></td><td>—</td><td><span class="pill bad">AGPL-3.0</span></td><td>最后 release 2017-03（停更）</td><td><span class="pill bad">⛔ 只能看</span>（<strong>AGPL 传染 + 停更 8 年 + 精度不如 whisperX</strong>，双红线，别碰）</td></tr>
+          <tr><td>录音</td><td>Web 标准 API（非项目）<sup class="cite" data-refid="10">[10]</sup></td><td>—</td><td>—</td><td>浏览器内置</td><td><span class="pill good">✅ 直接用</span>（getUserMedia+MediaRecorder+Web Audio，无需第三方库）</td></tr>
+          <tr><td>发音评分(云)</td><td>讯飞 ISE（见《讯飞 spec》）</td><td>—</td><td>商用 API</td><td>—</td><td><span class="pill good">✅ MVP 用</span></td></tr>
+          <tr><td>发音评分(本地/参考)</td><td>Echoic<sup class="cite" data-refid="14">[14]</sup></td><td>~37</td><td><span class="pill good">MIT</span></td><td>commit 到 2026-05 / 0 release</td><td><span class="pill warn">🟡 借架构</span>（whisperX+wav2vec2+phonemizer 接线图，<u>37★单人原型，读思路自己重搭</u>，非生产后端）</td></tr>
+          <tr><td>发音评分(本地·学术)</td><td>gopt(GOPT)<sup class="cite" data-refid="15">[15]</sup></td><td>~212</td><td><span class="pill good">BSD-3</span></td><td>研究 repo</td><td><span class="pill warn">🟡 借架构</span>（Transformer 多维 GOP，speechocean762 训练；研究级，要自己产品化）</td></tr>
+          <tr><td>发音评分(本地·经典)</td><td>kaldi gop_speechocean762<sup class="cite" data-refid="16">[16]</sup></td><td>—</td><td><span class="pill good">Apache-2.0</span></td><td>主仓 recipe</td><td><span class="pill warn">🟡 借架构</span>（经典 GOP 基线；kaldi 重、部署难，PCC≈0.45 父报告已述）</td></tr>
+          <tr class="row-highlight"><td><strong>SRS 间隔复习</strong></td><td><strong>ts-fsrs / fsrs-rs</strong><sup class="cite" data-refid="6">[6]</sup><sup class="cite" data-refid="7">[7]</sup></td><td>~685 / ~381</td><td><span class="pill good">MIT / BSD-3</span></td><td>2026-06 都活跃(v6)</td><td><span class="pill good">✅ 可 fork</span>（ts-fsrs 走前端，fsrs-rs 走 Tauri Rust 后端，二选一；纯算法零包袱）</td></tr>
+          <tr><td>数据存储</td><td>tauri-plugin-sql / -store<sup class="cite" data-refid="4">[4]</sup></td><td>—</td><td><span class="pill good">MIT/Apache</span></td><td>官方插件活跃</td><td><span class="pill good">✅ 直接用</span>（SQLite/JSON 持久化）</td></tr>
+          <tr><td>整 App 交互(media+字幕+造卡)</td><td>yall-mp(Y'ALL)<sup class="cite" data-refid="17">[17]</sup></td><td>~28</td><td><span class="pill bad">GPL-3.0</span></td><td>0.9.8 / 2026-04 活跃</td><td><span class="pill bad">⛔ 只能看</span>（Electron+MPV+字幕编辑+Anki造卡，<u>交互最全的近亲</u>，但 GPL 传染，<strong>只看交互别 fork</strong>）</td></tr>
+          <tr><td>整 App 交互(LR 类·句挖)</td><td>asbplayer<sup class="cite" data-refid="22">[22]</sup></td><td>~1k</td><td><span class="pill good">MIT</span></td><td>2026-05 活跃</td><td><span class="pill warn">🟡 借架构</span>（句子挖矿+造卡范式标杆；<u>是浏览器扩展/网页，碰不了硬盘原生文件</u>，形态≠桌面，借交互不借形态）</td></tr>
+          <tr><td>整 App 交互(本地AI儿童口语)</td><td>HiKid<sup class="cite" data-refid="23">[23]</sup></td><td>~935</td><td><span class="pill good">MIT</span></td><td>v0.1.0 / 2026-04</td><td><span class="pill warn">🟡 借架构</span>（<u>Electron 非 Tauri、macOS-only</u>；本地 ASR+TTS+Ollama 全离线管线是好参考，但形态/壳不同）</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout bad">
+        <p><strong>最重要的一条结论：没有任何一个「整 App」值得 fork。</strong>最像小贝的四个近亲——glucose_media_player（EUPL-1.2 copyleft）、yall-mp（GPL-3）是<u>copyleft 传染</u>，fork 进闭源商业产品要么违规要么被迫开源；asbplayer（MIT 但<u>是浏览器扩展</u>，碰不到本地文件，形态根本不对）；HiKid（MIT 但<u>Electron + macOS-only</u>，壳和平台都不是小贝要的）。它们的价值<strong>全在「读架构 / 抄交互范式」，不在代码本身</strong>——这跟父报告/github-eng 报告的判断一致：「算法和库可以拿，整套 app 基本只能看」<sup class="cite" data-refid="3">[3]</sup>。</p>
+      </div>
+
+      <h3>该真 fork 的是「库层」——三件套</h3>
+      <div class="callout good">
+        <p><strong>真正能 ✅ 直接 fork 进小贝（闭源）的，是这几个 license 友好的库/算法：</strong></p>
+        <ul style="margin:6px 0 0">
+          <li><strong>whisperX（BSD-2）</strong>——逐句/逐词对齐的事实标准，22.4k★、2026-05 仍活跃<sup class="cite" data-refid="5">[5]</sup>。代码 BSD-2 可商用；小贝只用它的<u>强制对齐</u>（forced alignment）那部分，<u>用不到 diarization</u>（说话人分离），正好绕开 pyannote 模型 CC-BY-4.0 + HF 门控这层麻烦。<span class="conf g">🟢</span></li>
+          <li><strong>ts-fsrs（MIT）/ fsrs-rs（BSD-3）</strong>——SRS 调度算法，2026-06 都更到 FSRS v6<sup class="cite" data-refid="6">[6]</sup><sup class="cite" data-refid="7">[7]</sup>。<u>选型建议</u>：小贝是 Tauri，复习调度若放<strong>前端</strong>用 ts-fsrs（JS，最省事）；若想放 Rust 后端统一管数据，<strong>fsrs-rs 是纯 Rust 无重依赖，天然贴 Tauri 后端</strong>。二选一即可，别两个都引。<span class="conf g">🟢</span></li>
+          <li><strong>subtitle.js（MIT）</strong>——字幕解析，435★，<u>2022 后停更但格式稳定可用</u>（SRT 完整、VTT 部分）<sup class="cite" data-refid="11">[11]</sup>。⚠️ 若需要 ass/ssa 完整支持，再找补充库或自己补。<span class="conf y">🟡</span></li>
+          <li><strong>whisper.cpp（MIT，父报告已定）+ tauri-plugin-sql/store（MIT/Apache）+ Web 录音 API</strong>——这几个 license 全干净，直接用。</li>
+        </ul>
+      </div>
+
+      <h3>关键项展开：glucose_media_player —— 最该「读」的那个</h3>
+      <div class="callout accent">
+        <p><strong>glucose_media_player 几乎是「小贝的开源骨架预览」</strong>：Tauri + Svelte + Rust，Windows 向，<u>本地 Whisper 转写生成字幕、srt/vtt/ass 全支持、从 MKV/MP4 直接抽内嵌字幕、双音轨、画中画</u>，99★、v3.6.1（2026-06）非常活跃<sup class="cite" data-refid="8">[8]</sup>。它已经把小贝阶段一要解决的「<u>Tauri 里怎么播本地视频、怎么调本地 Whisper、怎么渲染字幕</u>」全趟过一遍。<strong>但它是 EUPL-1.2（一种 copyleft/有 share-alike 性质的欧盟公共许可），不能 fork 进闭源商业产品</strong>——正确用法：<u>装来用、读它的 src 目录结构和 Tauri 配置、理解它怎么接 Whisper，然后用 AI 自己重写一遍干净的实现</u>。这跟逆向章的精神一致：学思路合法，照搬受 license/版权约束的代码不合法。<span class="conf y">🟡 EUPL 性质以其 LICENSE 为准</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4">
+    <h2><span class="num">04</span><span class="title-text">整体开发难度真相 + 工期估算（单人 + AI 辅助）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>先把一句反直觉的真相说清楚：<strong>对小贝，写代码不是瓶颈。</strong>父报告已反复确认「这条链路每一环都有成熟开源、AI 都能拼起来」——本章承接它，回答「那真正吃工期的是什么、单人+AI 大概多久」。</p>
+
+      <div class="callout bad">
+        <p><strong>瓶颈不在「写」，在这四处「写完离能用还很远」：</strong></p>
+        <ul style="margin:6px 0 0">
+          <li><strong>① 集成质量</strong>：13 个功能各自跑通是一回事，串成「不卡、不崩、状态一致」的整体是另一回事。单人项目最容易死在「每个零件都行、合起来全是边角 bug」。</li>
+          <li><strong>② 调参（尤其对齐 + 发音评分）</strong>：whisperX 对齐在干净录音上很好，但用户的视频有背景音乐、口音、多人对话——把它调到「逐句循环不切错词」要在真实素材上反复试<sup class="cite" data-refid="5">[5]</sup>。发音评分要把云 API 的多维分<u>映射成用户能看懂、不打击信心的反馈</u>，这是产品调校不是写代码。</li>
+          <li><strong>③ 跨端打磨</strong>：Tauri 用系统 WebView，Win/Mac 渲染、codec、文件路径、权限行为有差异；不能在 Mac 上交叉编译 Windows 包，要 CI 矩阵（父报告 Ch3）。</li>
+          <li><strong>④ 合规打包</strong>：双端签名公证、中国 Windows 签名路径、SmartScreen 冷启动——是<u>持续工程税</u>（见《签名公证 spec》），不是一次性。</li>
+        </ul>
+      </div>
+
+      <h3>各模块工期估（单人 + AI 辅助）<span class="conf r">🔴 类比估算/行业体感，非承诺</span></h3>
+      <p>把 Ch2 矩阵的「估时」按阶段汇总。⚠️ 下面是<u>类比同复杂度单人媒体类 Tauri 项目的体感人周</u>，含集成与基础打磨、不含长尾运营。真实工期由 🔴 项的反复次数决定，可能整体差 2–3 倍。</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>模块块</th><th>含功能</th><th>乐观(人周)</th><th>现实(人周)</th><th>悲观(人周)</th></tr></thead>
+        <tbody>
+          <tr><td>阶段一·窄楔子</td><td>播放+字幕+转写+对齐+逐句循环+录音回放（#1-6）</td><td>4</td><td>7</td><td>12</td></tr>
+          <tr><td>阶段二·精学闭环</td><td>发音评分+shadowing+挖空+SRS+存储+正式分发（#7-13）</td><td>5</td><td>9</td><td>16</td></tr>
+          <tr><td>阶段三·放量降本</td><td>变现+本地化发音评分+性能+合规备案</td><td>3</td><td>6</td><td>12</td></tr>
+          <tr class="row-highlight"><td><strong>合计（到阶段二可正式发布）</strong></td><td><strong>—</strong></td><td><strong>~9 周</strong></td><td><strong>~16 周</strong></td><td><strong>~28 周</strong></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">~2–3 月*</div><div class="l">乐观：到阶段一可玩 demo</div></div>
+        <div class="metric"><div class="v">~4–6 月*</div><div class="l">现实：到阶段二精学闭环+正式分发</div></div>
+        <div class="metric"><div class="v">~8–10 月*</div><div class="l">悲观：含反复调参/合规/打磨</div></div>
+      </div>
+      <p style="font-size:12.5px;color:var(--text-mute)">* 全部为单人+AI 辅助的<u>类比体感</u>，按「每周可投入的有效开发时间」折算会显著拉长（兼职 vs 全职差 2–3 倍）。<span class="conf r">🔴 非承诺</span></p>
+
+      <div class="callout info">
+        <p><strong>AI 辅助到底省多少？诚实分层：</strong>① <u>样板/胶水代码（Tauri 配置、前端组件、SQLite schema、API 调用封装）</u>——AI 省 70%+，几乎是「描述清楚就出」；② <u>有开源参考的功能（字幕渲染、FSRS 接入、录音）</u>——AI 省 50–60%，照着库文档拼；③ <u>要调参/调体验的（对齐精度、发音评分反馈、跨端兼容）</u>——AI 只省 20–30%，因为「问题在真实数据/真实设备里，不在代码里」，AI 写得快但<u>你得反复试、反复喂错误给它</u>。所以总工期不会因为 AI 缩到 1/5——<strong>缩的是写代码的时间，缩不掉调试和打磨的时间</strong>，而后者恰是小贝的大头。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5">
+    <h2><span class="num">05</span><span class="title-text">三阶段划分：每阶段功能清单 + 出口标准 + 耗时</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>三阶段的设计原则：<strong>每阶段只验证一件最关键的事，验证通过才进下一阶段。</strong>别把「全功能」当目标，把「下一个验证」当目标。</p>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">1</span>阶段一 · 窄楔子：验证「有人要这条链路」</div>
+        <div class="step-body">
+          <p><strong>功能清单（只做这些）：</strong>导入一个本地视频 → （无字幕则）whisper.cpp 本地转写 → whisperX 逐句对齐 → 字幕逐句高亮渲染 → 逐句循环精听（AB 复读）→ 录音 + 回放对比。<strong>不做</strong>：发音评分、shadowing、挖空、SRS、签名公证（开发期自用/给种子用户可临时绕过，见签名 spec 的 MVP 策略）。</p>
+          <div class="check-box"><strong>✅ 出口标准（验证指标）：</strong>① 找 5–10 个真实目标用户（国内 Windows 英语学习者），② 给一个能用的 demo，③ 看有没有人<u>主动连用 3 天以上</u>、愿意拿自己的剧/网课视频来精学。<strong>有人天天用 → 进阶段二；没人用 → 停下来想为什么，别急着堆功能。</strong></div>
+          <p style="font-size:13px;color:var(--text-mute)">耗时：乐观 ~4 人周 / 现实 ~7 人周 / 悲观 ~12 人周（#4 对齐是最大变量）。<span class="conf r">🔴 类比估算</span></p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">2</span>阶段二 · 核心精学闭环：验证「留存 + 付费意愿」</div>
+        <div class="step-body">
+          <p><strong>功能清单：</strong>shadowing 影子跟读 + 发音评分（云·讯飞 ISE，接入见姐妹 spec）+ 挖空字幕精听 + 生词进 SRS（FSRS）+ 本地数据存储 + <strong>双端签名公证正式分发</strong> + updater。这一阶段把「精听 → 跟读 → 评分 → 生词复习」串成完整闭环。</p>
+          <div class="check-box"><strong>✅ 出口标准：</strong>① 次周/次月留存达到自定阈值（如周留存 &gt;30%），② 有一定比例用户表达<u>付费意愿</u>（愿意为发音评分/无限视频付费），③ 发音评分反馈被用户认为「有用、不打击信心」。<strong>留存 + 付费意愿双证 → 进阶段三。</strong></div>
+          <p style="font-size:13px;color:var(--text-mute)">耗时：乐观 ~5 人周 / 现实 ~9 人周 / 悲观 ~16 人周。<span class="conf r">🔴 类比估算</span></p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="sn">3</span>阶段三 · 放量 + 变现 + 本地化降本：验证「单位经济成立」</div>
+        <div class="step-body">
+          <p><strong>功能清单：</strong>变现（订阅/买断/额度）+ <strong>发音评分从云迁本地</strong>（gopt/kaldi GOP 自建，降云成本 + 解数据出境合规，父报告 Ch7 已定「确认价值再迁本地」）+ 多视频库/资料管理 + 性能优化 + 国内分发合规（ICP 备案、必要时软著）。</p>
+          <div class="check-box"><strong>✅ 出口标准：</strong>① 付费转化 × 客单价 &gt; 获客 + 云评分成本（单位经济为正），② 本地发音评分质量被用户接受（不显著差于云），③ 分发合规无阻碍。<strong>单位经济成立 → 可考虑加投/扩张。</strong></div>
+          <p style="font-size:13px;color:var(--text-mute)">耗时：乐观 ~3 人周 / 现实 ~6 人周 / 悲观 ~12 人周（本地化发音评分是最大变量）。<span class="conf r">🔴 类比估算</span></p>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <p><strong>⚠️ 阶段划分的纪律：发音评分本地化故意放到阶段三，不要提前。</strong>父报告已拍「MVP 用云、确认价值再迁本地」——因为自建本地 GOP（gopt/kaldi）是个大坑（要训练/调校/建 SEA 口音校准集，见 github-eng 报告 Ch6），<u>在「还不知道有没有人要」的阶段就去啃它是浪费</u>。同理 SRS、挖空都放阶段二，阶段一就死磕「逐句精听跟读」这一条链路把它做到顺。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6">
+    <h2><span class="num">06</span><span class="title-text">★ Roadmap 开发节奏图：里程碑 + 依赖顺序 + 先上什么</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把三阶段拆成里程碑 M0–M9，并画出<strong>依赖顺序</strong>（哪个必须先于哪个）。下面甘特式时间轴用纯 HTML/CSS 画，横轴是相对周（现实档）。</p>
+
+      <div class="gantt">
+        <div class="gantt-row"><div class="gantt-label"><span class="ms-dot"></span>M0 脚手架</div><div class="gantt-track"><div class="gantt-bar p1" style="left:0%;width:8%">壳</div></div></div>
+        <div class="gantt-row"><div class="gantt-label"><span class="ms-dot"></span>M1 播放+字幕</div><div class="gantt-track"><div class="gantt-bar p1" style="left:8%;width:12%">播放/渲染</div></div></div>
+        <div class="gantt-row"><div class="gantt-label"><span class="ms-dot"></span>M2 转写 sidecar</div><div class="gantt-track"><div class="gantt-bar p1" style="left:20%;width:12%">whisper.cpp</div></div></div>
+        <div class="gantt-row"><div class="gantt-label"><span class="ms-dot"></span>M3 对齐+逐句循环</div><div class="gantt-track"><div class="gantt-bar p1" style="left:32%;width:16%">whisperX⚠️难</div></div></div>
+        <div class="gantt-row"><div class="gantt-label"><span class="ms-dot"></span>M4 录音回放<br>(=阶段一出口)</div><div class="gantt-track"><div class="gantt-bar p1" style="left:48%;width:10%">录音</div></div></div>
+        <div class="gantt-row"><div class="gantt-label"><span class="ms-dot"></span>M5 发音评分(云)</div><div class="gantt-track"><div class="gantt-bar p2" style="left:58%;width:12%">讯飞ISE</div></div></div>
+        <div class="gantt-row"><div class="gantt-label"><span class="ms-dot"></span>M6 shadowing+挖空</div><div class="gantt-track"><div class="gantt-bar p2" style="left:62%;width:14%">精学</div></div></div>
+        <div class="gantt-row"><div class="gantt-label"><span class="ms-dot"></span>M7 SRS+存储</div><div class="gantt-track"><div class="gantt-bar p2" style="left:70%;width:10%">FSRS</div></div></div>
+        <div class="gantt-row"><div class="gantt-label"><span class="ms-dot"></span>M8 签名+updater<br>(=阶段二出口)</div><div class="gantt-track"><div class="gantt-bar p2" style="left:80%;width:12%">正式分发</div></div></div>
+        <div class="gantt-row"><div class="gantt-label"><span class="ms-dot"></span>M9 变现+本地化降本</div><div class="gantt-track"><div class="gantt-bar p3" style="left:92%;width:8%">阶段三</div></div></div>
+        <div class="gantt-axis"><div></div><div class="ticks"><span>0周</span><span>4</span><span>8</span><span>12</span><span>16+</span></div></div>
+      </div>
+      <p style="font-size:12px;color:var(--text-mute)">🟧 阶段一（M0–M4）· 🟩 阶段二（M5–M8）· 🟪 阶段三（M9）。横轴=现实档相对周。注意 M5/M6/M7 部分并行（发音评分接入与挖空/SRS 互不阻塞）。<span class="conf r">🔴 节奏为类比估算</span></p>
+
+      <h3>依赖顺序：为什么必须这个先上</h3>
+      <div class="tree">
+        <div class="node q">关键依赖链（不能跳的顺序）</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><strong>播放（M1）</strong> → 没有播放器，一切无从谈起，但最简单（HTML5 video）</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><strong>转写（M2）</strong> → 用户的视频常无字幕，必须先能生成字幕文本，否则没有可对齐的内容</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><strong>对齐（M3）</strong> → <span class="lbl m">关键</span>有了文本还要<u>逐句/逐词时间戳</u>，否则「逐句循环」不知道每句从哪到哪</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><strong>逐句循环（M3 后半）</strong> → 依赖对齐给的句级时间戳，才能 AB 复读/自动暂停</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><strong>录音（M4）</strong> → 先有录音，才能在 M5 把录音喂给发音评分</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><strong>发音评分（M5）</strong> → 依赖录音；评分是「锦上添花」，所以排在阶段一验证通过之后</div>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>一句话先上线逻辑：<u>转写 → 对齐 → 才能逐句；录音 → 才能评分</u>。</strong>所以「先上什么」不是产品偏好问题，是<strong>技术依赖问题</strong>——底层链路（M0–M4）必须按顺序搭通，这条链路本身（「一个本地视频能逐句精听 + 跟读回放」）正好就是小贝最该先验证的窄楔子。<u>把它做到顺，比把十个半成品功能铺出来有价值得多。</u>发音评分/SRS/挖空都依赖这条链路存在，且都是「验证内核有人要之后」才加的增量。</p>
+      </div>
+      <div class="callout info">
+        <p><strong>可并行 / 可后置的：</strong>① <u>数据存储（M7 的一部分）</u>可以很早就铺底（schema 先立），但不阻塞链路；② <u>签名公证（M8）</u>开发期可完全后置（自用不签、给种子用户用 Mac 公证或临时方案，见签名 spec MVP 策略），<u>不要在阶段一就陷进证书采购</u>；③ <u>发音评分本地化</u>永远放最后（阶段三）。</p>
+      </div>
+
+      <h3>🍎 vs 🪟 Mac 端和 Windows 端，是一起开发还是先做完一个？</h3>
+      <div class="callout accent">
+        <p><strong>核心代码一起开发，不是「先做完一端再从头做另一端」。</strong>你选了 Tauri，它的根本价值就是<u>一套代码、两端构建</u>——前端 UI + Rust 后端写一遍，<code>tauri build</code> 分别出 Mac 包和 Win 包。上面 M0–M11 的功能链路<strong>绝大多数是平台无关的，写一次两端都有</strong>，根本不存在「做两遍」。把「先做完 Mac 再从头做 Windows」当默认节奏，是对跨平台框架最大的误解。</p>
+      </div>
+      <div class="callout info">
+        <p><strong>但平台差异点要从第一天就并行盯，别攒到最后：</strong></p>
+        <ul style="margin:6px 0 0">
+          <li><strong>WebView 内核不同：</strong>Windows 走 WebView2（Chromium 内核）、Mac 走 WKWebView（Safari 内核）——同一段前端在两边的渲染 / 音视频 / 录音 API 行为可能有差异，尤其录音和媒体这类小贝重度依赖的能力。</li>
+          <li><strong>sidecar 二进制各编一份：</strong>whisper.cpp / ffmpeg 要按每个 OS 各编译一份，<u>不能跨平台交叉编译</u>（父报告 Ch3）。</li>
+          <li><strong>签名公证两套、原生解码器、文件路径权限</strong>两端各有差异（见《签名公证 spec》）。</li>
+        </ul>
+        <p style="margin:6px 0 0">纪律：<strong>从第一天就上 CI 矩阵双端构建（tauri-action）+ 一台真 Windows 机 / VM 持续测</strong>。最经典的坑就是「Mac 上跑得好好的，最后打 Windows 包全是问题」——差异攒到最后才碰，代价最大。</p>
+      </div>
+      <div class="callout good">
+        <p><strong>真正能「错开」的是上线发布顺序，不是开发本身：</strong>你日常在 Mac 上开发（主力 debug 在 Mac），但目标用户 Windows 优先，这俩有张力。建议节奏：<strong>① 先发 Mac</strong>（公证便宜标准化、$99 免 DUNS、notarytool 四步，先给种子用户验证「产品到底有没有人要」）→ <strong>② Windows 紧随主攻</strong>（目标主力，但签名最贵最难，要先解决云签名 / SmartScreen 冷启动，见签名 spec），或两端同时发、Windows 先接受初期 SmartScreen 摩擦。<u>一句话：代码一起写、平台差异 CI 矩阵从第一天并行盯、上线可 Mac 先行验证 + Windows 主攻——绝不是串行做两遍。</u></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7">
+    <h2><span class="num">07</span><span class="title-text">哪些简单哪些复杂（深入）：最该轻松对待 vs 最该重仓</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>Ch2 给了矩阵，这里挑最两极的几个深挖——告诉你「为什么简单」「为什么复杂」「坑在哪」，好让你心力分配对。</p>
+
+      <h3>🟢 最简单的几个（别在这上面纠结）</h3>
+      <div class="callout good">
+        <p><strong>① 字幕渲染 + 逐句高亮</strong>——纯前端。解析用 subtitle.js（MIT）<sup class="cite" data-refid="11">[11]</sup>，渲染就是把当前时间对应的那句 DOM 高亮。<u>唯一坑</u>：时间轴漂移（字幕和音画对不上）——但这恰恰是 M3 对齐要解决的，渲染本身不难。<br><strong>② SRS 接 FSRS</strong>——调库就完事。ts-fsrs/fsrs-rs 把算法全封装好，你只需「记录用户对生词的回忆评级 → 调 scheduler 拿下次复习时间」<sup class="cite" data-refid="6">[6]</sup><sup class="cite" data-refid="7">[7]</sup>。难的不是算法，是「生词卡怎么生成、复习入口放哪」这种产品设计。<br><strong>③ 基础播放 + 数据存储</strong>——HTML5 video + tauri-plugin-sql（SQLite）<sup class="cite" data-refid="4">[4]</sup>，AI 一把过。</p>
+      </div>
+
+      <h3>🔴 最复杂的几个（重仓在这）</h3>
+      <div class="callout bad">
+        <p><strong>① 逐句/逐词强制对齐精度（#4）——小贝的真·技术核心难点。</strong>whisperX 的 wav2vec2 强制对齐在<u>干净朗读</u>上能到词级 ±50ms<sup class="cite" data-refid="5">[5]</sup>，但用户的视频是<u>真实素材</u>：背景音乐、笑声、多人抢话、口音、语速快——这些会让对齐「切错词、整句偏移」，直接毁掉「逐句循环」体验（循环到一半切到下一句）。<strong>坑</strong>：① 音乐/噪声段要先 VAD 切掉再对齐；② 对齐失败的句子要有 fallback（退回 whisper 自带的粗时间戳）；③ 不能当硬 SLA，要在<u>目标媒体/口音上实测</u>（父报告已警示）。这是最该花时间反复调的地方。</p>
+      </div>
+      <div class="callout bad">
+        <p><strong>② 发音评分集成 + 调参（#7）。</strong>MVP 接讯飞 ISE（姐妹 spec 给了接入细节）——接口调通不难，难在<u>把云返回的「准确度/流利度/完整度 + 音素级分」翻译成用户看得懂、不打击信心的反馈</u>。坑：① 分数怎么呈现（数字会让人焦虑，颜色/进步曲线更友好）；② 录音质量差时别给假低分（要先判录音是否有效）；③ <u>本地化（阶段三）是另一个量级的坑</u>——自建 GOP（gopt BSD-3 / kaldi Apache）要训练、要建 SEA 口音校准集、PCC≈0.45 的基线达不到云水平（github-eng Ch6 已详述）<sup class="cite" data-refid="15">[15]</sup><sup class="cite" data-refid="16">[16]</sup>。所以本地化故意压到阶段三。</p>
+      </div>
+      <div class="callout bad">
+        <p><strong>③ 跨端打包签名（#13）。</strong>不是「写代码」难，是<u>持续工程税</u>：CI 矩阵分平台 build（不能 Mac 上交叉编译 Win）、中国个人 Windows 签名路径特殊（Azure 无资格 → 云签名）、SmartScreen 信誉冷启动——全在《签名公证 spec》里展开。坑：每次发版都要走这套，且 SmartScreen 警告靠下载量累积、买 EV 也买不掉首发警告。<br><strong>④ 挖空字幕精听交互（#9）。</strong>技术不难但<u>交互设计活多</u>：挖哪些词（按词频/CEFR 难度，可借 github-eng 报告的分级词表数据）、判对错的容错（拼写错/同音词/大小写）、提示梯度（首字母→音标→放弃看答案）。开源参考少，基本自研，但逻辑清楚。</p>
+      </div>
+
+      <div class="callout accent">
+        <p><strong>心力分配建议：</strong>🟢 那几个用 AI 快速堆完、别返工纠结；把 70% 的调试心力压在 <strong>#4 对齐精度</strong> 和 <strong>#7 发音评分体验</strong> 这两个「决定产品好不好用」的点上。#13 签名按姐妹 spec 照做即可，别自己发明。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8">
+    <h2><span class="num">08</span><span class="title-text">★ 逆向工程市面软件：能不能、合不合法、值不值</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>阿杰问：能不能逆向欧路「每日英语听力」/ Language Reactor 这类，把它们的功能搬过来？分三块诚实回答——法律边界、技术可行性、值不值。<strong>先给结论：合法且推荐的只有「看交互学产品设计」（clean-room 精神），不是反编译抄码；而且多数时候不值，因为 AI 自己能写。</strong></p>
+      <p style="font-size:13px;color:var(--text-mute)">⚠️ 以下是一般性法律梳理，<strong>非法律意见</strong>；真要做有风险的动作前请咨询专业律师。</p>
+
+      <h3>① 法律边界</h3>
+      <h4>中国法</h4>
+      <div class="callout info">
+        <p><strong>《计算机软件保护条例》第十七条</strong>：「为了学习和研究软件内含的<u>设计思想和原理</u>，通过安装、显示、传输或者存储软件等方式使用软件的，可以不经软件著作权人许可，不向其支付报酬。」<sup class="cite" data-refid="18">[18]</sup> 学界普遍认为此条可作为<u>有限度的</u>软件反向工程合法性依据，但<strong>明确限于「学习和研究设计思想与原理」的目的</strong>——也就是说，<u>研究它「怎么设计的、用了什么思路」是允许的；把研究结果变成抄袭其代码表达则超出此边界</u>。<sup class="cite" data-refid="18">[18]</sup></p>
+        <p><strong>《反不正当竞争法》/ 商业秘密</strong>：最高法司法解释明确，<u>通过合法的反向工程</u>获得商业秘密<strong>不构成侵权</strong>；但若以不正当手段（如盗取、违约）获取后再托词「反向工程」，法院不予支持。<sup class="cite" data-refid="20">[20]</sup> 著作权层面，软件的<strong>表达（代码）受保护、思想（功能/原理）不受保护</strong>——「思想/表达二分」是底线。</p>
+        <p><strong>EULA 禁止逆向条款的效力</strong>：厂商可在 EULA 写「禁止逆向」，但其效力<u>受法定例外限制</u>——即便用户签了禁逆向协议，若行为落入第十七条等法定豁免（学习思想原理、为兼容性等），仍可主张豁免。<sup class="cite" data-refid="19">[19]</sup> 反之，超出豁免（如抄代码表达）则 EULA + 著作权双重约束。</p>
+      </div>
+      <h4>海外（美国）</h4>
+      <div class="callout info">
+        <p><strong>DMCA §1201(f) 互操作性例外</strong>：合法取得软件副本者，<u>为实现独立开发程序与其他程序的互操作</u>，可规避访问控制措施以识别/分析必要元素。<sup class="cite" data-refid="25">[25]</sup> 但该例外<u>严格限于实现兼容性</u>，不是「随便逆向一切」的通行证；且必须合法获得软件。<strong>clean-room（净室）逆向</strong>是行业公认降低法律风险的做法：A 组分析目标、写出「功能规格」（不含受版权代码），B 组只看规格、独立实现——这样产出的代码不接触原代码表达，规避著作权侵权。EFF 的逆向 FAQ 是这块的经典参考。<sup class="cite" data-refid="25">[25]</sup></p>
+      </div>
+
+      <h3>② 技术可行性</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>目标</th><th>形态</th><th>逆向难度</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>Language Reactor</td><td>Chrome 扩展</td><td class="check p">中</td><td>扩展是 JS，可读但常压缩/混淆；且 LR 国内不可用、形态是网页扩展（父报告 Ch2）</td></tr>
+          <tr><td>欧路每日英语听力</td><td>桌面 App</td><td class="check n">高</td><td>原生壳，可能加固/加壳；网络协议可抓包，但本地逻辑要反编译——难且法律风险高</td></tr>
+          <tr><td>asbplayer</td><td>开源(MIT)</td><td class="check y">无需逆向</td><td><u>它本来就开源</u>，直接读源码即可（但形态是浏览器扩展，借交互不借形态）<sup class="cite" data-refid="22">[22]</sup></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="callout warn">
+        <p><strong>关键观察：你想学的东西，大多<u>根本不用逆向</u>就能得到。</strong>① 欧路的「<u>交互怎么设计</u>」——装来用一遍就看明白了（合法、第十七条范围内）；② 「<u>技术怎么实现</u>」——本报告 Ch3 已经把每个功能的开源底座扒清楚了，asbplayer/glucose 等近亲<u>本身开源可读</u>，比反编译闭源 App 容易十倍。反编译只在「想抄它的<u>具体代码实现</u>」时才需要——而那恰恰是法律最危险、收益最低的事。</p>
+      </div>
+
+      <h3>③ 值不值（诚实结论）</h3>
+      <div class="callout bad">
+        <p><strong>反编译抄码：⛔ 不值，别做。</strong>三个理由：① <u>法律风险高</u>——抄代码表达踩著作权红线，超出「学习思想原理」豁免；② <u>收益低</u>——抄来的是混淆过的别人代码，难维护、和你的架构对不上，还不如重写；③ <u>AI 已经能写</u>——小贝要的功能（播放/对齐/录音/评分/SRS）本报告已证明开源底座齐全、AI 能拼，<strong>自己写出来的更干净、可控、零法律风险</strong>。花精力反编译别人的，是把简单的事做难、把合法的事做险。</p>
+      </div>
+      <div class="callout good">
+        <p><strong>✅ 合法且推荐的做法（clean-room 精神）：</strong>① <u>装来用、研究欧路/asbplayer/LR 的交互与产品设计</u>（哪些功能好用、流程怎么排、文案怎么写）——第十七条「学习设计思想和原理」明确允许<sup class="cite" data-refid="18">[18]</sup>；② <u>读开源近亲的源码</u>（asbplayer MIT、glucose 读架构）学实现思路；③ <u>用 AI 基于这些「思路」独立实现</u>，不接触受 license 约束的具体代码。<strong>判断：🟢 学交互/产品设计、读开源——放手做；⚠️ 抓网络协议——灰区谨慎；⛔ 反编译闭源抄代码——不做。</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9">
+    <h2><span class="num">09</span><span class="title-text">★ 立项：什么叫立项 + 怎么立（海外单人版）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>「立项」是个被用混的词，至少有两层意思，对单人 indie 影响完全不同。先拆清楚，再给最小可行清单。</p>
+
+      <h3>两层「立项」分清楚</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>「立项」指什么</th><th>语境</th><th>单人 indie 要不要</th></tr></thead>
+        <tbody>
+          <tr class="row-highlight"><td><strong>① 项目章程（project charter）</strong></td><td>产品/项目管理：写清做什么、不做什么、成功指标、里程碑、预算</td><td class="check y"><strong>必做</strong>（半小时一页纸，给自己定方向）<sup class="cite" data-refid="26">[26]</sup></td></tr>
+          <tr><td><strong>② 软件著作权登记</strong></td><td>官方知识产权：拿软件的权属证明</td><td class="check p"><strong>可选不急</strong>（免费、非上线必需）<sup class="cite" data-refid="21">[21]</sup></td></tr>
+          <tr><td><strong>③ 科技项目立项</strong></td><td>政府科技计划/高新企业：申请政府经费的审批</td><td class="check n"><strong>不需要</strong>（面向企业拿政府钱，单人 indie 无关）<sup class="cite" data-refid="24">[24]</sup></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>① 产品语境的「立项」= 一页纸项目章程（必做）</h3>
+      <p>项目章程是项目启动期的产出，说明项目的目标、范围、里程碑、成功标准、风险、预算、时间线<sup class="cite" data-refid="26">[26]</sup>。对单人 indie，<strong>不需要正式文档，一张纸/一个 note 写死下面这几栏就够</strong>——它的价值是<u>逼你在动手前把「不做什么」想清楚，防止发散</u>（正合无忌一贯提醒阿杰的「先挑一个窄的跑通」）。</p>
+      <div class="callout accent">
+        <p><strong>📋 小贝最小项目章程模板（照填即可）：</strong></p>
+        <ul style="margin:6px 0 0">
+          <li><strong>愿景（一句话）：</strong>把你硬盘里任意英语视频，变成一套全本地的逐句精学私教材料。</li>
+          <li><strong>范围·做什么（阶段一）：</strong>本地视频导入 + 本地转写 + 逐句对齐 + 逐句循环精听 + 录音回放。</li>
+          <li><strong>范围·<u>不</u>做什么（关键栏）：</strong>阶段一不做发音评分、不做 SRS、不做挖空、不做签名公证、不做多视频库管理、不做移动端、不做云同步。</li>
+          <li><strong>成功指标：</strong>5–10 个真实用户里有人主动连用 3 天以上、愿意拿自己的视频来精学。</li>
+          <li><strong>里程碑：</strong>M0 脚手架 → M1 播放字幕 → M2 转写 → M3 对齐+逐句 → M4 录音（=阶段一出口）。</li>
+          <li><strong>预算：</strong>开发期 $0（自用不签名）；上线期 Mac $99/年 + 讯飞按量 + 可选 Win 证书（见签名 spec）。</li>
+          <li><strong>时间盒：</strong>阶段一现实 ~7 人周；若超 2 倍仍没人用，停下来反思而非加功能。</li>
+          <li><strong>最大风险：</strong>对齐精度（#4）调不到能用；没人要这条链路。</li>
+        </ul>
+      </div>
+
+      <h3>② 软件著作权登记（可选、不急）</h3>
+      <div class="callout info">
+        <p><strong>结论（承接父报告，给「要不要办 + 怎么办」）：</strong></p>
+        <ul style="margin:6px 0 0">
+          <li><strong>要不要：</strong>父报告已述「软著非 ICP/App 备案的必需前提」。<u>它是「所有权证据」，不是「上线许可」</u>。<strong>阶段一/二不急办</strong>；想要权属凭证防抄袭、或上架某些国内渠道（部分商店要软著）时再办。</li>
+          <li><strong>费用：</strong>中国版权保护中心的<u>基础登记服务自 2017-04 起免费</u>（国家版权局停征登记费/证书费）<sup class="cite" data-refid="21">[21]</sup>；找代理则另付代理费。</li>
+          <li><strong>周期：</strong>自行申请约 30 个工作日取证（案例口径约 41 天含补正）<sup class="cite" data-refid="21">[21]</sup>；加急代理可缩短（付费）。</li>
+          <li><strong>流程：</strong>注册→实名认证→在线填报（提交源代码前后各 30 页 + 软件说明书）→提交→受理→审查→领证<sup class="cite" data-refid="21">[21]</sup>。<u>只要「创作完成」即可登记，不要求软件已发布/上线。</u></li>
+          <li><strong>⚠️ 海外单人提醒：</strong>软著登记是<u>中国</u>的制度，申请人需中国主体/个人身份信息；阿杰若以海外身份/无国内主体，办软著的可行性与必要性都更低——除非确有上架国内渠道的硬需求，否则<u>这一项基本可以先放着</u>。</li>
+        </ul>
+      </div>
+
+      <h3>③ 科技项目立项（单人不需要）</h3>
+      <div class="callout warn">
+        <p><strong>「科技项目立项」是另一回事——指政府科技计划项目的审批/启动</strong>，企业与政府签「科技计划项目合同书」，约定验收考核指标（经济/技术指标）以换取政府经费支持<sup class="cite" data-refid="24">[24]</sup>；与「高新技术企业认定」「科技型中小企业」是配套的政策体系。<strong>这是给「在中国注册、要拿政府研发补贴的企业」用的，海外单人 indie 做一个商业 App 完全不涉及</strong>，不用管。只有当小贝某天落成国内公司主体、想申请政府科技补贴时才相关。</p>
+      </div>
+
+      <div class="callout good">
+        <p><strong>🎯 海外单人开发者的最小可行立项清单：</strong>① <u>写一页项目章程</u>（上面模板，半小时）✅ 现在就做；② <u>软著</u>——先不办，有国内上架/防抄硬需求再说；③ <u>科技项目立项</u>——忽略。一句话：<strong>立项对你 = 写清「做什么、不做什么、怎么算成功」，官方那套登记/申报基本都不是现在的事。</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10">
+    <h2><span class="num">10</span><span class="title-text">风险与坑汇总（承接两份 spec + 本研究）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把三份报告（讯飞接入 spec / 签名公证 spec / 本研究）里的真实坑汇总成一张「技术债 + 缓解」表，方便一眼扫风险。</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>类别</th><th>具体坑</th><th>来自</th><th>缓解</th></tr></thead>
+        <tbody>
+          <tr><td>调参</td><td>whisperX 对齐在噪声/口音/音乐段切错词，毁逐句体验</td><td>本研究 Ch7</td><td>VAD 先切静音/音乐；对齐失败 fallback 粗时间戳；目标媒体实测不当 SLA</td></tr>
+          <tr><td>调参</td><td>发音评分分数呈现不当会打击用户信心</td><td>本研究 Ch7 + 讯飞 spec</td><td>用颜色/进步曲线代替裸数字；先判录音有效性再给分</td></tr>
+          <tr><td>依赖停更</td><td>subtitle.js 停更(2022)；aeneas 停更(2017)+AGPL；Echoic 单人原型 0 release</td><td>本研究 Ch3</td><td>subtitle.js 格式稳定可继续用；对齐用活跃的 whisperX 不用 aeneas；Echoic 只读思路</td></tr>
+          <tr><td>license 传染</td><td>glucose(EUPL)/yall-mp(GPL) 不能 fork 进闭源；whisperX 的 pyannote 模型 CC-BY-4.0 另算</td><td>本研究 Ch3</td><td>整 App 只读架构不抄码；whisperX 只用对齐不用 diarization 绕开门控模型</td></tr>
+          <tr><td>合规·打包</td><td>中国个人 Win 签名 Azure 无资格 → 云签名；SmartScreen 冷启动弹警告</td><td>签名公证 spec</td><td>MVP 先 Mac 公证、Win 暂缓或云签名；官网放「被拦截怎么办」</td></tr>
+          <tr><td>合规·codec</td><td>FFmpeg LGPL 打包义务 + H.264/265 专利</td><td>父报告 Ch4</td><td>LGPL build + 动态链接；播放优先 OS 原生解码器，FFmpeg 仅抽音频/转码</td></tr>
+          <tr><td>合规·数据出境</td><td>发音评分走云=用户录音出境；视频内容绝不可上传</td><td>父报告 Ch8 + 讯飞 spec</td><td>视频本体死锁本地；云端只发不含版权的短录音/文本；阶段三迁本地评分</td></tr>
+          <tr><td>跨端</td><td>不能 Mac 上交叉编译 Win；WebView 渲染/codec 差异</td><td>父报告 Ch3</td><td>CI 矩阵分平台 build（tauri-action）；双端都要真机/CI 验</td></tr>
+          <tr><td>集成</td><td>13 功能各自行、合起来边角 bug 多（单人项目通病）</td><td>本研究 Ch4</td><td>按 roadmap 顺序逐里程碑集成验收，别并行铺开；每个 M 设出口标准</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11">
+    <h2><span class="num">11</span><span class="title-text">给小贝的下一步决策树 + 第一周能动手清单</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>从今天到第一个可玩 demo，具体到「先 fork 哪个、先跑通哪条链路」。</p>
+
+      <h3>下一步决策树</h3>
+      <div class="tree">
+        <div class="node q">现在该做什么？</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl y">先</span>写一页项目章程（Ch9 模板，半小时）——把阶段一范围和「不做什么」钉死</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl y">然后</span>装来用 glucose_media_player + asbplayer + 欧路桌面版，<u>合法地</u>研究它们的交互（Ch8）</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">脚手架怎么起？</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><code>create-tauri-app</code> 起 Tauri 2.x 壳 → 读 glucose 的 src 结构理解「Tauri 里怎么播本地视频+调 Whisper」→ 用 AI 重写干净实现（别 fork EUPL 代码）</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">先跑通哪条链路？</div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><strong>M1→M2→M3</strong>：HTML5 video 播本地 mp4 → whisper.cpp sidecar 出字幕 → whisperX 对齐出句级时间戳 → 逐句循环。<u>这条通了，小贝的内核就立住了。</u></div>
+        <div class="step-arrow">↓</div>
+        <div class="node"><span class="lbl m">注意</span>对齐精度（M3）是最大变量——预留反复调的时间，别指望一次到位</div>
+      </div>
+
+      <h3>第一周能动手清单（按天）</h3>
+      <div class="step"><div class="step-head"><span class="sn">D1</span>立项 + 调研交互</div><div class="step-body">写一页项目章程；装 glucose/asbplayer/欧路，记下「哪些交互好用、我要照搬哪些产品决策」。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">D2</span>脚手架 + 播放</div><div class="step-body"><code>create-tauri-app</code> 起 Tauri 2.x；用 HTML5 video 在 WebView2 里播一个本地 mp4，能拖进度、变速。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">D3</span>字幕渲染</div><div class="step-body">引 subtitle.js（MIT）解析一个现成 srt，逐句高亮 + 点句跳转。先用现成字幕，不依赖转写。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">D4-5</span>转写 sidecar</div><div class="step-body">把 whisper.cpp 编译/下载为 sidecar（父报告 Ch3 的 externalBin 路径），对一个无字幕视频跑出字幕；做模型下载/进度 UX。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">D6-7</span>对齐 + 逐句循环（核心验证）</div><div class="step-body">接 whisperX 出句级/词级时间戳，实现「点一句→AB 循环精听」。<u>拿一个真实的、有背景音的视频试</u>——这一步的体验决定小贝成不成立。</div></div>
+
+      <div class="callout good">
+        <p><strong>一周末的目标：</strong>能用小贝<u>打开一个自己的英语视频，逐句循环精听</u>。哪怕粗糙——这就是小贝的不可替代内核的最小验证。录音回放（M4）放到第二周，发音评分/SRS/挖空/签名全部不在第一周范围内。<strong>先把这条窄链路跑顺，再谈别的。</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MINI DEMO ===== -->
+  <section class="chapter" id="demo">
+    <h2><span class="num">🎮</span><span class="title-text">Mini Demo（可玩）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>三个可玩组件：① 功能复杂度矩阵（可按难度筛选）② roadmap 里程碑切换 ③ 阶段卡片展开。</p>
+
+      <h3>① 功能复杂度矩阵（点按钮筛选）</h3>
+      <div class="sim-box">
+        <div class="sim-toggle" id="cxToggle">
+          <button class="sim-btn active" data-cx="all">全部</button>
+          <button class="sim-btn" data-cx="easy">🟢 简单</button>
+          <button class="sim-btn" data-cx="mid">🟡 中等</button>
+          <button class="sim-btn" data-cx="hard">🔴 复杂</button>
+        </div>
+        <div class="table-wrap">
+        <table>
+          <thead><tr><th>功能</th><th>难度</th><th>估时(人周)</th><th>开源底座</th></tr></thead>
+          <tbody id="cxBody">
+            <tr data-cx="easy"><td>本地视频播放</td><td class="check y">🟢</td><td>0.5–1</td><td>HTML5 video</td></tr>
+            <tr data-cx="easy"><td>字幕渲染+高亮</td><td class="check y">🟢</td><td>1–1.5</td><td>subtitle.js (MIT)</td></tr>
+            <tr data-cx="easy"><td>SRS 间隔复习</td><td class="check y">🟢</td><td>1–1.5</td><td>ts-fsrs/fsrs-rs</td></tr>
+            <tr data-cx="easy"><td>数据存储</td><td class="check y">🟢</td><td>0.5–1</td><td>tauri-plugin-sql</td></tr>
+            <tr data-cx="mid"><td>本地转写</td><td class="check p">🟡</td><td>1.5–2.5</td><td>whisper.cpp</td></tr>
+            <tr data-cx="mid"><td>录音回放</td><td class="check p">🟡</td><td>1–1.5</td><td>MediaRecorder API</td></tr>
+            <tr data-cx="mid"><td>逐句循环跟读</td><td class="check p">🟡</td><td>1–2</td><td>依赖对齐时间戳</td></tr>
+            <tr data-cx="mid"><td>shadowing</td><td class="check p">🟡</td><td>1–1.5</td><td>组合录音+逐句</td></tr>
+            <tr data-cx="mid"><td>挖空精听</td><td class="check p">🟡</td><td>1.5–2.5</td><td>自研为主</td></tr>
+            <tr data-cx="mid"><td>updater</td><td class="check p">🟡</td><td>0.5–1</td><td>tauri-plugin-updater</td></tr>
+            <tr data-cx="hard"><td>逐句强制对齐</td><td class="check n">🔴</td><td>2–4</td><td>whisperX (BSD-2)</td></tr>
+            <tr data-cx="hard"><td>发音评分</td><td class="check n">🔴</td><td>2–3</td><td>讯飞 ISE → gopt</td></tr>
+            <tr data-cx="hard"><td>跨端打包签名</td><td class="check n">🔴</td><td>1–3+</td><td>CI + 证书(签名spec)</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      <h3>② Roadmap 里程碑（点切换看每个 M 干什么）</h3>
+      <div class="sim-box">
+        <div class="sim-toggle" id="msToggle">
+          <button class="sim-btn active" data-ms="m0">M0</button>
+          <button class="sim-btn" data-ms="m1">M1</button>
+          <button class="sim-btn" data-ms="m2">M2</button>
+          <button class="sim-btn" data-ms="m3">M3★</button>
+          <button class="sim-btn" data-ms="m4">M4</button>
+          <button class="sim-btn" data-ms="m5">M5</button>
+          <button class="sim-btn" data-ms="m8">M8</button>
+          <button class="sim-btn" data-ms="m9">M9</button>
+        </div>
+        <div class="sim-dialog" id="msDialog"></div>
+      </div>
+
+      <h3>③ 三阶段卡片（点开看出口标准）</h3>
+      <div class="demo-grid">
+        <div class="demo-card"><div class="dc-icon">🪓</div><div class="dc-title">阶段一 · 窄楔子</div><div class="dc-tag">点击展开</div><div class="dc-body"><strong>功能：</strong>播放+字幕+转写+对齐+逐句循环+录音回放。<br><strong>出口：</strong>5–10 真实用户有人连用 3 天+、愿用自己的视频。<br><strong>耗时：</strong>现实 ~7 人周。</div></div>
+        <div class="demo-card"><div class="dc-icon">🔁</div><div class="dc-title">阶段二 · 精学闭环</div><div class="dc-tag">点击展开</div><div class="dc-body"><strong>功能：</strong>+shadowing+发音评分(云)+挖空+SRS+签名公证。<br><strong>出口：</strong>留存达标 + 付费意愿验证。<br><strong>耗时：</strong>现实 ~9 人周。</div></div>
+        <div class="demo-card"><div class="dc-icon">📈</div><div class="dc-title">阶段三 · 放量降本</div><div class="dc-tag">点击展开</div><div class="dc-body"><strong>功能：</strong>变现+发音评分迁本地+性能+国内合规备案。<br><strong>出口：</strong>单位经济为正。<br><strong>耗时：</strong>现实 ~6 人周。</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq">
+    <h2><span class="num">❓</span><span class="title-text">FAQ 常见问题（12 条）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">小贝一个人多久能做出来？</span><span class="toggle">＋</span></div><div class="faq-a"><p>单人+AI 辅助：乐观 ~2–3 月到阶段一可玩 demo，现实 ~4–6 月到阶段二精学闭环+正式分发，悲观 ~8–10 月（含反复调参/合规）。<span class="conf r">🔴 类比估算非承诺</span>。真实工期由「对齐精度 + 发音评分体验」这两处的反复次数决定，可能差 2–3 倍。兼职做会显著拉长。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">一个人够不够？</span><span class="toggle">＋</span></div><div class="faq-a"><p>够，但要守纪律。技术上每个功能都有开源底座、AI 能拼（Ch3/4）。单人最大的风险不是「写不出」，是「发散——把十个半成品功能铺开却没一个做顺」。守住「阶段一只做窄楔子、先验证有人要」就够一个人扛。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">AI 能写到什么程度？哪里帮不上？</span><span class="toggle">＋</span></div><div class="faq-a"><p>样板/胶水代码省 70%+；有开源参考的功能省 50–60%；<u>要调参/调体验的（对齐精度、发音评分反馈、跨端兼容）只省 20–30%</u>——因为问题在真实数据/真实设备里，不在代码里，AI 写得快但你得反复试。AI 缩的是写代码时间，缩不掉调试打磨时间，而后者是小贝大头（Ch4）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">哪个功能最该先做？</span><span class="toggle">＋</span></div><div class="faq-a"><p>「一个本地视频能逐句精听 + 跟读回放」这条窄链路（M0–M4）。这不是偏好，是技术依赖：转写→对齐→才能逐句，录音→才能评分（Ch6）。而且这条链路正好是小贝的不可替代内核，最便宜能验证「有没有人要」。发音评分/SRS/挖空都依赖它存在、且都该在验证内核之后才加。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">能不能直接 fork 一个现成开源 App 改改就用？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不能。最像小贝的近亲——glucose_media_player（EUPL-1.2 copyleft）、yall-mp（GPL-3）是 copyleft 传染，fork 进闭源商业产品要么违规要么被迫开源；asbplayer（MIT 但是浏览器扩展，碰不到本地文件）、HiKid（MIT 但 Electron+macOS-only）形态/平台都不对。它们价值在「读架构/抄交互」，不在代码。该 fork 的是<u>库层</u>：whisperX(BSD-2)/ts-fsrs(MIT)/subtitle.js(MIT)（Ch3）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">能不能抄欧路/Language Reactor 现成的？逆向合法吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>合法且推荐的只有一层：装来用、研究它的交互/产品设计（中国《软件保护条例》第十七条允许「为学习设计思想和原理而使用软件」）。<u>反编译它的二进制抄代码</u>超出此边界、踩著作权/EULA 红线，且对单人毫无收益——AI 自己写得更干净、可维护、零法律风险。结论：🟢 看交互学产品设计、读开源近亲源码；⛔ 别反编译抄码（Ch8）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">最该 fork 的开源是哪几个？</span><span class="toggle">＋</span></div><div class="faq-a"><p>四件套：① <strong>whisperX</strong>（BSD-2，逐句对齐，22.4k★活跃）；② <strong>ts-fsrs 或 fsrs-rs</strong>（MIT/BSD-3，SRS，Tauri 前端用 ts、后端用 rs 二选一）；③ <strong>subtitle.js</strong>（MIT，字幕解析，停更但稳定）；④ <strong>whisper.cpp</strong>（MIT，转写，父报告已定）。这几个 license 全干净可商用。整 App 层只读架构（glucose/asbplayer）不 fork（Ch3）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">最复杂、最该花时间的是哪几块？</span><span class="toggle">＋</span></div><div class="faq-a"><p>三个 🔴：① <strong>逐句强制对齐精度</strong>——whisperX 在噪声/口音/音乐段会切错词，毁逐句体验，要在真实素材上反复调；② <strong>发音评分体验</strong>——接讯飞不难，难在把多维分翻译成不打击信心的反馈；本地化(gopt/kaldi)是另一个量级的坑；③ <strong>跨端打包签名</strong>——持续工程税（Ch7）。把 70% 调试心力压在 ① ②。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">要不要先办软著？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不急。软著基础登记自 2017-04 起免费、周期约 30 工作日，但<u>非上线必需</u>，只要「创作完成」即可登记。它是所有权证据不是上线许可。阶段一/二先不办，想要防抄凭证或上架某些国内渠道时再办。⚠️ 软著是中国制度，需中国主体/身份；阿杰若以海外身份办，可行性和必要性都更低，基本可先放着（Ch9）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">「立项」到底是要干嘛？我一个人也要立项？</span><span class="toggle">＋</span></div><div class="faq-a"><p>对单人 indie，「立项」=<u>写一页纸项目章程</u>（愿景/范围做什么不做什么/成功指标/里程碑/预算/时间盒），半小时的事，<strong>必做</strong>——价值是逼你动手前想清「不做什么」，防发散。Ch9 给了小贝的填空模板。官方那套「软著登记」可选不急、「科技项目立项」（政府科技计划）单人完全不需要。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">停更的开源还能用吗（subtitle.js / aeneas）？</span><span class="toggle">＋</span></div><div class="faq-a"><p>分情况。<strong>subtitle.js</strong>（MIT，2022 停更）——能用，字幕格式是慢变量、格式稳定，停更不影响；若要 ass 完整支持再补。<strong>aeneas</strong>（AGPL，2017 停更）——别用，三重问题：AGPL 传染 + 停更 8 年 + 精度不如活跃的 whisperX，对齐直接用 whisperX（Ch3）。判断原则：停更的「数据/格式类」库可用，停更的「带传染 license 的核心算法」别碰。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">发音评分一开始就要做本地的吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不要。父报告已拍「MVP 用云（讯飞 ISE）、确认价值再迁本地」。自建本地 GOP（gopt BSD-3 / kaldi Apache）要训练/调校/建 SEA 口音校准集、基线 PCC≈0.45 达不到云水平——在「还不知道有没有人要」的阶段啃它是浪费。本地化故意压到阶段三（Ch5/Ch7）。用户的跟读录音不含版权，走云合规没问题（视频本体才是死锁本地的硬约束）。</p></div></div>
+    </div>
+  </section>
+
+  <!-- ===== REFERENCES ===== -->
+  <section class="chapter" id="refs">
+    <h2><span class="num">📚</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13px;color:var(--text-mute)">访问日期均为 2026-06-11。悬停正文 <sup class="cite" data-refid="1">[1]</sup> 可弹窗看来源并点外链。star/license/活跃度为查证当日 GitHub 快照，<strong>license 以各仓库 LICENSE 文件为准</strong>；工期/价格为类比估算或当日快照。</p>
+      <ol class="ref-list">
+        <li id="ref-1">本报告承接《本地视频英语精学桌面 App》主报告（无忌，2026-06-11）—— 形态 Tauri 2.x、本地栈 whisper.cpp/whisperX/ffmpeg、发音评分主推讯飞、竞品欧路最接近等结论。<a href="./local-video-english-study-tool.html" target="_blank" rel="noopener">local-video-english-study-tool.html</a> <span class="ref-meta">· 同门主报告 · 2026-06-11</span></li>
+        <li id="ref-2">姐妹子报告：《代码签名+公证落地 spec》（Tauri 2.x 双端签名/公证/CI/updater）与《讯飞 ISE 接入 spec》。<a href="./local-video-english-study-tool--signing-notarization-spec.html" target="_blank" rel="noopener">签名公证 spec</a> · <a href="./local-video-english-study-tool--xunfei-ise-spec.html" target="_blank" rel="noopener">讯飞 ISE spec</a> <span class="ref-meta">· 同门子报告 · 2026-06-11</span></li>
+        <li id="ref-3">关联报告《GitHub 英语学习开源生态》—— FSRS、Echoic/speechocean762 发音评测、整 App 只能借架构不能 fork、license 纠正（WhisperX=BSD-2、Piper 转 GPL、olp-en-cefrj CC-BY-SA 触发 ShareAlike 等）。<a href="./github-english-learning.html" target="_blank" rel="noopener">github-english-learning.html</a> <span class="ref-meta">· 同目录关联报告 · 2026-06-11</span></li>
+        <li id="ref-4">Tauri 官方插件 —— tauri-plugin-sql（SQLite/MySQL/Postgres 持久化）、tauri-plugin-store（KV）、externalBin/sidecar 机制（父报告已核）。<a href="https://v2.tauri.app/plugin/" target="_blank" rel="noopener">v2.tauri.app/plugin</a> <span class="ref-meta">· 官方 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-5">m-bain/whisperX —— Automatic Speech Recognition with Word-level Timestamps（wav2vec2 强制对齐，词级 ±50ms）。本轮核实：<strong>License BSD-2-Clause</strong>、~22.4k★、v3.8.6（2026-05）活跃；<u>diarization 用 pyannote-audio 模型，权重为 CC-BY-4.0，与代码许可分开</u>（小贝只需对齐、不需 diarization）。<a href="https://github.com/m-bain/whisperX" target="_blank" rel="noopener">github.com/m-bain/whisperX</a> <span class="ref-meta">· repo 核实 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-6">open-spaced-repetition/ts-fsrs —— TypeScript FSRS v6 调度器。本轮核实：<strong>License MIT</strong>、~685★、2026-06 活跃（含 binding 优化器）。<a href="https://github.com/open-spaced-repetition/ts-fsrs" target="_blank" rel="noopener">github.com/open-spaced-repetition/ts-fsrs</a> <span class="ref-meta">· repo 核实 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-7">open-spaced-repetition/fsrs-rs —— Rust FSRS（含 Burn 优化器+调度器，纯 Rust 适合 Tauri 后端）。本轮核实：<strong>License BSD-3-Clause</strong>、~381★、v6.6.0（2026-06）活跃。<a href="https://github.com/open-spaced-repetition/fsrs-rs" target="_blank" rel="noopener">github.com/open-spaced-repetition/fsrs-rs</a> <span class="ref-meta">· repo 核实 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-8">rudi-q/glucose_media_player —— Tauri+Svelte+Rust Windows 媒体播放器，本地 Whisper 转写、srt/vtt/ass、MKV/MP4 抽内嵌字幕、双音轨。本轮核实：<strong>License EUPL-1.2（copyleft，不可 fork 进闭源）</strong>、~99★、v3.6.1（2026-06）很活跃；<u>最像小贝的开源近亲，但只能读架构</u>。<a href="https://github.com/rudi-q/glucose_media_player" target="_blank" rel="noopener">github.com/rudi-q/glucose_media_player</a> <span class="ref-meta">· repo 核实 🟢 · license 性质以其 LICENSE 为准 ⚠️ · 访问 2026-06-11</span></li>
+        <li id="ref-9">nini22P/tauri-plugin-libmpv —— 在 Tauri 里通过 libmpv 嵌入 mpv 播放器。本轮核实：<strong>License MPL-2.0</strong>、~12★、Windows 已测/Linux 实验/macOS 未测、小项目无 release。<u>小贝若 HTML5 video 够用可先不引</u>。<a href="https://github.com/nini22P/tauri-plugin-libmpv" target="_blank" rel="noopener">github.com/nini22P/tauri-plugin-libmpv</a> <span class="ref-meta">· repo 核实 🟡 · 访问 2026-06-11</span></li>
+        <li id="ref-10">MDN / web.dev —— 浏览器录音标准 API：getUserMedia 取麦克风流 + MediaRecorder 录制 + Web Audio API（AnalyserNode）做波形可视化。无需第三方库。<a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API/Using_the_MediaStream_Recording_API" target="_blank" rel="noopener">MDN MediaStream Recording</a> · <a href="https://web.dev/patterns/media/microphone-record/" target="_blank" rel="noopener">web.dev 录音模式</a> <span class="ref-meta">· 官方文档 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-11">gsantiago/subtitle.js —— 流式字幕解析（SRT 完整、VTT 部分）。本轮核实：<strong>License MIT</strong>、~435★、v4.1.2（2022-01，<u>停更但格式稳定可用</u>）。<a href="https://github.com/gsantiago/subtitle.js" target="_blank" rel="noopener">github.com/gsantiago/subtitle.js</a> <span class="ref-meta">· repo 核实 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-12">SYSTRAN/faster-whisper —— CTranslate2 加速 Whisper（比 openai/whisper 快 ~4×）。<strong>License MIT</strong>，活跃。父报告偏 whisper.cpp（更易作 sidecar 嵌入），faster-whisper 为 Python 栈备选。<a href="https://github.com/SYSTRAN/faster-whisper" target="_blank" rel="noopener">github.com/SYSTRAN/faster-whisper</a> · <a href="https://github.com/SYSTRAN/faster-whisper/blob/master/LICENSE" target="_blank" rel="noopener">LICENSE</a> <span class="ref-meta">· repo 核实 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-13">readbeyond/aeneas —— 文本↔音频强制对齐（Python/C）。本轮核实：<strong>License AGPL-3.0（传染）</strong>、最后 release v1.7.3（<u>2017-03，停更 8 年</u>）。<strong>⛔ 不推荐</strong>：AGPL + 停更 + 精度不如 whisperX，对齐直接用 whisperX。<a href="https://github.com/readbeyond/aeneas" target="_blank" rel="noopener">github.com/readbeyond/aeneas</a> <span class="ref-meta">· repo 核实 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-14">Echoic（github-eng 报告已核：MIT、~37★、commit 到 2026-05、0 正式 release，whisperX+wav2vec2+phonemizer 接线图，单人原型宜读思路自己重搭，非生产后端）。本报告引用其结论不重刨。<a href="./github-english-learning.html" target="_blank" rel="noopener">见 github-english-learning.html Ch6</a> <span class="ref-meta">· 经关联报告核实 🟡 · 访问 2026-06-11</span></li>
+        <li id="ref-15">YuanGongND/gopt —— Transformer-Based 多维多粒度非母语发音评测（GOPT，ICASSP 2022）。本轮核实：<strong>License BSD-3-Clause</strong>、~212★、<u>研究 repo（非生产就绪）</u>、用 speechocean762（CC-BY-4.0）训练。<a href="https://github.com/YuanGongND/gopt" target="_blank" rel="noopener">github.com/YuanGongND/gopt</a> <span class="ref-meta">· repo 核实 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-16">kaldi-asr/kaldi · egs/gop_speechocean762 —— 经典 GOP 音素级发音评分 recipe（nnet3 TDNN，主仓内）。<strong>kaldi 整体 License Apache-2.0</strong>；speechocean762 语料 CC-BY-4.0（5000 句非母语 Mandarin-L1，半数儿童）。基线 PCC≈0.45 父报告已述。<a href="https://github.com/kaldi-asr/kaldi/tree/master/egs/gop_speechocean762" target="_blank" rel="noopener">kaldi gop_speechocean762</a> · <a href="https://arxiv.org/pdf/2104.01378" target="_blank" rel="noopener">speechocean762 论文</a> <span class="ref-meta">· repo+论文 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-17">kgurniak91/yall-mp（Y'ALL Media Player）—— Electron+Angular+MPV 语言学习播放器：字幕时间轴编辑、Yomitan 离线词典、一键 Anki 造卡。本轮核实：<strong>License GPL-3.0（传染，只看交互别 fork）</strong>、~28★、v0.9.8-beta（2026-04）活跃、Windows 稳定。<a href="https://github.com/kgurniak91/yall-mp" target="_blank" rel="noopener">github.com/kgurniak91/yall-mp</a> <span class="ref-meta">· repo 核实 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-18">《计算机软件保护条例》第十七条 —— 「为了学习和研究软件内含的设计思想和原理，通过安装、显示、传输或者存储软件等方式使用软件的，可以不经软件著作权人许可，不向其支付报酬。」学界视为有限度软件反向工程合法性依据，限于「学习/研究设计思想与原理」目的。<a href="https://xzfg.moj.gov.cn/front/law/detail?LawID=914" target="_blank" rel="noopener">国家行政法规库·计算机软件保护条例</a> · <a href="http://ipr.ruc.edu.cn/__local/2/39/75/7C26CC8F779E3D03D82DADAAB58_84E7AD8A_98488.pdf" target="_blank" rel="noopener">张吉豫·软件反向工程的合法性（人大）</a> <span class="ref-meta">· 法规+学术 🟢 · 非法律意见 · 访问 2026-06-11</span></li>
+        <li id="ref-19">EULA 禁逆向条款效力 —— 即便用户签禁逆向协议，若行为落入《软件保护条例》第十七条等法定豁免（学习思想原理/兼容性）仍可主张豁免；EULA 使用限制基于著作权法/合同法/反法多重基础。<a href="https://www.allbrightlaw.com/CN/10475/d869f2f14861bfb.aspx" target="_blank" rel="noopener">锦天城·嵌入式软件反法保护路径</a> <span class="ref-meta">· 律所文章 🟡 · 非法律意见 · 访问 2026-06-11</span></li>
+        <li id="ref-20">《反不正当竞争法》/ 商业秘密与反向工程 —— 最高法司法解释明确：通过合法反向工程获得商业秘密不构成侵权；但以不正当手段获取后托词反向工程，法院不予支持。软件「思想/表达二分」：表达（代码）受保护、思想（功能原理）不受保护。<a href="http://ipr.ruc.edu.cn/__local/2/39/75/7C26CC8F779E3D03D82DADAAB58_84E7AD8A_98488.pdf" target="_blank" rel="noopener">软件反向工程合法性（含反法/商业秘密分析）</a> <span class="ref-meta">· 学术 🟢 · 非法律意见 · 访问 2026-06-11</span></li>
+        <li id="ref-21">软件著作权登记（中国版权保护中心）—— 基础登记服务自 2017-04 起免费（国家版权局停征登记费/证书费）；自行申请周期约 30 工作日取证（案例口径约 41 天含补正）；流程：注册→实名→在线填报（源码+说明书）→受理→审查→领证；<strong>只要创作完成即可登记，非发布/上线必需</strong>。<a href="https://www.ccopyright.com.cn/index.php?optionid=1061" target="_blank" rel="noopener">中国版权保护中心·收费标准</a> · <a href="https://m.sme-gov.cn/ruanzhu.html" target="_blank" rel="noopener">软著登记资料/费用/周期解答</a> <span class="ref-meta">· 官方+服务平台 🟡 政策以官网为准 · 访问 2026-06-11</span></li>
+        <li id="ref-22">killergerbah/asbplayer —— 浏览器媒体播放器 + Chrome 扩展，字幕句子挖矿 + Anki 造卡（流媒体与本地拖入文件）。本轮核实：<strong>License MIT</strong>、~1k★、2026-05 活跃。<u>是浏览器扩展/网页，碰不到硬盘原生文件，形态≠桌面</u>，借交互范式不借形态。<a href="https://github.com/killergerbah/asbplayer" target="_blank" rel="noopener">github.com/killergerbah/asbplayer</a> <span class="ref-meta">· repo 核实 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-23">xiaochong/hi-kid（HiKid）—— 非英语国家儿童本地 AI 英语口语 pal。本轮核实：<strong>License MIT</strong>、~935★、v0.1.0（2026-04）、<u>Electron（非 Tauri）+ 目前 macOS-only</u>、本地 Qwen3-ASR + kitten-tts + Ollama 全离线。本地 ASR/TTS/LLM 管线是好参考，但壳/平台与小贝不同。<a href="https://github.com/xiaochong/hi-kid" target="_blank" rel="noopener">github.com/xiaochong/hi-kid</a> <span class="ref-meta">· repo 核实 🟢 · 访问 2026-06-11</span></li>
+        <li id="ref-24">科技项目立项（政府科技计划/高新企业）—— 指政府支持科技创新的科技计划项目审批/启动，企业与政府签「科技计划项目合同书」约定验收考核指标以换经费；与高企认定/科技型中小企业是配套政策。<u>面向中国注册、拿政府研发补贴的企业，海外单人 indie 不涉及</u>。<a href="https://zhuanlan.zhihu.com/p/571084671" target="_blank" rel="noopener">政府科技项目申报流程</a> · <a href="https://www.zjintel.com/article-item-1407.html" target="_blank" rel="noopener">高企与科技型中小企业区别</a> <span class="ref-meta">· 行业口径 🟡 · 访问 2026-06-11</span></li>
+        <li id="ref-25">DMCA §1201(f) 互操作性例外 + clean-room —— 合法取得软件者为实现独立程序的互操作可规避访问控制识别必要元素（严格限于兼容性，非随便逆向）；净室逆向（分析组写规格、实现组只看规格）是行业降低著作权风险的标准做法。<a href="https://www.eff.org/issues/coders/reverse-engineering-faq" target="_blank" rel="noopener">EFF Coders' Rights 逆向 FAQ</a> · <a href="https://www.copyright.gov/policy/1201/" target="_blank" rel="noopener">U.S. Copyright Office §1201</a> <span class="ref-meta">· EFF+美版权局 🟢 · 非法律意见 · 访问 2026-06-11</span></li>
+        <li id="ref-26">项目章程（project charter）—— 项目启动期产出，说明目标/范围/里程碑/成功标准/风险/预算/时间线；可从完整文件简化到「一张纸」以适应小项目；对独立开发者价值是动手前钉清范围与「不做什么」。<a href="https://www.atlassian.com/zh/work-management/project-management/project-planning/project-charter" target="_blank" rel="noopener">Atlassian·项目章程指南</a> <span class="ref-meta">· 行业方法论 🟢 · 访问 2026-06-11</span></li>
+      </ol>
+      <div class="callout info" style="margin-top:16px">
+        <p><strong>核实声明：</strong>本报告所有开源项目的 star/license/活跃度均于 2026-06-11 逐 repo 核实（whisperX BSD-2 / glucose EUPL-1.2 / ts-fsrs MIT / fsrs-rs BSD-3 / subtitle.js MIT / aeneas AGPL-3 / gopt BSD-3 / yall-mp GPL-3 / asbplayer MIT / hi-kid MIT / tauri-plugin-libmpv MPL-2.0），<strong>license 以各仓库 LICENSE 文件为准</strong>（⚠️ EUPL/copyleft 性质、whisperX 的 pyannote 模型权重 CC-BY-4.0 与代码许可分开等已标注）。<u>工期估算（人周/月）全部为「单人+AI 辅助」的类比体感，标 🔴 非承诺</u>，真实工期由对齐/发音评分的反复次数决定，可能差 2–3 倍。法律部分（软件保护条例第十七条、反法商业秘密、EULA 效力、DMCA §1201(f)、软著流程费用周期、科技项目立项）为一般性梳理，<strong>非法律意见</strong>，有风险动作前请咨询律师。承接父报告/姐妹 spec/github-eng 报告的结论（Tauri/whisper.cpp/讯飞/欧路/FSRS/license 纠正）不重新刨证。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>小贝开发落地深度研究 · 《小贝》报告开发子报告 · 整理：无忌 · 2026-06-11</p>
+    <p style="font-size:12px">开源 star/license 当日核实 · 工期为类比估算非承诺 · 法律部分非法律意见 · 落地实现代码留工程 session</p>
+  </footer>
+</main>
+
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+<script>
+/* 阅读进度条 + back-to-top */
+(function(){
+  var prog=document.getElementById('progress');
+  var btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement;
+    var sc=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100;
+    prog.style.width=sc+'%';
+    if(h.scrollTop>500)btt.classList.add('show');else btt.classList.remove('show');
+  }
+  window.addEventListener('scroll',onScroll);onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+/* 主题切换 */
+(function(){
+  var b=document.body,t=document.getElementById('themeToggle');
+  var saved=localStorage.getItem('devroadmap-theme');if(saved)b.setAttribute('data-theme',saved);
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('devroadmap-theme',n);upd();});
+})();
+/* 章节折叠 */
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+/* FAQ 折叠 */
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+/* 表格行高亮 */
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+/* demo 卡片展开 */
+document.querySelectorAll('.demo-card').forEach(function(c){
+  c.addEventListener('click',function(){c.classList.toggle('open');});
+});
+/* 复杂度矩阵筛选 */
+(function(){
+  var tog=document.getElementById('cxToggle');
+  if(!tog)return;
+  tog.querySelectorAll('.sim-btn').forEach(function(b){
+    b.addEventListener('click',function(e){
+      e.stopPropagation();
+      tog.querySelectorAll('.sim-btn').forEach(function(x){x.classList.remove('active');});
+      b.classList.add('active');
+      var f=b.getAttribute('data-cx');
+      document.querySelectorAll('#cxBody tr').forEach(function(tr){
+        tr.style.display=(f==='all'||tr.getAttribute('data-cx')===f)?'':'none';
+      });
+    });
+  });
+})();
+/* roadmap 里程碑切换 */
+(function(){
+  var ms={
+    'm0':{os:'M0 · 脚手架',icon:'🧱',title:'起 Tauri 2.x 壳',body:'create-tauri-app 起项目；读 glucose_media_player 架构理解「Tauri 怎么播本地视频+调 Whisper」（读不抄）。',vk:'warn',vt:'阶段一 · 最简单的起点'},
+    'm1':{os:'M1 · 播放+字幕',icon:'▶️',title:'本地视频 + 字幕渲染',body:'HTML5 video 播本地 mp4；subtitle.js(MIT) 解析 srt，逐句高亮+点句跳转。先用现成字幕。',vk:'warn',vt:'🟢 简单：纯前端'},
+    'm2':{os:'M2 · 转写',icon:'🎙️',title:'whisper.cpp sidecar',body:'无字幕视频本地转写出字幕（父报告 externalBin 路径）；做模型下载/进度 UX。',vk:'warn',vt:'🟡 中：产品化难非算法难'},
+    'm3':{os:'M3 · 对齐+逐句 ★',icon:'🎯',title:'whisperX 强制对齐',body:'出句级/词级时间戳→「点一句 AB 循环精听」。拿有背景音的真实视频试——这步体验决定小贝成不成立。',vk:'bad',vt:'🔴 核心难点：精度反复调'},
+    'm4':{os:'M4 · 录音(=阶段一出口)',icon:'🔴',title:'录音 + 回放对比',body:'getUserMedia+MediaRecorder 录跟读，波形可视化，与原句对比。阶段一出口：种子用户愿连用。',vk:'warn',vt:'🟡 中 · 阶段一收尾'},
+    'm5':{os:'M5 · 发音评分',icon:'📊',title:'云·讯飞 ISE',body:'依赖 M4 录音。接讯飞 ISE（姐妹 spec），把多维分映射成友好反馈。进入阶段二。',vk:'bad',vt:'🔴 难在反馈呈现非接口'},
+    'm8':{os:'M8 · 签名(=阶段二出口)',icon:'🔏',title:'双端签名公证+updater',body:'CI 矩阵 + 证书（签名 spec）；minisign updater。阶段二出口：留存+付费意愿验证。',vk:'bad',vt:'🔴 持续工程税'},
+    'm9':{os:'M9 · 阶段三',icon:'📈',title:'变现+本地化降本',body:'变现；发音评分从云迁本地（gopt/kaldi，降成本+解合规）；性能+国内合规备案。出口：单位经济为正。',vk:'good',vt:'🟪 放量阶段'}
+  };
+  var dlg=document.getElementById('msDialog'),tog=document.getElementById('msToggle');
+  if(!dlg||!tog)return;
+  function render(key){
+    var s=ms[key];if(!s)return;
+    dlg.innerHTML='<div class="sd-os">'+s.os+'</div><div class="sd-icon">'+s.icon+'</div><div class="sd-title">'+s.title+'</div><div class="sd-body">'+s.body+'</div><div class="sd-verdict '+s.vk+'">'+s.vt+'</div>';
+  }
+  tog.querySelectorAll('.sim-btn').forEach(function(b){
+    b.addEventListener('click',function(e){
+      e.stopPropagation();
+      tog.querySelectorAll('.sim-btn').forEach(function(x){x.classList.remove('active');});
+      b.classList.add('active');render(b.getAttribute('data-ms'));
+    });
+  });
+  render('m0');
+})();
+/* 移动端抽屉导航 + scrollspy */
+(function(){
+  var nav=document.querySelector('.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(tog&&nav&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=Array.prototype.slice.call(document.querySelectorAll('.anchor-list a')),secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120,cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur)cur.a.classList.add('active');
+  }
+  window.addEventListener('scroll',spy);spy();
+})();
+/* citation popover */
+(function() {
+  var activePopover=null,activeTrigger=null,hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect();
+    var pw=Math.min(380,window.innerWidth-24);
+    pop.style.width=pw+'px';
+    var left=r.left+window.scrollX;
+    if(left+pw>window.scrollX+window.innerWidth-12)left=window.scrollX+window.innerWidth-pw-12;
+    if(left<window.scrollX+12)left=window.scrollX+12;
+    pop.style.left=left+'px';
+    pop.style.top=(r.bottom+window.scrollY+6)+'px';
+  }
+  function showPopover(trigger){
+    if(activePopover){activePopover.remove();activePopover=null;}
+    if(hideTimer)clearTimeout(hideTimer);
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  bindCites();
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);
+  window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

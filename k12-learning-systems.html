@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>K12 学习系统全景研究：国内外头部产品的产品形态 / AI 能力 / 学习科学 / 商业模式 · 无忌 Deep Research · 2026-06-15</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 01 尺子与全景</a>
+    <a href="#ch2" data-target="ch2">02 02 市场格局</a>
+    <a href="#ch3" data-target="ch3">03 03 国内产品形态</a>
+    <a href="#ch4" data-target="ch4">04 04 海外产品形态</a>
+    <a href="#ch5" data-target="ch5">05 05 AI辅导答疑</a>
+    <a href="#ch6" data-target="ch6">06 06 口语评测对话</a>
+    <a href="#ch7" data-target="ch7">07 07 自适应知识追踪</a>
+    <a href="#ch8" data-target="ch8">08 08 词汇复习引擎</a>
+    <a href="#ch9" data-target="ch9">09 09 分级阅读体系</a>
+    <a href="#ch10" data-target="ch10">10 10 学习科学打假</a>
+    <a href="#ch11" data-target="ch11">11 11 商业模式与双减</a>
+    <a href="#ch12" data-target="ch12">12 12 机构分销白标</a>
+    <a href="#ch13" data-target="ch13">13 13 横向对比大表</a>
+    <a href="#ch14" data-target="ch14">14 14 banmi 路线建议</a>
+    <a href="#faq" data-target="faq">15 FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">16 References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>K12 学习系统全景研究：国内外头部产品的产品形态 / AI 能力 / 学习科学 / 商业模式</h1>
+    <div class="hero-meta">
+      <span>📅 2026-06-15</span>
+      <span>🔍 6 路并行搜证 + 80+ 次检索</span>
+      <span>🧭 尺子：用 banmi 量市场</span>
+      <span>🎯 委托方：banmi（AI 英语学习系统 · toB2B2C）</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>一句话定调：K12 学习系统的护城河正在从「内容」搬到「AI 辅导对话 + 评测引擎」，而 banmi 恰好强在内容深耕 + 多端授权 + 统一 FSRS 复习引擎，弱在 AI 辅导 / 对话 / 口语评测——这正是市场上钱和增长都在涌入的那一层。本报告用四把尺子（产品形态 / AI 能力 / 学习科学 / 商业模式）横扫国内外头部产品，并刻意做了一件别家研究不做的事：把「真 RCT 证据」「厂商自报数据」「营销话术」严格分开标注，告诉你哪些学习科学真该抄、哪些是坑别踩。</strong></p>
+      <p>报告按四维度展开：先立尺子与全景地图（Ch1）→ 市场格局两类玩家（Ch2）→ 产品形态国内（Ch3）/ 海外（Ch4）→ AI 三层能力：辅导答疑（Ch5）/ 口语评测与对话（Ch6）/ 自适应知识追踪（Ch7）→ 词汇复习引擎 SRS（Ch8）→ 分级阅读体系（Ch9）→ <strong>学习科学打假（Ch10，本报告最有价值的一章）</strong>→ 商业模式与双减重塑（Ch11）→ 机构分销白标范式（Ch12）→ 横向对比大表（Ch13）→ banmi 路线建议含决策树（Ch14）→ FAQ（Ch15）→ References（Ch16）。所有价格/营收/效应量标注访问日期 2026-06-15，关键数据标 🟢多源 / 🟡单源弱证 / 🔴估算。</p>
+    </div>
+  </div>
+
+  <div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+    <p style="margin:0"><strong>📌 三条最关键发现（先扫这个）：</strong></p>
+    <ul style="margin:8px 0 0">
+      <li><strong>双减把中国 K12 营利性学科 toC 大班课基本压没，三巨头全部转向「AI 学习机硬件 + toB 进校」双轨——硬件成了主战场。</strong>义务教育阶段学科类机构从 12.4 万家压减到 4,140 家（-96%，非归零、且统一转为非营利）<sup class="cite" data-refid="40">[40]</sup>；作业帮学习机 2025 全年发货 248.8 万台、线上销量份额 32.6%（奥维睿沃口径）行业第一<sup class="cite" data-refid="2">[2]</sup>；好未来内容解决方案（toB 进校）占比从 16.3% 升至 31.8%<sup class="cite" data-refid="1">[1]</sup>。<strong>对 banmi 的含义：直接面向义务教育学生的营利性学科 toC 在中国受双减强约束，banmi 的「合作公司→老师」逐级授权（toB2C）是相对合规且竞争尚不拥挤的路径</strong>（⚠️ 此为产品策略判断，非法律意见；落地前须就英语学科属性、未成年人数据 PIPL、生成式 AI 备案、机构预付费监管做专项合规核查）。<span class="conf y">🟡</span></li>
+      <li><strong>"AI 让学生学更好"在严格证据下被大幅缩水：自适应/个性化 EdTech 整体效应量只有 d≈0.18，Bloom "2 sigma" 真实约 0.79 sigma，FSRS 减 20-30% 复习量来自开发者内部 benchmark 而非独立 RCT。</strong>真正经得起检验的只有两条——间隔重复（spacing effect，254 项研究 meta）<sup class="cite" data-refid="30">[30]</sup>和测试效应（retrieval practice）<sup class="cite" data-refid="31">[31]</sup>。<strong>banmi 的统一 FSRS 复习引擎踩在「真证据」上是对的；但别把 FSRS 的 vendor 宣传当卖点，i+1、Lexile、"自适应革命"这些要么不可证伪、要么被系统性夸大。</strong><span class="conf g">🟢</span></li>
+      <li><strong>AI 能力是 banmi 唯一明显的补位缺口，且市场已经给出三条成熟范式：Khanmigo 的「苏格拉底式不给答案」辅导、ELSA/讯飞 ISE 的「音素级口语评测」、Speak/有道 Hi Echo 的「LLM 多轮口语对话」。</strong>Khanmigo 用户一年从约 6.8 万涨到约 70 万（2024-11 口径，最新年报更称已触达约 200 万）<sup class="cite" data-refid="11">[11]</sup><sup class="cite" data-refid="13">[13]</sup>，Speak 估值 10 亿美元靠 OpenAI Realtime API 做对话<sup class="cite" data-refid="22">[22]</sup>，有道 Hi Echo 国内首个虚拟人口语私教 68 元/月<sup class="cite" data-refid="14">[14]</sup>。<strong>banmi 该补的不是"再做一个大模型"，而是把现成 LLM + 第三方音素评测（如讯飞 ISE）接进已有的阅读/口语/书板块——内容是 banmi 的，AI 辅导层可以买。</strong><span class="conf g">🟢</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1" data-nav="01 尺子与全景">
+    <h2><span class="num">01</span><span class="title-text">导读：用 banmi 当尺子量市场</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>K12 学习系统是一个被「双减」「大模型」「学习机硬件」三股力量同时重塑的市场。要在信息洪流里看清门道，需要一把固定的尺子。本报告的尺子就是<strong>委托方 banmi 自己</strong>——一个面向中国 K12 学生的 AI 英语学习系统，四级架构（总部 HQ → 合作公司 → 老师 → 学生），本质是 toB2B2C / 白标分销 + 中央内容工厂。</p>
+      <h3>banmi 的家底（量市场前先量自己）</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">8 板块</div><div class="l">阅读 / 听力 / 口语 / 写作 / 词汇 / 书 / 考试测评 / 语法，内容深耕已落地</div></div>
+        <div class="metric"><div class="v">9,287 词</div><div class="l">CEFR 对齐词库（Oxford 3000/5000 + CEFR-J + Octanove 三源合并）</div></div>
+        <div class="metric"><div class="v">1 个 FSRS</div><div class="l">统一间隔复习「大脑」—— 生词走词本位、概念错题走 review_item，同一引擎</div></div>
+        <div class="metric"><div class="v">4 级授权</div><div class="l">总部→公司→老师→学生逐级授权，白标分销底座</div></div>
+      </div>
+      <p>技术栈 Next.js + FastAPI + Supabase + R2，已真部署。从证据看，banmi 的强项与弱项异常清晰：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>维度</th><th>banmi 现状</th><th>市场标杆做到了什么</th><th>差距判断</th></tr></thead>
+        <tbody>
+          <tr><td><strong>内容深耕</strong></td><td class="check y">8 板块 + EnglishPod/Crash Course/美剧逐句播放器 + 雅思题库录入中</td><td>Newsela/Raz 内容库，但多为单一形态</td><td>banmi 领先（多形态多板块）</td></tr>
+          <tr><td><strong>多端授权</strong></td><td class="check y">四级逐级授权，白标底座</td><td>IXL district / 松鼠AI 加盟 / 白标 LMS</td><td>banmi 架构对，但渠道未铺</td></tr>
+          <tr><td><strong>复习引擎</strong></td><td class="check y">统一 FSRS，跨板块一个大脑</td><td>Duolingo HLR / 墨墨 MM / Quizlet</td><td>banmi 选型先进（FSRS&gt;SM-2）</td></tr>
+          <tr><td><strong>AI 辅导/对话</strong></td><td class="check n">明显待补位</td><td>Khanmigo 苏格拉底式 / Duolingo Max / 三大教育大模型</td><td><strong>banmi 最大缺口</strong></td></tr>
+          <tr><td><strong>口语评测</strong></td><td class="check p">有口语板块（朗读/跟读）但无音素级评分</td><td>ELSA 音素级 / 讯飞 ISE / Speak 对话</td><td>banmi 有形无核</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info"><p><strong>本章结论：</strong>banmi 不是要从零追赶大平台，而是一个「内容 + 分销 + 复习引擎」三角都已成型、独缺 AI 辅导层的系统。后面所有章节都围绕一个问题展开——<strong>市场上那些钱和增长涌入的能力，哪些 banmi 该自建、哪些该买、哪些是营销泡沫别碰。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2" data-nav="02 市场格局">
+    <h2><span class="num">02</span><span class="title-text">市场格局：两类玩家，banmi 卡在中间</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把国内外头部产品摊开看，K12 学习系统市场清晰地分成两类玩家，而 banmi 恰好不属于任何一类——它卡在中间，这既是机会也是定位难题。</p>
+      <div class="callout purple"><h3>🅰️ 全科大平台：横向铺满，纵向靠规模与硬件</h3><p>作业帮、猿辅导系、学而思（好未来）、Khan Academy、IXL。覆盖语数英全科甚至全学段，靠题库规模（作业帮 19 亿题<sup class="cite" data-refid="7">[7]</sup>、猿辅导 15 亿题<sup class="cite" data-refid="6">[6]</sup>）、用户规模（作业帮月活 1.7 亿<sup class="cite" data-refid="2">[2]</sup>、Khan 注册 1.896 亿<sup class="cite" data-refid="13">[13]</sup>）和硬件/进校分发取胜。它们的弱点是单科深度有限、形态偏「搜题+刷题+录播课」，AI 多用于解题答疑而非沉浸式学习体验。</p></div>
+      <div class="callout purple"><h3>🅱️ 单点深做的英语/阅读产品：纵向钻透，横向窄</h3><p>Duolingo、ELSA、Speak、流利说、有道 Hi Echo（语言）；Newsela、Raz-Kids、Epic、ReadWorks（分级阅读）；墨墨、不背单词、Quizlet（词汇）。每家把一个能力做到极致——Duolingo 把游戏化+SRS 做成 1.35 亿月活<sup class="cite" data-refid="20">[20]</sup>，ELSA 把音素级发音诊断做成差异化<sup class="cite" data-refid="21">[21]</sup>，墨墨把 SRS 算法做成 FSRS 的源头<sup class="cite" data-refid="17">[17]</sup>。弱点是单一形态、缺乏跨技能的统一学习闭环。</p></div>
+      <div class="callout accent"><h3>📍 banmi 的位置：英语全技能 + 统一复习引擎，但内容比单点产品广、AI 比大平台弱</h3><p>banmi 不是全科（只做英语），也不是单点（阅读/听力/口语/写作/词汇/书/语法/考试八板块全做，还有统一 FSRS 串起来）。这个定位在市场上罕见——它最像「英语版的小型 Khan Academy + 自带分销渠道」。<strong>卡在中间的风险</strong>：大平台用规模碾压、单点产品用深度碾压；<strong>卡在中间的机会</strong>：没有任何一家同时做到「英语全技能闭环 + 四级白标授权 + 统一复习大脑」，这正是 banmi 的差异化护城河。前提是补上 AI 辅导层，否则「闭环」是断的（学生练完没有即时 AI 反馈）。<span class="conf y">🟡</span>（定位判断属分析推断）</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3" data-nav="03 国内产品形态">
+    <h2><span class="num">03</span><span class="title-text">产品形态（国内）：双减后 toC 课 → 硬件 + 进校</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>2021 年双减后，国内三巨头走了同一条路：砍掉义务教育学科 toC 大班课，转向「AI 学习机硬件 + toB 进校」双轨。这是理解中国 K12 市场最重要的一条主线。<sup class="cite" data-refid="1">[1]</sup></p>
+      <h3>三家转型对照</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>公司</th><th>硬件主战场</th><th>toB 进校</th><th>教育大模型</th><th>规模数据</th></tr></thead>
+        <tbody>
+          <tr><td><strong>作业帮</strong></td><td>学习机 2025 全年发货 248.8 万台 / 线上销量份额 32.6%（2025Q3 奥维睿沃）第一<sup class="cite" data-refid="2">[2]</sup>，主力 P30(2399)/P60(2999-3499)</td><td>云思智学进校 500+ 学校<sup class="cite" data-refid="1">[1]</sup></td><td>银河大模型 + AI 超级老师，过信通院最高等级，覆盖 2 万+ 学校<sup class="cite" data-refid="5">[5]</sup></td><td>月活 1.7 亿、累计激活 8 亿、题库 19 亿<sup class="cite" data-refid="2">[2]</sup></td></tr>
+          <tr><td><strong>猿辅导系</strong></td><td>小猿学练机墨水屏累计 100 万+ 台、年营收约 30 亿<sup class="cite" data-refid="3">[3]</sup>；小猿 AI 学习机起价 5999</td><td>飞象星球进校 183 地区<sup class="cite" data-refid="1">[1]</sup></td><td>看云/猿力大模型 + 2025-02 全线接入 DeepSeek-R1<sup class="cite" data-refid="6">[6]</sup></td><td>题库 15 亿、精讲视频 3 亿<sup class="cite" data-refid="6">[6]</sup></td></tr>
+          <tr><td><strong>学而思(好未来)</strong></td><td>学习机 2699-8599 元，在线销量同比+88% 达 35.6 万台<sup class="cite" data-refid="4">[4]</sup></td><td>内容解决方案占比 16.3%→31.8%<sup class="cite" data-refid="1">[1]</sup></td><td>九章大模型 MathGPT 过信通院 4+ 级，数学文字题正确率 97%+<sup class="cite" data-refid="5">[5]</sup></td><td>FY2025 营收 22.5 亿美元(+51%)<sup class="cite" data-refid="4">[4]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <h3>斑马 / 启蒙赛道：更名求生</h3>
+      <p>猿辅导旗下斑马 AI 课（原 2-8 岁启蒙）已更名为新思维/新双语/新人文以规避学科类监管<sup class="cite" data-refid="7">[7]</sup>。这是一个信号：<strong>面向低龄的英语启蒙在中国监管下名称都要改，banmi 若定位中小学英语必须想清楚合规话术（参照 banmi 内部已有的"内部使用产品"定位）。</strong></p>
+      <h3>行业格局：渗透率提升但未分胜负</h3>
+      <p>2025 Q1 六大品牌（作业帮/学而思/科大讯飞/步步高/小猿/小度）合计市占 74.4%<sup class="cite" data-refid="8">[8]</sup>；2024 学习平板全渠道销量 592.3 万台、销售额 190.6 亿元（+37.6%）<sup class="cite" data-refid="8">[8]</sup>。</p>
+      <div class="callout warn"><h4>⚠️ "真人答疑"翻车：学而思的前车之鉴</h4><p>学而思旗舰"随时问"真人服务已被静默替换为 AI，一年真人答题到期后全转 AI，用户评"更生硬、缺推导"；所谓"真人互动"实为录播课+AI 点击反馈，无实时监督，引发争议<sup class="cite" data-refid="9">[9]</sup>。<strong>给 banmi 的教训</strong>：AI 辅导能力如果做不到位，用"真人"话术包装迟早翻车；要么把 AI 苏格拉底式辅导真正做好（学 Khanmigo），要么诚实标注是 AI。<span class="conf g">🟢</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4" data-nav="04 海外产品形态">
+    <h2><span class="num">04</span><span class="title-text">产品形态（海外）：Khan / Duolingo / 分级阅读</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>海外没有双减，产品形态由商业模式驱动而非政策驱动，分成三大流派，每一派都对 banmi 有直接借鉴价值。</p>
+      <div class="callout info"><h4>① 公益免费大平台：Khan Academy</h4><p>最大免费 AI 教育平台，慈善资助，SY2024-25 总收入 1.28 亿美元（主要为捐赠及相关收入，另含投资收益/其他收入）；注册 1.896 亿、活跃 1.049 亿<sup class="cite" data-refid="13">[13]</sup>。全科覆盖、掌握式学习（mastery learning）路径、Khanmigo AI 辅导叠加收费。<strong>对 banmi 的启示</strong>：Khan 的「免费平台引流 + AI 辅导/学区版收费」分层是 banmi toB2C 可参照的范式。</p></div>
+      <div class="callout info"><h4>② 游戏化语言 app：Duolingo</h4><p>MAU 1.353 亿、付费 1150 万、Q3 2025 营收 2.717 亿美元(+41% YoY)、DAU 5050 万<sup class="cite" data-refid="20">[20]</sup>。核心=游戏化关卡 + 半衰期回归 SRS + Max 顶层 AI 对话订阅。<strong>对 banmi 的启示</strong>：Duolingo 的 freemium + SRS + AI 对话三层是「单点语言产品做到极致」的教科书，banmi 的词汇/复习引擎可对标其 SRS 层。</p></div>
+      <div class="callout info"><h4>③ 分级阅读：Newsela / Raz-Kids / Epic / ReadWorks</h4><p>Newsela 每篇文章 5 个 Lexile 等级、B2B 学区授权为主，独立研究（WestEd）显示西班牙裔暑期项目效果高 70%、符合 ESSA Tier II<sup class="cite" data-refid="24">[24]</sup>；Raz-Kids 课堂授权约 132 美元/年（36 生）<sup class="cite" data-refid="25">[25]</sup>；Epic 学校端免费、家长端 84.99 美元/年（图书馆 4 万+ 本）<sup class="cite" data-refid="25">[25]</sup>；ReadWorks 完全免费（非营利）<sup class="cite" data-refid="25">[25]</sup>。<strong>对 banmi 的启示</strong>：banmi 的「书」板块（左栏精读+标注）+ 阅读板块对标这一派，但 banmi 用 CEFR/CEFR-J 而非 Lexile（见 Ch9）。</p></div>
+      <h3>海外形态对 banmi 最直接的一条结论</h3>
+      <p>海外头部产品几乎都是<strong>单一商业模式做到极致</strong>（Khan 纯公益、Duolingo 纯 freemium、Newsela 纯 B2B 学区），很少有同时做 toC + toB + 白标的。banmi 的四级授权（既能 toB 卖给合作公司、又能 toC 触达学生）在海外都罕见——这是结构性差异化，但也意味着没有现成模板可抄，需要自己摸渠道（Ch12 详述）。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5" data-nav="05 AI辅导答疑">
+    <h2><span class="num">05</span><span class="title-text">AI 能力①：AI 辅导 / 答疑（Khanmigo vs 国内大模型）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是 banmi 最大的缺口，也是市场上最激烈的战场。AI 辅导分两条技术路线：海外的「苏格拉底式引导」和国内的「教育大模型解题答疑」。</p>
+      <h3>海外标杆：Khanmigo 的「绝不直接给答案」</h3>
+      <p>Khanmigo 基于 GPT-4，核心设计是<strong>苏格拉底式引导提问，绝不直接给答案</strong>，并有内容过滤防代写<sup class="cite" data-refid="10">[10]</sup>。定价：学生 4 美元/月或 44 美元/年，教师永久免费，学区约 15 美元/生/年（含 Khanmigo），已覆盖 380+ 学区<sup class="cite" data-refid="11">[11]</sup>。<strong>用户从 2023-24 的约 6.8 万暴涨到 2024-25 的约 70 万（2024-11 口径）<sup class="cite" data-refid="11">[11]</sup>，Khan 最新年报口径更称 SY24-25 Khanmigo 触达约 200 万用户、同比 +731%<sup class="cite" data-refid="13">[13]</sup></strong>——这是 AI 辅导需求真实存在的最强信号。</p>
+      <div class="callout warn"><p><strong>⚠️ 但要诚实：Khanmigo 的疗效 RCT 尚无结果。</strong>与多伦多/斯坦福的 RCT 进行中，截至 2024-11 尚无结果<sup class="cite" data-refid="11">[11]</sup>。真正有严谨证据的是 Khan Academy 平台本身（非 Khanmigo）：35 万名 3-8 年级准实验纵向研究显示每周用 30 分钟+ 者学习增益比预期高约 20%，掌握 2-3 个 skill 者高约 30%，但<strong>仅约 9% 学生达到推荐剂量</strong><sup class="cite" data-refid="11">[11]</sup>。这条"9% 达标"数据对 banmi 极其重要——见 Ch10。</p></div>
+      <h3>国内路线：三大教育大模型</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>大模型</th><th>归属</th><th>能力 / 认证</th><th>数据规模</th></tr></thead>
+        <tbody>
+          <tr><td><strong>银河大模型</strong></td><td>作业帮</td><td>AI 超级老师，过信通院可信 AI 教育智能体最高等级<sup class="cite" data-refid="5">[5]</sup></td><td>覆盖 400+ 城市、2 万+ 学校</td></tr>
+          <tr><td><strong>看云/猿力大模型</strong></td><td>猿辅导</td><td>2025-02 全线接入 DeepSeek-R1<sup class="cite" data-refid="6">[6]</sup></td><td>题库 15 亿、精讲视频 3 亿</td></tr>
+          <tr><td><strong>九章大模型 MathGPT</strong></td><td>好未来</td><td>过信通院 4+ 级，K12 数学文字题正确率 97%+，做 AI 解题/作文批改/口语分级练<sup class="cite" data-refid="5">[5]</sup></td><td>植入学习机</td></tr>
+          <tr><td><strong>子曰大模型</strong></td><td>有道</td><td>2024-07 获信通院最高评级（4+ 级），驱动 Hi Echo 口语私教<sup class="cite" data-refid="16">[16]</sup></td><td>14B，子曰翻译 2.0 宣称实测全球第一<sup class="cite" data-refid="16">[16]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout bad"><h4>给 banmi 的判断：别自研大模型，接现成 + 做苏格拉底式教学法封装</h4><p>三巨头/有道都自研了教育大模型，但它们有海量题库和资金。banmi 作为内部产品，<strong>自研大模型既无必要也无 ROI</strong>。正确路径是：① 接通用 LLM（如 GPT/Claude/DeepSeek）做底座；② 重点做<strong>教学法封装层</strong>——把 Khanmigo 的"苏格拉底式不给答案"、防代写、按学生水平调整提示这套 prompt 工程 + 教学法做扎实；③ 紧贴 banmi 已有的内容上下文（阅读篇章、词本位生词、书板块标注），让 AI 辅导"知道学生在学什么"。<strong>护城河在内容+教学法，不在模型本身。</strong><span class="conf y">🟡</span>（属军师判断，非实测）</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6" data-nav="06 口语评测对话">
+    <h2><span class="num">06</span><span class="title-text">AI 能力②：口语评测与 AI 对话</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>banmi 已有口语板块（朗读 / 美剧跟读，WebCodecs 逐句播放器），但缺「音素级评分」和「AI 多轮对话」两个核心引擎。这一层市场已经非常成熟，banmi 完全可以买而非自建。分两条技术线。</p>
+      <h3>技术线 A：音素级发音评测（打分诊断）</h3>
+      <div class="callout info"><h4>ELSA Speak —— 音素级精准打分</h4><p>以音素级精准打分为核心差异化（绿/黄/红 + 口型图），总融资 6000 万美元，用户超 1300 万（2021 数据）<sup class="cite" data-refid="21">[21]</sup>。定价 Free/Pro 约 13.33 美元/月（年付）/Premium 约 16-25 美元/月。这是消费级发音诊断的标杆。</p></div>
+      <div class="callout info"><h4>科大讯飞 ISE 引擎 —— 国内基础设施级评测</h4><p>支持音素→单词→句子三层打分，评分维度 total/accuracy/fluency/integrity，支持 phone_score（音素级）；已跑通 40+ 省级/国家级考试（高考/四六级），覆盖 250 万+ 师生<sup class="cite" data-refid="15">[15]</sup>。<strong>这是 banmi 最该直接调用的口语评测 API</strong>——讯飞把音素级评测做成了云服务，banmi 不必重复造轮子。</p></div>
+      <h3>技术线 B：AI 多轮口语对话（陪练）</h3>
+      <div class="callout info"><h4>Speak —— 市场最强 AI 对话，OpenAI Realtime API 驱动</h4><p>累计融资 1.62 亿美元、估值 10 亿美元；定价 20 美元/月或 99 美元/年；2024 底 15M+ 下载、App Store 4.8 分<sup class="cite" data-refid="22">[22]</sup>。核心是 OpenAI Realtime API 做实时语音对话。</p></div>
+      <div class="callout info"><h4>有道 Hi Echo —— 国内首个虚拟人口语私教</h4><p>基于子曰教育大模型，多轮自由对话 + 实时纠音；2.0 加难度分级（小初高大），3.0 内置雅思口语真题库；定价 68 元/月、连续包年 498 元/年<sup class="cite" data-refid="14">[14]</sup>。<strong>这是与 banmi 最像的产品形态参照</strong>——中国学生、英语、虚拟人对话、雅思真题（banmi 也在录雅思题库）。</p></div>
+      <p>另有 Duolingo Max 的 Video Call with Lily + Roleplay（GPT-4 驱动）<sup class="cite" data-refid="19">[19]</sup>、流利说"懂你英语"（早期 AI 自适应口语先驱，现深度衰退靠卖课维持，历史峰值注册 1.856 亿）<sup class="cite" data-refid="18">[18]</sup>。</p>
+      <div class="callout good"><h4>给 banmi 的明确建议：买评测 + 接 LLM 对话，绑定到已有内容</h4><p>① <strong>发音评测直接调讯飞 ISE</strong>（国内合规、考试级精度、音素级），接到 banmi 现有的朗读/美剧跟读板块，给学生打音素级分数；② <strong>AI 对话接 LLM Realtime API</strong>（参照 Speak/Hi Echo），但绑定 banmi 的内容——读完某篇文章后就这篇内容对话、学完某批词后用这些词造句对话；③ <strong>关键差异化</strong>：Speak/Hi Echo 是孤立对话产品，banmi 的对话可以"挂"在阅读/词汇/书的学习闭环里，对话内容由 banmi 内容工厂供给。这是 banmi 用内容优势补 AI 短板的最佳切口。<span class="conf y">🟡</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7" data-nav="07 自适应知识追踪">
+    <h2><span class="num">07</span><span class="title-text">AI 能力③：自适应与知识追踪</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>自适应（adaptive）和知识追踪（knowledge tracing）是 EdTech 营销最爱用的词，但也是证据最虚的一层（打假见 Ch10）。先看技术实现。</p>
+      <h3>三种典型实现</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>产品</th><th>技术核心</th><th>机制</th><th>证据强度</th></tr></thead>
+        <tbody>
+          <tr><td><strong>IXL SmartScore</strong></td><td>动态自适应算法</td><td>实时测掌握度 0-100，掌握目标 80，答错呈现更简单题；Flex Diagnostic 45 分钟/科目定位水平生成个性化路径<sup class="cite" data-refid="26">[26]</sup></td><td>自资助研究为主，仅 ESSA Tier 2 准实验<sup class="cite" data-refid="27">[27]</sup></td></tr>
+          <tr><td><strong>松鼠AI</strong></td><td>纳米级知识点图谱 + IRT + 大模型</td><td>知识图谱拆到"最小知识点"，2025 吉尼斯挑战 11.27 万学生×10.84 万条路径；自报 6 年级数学 60 分段 3 个月平均提 22 分<sup class="cite" data-refid="12">[12]</sup></td><td><strong>无 peer-reviewed efficacy，艾瑞/IDC 系受托发布</strong></td></tr>
+          <tr><td><strong>Riiid/Santa</strong></td><td>深度知识追踪(DKT) + IRT = Deep-IRT</td><td>预测 TOEIC 得分；EdNet 数据集 100 万+ 学生、9900 万次交互；2025-09 改名 Socra.ai<sup class="cite" data-refid="29">[29]</sup></td><td>模型准确率比较强，真实课堂 RCT 弱</td></tr>
+        </tbody>
+      </table></div>
+      <h3>一个被反复滥用的标签</h3>
+      <p>"自适应"在产品宣传里几乎是默认配置，但学界对"自适应让学生学更好"的整体效应量评估只有 d≈0.18-0.35（见 Ch10）。<strong>区分"真自适应"（实时调整难度/路径，如 IXL SmartScore、松鼠纳米级图谱）和"假自适应"（只是按答对答错换下一题）很重要。</strong></p>
+      <div class="callout warn"><h4>给 banmi 的判断：自适应是「锦上添花」不是「雪中送炭」，优先级低于 AI 辅导/口语</h4><p>① banmi 已有 FSRS 复习引擎，这本身就是一种"自适应"（按记忆状态调度复习），且踩在真证据上（间隔重复），比知识图谱式自适应靠谱；② 纳米级知识图谱（松鼠那套）需要海量标注和题库，banmi 没必要在英语上重做；③ <strong>真正值得做的自适应是「难度分级推送」</strong>——banmi 已有 CEFR/CEFR-J 9287 词库和分级阅读，按学生 CEFR 水平推送 i+1 难度内容（注意 i+1 本身是争议假说，见 Ch10），这是轻量、可解释、不画大饼的自适应。别学松鼠 AI 用"纳米级"做营销。<span class="conf y">🟡</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8" data-nav="08 词汇复习引擎">
+    <h2><span class="num">08</span><span class="title-text">词汇与复习引擎（SRS）：FSRS 的渊源与对照</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是 banmi 难得的「选型领先」环节。banmi 用统一 FSRS 引擎，而 FSRS 恰好是当前最先进的开源 SRS 算法之一。先理清渊源。</p>
+      <h3>FSRS 的中国血统：源自墨墨背单词</h3>
+      <div class="callout good"><p><strong>FSRS 源自墨墨背单词的 MM 算法（KDD 2022 论文 Stochastic Shortest Path）</strong><sup class="cite" data-refid="17">[17]</sup>。墨墨自研 MM/MMX 系列 + 开源 FSRS 系列；FSRS v4 性能略优于 SM-17。墨墨定价按词上限买断而非订阅：550 词 ¥8 / 4400 词 ¥50 / 8800 词 ¥88 / 17600 词 ¥163<sup class="cite" data-refid="17">[17]</sup>。<strong>这意味着 banmi 用 FSRS = 站在中文世界最强 SRS 研究的肩膀上，选型正确。</strong></p></div>
+      <h3>各家 SRS 对照</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>产品</th><th>SRS 算法</th><th>证据/数据</th><th>商业模式</th></tr></thead>
+        <tbody>
+          <tr><td><strong>banmi</strong></td><td>FSRS（统一引擎，词本位+概念错题共用）</td><td>FSRS 开源、benchmark 5 亿+ Anki 记录</td><td>内嵌系统</td></tr>
+          <tr><td><strong>墨墨背单词</strong></td><td>MM/MMX（FSRS 源头）</td><td>KDD 2022 论文 + 累计下载 3 亿+<sup class="cite" data-refid="37">[37]</sup></td><td>按词量买断</td></tr>
+          <tr><td><strong>Duolingo</strong></td><td>半衰期回归 HLR（ACL 2016）</td><td>基于 1300 万学习轨迹、开源、A/B 日活+12%<sup class="cite" data-refid="23">[23]</sup></td><td>freemium 订阅</td></tr>
+          <tr><td><strong>Quizlet</strong></td><td>Learn（SRS 变体，非 FSRS）</td><td>内部白皮书<sup class="cite" data-refid="28">[28]</sup></td><td>Plus 7.99 美元/月</td></tr>
+          <tr><td><strong>不背单词</strong></td><td>艾宾浩斯曲线（非 FSRS）</td><td>150 万+ 真人例句+图片，真实语境<sup class="cite" data-refid="36">[36]</sup></td><td>freemium</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout warn"><h4>⚠️ 关键诚实标注：FSRS"减 20-30% 复习量"是 vendor 数据，不是独立 RCT</h4><p>FSRS 比 SM-2 在保留率预测上更准，这有 5 亿+ Anki 记录的内部 benchmark 支撑<sup class="cite" data-refid="33">[33]</sup>；但"同等保留率减 20-30% 复习量"这个常被引用的卖点<strong>来自开发者内部 benchmark，无独立同行评审 RCT</strong><sup class="cite" data-refid="33">[33]</sup>。<strong>给 banmi 的纪律</strong>：用 FSRS 是对的（它确实预测更准 + 踩在间隔重复真证据上），但对外宣传别用"减 20-30% 复习量"这种 vendor 话术，那是 Ch10 打假表里点名的项目之一。</p></div>
+      <div class="callout good"><h4>banmi 的 SRS 反而是少有的优势项</h4><p>banmi 把 FSRS 做成<strong>跨板块统一引擎</strong>（生词、概念、错题共用一个大脑），这一点 Duolingo（只管词）、Quizlet（只管卡片）、墨墨（只管单词）都没做到——它们的 SRS 是单一内容类型的。banmi 的统一复习池（event_log/vocab/review-item 契约）让"读到的生词、错的语法、标注的句子"进同一个 FSRS 调度，这是结构性优势，应当作为差异化卖点强化，而非补位。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9" data-nav="09 分级阅读体系">
+    <h2><span class="num">09</span><span class="title-text">分级阅读体系：Lexile vs CEFR vs CEFR-J</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>banmi 用 CEFR/CEFR-J 对齐词库和内容分级，而海外分级阅读巨头（Newsela/Raz）用 Lexile。这两套体系的优劣对 banmi 的分级策略有直接影响。</p>
+      <h3>三套体系对照</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>体系</th><th>怎么测难度</th><th>覆盖</th><th>主要批评</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Lexile</strong></td><td>词频 + 句长（量化公式）</td><td>Newsela(5 级)/Raz-Kids(29 级)，美国主流</td><td>遗漏主题/意图/动机；叙事小说难度被系统低估；小标点改动致重新分级<sup class="cite" data-refid="34">[34]</sup></td></tr>
+          <tr><td><strong>CEFR</strong></td><td>六级能力描述符（A1-C2）</td><td>欧洲主流，全球通用</td><td>描述符解释一致性差，被批 Eurocentric、不适用亚洲学习者，B2 常被误用为门槛<sup class="cite" data-refid="35">[35]</sup></td></tr>
+          <tr><td><strong>CEFR-J</strong></td><td>把 CEFR 拆成 12 子级（A1/A2 各设 3 子级）</td><td>日本/亚洲学习者本地化</td><td>验证研究有限<sup class="cite" data-refid="35">[35]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout warn"><h4>⚠️ Lexile 的硬伤：2025 arXiv 论文称 readability 公式是阅读流畅度的糟糕预测器</h4><p>Lexile 只用词频+句长两个变量测难度，遗漏了主题、作者意图、读者动机——Krashen 本人批评过它，2025 arXiv 论文进一步指出 readability 公式是阅读流畅度的糟糕预测器<sup class="cite" data-refid="34">[34]</sup>。<strong>对 banmi 的含义</strong>：banmi 选 CEFR/CEFR-J 而非 Lexile，在"面向中国学生学英语"这个场景下其实更合理——CEFR 是能力框架（能做什么）而非纯文本难度公式，更贴合学习目标。但要注意 CEFR 自己的一致性问题（评分者间分歧大）。</p></div>
+      <div class="callout good"><h4>banmi 的分级资产是真优势</h4><p>banmi 的 9287 词库三源合并（Oxford 3000/5000 + CEFR-J + Octanove，banmi 内部资产）本身就是一笔难得的对齐资产——多数竞品要么只用 Lexile（文本难度），要么没有公开的 CEFR 对齐方法（证据包明确指出"各产品 CEFR 对齐方法未公开"）。banmi 把词库 CEFR 化做扎实了，应当：① 用它驱动 i+1 难度推送（但别迷信 i+1，见 Ch10）；② 在分级阅读上做成"CEFR 能力 + 词频双维度"，既避开 Lexile 的文学低估问题，又避开纯 CEFR 的主观性。<span class="conf y">🟡</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10" data-nav="10 学习科学打假">
+    <h2><span class="num">10</span><span class="title-text">学习科学打假：真证据 vs 厂商自报 vs 营销话术</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是本报告最有价值的一章。EdTech 行业最大的认知污染是：把"看起来科学"的概念当成"被证明有效"。本章严格区分三层证据——<strong>真 RCT/meta 证据（可信，该抄）、厂商自报数据（参考，打折看）、营销话术（被夸大/争议，别当卖点）</strong>。这个区分是 banmi 做产品决策时最该内化的纪律。</p>
+
+      <h3>第一层：真证据（peer-reviewed RCT/meta，🟢 该抄）</h3>
+      <div class="callout good"><h4>✅ 间隔重复（spacing effect）—— 认知科学证据最充分的学习规律之一</h4><p>Cepeda 2006 综合 254 项研究的 meta-analysis，确认间隔学习显著优于集中学习，最优间隔约为保留区间的 10-20%<sup class="cite" data-refid="30">[30]</sup>。这是 banmi FSRS 引擎的理论根基，<strong>是真的，放心做。</strong><span class="conf g">🟢</span></p></div>
+      <div class="callout good"><h4>✅ 测试效应（testing effect / retrieval practice）—— 提取练习远优于重读</h4><p>Roediger &amp; Karpicke 2006 经典实验：1 周后测试组显著高于重读组，且生成性测试（要自己想出答案）&gt; 选择题<sup class="cite" data-refid="31">[31]</sup>。<strong>对 banmi 的含义</strong>：复习时让学生"主动回忆/拼写/造句"比"看一遍答案"有效得多——banmi 的词本位复习、错题复习应优先用生成式而非纯识别式。<span class="conf g">🟢</span></p></div>
+      <div class="callout good"><h4>✅ 泛读（Extensive Reading）—— 对 L2 词汇/阅读正向，效应量中等</h4><p>2025 Springer《Educational Psychology Review》meta 分析 + Jeon &amp; Day 2016（EFL&gt;ESL）支持泛读对二语词汇和阅读的正向作用，但多数非 RCT，高水平学习者更明显、低水平需脚手架<sup class="cite" data-refid="38">[38]</sup>。<strong>对 banmi 的含义</strong>：书板块（左栏精读）+ 大量分级阅读输入是有证据的方向，但低水平学生要配脚手架（生词标注、AI 辅助），不能只丢一本书。<span class="conf y">🟡-🟢</span></p></div>
+
+      <h3>第二层：厂商自报/弱证据（🟡 打折看）</h3>
+      <div class="callout warn"><h4>🟡 FSRS"减 20-30% 复习量" / Duolingo"≈大学外语课"</h4><p>FSRS 的复习量节省来自开发者内部 benchmark，无独立 RCT<sup class="cite" data-refid="33">[33]</sup>；Duolingo 的平台效果研究多由 Duolingo 自己资助，35 项研究系统综述总体支持正相关但独立 RCT 极少<sup class="cite" data-refid="32">[32]</sup>。<strong>这些不是假的，但是"利益相关方自报"，引用时必须打折，不能当成铁证拿去对外宣传。</strong></p></div>
+      <div class="callout warn"><h4>🟡 BKT/DKT 知识追踪 / IXL / 松鼠AI 自报疗效</h4><p>BKT(1995 HMM)/DKT(LSTM) 有理论基础，但多为"模型准确率比较"，缺大规模真实课堂 RCT 证明"用了就学更好"<sup class="cite" data-refid="39">[39]</sup>；IXL 的"坚持者增益更大"是自资助研究、仅 ESSA Tier 2 准实验（无随机分配）<sup class="cite" data-refid="27">[27]</sup>；松鼠 AI 无 peer-reviewed efficacy、数据由艾瑞/IDC 受托发布<sup class="cite" data-refid="12">[12]</sup>。<strong>这些是"技术真、疗效证据弱"的典型，banmi 别被它们的营销吓住，也别学它们画饼。</strong></p></div>
+
+      <h3>第三层：营销话术（🔴 被夸大/争议，别当卖点）</h3>
+      <div class="trap-box"><strong>⚠️ "Bloom 2 Sigma → AI 辅导即将革命教育"——原始效应约 4 倍高估。</strong>VanLehn/Nintil 综述：真实辅导效应 d≈0.79 sigma（不是 2 sigma），掌握学习单独只有 d=0.2-0.5；更关键的是，在标准化测试上效应骤降到 d=0.08（vs 教师自编测试 d=0.5），<strong>暗示很多"提分"其实是应试过拟合</strong>。原始 2 sigma 可能因控制组/辅导组阈值设置不同被放大<sup class="cite" data-refid="41">[41]</sup>。<span class="conf g">🟢</span></div>
+      <div class="trap-box"><strong>⚠️ "i+1 可理解输入是语言习得充分条件"——不可证伪，主流已转向输出/互动并重。</strong>Krashen 的 i+1 影响极大、驱动了 Natural Approach 和泛读，但被批<strong>无法操作化、不可证伪</strong>，且忽视了 Swain 的输出假设；现代神经科学强调主动互动、多模态<sup class="cite" data-refid="42">[42]</sup>。<strong>对 banmi 的含义</strong>：可以用 CEFR 做"略高于当前水平"的难度推送（这是合理工程实践），但别把"i+1"当成科学背书的卖点——它是个有用的启发式，不是定律。<span class="conf g">🟢</span></div>
+      <div class="trap-box"><strong>⚠️ "自适应让学生学更好"——整体效应量小 d≈0.18，强依赖实施质量。</strong>BJET 2021 meta 分析（低中收入国家 69 研究 9095 生）整体 d=0.18，真自适应 d=0.35；2023 ESSA 调查仅 16% 教师认为 EdTech"非常有效"<sup class="cite" data-refid="43">[43]</sup>。<strong>"自适应"这个标签被严重滥用，实施质量（老师怎么用、剂量够不够）比算法本身更决定效果。</strong><span class="conf g">🟢</span></div>
+      <div class="trap-box"><strong>⚠️ "Lexile 客观反映难度" / "CEFR 级别可跨考试国家直接比较"——都被系统性证伪。</strong>Lexile 仅词频+句长、叙事文学被系统低估<sup class="cite" data-refid="34">[34]</sup>；CEFR 评分者间一致性差、各国 B2 要求系统性差异<sup class="cite" data-refid="35">[35]</sup>。分级体系是有用工具，但不是精密标尺。<span class="conf g">🟢</span></div>
+
+      <h3>真实 RCT 效应量：把数字钉死</h3>
+      <p>当有真随机对照试验时，EdTech 的效应量是这样的（注意都不大，且强依赖"老师监督+足够剂量"）：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>产品/干预</th><th>研究设计</th><th>效应量 d</th><th>关键条件</th></tr></thead>
+        <tbody>
+          <tr><td>Khan 平台（自报纵向）</td><td>35 万名 3-8 年级准实验纵向（非随机）</td><td>增益高约 20-30%</td><td>每周 30 分钟+ / 掌握 2-3 skill；仅 9% 达推荐剂量<sup class="cite" data-refid="44">[44]</sup></td></tr>
+          <tr><td>Khan 式产品（多伦多）</td><td>RCT 约 11,000 名小学数学</td><td>d≈0.12-0.17</td><td>每周 35 分钟+ + 老师监督<sup class="cite" data-refid="44">[44]</sup></td></tr>
+          <tr><td>Khan 式产品（印度）</td><td>RCT 约 5,500 名 74 校</td><td>d≈0.44-0.47</td><td>含监督、剂量达标（含监督是关键变量）<sup class="cite" data-refid="44">[44]</sup></td></tr>
+          <tr><td>IXL（俄克拉荷马）</td><td>准实验（非随机）</td><td>多 4% 达熟练</td><td>仅 ESSA Tier 2，无随机分配<sup class="cite" data-refid="27">[27]</sup></td></tr>
+          <tr><td>广义自适应 EdTech</td><td>BJET 2021 meta 69 研究</td><td>d=0.18（真自适应 0.35）</td><td>实施质量是关键<sup class="cite" data-refid="43">[43]</sup></td></tr>
+          <tr><td>人类一对一辅导（Bloom 修正）</td><td>VanLehn/Nintil 综述</td><td>d≈0.79（非 2 sigma）</td><td>标准化测试上降到 0.08<sup class="cite" data-refid="41">[41]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout accent"><h4>本章给 banmi 的总结论：把"剂量+生成式提取+间隔"做扎实，比追任何花哨算法都有效</h4><p>所有真证据指向同一件事——<strong>学习效果的瓶颈不在算法多先进，而在「学生有没有真的用够剂量 + 有没有主动提取 + 有没有间隔复习」</strong>。Khan 的研究里只有 9% 学生达到推荐剂量<sup class="cite" data-refid="11">[11]</sup>，这才是真问题。banmi 该做的：① 把 FSRS（间隔）+ 生成式复习（提取）+ 用量追踪（剂量提醒/激励）这三件真证据的事做到极致；② 对外诚实——别用 2 sigma、i+1、纳米级、自适应革命这些话术；③ AI 辅导的价值不在"提分黑科技"，而在"降低学生坚持用够剂量的门槛"（即时反馈、降低挫败感）。<strong>这是 banmi 相对那些靠营销话术的竞品最该有的诚实姿态。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11" data-nav="11 商业模式与双减">
+    <h2><span class="num">11</span><span class="title-text">商业模式与分发：freemium / 进校 / 双减重塑</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>K12 学习系统的商业模式有三种基本形态，外加双减这个把中国市场彻底重塑的政策变量。</p>
+      <h3>三种基本商业模式</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>模式</th><th>代表</th><th>关键数据</th><th>适合谁</th></tr></thead>
+        <tbody>
+          <tr><td><strong>toC freemium</strong></td><td>Duolingo</td><td>约 9% 转化率，ARPU 约 80-95 美元/年（🔴估算）；Super 13.99/月、Max 29.99/月<sup class="cite" data-refid="45">[45]</sup></td><td>海量低龄/语言用户</td></tr>
+          <tr><td><strong>toB 进校 license</strong></td><td>IXL / Khan Districts / iReady</td><td>美国 K12 SaaS 按学生 5-35 美元/生/年；IXL 学区 5-10、Khan 三产品打包约 12.5、iReady 犹他州 34.25<sup class="cite" data-refid="47">[47]</sup></td><td>有学区采购预算的市场</td></tr>
+          <tr><td><strong>toB2C 机构分销/白标</strong></td><td>松鼠AI 加盟 / 白标 LMS</td><td>白标 LMS 按 seat 或年费（444 美元/25 用户/年起）<sup class="cite" data-refid="50">[50]</sup></td><td><strong>banmi 的模式</strong></td></tr>
+        </tbody>
+      </table></div>
+      <h3>双减：把中国 K12 营利性学科 toC 大班课基本压没（非归零）</h3>
+      <div class="callout bad"><h4>⛔ 双减（2021-07-24）的硬数字</h4><p>禁义务教育学段学科类机构周末/节假日/寒暑假授课，禁新审批，现有转非营利，禁上市融资。<strong>义务教育学科机构 12.4 万→4,140 家（压减 96%）；高中 6.3 万→6,350 家（-89.9%）；线上线下均压减约 84%</strong><sup class="cite" data-refid="40">[40]</sup>。转型路径：新东方回归大学生/留学+非学科（FY2024 43.14 亿，+44%）；好未来 Think Academy 出海（2025 上半年 10.3 亿，+50%）；猿辅导飞象星球 toB；纷纷推学习机<sup class="cite" data-refid="40">[40]</sup>。<span class="conf g">🟢</span></p></div>
+      <div class="callout warn"><h4>⚠️ 双减后的合规路径：硬件 + AI 自习室 + toB</h4><p>合规 toC 主战场是学习机硬件（一次性硬件+内容订阅）；线下新业态是 AI 自习室（2024-07 全国 1 万家，新增注册 4.75 万家），模式=品牌授权/加盟+学习机销售+督学服务费+内容订阅，<strong>松鼠AI 零加盟费仅收进货款、称续费率 95%</strong><sup class="cite" data-refid="48">[48]</sup>。<strong>对 banmi 的关键含义：直接面向义务教育学生的营利性学科 toC 受双减强约束，而「toB2C 机构分销/白标」相对更合规——这恰好是 banmi 的四级授权架构。</strong></p></div>
+      <div class="callout warn"><h4>⚠️ 合规判断的诚实边界：这是产品策略，不是法律意见</h4><p>本报告"toB2C 更合规"的判断基于双减政策文本与行业转型事实，但<strong>引用以政策/媒体/商业案例为主，未逐条核对地方审批细则</strong>。banmi 落地前必须就以下五点做专项合规核查（建议法务）：① 外语（英语）被教育部明确按<strong>学科类</strong>管理——即便走 toB2C，若机构端被认定为面向义务教育学生的学科培训，仍受办学许可证/政府指导价约束<sup class="cite" data-refid="40">[40]</sup>；② 未成年人个人信息受 PIPL + 《未成年人网络保护条例》约束（语音、口语录音属敏感个人信息）；③ AI 对话/生成内容受《生成式人工智能服务管理暂行办法》备案与内容安全约束；④ 机构端预付费受校外培训预收费监管；⑤ banmi 内部已有"内部使用产品"定位（不受真题版权约束），但对外授权给第三方机构时该豁免可能不再成立。<strong>结论方向（toB2C 优于纯 toC）大概率成立，但"合规"二字不能拍胸脯，须法务背书。</strong><span class="conf y">🟡</span></p></div>
+      <h3>获客成本现实</h3>
+      <p>edtech toC app 安装 CPI 2-5 美元（iOS 5.11/Android 4.61，2023）；toB SaaS 教育 CAC 从 150 美元降至 120 美元，企业级口径平均高达 1,617 美元（🔴估算）<sup class="cite" data-refid="51">[51]</sup>。中国渠道=应用商店+抖音快手信息流+私域+地推，双减后更依赖私域+复购。</p>
+      <div class="callout info"><p><strong>给 banmi 的商业判断：</strong>banmi 既不该走 Duolingo 式纯 toC freemium（中国学科监管 + 获客烧钱），也不该走 IXL 式纯学区 license（中国公立校采购链条复杂、banmi 是内部产品起步）。<strong>banmi 的合规且低 CAC 路径是 toB2C——把内容工厂的产出授权给合作公司/培训机构，由它们触达学生</strong>。CAC 摊到机构身上，banmi 收授权费/订阅费，这正是松鼠 AI 和白标 LMS 验证过的模式，且避开了双减红线。详见 Ch12。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12" data-nav="12 机构分销白标">
+    <h2><span class="num">12</span><span class="title-text">机构分销 / 白标范式：对照 banmi 四级授权</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>banmi 的核心架构是四级逐级授权（总部→合作公司→老师→学生），本质是 toB2B2C 白标分销。市场上有三个最接近的范式可参照。</p>
+      <div class="callout purple"><h4>范式 A：松鼠AI 加盟 —— 中国最接近的案例（但绑硬件）</h4><p>松鼠AI 为 100 万家 K12 培训机构 + 36 万中小学供 AI SaaS<sup class="cite" data-refid="49">[49]</sup>；加盟分城市代理/单店/战略合作三档，零加盟费只收进货款（学习机硬件）→ 给品牌+课程体系+师资培训+营销工具，典型 toB2C；商业模式 toB，先免费 1.5-2 年再收费，按账号订阅，授权价≈零售 20%<sup class="cite" data-refid="46">[46]</sup>。<strong>对 banmi：松鼠绑硬件，banmi 是纯软件/内容，反而更轻、更易复制。banmi 可借鉴「免费试用期 + 按账号订阅 + 给机构整套工具」的打法，但不背硬件库存。</strong></p></div>
+      <div class="callout purple"><h4>范式 B：IXL district / Khan Districts —— 海外校端 license</h4><p>IXL 私有，美国 top100 学区 95% 在用，学区 5-10 美元/生/年；Khan Districts（Khanmigo）企业版约 10 美元/生（1000 生以下）、三产品打包约 12.5 美元/生/年<sup class="cite" data-refid="47">[47]</sup>。<strong>banmi 的「合作公司→老师→学生」层级类似 IXL 的「区→校→老师」。</strong>这套按学生数计费的 license 模型可直接套用——banmi 向合作公司按激活学生数收费。</p></div>
+      <div class="callout purple"><h4>范式 C：白标 LMS —— 平台即服务 + 自有品牌</h4><p>CYPHER/iSpring 等白标 LMS 让机构定制品牌+全功能，per-seat 或年费（444 美元/25 用户/年起），多租户 SaaS 标准架构；Yo!Coach 为线上辅导机构建 marketplace<sup class="cite" data-refid="50">[50]</sup>。<strong>对 banmi：白标 LMS 验证了「多租户 + 各机构自有品牌外壳 + 共享内容/引擎后端」的技术与商业架构，banmi 的四级授权本质就是这套——只是 banmi 的内容工厂（八板块+词库+FSRS）比通用 LMS 厚重得多，这是差异化。</strong></p></div>
+      <h3>三范式对 banmi 的综合启示</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">计费</div><div class="l">学松鼠（按账号订阅+试用期）+ IXL（按学生数 license）混合</div></div>
+        <div class="metric"><div class="v">分账</div><div class="l">授权价≈零售 20-30%，给合作公司留足分销利润</div></div>
+        <div class="metric"><div class="v">不背</div><div class="l">不绑硬件库存（区别于松鼠），纯软件/内容更轻</div></div>
+        <div class="metric"><div class="v">护城河</div><div class="l">内容工厂 + 统一 FSRS（比通用白标 LMS 厚重）</div></div>
+      </div>
+      <div class="callout good"><p><strong>本章结论：</strong>banmi 的四级授权不是怪异设计，而是同时融合了松鼠（中国合规机构分销）、IXL（按学生 license）、白标 LMS（多租户自有品牌）三种被验证过的范式。banmi 的独特之处是「内容工厂的厚度」——别人白标的是空壳 LMS，banmi 白标的是八板块英语学习内容 + CEFR 词库 + FSRS 引擎。<strong>这是 banmi 商业模式上最被低估的优势，应当作为对合作公司的核心卖点。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13" data-nav="13 横向对比大表">
+    <h2><span class="num">13</span><span class="title-text">横向对比大表：产品 × 四维度 × 对 banmi 启示</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>本章是报告的灵魂——把头部产品按「产品形态 / AI 能力 / 学习科学证据 / 商业模式」四维度拉平横评，最后一列直接给对 banmi 的启示。<strong>纳入标准</strong>：与 banmi 形成产品形态/能力/商业模式对照价值的国内外头部代表；<strong>已知未纳入</strong>（因与 banmi 英语 K12 + toB2C 定位相关性较低或证据稀薄）：i-Ready / DreamBox（北美数学自适应）、Amplify、VIPKid/伴鱼（已实质衰退）、Photomath（解题工具非学习系统）等——若 banmi 后续进军数学或北美学区，需补这批直接替代品。</p>
+      <h3>总表：国内外头部产品 × 四维度</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>产品</th><th>产品形态</th><th>AI 能力</th><th>学习科学证据</th><th>商业模式</th><th>对 banmi 启示</th></tr></thead>
+        <tbody>
+          <tr><td><strong>作业帮</strong></td><td>搜题+学习机+进校</td><td>银河大模型解题答疑</td><td class="check p">弱（自报）</td><td>硬件+toB</td><td>别拼规模，学其 toB 进校</td></tr>
+          <tr><td><strong>猿辅导/斑马</strong></td><td>启蒙+学练机+进校</td><td>看云+DeepSeek-R1</td><td class="check p">弱（自报）</td><td>硬件+toB</td><td>启蒙更名=合规警示</td></tr>
+          <tr><td><strong>学而思</strong></td><td>学习机三档+进校</td><td>九章 MathGPT 97%+</td><td class="check p">弱（自报）</td><td>硬件+toB</td><td>"真人答疑"翻车=别用假话术</td></tr>
+          <tr><td><strong>松鼠AI</strong></td><td>自适应+加盟机构</td><td>纳米级图谱+IRT</td><td class="check n">无 peer-review</td><td>toB2C 加盟</td><td><strong>商业模式直接参照（不绑硬件）</strong></td></tr>
+          <tr><td><strong>有道 Hi Echo</strong></td><td>虚拟人口语私教</td><td class="check y">子曰大模型对话+纠音</td><td class="check p">中</td><td>toC 订阅 68/月</td><td><strong>口语对话产品形态参照</strong></td></tr>
+          <tr><td><strong>讯飞 ISE</strong></td><td>评测引擎/API</td><td class="check y">音素级三层打分</td><td class="check y">考试级验证</td><td>API/toB</td><td><strong>口语评测直接调用</strong></td></tr>
+          <tr><td><strong>墨墨/不背单词</strong></td><td>词汇 app</td><td class="check p">SRS</td><td class="check y">MM=FSRS 源头</td><td>买断/freemium</td><td>FSRS 印证 banmi 选型对</td></tr>
+          <tr><td><strong>Khan Academy</strong></td><td>全科公益平台</td><td class="check y">Khanmigo 苏格拉底式</td><td class="check y"><strong>RCT/准实验 d≈0.12-0.47</strong></td><td>公益+学区收费</td><td><strong>AI 辅导教学法 + 分层范式</strong></td></tr>
+          <tr><td><strong>IXL</strong></td><td>全科自适应练习</td><td class="check y">SmartScore 自适应</td><td class="check p">ESSA Tier2 准实验</td><td>家庭+学区 license</td><td>按学生 license 计费参照</td></tr>
+          <tr><td><strong>Duolingo</strong></td><td>游戏化语言 app</td><td class="check y">Max GPT-4 对话</td><td class="check y"><strong>HLR 最扎实+13M 数据</strong></td><td>freemium 9% 转化</td><td>SRS 层 + freemium 标杆</td></tr>
+          <tr><td><strong>ELSA</strong></td><td>发音 app</td><td class="check y">音素级打分</td><td class="check p">音素诊断第三方测试</td><td>toC 订阅</td><td>音素级评测能力参照</td></tr>
+          <tr><td><strong>Speak</strong></td><td>AI 对话 app</td><td class="check y"><strong>OpenAI Realtime 对话</strong></td><td class="check n">弱（早期）</td><td>toC 估值 10 亿</td><td><strong>AI 对话技术路线参照</strong></td></tr>
+          <tr><td><strong>Newsela/Raz</strong></td><td>分级阅读</td><td class="check n">无 AI</td><td class="check p">WestEd ESSA Tier2</td><td>B2B 学区</td><td>分级阅读但用 Lexile</td></tr>
+          <tr><td><strong>Quizlet</strong></td><td>闪卡</td><td class="check y">Q-Chat 苏格拉底式</td><td class="check p">中（内部）</td><td>B2C+B2B</td><td>SRS 变体参照</td></tr>
+          <tr class="row-highlight"><td><strong>banmi</strong></td><td><strong>英语全技能 8 板块</strong></td><td class="check n"><strong>待补 AI 辅导/对话/评测</strong></td><td class="check y"><strong>FSRS 踩真证据</strong></td><td class="check y"><strong>toB2C 四级授权</strong></td><td>—（本报告对象）</td></tr>
+        </tbody>
+      </table></div>
+      <h3>从大表读出的三条横向规律</h3>
+      <div class="callout accent"><h4>规律 1：AI 能力强的产品（Khan/Duolingo/Speak/Hi Echo），学习科学证据反而往往更诚实</h4><p>Khan 有真 RCT、Duolingo 有公开论文+13M 数据、Hi Echo 标注是 AI 私教。反观自报疗效最猛的（松鼠 AI、各家学习机），AI 能力多是解题答疑、学习科学证据最弱。<strong>启示：banmi 补 AI 能力时该对齐 Khan/Duolingo 这种"能力真+证据诚实"的一派，而非"营销猛+证据虚"的一派。</strong></p></div>
+      <div class="callout accent"><h4>规律 2：口语评测/对话已完全可外采，无需自建</h4><p>讯飞 ISE（音素评测）、OpenAI Realtime / 子曰（对话）都是成熟 API。没有一家头部口语产品的护城河在"自研评测算法"——ELSA 的算法是壁垒但 banmi 不需要做到 ELSA 那么深。<strong>启示：banmi 的口语能力 = 现成评测 API + LLM 对话 + banmi 内容上下文，三个月可成，不必自研。</strong></p></div>
+      <div class="callout accent"><h4>规律 3：没有任何一家同时具备「英语全技能闭环 + 四级白标授权 + 统一复习引擎」</h4><p>Duolingo 有 SRS 无全技能闭环和白标；Khan 有全科无白标和统一 SRS；松鼠有 toB2C 无英语深耕和真证据复习引擎。<strong>banmi 这三件套的组合在市场上是空白——这就是 banmi 不该被"卡在中间"焦虑、反而该正面打的差异化。补上 AI 辅导层后，这个组合短期内难被直接复制</strong>（但功能组合本身不是终极护城河，真正可防御的是数据闭环+独家内容+渠道锁定，见 Ch14 反方①）。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH14 ===== -->
+  <section class="chapter" id="ch14" data-nav="14 banmi 路线建议">
+    <h2><span class="num">14</span><span class="title-text">banmi 路线建议：决策树 + 可执行下一步</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>军师定位：给方案和判断，不替 banmi 写代码。本章把前 13 章的发现收敛成一棵决策树 + 三步可执行路线。</p>
+      <h3>核心判断：banmi 该补什么、该参照谁、该躲什么坑</h3>
+      <div class="tree">
+        <div class="node">🎯 banmi 要补的能力是什么？
+          <div class="node">→ <strong>AI 辅导/对话/评测</strong>（唯一明显缺口，市场钱和增长都在这）
+            <div class="node">✅ 口语评测 → <strong>直接调讯飞 ISE</strong>（音素级、考试级、国内合规），接到现有朗读/跟读板块</div>
+            <div class="node">✅ AI 对话 → <strong>接 LLM Realtime API</strong>（参照 Speak/Hi Echo），绑定 banmi 内容（读完的文章/学完的词）</div>
+            <div class="node">✅ AI 答疑辅导 → <strong>接通用 LLM + 做苏格拉底式教学法封装</strong>（学 Khanmigo 不给答案），别自研大模型</div>
+          </div>
+          <div class="node">→ <strong>自适应/知识图谱</strong>（优先级低）
+            <div class="node">⚠️ 已有 FSRS 即一种自适应；只做轻量「CEFR 难度分级推送」，别学松鼠纳米级图谱</div>
+          </div>
+        </div>
+        <div class="node">💰 商业模式参照谁？
+          <div class="node">→ <strong>toB2C 机构分销（松鼠模式但不绑硬件）+ 按学生 license（IXL）+ 多租户白标（LMS）</strong>三者融合</div>
+          <div class="node">⛔ 别走纯 toC freemium（中国学科监管+烧钱），别走纯学区 license（采购链复杂）</div>
+        </div>
+        <div class="node">🧪 学习科学抄什么躲什么？
+          <div class="node">✅ 真该抄：间隔重复（FSRS 已有）、测试效应（改成生成式复习）、用量剂量管理</div>
+          <div class="node">⛔ 别当卖点：2 sigma、i+1 充分条件、纳米级、自适应革命、FSRS 减 20-30%（全是被夸大/vendor 话术）</div>
+        </div>
+      </div>
+
+      <h3>三步可执行路线</h3>
+      <div class="step"><div class="step-head"><span class="sn">1</span>近期（补 AI 评测/对话，把闭环接上）</div><div class="step-body"><strong>接讯飞 ISE 给口语板块打音素级分数</strong> + <strong>接 LLM Realtime 做"基于本课内容"的口语对话</strong>。关键设计：对话/评测都挂在已有内容上（读完这篇就这篇对话、学完这批词就用这些词造句），让 banmi 的内容优势成为 AI 对话的差异化，而不是再做一个孤立的 Speak。这一步把"练习→AI 反馈"的闭环接通，解决当前"学生练完没有即时反馈"的断点。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>中期（做苏格拉底式 AI 辅导 + 把复习引擎做成卖点）</div><div class="step-body"><strong>AI 辅导层：接通用 LLM + 苏格拉底式教学法封装</strong>（不给答案、防代写、按 CEFR 水平调提示、读取 banmi 内容上下文），定位"降低学生坚持用够剂量的门槛"而非"提分黑科技"。同时<strong>把统一 FSRS 复习引擎包装成对外卖点</strong>——这是 banmi 真优势（跨板块统一大脑，Duolingo/Quizlet/墨墨都没做到），但宣传用"间隔重复+主动提取"这种真证据表述，不用"减 20-30% 复习量"这种 vendor 话术。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>长期（铺 toB2C 分销渠道，把内容工厂厚度变现）</div><div class="step-body"><strong>把四级授权的商业链路真正跑起来</strong>：参照松鼠（免费试用期+按账号订阅+给机构整套工具但不背硬件）+ IXL（按激活学生数 license）+ 白标 LMS（各合作公司自有品牌外壳）。对合作公司的核心卖点 = "别人白标的是空壳 LMS，banmi 白标的是八板块英语内容 + CEFR 词库 + FSRS 引擎 + AI 辅导"。CAC 摊给机构，banmi 收授权费，合规避开双减红线。</div></div>
+
+      <h3>两个必须正视的反方（别只听好消息）</h3>
+      <div class="callout bad"><h4>反方①：「组合无人能复制」会被现实削弱——护城河没那么深</h4><p>本报告说 banmi 的「全技能闭环+四级白标+统一 FSRS」组合罕见，但要诚实承认三条侵蚀路径：① <strong>大平台也能接 LLM/评测 API</strong>——AI 辅导层是买来的，作业帮/有道接得比 banmi 快；② <strong>生成式 AI 正在削弱"内容工厂"moat</strong>——当 LLM 能现场生成分级阅读和练习，banmi 攒的内容资产相对贬值；③ <strong>白标 LMS 的切换成本不高</strong>，合作公司若发现别家内容更好可以换供应商。<strong>banmi 真正可防御的，是数据闭环（学生跨板块学习轨迹喂 FSRS 越用越准）+ 内容版权/独家素材（EnglishPod/美剧逐句对齐这种重活）+ 渠道锁定，而不是"功能组合"本身。</strong>路线里要把"积累数据闭环"当成长期护城河，而非靠功能清单。<span class="conf y">🟡</span></p></div>
+      <div class="callout bad"><h4>反方②：接通用 LLM 做辅导/对话，有一串绕不开的失败模式</h4><p>"接讯飞 ISE + LLM 三个月可成"在工程上乐观，且忽略了风险清单：<strong>① LLM 幻觉/直接给答案/被学生诱导作弊</strong>（需 content grounding + 苏格拉底式 guardrail + 审计日志）；<strong>② 儿童语音/中国口音被 ASR 误判</strong>（讯飞 ISE 也需用 100 条真实儿童样本 benchmark，否则纠音反而挫败学生）；<strong>③ 数据出境/留存与未成年人隐私</strong>（口语录音是敏感信息，retention 策略要先定，参照 banmi 已有的"跟读只存最新/90 天清"纪律）；<strong>④ 供应商风险</strong>（API 涨价、模型政策变化——需备选供应商）；<strong>⑤ 低龄学生不愿开口</strong>（反馈强度要按低/中/高水平分层，过度纠错适得其反）。这些不是"做不做"而是"做之前必须有 risk register 和 guardrails"。<span class="conf y">🟡</span></p></div>
+      <h3>把路线变成可验证的试点（而非口号）</h3>
+      <div class="callout info"><p>Khan 的真证据反复指向同一件事：<strong>效果瓶颈是"剂量"不是"算法"（仅 9% 学生达推荐剂量）</strong><sup class="cite" data-refid="11">[11]</sup>。所以 banmi 的最小 efficacy 验证不该是"AI 多聪明"，而该测：① <strong>前测/后测</strong>（CEFR 水平或词汇量变化）；② <strong>剂量/留存</strong>（周活、连续天数、复习完成率）；③ <strong>生成式提取占比</strong>（主动回忆 vs 被动识别）；④ <strong>A/B 或准实验</strong>（有 AI 辅导组 vs 无，看剂量与留存差异，而非直接看提分）。先在一两家合作机构小范围跑这套指标，再谈规模化。这比任何"接 ISE + LLM 三个月闭环"的口号都更能证明 banmi 是否真有学习价值。<span class="conf y">🟡</span></p></div>
+      <div class="callout good"><h4>一句话路线总结</h4><p><strong>banmi 不缺内容、不缺复习引擎、不缺分销架构——缺的是把 AI 辅导/对话/评测接进已有闭环，并把"内容工厂厚度 + 统一 FSRS"这两个真优势讲清楚。补 AI 该买的买（评测 API、LLM）、该做的做（教学法封装），别自研大模型、别追纳米级自适应、别学竞品用营销话术画饼。这是一个"补一层就闭环、且组合短期难被直接复制"的系统，而不是一个要从零追赶大平台的追随者——长期护城河靠数据闭环和独家内容去攒，不是靠功能清单。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq" data-nav="FAQ 常见问题">
+    <h2><span class="num">15</span><span class="title-text">FAQ 常见问题</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">banmi 到底该不该自研教育大模型？</span><span class="toggle">+</span></div><div class="faq-a"><p><strong>不该。</strong>三巨头和有道自研大模型是因为它们有海量题库（作业帮 19 亿、猿辅导 15 亿题）和巨额资金。banmi 作为内部产品，自研既无数据基础也无 ROI。正确路径是接通用 LLM 做底座，把精力放在「教学法封装层」（苏格拉底式、防代写、绑定 banmi 内容上下文）。护城河在内容+教学法，不在模型<sup class="cite" data-refid="5">[5]</sup>。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">口语评测要不要自研算法？</span><span class="toggle">+</span></div><div class="faq-a"><p><strong>不要，直接调讯飞 ISE。</strong>讯飞 ISE 支持音素→单词→句子三层打分，已跑通高考/四六级等 40+ 国家级考试、覆盖 250 万+ 师生<sup class="cite" data-refid="15">[15]</sup>。这是国内合规、考试级精度的现成 API。ELSA 的音素级算法是壁垒，但 banmi 不需要做到那么深——把现成评测接到已有朗读/跟读板块即可。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">banmi 用 FSRS 是对的选择吗？相比 SM-2、HLR、艾宾浩斯？</span><span class="toggle">+</span></div><div class="faq-a"><p><strong>是对的。</strong>FSRS 源自墨墨背单词 KDD 2022 论文，性能略优于 SM-17，在保留率预测上比 SM-2 更准<sup class="cite" data-refid="17">[17]</sup><sup class="cite" data-refid="33">[33]</sup>。比 Duolingo 的 HLR 更通用、比不背单词的"艾宾浩斯曲线"更有现代算法基础。但注意：别用"减 20-30% 复习量"这种 vendor 话术对外宣传，那来自开发者内部 benchmark 而非独立 RCT。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">banmi 用 CEFR/CEFR-J 而非 Lexile，是劣势吗？</span><span class="toggle">+</span></div><div class="faq-a"><p><strong>对"中国学生学英语"场景反而更合适。</strong>Lexile 只用词频+句长，叙事文学被系统低估，被 Krashen 批评、2025 arXiv 论文称 readability 公式是阅读流畅度的糟糕预测器<sup class="cite" data-refid="34">[34]</sup>。CEFR 是能力框架（能做什么）更贴合学习目标。banmi 的 9287 词三源 CEFR 对齐词库是难得资产，但要注意 CEFR 自己也有评分者一致性问题<sup class="cite" data-refid="35">[35]</sup>。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">双减对 banmi 是威胁还是机会？</span><span class="toggle">+</span></div><div class="faq-a"><p><strong>对 banmi 的 toB2C 路径反而是机会。</strong>双减把义务教育学科 toC 机构压减 96%（12.4 万→4140 家）<sup class="cite" data-refid="40">[40]</sup>，纯学科 toC 不合规。但「toB2C 机构分销/白标」是合规路径——这恰好是 banmi 的四级授权架构。banmi 把内容授权给合作机构、由机构触达学生，避开了直接面向义务教育学生收费的红线。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">"AI 自适应让学生学更好"是真的吗？banmi 要不要做纳米级知识图谱？</span><span class="toggle">+</span></div><div class="faq-a"><p><strong>被大幅夸大，banmi 不必做纳米级图谱。</strong>广义自适应 EdTech 整体效应量只有 d≈0.18，真自适应 d≈0.35，且强依赖实施质量<sup class="cite" data-refid="43">[43]</sup>。松鼠 AI 的纳米级知识点图谱无 peer-reviewed efficacy<sup class="cite" data-refid="12">[12]</sup>。banmi 已有 FSRS（一种踩真证据的自适应），只需做轻量「CEFR 难度分级推送」即可，别在英语上重做需要海量标注的知识图谱。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">Bloom 2 sigma 是不是说 AI 一对一辅导能让学生提升两个标准差？</span><span class="toggle">+</span></div><div class="faq-a"><p><strong>原始 2 sigma 约被 4 倍高估，真实约 0.79 sigma。</strong>VanLehn/Nintil 综述显示真实辅导效应 d≈0.79，且在标准化测试上骤降到 d=0.08（暗示很多提分是应试过拟合）<sup class="cite" data-refid="41">[41]</sup>。banmi 做 AI 辅导别用 2 sigma 当卖点，它的真实价值在"降低学生坚持用够剂量的门槛"，而非提分黑科技。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">有道 Hi Echo 和 banmi 是直接竞品吗？</span><span class="toggle">+</span></div><div class="faq-a"><p><strong>是最像的口语对话产品形态参照，但不是直接竞品。</strong>Hi Echo 是中国学生、英语、虚拟人对话、雅思真题（banmi 也在录雅思题库），定价 68 元/月<sup class="cite" data-refid="14">[14]</sup>。但 Hi Echo 是孤立的口语对话产品，banmi 的对话可以挂在阅读/词汇/书的学习闭环里。banmi 应学其形态、用内容闭环做差异化。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">学而思"真人答疑"翻车对 banmi 有什么警示？</span><span class="toggle">+</span></div><div class="faq-a"><p><strong>AI 辅导做不到位就用"真人"话术包装迟早翻车。</strong>学而思旗舰"随时问"真人服务被静默替换为 AI，用户评"更生硬、缺推导"<sup class="cite" data-refid="9">[9]</sup>。banmi 要么把苏格拉底式 AI 辅导真正做好（学 Khanmigo），要么诚实标注是 AI——别玩文字游戏。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">banmi 该向 Khan Academy 学什么？</span><span class="toggle">+</span></div><div class="faq-a"><p><strong>学三样：① Khanmigo 苏格拉底式辅导的教学法（不给答案、引导提问）；② "免费平台引流 + AI 辅导/学区版收费"分层；③ 诚实的 efficacy 态度（做真 RCT、公布"仅 9% 学生达推荐剂量"这种不光彩数据）</strong><sup class="cite" data-refid="10">[10]</sup><sup class="cite" data-refid="11">[11]</sup>。第三条最难也最值钱——它揭示真问题是"剂量"而非"算法"。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">banmi 的统一 FSRS 复习引擎是优势还是普通配置？</span><span class="toggle">+</span></div><div class="faq-a"><p><strong>是被低估的结构性优势。</strong>banmi 把 FSRS 做成跨板块统一引擎（生词、概念、错题、句子标注共用一个大脑），而 Duolingo（只管词）、Quizlet（只管卡片）、墨墨（只管单词）都是单一内容类型的 SRS<sup class="cite" data-refid="17">[17]</sup><sup class="cite" data-refid="23">[23]</sup>。这是市场上少见的"统一复习大脑"，应作为差异化卖点强化。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q</span><span class="qtext">如果只做一件事补 AI 能力，banmi 该做哪件？</span><span class="toggle">+</span></div><div class="faq-a"><p><strong>接讯飞 ISE 给口语板块打音素级分数 + 接 LLM 做"基于本课内容"的对话。</strong>这一步成本最低（都是现成 API）、收益最大（把"学生练完没有即时反馈"这个闭环断点接上），且能立即用 banmi 的内容优势做差异化。AI 答疑辅导可以排第二步。<span class="conf y">🟡</span></p></div></div>
+    </div>
+  </section>
+
+  <!-- ===== REFERENCES ===== -->
+  <section class="chapter" id="refs" data-nav="References">
+    <h2><span class="num">16</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://36kr.com/p/3179154970529925" target="_blank" rel="noopener">36氪《2025 年头部教育公司展望》</a><span class="ref-meta">· 访问 2026-06-15 · 引用 6 次</span></li>
+        <li id="ref-2"><a href="https://finance.sina.com.cn/tech/roll/2025-10-24/doc-infuykxs7026380.shtml" target="_blank" rel="noopener">新浪科技：作业帮学习机 2025 销量/市占</a><span class="ref-meta">· 访问 2026-06-15 · 引用 5 次</span></li>
+        <li id="ref-3"><a href="https://www.geekpark.net/news/340686" target="_blank" rel="noopener">极客公园：小猿学练机销量/营收</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+        <li id="ref-4"><a href="https://m.cls.cn/detail/2016428" target="_blank" rel="noopener">财联社：好未来 FY2025 财报</a><span class="ref-meta">· 访问 2026-06-15 · 引用 3 次</span></li>
+        <li id="ref-5"><a href="https://m.tech.china.com/digi/articles/20251105/202511051759346.html" target="_blank" rel="noopener">中华网：三家教育大模型对照（银河/看云/九章）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 4 次</span></li>
+        <li id="ref-6"><a href="https://www.geekpark.net/news/337563" target="_blank" rel="noopener">极客公园：猿辅导接入 DeepSeek-R1</a><span class="ref-meta">· 访问 2026-06-15 · 引用 3 次</span></li>
+        <li id="ref-7"><a href="https://www.hangyan.co/charts/3602297197468583146" target="_blank" rel="noopener">小牛行研：三家产品形态与学段差异</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+        <li id="ref-8"><a href="https://finance.sina.com.cn/jjxw/2025-06-17/doc-infaktwz9688204.shtml" target="_blank" rel="noopener">新浪财经：AI 学习机行业格局/六大品牌市占</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+        <li id="ref-9"><a href="https://finance.sina.com.cn/jjxw/2025-06-17/doc-infaktwz9688204.shtml" target="_blank" rel="noopener">新浪财经：学而思"随时问"真人转 AI 争议</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+        <li id="ref-10"><a href="https://blog.khanacademy.org/harnessing-ai-so-that-all-students-benefit-a-nonprofit-approach-for-equal-access/" target="_blank" rel="noopener">Khan Academy 博客：Khanmigo 苏格拉底式设计</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+        <li id="ref-11"><a href="https://blog.khanacademy.org/khan-academy-efficacy-results-november-2024/" target="_blank" rel="noopener">Khan Academy 博客：2024-11 efficacy 结果与用户数</a><span class="ref-meta">· 访问 2026-06-15 · 引用 4 次</span></li>
+        <li id="ref-12"><a href="https://www.cnblogs.com/pinpai/p/19363701" target="_blank" rel="noopener">松鼠AI 纳米级知识点图谱与吉尼斯挑战数据</a><span class="ref-meta">· 访问 2026-06-15 · 引用 3 次</span></li>
+        <li id="ref-13"><a href="https://annualreport.khanacademy.org/" target="_blank" rel="noopener">Khan Academy 年度报告：营收/注册/活跃</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+        <li id="ref-14"><a href="https://hiecho.youdao.com/" target="_blank" rel="noopener">有道 Hi Echo 官网（含定价）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 3 次</span></li>
+        <li id="ref-15"><a href="https://www.xfyun.cn/doc/voiceservice/ise/ise_protocol.html" target="_blank" rel="noopener">科大讯飞 ISE 口语评测引擎协议文档</a><span class="ref-meta">· 访问 2026-06-15 · 引用 3 次</span></li>
+        <li id="ref-16"><a href="https://www.qbitai.com/2025/03/263067.html" target="_blank" rel="noopener">量子位：有道子曰大模型评级/子曰翻译 2.0</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-17"><a href="https://memodocs.maimemo.com/docs/algorithm-intro/" target="_blank" rel="noopener">墨墨背单词：MM/FSRS 算法说明（FSRS 源头）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 4 次</span></li>
+        <li id="ref-18"><a href="https://www.woshipm.com/evaluating/3480924.html" target="_blank" rel="noopener">人人都是产品经理：流利说懂你英语评测</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-19"><a href="https://beginnersinai.org/duolingo-max-explained/" target="_blank" rel="noopener">Duolingo Max 功能与定价解析</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-20"><a href="https://www.sec.gov/Archives/edgar/data/0001562088/000162828025049514/q3fy25duolingo9-30x25share.htm" target="_blank" rel="noopener">Duolingo Q3 2025 SEC 财报（MAU/付费/营收）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+        <li id="ref-21"><a href="https://www.businesswire.com/news/home/20230912548387/en/" target="_blank" rel="noopener">ELSA Speak 融资/用户数（音素级评测）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-22"><a href="https://beginnersinai.org/speak-explained/" target="_blank" rel="noopener">Speak app：OpenAI Realtime 对话/估值/下载</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-23"><a href="https://research.duolingo.com/papers/settles.acl16.pdf" target="_blank" rel="noopener">Settles &amp; Meeder 2016：Duolingo 半衰期回归 HLR（ACL）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+        <li id="ref-24"><a href="https://newsela.com/research-and-efficacy" target="_blank" rel="noopener">Newsela 研究与 efficacy（WestEd / ESSA Tier II）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-25"><a href="https://myelearningworld.com/epic-pricing/" target="_blank" rel="noopener">分级阅读定价对照（Epic/Raz-Kids/ReadWorks）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-26"><a href="https://www.ixl.com/materials/SmartScore_Guide.pdf" target="_blank" rel="noopener">IXL SmartScore 指南（自适应算法）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-27"><a href="https://www.ixl.com/materials/us/research/IXL_Math_3-Year_QED_ESSA_Tier_2.pdf" target="_blank" rel="noopener">IXL 数学 3 年准实验（ESSA Tier 2，自资助）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 3 次</span></li>
+        <li id="ref-28"><a href="https://getlatka.com/companies/quizlet" target="_blank" rel="noopener">Quizlet ARR/估值（Latka 估算）+ SRS 变体</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-29"><a href="https://deepai.org/publication/deep-irt-make-deep-learning-based-knowledge-tracing-explainable-using-item-response-theory" target="_blank" rel="noopener">Deep-IRT：Riiid 深度知识追踪 + IRT</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-30"><a href="https://www.semanticscholar.org/paper/Distributed-practice-in-verbal-recall-tasks%3A-A-and-Cepeda-Pashler/634293d8c7b2e0e89f80ad7f1e6d3c2b" target="_blank" rel="noopener">Cepeda 2006：间隔重复 254 项研究 meta-analysis</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-31"><a href="https://journals.sagepub.com/doi/10.1111/j.1467-9280.2006.01693.x" target="_blank" rel="noopener">Roediger &amp; Karpicke 2006：测试效应经典实验</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-32"><a href="https://cdnprodwpv2.avantassessment.com/wp-content/uploads/The-effectiveness-of-Duolingo.pdf" target="_blank" rel="noopener">Duolingo 效果系统综述（LLT 2024，独立 RCT 极少）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-33"><a href="https://deepwiki.com/open-spaced-repetition/fsrs-optimizer/7.3-comparison-with-sm-2" target="_blank" rel="noopener">FSRS vs SM-2 比较（开发者内部 benchmark）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 3 次</span></li>
+        <li id="ref-34"><a href="https://arxiv.org/html/2502.11150v3" target="_blank" rel="noopener">2025 arXiv：readability 公式是阅读流畅度的糟糕预测器（Lexile 批评）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 4 次</span></li>
+        <li id="ref-35"><a href="https://www.coe.int/en/web/common-european-framework-reference-languages/level-descriptions" target="_blank" rel="noopener">CEFR 官方描述符 + 一致性批评 / CEFR-J 本地化</a><span class="ref-meta">· 访问 2026-06-15 · 引用 3 次</span></li>
+        <li id="ref-36"><a href="https://baike.baidu.com/item/%E4%B8%8D%E8%83%8C%E5%8D%95%E8%AF%8D" target="_blank" rel="noopener">不背单词：艾宾浩斯曲线 + 真实语境例句</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-37"><a href="https://www.woshipm.com/evaluating/4300714.html" target="_blank" rel="noopener">中国词汇 app 规模（墨墨/百词斩下载量）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+        <li id="ref-38"><a href="https://link.springer.com/article/10.1007/s10648-025-10068-6" target="_blank" rel="noopener">2025 Springer EPR：泛读对 L2 词汇/阅读 meta 分析</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-39"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12246154/" target="_blank" rel="noopener">BKT/DKT 知识追踪：理论强、真实课堂 RCT 弱</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-40"><a href="https://zh.wikipedia.org/zh-cn/%E2%80%9C%E5%8F%8C%E5%87%8F%E2%80%9D%E6%94%BF%E7%AD%96" target="_blank" rel="noopener">"双减"政策（机构压减数据 + 大厂转型）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 4 次</span></li>
+        <li id="ref-41"><a href="https://nintil.com/bloom-sigma/" target="_blank" rel="noopener">Nintil：Bloom 2 sigma 被高估，真实约 0.79 sigma</a><span class="ref-meta">· 访问 2026-06-15 · 引用 3 次</span></li>
+        <li id="ref-42"><a href="https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2025.1636777/full" target="_blank" rel="noopener">Frontiers 2025：Krashen i+1 批评（不可证伪/忽视输出）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+        <li id="ref-43"><a href="https://bera-journals.onlinelibrary.wiley.com/doi/10.1111/bjet.13116" target="_blank" rel="noopener">BJET 2021 meta：自适应 EdTech 整体效应 d=0.18</a><span class="ref-meta">· 访问 2026-06-15 · 引用 3 次</span></li>
+        <li id="ref-44"><a href="https://blog.khanacademy.org/khan-academy-efficacy-results-november-2024/" target="_blank" rel="noopener">Khan Academy 真 RCT 效应量（多伦多/印度 d=0.12-0.47）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+        <li id="ref-45"><a href="https://www.sec.gov/Archives/edgar/data/0001562088/000162828026012246/q4fy25duolingo12-31x25shar.htm" target="_blank" rel="noopener">Duolingo Q4 FY2025 SEC 财报（转化率/bookings）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-46"><a href="https://m.21jingji.com/article/20211119/bf69b9bed2caa2fc29c7d4ed4867dd45_zaker.html" target="_blank" rel="noopener">21 世纪经济：松鼠AI 商业模式/授权价/续费</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-47"><a href="https://brighterly.com/blog/ixl-cost/" target="_blank" rel="noopener">IXL 定价 + 美国 K12 SaaS 按学生 license 阶梯</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+        <li id="ref-48"><a href="https://www.qbitai.com/2025/09/328513.html" target="_blank" rel="noopener">量子位：AI 自习室业态 + 松鼠零加盟费/续费率</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-49"><a href="https://zhuanlan.zhihu.com/p/446289058" target="_blank" rel="noopener">松鼠AI toB2C 机构分销/加盟体系</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+        <li id="ref-50"><a href="https://www.yo-coach.com/blog/top-white-label-tutoring-platforms/" target="_blank" rel="noopener">白标辅导平台/LMS 范式（CYPHER/iSpring/Yo!Coach）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+        <li id="ref-51"><a href="https://focus-digital.co/average-customer-acquisition-cost-for-online-education/" target="_blank" rel="noopener">在线教育获客成本 CAC（toC CPI / toB SaaS）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+      </ol>
+    </div>
+  </section>
+  <footer>
+    无忌 · Deep Research（L2）· 2026-06-15 · 仅供阿杰个人决策参考；数据与判例以原始来源为准。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('k12-learning-systems-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('k12-learning-systems-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

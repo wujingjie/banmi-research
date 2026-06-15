@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>半米全功能竞品深度研究 · 拆解 / 借鉴 / 建议 · 无忌 Deep Research · 2026-06-15</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 01 全局判断</a>
+    <a href="#ch2" data-target="ch2">02 02 词汇系统</a>
+    <a href="#ch3" data-target="ch3">03 03 复习 / SRS</a>
+    <a href="#ch4" data-target="ch4">04 04 听力精听</a>
+    <a href="#ch5" data-target="ch5">05 05 口语 / 跟读</a>
+    <a href="#ch6" data-target="ch6">06 06 阅读 + 电子书</a>
+    <a href="#ch7" data-target="ch7">07 07 写作（雅思）</a>
+    <a href="#ch8" data-target="ch8">08 08 语法</a>
+    <a href="#ch9" data-target="ch9">09 09 考试 / 测评</a>
+    <a href="#ch10" data-target="ch10">10 10 自适应 / 知识图谱</a>
+    <a href="#ch11" data-target="ch11">11 11 报告 / 动态档案</a>
+    <a href="#ch12" data-target="ch12">12 12 老师端 AI 助教</a>
+    <a href="#ch13" data-target="ch13">13 13 Today / 游戏化</a>
+    <a href="#ch14" data-target="ch14">14 14 升学陪跑</a>
+    <a href="#ch15" data-target="ch15">15 15 商业模式 / GTM</a>
+    <a href="#ch16" data-target="ch16">16 16 护城河综合</a>
+    <a href="#ch17" data-target="ch17">17 17 阿杰路线建议</a>
+    <a href="#faq" data-target="faq">FAQ FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">REF References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>半米全功能竞品深度研究 · 拆解 / 借鉴 / 建议</h1>
+    <div class="hero-meta">
+      <span>📅 2026-06-15</span>
+      <span>🔍 8 路并行 Agent · 关键数据核实至 2026-06</span>
+      <span>🧭 14 个功能簇逐一竞品对标</span>
+      <span>🌏 立场：海外视角 · 给阿杰的产品军师参谋</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>一句话定调：半米已经押对了几乎所有方向性大赌注（老师驱动 &gt; 纯算法、Today 不堆 backlog、AI 初评 + 老师终审、三曲线动态档案、CEFR-J 分级），它真正的、竞品都没有的护城河不是任何单点功能做到行业第一，而是「全链路同一大脑」——把读到的生词、看错的发音、写错的语法、做错的题，全部沿同一个 FSRS 复习池 + 同一张知识图谱回流。</strong></p>
+      <p>本报告对半米 14 个功能簇逐一做竞品对标，每章 = 功能拆解（半米现状）→ 竞品怎么做（★ 最该借鉴 / ⚠️ 坑 / 💡 缺的亮点）→ 可落地建议，竞品对比大量用表格。章节顺序：全局判断（Ch1）→ 内容学习七簇（词汇/SRS/听力/口语/阅读/写作/语法，Ch2–8）→ 测评与智能四簇（考试/自适应/报告，Ch9–11）→ 引擎与体验两簇（老师端 AI 助教/Today 游戏化，Ch12–13）→ 商业层两簇（升学陪跑/商业模式，Ch14–15）→ 护城河综合（Ch16）→ 阿杰路线决策树（Ch17）。本报告补足 2026-05 旧调研（词汇/考试/阅读/方法论）未覆盖的听力精听、口语跟读、AI 助教、自适应、升学陪跑、商业模式与亚洲市场竞品。所有硬数字标注访问日期 2026-06-15，关键事实标 🟢多源 / 🟡单源 / 🔴估算。</p>
+    </div>
+  </div>
+
+  <div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+    <p style="margin:0"><strong>📌 三条最关键发现（先扫这个）：</strong></p>
+    <ul style="margin:8px 0 0">
+      <li><strong>护城河 = 全链路同一大脑，不是任何单点。</strong>竞品全是单点强：Readlang 只查词、批改网只批作文、ELSA 只评发音、Anki 只复习——<u>没有任何一家把「读到的词 / 写错的句 / 错的发音 / 做错的题」沿同一条 SRS 闭环 + 同一张知识图谱回流</u>。半米同时握有 阅读/听力/口语 LE + 词本位 + FSRS 大脑（<code>srs.py</code>）+ CEFR-J 语法库 + <code>annotation</code>/<code>review_item</code>/<code>assignment</code> 契约，这条全链路是结构性独有。<span class="conf g">🟢</span></li>
+      <li><strong>半米已经反向被竞品验证押对了方向。</strong>Knewton 鼓吹纯算法自适应、融 $1.8 亿、交付不出，2019 年技术资产被 Wiley 低价收购收场<sup class="cite" data-refid="40">[40]</sup>；Anki 最大劝退点恰恰是回来看到几百张积压<sup class="cite" data-refid="6">[6]</sup>；连剑桥 Write &amp; Improve 都只敢把 AI 给的分称「估算 band」（高风险正式评分如 Linguaskill/PTE 则保留人工复核）<sup class="cite" data-refid="20">[20]</sup>。半米「老师驱动、Today 不堆债、AI 初评 + 老师终审」全是行业最佳实践而非妥协。<span class="conf g">🟢</span></li>
+      <li><strong>P0 临门一脚四件事，地基都已有、补一步就成闭环：</strong>① 采词强制存原句 + 复习放回原句考（抄 Readlang，<code>vocab_source_context</code> 已为此而生）<sup class="cite" data-refid="2">[2]</sup>；② <code>recommendation_queue</code> 做成 Wayground 式「薄弱→补救题→一键派给特定学生」可执行回路<sup class="cite" data-refid="36">[36]</sup>；③ 复习按时间预算封顶 + 永不暴露原始 backlog（抄墨墨 SSP-MMC + Duolingo Birdbrain）<sup class="cite" data-refid="3">[3]</sup>；④ 知识图谱可视化抄 ALEKS 饼图 / Khan 命名等级 + 错题标错因<sup class="cite" data-refid="29">[29]</sup>。<span class="conf g">🟢</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1" data-nav="01 全局判断">
+    <h2><span class="num">01</span><span class="title-text">全局判断：半米已押对的方向 + 独有护城河</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>在逐簇拆解前，先给三个全局结论：半米的几个方向性大赌注已被竞品反向验证为对的；它最大的杠杆是「全链路同一大脑」；以及三个最该立刻补强的能力。这一节不挤一个框——每个押对的方向都值得展开，因为它们决定了后面 14 章「该往哪走」的判断基准。</p>
+
+      <h3>半米已押对的方向（竞品反向验证）</h3>
+
+      <div class="callout good"><h4>✅ 押对一：老师驱动 &gt; 纯算法推荐</h4><p><strong>Knewton</strong> 当年鼓吹「读心式自适应机器人」、累计融资约 $1.8 亿，但算法脱离内容与老师工作流，交付不出实际效果，2019 年 5 月技术资产被 Wiley 以远低于融资额（据报约 $17M）收购收场<sup class="cite" data-refid="40">[40]</sup>。反过来，行业里最干净、可持续的范式——<strong>Century Tech</strong> 的 Recommended Path、<strong>Carnegie Learning LiveLab</strong>——全是「老师设定边界 + AI 在边界内推荐 + 老师可随时覆盖」<sup class="cite" data-refid="33">[33]</sup>。半米 V1 故意把推荐算法降级、把「省老师力气 + 把学生状态估给老师看」当主战场，是被反复验证过的正确路线，而不是技术能力不足的妥协。这条判断直接决定了 Ch9 自适应章「先 IRT→BKT、DKT 后置」的演进节奏。</p></div>
+
+      <div class="callout good"><h4>✅ 押对二：Today 永远清爽、逾期挪补做区、不堆 backlog</h4><p><strong>Duolingo</strong> 的连胜（streak）设计有一条关键细节：完成 1 节课就保住连胜，<u>跟当天的学习目标量无关、漏掉的天也不累积成债</u><sup class="cite" data-refid="34">[34]</sup>；而 <strong>Anki</strong> 公认最大的劝退点，恰恰是停几天回来看到几百张积压卡片的窒息感<sup class="cite" data-refid="6">[6]</sup>。逾期复习暴露成原始队列，是这个行业的头号 churn（流失）杀手。半米「Today 只突出今天一个主任务 + 逾期项挪到独立补做区 + 学生自助补做、不混进今天」的设计，从架构层面天然规避了这个坑。这是被低估的方向性正确，Ch3 复习章和 Ch13 Today 章都建立在它之上。</p></div>
+
+      <div class="callout good"><h4>✅ 押对三：词本位 + 采词存原句 + 统一 FSRS 复习池</h4><p>竞品在词汇/复习这条线上全是单点：<strong>Readlang</strong> 只做语境查词 + 闪卡<sup class="cite" data-refid="2">[2]</sup>、<strong>批改网</strong>只批作文<sup class="cite" data-refid="19">[19]</sup>、剑桥 <strong>English Grammar Profile</strong> 只给语法 can-do 档案<sup class="cite" data-refid="22">[22]</sup>。<u>没有任何一家竞品把「读到的词 / 写错的句 / 学到的语法点 / 做错的题」沿同一条 SRS 闭环回流</u>。半米以词本位为基础、采词时存原句来源（<code>vocab_source_context</code>）、概念/错题/造句各包成卡进同一个 FSRS 大脑（<code>review_item</code> + <code>srs.py</code>），这是结构性独有的护城河，不是可被快速复制的功能点。后面每一簇的建议都在加固这条全链路。</p></div>
+
+      <div class="callout good"><h4>✅ 押对四：AI formative 反馈 + 老师终审</h4><p>严肃的高风险写作/口语评分产品——<strong>Linguaskill</strong>、<strong>PTE</strong>、<strong>E2</strong>——都把人工复核留在出正式分前的环节；即便定位为「练习反馈工具」的剑桥 <strong>Write &amp; Improve</strong>（自动反馈），也只敢把 AI 给出的分数称为「估算 band」、明确声明非官方<sup class="cite" data-refid="20">[20]</sup>。<u>这里要分清两类：练习反馈工具可以全自动给 formative 反馈，但任何被当成「正式定级/band」用的分数，行业惯例都保留人工终审</u>。半米坚持「AI 给 formative（形成性）反馈 + 老师终评」不是技术不够的退让，而是行业最佳实践本身。Ch6 写作、Ch7 口语、Ch9 测评三章都把这条当作不可逾越的边界。</p></div>
+
+      <div class="callout good"><h4>✅ 押对五：动态档案 = 词汇量曲线 + CEFR 曲线 + 知识图谱三件套</h4><p>竞品里<u>没有一家三者齐全</u>：<strong>IXL</strong> 有掌握分（SmartScore）但无 CEFR<sup class="cite" data-refid="28">[28]</sup>、<strong>Duolingo English Test</strong> 有 CEFR 对齐但无连续成长曲线<sup class="cite" data-refid="25">[25]</sup>。半米把「词汇量曲线 + CEFR 曲线 + 目标相关知识图谱」三曲线同屏，是 V1 里 AI 真正的主战场，方向对。Ch11 报告章会把它做透。</p></div>
+
+      <div class="callout good"><h4>✅ 押对六：CEFR-J 当分级主轴</h4><p>CEFR-J 是日本东京外大（TUFS）发起、为日本英语教学语境细分 CEFR 的体系（词表 + 语法档 + EVP English Vocabulary Profile 校准）<sup class="cite" data-refid="9">[9]</sup>。它源自东亚教学语境，对中国学习者通常比纯 Oxford 3000/5000 更接近（同属东亚 EFL、起点与教材结构相似），但严格说是「日本语境来源」而非「已为中日韩三国分别校准」。半米以它为分级主轴（词表、语法档、定级口径），方向对——⚠️ 但要注意：对中国用户，KET/PET/雅思/中高考/国际课程大纲的可解释对齐，购买驱动力可能强于 CEFR-J 本身，定级报告应做双轨呈现。</p></div>
+
+      <h3>半米最大的、竞品都没有的杠杆：全链路同一大脑</h3>
+      <div class="callout accent"><p><strong>半米最高价值的动作，不是把任何单点做到行业第一，而是把全链路打通。</strong>它同时握有 阅读/听力/口语 LE + 词本位 + FSRS 大脑（<code>srs.py</code>）+ CEFR-J 语法库 + <code>annotation</code>/<code>review_item</code>/<code>assignment</code> 契约 + 多技能 <code>event_log</code>。竞品都是单点强（查词、批文、评音、复习各做各的），<u>没有任何一家把读到的生词、看错的发音、写错的语法、做错的题全部沿同一个 FSRS 复习池 + 同一张知识图谱回流</u>。这条全链路是后面每一章建议的共同指向：每个单点功能的改进，最终都要回流到这同一个大脑里。</p></div>
+
+      <h3>三个最该立刻补强的能力（详见各簇）</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">补强一</div><div class="l">把 <code>recommendation_queue</code> 做成可执行回路：抄 Wayground「薄弱技能 → 自动生成补救题 → 一键派给特定几个学生」，让老师诊断从「看曲线」升级到「直接拿到补谁、补什么」（Ch12）</div></div>
+        <div class="metric"><div class="v">补强二</div><div class="l">知识图谱可视化范式 + 错因标注：抄 ALEKS 饼图 / IXL SmartScore / Khan 命名等级（Familiar→Proficient→Mastered），错题进池时标错因类型（不只对错）（Ch9 / Ch11）</div></div>
+        <div class="metric"><div class="v">补强三</div><div class="l">复习负载按时间预算封顶 + 永不暴露原始逾期队列：抄墨墨 SSP-MMC「每日时间预算 + 记忆规划预分配」，规避 Anki 招牌坑（Ch3）</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 词汇 ===== -->
+  <section class="chapter" id="ch2" data-nav="02 词汇系统">
+    <h2><span class="num">02</span><span class="title-text">词汇系统：词本位 + 采词存原句 + AI 判造句</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>功能拆解（半米现状）</h3>
+      <ul>
+        <li><strong>词本位</strong>：9287 词，Oxford 3000/5000 + CEFR-J + Octanove 三源打标，覆盖 A1–C2。</li>
+        <li><strong>采词三维判定</strong>（后端 <code>vocab.py</code>）：immediate（首遇高级词直进高频池）/ standard（重复遇 + 确认查词）/ unknown_mark（一键「不会」）。触发点 = 阅读长按、听力点词、口语扣分词。</li>
+        <li><strong>掌握度梯度</strong>：认识 → 拼写 → 造句；每词按词频/CEFR 设<strong>目标掌握级</strong>（高频要造句、长尾认识即可，老师可调）；造句由 AI 判分。</li>
+        <li><strong>学生端</strong>：<code>/student/vocab</code> 紧凑行列表（状态点 + CEFR + 释义 + 遇到次数 + 展开例句回链《书名》第 N 章）。</li>
+        <li><strong>数据</strong>：<code>vocab_source_context</code> 存采词原句来源、<code>book_anchor</code> 回链阅读。</li>
+      </ul>
+
+      <h3>竞品怎么做（产品名加粗）</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>竞品</th><th>核心机制</th><th>★ 半米可借鉴</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Readlang</strong>（语境阅读器）</td><td>点词即弹行内翻译 + 静默生成闪卡，<u>闪卡存下该词出现的整句原文</u>，复习永不脱离语境<sup class="cite" data-refid="2">[2]</sup></td><td>半米 <code>vocab_source_context</code> 已为此而生——务必把采词时的 source sentence 强制落库，复习时把词放回原句考</td></tr>
+          <tr><td><strong>LingQ</strong>（导入式语境学习）</td><td>词状态账号级全局着色（蓝=新/黄=已查/白=已知），翻页批量「已认识」；「已知词数」是核心进度指标<sup class="cite" data-refid="4">[4]</sup></td><td>同一词在所有阅读材料里按掌握级着色 + 给老师「该生已知词数 / CEFR 各级覆盖率」仪表盘</td></tr>
+          <tr><td><strong>Vocabulary.com</strong>（自适应引擎）</td><td>每词打在多级熟度表，10 种题型，引擎同时决定「考哪个词」+「用哪种题型」，按 recency 自动插复习题（数十亿答题数据）<sup class="cite" data-refid="5">[5]</sup></td><td>借鉴「引擎自动选下一题型」，但用老师设的目标掌握级当上界——AI 在认识→拼写→造句梯度内自动选题，老师只设天花板</td></tr>
+          <tr><td><strong>百词斩</strong>/<strong>Memrise</strong>/<strong>Drops</strong>（图记/助记）</td><td>图像/众包 mems/纯图标做多次曝光强化记忆<sup class="cite" data-refid="7">[7]</sup></td><td>对高频核心词，AI 生成语境图或词根词缀拆解卡，作<u>可选</u>助记脚手架</td></tr>
+          <tr><td><strong>CEFR-J 词表</strong></td><td>专为东亚学习者校准的分级体系<sup class="cite" data-refid="9">[9]</sup></td><td>继续以它为分级主轴（已用对）</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>★ 最该借鉴 / ⚠️ 坑 / 💡 缺的亮点</h3>
+      <div class="callout good"><p><strong>★ 强制采词存原句（最高优先）</strong>：复习时轮换该词在不同来源里的句子（LingQ 式「多处复现」），比单一例句强。这是词本位最大的差异化，也是「全链路同一大脑」在词汇侧的落点。</p></div>
+      <div class="callout info"><p><strong>💡 AI 判造句是半米真正的领先点</strong>：竞品词汇几乎全停在识别/拼写（Vocabulary.com 多达 10 种题型也仍是选择/匹配类），<u>无人做自由造句产出评估</u>。把它做成高频词「毕业」的硬门槛，AI 评分维度（用词准确 / 语法 / 搭配自然度）结构化反馈给老师。</p></div>
+      <div class="trap-box"><strong>⚠️ 别让图记反噬：</strong>百词斩官方都承认存在「记住了图、没记住词」的问题<sup class="cite" data-refid="7">[7]</sup>。图只能辅助，主判定必须落在词义/拼写/造句上。</div>
+
+      <h3>建议</h3>
+      <div class="check-box">
+        <p><strong>① 强制采词存原句 + 复习多句轮换</strong>（P0）。</p>
+        <p><strong>② 全局词着色 + 已知词计数仪表盘给老师</strong>——直接服务「把学生状态估给老师看」。</p>
+        <p><strong>③ 把 AI 判造句做成高频词毕业硬门槛</strong>，结构化评分喂老师。</p>
+        <p><strong>④ 图记只做可选脚手架</strong>，绝不让它替代主判定。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 复习/SRS ===== -->
+  <section class="chapter" id="ch3" data-nav="03 复习 / SRS">
+    <h2><span class="num">03</span><span class="title-text">复习系统 / SRS：统一 FSRS 大脑 + 防堆积</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>功能拆解（半米现状）</h3>
+      <ul>
+        <li>统一复习池（<code>review_item</code>，4 池）：vocab / concept / knowledge / mistake，统一 FSRS 大脑 <code>srs.py</code>。</li>
+        <li>FSRS 默认参数起步 → 攒数据自动调参；区分新词「学习期」密集 → 毕业进 FSRS 长周期；「软毕业」（升到目标级 + 间隔&gt;180 天 → 移出活跃池但可召回）。</li>
+        <li>评分 = 客观对错 + 主观难度感 → 合成 FSRS 4 档（Again/Hard/Good/Easy）。</li>
+        <li>每日上限（绝不堆 200）；复习 = Today 固定一块 + 独立入口；两个 AI 架构（学生 AI 主持 + 老师 AI 注入约束）。</li>
+      </ul>
+
+      <h3>竞品怎么做（产品名加粗）</h3>
+      <div class="callout accent"><h4>★ 墨墨背单词 SSP-MMC——防堆积内建于调度器</h4><p><strong>墨墨</strong>用「随机最短路 + 最小化记忆成本」的动态规划（KDD/TKDE 论文 SSP-MMC + DHP 记忆模型），卡<u>每日时间预算</u>（约 10 分钟），超预算的项目推到次日，并<u>把未来负载预分配、使复习曲线平滑</u><sup class="cite" data-refid="3">[3]</sup>。半米已定「每日上限」，但更优做法是<strong>按预估复习时间封顶（而非固定条数）+ 调度器主动往后推 + 预铺平未来几天</strong>。这是墨墨工程里最值钱的部分，也是半米防劝退的关键升级。</p></div>
+      <div class="callout accent"><h4>★ Duolingo Birdbrain / RemNote——永不暴露原始逾期队列</h4><p>底层算出 180 项到期，学生端只呈现「今日 N 张」的有限会话<sup class="cite" data-refid="34">[34]</sup>。这是半米防劝退的头号铁律，从根上规避 Anki 招牌坑（停几天回来看到几百张积压而弃用<sup class="cite" data-refid="6">[6]</sup>）。半米「Today 不堆 backlog」的方向正确，但要确保复习模块也严格遵守同一纪律。</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>竞品</th><th>核心机制</th><th>★ 半米可借鉴</th></tr></thead>
+        <tbody>
+          <tr><td><strong>FSRS-6</strong>（2025，约 7 亿条复习训练）</td><td>S(稳定性)/D(难度)/R(可提取性) 三态 + 幂律遗忘曲线；同 90% 留存比 SM-2 少约 20–30% 复习量；<u>短期记忆模型薄弱</u>，需另设学习期<sup class="cite" data-refid="1">[1]</sup></td><td>半米「学习期密集 → 毕业进 FSRS」的两段设计正好对症（别合进一个模型）</td></tr>
+          <tr><td><strong>Anki cloze</strong> / <strong>RemNote</strong> 概念卡</td><td>「万物皆卡」——任何可判对错的项 = 一张带自己 S/D/R 的卡，骑同一调度器<sup class="cite" data-refid="6">[6]</sup></td><td>半米把概念/错题/造句各包成卡进同一 FSRS 大脑（已有 <code>review_item</code>），不需要第二套引擎</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>建议</h3>
+      <div class="check-box">
+        <p><strong>① 每日负载按时间预算封顶 + 跨天重铺平</strong>（墨墨式），不要固定条数（P0）。</p>
+        <p><strong>② 学生端绝不暴露原始 backlog</strong>——只给「今日 N 张」（留存生死线，P0）。</p>
+      </div>
+      <div class="trap-box"><strong>⚠️ 主观难度档别乱映射：</strong>FSRS 里<u>只有 Again = lapse（遗忘）</u>，Hard 仍算成功。把「答对但觉得难」误判成 lapse 会污染 stability（稳定性）估计<sup class="cite" data-refid="1">[1]</sup>。</div>
+      <div class="trap-box"><strong>⚠️ 默认参数别当终点：</strong>数据少时先用群体级参数，别过早 per-user 拟合（会过拟合）；数据起来后务必落地「自动调参」，否则退化成半个 SM-2<sup class="cite" data-refid="1">[1]</sup>。</div>
+      <div class="callout info"><p><strong>💡 老师可见的负载/留存预测仪表盘</strong>：把「该生未来 7 天预估复习负载、各项预测留存率、哪些词卡在哪一级」暴露给老师——竞品的调度全是黑箱给学生看，这是「AI 估状态给老师」的直接落地，也是半米双 AI 架构（老师 AI 注入约束）的天然出口。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 听力 ===== -->
+  <section class="chapter" id="ch4" data-nav="04 听力精听">
+    <h2><span class="num">04</span><span class="title-text">听力 / 视频精听：WebCodecs 逐句 + 听写填空</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>功能拆解（半米现状）</h3>
+      <ul>
+        <li>内容：Crash Course Kids / SciShow Kids 教育视频、EnglishPod 播客；台词本×字幕严格时间戳对齐。</li>
+        <li><strong>WebCodecs 自研逐句视频播放器（VideoStageWC）</strong>做句子级回放，规避原生 video seek 卡顿。</li>
+        <li>听力 LE：预测 → 盲听抓主旨 → 分段重听做细节题 → 对照 transcript → 跟读。transcript 可隐藏/对照。</li>
+        <li>已实装：<code>ListeningLE.tsx</code>、R2 音频流、点词采词集成。</li>
+      </ul>
+
+      <h3>竞品怎么做（产品名加粗）</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>竞品</th><th>核心机制</th><th>★ 半米可借鉴</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Language Reactor</strong>（双语字幕标杆，桌面）</td><td>单键精听——<code>S</code> 重播本句、<code>A/D</code> 跳句、<code>Q</code> 开关句末暂停；<u>没有移动端</u><sup class="cite" data-refid="11">[11]</sup></td><td>直接映射到 VideoStageWC，零鼠标精听肌肉记忆；它没移动端 = 半米 Web 端的机会</td></tr>
+          <tr><td><strong>Trancy</strong> / <strong>Yabla</strong></td><td>句末 auto-pause + 逐句循环 N 次；Yabla 专利听写游戏 <strong>Scribe</strong>（听一句填一句）<sup class="cite" data-refid="12">[12]</sup></td><td>盲听阶段默认句末停 + 循环计数（循环 3 遍才放行）；细节题插入<u>听写填空判分</u>（词级=新手 / 句级=进阶）</td></tr>
+          <tr><td><strong>Migaku</strong>（sentence mining）</td><td>点词建卡且<u>自动截取该词所在视频片段</u>（音频+截图+字幕）<sup class="cite" data-refid="13">[13]</sup></td><td>半米 schema（<code>vocab_source_context</code>/<code>captions</code>）已支持，前端没做透——点词→存片段→复习回放原声原句，把听力与词本位/FSRS 打通</td></tr>
+          <tr><td><strong>欧路每日英语听力</strong></td><td>单句精听 + 词级/句级两档填空纠错，最贴中国学生既有习惯</td><td>词级=新手、句级=进阶的两档听写直接照搬</td></tr>
+          <tr><td><strong>字幕渐进遮挡</strong>（Trancy）</td><td>盲听=全隐 → 主旨=只母语 → 细节=显英文 → 对照=双语<sup class="cite" data-refid="12">[12]</sup></td><td>半米的「可隐藏/对照」应升级成这条 4 档渐进，而非二元开关</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>建议</h3>
+      <div class="check-box">
+        <p><strong>① 加 Language Reactor 单键键位</strong>到逐句播放器（触屏给左右滑跳句 + 大点击区）（P1）。</p>
+        <p><strong>② 加听写填空判分步骤</strong>（Yabla Scribe / 欧路）——强制主动听，弥补现有 detail 题多为选择题的弱点（P1）。</p>
+        <p><strong>③ 首遍强制隐藏字幕</strong>：半米「先盲听 → 后字幕」流程是优势，务必门控（循环 N 遍或盲听一遍才解锁字幕），否则退化成「带字幕看视频」——这是 FluentU/LingQ/Trancy 全行业通病（P1）。</p>
+      </div>
+      <div class="callout info"><p><strong>💡 自有可控语料 + 严格时间戳对齐</strong>（Crash Course/EnglishPod）是比「任意 Netflix 注入」更稳的护城河——别为追求「任意视频注入」而牺牲对齐质量。Language Reactor 靠注入 Netflix 字幕起家，但字幕质量与对齐受制于平台；半米掌控语料就掌控了精听体验的下限。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 口语 ===== -->
+  <section class="chapter" id="ch5" data-nav="05 口语 / 跟读">
+    <h2><span class="num">05</span><span class="title-text">口语 / 跟读 / AI 陪练：GOP 评分 + 双引擎</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>功能拆解（半米现状）</h3>
+      <ul>
+        <li>C6 朗读母 pipeline（5 步）：示范 → 分段录音（实时 waveform）→ AI 评分（句级 3 维 Fluency/Pron/Intonation + 学生↔native 双波形对比）→ 难点重练（音素级 hint）→ 整段连读 + 自评。后端 <code>POST /speaking/score</code>（V0.1 Azure-shape mock，V0.2 接真 Azure Pronunciation Assessment）。</li>
+        <li>衍生 LE：EnglishPod（6 步含角色扮演 + 复述）、看美剧学口语（WebCodecs 逐句 shadowing + 整集 retell）、短对话/长讲座。</li>
+        <li>录音策略：跟读只存最新/90 天清；复述全留攒微调语料。</li>
+      </ul>
+
+      <h3>竞品怎么做（产品名加粗）</h3>
+      <div class="callout accent"><h4>★ ELSA Speak——音素级 GOP 评分标杆</h4><p><strong>ELSA</strong> 核心是<u>音素级 GOP（Goodness of Pronunciation）评分</u>——用带口音的 L2（二语）英语语料训练，能识别中国/越南等学生特有的错音；评 5 维（音段/韵律/语调/重音/流利度）；并开放 ELSA API（Interspeech 2025 仍在迭代 logit-based GOP）<sup class="cite" data-refid="10">[10]</sup>。半米现有 4 维已接近，应在<strong>发音维下钻到音素级 + 标红 + 给口型对比</strong>。</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>竞品</th><th>核心机制</th><th>★ 半米可借鉴</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Duolingo Max Video Call</strong> / <strong>Cambly</strong></td><td>对话进行中<u>不打断</u>，结束后给「标注转录稿」式反馈（高亮错词、给替代说法）<sup class="cite" data-refid="46">[46]</sup></td><td>半米复述坚持「先让说完 → 后批改」，避免实时纠错打断流利度；反馈做成<u>可回看的高亮转录</u>而非一次性弹分</td></tr>
+          <tr><td><strong>英语流利说（LAIX）</strong></td><td>自研引擎 + 8 级体系对齐 CEFR，最懂中国学生定级口径<sup class="cite" data-refid="14">[14]</sup></td><td>半米口语分必须映射 CEFR band（接 0020 stage/goal + CVLA），告诉学生「当前约 B1，距 B2 差在韵律」</td></tr>
+          <tr><td><strong>Speak</strong>（OpenAI 投资，估值约 $10 亿独角兽）/ <strong>Praktika</strong> / <strong>Loora</strong> / <strong>TalkPal</strong></td><td>开放式 AI 语音对话陪练，按 goal/CEFR/兴趣定制场景<sup class="cite" data-refid="15">[15]</sup></td><td>半米有 role-play 但偏剧本，缺「无剧本自由对话」+ 实时语音。可复用台词本×字幕对齐做「有剧本 role-play」，再渐进到自由对话</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>建议</h3>
+      <div class="trap-box"><strong>⚠️ GOP 别一上来自研：</strong>ELSA 的护城河是 L2 accented（带口音二语）训练数据，从零训练极易对中国口音误判（过严打击信心 / 过松毫无意义）。<u>先接 ELSA API 或开源 GOP（wav2vec2-based）验证口径</u>，再考虑自研（P1）<sup class="cite" data-refid="10">[10]</sup>。</div>
+      <div class="check-box">
+        <p><strong>① 明确两条评分引擎</strong>：跟读 = 发音/GOP 评分；复述/role-play = 对话流利度评分。别混用一个分数（ELSA 发音强对话弱、Speak 反之）。</p>
+        <p><strong>② 双波形对齐可视化</strong>（design token <code>--you-wave</code>/<code>--native-wave</code> 已留、未做）= 跟读对比的杀手锏。</p>
+        <p><strong>③ 口语分映射 CEFR band</strong>，接 0020 stage/goal + CVLA。</p>
+      </div>
+      <div class="trap-box"><strong>⚠️ 录音存储：</strong>半米「跟读存最新/90 天清、复述全留」是对的，别为做对比无限期存全部跟读（与 MEMORY 中既定策略一致）。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 阅读 ===== -->
+  <section class="chapter" id="ch6" data-nav="06 阅读 + 电子书">
+    <h2><span class="num">06</span><span class="title-text">阅读：内容验证解锁 + 雅思题型引擎 + 电子书标注</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>功能拆解（半米现状）</h3>
+      <ul>
+        <li>6 种阅读 LE：短文/新闻、绘本（看图预测+跟读+排序）、分级读物（对接 Reading A-Z）、小说章节、长文、雅思学术阅读（题型：matching headings、T/F/NG、summary completion、matching features、vocab in context、inference…）。</li>
+        <li>阅读 LE：预读略读 → 精读答题 → 报告/提问；<strong>强过程控制（Alpha Reads：答题前强制等待）</strong>。</li>
+        <li>书板块（C5，第 6 库，已端到端验通）：上传 PDF/EPUB → 章节化 → LLM 清洗 MD；左栏可读 + <strong>三粒度标注</strong>（词/短语/句，词级标注↔词本位互链）；进度条 + 「接着上次读」resume；灵活 scope（全书/指定章/范围）布置。</li>
+        <li>已实装：<code>ReadingLE.tsx</code>、<code>BookLE</code>、<code>annotation</code> 表。</li>
+      </ul>
+
+      <h3>竞品怎么做（产品名加粗）</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>竞品</th><th>核心机制</th><th>★ 半米可借鉴</th></tr></thead>
+        <tbody>
+          <tr><td><strong>CommonLit</strong>（切块 + 模糊锁）</td><td>文章切块，下一块模糊锁定，答对当前块检查题才解锁；答错无限重试不计分<sup class="cite" data-refid="16">[16]</sup></td><td>最强反跳读 UX，对中国学生不羞辱；半米 Alpha Reads 可升级成这种「内容验证解锁」</td></tr>
+          <tr><td><strong>LightSail</strong>（双层题）</td><td>正文嵌 cloze（验在读 + 顺手测词）+ 章末 text-evidence 简答<sup class="cite" data-refid="17">[17]</sup></td><td>喂同一能力估计，cloze 顺手回流词本</td></tr>
+          <tr><td><strong>Newsela</strong>（同文多档）</td><td>同篇时事生成 5 个 Lexile 档，做满若干题后自动按表现升降档<sup class="cite" data-refid="18">[18]</sup></td><td>省反复测评，难度自适应</td></tr>
+          <tr><td><strong>微信读书</strong>（三色语义标注）</td><td>黄底=核心论点 / 红线=有趣 / 蓝波浪=生词</td><td>生词类直接回流词本（半米 <code>annotation</code> 表 word↔vocab 互链已支持）</td></tr>
+          <tr><td><strong>Lexile/AR/GRL/Reading A-Z</strong> 分级</td><td>⚠️ 四套系统维度不同（Lexile 只算词频+句长，不测概念难度），<u>所有换算表都是按年级带的近似对齐，非精确换算</u><sup class="cite" data-refid="23">[23]</sup></td><td>别承诺精确换算</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>建议</h3>
+      <div class="callout good"><p><strong>★ 把 Alpha Reads 升级为「内容验证解锁」</strong>（CommonLit 切块锁 + LightSail 嵌入 cloze + 停留/滚动信号），合成「证明真读」反作弊层，喂老师布置回流。这是阅读侧最该做的一步（P1）。</p></div>
+      <div class="trap-box"><strong>⚠️ 别把 Lexile 当唯一真理</strong>（它只算词频+句长，会低估雅思学术文的概念难度<sup class="cite" data-refid="23">[23]</sup>）——Lexile + 人工标签并行；别承诺精确「级别换算」（会被打脸）。</div>
+      <div class="callout info"><p><strong>💡 雅思学术阅读专项题型引擎 + 逐题定位原文证据句</strong>（matching headings / T-F-NG vs Y-N-NG 的事实-观点区分 / summary completion）——竞品几乎无人系统做雅思题型引擎，是半米雅思差异化护城河（P1）。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 写作 ===== -->
+  <section class="chapter" id="ch7" data-nav="07 写作（雅思）">
+    <h2><span class="num">07</span><span class="title-text">写作（雅思）：渐进式反馈 + 中式英语检测</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>功能拆解（半米现状）</h3>
+      <p>雅思写作流：题目解析 → outline → draft → rubric 反馈 → 老师确认。AI 给 formative 反馈、不直接给正式分。已有 <code>LongEssayLE.tsx</code>（移植中）。</p>
+
+      <h3>竞品怎么做（产品名加粗）</h3>
+      <div class="callout accent"><h4>★ Cambridge Write &amp; Improve（剑桥）——渐进式 + 三层显式度反馈</h4><p>三层显式度反馈（词级直接给改法 / 词级标红 / 句级整句绿黄红配色）；给估算 CEFR + 对比数千篇范文出<u>估算 IELTS band（明确声明非官方）</u>。关键策略：<strong>首轮只回最常见错误，改完后次级错误才在下一轮显现</strong>（防轰炸、维持动机）<sup class="cite" data-refid="20">[20]</sup>。这套全部直接借鉴。</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>竞品</th><th>核心机制</th><th>★ 半米可借鉴</th></tr></thead>
+        <tbody>
+          <tr><td><strong>批改网（Pigai）</strong></td><td>唯一明确做<u>中式英语检测</u>（语料里查无此用法即标「疑似中式英语」）<sup class="cite" data-refid="19">[19]</sup></td><td>建 IELTS 范文 + L1-Chinese 高频误用语料，标「native 不这么说」——中国学生差异化王牌</td></tr>
+          <tr><td><strong>Grammarly Goals</strong></td><td>作答前选受众/正式度，反馈按维度可开关<sup class="cite" data-refid="24">[24]</sup></td><td>答题前选 Task1/Task2 + 目标 band，反馈按 TR/CC/LR/GRA 四维分别给</td></tr>
+          <tr><td><strong>ETS e-rater</strong>（Criterion）</td><td>⚠️ <u>已被实证可刷分</u>——长度是最强代理变量，BABEL 生成器证明胡话能拿高分<sup class="cite" data-refid="21">[21]</sup></td><td>反面教材：别用长度/复杂度当隐性评分代理</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>建议</h3>
+      <div class="check-box">
+        <p><strong>① 渐进式反馈</strong>（首轮只标高频/最严重错误）+ <strong>三层显式度 × 句级配色</strong>——既 formative（不喂答案）又落句粒度（P1）。</p>
+        <p><strong>② 中式英语专项检测层</strong>（批改网式语料距离）（P1）。</p>
+      </div>
+      <div class="trap-box"><strong>⚠️ 两条边界：</strong>别用长度/复杂度当隐性评分代理（e-rater 教训<sup class="cite" data-refid="21">[21]</sup>）；别让 AI 直接出官方 band（连剑桥都只称「估算」<sup class="cite" data-refid="20">[20]</sup>）——守住「formative + 老师终审」边界。</div>
+      <div class="callout info"><p><strong>💡 进步曲线 vs 范文基准</strong>（你的词汇多样性 vs band 7 范文），把单篇反馈变成纵向成长叙事——这又接回了「三曲线动态档案」全链路。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 语法 ===== -->
+  <section class="chapter" id="ch8" data-nav="08 语法">
+    <h2><span class="num">08</span><span class="title-text">语法：EGP criterial features + 阅读双向链接</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>功能拆解（半米现状）</h3>
+      <p>CEFR-J 语法体系、语法书/语法库（半米现状较单薄，是最早期阶段的功能簇之一）。</p>
+
+      <h3>竞品怎么做（产品名加粗）</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>竞品</th><th>核心机制</th><th>★ 半米可借鉴</th></tr></thead>
+        <tbody>
+          <tr><td><strong>English Grammar Profile（EGP，剑桥）</strong></td><td>基于约 5500 万词学习者语料的 1200+ 条「语法 can-do」，核心是 <u>criterial features（区分级特征）</u>——能区分某 CEFR 级与前级的结构<sup class="cite" data-refid="22">[22]</sup></td><td>用 EGP 给每个语法点打 CEFR 标 + 接 CEFR-J 错误清单驱动诊断（不只「现在完成时=B1」，而是区分级逻辑）</td></tr>
+          <tr><td><strong>Murphy《English Grammar in Use》</strong></td><td><u>左页规则+例句、右页练习</u>对开双页结构</td><td>直接当语法 book 单点页模板（同屏单点聚焦 + 章末综合）</td></tr>
+          <tr><td><strong>Grammarly GECToR</strong>（token 标签纠错）</td><td>keep/delete/append/replace + 语法变换标签<sup class="cite" data-refid="24">[24]</sup></td><td>写作纠错结构化归到具体语法点 → 自动回流复习池</td></tr>
+          <tr><td><strong>Duolingo</strong>（隐性）vs <strong>Babbel</strong>（显性母语规则盒）</td><td>⚠️ 纯隐性对应试/东亚学生不够；显性规则别按教材直觉排序<sup class="cite" data-refid="34">[34]</sup></td><td>显性规则必以 EGP/CEFR-J 实证映射为准</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>建议</h3>
+      <div class="callout info"><p><strong>💡 语法点 ↔ 真实阅读文本双向链接</strong>（阅读时高亮命中的 EGP feature，点开跳语法 book 单点）——半米同时握阅读 LE + CEFR-J 语法库，是<u>独有打通条件</u>。这是「全链路同一大脑」在语法侧最锋利的落点。</p></div>
+      <div class="callout info"><p><strong>💡 写作纠错回流分级</strong>：写作语法错 → 归具体语法点 → 进 SRS。竞品无人打通「纠错→分级→复习」全链——Grammarly 能纠错但不入 SRS、Anki 能复习但不接纠错。半米把两端串起来即独有。</p></div>
+      <div class="check-box">
+        <p><strong>① EGP criterial features 打标</strong> + 接 CEFR-J 错误清单做诊断（P1）。</p>
+        <p><strong>② CEFR criterial-feature 进度雷达</strong>：按区分级特征显示「该级语法已覆盖 X%」。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 考试测评 ===== -->
+  <section class="chapter" id="ch9" data-nav="09 考试 / 测评">
+    <h2><span class="num">09</span><span class="title-text">考试 / 水平测评：CAT 测准即停 + 整合 subscore</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>功能拆解（半米现状）</h3>
+      <ul>
+        <li>0F 测评系统：标准化模考 + 水平测试（CEFR/Lexile/诊断/KET/PET/雅思模考）共享同一题库+引擎，差异在 mode/assembly_rule/score_scale 三字段。</li>
+        <li>定级由老师发起；结果不自动决定学生难度，只进动态档案给老师/家长参考。</li>
+        <li>已实装：<code>ExamLE.tsx</code>（整套真题 + 计时 + 即时反馈）、<code>LexileLE</code>（13 标尺）、<code>VstLE</code>（词汇量测）、IELTS Reading 题库真部署；题库锁 HQ 管理员。</li>
+      </ul>
+
+      <h3>竞品怎么做（产品名加粗）</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>竞品</th><th>核心机制</th><th>★ 半米可借鉴</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Duolingo English Test（DET）</strong></td><td>CAT + Rasch/IRT，总分 10–160 对齐 CEFR；2024-07 起报 <u>8 个 subscore</u>（4 单项 + 4 整合分：读写/听读/听说/说写）<sup class="cite" data-refid="25">[25]</sup></td><td>比半米现「一个 CEFR 数」信息密度高得多，且与动态档案天然契合</td></tr>
+          <tr><td><strong>MAP Growth / STAR / Linguaskill</strong></td><td>能力与难度共用一条 IRT 等距尺，<u>约 34 题 / 6–10 题即可精准定级</u>；<strong>Santa（Riiid）</strong>6–10 题预测 TOEIC 准确率约 90%（EdNet 1.31 亿交互）<sup class="cite" data-refid="26">[26]</sup></td><td>半米题库本就要标难度，CAT 测准即停可大幅压缩题量</td></tr>
+          <tr><td><strong>PTE</strong>（整合评分）</td><td>1 个作答同时打多个分（4 技能 + 6 enabling skills），含部分给分<sup class="cite" data-refid="27">[27]</sup></td><td>半米一道阅读题可同时喂「阅读 + 词汇 + 语法」多维度，省题且报告丰富</td></tr>
+          <tr><td><strong>STAR ZPD</strong> / Lexile 书目难度带</td><td>定级直接产出「该读哪个难度的书」<sup class="cite" data-refid="32">[32]</sup></td><td>半米已有 Lexile + 书板块（C5），定级闭环到现有内容</td></tr>
+          <tr><td><strong>Magoosh</strong> 分数预测</td><td>用历史学生真实官分 ↔ 练习表现回归，预测当前考分</td><td>给家长极强获得感（KET/PET/雅思 band 预测）</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>建议</h3>
+      <div class="check-box">
+        <p><strong>① 上 CAT（Rasch/IRT）测准即停</strong>（现在是固定卷）大幅压缩题量（P1）。⚠️ 注意「6–10 题精准定级」是 Santa 在 TOEIC 单一场景的经验，不能直接迁移到 KET/PET/IELTS/CEFR——CAT 精度依赖题库校准质量、内容覆盖约束与可接受测量误差（置信区间），半米需先把题库难度校准做扎实，再谈最短题量。</p>
+        <p><strong>② 整合 subscore 报告</strong>（DET 8 分 / PTE enabling skills）替代单一 CEFR 数（P1）。</p>
+        <p><strong>③ 定级 → ZPD 书目难度带</strong>自动闭环到书板块。</p>
+        <p><strong>④ 分数预测器</strong>（Magoosh 式回归）。</p>
+      </div>
+      <div class="trap-box"><strong>⚠️ 三条坑：</strong>写作/口语保留 AI 初评 + 人工终审（Linguaskill/PTE 全这么干<sup class="cite" data-refid="20">[20]</sup>）；别盲目自建 AI 远程监考（DET 重投入且持续被对抗，半米已有 lockdown，性价比低<sup class="cite" data-refid="25">[25]</sup>）；中国市场（雅思哥/小站）证明<u>机经/题库速度 + 信任信号比算法深度更值钱</u>——别先卷 IRT 而题库空。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 自适应 ===== -->
+  <section class="chapter" id="ch10" data-nav="10 自适应 / 知识图谱">
+    <h2><span class="num">10</span><span class="title-text">自适应 / 知识追踪 / 知识图谱：IRT→BKT→DKT</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>功能拆解（半米现状）</h3>
+      <ul>
+        <li>V1 <strong>故意不做推荐算法</strong>（老师驱动）。研究停放区：知识追踪（IRT→BKT→DKT）、知识图谱（per-知识点掌握地图，目标相关，掌握度梯度）、冷启动用定级当种子。</li>
+        <li>已有：<code>0020_learning_taxonomy_seed</code>（分类法种子）、FSRS 大脑、定级结果。</li>
+      </ul>
+
+      <h3>竞品怎么做（产品名加粗）</h3>
+      <div class="callout accent"><h4>★ 算法谱系：IRT→BKT→DKT 正好匹配半米演进</h4><p><strong>IRT</strong>（项目反应理论）：静态能力 θ，适合定级冷启动 → <strong>BKT</strong>（贝叶斯知识追踪）：每技能 2 态 HMM、4 个可解释参数，适合给老师看的逐知识点掌握图、小数据友好 → <strong>DKT</strong>（深度知识追踪）：RNN/Transformer，精度最高但数据饥渴、不可解释<sup class="cite" data-refid="30">[30]</sup>。<u>IRT→BKT→（后置 DKT）正好匹配半米演进</u>：IRT 做 CEFR 曲线冷启动 → BKT 做逐知识点掌握地图（可解释、老师可读）→ 数据起来再上 DKT。<strong>FSRS 管复习时机、BKT 管掌握度，两者并存</strong>，串成「同一大脑」链路（定级种子 → 知识图谱 → BKT 掌握度 → FSRS 复习）。</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>竞品</th><th>核心机制</th><th>★ 半米可借鉴</th></tr></thead>
+        <tbody>
+          <tr><td><strong>ALEKS</strong>（知识空间理论 KST）</td><td>约 350 原子主题 → 数百万知识状态；<u>ALEKS 饼图</u>可视化（深=已掌握、浅=ready-to-learn、空=未学）<sup class="cite" data-refid="29">[29]</sup></td><td>半米动态档案知识图谱的现成 UI 语言</td></tr>
+          <tr><td><strong>IXL SmartScore</strong> / <strong>Khan</strong> 命名等级</td><td>IXL SmartScore 0–100（非百分比，难度+准确+一致性加权，80=熟练/90=优秀/100=精通）；Khan「Familiar→Proficient→Mastered」<sup class="cite" data-refid="28">[28]</sup></td><td>掌握度展示用命名等级而非冷冰数字，对中国学生更正向</td></tr>
+          <tr><td><strong>Century</strong> Recommended Path / <strong>Carnegie LiveLab</strong></td><td>最干净的「老师设定 + AI 推荐共存、老师可覆盖」范例；LiveLab 实时区分「有效挣扎 vs 无效挣扎」+ 预警<sup class="cite" data-refid="33">[33]</sup></td><td>半米老师驱动 + AI 填「ready-to-learn」项的范本</td></tr>
+          <tr><td><strong>松鼠 AI</strong>（错因诊断）</td><td>五维错因（知识断点/思维路径/概念关联/解题习惯/认知层级）；约 1 万+纳米知识点<sup class="cite" data-refid="31">[31]</sup></td><td>错题进池时标错因类型（不只对错），喂老师 + 提升 BKT 估计</td></tr>
+          <tr><td><strong>Knewton</strong>（反面教材）</td><td>纯算法自适应脱离内容与老师工作流，交付失败贱卖<sup class="cite" data-refid="40">[40]</sup></td><td>直接验证半米「老师驱动优先」正确</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>建议</h3>
+      <div class="check-box">
+        <p><strong>① 算法路线 IRT→BKT→DKT 渐进</strong>；BKT 掌握度 + FSRS 复习时机并存（P2）。</p>
+        <p><strong>② 知识图谱可视化抄 ALEKS 饼图 / IXL SmartScore / Khan 命名等级</strong>；错题标错因维度（P0）。</p>
+      </div>
+      <div class="trap-box"><strong>⚠️ 四条坑：</strong>① 别一上来上 DKT（数据不够过拟合、给不出老师能读的单点数值，与动态档案目标冲突）；② 英语技能边界模糊，别盲目追松鼠 AI「1 万纳米知识点」（那是 K12 数学结构强的产物<sup class="cite" data-refid="31">[31]</sup>，英语盲目细化标注成本爆炸）——英语适合「技能×CEFR 档」中等粒度 + 词汇本位单点；③ IXL 非对称罚分（答错重扣）易挫败<sup class="cite" data-refid="28">[28]</sup>，面向中国学生焦虑度高，掌握度展示要谨慎正向。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 报告 ===== -->
+  <section class="chapter" id="ch11" data-nav="11 报告 / 动态档案">
+    <h2><span class="num">11</span><span class="title-text">学习报告 / 动态档案 / 家长沟通：双数报告 + 薄弱点诊断</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>功能拆解（半米现状）</h3>
+      <ul>
+        <li>动态档案：词汇量曲线 + CEFR 曲线 + 知识图谱（目标相关掌握地图）。</li>
+        <li>三受众三报告：学生=动力向、老师=诊断向、家长=放心向。</li>
+      </ul>
+
+      <h3>竞品怎么做（产品名加粗）</h3>
+      <div class="callout accent"><h4>★ Renaissance Star——双数报告（成就 + 成长百分位）</h4><p><strong>Star</strong> 分离「成就」与「成长」两个维度：Scaled Score + 百分位 + <u>SGP（Student Growth Percentile）1–99</u>（与起点相近的「学业同伴」比，50=典型成长）+ 成长-熟练四象限<sup class="cite" data-refid="32">[32]</sup>。双数（稳定成就分 + 同伴成长百分位）胜过单一数字，正好契合半米的「词汇量 + CEFR 双曲线」。</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>竞品</th><th>核心机制</th><th>★ 半米可借鉴</th></tr></thead>
+        <tbody>
+          <tr><td><strong>IXL Trouble Spots</strong></td><td>某技能内<u>错 3 题即标薄弱点，按「影响多少学生」排序</u><sup class="cite" data-refid="28">[28]</sup></td><td>可执行的诊断信号，让老师从「看曲线」升级到「拿到该补谁、补什么」</td></tr>
+          <tr><td><strong>ClassDojo</strong> / <strong>Seesaw</strong>（家长向）</td><td>ClassDojo 老师可选哪些积分分享或隐藏（正向框架）；Seesaw 作品集优先（家长看真实作品而非分数）<sup class="cite" data-refid="37">[37]</sup></td><td>直接服务「家长=放心向」，坚决做减法</td></tr>
+          <tr><td><strong>LLM 自动评语</strong>（2024–26 行业实践）</td><td><u>「生成-不直发」</u>——两 Agent 生成→批判收敛过度表扬，老师当草稿改、批准后发，<u>绝不自动发</u>（主要失败是幻觉式夸奖）<sup class="cite" data-refid="38">[38]</sup></td><td>LLM 评语 = 两 Agent 草稿 + 老师批准、不自动发</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>建议</h3>
+      <div class="check-box">
+        <p><strong>① 双数报告</strong>（成就 + 成长百分位，Star SGP 式）。</p>
+        <p><strong>② IXL 式「错 N 题=薄弱点、按影响人数排序」诊断引擎</strong>——半米最该补的，让老师诊断视图从「看曲线」升级到「可执行」（P2）。</p>
+        <p><strong>③ 家长向坚决做减法</strong>：证据 + 正向 + 老师可隐藏（ClassDojo/Seesaw），别堆数据。</p>
+        <p><strong>④ LLM 评语 = 两 Agent 草稿 + 老师批准、不自动发</strong>。</p>
+      </div>
+      <div class="callout info"><p><strong>💡 半米「词汇量 + CEFR + 知识图谱」三件套竞品无人齐全 = 结构性领先</strong>，把它做透即护城河（呼应 Ch1 押对五）。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 老师端 ===== -->
+  <section class="chapter" id="ch12" data-nav="12 老师端 AI 助教">
+    <h2><span class="num">12</span><span class="title-text">老师端引擎 + AI 助教：可执行回路 + 连续周计划</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>功能拆解（半米现状）</h3>
+      <ul>
+        <li>老师录素材 → AI 按 LE pattern 生成完整学习体验（step + 题 + 提示 + 生词草稿）→ 老师 inline 编辑/审核/发布。</li>
+        <li>为每个学生布置周计划；Dashboard 看完成率/低置信度/<code>recommendation_queue</code>。</li>
+        <li>老师 AI 助教：批量布置、向学生 AI 注入复习约束。Agent-first 底座（<code>/api/v1/actions/*</code> 走 <code>agent_operation</code> 审计 + 幂等）。</li>
+        <li>已实装：<code>/company/assign</code>、<code>/company/progress</code>、<code>/company/students</code>、book-report 回看。</li>
+      </ul>
+
+      <h3>竞品怎么做（产品名加粗）</h3>
+      <div class="callout accent"><h4>★ Wayground（原 Quizizz）「Analyze with AI」——可执行补救回路</h4><p>当某技能准确率低于阈值触发，系统标出薄弱技能 + 提供<u>一键「Assign to X students」</u>补救派题<sup class="cite" data-refid="36">[36]</sup>。这正是半米 <code>recommendation_queue</code> 最该补的可执行回路：薄弱技能 → 自动生成补救题 → 一键派给特定几个学生。它是半米诊断闭环的临门一脚（P0）。</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>竞品</th><th>核心机制</th><th>★ 半米可借鉴</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Diffit</strong>（3M+ 教师）</td><td>三输入（粘贴文本 / 打主题 / 贴 URL）→ 一键 bundle（分级段落 + 摘要 + 生词表 + 理解题）<sup class="cite" data-refid="35">[35]</sup></td><td>半米阅读闭环可对齐这套「内容工厂 UX」，且半米多了「LE pattern 生成完整 step」更深一层</td></tr>
+          <tr><td><strong>MagicSchool AI</strong>（6M 教师，约 80+ 工具）/ <strong>Twee</strong>（ESL 专用 CEFR A1–C2）</td><td>Twee 最贴半米但<u>弱在布置 + 分析</u><sup class="cite" data-refid="41">[41]</sup></td><td>这正是半米该打穿的缺口（半米有 CEFR-J + 连续周计划编排）</td></tr>
+          <tr><td><strong>SchoolAI Mission Control</strong></td><td>实时看每个「学生-AI」对话 + 情绪信号（confidence/frustration）+ Smart Groupings 自动聚类学困生</td><td>半米「向学生 AI 注入约束」已同向，可加情绪/低置信信号流</td></tr>
+          <tr><td><strong>Khanmigo</strong>（老师全免费，微软捐 Azure）</td><td>赞助式「老师全免费」是 bottom-up 病毒获客的钥匙<sup class="cite" data-refid="42">[42]</sup></td><td>bottom-up 老师引流策略（详见 Ch15）</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info"><p><strong>审核工作流行业共识</strong>：全行业都是<strong>草稿 → 老师改 → 布置（human-in-loop）</strong>，Wayground 口号即 <em>"We suggest, you decide"</em><sup class="cite" data-refid="36">[36]</sup>。半米的 Agent-first 底座要守住这条。</p></div>
+
+      <h3>建议</h3>
+      <div class="callout good"><p><strong>★ 把 <code>recommendation_queue</code> 做成 Wayground 式可执行回路</strong>（薄弱→补救题→一键派给特定学生）——这是半米诊断闭环的临门一脚，地基已有（P0）。</p></div>
+      <div class="callout info"><p><strong>💡「为每个学生编排连续周计划」是半米独有差异化</strong>——竞品（Diffit/MagicSchool/Twee）几乎都只做单次内容生成，没有连续编排。把这个做成招牌。</p></div>
+      <div class="trap-box"><strong>⚠️ 三条坑：</strong>坚持 human-in-loop（别做「一键全自动、老师只能接受」）；别把核心产出锁付费墙后（MagicSchool「免费但导出付费」激怒用户<sup class="cite" data-refid="41">[41]</sup>）；过程回放定位成帮助而非抓作弊 gotcha（Brisk 刻意不做监控工具）。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 Today ===== -->
+  <section class="chapter" id="ch13" data-nav="13 Today / 游戏化">
+    <h2><span class="num">13</span><span class="title-text">Today / 每日闭环 / 游戏化：连胜不堆债 + 努力双轨</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>功能拆解（半米现状）</h3>
+      <ul>
+        <li>Today 只突出「今天一个主任务」，永远清爽不堆 backlog；逾期挪「补做区」不混进今天、学生可自助补做。</li>
+        <li>游戏化谨慎（砍掉 Play 模式，激励放弹窗 + 个人空间）；系统 AI = 提醒/记录/分析弹窗（非聊天）。</li>
+      </ul>
+
+      <h3>竞品怎么做（产品名加粗）</h3>
+      <div class="callout accent"><h4>★ Duolingo（DAU 5000 万+ 量级）——连胜与每日目标解耦</h4><p>Duolingo DAU 已在 5000 万以上量级并持续增长（2025Q4 约 52.7M、2026Q1 约 56.5M，引用时注意是季度口径而非实时数<span class="conf y">🟡</span>）。Streak 是 600+ 次实验沉淀的产物，7 天连胜的完课率约为非连胜用户的 3.6 倍；关键细节是<u>完成 1 节课就保连胜，跟当天目标量无关、漏掉的天不成债</u>；Streak Freeze（提前买/自动护一天）<sup class="cite" data-refid="34">[34]</sup>。半米「Today 清爽 + 逾期挪补做」高度同向——应明确<strong>连续天数只看「今天那一个主任务」，补做不影响连胜</strong>。</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>竞品</th><th>核心机制</th><th>★ 半米可借鉴</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Khan</strong>（低压力双轨）</td><td>mastery points（真进度）+ energy points（努力，明确「≠能力」）+ 会进化的 avatar<sup class="cite" data-refid="43">[43]</sup></td><td>表扬「来了」≠「学会了」；补一个轻量「努力轨」信号（来了就有 energy 进个人空间），让低压力 ≠ 无反馈</td></tr>
+          <tr><td><strong>Habitica</strong></td><td>宠物纯装饰、零玩法加成</td><td>装饰性奖励放个人空间、与学习主循环解耦（契合半米「激励放个人空间」）</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>建议</h3>
+      <div class="check-box">
+        <p><strong>① 连胜只看「今天一个主任务」</strong> + 补做不影响连胜 + Streak Freeze 当赠予/赚来的缓冲（非付费墙）。</p>
+        <p><strong>② 努力 vs 掌握双轨</strong>（Khan energy vs mastery）。</p>
+      </div>
+      <div class="trap-box"><strong>⚠️ 别学 Duolingo 暗黑模式：</strong>愧疚/羞辱式推送（「你让 Duo 难过了」）、损失厌恶连胜压力当核心循环、<u>默认公开竞争排行榜</u>（东亚焦虑，设为可选/私密）、病毒焦虑营销。Prodigy 已因「操纵性升级推销」遭 FTC 投诉<sup class="cite" data-refid="44">[44]</sup>。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH14 升学陪跑 ===== -->
+  <section class="chapter" id="ch14" data-nav="14 升学陪跑">
+    <h2><span class="num">14</span><span class="title-text">升学陪跑 / 升学规划：背景提升 SKU + 录取概率分</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>功能拆解（半米定位）</h3>
+      <p>EdTech + 留学服务 hybrid，终极 = 「可汗学院（全学科）+ 留学陪跑」。以终为始：大学目标 → 倒推路径 → 陪跑到录取。范围含英语成绩 + 学科 GPA + 标化（SAT/ACT/A-Level/IB/AP）+ 软实力（活动/竞赛/论文/推荐信）。</p>
+
+      <h3>竞品怎么做（产品名加粗）</h3>
+      <div class="callout accent"><h4>★ Crimson Education——科技+导师混合（估值约 NZ$10 亿独角兽）</h4><p><strong>Crimson</strong> 是 2400+ 全球导师 + App（AI 导师匹配 + 10 年数据「录取概率分」）；综合套餐 <u>约 $25k–60k、顶配约 $200k</u>；垂直整合自营在线高中 + 科研营；FY24 营收约 $1 亿（「$750M 营收」为误传）。⚠️ 其 AI 仍偏 beta，真正护城河是真人导师网络<sup class="cite" data-refid="45">[45]</sup>。科技+导师混合优于纯人工（InGenius 纯人工约 $40k、无估值披露）。</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>竞品</th><th>核心机制</th><th>★ 半米可借鉴</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Polygence</strong> / <strong>Lumiere</strong>（背景提升产品化）</td><td>卖标准单元——约 10 次 1:1 + PhD 导师 + 12 周 → 1 篇论文，约 $2,895–3,200；Lumiere 清晰阶梯（Individual $3,190 → Publication $6,450 → Fellowship $9,900 + 初中款 $2,690）<sup class="cite" data-refid="47">[47]</sup></td><td>半米最该立刻产品化的高毛利模块：把背景提升做成可独立售卖、可加价阶梯的标准 SKU</td></tr>
+          <tr><td><strong>Empowerly Score®</strong> / <strong>新东方前途 U.S.DATA</strong></td><td>ML 跑数千录取 → 竞争力分 + 选校<sup class="cite" data-refid="48">[48]</sup></td><td>「录取概率分 / Profile-Roadmap」是 tech 差异化核心抓手——半米「大学目标→倒推路径」正是这个 roadmap 可视化形态</td></tr>
+          <tr><td><strong>市场盘</strong></td><td>中国出国咨询约 RMB 300–350 亿，增速降至约 4–5%；2017 取消牌照后碎片化无监管护城河；英美澳加同时收紧签证（中国赴美 F-1 上半年约 -24%）<sup class="cite" data-refid="49">[49]</sup></td><td>roadmap 内建多国替代路径</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>建议</h3>
+      <div class="callout info"><h4>💡 半米独有机会：全链路数据沉淀在一个平台</h4><p>把「英语 → 学科 GPA → 标化 → 软实力」<u>全链路数据沉淀在一个平台</u>——Crimson 有导师无学科产品、Polygence 只科研单点、传统中介只在申请季服务。半米做「从 10 岁到录取的连续数据 + 自产内容 + AI roadmap」全程陪跑，这是真护城河（呼应 Ch16）。</p></div>
+      <div class="check-box">
+        <p><strong>① 立刻产品化背景提升 SKU</strong>（Polygence/Lumiere 式 ¥2 万级标准单元 + 阶梯）= 高毛利、可独立卖（P2）。</p>
+        <p><strong>② 录取概率分 / roadmap 可视化</strong>用已有成绩/标化/活动数据喂。</p>
+      </div>
+      <div class="trap-box"><strong>⚠️ 三条法律/声誉雷区：</strong>「保录/保排名」是法律声誉雷区（藤门已因此崩盘注销）——概率分必须反复声明「非保证」；AI 代写文书 = 致命线（Turnitin 高置信检测）；roadmap 内建多国/港新替代路径（别赌单一英美澳加）<sup class="cite" data-refid="49">[49]</sup>。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH15 商业模式 ===== -->
+  <section class="chapter" id="ch15" data-nav="15 商业模式 / GTM">
+    <h2><span class="num">15</span><span class="title-text">商业模式 / SaaS 多租户 / 定价 / GTM：bottom-up 引流 + seat 变现</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>功能拆解（半米现状）</h3>
+      <p>直营（B2C）+ 合作（B2B 学校 / B2B2C 个体老师）；seat-based（teacher seat + student seat + school plan）；4 级账号（总部→学校→老师→学生）总部监管；多租户白标。</p>
+
+      <h3>竞品怎么做（产品名加粗）</h3>
+      <div class="callout accent"><h4>★ GTM 两条路：自上而下卖学区 vs 自下而上老师 freemium</h4><p>①<strong>自上而下卖学区</strong>：<strong>IXL</strong> 美国 Top100 学区 96 个在用，约 $5–12/生/年；<strong>DreamBox</strong> 约 $20/生/年；销售周期长、回款慢<sup class="cite" data-refid="28">[28]</sup>。②<strong>自下而上老师 freemium</strong>：<strong>MagicSchool</strong> 2 年达 6M 教师、近乎零销售成本（免费 forever + Plus 约 $100/师/年 + Enterprise 合规），Quizizz/Khanmigo 同路<sup class="cite" data-refid="41">[41]</sup>。<u>半米最优 = bottom-up 老师引流 + 学校 seat 变现</u>——四级账号天然支持：老师免费用 → 学校为合规/集中管理台付费。</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>项</th><th>真实数字 / 机制</th><th>★ 半米可借鉴</th></tr></thead>
+        <tbody>
+          <tr><td><strong>定价基准</strong></td><td>按生/年 $5–20；按师/年 $100–156；按班/年 $120–300（Learning A-Z $199.95/班）；英国按校 £1,300 起<sup class="cite" data-refid="50">[50]</sup></td><td>student seat $10–20/生/年、teacher seat $100–150/师/年、school plan 阶梯降单价</td></tr>
+          <tr><td><strong>松鼠 AI</strong> 加盟连锁</td><td>HQ 内容/技术工厂，加盟首年约 $11–13.7 万，capex/人力压给加盟商<sup class="cite" data-refid="31">[31]</sup></td><td>⚠️ 别学重资产加盟，双减后实体连锁剧烈收缩</td></tr>
+          <tr><td><strong>双减政策</strong>（2021，仍生效）</td><td>禁 K9 义务教育阶段学科类营利培训<sup class="cite" data-refid="51">[51]</sup></td><td>⚠️ 留学/标化备考/国际课程/后义务教育/素养是安全区；向义务教育阶段卖外国 K9 课程本身受限</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>建议</h3>
+      <div class="check-box">
+        <p><strong>① GTM 混合双引擎</strong>：bottom-up 老师免费引流（MagicSchool 打法）→ 学校 seat 变现（「集中管理 + 合规 + 监管台」才是企业版付费点，别免费送）（P2）。</p>
+        <p><strong>② 定价锚点</strong>：student seat $10–20/生/年、teacher seat $100–150/师/年、school plan 阶梯降单价；留学服务（¥2 万–100 万）是利润中心，SaaS 走量。</p>
+      </div>
+      <div class="callout info"><p><strong>💡「内容工厂 → 四级级联授权」市面无成熟同构先例</strong>——半米可定义这个白标多租户标准（最接近的是松鼠 AI 加盟 + LMS 白标基础设施，但没有完全一样的）。</p></div>
+      <div class="trap-box"><strong>⚠️ 四条坑：</strong>走纯 SaaS 轻资产（别学松鼠重资产加盟）；合规口径锁「国际课程/留学备考/后义务教育」；freemium 严格限额（MagicSchool 6M 免费用户算力成本巨大<sup class="cite" data-refid="41">[41]</sup>）；早期靠 bottom-up 现金流活着（自上而下卖学校回款慢）。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH16 护城河综合 ===== -->
+  <section class="chapter" id="ch16" data-nav="16 护城河综合">
+    <h2><span class="num">16</span><span class="title-text">护城河综合：半米相对竞品的结构性优势</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把 14 簇的竞品对标收敛，半米相对竞品的结构性优势集中在七条——它们的共同点是「竞品都是单点强、半米靠打通取胜」：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>优势</th><th>为什么竞品做不到</th></tr></thead>
+        <tbody>
+          <tr><td><strong>全链路同一 FSRS 大脑</strong></td><td>读到的词 / 看错的发音 / 写错的语法 / 做错的题 → 同一复习池 + 同一知识图谱回流。竞品全是单点（Readlang 只查词、批改网只批文、ELSA 只评音、Anki 只复习）。</td></tr>
+          <tr><td><strong>为每生编排连续周计划</strong></td><td>Diffit/MagicSchool/Twee 只做单次内容生成，无连续编排；半米老师端是核心引擎。</td></tr>
+          <tr><td><strong>词汇量 + CEFR + 知识图谱三曲线齐全</strong></td><td>竞品无一家三者齐全；这是 V1 里 AI 的主战场。</td></tr>
+          <tr><td><strong>AI 判自由造句产出评估</strong></td><td>竞品词汇都停在识别/拼写，无人做自由造句产出评估。</td></tr>
+          <tr><td><strong>自有可控语料 + 严格时间戳对齐 + WebCodecs 逐句播放器</strong></td><td>比「任意 Netflix 注入」更稳；Language Reactor 无移动端 = Web 端机会。</td></tr>
+          <tr><td><strong>EdTech 引流 + 留学服务变现飞轮</strong></td><td>Crimson 有导师无学科产品、Polygence 只科研、中介只申请季——半米全程陪跑 + 全链路数据 + 自产内容。</td></tr>
+          <tr><td><strong>内容工厂 → 四级级联授权白标</strong></td><td>市面无成熟同构先例。</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout accent"><p><strong>一句话护城河：半米的价值不在任何单点功能做到行业第一，而在「把读到的词、看错的发音、写错的语法、做错的题全部沿同一个 FSRS 大脑 + 同一张知识图谱回流」——这条全链路（就本次竞品样本观察）没有任何竞品打通，也最难被快速复制（复制单点功能易，复制贯穿七簇的数据闭环难）。</strong></p></div>
+      <div class="callout warn"><h4>⚠️ 反方必须正视：全链路也可能是复杂度陷阱</h4><p>「全链路同一大脑」是结构性优势，但反过来也是工程与认知复杂度的源头：单点工具（Readlang/ELSA/批改网）更轻、更快形成初始 wedge（楔入点），用户一个场景就能上手；半米要让七簇全部回流到同一个大脑，意味着每个单点都不能太弱、且数据契约要一致，铺开成本远高于做透一个场景。<u>务实路径不是「全链路一次铺开」，而是先用 P0 四件事把「词汇采词 → FSRS 复习 → 老师诊断 → 知识图谱」这一条最短闭环焊死、拿它当 wedge</u>，验证「同一大脑」真能带来留存/续费，再向听说写读语法逐簇接入。把全链路当愿景、把最短闭环当第一仗，才避免摊大饼。另注两个被低估的成本：① 老师终审不是免费资源（human-in-loop 会带来延迟、审阅疲劳、责任归属、规模瓶颈，要给老师批量化工具）；② 「Today 不堆债」对学生端是减压，但老师/家长端可能必须看到真实逾期与补交记录——「不暴露 backlog」应是<u>学生视图</u>纪律，而非全系统隐藏。<span class="conf y">🟡</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH17 路线建议 ===== -->
+  <section class="chapter" id="ch17" data-nav="17 阿杰路线建议">
+    <h2><span class="num">17</span><span class="title-text">阿杰路线建议：P0 / P1 / P2 决策树</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把 14 簇的建议按「地基成熟度 × 杠杆」排成三级。决策原则：<strong>先把已有地基的临门一脚踢成闭环（P0），再做差异化护城河（P1），最后做需要团队/资源的商业放大（P2）。</strong></p>
+
+      <div class="tree">
+        <div class="node"><span class="lbl y">P0 · 临门一脚</span>半米已有地基、补一步就成闭环 → 优先级最高</div>
+        <div class="node"><span class="lbl m">P1 · 差异化护城河</span>构筑竞品打不通的全链路优势 → 中期</div>
+        <div class="node"><span class="lbl n">P2 · 商业放大</span>需团队/资源/数据积累 → 后置</div>
+      </div>
+
+      <h3>P0（临门一脚，逐条展开）</h3>
+      <div class="callout good"><h4>★ P0-1 采词强制存原句 + 复习放回原句考</h4><p>这是词本位最大的差异化，也是「全链路同一大脑」在词汇侧最直接的落点。半米的 <code>vocab_source_context</code> 表已为此而生——只差把采词时的 source sentence 强制落库、复习时把词放回原句考（轮换该词在不同来源里的句子，LingQ 式「多处复现」<sup class="cite" data-refid="4">[4]</sup>）。Readlang 靠这一条吃下了语境查词市场<sup class="cite" data-refid="2">[2]</sup>，但它只做查词单点；半米把同样的机制接到 FSRS 大脑 + 老师诊断，就从「又一个 Readlang」变成结构性独有。工程量小、地基已有、杠杆极高，应是第一件事。</p></div>
+      <div class="callout good"><h4>★ P0-2 recommendation_queue 做成 Wayground 式可执行回路</h4><p>半米 Dashboard 已有 <code>recommendation_queue</code> 字段，但它现在只是「看曲线」。抄 Wayground「Analyze with AI」：某技能准确率低于阈值触发 → 系统标出薄弱技能 → 自动生成补救题 → 老师一键「Assign to X students」派给特定几个学生<sup class="cite" data-refid="36">[36]</sup>。这一步把老师诊断从「我知道这班整体弱在哪」升级到「我直接拿到该补谁、补什么、一键派出去」——正是半米「省老师力气 + 把状态估给老师」定位的临门一脚。守住 human-in-loop（老师可改可拒），别做全自动。地基（assignment 链 + agent_operation 审计）已有，是诊断闭环最高 ROI 的一步。</p></div>
+      <div class="callout good"><h4>★ P0-3 复习按时间预算封顶 + 永不暴露原始 backlog</h4><p>这是留存生死线，也是半米「Today 不堆债」方向在复习模块的落实。两件事：① 抄墨墨 SSP-MMC——复习负载按<u>预估时间</u>封顶（而非固定条数），超预算项推到次日，并把未来负载预分配铺平<sup class="cite" data-refid="3">[3]</sup>；② 抄 Duolingo Birdbrain——底层算出 N 项到期，学生端<u>只呈现「今日 M 张」</u>，永不暴露原始逾期队列<sup class="cite" data-refid="34">[34]</sup>。Anki 最大的劝退点恰恰是回来看到几百张积压<sup class="cite" data-refid="6">[6]</sup>，半米一旦在复习模块暴露原始 backlog，就把架构层面规避掉的头号 churn 杀手又请回来了。注意主观难度档别乱映射（FSRS 里只有 Again = lapse，Hard 仍算成功<sup class="cite" data-refid="1">[1]</sup>）。</p></div>
+      <div class="callout good"><h4>★ P0-4 知识图谱可视化范式 + 错题标错因</h4><p>半米三曲线动态档案的知识图谱部分缺一套可视化语言。直接抄现成的：ALEKS 饼图（深=已掌握 / 浅=ready-to-learn / 空=未学<sup class="cite" data-refid="29">[29]</sup>）/ IXL SmartScore 0–100（难度+准确+一致性加权<sup class="cite" data-refid="28">[28]</sup>）/ Khan 命名等级（Familiar→Proficient→Mastered<sup class="cite" data-refid="28">[28]</sup>）——三者都是验证过的 UI 语言，不必自己发明。同时，错题进池时标错因类型（不只对错，参考松鼠 AI 五维错因<sup class="cite" data-refid="31">[31]</sup>）——这既喂老师诊断，又为后续 BKT 估计提供输入。注意对中国学生用命名等级而非冷数字、慎用非对称罚分（IXL 答错重扣易挫败<sup class="cite" data-refid="28">[28]</sup>）。</p></div>
+
+      <h3>P1（差异化护城河，中期）</h3>
+      <div class="step"><div class="step-head"><span class="sn">5</span>听力</div><div class="step-body">听写填空判分 + 首遍强制隐字幕 + Language Reactor 单键精听键位（Ch4）。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">6</span>口语</div><div class="step-body">接 ELSA API 验证 GOP 口径 + 双波形对齐 + CEFR band 映射（<u>别自研发音引擎</u>，Ch5）。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">7</span>写作</div><div class="step-body">渐进式反馈 + 中式英语检测层 + 句级配色（守住 AI 初评+老师终审，Ch7）。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">8</span>阅读</div><div class="step-body">Alpha Reads 升级为「内容验证解锁」+ 雅思题型逐题原文证据定位（Ch6）。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">9</span>语法</div><div class="step-body">EGP criterial features 打标 + 语法点↔阅读文本双向链接 + 纠错回流 SRS（Ch8）。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">10</span>测评</div><div class="step-body">上 CAT 测准即停 + DET 式整合 subscore 报告 + 分数预测器（Ch9）。</div></div>
+
+      <h3>P2（商业放大，需团队/资源）</h3>
+      <div class="step"><div class="step-head"><span class="sn">11</span>动态档案</div><div class="step-body">双数报告（成就+成长百分位）+ IXL 式薄弱点诊断引擎 + 两 Agent LLM 评语（Ch11）。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">12</span>GTM</div><div class="step-body">bottom-up 老师 freemium 引流（Khanmigo/MagicSchool 打法）+ 学校 seat 变现（Ch15）。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">13</span>升学</div><div class="step-body">背景提升标准 SKU 产品化（Polygence 式 ¥2 万级）+ 录取概率分/roadmap 可视化（Ch14）。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">14</span>知识追踪</div><div class="step-body">IRT→BKT 渐进（BKT 掌握度 + FSRS 时机并存），DKT 后置（Ch10）。</div></div>
+
+      <div class="callout accent"><p><strong>一句话路线：先用 P0 四件事把「全链路同一大脑」在词汇/复习/老师诊断/知识图谱四个落点焊成闭环（地基都有、工程量小、杠杆极高），再用 P1 六簇构筑竞品打不通的差异化，P2 留给有团队和数据后的商业放大。永远不碰：自研发音引擎（先接 ELSA）、DKT 早上（数据不够）、保录承诺（法律雷区）、重资产加盟（双减后死路）。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq" data-nav="FAQ 常见问题">
+    <h2><span class="num">FAQ</span><span class="title-text">常见问题</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">半米该不该自研发音评分引擎（GOP）？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不该一上来自研。ELSA 的护城河不是算法、是<u>带口音的 L2 训练数据</u>（能识别中国/越南学生特有错音）<sup class="cite" data-refid="10">[10]</sup>。从零训练极易对中国口音误判：过严打击信心、过松毫无意义。正确路径是先接 ELSA API 或开源 GOP（wav2vec2-based）验证口径、跑通跟读评分体验，等有了足够本土录音数据、且单位成本压不下来时再评估自研。这跟半米既定的「先接 Azure mock、V0.2 接真 Azure」节奏一致。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">复习算法该选 FSRS 还是 Leitner/SM-2？</span><span class="toggle">＋</span></div><div class="faq-a"><p>选 FSRS，半米已经选对了。FSRS-6（2025，约 7 亿条复习训练）用 S/D/R 三态 + 幂律遗忘曲线，同 90% 留存比 SM-2 少约 20–30% 复习量<sup class="cite" data-refid="1">[1]</sup>；Leitner 太粗、SM-2 是上一代。但两个工程要点：① FSRS 短期记忆模型薄弱，新词「学习期」要单独密集排（别合进 FSRS）——半米两段设计正好对症；② 数据少时先用群体级参数，数据起来再 per-user 自动调参，别过早拟合。真正值钱的不是「换 FSRS」，而是把墨墨的「按时间预算封顶 + 不暴露 backlog」叠在 FSRS 上（见 Ch3）。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">GTM 该走 to-school（卖学校）还是 to-teacher（老师 freemium）？</span><span class="toggle">＋</span></div><div class="faq-a"><p>混合双引擎，但<u>早期重心放 to-teacher</u>。MagicSchool 2 年靠 bottom-up 老师免费用做到 6M 教师、近乎零销售成本<sup class="cite" data-refid="41">[41]</sup>；自上而下卖学区（IXL/DreamBox）销售周期长、回款慢<sup class="cite" data-refid="28">[28]</sup>，早期现金流撑不住。半米四级账号天然支持这条：老师免费用 → 学校为「集中管理 + 合规 + 监管台」付费 seat。关键纪律：核心产出别锁付费墙后（MagicSchool「免费但导出付费」激怒用户），变现点是企业级管理/合规而非功能阉割。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">背景提升（升学软实力）怎么产品化？</span><span class="toggle">＋</span></div><div class="faq-a"><p>抄 Polygence/Lumiere 的标准 SKU 模式：把「约 10 次 1:1 + PhD/资深导师 + 12 周 → 1 篇论文/作品」打包成可独立售卖、可加价阶梯的产品（Individual → Publication → Fellowship 阶梯定价 $3.2k–9.9k）<sup class="cite" data-refid="47">[47]</sup>。这是升学线里最该立刻做的高毛利模块——不需要 Crimson 那种 2400+ 真人导师网络的重投入，单元化即可卖。半米的差异化在于：背景提升产生的数据（论文主题、技能成长）能沉淀进同一个动态档案，喂录取概率分/roadmap，这是纯背景提升公司给不了的全链路。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">英语自适应该不该学松鼠 AI 的「1 万纳米知识点」？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不该。松鼠 AI 的超细知识点拆分是 K12 数学结构强、前置依赖清晰的产物<sup class="cite" data-refid="31">[31]</sup>；英语技能边界模糊（一句话同时考词汇/语法/搭配/语用），盲目细化标注成本会爆炸且无收益。英语适合「技能 × CEFR 档」的中等粒度 + 词汇本位的单点追踪。可以借鉴的是松鼠的<u>五维错因诊断</u>（错题标错因类型而非只对错），但拆分粒度要克制。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">知识追踪算法 IRT / BKT / DKT 怎么选？</span><span class="toggle">＋</span></div><div class="faq-a"><p>渐进上：IRT（静态能力 θ，适合定级冷启动）→ BKT（每技能 2 态、4 可解释参数，适合给老师看的逐知识点掌握图、小数据友好）→ DKT 后置（RNN/Transformer，精度最高但数据饥渴、不可解释）<sup class="cite" data-refid="30">[30]</sup>。别一上来上 DKT：数据不够会过拟合，且它给不出老师能读的单点数值，与半米「动态档案给老师看」的目标直接冲突。注意 FSRS 管复习时机、BKT 管掌握度，两者并存而非替代——它们一起串成「定级种子 → 知识图谱 → BKT 掌握度 → FSRS 复习」的同一大脑链路。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">AI 能直接给学生官方雅思 band / CEFR 分吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不能直接给「官方」分。连剑桥 Write &amp; Improve 都只敢称 AI 给出的是「估算 band」、明确声明非官方，写作/口语保留人工复核<sup class="cite" data-refid="20">[20]</sup>。ETS e-rater 更是被 BABEL 生成器实证可刷分（胡话靠长度拿高分）<sup class="cite" data-refid="21">[21]</sup>。半米守住「AI 初评 + 老师终审」边界：AI 给 formative 反馈和「估算区间」，正式 band 由老师确认。这不是技术不足，是行业最佳实践。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">精听里「先盲听后字幕」真的比「带字幕看」强吗？怎么防退化？</span><span class="toggle">＋</span></div><div class="faq-a"><p>强，但必须门控。FluentU/LingQ/Trancy 全行业的通病是：一旦字幕随手可开，「精听」就退化成「带字幕看视频」，主动听的环节被跳过。半米 LE 流程「先盲听 → 后字幕」是优势，但要<u>硬门控</u>：循环 N 遍或盲听一遍才解锁字幕<sup class="cite" data-refid="12">[12]</sup>。再叠加听写填空判分（Yabla Scribe / 欧路：词级新手、句级进阶），强制把「听懂」变成「能写出来」，这是半米现有 detail 题多为选择题最该补的环节。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">游戏化要不要做？做到什么程度？</span><span class="toggle">＋</span></div><div class="faq-a"><p>做克制版。Duolingo 连胜的有效设计可借鉴（完成 1 个主任务就保连胜、漏掉的天不成债、Streak Freeze 当缓冲<sup class="cite" data-refid="34">[34]</sup>）+ Khan 的努力/掌握双轨（来了就有 energy，但明确「努力≠学会」<sup class="cite" data-refid="43">[43]</sup>）。但<u>坚决不学 Duolingo 暗黑模式</u>：愧疚/羞辱推送、损失厌恶当核心循环、默认公开竞争排行榜（东亚学生焦虑度高，设为可选/私密）——Prodigy 已因操纵性营销遭 FTC 投诉<sup class="cite" data-refid="44">[44]</sup>。半米「激励放个人空间、装饰与学习主循环解耦」的方向对，保持即可。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">老师端 AI 助教最该先做哪一个功能？</span><span class="toggle">＋</span></div><div class="faq-a"><p>把 <code>recommendation_queue</code> 做成 Wayground 式可执行回路（薄弱技能 → 自动补救题 → 一键派给特定学生）<sup class="cite" data-refid="36">[36]</sup>。理由：① 地基已有（assignment 链 + agent_operation 审计 + Dashboard 已存 recommendation_queue 字段），是工程量最小的临门一脚；② 它直击半米「省老师力气 + 把状态估给老师」的核心定位，把诊断从「看曲线」升级到「可执行」；③ 守住 human-in-loop（老师可改可拒）即避开全行业共识红线。比「再加一个内容生成工具」（Diffit/Twee 已做透）杠杆高得多。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">中式英语检测真能做出差异化吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能，这是中国学生市场的差异化王牌。批改网是少数明确做中式英语检测的产品——靠语料库「查无此用法即标疑似中式英语」<sup class="cite" data-refid="19">[19]</sup>；通用语法工具（Grammarly）只查语法对错，不判「native 不这么说」。半米可建 IELTS 范文 + L1-Chinese 高频误用语料，在写作反馈里标「语法对但 native 不这么说」。配合渐进式反馈（首轮只标最高频错误，防轰炸<sup class="cite" data-refid="20">[20]</sup>），既保 formative 不喂答案，又给中国学生最痛的点。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q12</span><span class="qtext">半米要不要追「任意 Netflix 视频注入」做精听？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不必追，自有可控语料反而是护城河。Language Reactor 靠注入 Netflix 字幕起家、约 2–3M 用户<sup class="cite" data-refid="11">[11]</sup>，但字幕质量与时间戳对齐受制于平台，且它没有移动端。半米的 Crash Course/EnglishPod 是自有语料 + 严格时间戳对齐 + WebCodecs 逐句播放器，精听体验的下限可控，这比「任意注入」更稳。别为追求「任意视频」牺牲对齐质量——逐句精听的核心体验恰恰建立在时间戳精度上。Language Reactor 无移动端，正是半米 Web 端的机会窗口。</p></div></div>
+    </div>
+  </section>
+
+  <!-- ===== References ===== -->
+  <section class="chapter" id="refs" data-nav="References">
+    <h2><span class="num">REF</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+    <div class="chapter-body"><ol class="ref-list">
+      <li id="ref-1"><a href="https://github.com/open-spaced-repetition/fsrs4anki-helper" target="_blank" rel="noopener">FSRS (Free Spaced Repetition Scheduler) — Open Spaced Repetition / fsrs4anki-helper</a>；<a href="https://expertium.github.io/Algorithm.html" target="_blank" rel="noopener">Expertium: FSRS Algorithm Explained</a>；<a href="https://deepwiki.com/open-spaced-repetition" target="_blank" rel="noopener">DeepWiki: open-spaced-repetition</a><span class="ref-meta">· 访问 2026-06-15 · 引用 5 次</span></li>
+      <li id="ref-2"><a href="https://blog.readlang.com/2016/01/21/the-readlang-method" target="_blank" rel="noopener">The Readlang Method — Readlang Blog（语境查词 + 闪卡存原句）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 3 次</span></li>
+      <li id="ref-3"><a href="https://memodocs.maimemo.com/docs/2022_KDD" target="_blank" rel="noopener">墨墨 MaiMemo SSP-MMC（KDD 2022 论文文档）</a>；<a href="https://maimemo.com/pages/memory-science-popularization" target="_blank" rel="noopener">墨墨：记忆科学科普（DHP 记忆模型）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 4 次</span></li>
+      <li id="ref-4"><a href="https://www.lingq.com" target="_blank" rel="noopener">LingQ — 导入式语境学习（词状态全局着色 / 已知词数指标）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 3 次</span></li>
+      <li id="ref-5"><a href="https://www.vocabulary.com/how-it-works/" target="_blank" rel="noopener">Vocabulary.com — How It Works（自适应词汇引擎 / 多级熟度）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+      <li id="ref-6"><a href="https://docs.ankiweb.net/deck-options.html" target="_blank" rel="noopener">Anki Manual — Deck Options（含 FSRS / backlog 行为）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 4 次</span></li>
+      <li id="ref-7"><a href="https://www.baicizhan.com/little_class/article/491" target="_blank" rel="noopener">百词斩 — 图记方法说明（小课堂）</a>；<a href="https://en.wikipedia.org/wiki/Memrise" target="_blank" rel="noopener">Memrise — Wikipedia</a>；<a href="https://languagedrops.com" target="_blank" rel="noopener">Drops（Language Drops）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+      <li id="ref-9"><a href="https://github.com/openlanguageprofiles/olp-en-cefrj" target="_blank" rel="noopener">CEFR-J Wordlist — Open Language Profiles (olp-en-cefrj)</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+      <li id="ref-10"><a href="https://www.elsaspeak.com/en/elsa-api/" target="_blank" rel="noopener">ELSA Speak — ELSA API（音素级 GOP 发音评分）</a>；<a href="https://www.isca-archive.org/interspeech_2025/parikh25b_interspeech.pdf" target="_blank" rel="noopener">Parikh et al., Interspeech 2025 — logit-based GOP</a>；<a href="https://nganp.medium.com/machine-learning-applications-in-speech-recognition-and-language-learning-1416fcae760b" target="_blank" rel="noopener">ML Applications in Speech Recognition & Language Learning (Medium)</a><span class="ref-meta">· 访问 2026-06-15 · 引用 4 次</span></li>
+      <li id="ref-11"><a href="https://skywork.ai/blog/ai-agent/language-reactor-review/" target="_blank" rel="noopener">Language Reactor Review 2025 — Skywork.ai（单键精听 / 用户量 / 无移动端）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 3 次</span></li>
+      <li id="ref-12"><a href="https://skywork.ai/blog/trancy-ai-review-2025-2/" target="_blank" rel="noopener">Trancy AI Review 2025 — Skywork.ai（句末暂停 / 字幕渐进遮挡）</a>；<a href="https://english.yabla.com/Yabla-Tutorials-Scribe-Dictation-Game-episode-9621" target="_blank" rel="noopener">Yabla — Scribe Dictation Game Tutorial</a><span class="ref-meta">· 访问 2026-06-15 · 引用 4 次</span></li>
+      <li id="ref-13"><a href="https://www.migaku.com/blog/language-fun/sentence-mining-guide-learn-vocabulary-faster" target="_blank" rel="noopener">Migaku — Sentence Mining Guide（点词建卡 + 自动截视频片段）</a>；<a href="https://www.redkiwiapp.com" target="_blank" rel="noopener">RedKiwi（逐句精听）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+      <li id="ref-14"><a href="https://www.prnewswire.com/news-releases/with-millions-of-data-points-about-how-people-learn-english-cambly-302266081.html" target="_blank" rel="noopener">Cambly / LAIX 行业背景（英语口语学习数据点，PR Newswire）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+      <li id="ref-15"><a href="https://www.speak.com/blog/series-c" target="_blank" rel="noopener">Speak — Series C 公告（官方博客）</a>；<a href="https://techfundingnews.com/openai-backed-speak-closes-78m-at-1b-valuation-for-ai-powered-language-tutor/" target="_blank" rel="noopener">OpenAI-backed Speak Closes $78M at $1B Valuation — TechFundingNews</a>；<a href="https://icanlearn.com/praktika-vs-talkpal/" target="_blank" rel="noopener">Praktika vs TalkPal 对比 — iCanLearn</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+      <li id="ref-16"><a href="https://www.commonlit.org" target="_blank" rel="noopener">CommonLit（文章切块 + 模糊锁定 / 检查题解锁）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+      <li id="ref-17"><a href="https://www.lightsailed.com" target="_blank" rel="noopener">LightSail Education（正文嵌 cloze + 章末 text-evidence 简答）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+      <li id="ref-18"><a href="https://newsela.com" target="_blank" rel="noopener">Newsela（同篇多 Lexile 档 / 自适应升降档）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+      <li id="ref-19"><a href="https://www.pigai.org" target="_blank" rel="noopener">批改网 Pigai（中式英语检测 / 语料距离）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+      <li id="ref-20"><a href="https://writeandimprove.com" target="_blank" rel="noopener">Cambridge Write & Improve（三层显式度反馈 / 估算 CEFR & IELTS band / 渐进式纠错）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 6 次</span></li>
+      <li id="ref-21"><a href="https://en.wikipedia.org/wiki/E-rater" target="_blank" rel="noopener">ETS e-rater / Criterion 与 Perelman BABEL 批评（Wikipedia）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+      <li id="ref-22"><a href="https://www.englishprofile.org/english-grammar-profile" target="_blank" rel="noopener">English Grammar Profile (EGP) — English Profile（criterial features / 1200+ 语法 can-do）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+      <li id="ref-23"><a href="https://lexile.com" target="_blank" rel="noopener">Lexile Framework — MetaMetrics（词频+句长测度 / 近似对齐说明）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+      <li id="ref-24"><a href="https://www.grammarly.com" target="_blank" rel="noopener">Grammarly — Goals & GECToR（按受众/正式度反馈 / token 标签纠错）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+      <li id="ref-25"><a href="https://blog.englishtest.duolingo.com/how-is-the-duolingo-english-test-scored/" target="_blank" rel="noopener">How Is the Duolingo English Test Scored — DET Blog（CAT + Rasch/IRT）</a>；<a href="https://blog.duolingo.com/subscores-improving-how-we-report-duolingo-english-test-results-2/" target="_blank" rel="noopener">Subscores: Improving How We Report DET Results — Duolingo Blog（8 subscore）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+      <li id="ref-26"><a href="https://github.com/riiid/ednet" target="_blank" rel="noopener">Riiid EdNet — GitHub（1.31 亿交互数据集 / Santa TOEIC 预测）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+      <li id="ref-27"><a href="https://www.pearsonpte.com/the-test/scoring" target="_blank" rel="noopener">PTE Academic Scoring — Pearson（整合评分 / enabling skills / 部分给分）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+      <li id="ref-28"><a href="https://www.ixl.com" target="_blank" rel="noopener">IXL — SmartScore / Trouble Spots / Analytics（0–100 加权 / 错 3 题标薄弱点 / 非对称罚分 / 学区定价）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 6 次</span></li>
+      <li id="ref-29"><a href="https://www.aleks.com" target="_blank" rel="noopener">ALEKS — 知识空间理论 (KST) & ALEKS 饼图（已掌握/ready-to-learn/未学）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+      <li id="ref-30"><a href="https://github.com/riiid/ednet" target="_blank" rel="noopener">知识追踪算法谱系 IRT/BKT/DKT（Riiid EdNet 基准 + 文献综述）</a>；<a href="https://en.wikipedia.org/wiki/Bayesian_knowledge_tracing" target="_blank" rel="noopener">Bayesian Knowledge Tracing — Wikipedia</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+      <li id="ref-31"><a href="https://en.wikipedia.org/wiki/Squirrel_AI" target="_blank" rel="noopener">松鼠 AI (Squirrel AI) — Wikipedia（纳米知识点 / 五维错因 / 加盟模式）</a>；<a href="https://news.qq.com/rain/a/20240724A04YVB00" target="_blank" rel="noopener">松鼠 AI 报道 — 腾讯新闻</a><span class="ref-meta">· 访问 2026-06-15 · 引用 4 次</span></li>
+      <li id="ref-32"><a href="https://www.renaissance.com" target="_blank" rel="noopener">Renaissance — Star Assessments & SGP（Student Growth Percentile / 双数报告 / ZPD）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+      <li id="ref-33"><a href="https://www.century.tech" target="_blank" rel="noopener">Century Tech — Recommended Path（老师设定 + AI 推荐共存）</a>；<a href="https://www.carnegielearning.com" target="_blank" rel="noopener">Carnegie Learning — LiveLab（有效挣扎 vs 无效挣扎预警）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+      <li id="ref-34"><a href="https://blog.duolingo.com/guide-to-duolingo-practice-hub/" target="_blank" rel="noopener">Duolingo — Practice Hub & Streak 机制（完成即保连胜 / Streak Freeze）</a>；<a href="https://investors.duolingo.com/news-releases/news-release-details/duolingo-launches-ai-powered-video-call-android" target="_blank" rel="noopener">Duolingo Launches AI-Powered Video Call — Investors（Max Video Call）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 4 次</span></li>
+      <li id="ref-35"><a href="https://web.diffit.me" target="_blank" rel="noopener">Diffit（三输入 → 一键分级 bundle / 3M+ 教师）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+      <li id="ref-36"><a href="https://wayground.com" target="_blank" rel="noopener">Wayground（原 Quizizz）— Analyze with AI & Assign to Students（"We suggest, you decide"）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 4 次</span></li>
+      <li id="ref-37"><a href="https://www.classdojo.com" target="_blank" rel="noopener">ClassDojo（家长向 / 老师可选分享或隐藏积分）</a>；<a href="https://web.seesaw.com" target="_blank" rel="noopener">Seesaw（作品集优先 / 家长看真实作品）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+      <li id="ref-38"><a href="https://www.magicschool.ai" target="_blank" rel="noopener">MagicSchool AI（LLM 评语生成 / human-in-loop / 教师工具）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+      <li id="ref-40"><a href="https://en.wikipedia.org/wiki/Knewton" target="_blank" rel="noopener">Knewton — Wikipedia（$1.8 亿融资 / 纯算法自适应交付失败 / 2019 被 Wiley 收购）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 3 次</span></li>
+      <li id="ref-41"><a href="https://www.magicschool.ai" target="_blank" rel="noopener">MagicSchool AI（6M 教师 / freemium / 免费 forever + Plus + Enterprise / 约 $65M 融资）</a>；<a href="https://www.twee.com" target="_blank" rel="noopener">Twee（ESL 专用 CEFR A1–C2 教师工具）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 4 次</span></li>
+      <li id="ref-42"><a href="https://www.khanacademy.org/khan-labs" target="_blank" rel="noopener">Khanmigo — Khan Academy（老师全免费 / 微软捐 Azure）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+      <li id="ref-43"><a href="https://www.khanacademy.org" target="_blank" rel="noopener">Khan Academy（mastery points vs energy points 双轨 / 努力≠能力）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+      <li id="ref-44"><a href="https://www.prodigygame.com" target="_blank" rel="noopener">Prodigy（FTC 投诉：操纵性升级推销 / 游戏化暗黑模式参考）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+      <li id="ref-45"><a href="https://www.crimsoneducation.org" target="_blank" rel="noopener">Crimson Education（估值约 NZ$10 亿 / FY24 营收约 $1 亿 / 2400+ 导师 / 套餐 $25k–200k）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+      <li id="ref-46"><a href="https://www.cambly.com" target="_blank" rel="noopener">Cambly（真人对话陪练 / 不打断 + 事后高亮反馈）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+      <li id="ref-47"><a href="https://www.polygence.org" target="_blank" rel="noopener">Polygence（约 10 次 1:1 + PhD 导师 + 12 周 → 1 篇论文，约 $2,895–3,200）</a>；<a href="https://www.lumiere-education.com" target="_blank" rel="noopener">Lumiere Education（阶梯定价 Individual $3,190 → Publication $6,450 → Fellowship $9,900）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+      <li id="ref-48"><a href="https://www.empowerly.com" target="_blank" rel="noopener">Empowerly — Empowerly Score®（ML 录取竞争力分 + 选校）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+      <li id="ref-49"><a href="https://en.wikipedia.org/wiki/F_visa_(United_States)" target="_blank" rel="noopener">F-1 签证收紧 / 中国出国咨询市场规模与碎片化（综合：行业报告 + 签证数据）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 2 次</span></li>
+      <li id="ref-50"><a href="https://www.learninga-z.com" target="_blank" rel="noopener">Learning A-Z（Reading A-Z 等，约 $199.95/班/年 / EdTech 定价基准）</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+      <li id="ref-51"><a href="http://www.moe.gov.cn/jyb_xwfb/gzdt_gzdt/s5987/202107/t20210724_546576.html" target="_blank" rel="noopener">中共中央办公厅、国务院办公厅《关于进一步减轻义务教育阶段学生作业负担和校外培训负担的意见》（双减，2021）— 教育部</a><span class="ref-meta">· 访问 2026-06-15 · 引用 1 次</span></li>
+    </ol></div>
+  </section>
+  <footer>
+    无忌 · Deep Research（L2）· 2026-06-15 · 仅供阿杰个人决策参考；数据与判例以原始来源为准。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('banmi-competitor-deepdive-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('banmi-competitor-deepdive-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

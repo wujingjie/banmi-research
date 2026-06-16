@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>四大 LMS 深度对比 × 半米 BetterMe 改进路线 · 无忌 Deep Research · 2026-06-16</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L4</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 01 方法论与画像</a>
+    <a href="#ch2" data-target="ch2">02 02 五列总览大表</a>
+    <a href="#ch3" data-target="ch3">03 03 Canvas 深度</a>
+    <a href="#ch4" data-target="ch4">04 04 Google Classroom 深度</a>
+    <a href="#ch5" data-target="ch5">05 05 Schoology 深度</a>
+    <a href="#ch6" data-target="ch6">06 06 Moodle 深度</a>
+    <a href="#ch7" data-target="ch7">07 07 横向对比</a>
+    <a href="#ch8" data-target="ch8">08 08 趋势与学习科学</a>
+    <a href="#ch9" data-target="ch9">09 09 半米×LMS对位</a>
+    <a href="#ch10" data-target="ch10">10 10 半米路线决策树</a>
+    <a href="#ch11" data-target="ch11">11 11 风险与反方</a>
+    <a href="#faq" data-target="faq">Q FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">R References</a>
+  </div>
+</nav>
+
+<main>  <div class="hero">
+    <h1>四大 LMS 深度对比 × 半米 BetterMe 改进路线</h1>
+    <div class="hero-meta">
+      <span>📅 2026-06-16</span>
+      <span>🔍 5 份证据包 · 80+ 次检索 · 60+ 来源</span>
+      <span>⚖️ Canvas / Google Classroom / Schoology / Moodle</span>
+      <span>🌏 立场：人在马来西亚、单用户 AI 学习 OS 的产品主理人</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>一句话定调：四大 LMS 是为"班级管理"造的——多人、师生家长协作、成绩册、合规、按人头收费；而半米 BetterMe 是为"一个人深度自学+知识沉淀"造的。所以正确的问题不是"半米功能比谁多"，而是：哪些被 LMS 验证了十几年的<u>结构化学习能力</u>（模块化课程、先决条件、掌握路径、进度分析、练习/题库、能力框架、LTI 集成）值得半米克制地借鉴，哪些 LMS 的<u>包袱</u>（重管理、师生中心、合规负担、UI 臃肿、按人头计价）必须坚决避开。</strong></p>
+      <p>本报告按"先看清对手、再对位自身"的顺序展开：方法论与四个 LMS 一句话画像（Ch1）→ 一张五列总览大表（Ch2）→ Canvas（Ch3）/ Google Classroom（Ch4）/ Schoology（Ch5）/ Moodle（Ch6）四个深度章（概述·功能·价格·优势·痛点·多视角真实用户反馈）→ 横向多表对比（Ch7）→ edtech 趋势与学习科学可借鉴能力（Ch8）→ 半米 BetterMe × LMS 能力逐项对位（Ch9）→ <strong>半米路线建议决策树（Ch10，立即/中期/长期 + 要避开的包袱）</strong>→ 风险与反方观点（Ch11）→ FAQ（Ch12）→ References。所有价格标访问日期 2026-06-16，关键数据标 🟢多源 / 🟡单源 / 🔴估算，无来源处明示 ⚠️估算。</p>
+    </div>
+  </div>
+
+  <div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+    <p style="margin:0"><strong>📌 三条最关键发现（先扫这个）：</strong></p>
+    <ul style="margin:8px 0 0">
+      <li><strong>半米最该借的不是 LMS 的"功能"，而是它的"学习结构骨架"——把零散内容编成"模块化路径 + 先决条件 + 掌握度进度"。</strong>Canvas 的 Mastery Paths（按成绩条件释放内容）<sup class="cite" data-refid="5">[5]</sup>、Moodle 的条件化访问限制（基于完成/成绩/日期）<sup class="cite" data-refid="33">[33]</sup>、Outcomes/能力框架追踪，本质都是把"一堆资料"变成"有顺序、可追踪的学习旅程"。半米现在有强大的卡片原子库和精听闭环，但卡片之间是平铺的——给视频/书内容叠一层轻量"学习路径 + 完成度仪表盘"，就能在不引入班级管理的前提下补上 LMS 的最大长板。<span class="conf g">🟢</span></li>
+      <li><strong>四大 LMS 在 2024–2026 集体暴露了"重管理 + 按人头付费 + 合规集中风险"的系统性代价，这恰好反衬出半米单用户/数据自有路线的护城河。</strong>PowerSchool 2024 年底泄露 6200–7000 万学生 + 950 万教师数据（美国史上最大儿童数据泄露）<sup class="cite" data-refid="20">[20]</sup>；Canvas 2026 年 5 月遭 ShinyHunters 攻击（攻击者声称 3.65TB / 2.75 亿条记录，Instructure 确认泄露但未逐项背书规模）<sup class="cite" data-refid="3">[3]</sup>；两家 LMS 母公司（Instructure 被 KKR 48 亿美元、PowerSchool 被 Bain 56 亿美元）双双被 PE 私有化<sup class="cite" data-refid="2">[2]</sup><sup class="cite" data-refid="19">[19]</sup>。半米的 Obsidian Markdown + 本地 LanceDB 是"数据握在自己手里、零按人头成本"——这不是要补的短板，是要守住并讲清楚的差异化。<span class="conf g">🟢</span></li>
+      <li><strong>学习科学已经给出半米最高 ROI 的两个可借鉴点：FSRS 间隔重复 + AI 辅导纳入"学习者历史状态"。</strong>FSRS 相比传统 SM-2 在同等保留率下让复习量更少（二手量化约减 20–30%，🟡）、已于 2023 年并入 Anki<sup class="cite" data-refid="51">[51]</sup><sup class="cite" data-refid="52">[52]</sup>；Khan Academy 在 1500 万+ 辅导线程上 A/B 测出"把学生近期解题历史 + 未掌握先决技能喂给 AI"可让下题正确率提升 6 个百分点<sup class="cite" data-refid="50">[50]</sup>。半米已有 SRS（间隔 1/2/4/7/15/30/60/90 天）和 AI 问答浮窗——把 SRS 调度换成 FSRS、把问答的上下文从"当前卡片"扩展到"用户的掌握度画像"，就是用别人验证过的杠杆撬自己的闭环。<span class="conf g">🟢</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1" data-nav="01 方法论与画像">
+    <h2><span class="num">01</span><span class="title-text">方法论：四个 LMS 一句话画像 + 海外个人视角声明</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>研究范围与立场</h3>
+      <p>本报告基于 5 份已搜证的证据包（Canvas / Google Classroom / Schoology / Moodle / edtech 趋势），共 60+ 公开来源，覆盖市场份额、定价、功能、用户反馈（Capterra / G2 / PeerSpot / 社区论坛 / 学生报纸 / 行业分析）。立场是<strong>人在马来西亚、产品主理人阿杰本人</strong>：价格统一用 USD，Google / Canvas 等海外服务直接当首选、不纠结国内可达性；终端用户是深度自学者本人 + 家人（例如给孩子 Danny 布置 SciShow Kids / Crash Course Kids 整集作业）。</p>
+      <div class="callout info"><p><strong>这不是一份选 LMS 的采购报告。</strong>半米（BetterMe）不会去买 Canvas，也不会变成班级 LMS。这份报告的唯一目的是：把四大 LMS 十几年沉淀的结构化学习能力当作"参照系"，逐项判断半米该<strong>借鉴</strong>什么、该<strong>避开</strong>什么、已有什么<strong>护城河</strong>。所以每一章 LMS 深挖的落点，都会回到"对半米意味着什么"。</p></div>
+      <h3>四个 LMS 一句话画像</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>LMS</th><th>一句话画像</th><th>最强的那一招</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Canvas (Instructure)</strong></td><td>北美高等教育霸主，最完整的 LTI 集成生态 + AI 战略（IgniteAI / OpenAI 合作）</td><td>SpeedGrader 内联批改 + 1000+ LTI 集成 + Mastery Paths<sup class="cite" data-refid="8">[8]</sup></td></tr>
+          <tr><td><strong>Google Classroom</strong></td><td>不是完整 LMS，是"零摩擦作业分发中枢"，靠 Google Workspace + Chromebook 免费捆绑统治 K-12</td><td>近乎零设置成本 + Google 生态无缝协作<sup class="cite" data-refid="13">[13]</sup></td></tr>
+          <tr><td><strong>Schoology (PowerSchool)</strong></td><td>K-12 专用，社交网络式界面 + 与 PowerSchool SIS 最紧密的成绩同步 + 三方（师生家长）沟通</td><td>原生 PowerSchool SIS 双向同步 + 家长门户<sup class="cite" data-refid="22">[22]</sup></td></tr>
+          <tr><td><strong>Moodle</strong></td><td>全球部署最广的开源 LMS，极致可定制（2390+ 插件 + 完整 API + 数据主权）</td><td>开源 + 条件化学习路径 + 能力框架 + 多内容标准<sup class="cite" data-refid="33">[33]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <h3>半米 BetterMe 的画像（对照锚点）</h3>
+      <p>半米是<strong>单用户、AI 原生的"个人知识库驱动学习/研究操作系统"</strong>（personal learning OS）。核心数据层是 Obsidian Markdown 卡片 + LanceDB 语义向量检索；三层架构是 L1 采集（脚本零 token）→ L2 知识库（Gemini 低成本结构化）→ L3 创作（Opus 按需）。八个功能模块：图书馆、视频精听闭环、书阅读器、写作板块（双链）、英语/词汇 + SRS、人物模块、信息入库 router、研究报告生成。<strong>它没有班级/师生/家长/成绩册/合规这一整套——这既是它的"缺"，也是它的"轻"。</strong></p>
+      <div class="callout warn"><p><strong>方法论诚实声明：</strong>证据包里多处市场份额、定价为第三方估算（Canvas/Schoology 均无公开价目表），口径差异大（按机构数 vs 按注册人数 vs 按营收，排名会变）。本报告对这类数字一律标 🟡/🔴 并注明口径，不把估算当事实。LMS 的能力描述则置信度较高（官方文档 + 多源用户反馈交叉验证）。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2" data-nav="02 五列总览大表">
+    <h2><span class="num">02</span><span class="title-text">总览：四大 LMS + 半米，八维度同框对比</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>先用一张大表把五者的"基因差异"摊开。读这张表的正确姿势：不是看半米某格是 ❌ 就该补，而是看半米的 ❌ 大多落在"班级管理"维度（本就不该有），✅ 落在"个人 AI 学习"维度（护城河）。</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>维度</th><th>Canvas</th><th>Google Classroom</th><th>Schoology</th><th>Moodle</th><th>半米 BetterMe</th></tr></thead>
+        <tbody>
+          <tr><td><strong>定位</strong></td><td>高校全功能 LMS</td><td>作业分发中枢（非完整 LMS）</td><td>K-12 社交式 LMS</td><td>开源可定制 LMS</td><td>单人 AI 学习 OS</td></tr>
+          <tr><td><strong>目标用户</strong></td><td>高校/K-12/企业</td><td>K-12（Google 生态）</td><td>K-12 学区</td><td>有技术团队的机构/企业</td><td>深度自学者本人 + 家人</td></tr>
+          <tr><td><strong>多人协作</strong></td><td class="check y">班级/师生/家长</td><td class="check y">班级/师生</td><td class="check y">三方沟通强</td><td class="check y">班级/角色</td><td class="check n">单用户（刻意）</td></tr>
+          <tr><td><strong>部署</strong></td><td>云 SaaS（开源可自托管）</td><td>云（不可自托管）</td><td>云 SaaS</td><td>自托管/云/MoodleCloud</td><td>本地 + 自有数据</td></tr>
+          <tr><td><strong>价格模型</strong></td><td>按 FTE 谈判，不公开<sup class="cite" data-refid="4">[4]</sup></td><td>Fundamentals 免费 / Plus $6·人·年<sup class="cite" data-refid="14">[14]</sup></td><td>定制报价，无公开价<sup class="cite" data-refid="27">[27]</sup></td><td>开源免费 / 云 $130–1770·年<sup class="cite" data-refid="32">[32]</sup></td><td>零按人头 · 仅 API 边际成本</td></tr>
+          <tr><td><strong>集成标准</strong></td><td class="check y">1000+ LTI 1.3<sup class="cite" data-refid="8">[8]</sup></td><td class="check n">无 SCORM/LTI<sup class="cite" data-refid="15">[15]</sup></td><td class="check y">200+ LTI</td><td class="check y">SCORM/xAPI/LTI/H5P</td><td class="check p">入库 router（私有）</td></tr>
+          <tr><td><strong>AI 原生度</strong></td><td class="check p">IgniteAI（外挂层）<sup class="cite" data-refid="6">[6]</sup></td><td class="check p">Gemini 渐进落地<sup class="cite" data-refid="17">[17]</sup></td><td class="check p">PowerBuddy<sup class="cite" data-refid="25">[25]</sup></td><td class="check p">5.0 AI 子系统</td><td class="check y">L1–L3 全链路原生</td></tr>
+          <tr><td><strong>开源/数据自有</strong></td><td class="check p">AGPL 但企业功能云锁<sup class="cite" data-refid="11">[11]</sup></td><td class="check n">完全闭源</td><td class="check n">闭源</td><td class="check y">GPL 全开源<sup class="cite" data-refid="38">[38]</sup></td><td class="check y">Obsidian 兼容/可改码</td></tr>
+          <tr><td><strong>知识沉淀</strong></td><td class="check n">消费完即弃</td><td class="check n">学期归档</td><td class="check n">课程归档</td><td class="check n">课程归档</td><td class="check y">卡片 + 双链网络（核心）</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout good"><p><strong>读表结论：</strong>半米的"红叉"几乎全在<strong>多人协作 / 班级</strong>这一类——这是它<u>主动放弃</u>的，不是缺陷。半米的"绿勾"集中在<strong>AI 原生 / 数据自有 / 知识沉淀</strong>——这三项恰恰是四大 LMS 普遍较弱的（典型 LMS 课程生命周期倾向于按学期/课程归档，缺乏跨课程的持续知识网络；这是产品定位倾向的归纳，非逐平台量化）。真正值得补的灰色地带只有一处：<strong>集成标准 / 学习结构</strong>——半米的入库 router 是私有的、卡片是平铺的，缺一层"模块化路径 + 进度追踪"。这就是 Ch9–10 的主战场。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3" data-nav="03 Canvas 深度">
+    <h2><span class="num">03</span><span class="title-text">Canvas (Instructure)：高校霸主的长板与裂缝</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>概述：北美高校第一，刚被 PE 私有化，又遭史上最大泄露</h3>
+      <p>Canvas 由 Instructure 开发，2024 年 11 月被 KKR 以 48 亿美元（$23.60/股）私有化、从纽交所退市<sup class="cite" data-refid="2">[2]</sup>。它是北美高等教育的 LMS 霸主：2025 年春按机构数占 39%、按注册人数约 50%，<strong>历史性地超过后三名竞争对手（Blackboard / D2L / Moodle）之和</strong><sup class="cite" data-refid="1">[1]</sup>。全球 3000 万+ 活跃用户、影响约 2 亿学习者、覆盖 11,342+ 机构。但 2026 年 5 月，ShinyHunters 通过 Free-for-Teacher 免费账号通道发动攻击。需区分两类口径：<strong>攻击者声称</strong>窃取 3.65TB / 约 2.75 亿条记录、涉 8809 所机构（"史上最大教育数据泄露"是基于此声称的描述）；<strong>Instructure 确认</strong>的是泄露发生及涉及的数据类型（姓名、邮件、学生 ID、私信），但未逐项背书攻击者声称的规模数字。Free-for-Teacher 通道在事件后被关闭（公开报道多表述为暂停/下线，是否"永久"以官方 incident update 为准）<sup class="cite" data-refid="3">[3]</sup>。<span class="conf y">🟡</span>（规模为攻击者声称，非独立证实）</p>
+      <h3>核心功能</h3>
+      <ul>
+        <li><strong>Modules</strong> 模块化课程组织 + <strong>Mastery Paths</strong>（按成绩条件释放内容，自适应路径）<sup class="cite" data-refid="5">[5]</sup>。</li>
+        <li><strong>SpeedGrader</strong>：内联 PDF 批注、Rubric 对齐评分、音视频反馈——行业标杆。2025 年底更新、2026 年 1 月 GA，早期用户反映加载快 10 倍、崩溃率降 99%<sup class="cite" data-refid="9">[9]</sup>。</li>
+        <li><strong>Outcomes + Learning Mastery Gradebook</strong>：能力本位教育（CBE），按学习成果追踪熟练度。</li>
+        <li><strong>IgniteAI</strong>（Core/Plus/Next 三层）：Rubric 生成、讨论洞察、AI 辅助评分、多步 Agent（Amazon Bedrock 驱动）<sup class="cite" data-refid="6">[6]</sup>；2025 年 7 月与 OpenAI 全球合作，可在作业里嵌入 LLM 对话，学习证据回流成绩册、学生数据不共享给 OpenAI<sup class="cite" data-refid="7">[7]</sup>。</li>
+        <li><strong>1000+ LTI 集成</strong>（EduAppCenter）：原生 Google Workspace / Microsoft 365 / Zoom / Turnitin（已迁 LTI 1.3）<sup class="cite" data-refid="8">[8]</sup>——被开发者评为"所有 LMS 里最好的集成"。</li>
+      </ul>
+      <h3>价格</h3>
+      <p>不公开标准价格表，全部按 FTE/在籍学生数定制谈判，第三方估算 $4–$30/生/年（小型校约 $4–$9）<sup class="cite" data-refid="4">[4]</sup> <span class="conf y">🟡</span>。Free-for-Teacher 曾是 $0 但限 50MB 存储、无 SIS/无支持——已于 2026 年 5 月泄露后关闭（"永久"以官方 incident update 为准）。IgniteAI 高级功能美国机构免费用至 2026-06-30，之后需升级 Plus/Next。</p>
+      <h3>优势（拆三个独立 callout）</h3>
+      <div class="callout good"><h4>① 集成生态是行业天花板，这才是半米最该眼馋的地方</h4><p>1000+ LTI 工具 + 原生 Google/Microsoft/Zoom/Turnitin，Turnitin 已完成 LTI 1.3 迁移（名册同步 + 成绩回传改善）<sup class="cite" data-refid="8">[8]</sup>。开发者直言"Canvas 与其他教育工具的集成能力大概是最好的"。<strong>对半米的启发</strong>：半米的入库 router 是私有判型分流，能力很强但不是"标准"。借鉴 LTI 的思路不是去实现 LTI（半米单用户不需要），而是把"内容来源 → 标准化卡片"的契约做得像 LTI 一样清晰可扩展，未来接新数据源（新平台、新格式）零改造。</p></div>
+      <div class="callout good"><h4>② SpeedGrader 证明了"内联批注 + 多模态反馈"的价值，对应半米的批注/Q&A 浮窗</h4><p>SpeedGrader 支持 PDF 内联批注、录音录像反馈、Rubric 集成，是 Canvas 用户最爱的功能（"grading so much easier and faster"），德州理工迁移后 LMS 帮助台投诉降 40%<sup class="cite" data-refid="9">[9]</sup>。<strong>对半米的启发</strong>：半米书阅读器的选区批注、视频精听的 Q&A 浮窗，本质同源——"在内容原位即时反馈/标注"。Canvas 验证了这条交互的高价值，半米可以把"选区→AI 解释/批注→沉淀成卡片"的闭环做得比任何 LMS 更顺，因为它是 AI 原生的。</p></div>
+      <div class="callout good"><h4>③ Mastery Paths + Outcomes 是"学习路径 + 能力追踪"的成熟范式</h4><p>Mastery Paths 按成绩条件释放后续内容、Outcomes/Learning Mastery Gradebook 按成果追踪熟练度<sup class="cite" data-refid="5">[5]</sup>，构成完整的能力本位路径。<strong>对半米的启发</strong>：这正是半米平铺卡片库缺的那层骨架——给"某集课程/某本书"配一条"先看 A、掌握后解锁 B"的轻量路径 + 一块"掌握度仪表盘"。注意要克制：半米不需要成绩册和教师审核，只需要"对自己/对家人"的进度可视化。</p></div>
+      <h3>痛点</h3>
+      <ul>
+        <li><strong>New Quizzes 引擎多年 bug 未根治</strong>：蓝图复制失败、旧媒体嵌入不显示、学生提交图片在 SpeedGrader 不可见、无 CSV 导出、不支持练习测验和调查功能<sup class="cite" data-refid="10">[10]</sup>。</li>
+        <li><strong>成绩册"破坏性更新"</strong>：曾在期末前强推 beta 版到生产环境、删除统计功能且不可回退。</li>
+        <li><strong>SIS 集成需额外中间件</strong>；大班课（300+）历史上 SpeedGrader 极慢；讨论区被评"正式、强制、与人疏离"。</li>
+        <li><strong>定价完全不透明</strong>，评估成本高；2026 年泄露重创安全信任。</li>
+      </ul>
+      <h3>用户反馈（多视角真实引述）</h3>
+      <div class="callout info"><p><strong>👩‍🏫 教师（正面）：</strong>"SpeedGrader is my favorite thing in the world... it makes grading so much easier and faster!"——Canvas 官方博客用户引用<sup class="cite" data-refid="9">[9]</sup>。<br><strong>🧑‍💻 IT 管理员（毁誉参半）：</strong>"A very powerful platform... Integration with our student information system required some additional outside services."——Capterra, Jim A.（IT 副总裁）。<br><strong>🎓 学生（负面）：</strong>"Canvas creates a mind-bending scavenger hunt for students searching for course materials."课程间布局不一致，找材料像寻宝；另有学生反映"I wrote an entire essay and it did not save my work"（无自动保存丢失作业）<sup class="cite" data-refid="12">[12]</sup>。<br><strong>👨‍🏫 教师（负面）：</strong>"The new quizzes situation has been going on for a long time... lacks autosave when building quizzes."——Capterra, Pablo R.（学习体验总监）。</p></div>
+      <div class="callout warn"><p><strong>给半米的提醒：</strong>Canvas 的负面反馈高度集中在"<strong>UI 不一致 + 无自动保存 + 引擎 bug + 强推未测试更新</strong>"——这些都是"大型多人系统积累的工程债"。半米单用户、迭代快、阿杰自己就是用户，天然避开"课程间布局不一致"（因为只有一个组织者）和"客服等 2 小时"（自己就是客服）。但"无自动保存丢内容"这种基础体验问题，半米写作板块/批注必须引以为戒。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4" data-nav="04 Google Classroom 深度">
+    <h2><span class="num">04</span><span class="title-text">Google Classroom：零摩擦中枢，但不是完整 LMS</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>概述：180M+ 用户，靠免费捆绑统治 K-12</h3>
+      <p>Google Classroom 2014 年推出，与 Google Workspace for Education（Docs/Drive/Meet/Forms/Gmail）深度集成。它<strong>不是完整 LMS，而是"零摩擦作业分发中枢"</strong>——Google 自己都承认"didn't set out to create an LMS"<sup class="cite" data-refid="15">[15]</sup>。截至 2025 年中超 180M 注册用户、覆盖 230 个国家<sup class="cite" data-refid="13">[13]</sup>（但 Android 日活仅约 1000 万，注册量与活跃量差距巨大 <span class="conf y">🟡</span>）。统治力来自 Chromebook 占全球 K-12 设备 60.1%、美国 93% 学区计划采购 Chromebook 的捆绑效应<sup class="cite" data-refid="16">[16]</sup>。</p>
+      <h3>核心功能 + 价格</h3>
+      <p>Education Fundamentals 对合资格机构<strong>完全免费</strong>（含 Classroom + 全套 Workspace + 100TB 共享存储 + 免费层 Gemini）；Education Plus $6/用户/年（2025 年 10 月从 $5 涨价）；Teaching & Learning Upgrade $60/用户/年（从 $48 涨价），解锁无限原创性报告、Practice Sets、互动视频、Meet 高级功能<sup class="cite" data-refid="14">[14]</sup>。Gemini for Education 渐进落地：Practice Sets（50+ 语言实时 AI 反馈）、Read Along（800+ 绘本）、Interactive Video Activities（YouTube 内嵌问题）、Learning Coach（LearnLM 驱动步骤引导）<sup class="cite" data-refid="17">[17]</sup>。</p>
+      <h3>优势（拆三个独立 callout）</h3>
+      <div class="callout good"><h4>① "零摩擦"是它唯一也是最强的护城河——半米该把"入库即用"做到同等顺滑</h4><p>教师无需 IT 支持、一次备课时间内就能建班发作业，官方和用户一致描述为"minutes to set up"<sup class="cite" data-refid="13">[13]</sup>。"When students already live in Docs and Slides, the workflow feels invisible"——工作流隐形无感是它的魔法<sup class="cite" data-refid="18">[18]</sup>。<strong>对半米的启发</strong>：半米的入库 router（多格式自动判型分流）就是在追求同样的"零摩擦"——扔个 URL/文件进来自动变卡片。这是对的方向，要继续把"从一个链接到可学习的卡片"的步数压到最少。</p></div>
+      <div class="callout good"><h4>② 免费 + 生态捆绑 = 网络效应，反推半米"零边际成本"的价值</h4><p>Fundamentals 免费让预算受限学校零门槛获得核心功能，与 Chromebook 形成自我强化网络效应<sup class="cite" data-refid="16">[16]</sup>。<strong>对半米的启发</strong>：半米虽是单用户、没有网络效应可言，但"零按人头成本 + 数据自有"是它对标 Google 免费策略的等价优势——Google 免费的代价是数据被收集（见下），半米免费的代价是零（数据在本地）。这条对比在讲半米故事时很有力。</p></div>
+      <div class="callout good"><h4>③ AI 功能里 Practice Sets 的"实时反馈 + 分步提示"值得半米精听场景借鉴</h4><p>Practice Sets 提供个性化实时反馈和分步提示<sup class="cite" data-refid="17">[17]</sup>；Interactive Video Activities 在 YouTube 视频里内嵌问题<sup class="cite" data-refid="17">[17]</sup>。<strong>对半米的启发</strong>：半米视频精听已有"时间轴 Q&A 浮窗"，可以进一步借鉴"视频内嵌检查点问题"——在精听某集的关键时间点弹出理解检查题（用简单语言/类比，符合半米学习场景偏好），把被动观看变成主动回忆。给 Danny 布置整集作业时尤其有用。</p></div>
+      <h3>痛点</h3>
+      <ul>
+        <li><strong>不是完整 LMS</strong>：无 SCORM/xAPI/LTI，承载不了第三方交互课件包<sup class="cite" data-refid="15">[15]</sup>；成绩册深度不足、无原生题库引擎（Quiz 依赖 Google Forms）。</li>
+        <li><strong>Originality Reports 不检测 AI 生成内容</strong>：仅做网页相似度比对，ChatGPT/Gemini 写的原创文章查不出来<sup class="cite" data-refid="17b">[17b]</sup>。</li>
+        <li><strong>非 Google 工具集成薄弱</strong>（NearPod/EdPuzzle 无法原生集成）；家长访问极受限（Guardian Summary 不含成绩）。</li>
+        <li><strong>隐私争议持续</strong>：2019 年 FTC 因在儿童不知情下收集数据罚 Google 1.7 亿美元，多州 AG 起诉<sup class="cite" data-refid="18b">[18b]</sup>。</li>
+      </ul>
+      <h3>用户反馈（多视角）</h3>
+      <div class="callout info"><p><strong>👨‍🏫 教师（正面）：</strong>"the workflow feels invisible — I pulled up their shared Docs during a live Meet call to workshop essays in real time. That's the magic."<sup class="cite" data-refid="18">[18]</sup><br><strong>🎨 教师（负面）：</strong>"Cannot integrate non-Google apps like NearPod or EdPuzzle — you're stuck in the Google bubble."——Capterra, Karly R.<br><strong>👪 家长（毁誉参半）：</strong>"Improves parent-teacher communication... but I can't see grades or submissions, only get an email summary."<br><strong>🎓 学生（负面）：</strong>"Hard to find stuff... when teachers don't organize well the whole class page gets confusing fast."——Capterra, Jaden A. Capterra 综合 4.6/5（2872 评）、G2 4.5/5（1526 评）<sup class="cite" data-refid="18c">[18c]</sup>。</p></div>
+      <div class="trap-box"><strong>⚠️ 给半米的反面教材：</strong>Google Classroom 的"stuck in the Google bubble"（锁死在自家生态）和"频繁无通知改版增加支持负担"是经典平台病。半米数据层基于开放的 Obsidian Markdown，天然反"bubble"；但要警惕另一面——半米的强项是 Gemini/Opus，不要把自己锁死在单一 AI 供应商上，L2/L3 应保留切换模型的能力（这点 Moodle 5.0 多 AI 提供商架构做得对，见 Ch6）。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5" data-nav="05 Schoology 深度">
+    <h2><span class="num">05</span><span class="title-text">Schoology (PowerSchool)：社交式 LMS 与数据泄露阴影</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>概述：K-12 专用，PowerSchool 整合 + 史上最大儿童数据泄露</h3>
+      <p>Schoology 2009 年成立，2019 年 11 月被 PowerSchool 以 2 亿美元+收购<sup class="cite" data-refid="24">[24]</sup>。它是 K-12 专用 LMS，差异化在<strong>社交网络式界面</strong>（活动流、群组、讨论板、点赞）、<strong>师生家长三方沟通</strong>、以及<strong>与 PowerSchool SIS 最紧密的原生双向同步</strong>（成绩回传、考勤、名册）。2024 年约 1600+ 学区、60,000 学校、2000 万+ 用户，K-12 LMS 市占约 21–22%（按实施数）<sup class="cite" data-refid="21">[21]</sup>。2024 年 10 月 PowerSchool 被 Bain Capital 以 56 亿美元私有化<sup class="cite" data-refid="19">[19]</sup>。</p>
+      <div class="callout bad"><h4>⛔ 2024 年 12 月 PowerSchool 数据泄露：美国史上最大儿童数据泄露</h4><p>攻击者用窃取的凭证访问缺乏 MFA 的客户支持门户，泄露 6200–7000 万学生 + 950 万教师个人数据（含姓名、地址、SSN、医疗记录、成绩）<sup class="cite" data-refid="20">[20]</sup>。PowerSchool 2025 年 1 月付了约 285 万美元比特币赎金，但 2025 年 5 月黑客开始直接勒索各学区——说明删除承诺不可靠、数据仍可能在流通（不能据此断言原攻击者从未销毁）；据报道一名 19 岁嫌疑人 Matthew Lane 因该案被起诉/认罪<sup class="cite" data-refid="20">[20]</sup>（具体量刑细节以 DOJ/法院文书为准）。<strong>这是"把全班/全校敏感数据集中托管在第三方"模式的灾难性代价示范。</strong><span class="conf g">🟢</span></p></div>
+      <h3>核心功能 + 价格</h3>
+      <p>课程管理、标准对齐评分、协作讨论板、徽章/游戏化、Google Drive 集成、PowerBuddy AI（2024 起：学生导师 Socratic 模式、教师内容生成、AI Rubric 评分、IEP/504 生成器、多语言）<sup class="cite" data-refid="25">[25]</sup>。价格 100% 定制报价、无公开价目表，第三方估算企业版约 $10/生/月，总拥有成本（含实施/培训/集成）是基础许可的 2–5 倍<sup class="cite" data-refid="27">[27]</sup> <span class="conf y">🟡</span>。<strong>免费 Basic 计划已于 2023 年 10 月 1 日停服并删除所有内容</strong>，激怒了大批独立教师用户<sup class="cite" data-refid="26">[26]</sup>。</p>
+      <h3>优势（拆三个独立 callout）</h3>
+      <div class="callout good"><h4>① 社交式界面降低青少年采纳门槛——但对半米是"要克制"的范例</h4><p>活动流、群组、点赞的 Facebook 式界面对学生熟悉，降低采纳门槛<sup class="cite" data-refid="22">[22]</sup>。但这恰恰是双刃剑：用户批评"基于 Facebook 式界面...不适合一眼看到所有待办作业...它想把本该是项目管理系统的东西做成 Facebook，两头不讨好"<sup class="cite" data-refid="23">[23]</sup>。<strong>对半米的启发</strong>：半米是单用户、没有社交对象，<u>不该</u>抄社交流。但"游戏化/徽章"激励机制在单人场景仍可借鉴——给精听/词汇连续打卡、掌握度里程碑做轻量成就反馈，前提是不让用户"优化积分而非学习深度"（Duolingo 的教训，见 Ch8）。</p></div>
+      <div class="callout good"><h4>② 标准对齐评分 + 题库复用是省时利器，对应半米"作业/练习集"借鉴点</h4><p>测验/测试自动评分、题库（question bank）、标准对齐被教师反复称赞为省时利器："Tests and quizzes grade automatically. I couldn't imagine teaching without it!"<sup class="cite" data-refid="28">[28]</sup>；"The assignment bank reusability across school years is excellent."<strong>对半米的启发</strong>：半米可以引入<strong>轻量练习集/题库</strong>——把某集课程或某章书的关键点做成可复用的检查题，给家人（Danny）布置时直接"复制为当日作业"。这是半米已有的"复制整集为作业"能力的自然延伸。</p></div>
+      <div class="callout good"><h4>③ 强管理控制 + 紧密 SIS 同步是 K-12 刚需，但对半米完全是包袱</h4><p>企业级角色权限、隐私控制、SSO、与 PowerSchool 的双向成绩同步，被 IT 评测者评为优于 Canvas/Blackboard<sup class="cite" data-refid="22">[22]</sup>。<strong>对半米的启发（反向）</strong>：这一整套（SIS 同步、成绩回传、角色权限、合规）正是半米<u>必须避开</u>的 LMS 包袱——单用户不需要 SIS，不需要把成绩推给任何系统。Schoology 的 SIS 同步还极其脆弱（见痛点），更说明这类集成是"高维护、低单人 ROI"。</p></div>
+      <h3>痛点</h3>
+      <ul>
+        <li><strong>UI 过时</strong>："completely out of date"、导航点击过多；移动端考试时崩溃、与 Web 功能不对等。</li>
+        <li><strong>成绩同步脆弱</strong>：作业标题超 50 字符、缺截止日、重复分类名、权重方案不匹配都会触发同步失败<sup class="cite" data-refid="29">[29]</sup>——教师要手动排错。</li>
+        <li><strong>收购后支持质量下滑</strong>；2023 年停免费版的反弹；2024 数据泄露重创信任。</li>
+        <li><strong>学区流失</strong>：Round Rock ISD（德州）宣布 2026–27 从 Schoology 迁回 Google Classroom，理由是成绩册摩擦、可靠性、教师工作流抱怨<sup class="cite" data-refid="30">[30]</sup>。</li>
+      </ul>
+      <h3>用户反馈（多视角）</h3>
+      <div class="callout info"><p><strong>👨‍🏫 教师（正面，15 年教龄）：</strong>"Schoology is by far the best gradebook I've used in 15 years of teaching."<sup class="cite" data-refid="28">[28]</sup><br><strong>👪 家长（毁誉参半）：</strong>"The ability to have real-time data on a child's progress is amazing. However, from a parent side it is not very user friendly — it took me 30 minutes to navigate to what I needed."<br><strong>🎓 学生（负面）：</strong>"The mobile version does tend to crash occasionally even during assessments."<br><strong>🧑‍💻 IT 管理员（负面）：</strong>"At the enterprise level, support can be lackluster when dealing with synchronization between Schoology and PowerSchool."<br>Capterra 4.4/5（488 评）、G2 4.4/5（394 评）<sup class="cite" data-refid="31">[31]</sup>。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6" data-nav="06 Moodle 深度">
+    <h2><span class="num">06</span><span class="title-text">Moodle：开源自由的极致，与维护负担的代价</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>概述：全球部署最广的开源 LMS，5 亿用户</h3>
+      <p>Moodle 2002 年由 Martin Dougiamas 创立，GPL v2+ 许可。截至 2025 年底 148,655 个注册站点、235 国、注册用户突破 5 亿<sup class="cite" data-refid="32">[32]</sup>。商业模式是"开源软件 + 合作伙伴生态"：软件免费，靠 MoodleCloud 托管订阅、Moodle Workplace 企业版、Certified Partner 网络营收（生态营收规模有第三方提及约 6.95 亿美元量级，但无公开财报直接佐证，⚠️估算 <span class="conf r">🔴</span>）。核心差异化是<strong>极强可定制性</strong>：2390+ 插件、完整 REST API、支持 SCORM/xAPI/LTI/H5P 四大标准、深度能力框架与条件化学习路径<sup class="cite" data-refid="33">[33]</sup>。但北美高教份额约 9% 且缓慢下滑，被 Canvas（50%）持续压缩<sup class="cite" data-refid="34">[34]</sup>。Moodle 5.0（2025 年 4 月）引入 Bootstrap 5 界面、Activities 总览页、多 AI 提供商子系统（OpenAI/Gemini/AWS Bedrock/Ollama 本地）<sup class="cite" data-refid="35">[35]</sup>。</p>
+      <h3>价格（这是开源"免费"的真实账单）</h3>
+      <p>MoodleCloud 官方 SaaS：$130–$1770/年（50–750 用户），但<strong>不支持自定义插件、不开放 API</strong><sup class="cite" data-refid="32">[32]</sup>。自托管：软件 $0，但真实 3 年 TCO 中型部署约 $103,000–$120,000，<strong>人力成本占 68–71%</strong>，需 0.5–1.0 FTE Linux 管理员、每月 15–25 小时维护<sup class="cite" data-refid="36">[36]</sup> <span class="conf y">🟡</span>。Moodle Workplace 企业版约 $3–$9/活跃用户/月<sup class="cite" data-refid="37">[37]</sup>。</p>
+      <h3>优势（拆三个独立 callout）</h3>
+      <div class="callout good"><h4>① 开源 + 数据主权——这是半米已有护城河的"机构版印证"</h4><p>GPL 全开源、可深度二次开发、自托管满足 GDPR/HIPAA/数据驻留，是政府医疗等强监管行业首选<sup class="cite" data-refid="38">[38]</sup>。<strong>对半米的启发</strong>：Moodle 证明了"数据自有 + 可改代码"对一类用户是刚需而非奢侈。半米的 Obsidian Markdown + 本地 LanceDB + 可自己改代码定制，本质是 Moodle 数据主权理念的<u>个人版</u>——而且没有 Moodle 那套自托管的运维负担（半米是本地单机，不用养 Linux 管理员）。这是要守住并讲清楚的，不是要补的。</p></div>
+      <div class="callout good"><h4>② 条件化学习路径 + 能力框架是半米最该直接借的结构能力</h4><p>条件化访问限制（基于完成状态/成绩/日期释放内容）、内置能力框架（Competency Frameworks）、高级成绩册（自定义公式聚合/权重）<sup class="cite" data-refid="33">[33]</sup>。Quiz 支持 15+ 题型、Workshop 同伴互评、Lesson 自适应路径。<strong>对半米的启发</strong>：和 Canvas Mastery Paths 殊途同归——这就是把平铺卡片变成"有先决条件的学习旅程"的范式。半米可以给视频/书内容做<strong>轻量条件释放</strong>（学完前置卡片才解锁下一组），用"能力框架"思路给词汇/语法标掌握度等级。</p></div>
+      <div class="callout good"><h4>③ Moodle 5.0 多 AI 提供商架构——半米保持模型可切换的正面范例</h4><p>5.0 的 AI 子系统支持 OpenAI/Gemini/Azure/AWS Bedrock/Ollama 本地化，管理员可审计 AI 用量、控制权限<sup class="cite" data-refid="35">[35]</sup>。<strong>对半米的启发</strong>：半米目前 L2 用 Gemini、L3 用 Opus，应像 Moodle 一样把"AI 提供商"做成可配置层（含本地模型 Ollama 兜底），避免被单一供应商绑死或断供——这与 Ch4 给 Google Classroom 的反面教材呼应。半米本机已有本地模型探索，方向一致。</p></div>
+      <h3>痛点</h3>
+      <ul>
+        <li><strong>UI/UX 长期过时</strong>："feels like it is from another era"，创始人本人承认"way more complex than nearly anything else"；5.0 改善但仍落后 Canvas。</li>
+        <li><strong>学习曲线极陡 + 自托管维护负担重</strong>：每次主版本升级需 20–60 小时工时；修改个别成绩"几乎总要 IT 介入"。</li>
+        <li><strong>高峰性能问题</strong>（截止日前加载慢）；MoodleCloud 功能阉割（无自定义插件/API、750 用户上限）；移动端体验不足。</li>
+      </ul>
+      <h3>用户反馈（多视角）</h3>
+      <div class="callout info"><p><strong>🧑‍💻 IT/技术经理（毁誉参半）：</strong>"highly flexible, scalable, and cost-effective... non-intuitive user interface for non-technical users requires substantial training investment."<sup class="cite" data-refid="39">[39]</sup><br><strong>👨‍🏫 教授（负面）：</strong>"modifying individual grades almost always requires you to get tech involved."<br><strong>🎓 学生（负面）：</strong>"when I try to add a file and submit it... takes too many clicks... already missed deadlines."<br><strong>👩‍💼 HR（毁誉参半）：</strong>"user interface often feels like it's from another era... very functional but lacks modernity." Capterra 4.3/5（3374 评）<sup class="cite" data-refid="40">[40]</sup>。</p></div>
+      <div class="trap-box"><strong>⚠️ 给半米的核心警示：</strong>Moodle 是"<strong>功能极强 + 极度可定制 = 极陡学习曲线 + 极重维护</strong>"的活标本。它强大到没人会用。半米作为单用户产品，最大的风险就是滑向 Moodle——为了"借鉴 LMS 能力"而把界面堆成 Moodle 那样的"无组织功能乱麻"。每加一个 LMS 借鉴功能，都要先问："这会不会让阿杰/Danny 多点三次、多学一套概念？"如果会，要么砍掉，要么藏进 AI（让 AI 替用户操作）。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7" data-nav="07 横向对比">
+    <h2><span class="num">07</span><span class="title-text">横向对比：功能矩阵 / 成本 / 集成 / 满意度 / 适用场景</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>表 1 · 功能矩阵</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>能力</th><th>Canvas</th><th>Google CR</th><th>Schoology</th><th>Moodle</th></tr></thead>
+        <tbody>
+          <tr><td>模块化课程</td><td class="check y">✅ 强</td><td class="check p">⚠️ 弱</td><td class="check y">✅</td><td class="check y">✅ 强</td></tr>
+          <tr><td>先决条件/条件释放</td><td class="check y">✅ Mastery Paths</td><td class="check n">⛔</td><td class="check p">⚠️</td><td class="check y">✅ 条件限制</td></tr>
+          <tr><td>题库/测验引擎</td><td class="check p">⚠️ New Quizzes 有 bug</td><td class="check n">⛔ 依赖 Forms</td><td class="check y">✅ 题库</td><td class="check y">✅ 15+ 题型</td></tr>
+          <tr><td>能力/掌握框架</td><td class="check y">✅ Outcomes</td><td class="check n">⛔</td><td class="check p">⚠️ 标准对齐</td><td class="check y">✅ Competency</td></tr>
+          <tr><td>内联批改</td><td class="check y">✅ SpeedGrader</td><td class="check p">⚠️ 基础</td><td class="check p">⚠️</td><td class="check p">⚠️</td></tr>
+          <tr><td>学习分析仪表盘</td><td class="check y">✅</td><td class="check p">⚠️ 浅</td><td class="check y">✅</td><td class="check y">✅</td></tr>
+          <tr><td>家长门户</td><td class="check y">✅ Observer</td><td class="check p">⚠️ 邮件摘要</td><td class="check y">✅ 强</td><td class="check p">⚠️</td></tr>
+        </tbody>
+      </table></div>
+      <h3>表 2 · 成本与开源</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>维度</th><th>Canvas</th><th>Google CR</th><th>Schoology</th><th>Moodle</th></tr></thead>
+        <tbody>
+          <tr><td>价格透明度</td><td class="check n">不公开</td><td class="check y">公开</td><td class="check n">不公开</td><td class="check y">公开</td></tr>
+          <tr><td>起步价</td><td>$4–30/生/年<sup class="cite" data-refid="4">[4]</sup></td><td>免费 / $6·人·年<sup class="cite" data-refid="14">[14]</sup></td><td>~$10/生/月<sup class="cite" data-refid="27">[27]</sup></td><td>$0 自托管 / $130·年<sup class="cite" data-refid="32">[32]</sup></td></tr>
+          <tr><td>免费层</td><td class="check n">已关闭(FFT)</td><td class="check y">Fundamentals</td><td class="check n">2023 停服</td><td class="check y">开源</td></tr>
+          <tr><td>真实 TCO</td><td>中(隐藏中间件)</td><td>低(已用 Google)</td><td>高(2–5×)</td><td>高(人力 68–71%)<sup class="cite" data-refid="36">[36]</sup></td></tr>
+          <tr><td>开源</td><td class="check p">AGPL(企业云锁)</td><td class="check n">闭源</td><td class="check n">闭源</td><td class="check y">GPL 全开源</td></tr>
+        </tbody>
+      </table></div>
+      <h3>表 3 · 集成生态 + AI</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>维度</th><th>Canvas</th><th>Google CR</th><th>Schoology</th><th>Moodle</th></tr></thead>
+        <tbody>
+          <tr><td>LTI / 标准</td><td class="check y">1000+ LTI 1.3</td><td class="check n">无 LTI/SCORM</td><td class="check y">200+ LTI</td><td class="check y">SCORM/xAPI/LTI/H5P</td></tr>
+          <tr><td>原生 Google/MS</td><td class="check y">✅ 两者</td><td class="check y">✅ Google</td><td class="check y">✅ 两者</td><td class="check p">⚠️ 插件</td></tr>
+          <tr><td>AI 旗舰</td><td>IgniteAI + OpenAI<sup class="cite" data-refid="7">[7]</sup></td><td>Gemini/LearnLM<sup class="cite" data-refid="17">[17]</sup></td><td>PowerBuddy<sup class="cite" data-refid="25">[25]</sup></td><td>多提供商子系统<sup class="cite" data-refid="35">[35]</sup></td></tr>
+          <tr><td>AI 检测原创性</td><td class="check p">Turnitin</td><td class="check n">不检测 AI<sup class="cite" data-refid="17b">[17b]</sup></td><td class="check p">第三方</td><td class="check p">插件</td></tr>
+        </tbody>
+      </table></div>
+      <h3>表 4 · 用户满意度（Capterra / G2）</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>平台</th><th>Capterra</th><th>G2</th><th>口碑关键词</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Google Classroom</strong></td><td>4.6/5（2872）<sup class="cite" data-refid="18c">[18c]</sup></td><td>4.5/5（1526）</td><td>免费·易用·Google 集成 / 定制差·成绩册简陋</td></tr>
+          <tr><td><strong>Schoology</strong></td><td>4.4/5（488）<sup class="cite" data-refid="31">[31]</sup></td><td>4.4/5（394）</td><td>成绩册好·题库 / UI 过时·移动端崩</td></tr>
+          <tr><td><strong>Moodle</strong></td><td>4.3/5（3374）<sup class="cite" data-refid="40">[40]</sup></td><td>受限未取</td><td>灵活开源 / 过时·学习曲线陡</td></tr>
+          <tr><td><strong>Canvas</strong></td><td>多平台分散<sup class="cite" data-refid="12">[12]</sup></td><td>用户反馈两极</td><td>SpeedGrader/集成 / Quiz bug·寻宝式导航</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout warn"><p><strong>满意度数字要谨慎读：</strong>Google Classroom 4.6 分最高，但很大程度因为它"免费 + 简单"——简单意味着可批评的面少。Moodle 3374 条评价样本最大、分布最真实。这些评分不能直接横比"谁更好"，只能说明"在各自定位下被接受的程度"。对半米的意义：用户满意度高的共性是"<strong>设置摩擦低 + 工作流隐形</strong>"（Google），不满意的共性是"<strong>功能多但 UI 复杂、要学一套概念</strong>"（Moodle/Canvas）——这条规律对单用户产品同样成立。</p></div>
+      <h3>表 5 · 适用场景一句话</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>LMS</th><th>最适合</th><th>最不适合</th></tr></thead>
+        <tbody>
+          <tr><td>Canvas</td><td>高校 + 需深度集成 + CBE 路径</td><td>预算紧 + 想透明定价 + 个人用</td></tr>
+          <tr><td>Google Classroom</td><td>已用 Chromebook 的 K-12、要零成本零摩擦</td><td>需题库/SCORM/深成绩册/高校企业</td></tr>
+          <tr><td>Schoology</td><td>已用 PowerSchool SIS 的 K-12 学区</td><td>预算紧 + 怕数据风险 + 嫌 UI 旧</td></tr>
+          <tr><td>Moodle</td><td>有技术团队 + 要数据主权/极致定制</td><td>无运维能力 + 要开箱即用</td></tr>
+          <tr><td><strong>半米 BetterMe</strong></td><td><strong>单人深度自学 + 知识沉淀 + AI 辅导 + 给家人布置作业</strong></td><td><strong>班级管理 / 多人协作 / 合规成绩册</strong></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8" data-nav="08 趋势与学习科学">
+    <h2><span class="num">08</span><span class="title-text">edtech 趋势与可借鉴的学习科学能力</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>市场格局：集中化 + 集体翻车</h3>
+      <p>全球 LMS 市场 2025 年约 340 亿美元，预计 2033 年达 1200 亿<sup class="cite" data-refid="41">[41]</sup>（按 340→1200、2025→2033 算 CAGR 约 17%；原始来源标注的"约 20%"用的是不同起止年份口径，此处以可复核的算术值为准）<span class="conf y">🟡</span>。格局高度集中：高教 Canvas 北美约 50% 注册人数；K-12 Google Classroom 31% / Canvas 24% / Schoology 19%，三强合计约 74%<sup class="cite" data-refid="42">[42]</sup>。但 2024–2026 是 LMS 的"翻车年"：Blackboard 母公司 Anthology 2025 年 9 月申请破产（负债 16.25 亿美元）<sup class="cite" data-refid="43">[43]</sup>、Moodle 持续失血、Canvas 遭史上最大泄露、PowerSchool 遭史上最大儿童数据泄露。<strong>这反衬出半米单用户/本地/数据自有路线在"集中化供应链风险"上的天然免疫。</strong></p>
+      <h3>三条 LMS 已成熟、半米可直接借鉴的结构能力</h3>
+      <ul>
+        <li><strong>模块化课程 + 先决条件 + 条件释放</strong>（Canvas Mastery Paths / Moodle 条件限制）——把内容编成有顺序的学习旅程。</li>
+        <li><strong>学习分析仪表盘 + 能力框架追踪</strong>——从"完成率/得分"升级到"掌握度建模"。</li>
+        <li><strong>LTI 1.3 集成标准</strong>（OIDC + JWT + OAuth2.0，Deep Linking / 成绩同步）<sup class="cite" data-refid="44">[44]</sup>——半米不需实现 LTI，但要学其"清晰契约 + 可扩展"的工程哲学。</li>
+      </ul>
+      <h3>学习科学：半米最高 ROI 的两个杠杆</h3>
+      <div class="callout good"><h4>① FSRS 间隔重复——直接换掉半米现有的固定间隔 SRS</h4><p>Anki 官方支持的方向性结论是：在同等保留率下 FSRS 让你复习更少<sup class="cite" data-refid="52">[52]</sup>；二手来源进一步量化为减少 20–30% 复习量<sup class="cite" data-refid="51">[51]</sup>（该来源还给出"FSRS 89.6% vs SM2 47.1%"的对比，但"成功率"定义不清、为单一二手站点，仅作方向性参考 <span class="conf y">🟡</span>）。FSRS 2023 年（v23.10）已并入 Anki<sup class="cite" data-refid="52">[52]</sup>。机制上 FSRS 考虑每张卡的难度、记忆稳定性、历史响应模式，而 SM-2 对所有卡统一处理——具体收益需用半米自己的复习数据验证。<strong>对半米</strong>：半米现有 SRS 是固定间隔（1/2/4/7/15/30/60/90 天），这正是 SM-2 式的"对所有卡统一处理"。换成 FSRS 能让阿杰/Danny 少复习 20–30% 却记得一样牢——这是有公开算法实现、ROI 极高的升级。</p></div>
+      <div class="callout good"><h4>② AI 辅导纳入"学习者历史状态"——把半米问答从单卡上下文升级到掌握度画像</h4><p>Khan Academy 在 1500 万+ 辅导线程上 A/B 测试：纳入近期解题历史 +3.4%、呈现未掌握先决技能 +2.7%、24 小时对话记录 +5.09%，六项优化合计下题正确率 +6 个百分点<sup class="cite" data-refid="50">[50]</sup>。<strong>对半米</strong>：半米的 Q&A 浮窗目前主要基于"当前卡片"上下文。借鉴 Khanmigo——把用户的"最近学了什么、哪些词/概念还没掌握（SRS 数据现成）"喂进问答上下文，AI 辅导会更精准。半米有 LanceDB 语义检索，调取相关历史卡片是现成能力。</p></div>
+      <h3>PKM 工具的视角：半米所在象限的差异化空间</h3>
+      <p>Obsidian / Notion / Logseq / RemNote 善于知识沉淀与互联，但<strong>普遍缺少结构化学习路径、进度追踪、强制间隔复习</strong>——这恰是半米的潜在差异化空间<sup class="cite" data-refid="48">[48]</sup>。自适应学习系统综述显示 59% 的研究中学习者成绩提升<sup class="cite" data-refid="53">[53]</sup>，印证"路径+自适应"的价值。Obsidian 大型 Vault 性能退化、插件冲突是真实痛点<sup class="cite" data-refid="49">[49]</sup>；RemNote 的"记笔记时同步生成复习卡"被用户称为 game changer。<strong>对半米</strong>：半米同时站在"PKM（知识沉淀）+ LMS（学习路径）+ AI 辅导"三个象限的交集——这是个空位。把 LMS 的"路径+进度"嫁接到 PKM 的"卡片+双链"上、再用 AI 原生辅导驱动，就是半米的独特定位。</p>
+      <div class="trap-box"><strong>⚠️ 反面案例（要避开的趋势陷阱）：</strong>Duolingo 2025 年 4 月宣布"AI-first"后，用户在 Reddit 投诉课程变成"AI slop"、付费 Max 体验更差；同期股价从约 540 美元高点大幅回落（证据包来源称跌超 80%<sup class="cite" data-refid="47">[47]</sup>，⚠️不同财经媒体口径从 -35% 到 -65% 不等，且股价回落是 AI 争议 + 估值/大盘等多因素叠加，不应单归因于 AI slop <span class="conf y">🟡</span>）；过度游戏化还导致用户"优化积分而非学习深度"。<strong>对半米的教训</strong>：AI 原生是半米的招牌，但不能为 AI 而 AI——L2 生成的卡片质量必须把关（坏卡 repair 已是半米机制），游戏化激励要服务于"学得深"而非"刷得多"。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9" data-nav="09 半米×LMS对位">
+    <h2><span class="num">09</span><span class="title-text">半米 BetterMe × LMS 能力逐项对位</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把 LMS 验证过的每项结构能力，逐一对照"半米现状 → 借鉴空间"。这是整份报告的对位核心表。</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>LMS 能力</th><th>谁做得最好</th><th>半米现状</th><th>借鉴空间（怎么落地）</th></tr></thead>
+        <tbody>
+          <tr><td><strong>模块化课程结构</strong></td><td>Canvas Modules / Moodle</td><td>卡片平铺，按图书馆 5 类组织，无"课程→模块→课时"层级</td><td>给视频/书/课程内容加一层 Module/Lesson 轻结构（半米已有"课程"入口雏形）</td></tr>
+          <tr><td><strong>学习路径 + 先决条件</strong></td><td>Canvas Mastery Paths / Moodle 条件限制<sup class="cite" data-refid="5">[5]</sup></td><td>无；卡片间靠双链关联但无"先后/解锁"</td><td>给一组卡片定义"学完 A 解锁 B"的轻量条件释放，不要成绩门槛只要完成度</td></tr>
+          <tr><td><strong>进度追踪 + 学习分析</strong></td><td>四家都有仪表盘</td><td>SRS 有间隔数据，但无统一"我学到哪了"视图</td><td>做一块"掌握度仪表盘"：精听完成度、词汇掌握曲线、章节阅读进度</td></tr>
+          <tr><td><strong>作业/练习系统</strong></td><td>Schoology 题库 / Canvas</td><td>已有"复制整集为当日作业"给 Danny（强）</td><td>把作业升级为"可复用练习集"：整集 → 检查题 + 跟读任务 + 词表，一键布置</td></tr>
+          <tr><td><strong>测验/题库引擎</strong></td><td>Moodle 15+ 题型 / Schoology</td><td>无原生题库；Q&A 是开放问答</td><td>轻量题库：每集/每章关键点存成可复用检查题（选择/填空/跟读），AI 自动生成</td></tr>
+          <tr><td><strong>能力/掌握框架</strong></td><td>Canvas Outcomes / Moodle Competency<sup class="cite" data-refid="33">[33]</sup></td><td>词汇有 SRS 等级，但无跨模块能力地图</td><td>给英语/语法/学科建"能力框架"，把卡片挂到能力节点上追踪熟练度</td></tr>
+          <tr><td><strong>间隔重复算法</strong></td><td>Anki/FSRS（非 LMS 但最强）<sup class="cite" data-refid="51">[51]</sup></td><td>固定间隔 SRS（SM-2 式）</td><td><strong>直接换 FSRS</strong>，少复习 20–30% 维持保留率（最高 ROI 的小改动）</td></tr>
+          <tr><td><strong>AI 辅导（含历史状态）</strong></td><td>Khanmigo<sup class="cite" data-refid="50">[50]</sup> / Canvas+OpenAI</td><td>Q&A 浮窗基于当前卡片 + 简单语言</td><td>把 SRS 掌握数据 + 相关历史卡片（LanceDB 检索）喂进问答上下文</td></tr>
+          <tr><td><strong>集成标准 (LTI)</strong></td><td>Canvas 1000+ LTI<sup class="cite" data-refid="8">[8]</sup></td><td>入库 router（私有判型分流）</td><td>不实现 LTI；把"来源→卡片"契约做成可扩展标准，接新数据源零改造</td></tr>
+          <tr><td><strong>协作学习</strong></td><td>Schoology 社交流</td><td>无（单用户）</td><td><strong>克制借鉴</strong>：仅家庭内"布置-完成-反馈"轻协作，不做社交流/班级</td></tr>
+          <tr><td><strong>知识沉淀 + 双链</strong></td><td><strong>半米强项，LMS 普遍弱（按课程归档）</strong></td><td>写作板块 Block + 维基双链 + 概念视图</td><td>守住护城河；可把学习路径的"完成"自动沉淀成知识网络节点</td></tr>
+          <tr><td><strong>数据自有 / 开源</strong></td><td>Moodle GPL<sup class="cite" data-refid="38">[38]</sup> / 半米</td><td>Obsidian Markdown + 本地 LanceDB + 可改码</td><td>守住护城河；对外讲清楚"零按人头 + 数据在本地"对比 LMS 的价值</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout accent"><p><strong>对位结论：</strong>半米要借的 LMS 能力高度集中在<strong>上半张表（学习结构层）</strong>——模块化、路径、进度、练习、题库、能力框架、FSRS、AI 历史状态。下半张表（协作、沉淀、数据自有）半米要么不需要、要么本就是护城河。一句话：<strong>半米缺的不是"内容"也不是"AI"，缺的是把内容和 AI 串成"有结构、可追踪的学习旅程"的那层骨架。</strong>这层骨架 LMS 已经验证了十几年，半米照着搭、但用 AI 原生的方式搭，且坚决不带班级管理。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10" data-nav="10 半米路线决策树">
+    <h2><span class="num">10</span><span class="title-text">半米路线建议：立即 / 中期 / 长期 决策树</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把 Ch9 的对位落成可执行路线。原则贯穿始终：<strong>借结构、不借管理；用 AI 替代点击；每加一项先过"会不会变成 Moodle"这道闸。</strong></p>
+      <div class="tree">
+        <div class="node q">Q1 · 这个 LMS 能力服务"一个人学得更深"还是"管理很多人"？</div>
+        <div class="node"><span class="lbl n">管理多人</span>⛔ 成绩册/SIS/角色权限/合规/家长门户 → 直接避开（Ch5 包袱）</div>
+        <div class="node"><span class="lbl y">学得更深</span>✅ 路径/进度/练习/掌握度/FSRS/AI 历史 → 进入 Q2</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q2 · 落地它会不会让阿杰/Danny 多学一套概念、多点几次？</div>
+        <div class="node"><span class="lbl n">会，且无法藏进 AI</span>⚠️ 推迟或砍掉 → 防 Moodle 化（Ch6 警示）</div>
+        <div class="node"><span class="lbl y">不会，或能藏进 AI 自动完成</span>✅ 进入排期 → Q3</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q3 · 改动大小？</div>
+        <div class="node"><span class="lbl y">小改/有现成算法</span>✅ 立即做（FSRS / AI 历史上下文）</div>
+        <div class="node"><span class="lbl m">中等/需新数据模型</span>⚠️ 中期（学习路径 / 掌握度仪表盘 / 练习集）</div>
+        <div class="node"><span class="lbl m">大/需打磨</span>⚠️ 长期（能力框架 / 入库契约标准化 / 视频检查点）</div>
+      </div>
+
+      <h3>🟢 立即可做（小改动 / 有现成实现 / 最高 ROI）</h3>
+      <div class="callout info"><p><strong>把每条都当实验做（不是当功能上）：</strong>每项给出"成功指标 / 成本 / 风险 / 失败阈值 + 回滚"，先灰度、用半米自己的数据验证再扩——这正是回应"路线不能只靠主观 ROI"的纪律。</p></div>
+      <div class="step"><div class="step-head"><span class="sn">1</span>把 SRS 换成 FSRS</div><div class="step-body">现有固定间隔（1/2/4/7/15/30/60/90 天）是 SM-2 式。接入开源 FSRS 调度器（Anki 同款），按每张卡难度/稳定性动态排程。<strong>成功指标</strong>：同等保留率下日均复习量下降（二手量化约 20–30%，需自测<sup class="cite" data-refid="51">[51]</sup>）。<strong>成本</strong>：低（现成实现）。<strong>风险</strong>：旧 SRS 数据迁移到 FSRS 状态需映射。<strong>失败阈值/回滚</strong>：若灰度两周留存未达基线则保留旧调度并并行对比。<strong>下一步</strong>：词汇/英语模块先灰度。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>给 Q&A 浮窗注入"学习者历史状态"</div><div class="step-body">问答上下文从"当前卡片"扩展到"最近学的卡 + SRS 里还没掌握的概念 + LanceDB 检索的相关历史卡"。<strong>成功指标</strong>：参照 Khanmigo（+6pp<sup class="cite" data-refid="50">[50]</sup>），半米侧看"答案被采纳率/追问减少"。<strong>成本</strong>：低（LanceDB 检索现成）。<strong>风险</strong>：注入历史会增 token/延迟，且引入 prompt injection / 幻觉 / 隐私（把更多个人学习数据发给模型）面。<strong>失败阈值/回滚</strong>：延迟或成本超阈值则只注入精简掌握度摘要而非全文。<strong>下一步</strong>：精听 Q&A 先试，保持"简单语言/类比"风格。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>把"复制整集为作业"升级为"练习集"</div><div class="step-body">现有给 Danny 布置整集（SciShow Kids / Crash Course Kids）的能力，加上"自动生成 3–5 道检查题 + 跟读任务 + 当日词表"打包。<strong>成功指标</strong>：Danny 作业完成率 + 检查题正确率。<strong>成本</strong>：中（复用词表/Q&A 链路）。<strong>风险</strong>：AI 生成题质量参差（Quizlet/Duolingo 前车之鉴<sup class="cite" data-refid="47">[47]</sup>）。<strong>失败阈值/回滚</strong>：烂题率高则退回"整集+人工挑 3 题"。<strong>下一步</strong>：复用坏卡 repair 机制做题目质量闸。</div></div>
+
+      <h3>🟡 中期（需新数据模型 / 中等改动）</h3>
+      <div class="step"><div class="step-head"><span class="sn">4</span>给视频/书/课程加"模块化学习路径 + 先决条件"</div><div class="step-body">参照 Canvas Mastery Paths / Moodle 条件限制<sup class="cite" data-refid="5">[5]</sup>，给一组卡片定义"学完 A（完成度达标）→ 解锁 B"。<strong>先分清四种路径机制（价值差异很大）</strong>：① <u>线性 playlist</u>（最简单，按序学，单用户够用）；② <u>prerequisite graph</u>（先决依赖图，适合学科）；③ <u>mastery gating</u>（掌握度达标才解锁，靠 SRS 数据）；④ <u>adaptive remediation</u>（答错自动补救，最重、最像真自适应）。<strong>关键克制</strong>：第一版只做 ①线性 + ③轻量 mastery gating，只用"完成度/掌握度"门槛，不要成绩门槛、不要教师审核、不要先碰 ④自适应（那是 Moodle 化的起点）。<strong>成功指标</strong>：Danny 作业完成率 / 路径放弃率；<strong>失败阈值</strong>：若"被解锁机制卡住而放弃"上升则回退为可跳过。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">5</span>做一块"掌握度进度仪表盘"</div><div class="step-body">统一展示：精听完成度、词汇 SRS 掌握曲线、章节阅读进度、本周学习量。<strong>预期收益</strong>：把分散在各模块的进度收成一个"我学到哪了"视图（LMS 学习分析的个人版）。<strong>下一步</strong>：先聚合现有数据做只读看板，不引入复杂分析。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">6</span>引入轻量题库引擎</div><div class="step-body">每集/每章关键点存成可复用检查题（选择/填空/跟读/简答），AI 自动生成、人工 repair（复用坏卡 repair 机制）。<strong>预期收益</strong>：练习集和路径都靠它供题。<strong>下一步</strong>：题型先做 2–3 种，别学 Moodle 的 15+ 题型。</div></div>
+
+      <h3>🔴 长期（大改 / 需打磨 / 战略级）</h3>
+      <div class="step"><div class="step-head"><span class="sn">7</span>建"能力框架"把卡片挂到能力节点</div><div class="step-body">参照 Canvas Outcomes / Moodle Competency<sup class="cite" data-refid="33">[33]</sup>，给英语/语法/各学科建能力地图，卡片挂到节点上追踪跨模块熟练度。<strong>下一步</strong>：从词汇 CEFR-J 等级这类已有结构起步。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">8</span>把入库 router 契约标准化（LTI 哲学，非 LTI 实现）</div><div class="step-body">借鉴 LTI 1.3 的"清晰契约 + 可扩展"工程哲学<sup class="cite" data-refid="44">[44]</sup>，把"内容源→标准卡片"定义成稳定接口，接新平台/新格式零改造。<strong>注意</strong>：单用户不需要真 LTI 互操作，只需要内部契约的清晰度。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">9</span>视频精听内嵌检查点 + 模型可切换层</div><div class="step-body">借鉴 Google Interactive Video Activities<sup class="cite" data-refid="17">[17]</sup>，在精听关键时间点弹理解检查题；同时像 Moodle 5.0 那样把 AI 提供商做成可配置层（含 Ollama 本地兜底）<sup class="cite" data-refid="35">[35]</sup>，避免供应商绑死。</div></div>
+
+      <h3>⛔ 必须避开的 LMS 包袱（反向清单）</h3>
+      <div class="check-box">
+        <strong>① 成绩册 / 加权分类 / 标准化报告单</strong>——单用户不需要给谁打分（Schoology/Canvas 成绩册的复杂度全是为多人审计服务的）。<br>
+        <strong>② SIS / SSO / 角色权限 / 合规（GDPR 流程）</strong>——半米数据在本地，没有"机构合规"这回事，这套是 Moodle/Schoology 维护负担的大头。<br>
+        <strong>③ 师生中心 / 班级 / 家长门户 / 社交流</strong>——半米是个人 OS，最多做家庭内轻协作，不做班级和 Facebook 式动态流（Schoology 两头不讨好的教训）。<br>
+        <strong>④ 按人头付费模型</strong>——半米的护城河就是零按人头、零边际（只有 API 成本）。<br>
+        <strong>⑤ UI 臃肿 / 让用户学一套概念</strong>——Moodle 的死法。每个借鉴功能都要能藏进 AI 或砍掉，不能堆成"功能乱麻"。<br>
+        <strong>⑥ 把内容当"用完即弃的课程材料"</strong>——这是所有 LMS 的通病，半米的知识沉淀+双链恰恰相反，绝不能为了"像 LMS"而丢掉。
+      </div>
+      <div class="callout accent"><p><strong>一句话路线：先用 FSRS + AI 历史上下文这两个小改动把现有闭环做强（立即），再给内容叠"路径+进度+练习"三件套补上 LMS 最大长板（中期），最后用"能力框架+契约标准化"做战略纵深（长期）——全程坚决不长出成绩册、SIS、班级和按人头付费这四颗 LMS 毒瘤。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11" data-nav="11 风险与反方">
+    <h2><span class="num">11</span><span class="title-text">风险与反方观点：半米不该照搬 LMS 的地方</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>反方观点一：单用户做"学习路径"可能是过度工程</h3>
+      <p>LMS 的路径/先决条件是为"让老师批量管理一群学生的进度"设计的。<strong>一个人学习时，自己就知道下一步学什么，真需要系统强制解锁吗？</strong>这是合理质疑。回应：路径的价值对"自己"确实弱，但对"给 Danny 布置作业"很强——家长需要"先学完 A 再解锁 B"的结构。所以路径功能应优先服务"家人作业"场景，对阿杰自己的学习保持可选/可跳过，不强制。</p>
+      <h3>反方观点二：进度仪表盘可能变成"虚荣指标"</h3>
+      <p>Duolingo 的教训证明：可视化进度/连续打卡容易让人"优化积分而非学习深度"<sup class="cite" data-refid="47">[47]</sup>。半米若做掌握度仪表盘，风险是阿杰开始为"填满进度条"而学。回应：仪表盘要展示"掌握度/留存率"这类<strong>结果指标</strong>，而非"学习时长/打卡天数"这类<strong>过程虚荣指标</strong>；让 FSRS 的"长期保留"成为主 KPI。</p>
+      <h3>反方观点三：题库/练习集的 AI 生成质量风险</h3>
+      <p>AI 自动生成检查题，质量参差是真实风险（Quizlet 众包卡片质量参差、Duolingo "AI slop" 都是前车之鉴<sup class="cite" data-refid="47">[47]</sup>）。回应：半米已有坏卡 repair 机制，练习集题目走同一套质量闸；且单用户场景下阿杰能即时发现烂题并修，比 LMS 的大规模分发容错率高。</p>
+      <h3>反方观点四：借鉴越多，越可能稀释"AI 原生 + 知识沉淀"的核心</h3>
+      <p>最大的战略风险不是某个功能做不好，而是<strong>方向漂移</strong>——为了"补齐 LMS 能力"逐渐变成一个四不像的小型 LMS，丢掉单用户/AI 原生/知识沉淀的独特性。回应：这正是 Ch10 决策树 Q1/Q2 两道闸的作用——任何借鉴必须先证明"服务一个人学得更深"且"不增加认知负担"，否则不做。<strong>半米的北极星是"个人学习/研究 OS"，不是"更好的 LMS"。</strong></p>
+      <h3>反方观点五：竞争面其实不是四大 LMS，而是 Anki / RemNote / NotebookLM / Khanmigo</h3>
+      <p>诚实地说，半米真正的对照系不是 Canvas/Schoology——而是<strong>更接近它形态的工具</strong>：Anki（FSRS 间隔重复的标杆）、RemNote（笔记即生成复习卡，被用户称 game changer<sup class="cite" data-refid="48">[48]</sup>）、NotebookLM（source-grounded 问答）、Khanmigo（AI 辅导<sup class="cite" data-refid="50">[50]</sup>）、Readwise Reader（阅读+高亮沉淀）。本报告用 LMS 当尺子是因为 LMS 把"学习结构"做得最系统、最值得借骨架；但<strong>差异化对标应同时看这些近邻</strong>：半米的独特之处是把"PKM 卡片+双链 + LMS 路径+进度 + AI 原生辅导"三者合一，而上述工具各占其一。后续若要验证护城河，应拿这些近邻而非 LMS 做正面 A/B。</p>
+      <h3>反方观点六："本地/数据自有" ≠ 天然安全</h3>
+      <p>报告反复用 Canvas/PowerSchool 的集中泄露反衬半米本地路线的优势——但<strong>"集中 SaaS 有风险"不等于"本地天然安全"</strong>。半米的真实失败模式是：设备丢失/磁盘未加密、iCloud/云盘同步泄露、API 请求把内容发给模型供应商（retention 政策）、备份缺失导致单点设备故障全损、Danny 的儿童数据保护。<strong>对应纪律</strong>：本地不是免死金牌，磁盘加密 + 定期异地备份 + API 侧最小化发送 + 模型供应商 retention 审查，是把"数据自有"从口号变成真护城河的前提。</p>
+      <h3>反方观点七：单用户 vs 给家人布置作业的内在张力</h3>
+      <p>报告一边说"单用户、不做协作"，一边反复强调"给 Danny 布置作业"——这其实需要<strong>轻量多账户/视图/同步</strong>（至少"布置者"和"完成者"两个角色 + 进度回传），不能简单归为"不做协作"。这不是要变成班级 LMS，但要诚实承认：家庭作业场景天然带一点点协作，路线设计要为它预留最小可行的"双角色"模型，而不是假装它不存在。</p>
+      <h3>反方观点八：Markdown 可迁移 ≠ 无 lock-in</h3>
+      <p>"数据自有"常被等同于"无锁定"，但 Obsidian Markdown 只保证<strong>文本</strong>可迁移。FSRS 状态、练习题、学习路径、LanceDB 嵌入向量、学习日志若锁在私有 DB/格式里，仍会形成新的 lock-in。借鉴 LMS 能力时要顺带把这些衍生数据也设计成可导出（如 SRS 状态导出为 Anki 兼容格式），才真正守住"数据自有"的承诺。</p>
+      <h3>单用户 ROI 的冷静账</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>借鉴项</th><th>开发成本</th><th>单用户 ROI</th><th>判断</th></tr></thead>
+        <tbody>
+          <tr><td>FSRS</td><td>低（现成实现）</td><td class="check y">高（每天复习都受益）</td><td>✅ 立即</td></tr>
+          <tr><td>AI 历史上下文</td><td>低（LanceDB 现成）</td><td class="check y">高（每次问答受益）</td><td>✅ 立即</td></tr>
+          <tr><td>练习集/作业升级</td><td>中</td><td class="check y">高（Danny 作业刚需）</td><td>✅ 立即-中期</td></tr>
+          <tr><td>学习路径</td><td>中</td><td class="check p">中（家人强、自己弱）</td><td>⚠️ 中期，先服务家人</td></tr>
+          <tr><td>掌握度仪表盘</td><td>中</td><td class="check p">中（防虚荣指标）</td><td>⚠️ 中期，重结果指标</td></tr>
+          <tr><td>能力框架</td><td>高</td><td class="check p">中-低（单人地图价值有限）</td><td>⚠️ 长期，从词汇等级起</td></tr>
+          <tr><td>LTI 真实现</td><td>高</td><td class="check n">低（单用户无互操作需求）</td><td>⛔ 不做，只借哲学</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout warn"><p><strong>诚实的结论：</strong>并非所有 LMS 能力对半米都正 ROI。FSRS、AI 历史上下文、练习集是确定正收益（每天/每次都受益）；学习路径、仪表盘、能力框架是"对家人/特定场景正收益、对阿杰自己边际收益递减"；LTI 真实现、成绩册、SIS 是确定负收益。把有限的开发精力压在前三项，是这份报告对"不含糊的下一步"最实在的回答。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq" data-nav="FAQ 常见问题">
+    <h2><span class="num">Q</span><span class="title-text">FAQ：12 个最可能被问到的问题</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">半米为什么不直接用 Canvas/Moodle，非要自己造？</span><span class="toggle">＋</span></div><div class="faq-a"><p>因为四大 LMS 都是为"班级管理"造的，自带半米不需要的全套包袱：师生家长协作、成绩册、SIS、合规、按人头付费。半米是单用户、AI 原生、知识沉淀型——这三点 LMS 全弱（LMS 把内容当用完即弃的课程材料，没有跨课程的知识网络）。用 LMS 等于背一身用不到的重量。正确做法是借 LMS 的结构能力（路径/进度/练习），但用 AI 原生方式重做，不带管理层。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">半米最该借的第一个 LMS 能力是什么？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不是 LMS 独有的，但学习科学最确定：把现有固定间隔 SRS 换成 FSRS。它有开源实现（Anki 2023 已并入）<sup class="cite" data-refid="51">[51]</sup>，能让复习量降 20–30% 却维持同等保留率。这是改动小、每天都受益、ROI 最高的一项。紧随其后是给 AI 问答注入"学习者历史状态"（参照 Khanmigo +6 个百分点<sup class="cite" data-refid="50">[50]</sup>），半米有 LanceDB 检索是现成能力。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">Canvas 那么强，它最大的弱点是什么？</span><span class="toggle">＋</span></div><div class="faq-a"><p>三个：① New Quizzes 引擎多年 bug 未根治（复制失败、图片不显示、无 CSV 导出、不支持练习测验）<sup class="cite" data-refid="10">[10]</sup>；② 定价完全不透明、必须走完整销售流程；③ 2026 年 5 月遭史上最大教育数据泄露（2.75 亿条记录）<sup class="cite" data-refid="3">[3]</sup>，重创安全信任。前两个是大型多人系统的工程债，第三个是集中托管模式的供应链风险——半米单用户/本地数据天然免疫第三个。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">Google Classroom 免费又简单，半米能学到什么？</span><span class="toggle">＋</span></div><div class="faq-a"><p>学它的"零摩擦"——教师"minutes to set up"、工作流"invisible"<sup class="cite" data-refid="13">[13]</sup>。半米的入库 router（扔 URL/文件自动变卡片）就是同一追求，要继续压缩"从链接到可学卡片"的步数。但要避开它的"stuck in the Google bubble"（锁死单一生态）——半米基于开放 Obsidian Markdown，且 AI 层要保持模型可切换，别锁死单一供应商。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">Schoology 的社交流界面，半米要不要抄？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不要。Schoology 的 Facebook 式活动流被用户批评"想把项目管理系统做成 Facebook，两头不讨好"<sup class="cite" data-refid="23">[23]</sup>，而且半米是单用户、没有社交对象。可以借的是它的"徽章/游戏化"激励，但要服务"学得深"而非"刷积分"（Duolingo 教训）。它最该让半米警惕的是 2024 年那场史上最大儿童数据泄露<sup class="cite" data-refid="20">[20]</sup>——集中托管全校敏感数据的灾难示范。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">Moodle 开源、可定制，和半米数据自有不是一回事吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>理念同源（数据主权 + 可改代码），但实现成本天差地别。Moodle 自托管真实 3 年 TCO 中型部署 10 万+ 美元、人力占 68–71%，要养 Linux 管理员<sup class="cite" data-refid="36">[36]</sup>。半米是本地单机，没有这套运维负担——它是 Moodle 数据主权理念的"个人轻量版"。但 Moodle 也是最该让半米警惕的反面教材："功能极强=学习曲线极陡=没人会用"，半米每加一个功能都要防止滑向这个结局。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">单用户做"学习路径/先决条件"是不是过度工程？</span><span class="toggle">＋</span></div><div class="faq-a"><p>对阿杰自己学习，价值确实弱——自己知道下一步学什么。但对"给 Danny 布置作业"很强：家长需要"先学完 A 再解锁 B"的结构。所以路径应优先服务家人作业场景，对阿杰自己保持可选/可跳过、不强制。这就是 Ch11 反方观点一的核心：不是不做，是看清它真正服务谁。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">为什么说成绩册、SIS、合规是"必须避开的包袱"？</span><span class="toggle">＋</span></div><div class="faq-a"><p>这三样的复杂度全是为"多人审计/机构责任"服务的。成绩册的加权分类、标准化报告单是给一群学生算分；SIS 同步是把成绩推给学校系统（而且 Schoology 的 SIS 同步极脆弱，作业标题超 50 字符就失败<sup class="cite" data-refid="29">[29]</sup>）；合规是机构法律义务。半米单用户、数据在本地，没有"给谁打分""推给哪个系统""机构合规"这三个前提，做这些是纯负收益。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">半米的差异化护城河具体是哪几条？</span><span class="toggle">＋</span></div><div class="faq-a"><p>四条，且都是 LMS 普遍弱的：① AI 原生精听/问答（L1–L3 全链路，不是 Canvas IgniteAI 那种外挂层）；② 知识沉淀 + 双链（LMS 把内容用完即弃，半米连成网络）；③ 数据自有（Obsidian Markdown + 本地 LanceDB，对比 Canvas/PowerSchool 的集中泄露）；④ 海外个人可达 + 零边际成本（对比 LMS 按人头付费）。这些不是要补的短板，是要守住并讲清楚的资产。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">题库/练习集 AI 自动生成，质量靠谱吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>有风险（Quizlet 众包质量参差、Duolingo "AI slop" 都是前车之鉴<sup class="cite" data-refid="47">[47]</sup>），但半米有两道防线：① 已有的坏卡 repair 机制可复用到练习题；② 单用户场景下阿杰能即时发现烂题并修，容错率远高于 LMS 的大规模分发。建议题型先做 2–3 种（别学 Moodle 的 15+ 题型），把生成质量打磨好再扩。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">这些 LMS 的 AI 战略（IgniteAI/Gemini/PowerBuddy）半米能借鉴吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>战略思路能借，具体实现半米已经更超前。Canvas IgniteAI、Schoology PowerBuddy 都是在传统 LMS 上"外挂"AI 层<sup class="cite" data-refid="6">[6]</sup><sup class="cite" data-refid="25">[25]</sup>，半米则是 AI 原生（L1 采集→L2 结构化→L3 创作全是 AI 驱动）。值得借的细节是 Moodle 5.0 的"多 AI 提供商可配置"<sup class="cite" data-refid="35">[35]</sup>（防供应商绑死）和 Khanmigo 的"纳入学习者历史状态"<sup class="cite" data-refid="50">[50]</sup>（让辅导更准）。半米的优势是不用为"在旧架构上嫁接 AI"妥协。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q12</span><span class="qtext">如果只能做一件事，半米这季度该做什么？</span><span class="toggle">＋</span></div><div class="faq-a"><p>把"立即可做"三件打包做掉：① FSRS 替换 SRS；② Q&A 注入学习者历史状态；③ "复制整集为作业"升级成"练习集"（检查题+跟读+词表）。三件共性是改动小、ROI 高、每天/每次学习都受益，且全部服务"学得更深"而非"管理多人"。做完这三件，半米的核心学习闭环就明显强于任何 LMS 在单用户场景下能提供的体验——而且一行管理代码都没多写。</p></div></div>
+    </div>
+  </section>
+
+  <!-- ===== REFS ===== -->
+  <section class="chapter" id="refs" data-nav="References">
+    <h2><span class="num">R</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13.5px">共 54 条（编号至 53，其中 17b/18b/18c 为同主题补充来源的字母后缀编号）。访问日期均为 2026-06-16。价格、市场份额、泄露规模类信息以访问当日页面为准且多为第三方估算或攻击者声称（已在正文标 🟡/🔴 并区分"已证实/声称/估算"）；功能、用户反馈类信息为官方文档 + 多平台用户评测交叉验证。<strong>读数提醒：</strong>本报告所有市场份额（口径差异：按机构数/注册人数/营收）、定价（Canvas/Schoology 无公开价目表）、泄露规模（多为攻击者声称）均非独立核验的硬数据，结论以"产品方向判断"为主、不以单个数字为支点。</p>
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://edutechnica.com/2025/05/26/lms-data-spring-2025-updates/" target="_blank" rel="noopener">LMS Data – Spring 2025 Updates — edutechnica（Canvas 超后三名之和）</a><span class="ref-meta">· 2026-06-16 · 引用 2 次</span></li>
+        <li id="ref-2"><a href="https://www.prnewswire.com/news-releases/instructure-to-be-acquired-by-kkr-for-4-8-billion-302206622.html" target="_blank" rel="noopener">Instructure to be Acquired by KKR for $4.8 Billion — PR Newswire</a><span class="ref-meta">· 2026-06-16 · 引用 2 次</span></li>
+        <li id="ref-3"><a href="https://en.wikipedia.org/wiki/2026_Canvas_data_breach" target="_blank" rel="noopener">2026 Canvas data breach — Wikipedia（ShinyHunters / 3.65TB / 2.75 亿记录）</a><span class="ref-meta">· 2026-06-16 · 引用 3 次</span></li>
+        <li id="ref-4"><a href="https://www.wooclap.com/en/blog/canvas-lms-pricing/" target="_blank" rel="noopener">Canvas LMS Pricing: An In-depth Breakdown — Wooclap（$4–9/生估算）</a><span class="ref-meta">· 2026-06-16 · 引用 4 次</span></li>
+        <li id="ref-5"><a href="https://www.instructure.com/press-release/instructure-introduces-simplified-canvas-tiers-and-ecosystem-updates-new-next" target="_blank" rel="noopener">Instructure Introduces Simplified Canvas Tiers (Core/Plus/Next) — Instructure</a><span class="ref-meta">· 2026-06-16 · 引用 5 次</span></li>
+        <li id="ref-6"><a href="https://www.instructure.com/press-release/instructure-introduces-simplified-canvas-tiers-and-ecosystem-updates-new-next" target="_blank" rel="noopener">IgniteAI 三层（Core/Plus/Next）+ Amazon Bedrock Agent — Instructure New & Next</a><span class="ref-meta">· 2026-06-16 · 引用 3 次</span></li>
+        <li id="ref-7"><a href="https://www.prnewswire.com/news-releases/instructure-and-openai-announce-global-partnership-to-embed-ai-learning-experiences-within-canvas-302511709.html" target="_blank" rel="noopener">Instructure and OpenAI Announce Global Partnership — PR Newswire（LLM 嵌入作业、数据不共享）</a><span class="ref-meta">· 2026-06-16 · 引用 2 次</span></li>
+        <li id="ref-8"><a href="https://www.eduappcenter.com/" target="_blank" rel="noopener">EduAppCenter（1000+ LTI，Instructure 维护）+ Turnitin LTI 1.3 迁移</a><span class="ref-meta">· 2026-06-16 · 引用 4 次</span></li>
+        <li id="ref-9"><a href="https://community.canvaslms.com/t5/The-Product-Blog/Performance-and-Usability-Upgrades-for-SpeedGrader-Goes-to/ba-p/663762" target="_blank" rel="noopener">SpeedGrader GA in January（10x 加载 / 99% 少崩溃）— Instructure Community</a><span class="ref-meta">· 2026-06-16 · 引用 3 次</span></li>
+        <li id="ref-10"><a href="https://canvashelp.stanford.edu/hc/en-us/articles/4405462061843-Missing-or-Changed-Functionality-in-New-Quizzes" target="_blank" rel="noopener">Missing or Changed Functionality in New Quizzes — Stanford University</a><span class="ref-meta">· 2026-06-16 · 引用 2 次</span></li>
+        <li id="ref-11"><a href="https://products.containerize.com/lms/canvas/" target="_blank" rel="noopener">Canvas | Free And Open Source Ruby Based LMS（AGPL v3）— Containerize</a><span class="ref-meta">· 2026-06-16 · 引用 1 次</span></li>
+        <li id="ref-12"><a href="https://elearningindustry.com/directory/elearning-software/canvas/reviews" target="_blank" rel="noopener">Canvas 用户评测汇编（寻宝式导航 / 无自动保存丢作业）— eLearning Industry</a><span class="ref-meta">· 2026-06-16 · 引用 2 次</span></li>
+        <li id="ref-13"><a href="https://blog.google/outreach-initiatives/education/classroom-roadmap/" target="_blank" rel="noopener">A peek at what's next for Google Classroom — Google Blog（180M+ / minutes to set up）</a><span class="ref-meta">· 2026-06-16 · 引用 3 次</span></li>
+        <li id="ref-14"><a href="https://www.trafera.com/blog/2025-google-workspace-for-education-pricing-and-licensing-updates/" target="_blank" rel="noopener">2025 Google Workspace for Education Pricing Updates — Trafera（Plus $5→$6 / T&L $48→$60）</a><span class="ref-meta">· 2026-06-16 · 引用 3 次</span></li>
+        <li id="ref-15"><a href="https://managedmethods.com/blog/is-google-classroom-a-learning-management-system/" target="_blank" rel="noopener">Is Google Classroom a Learning Management System? — ManagedMethods（无 SCORM/LTI）</a><span class="ref-meta">· 2026-06-16 · 引用 2 次</span></li>
+        <li id="ref-16"><a href="https://www.aboutchromebooks.com/google-for-education-user-statistics/" target="_blank" rel="noopener">Google for Education User Statistics 2025 — AboutChromebooks（Chromebook 60.1%）</a><span class="ref-meta">· 2026-06-16 · 引用 2 次</span></li>
+        <li id="ref-17"><a href="https://blog.google/outreach-initiatives/education/bett-2024-google-for-education-updates" target="_blank" rel="noopener">Google for Education Bett 2024 updates（Practice Sets / Interactive Video / LearnLM）</a><span class="ref-meta">· 2026-06-16 · 引用 4 次</span></li>
+        <li id="ref-17b"><a href="https://www.tryleap.ai/blog/does-google-classroom-detect-ai" target="_blank" rel="noopener">Does Google Classroom Detect AI? Originality Reports Explained — Leap AI（不检测 AI 生成）</a><span class="ref-meta">· 2026-06-16 · 引用 2 次</span></li>
+        <li id="ref-18"><a href="https://www.notion4teachers.com/blog/google-classroom-lms-vs-canvas-schoology-comparison" target="_blank" rel="noopener">Google Classroom vs Canvas vs Schoology — Notion4Teachers（workflow feels invisible）</a><span class="ref-meta">· 2026-06-16 · 引用 2 次</span></li>
+        <li id="ref-18b"><a href="https://proton.me/blog/ed-tech-student-privacy" target="_blank" rel="noopener">The Googlization of schools: How student data is collected — Proton（FTC 1.7 亿罚款）</a><span class="ref-meta">· 2026-06-16 · 引用 1 次</span></li>
+        <li id="ref-18c"><a href="https://capterra.com/p/186631/Google-Classroom/reviews/" target="_blank" rel="noopener">Google Classroom Reviews 2026 — Capterra（4.6/5，2872 评）</a><span class="ref-meta">· 2026-06-16 · 引用 2 次</span></li>
+        <li id="ref-19"><a href="https://www.baincapital.com/news/powerschool-be-acquired-bain-capital-56-billion-transaction" target="_blank" rel="noopener">PowerSchool to be Acquired by Bain Capital in $5.6 Billion Transaction — Bain Capital</a><span class="ref-meta">· 2026-06-16 · 引用 2 次</span></li>
+        <li id="ref-20"><a href="https://www.bleepingcomputer.com/news/security/powerschool-hacker-claims-they-stole-data-of-62-million-students/" target="_blank" rel="noopener">PowerSchool hacker claims they stole data of 62 million students — BleepingComputer</a><span class="ref-meta">· 2026-06-16 · 引用 3 次</span></li>
+        <li id="ref-21"><a href="https://listedtech.com/blog/the-state-of-the-lms-market-in-2024-trends-in-k-12/" target="_blank" rel="noopener">The State of the LMS Market in 2024: K-12 — ListEdTech（Schoology 22% 实施数）</a><span class="ref-meta">· 2026-06-16 · 引用 2 次</span></li>
+        <li id="ref-22"><a href="https://www.selecthub.com/p/lms-software/schoology/" target="_blank" rel="noopener">Schoology Reviews 2026 — SelectHub（1600+ 客户 / SIS 同步 / 管理控制）</a><span class="ref-meta">· 2026-06-16 · 引用 3 次</span></li>
+        <li id="ref-23"><a href="https://fhsphoenix.org/schoology-great-application-or-educational-nightmare/" target="_blank" rel="noopener">Schoology: Great Application or Educational Nightmare? — FHS Phoenix（Facebook 式界面两头不讨好）</a><span class="ref-meta">· 2026-06-16 · 引用 1 次</span></li>
+        <li id="ref-24"><a href="https://thejournal.com/articles/2019/11/25/powerschool-completes-acquisition-of-schoology.aspx" target="_blank" rel="noopener">PowerSchool Completes Acquisition of Schoology — THE Journal（2019.11）</a><span class="ref-meta">· 2026-06-16 · 引用 1 次</span></li>
+        <li id="ref-25"><a href="https://www.businesswire.com/news/home/20240620423198/en/PowerSchool-Announces-New-Contextual-AI-Solutions-Personalized-for-Amplifying-Student-Engagement-and-Democratizing-Data-Access" target="_blank" rel="noopener">PowerSchool Announces PowerBuddy Contextual AI — BusinessWire</a><span class="ref-meta">· 2026-06-16 · 引用 3 次</span></li>
+        <li id="ref-26"><a href="https://help.powerschool.com/t5/Community-Forum/An-Open-Letter-to-Schoology-PowerSchool-Basic-Accounts/m-p/457988" target="_blank" rel="noopener">An Open Letter to Schoology/PowerSchool (Basic Accounts) — PowerSchool Community（2023.10 停免费版）</a><span class="ref-meta">· 2026-06-16 · 引用 1 次</span></li>
+        <li id="ref-27"><a href="https://softwarefinder.com/resources/how-much-does-schoology-cost" target="_blank" rel="noopener">How Much Does Schoology Cost? — Software Finder（~$10/生/月估算，TCO 2–5×）</a><span class="ref-meta">· 2026-06-16 · 引用 3 次</span></li>
+        <li id="ref-28"><a href="https://www.capterra.com/p/128481/Schoology/reviews/?page=3" target="_blank" rel="noopener">Schoology Reviews — Capterra（题库/自动评分省时 + 数学图形缺失）</a><span class="ref-meta">· 2026-06-16 · 引用 2 次</span></li>
+        <li id="ref-29"><a href="https://go.powerschool.com/rs/861-RMI-846/images/Grade_passback_success.pdf?version=0" target="_blank" rel="noopener">Troubleshoot Grade Passback Issues — PowerSchool（标题超 50 字符同步失败）</a><span class="ref-meta">· 2026-06-16 · 引用 2 次</span></li>
+        <li id="ref-30"><a href="https://educationintel.substack.com/p/why-districts-are-walking-away-from" target="_blank" rel="noopener">Why Districts Are Walking Away From Core Platforms — Education Intel（Round Rock ISD 迁回 GC）</a><span class="ref-meta">· 2026-06-16 · 引用 1 次</span></li>
+        <li id="ref-31"><a href="https://capterra.com/p/128481/Schoology/reviews/" target="_blank" rel="noopener">Schoology Reviews 2026 — Capterra（4.4/5，488 评）</a><span class="ref-meta">· 2026-06-16 · 引用 2 次</span></li>
+        <li id="ref-32"><a href="https://www.moodlecloud.com/standard-plans/" target="_blank" rel="noopener">MoodleCloud Standard Plans（$130–1770/年，无插件/API）— 官方</a><span class="ref-meta">· 2026-06-16 · 引用 3 次</span></li>
+        <li id="ref-33"><a href="https://moodledev.io/general/releases/5.0" target="_blank" rel="noopener">Moodle 5.0 Release（条件化路径 / 能力框架 / 2390+ 插件）— Moodle Developer</a><span class="ref-meta">· 2026-06-16 · 引用 4 次</span></li>
+        <li id="ref-34"><a href="https://onedtech.philhillaa.com/p/state-of-higher-ed-lms-market-for-us-and-canada-year-end-2024-edition" target="_blank" rel="noopener">State of Higher Ed LMS Market US/Canada Year-End 2024 — Phil Hill（Moodle 北美 9%）</a><span class="ref-meta">· 2026-06-16 · 引用 1 次</span></li>
+        <li id="ref-35"><a href="https://pimenko.com/en/moodle-5-0-new-features-technical-evolutions-and-impact-on-your-lms-2025/" target="_blank" rel="noopener">Moodle 5.0: Key Features（Bootstrap 5 / 多 AI 提供商 / Ollama）— Pimenko</a><span class="ref-meta">· 2026-06-16 · 引用 3 次</span></li>
+        <li id="ref-36"><a href="https://blog.moodiycloud.com/real-cost-of-moodle-tco-guide-2026" target="_blank" rel="noopener">The Real Cost of Moodle: TCO Guide 2026 — MooDIY（人力占 68–71%）</a><span class="ref-meta">· 2026-06-16 · 引用 3 次</span></li>
+        <li id="ref-37"><a href="https://moodle.com/products/workplace/" target="_blank" rel="noopener">Moodle Workplace — Enterprise LMS（$3–9/活跃用户/月估算）</a><span class="ref-meta">· 2026-06-16 · 引用 1 次</span></li>
+        <li id="ref-38"><a href="https://moodledev.io/general/license" target="_blank" rel="noopener">Moodle License (GPL v2+) — Moodle Developer Resources（数据主权 / 商用可）</a><span class="ref-meta">· 2026-06-16 · 引用 2 次</span></li>
+        <li id="ref-39"><a href="https://www.peerspot.com/products/moodle-reviews" target="_blank" rel="noopener">Moodle Reviews — PeerSpot（灵活但非技术用户界面不直观 / 改成绩要 IT）</a><span class="ref-meta">· 2026-06-16 · 引用 1 次</span></li>
+        <li id="ref-40"><a href="https://www.capterra.com/p/80691/Moodle/reviews/" target="_blank" rel="noopener">Moodle Reviews 2026 — Capterra（4.3/5，3374 评 / from another era）</a><span class="ref-meta">· 2026-06-16 · 引用 2 次</span></li>
+        <li id="ref-41"><a href="https://programs.com/resources/lms-statistics/" target="_blank" rel="noopener">The Latest LMS Statistics 2026 — Programs.com（市场 340 亿→1200 亿）</a><span class="ref-meta">· 2026-06-16 · 引用 1 次</span></li>
+        <li id="ref-42"><a href="https://listedtech.com/blog/k-12-lms-market-update-insights-may-2026/" target="_blank" rel="noopener">K-12 LMS Market Update May 2026 — ListEdTech（GC 31% / Canvas 24% / Schoology 19%）</a><span class="ref-meta">· 2026-06-16 · 引用 1 次</span></li>
+        <li id="ref-43"><a href="https://onedtech.philhillaa.com/p/anthology-declares-bankruptcy-blackboard-to-remain-as-the-core" target="_blank" rel="noopener">Anthology Files for Chapter 11 Bankruptcy — On EdTech（负债 16.25 亿）</a><span class="ref-meta">· 2026-06-16 · 引用 1 次</span></li>
+        <li id="ref-44"><a href="https://www.1edtech.org/standards/lti" target="_blank" rel="noopener">Learning Tools Interoperability (LTI 1.3: OIDC + JWT + OAuth2.0) — 1EdTech</a><span class="ref-meta">· 2026-06-16 · 引用 2 次</span></li>
+        <li id="ref-47"><a href="https://chiefaiofficer.com/duolingos-ai-strategy-fuels-51-user-growth-and-1b-revenue/" target="_blank" rel="noopener">Duolingo's AI Strategy — Chief AI Officer（AI-first 后 AI slop 投诉 / 股价跌 80%）</a><span class="ref-meta">· 2026-06-16 · 引用 4 次</span></li>
+        <li id="ref-48"><a href="https://notigo.ai/blog/best-flashcard-apps-students-anki-remnote-quizlet-2025" target="_blank" rel="noopener">Best Flashcard Apps 2025 — notigo.ai（Quizlet 短期记忆偏向 / RemNote 笔记生成卡）</a><span class="ref-meta">· 2026-06-16 · 引用 1 次</span></li>
+        <li id="ref-49"><a href="https://medium.com/@theo-james/10-problems-with-obsidian-youll-realize-when-it-s-too-late-17e903886847" target="_blank" rel="noopener">10 Problems with Obsidian — Medium/@theo-james（大型 Vault 性能退化）</a><span class="ref-meta">· 2026-06-16 · 引用 1 次</span></li>
+        <li id="ref-50"><a href="https://blog.khanacademy.org/how-khan-academy-is-building-a-better-ai-tutor-our-most-recent-learnings/" target="_blank" rel="noopener">How Khan Academy Is Building a Better AI Tutor — Khan Academy Blog（纳入历史状态 +6pp）</a><span class="ref-meta">· 2026-06-16 · 引用 4 次</span></li>
+        <li id="ref-51"><a href="https://www.quizcat.ai/blog/fsrs-algorithm-next-gen-spaced-repetition" target="_blank" rel="noopener">FSRS Algorithm: Next-Gen Spaced Repetition — QuizCat（减 20–30% 复习 / FSRS 89.6% vs SM2 47.1%）</a><span class="ref-meta">· 2026-06-16 · 引用 4 次</span></li>
+        <li id="ref-52"><a href="https://faqs.ankiweb.net/what-spaced-repetition-algorithm" target="_blank" rel="noopener">What spaced repetition algorithm does Anki use? — Anki FAQs（2023 v23.10 并入 FSRS）</a><span class="ref-meta">· 2026-06-16 · 引用 1 次</span></li>
+        <li id="ref-53"><a href="https://link.springer.com/article/10.1007/s44217-025-00908-6" target="_blank" rel="noopener">AI in adaptive education: a systematic review — Springer Nature（59% 研究学习者成绩提升）</a><span class="ref-meta">· 2026-06-16 · 引用 1 次</span></li>
+      </ol>
+    </div>
+  </section>
+  <footer>
+    无忌 · Deep Research（L4）· 2026-06-16 · 仅供阿杰个人决策参考；数据与判例以原始来源为准。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('lms-vs-betterme-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('lms-vs-betterme-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>马来西亚（新山 Johor）数据中心落地全流程研究 · 无忌 Deep Research · 2026-06-17</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 01 市场全景与窗口期</a>
+    <a href="#ch2" data-target="ch2">02 02 土地与选址</a>
+    <a href="#ch3" data-target="ch3">03 03 外资购地与税费</a>
+    <a href="#ch4" data-target="ch4">04 04 审批/牌照全流程</a>
+    <a href="#ch5" data-target="ch5">05 05 监管收紧分水岭</a>
+    <a href="#ch6" data-target="ch6">06 06 电力 TNB/Green Lane/电价</a>
+    <a href="#ch7" data-target="ch7">07 07 供水与冷却</a>
+    <a href="#ch8" data-target="ch8">08 08 WUE/PUE 合规硬指标</a>
+    <a href="#ch9" data-target="ch9">09 09 商业模式对比</a>
+    <a href="#ch10" data-target="ch10">10 10 经济性测算</a>
+    <a href="#ch11" data-target="ch11">11 11 客户获取</a>
+    <a href="#ch12" data-target="ch12">12 12 风险全景+芯片管制</a>
+    <a href="#ch13" data-target="ch13">13 13 阿杰路线建议</a>
+    <a href="#faq" data-target="faq">Q FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">R References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>马来西亚（新山 Johor）数据中心落地全流程研究</h1>
+    <div class="hero-meta">
+      <span>📅 2026-06-17</span>
+      <span>🔍 ~80 份证据来源 + 6 大证据包交叉核查</span>
+      <span>⚡ 抢电 × 抢水 × 外资门槛 × 芯片管制</span>
+      <span>🌏 立场：一位准备在新山自建/投资 DC 的中等资本投资人</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>一句话定调：Johor 数据中心的窗口正在收窄、但还没关——新加坡禁令外溢 + AI 红利让它三年从 10MW 冲到约 900MW 运营、总 pipeline 约 3.3-4.0GW（运营+在建+规划，口径有差异）<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>；但 2025 下半年起 Johor 停批 Tier1/2、湿冷暂停到 2027、RP4 电价涨到约 60 sen/kWh（≈$0.13-0.14/kWh，对新加坡的电价优势大幅收窄）<sup class="cite" data-refid="3">[3]</sup><sup class="cite" data-refid="4">[4]</sup>，低端小项目的窗口已基本焊死。能进去的只剩一种姿势：高端合规（Tier3/4 液冷 + 再生水）+ 真实 AI 需求 + 干净的资本/客户身份。</strong></p>
+      <p>本报告按落地顺序展开：市场全景与窗口期（Ch1）→ 土地与选址（Ch2）→ 外资购地限制与税费（Ch3）→ 审批/牌照全流程与时间线（Ch4）→ 监管收紧这道分水岭（Ch5）→ 电力：TNB/Green Lane/RP4/绿电（Ch6）→ 供水与冷却技术（Ch7）→ 可持续合规硬指标 WUE/PUE（Ch8）→ 五种商业模式对比（Ch9）→ 经济性：capex/收入/回收期/规模（Ch10）→ 客户获取与 anchor tenant（Ch11）→ 风险全景，含美国芯片管制（Ch12）→ 给阿杰的路线建议决策树（Ch13）→ FAQ（Ch14）→ References。所有价格/MW/RM/USD 标注访问日期 2026-06-17，关键数据带 🟢 多源 / 🟡 单源 / 🔴 估算 可信度。</p>
+    </div>
+  </div>
+
+  <div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+    <p style="margin:0"><strong>📌 三条最关键发现（先扫这个）：</strong></p>
+    <ul style="margin:8px 0 0">
+      <li><strong>抢的是电和水，不是地。</strong>地价虽涨（DC 专用地已被推到 RM500-800 万/acre<sup class="cite" data-refid="5">[5]</sup>）但从来不是瓶颈；真正的卡口是 TNB 并网容量——TNB 已收到超过 11,000MW 的 DC 申请，超过半岛装机 27GW 的 40%，而实际运行负荷只有 603MW<sup class="cite" data-refid="6">[6]</sup>；以及 Johor 的水——Tier1/2 因每天耗水可达 5000 万升被全面停批<sup class="cite" data-refid="3">[3]</sup>。选址的第一性原则不是看地块，是看这块地能不能拿到电、拿到（再生）水。<span class="conf g">🟢</span></li>
+      <li><strong>美国芯片管制是最大的、且在恶化的不确定性。</strong>2025-2026 年 BIS 把"终极母公司在中国/澳门"作为穿透判定标准，马来西亚子公司不再是安全港<sup class="cite" data-refid="7">[7]</sup>；2026-05 Megaspeed 经马来西亚为中国客户采购近 $20 亿 Nvidia 芯片的案子<sup class="cite" data-refid="8">[8]</sup>直接坐实了执法方向。结论很硬：中资背景运营商 + 中资终端客户的 GPU 云租赁（neocloud）模式风险最高；美欧资本 + 合规客户相对安全。这一条几乎单独决定了阿杰能选哪条路线。<span class="conf g">🟢</span></li>
+      <li><strong>窗口有效期约 2026-2028，低端已关、高端仍开。</strong>支持窗口仍开的理由真实：AI 需求对延迟不敏感、建成即被吸纳、Mordor 预测马来西亚 DC 市场 2026 年 $65.5 亿→2031 年 $160.2 亿、CAGR 19.5%<sup class="cite" data-refid="9">[9]</sup>。但 2029+ 当前 pipeline（约 3.3-4.0GW）大量入市，叠加 carrier-neutral colo 过供担忧、DeepSeek 效应压缩算力需求、RP4 把电价优势侵蚀殆尽，过剩概率明显上升；neocloud 的窗口更短，只有 2-3 年。所以这不是"进不进"的问题，是"用什么身份、多大规模、多快进、多快能退"的问题。<span class="conf y">🟡</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1" data-nav="01 市场全景与窗口期">
+    <h2><span class="num">01</span><span class="title-text">市场全景与窗口期：三年从 10MW 到 900MW</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>要判断"现在该不该进"，先得看清这个市场是怎么在三年里从无到有炸起来的，以及它现在站在曲线的哪一段。</p>
+      <h3>增长曲线：一条被新加坡禁令喂大的火箭</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">10MW</div><div class="l">2021 年初 Johor 运营容量<sup class="cite" data-refid="1">[1]</sup></div></div>
+        <div class="metric"><div class="v">~897MW</div><div class="l">2025 年末运营容量（同比 +124%）<sup class="cite" data-refid="2">[2]</sup></div></div>
+        <div class="metric"><div class="v">~3.3-4.0GW</div><div class="l">Johor 总 pipeline（运营897+在建315+规划2099MW≈3.3GW；Cushman 更宽口径约 4.0GW）<sup class="cite" data-refid="2">[2]</sup></div></div>
+        <div class="metric"><div class="v">$233 亿</div><div class="l">马来西亚 DC 累计承诺投资，东南亚第一（Knight Frank）<sup class="cite" data-refid="10">[10]</sup></div></div>
+      </div>
+      <p>这条曲线的根本动力是<strong>新加坡的供给冻结外溢</strong>。新加坡 2019 年起对新建 DC 实施 moratorium（禁令），2022 年才以 DC-CFA 招标方式有限解禁，首批仅放出约 80MW 给 4 家运营商<sup class="cite" data-refid="11">[11]</sup>，此后新增容量年均不足 200MW。被堵住的需求顺着柔佛海峡漫过来——Johor 与新加坡仅一桥之隔、地价电价更低、光纤延迟可控，成了天然的"新加坡 +1"承接地。2025 年马来西亚新增运营容量 +496MW，印尼+马来西亚合计占 APAC 新增的 58%<sup class="cite" data-refid="12">[12]</sup>。</p>
+      <h3>玩家地图：谁已经占住了坑</h3>
+      <p>截至 2024 年末的已建 IT 容量份额：Bridge Data Centres 占 32%、DayOne（GDS 系）占 29%、AirTrunk（Blackstone 系）占 13%<sup class="cite" data-refid="13">[13]</sup>。这三家几乎吃掉四分之三。新进的还有 YTL（与 Nvidia 合作 $23 亿、Kulai，全球首个 GB200 NVL72 部署之一<sup class="cite" data-refid="14">[14]</sup>）、PDG（JH1 150MW）、Equinix、Vantage、NTT，以及 K2/ZData 等中小玩家。</p>
+      <p>超大规模云厂商的承诺超过 $230 亿：AWS RM292 亿（约 $62 亿）/15 年 3 个可用区、Microsoft $22 亿（Cyberjaya）、Google $20 亿、Oracle $65 亿、Nvidia+YTL $23 亿<sup class="cite" data-refid="15">[15]</sup>。ByteDance 走"以租代购"路线。这意味着：<strong>头部供地、头部 anchor tenant、头部资本，坑位基本被占满了。</strong>中等资本投资人不可能在 hyperscale BTS 这条主赛道上正面竞争。</p>
+      <h3>窗口期判断：开放派 vs 风险派</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>窗口仍开的理由（开放派）</th><th>窗口在关的理由（风险派）</th></tr></thead>
+        <tbody>
+          <tr><td>AI 训练/推理对延迟不敏感，可远程承接<sup class="cite" data-refid="16">[16]</sup></td><td>carrier-neutral colo 过供担忧已被多家分析点名<sup class="cite" data-refid="16">[16]</sup></td></tr>
+          <tr><td>市场建成即被吸纳，PDG CEO 称"5 年或超北弗吉尼亚"<sup class="cite" data-refid="17">[17]</sup></td><td>DeepSeek 效应：训练效率提升压缩单位算力需求</td></tr>
+          <tr><td>Mordor 预测 2026→2031 CAGR 19.5%、超大规模段 CAGR 37%<sup class="cite" data-refid="9">[9]</sup></td><td>美国芯片管制（Ch12）直接掐 neocloud 的脖子</td></tr>
+          <tr><td>马来西亚被视为"AI safe haven"承接转移需求<sup class="cite" data-refid="18">[18]</sup></td><td>Johor 市长公开承认电、水都不够<sup class="cite" data-refid="17">[17]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <h3>供给-吸纳的节奏：为什么是 2028 这个拐点</h3>
+      <p>窗口判断的机制不是拍脑袋，而是供给入市节奏 vs 吸纳速度的赛跑（⚠️ 下表为本报告基于 pipeline 与吸纳率的情景推演，非精确预测）：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>阶段</th><th>供给侧</th><th>需求侧</th><th>对新进入者</th></tr></thead>
+        <tbody>
+          <tr><td><strong>2026-2027</strong></td><td>运营 897MW + 在建 315MW 陆续投产<sup class="cite" data-refid="2">[2]</sup></td><td>新加坡外溢 + AI 需求仍紧，吸纳快</td><td class="check y">✅ 高吸纳、可议价</td></tr>
+          <tr><td><strong>2028</strong></td><td>规划项目开始集中投产</td><td>需求增速放缓（DeepSeek 效应/效率提升）</td><td class="check p">⚠️ 供需趋平、议价转弱</td></tr>
+          <tr><td><strong>2029+</strong></td><td>约 2GW 规划容量入市</td><td>吸纳跟不上，空置率上行风险</td><td class="check n">⛔ 过剩概率高、租金承压</td></tr>
+        </tbody>
+      </table></div>
+      <p style="font-size:14px">关键变量是<strong>吸纳率（absorption）与预租率</strong>——目前头部园区近满租（JHB1/2）说明 2026-2027 吸纳仍强；但 2029+ 大量规划容量入市时，若 AI 需求增速放缓 + carrier-neutral colo 过供担忧兑现，空置率会成为最先恶化的信号（Ch13 路线④把它列为观察触发器）。<u>注：精确的逐年供给/吸纳/空置率数据多在付费报告里，本表是数量级推演（🔴）。</u></p>
+      <div class="callout info"><p><strong>本报告的综合判断：</strong>红利的有效窗口约 <strong>2026-2028</strong>，2029+ 当前约 3.3-4.0GW 的 pipeline 大量入市，过剩概率上升；<strong>neocloud（GPU 云租赁）窗口更短，2-3 年</strong>，因为它同时受过剩和芯片管制双重夹击。低端、小规模、非 AI、湿冷的项目<u>窗口已经基本关闭</u>（Ch5）；高端合规（Tier3/4 液冷 + 再生水）+ 真实 AI 需求才进得去。下面各章把每一道门槛拆开看。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2" data-nav="02 土地与选址">
+    <h2><span class="num">02</span><span class="title-text">土地与选址：地不贵但要绑电绑水</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>Johor DC 用地实测价格（2024-2025 成交）</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>地块/交易</th><th>面积</th><th>总价</th><th>折算/acre</th><th>性质</th></tr></thead>
+        <tbody>
+          <tr><td>Sedenak Tech Park（STeP，挂牌）</td><td>—</td><td>RM85/sqft</td><td>≈RM370 万<sup class="cite" data-refid="5">[5]</sup></td><td>leasehold</td></tr>
+          <tr><td>Nusajaya Tech Park（挂牌）</td><td>20 acres</td><td>RM1.57 亿</td><td>≈RM784 万<sup class="cite" data-refid="19">[19]</sup></td><td>freehold</td></tr>
+          <tr><td>NTT ← Tropicana（2024-08）</td><td>68.46 acres</td><td>RM3.83 亿</td><td>≈RM559 万<sup class="cite" data-refid="20">[20]</sup></td><td>—</td></tr>
+          <tr><td>ZData ← Tropicana（2024-10）</td><td>38.53 acres</td><td>RM2.40 亿</td><td>≈RM623 万<sup class="cite" data-refid="20">[20]</sup></td><td>—</td></tr>
+          <tr><td>Bridge ← Paragon（2024-05）</td><td>48 acres</td><td>RM2.38 亿</td><td>≈RM496 万<sup class="cite" data-refid="21">[21]</sup></td><td>—</td></tr>
+        </tbody>
+      </table></div>
+      <p>口径要分清：普通工业地 Johor 约 RM45-65 万/acre，Klang Valley/Cyberjaya 约 RM65-95 万/acre（贵 40-60%）<sup class="cite" data-refid="22">[22]</sup>；但<strong>DC 专用地被推到 RM500 万+/acre，比普通工业地贵 5-10 倍</strong><sup class="cite" data-refid="20">[20]</sup>。即便如此，对一个 100MW 项目（capex 约 $8-11 亿，见 Ch10），土地占 capex 的 5-10%，<u>不是经济性的决定项</u>。</p>
+      <h3>主要园区供地格局</h3>
+      <ul>
+        <li><strong>Sedenak Tech Park（745 acres，JLand/Yondr）</strong>：有对外散售先例（PDG 拿 31 acres 做 150MW）<sup class="cite" data-refid="23">[23]</sup>，是中等玩家拿地最现实的入口之一。</li>
+        <li><strong>YTL Green DC Park（Kulai，275 acres）</strong>：自持不散售<sup class="cite" data-refid="24">[24]</sup>，进不去。</li>
+        <li><strong>Nusajaya Tech Park（509 acres，UEM Sunrise）</strong>：有在售。</li>
+        <li><strong>Gelang Patah / Iskandar（Tropicana 系）</strong>：是最活跃的大宗供地源，NTT/ZData 都从这里拿地。<span class="conf y">🟡</span></li>
+      </ul>
+      <h3>选址第一性原则：跟着电和水走</h3>
+      <p>这是本章最重要的一句话：<strong>不要按"哪块地便宜/位置好"选址，要按"哪块地能拿到 TNB 并网容量 + 再生水供应"反推选址。</strong>2025-11 起 Johor 只批 Tier3/4 且必须落在指定工业区——Ibrahim Technopolis、Sedenak、Pasir Gudang<sup class="cite" data-refid="25">[25]</sup>。这等于把选址自由度直接锁死在三个园区里。买地之前，先拿到 TNB 的并网意向（Ch6）和供水方/再生水来源的确认（Ch7），否则就是买了一块通不上电、供不上水的"砖头"。</p>
+      <div class="trap-box"><strong>⚠️ 坑：</strong>STeP 对外散售的地价未完整披露、freehold 有显著溢价（Nusajaya 案例 RM784 万/acre vs leasehold RM370 万）。柔佛 DC 用地以 leasehold 99 年为主<sup class="cite" data-refid="5">[5]</sup>——别为了 freehold 多付一倍，DC 是 10-15 年回收的资产，99 年租约绰绰有余。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3" data-nav="03 外资购地与税费">
+    <h2><span class="num">03</span><span class="title-text">外资购地限制、流程与税费：别碰农转工</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>外资购地的硬约束</h3>
+      <ul>
+        <li><strong>州政府书面同意是前置条件</strong>：依《国家土地法典》433E，外资购地须取得所在州政府书面同意<sup class="cite" data-refid="26">[26]</sup>。Johor 工业地外资最低门槛 RM200 万，审批 8 周-6 个月<sup class="cite" data-refid="26">[26]</sup>。</li>
+        <li><strong>柔佛外资审批费 2025-07-01 起翻倍到 4%</strong>（工业地，原 2%，按购买价计）<sup class="cite" data-refid="27">[27]</sup>。</li>
+        <li><strong>Medini SEZ 内不受最低门槛限制</strong><sup class="cite" data-refid="26">[26]</sup>；JS-SEZ 经 IMFC-J 一站式 + 15 年 5% 企业税<sup class="cite" data-refid="28">[28]</sup>。</li>
+      </ul>
+      <h3>现实路径：本地 Sdn Bhd（可 100% 外资）+ 买已批工业地</h3>
+      <p>关键利好：<strong>DC 运营公司可以 100% 外资持有</strong>——DC 不在外资限制名单上（受限的是电信牌照运营商、油气、批发零售）<sup class="cite" data-refid="29">[29]</sup>。所以最干净的结构是注册一家 100% 外资的本地 Sdn Bhd，由这家公司去买地。但注意两个口径：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>事项</th><th>口径</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td>100% 外资 Sdn Bhd 买工业地</td><td class="check y">无硬性 bumi 配额<sup class="cite" data-refid="30">[30]</sup></td><td>这是主流做法</td></tr>
+          <tr><td>购地额 &gt; RM2000 万且稀释 bumi 持股</td><td class="check p">需 EPU 批<sup class="cite" data-refid="30">[30]</sup></td><td>大宗交易要提前规划股权结构</td></tr>
+          <tr><td>外资最低门槛 RM200 万</td><td class="check p">针对个人口径，公司名义有分歧<sup class="cite" data-refid="22">[22]</sup></td><td>⚠️ 公司购地口径必须律所确认</td></tr>
+          <tr><td>农地转工业地（conversion）</td><td class="check n">6-12 个月，运营商主流回避<sup class="cite" data-refid="31">[31]</sup></td><td>只买已批工业地</td></tr>
+        </tbody>
+      </table></div>
+      <h3>购地流程与税费</h3>
+      <p>流程：SPA（买卖合同）→ 州政府同意 → MOT（产权转移）全程 4-8 个月<sup class="cite" data-refid="22">[22]</sup>。税费合计约成交价 <strong>8-10%</strong>：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>项目</th><th>税率/口径</th></tr></thead>
+        <tbody>
+          <tr><td>印花税（MOT），外资</td><td>flat 4%<sup class="cite" data-refid="32">[32]</sup></td></tr>
+          <tr><td>州审批费（柔佛 2025.7 起）</td><td>4% of purchase price<sup class="cite" data-refid="27">[27]</sup></td></tr>
+          <tr><td>律师费（&gt;RM500 万部分）</td><td>约 0.5%<sup class="cite" data-refid="22">[22]</sup></td></tr>
+          <tr><td>RPGT（不动产利得税，外资公司）</td><td>持有 &lt;5 年 30% / ≥6 年 10%<sup class="cite" data-refid="33">[33]</sup></td></tr>
+          <tr><td>农转工 conversion premium（如适用）</td><td>约转换后市值 20%（已批工业地免）<sup class="cite" data-refid="31">[31]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout warn"><p><strong>实操结论：</strong>① 用 100% 外资本地 Sdn Bhd 持有；② 只买已批工业地（避开 6-12 个月农转工 + 20% conversion premium）；③ 预算里把 all-in 约 8.5-10% 的交易税费（已含印花税 4% + 柔佛审批费 4% + 律师费约 0.5%，不含持有期 RPGT）算进土地总成本；④ 购地额接近 RM2000 万时提前做股权结构规划避免 EPU 审批拖延；⑤ "外资门槛 RM200 万针对个人还是公司"这一条<u>必须找柔佛本地律所书面确认</u>，不同来源口径不一致<sup class="cite" data-refid="22">[22]</sup>。<span class="conf g">🟢</span></p></div>
+      <div class="trap-box"><strong>⚠️ 估算待证：</strong>有传闻 2026 年预算可能把外资印花税升到 4-8% ⚠️估算（未证实），以及 STeP 对外散售地价未公开披露——拿地前以柔佛土地局当日口径为准。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4" data-nav="04 审批/牌照全流程">
+    <h2><span class="num">04</span><span class="title-text">审批与牌照全流程 + 时间线</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>公司与联邦准入</h3>
+      <ul>
+        <li><strong>DC 运营 Sdn Bhd 可 100% 外资持有</strong>；法定最低资本 RM1，实操含外资雇员准证约需 RM50 万实缴<sup class="cite" data-refid="29">[29]</sup>。SSM MyCoID 线上注册 1-3 周<sup class="cite" data-refid="34">[34]</sup>。</li>
+        <li><strong>MIDA 是所有 DC 项目联邦审批的唯一对接口（focal point）</strong>：2025-07-21 由数据中心专责小组（DCTF）确立<sup class="cite" data-refid="35">[35]</sup>。这意味着联邦层面只对一个口子，但<u>州层面（柔佛 JPBD/规划/供水/供电）是另一条平行线</u>。</li>
+      </ul>
+      <h3>税务激励：DESAC 是核心抓手</h3>
+      <p>MIDA 的 <strong>DESAC（数字生态加速计划）</strong>是 DC 最主要的激励：新公司可拿 ITA（投资税抵免）100% 合格 capex（5 或 10 年）+ 优惠税率 10-15%；现有扩建 ITA 60%<sup class="cite" data-refid="36">[36]</sup>。可叠加 Pioneer Status（收入豁免 70%/5 年）、GITA（绿色投资税抵免）。<strong>但 2024-12 起，拿 DESAC 必须满足 PUE/WUE/CUE 指标（Ch8）</strong>。DESAC 申请截止 <strong>2027-12-31</strong><sup class="cite" data-refid="36">[36]</sup>；MD Status（MDEC）可叠加 MDTI<sup class="cite" data-refid="37">[37]</sup>。</p>
+      <h3>牌照：纯 colo 不强制电信牌照，但有边界</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>业务形态</th><th>是否需 MCMC 牌照</th></tr></thead>
+        <tbody>
+          <tr><td>纯 colocation（只租机柜/电力/制冷）</td><td class="check y">本体不强制 NFP<sup class="cite" data-refid="38">[38]</sup></td></tr>
+          <tr><td>自铺光纤/出租传输</td><td class="check n">需 NFP/NSP<sup class="cite" data-refid="38">[38]</sup></td></tr>
+          <tr><td>对外提供云服务（IaaS/PaaS）</td><td class="check n">需 ASP-C<sup class="cite" data-refid="38">[38]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <p>无牌经营违反《通信与多媒体法 1998》第 126 条，最高罚 RM50 万 + 5 年监禁<sup class="cite" data-refid="38">[38]</sup>。另：PDPA 2024 修正案（2025 上半年生效）强制设 DPO + 数据泄露通报；2025-04-29 起跨境数据转移改"新指引"取代白名单制<sup class="cite" data-refid="39">[39]</sup>——若客户有中国/敏感数据，这一条要进合规清单。</p>
+      <h3>规划与建设审批（州层面）</h3>
+      <p>PLANMalaysia 的 DC 规划指南（GPP）2024-10 内阁通过，适用 IT 负荷 &gt;1MVA，仅限商业/工业用地<sup class="cite" data-refid="40">[40]</sup>。柔佛 JPBD 2025-02 指引：限工业区、建蔽率 ≤60%、噪音热量控制<sup class="cite" data-refid="40">[40]</sup>。审批序列：</p>
+      <div class="step"><div class="step-head"><span class="sn">1</span>规划准证 KM</div><div class="step-body">标准 99 天 / 快速通道 22-29 天<sup class="cite" data-refid="41">[41]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>建筑图则 BP</div><div class="step-body">4-6 个月<sup class="cite" data-refid="41">[41]</sup>。EIA：DC 未列入《环境质量（指定活动）令 2015》强制项，但超大规模/敏感选址 DOE 可要求 Detailed EIA，6-18 个月<sup class="cite" data-refid="42">[42]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>施工</div><div class="step-body">12-24 个月。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>CCC（竣工合规证）</div><div class="step-body">1-3 个月<sup class="cite" data-refid="41">[41]</sup>。</div></div>
+      <h3>整体时间线</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">30-42 月</div><div class="l">保守口径：拿地→通电运营 <span class="conf y">🟡</span></div></div>
+        <div class="metric"><div class="v">20-24 月</div><div class="l">最快口径：Green Lane 并网并行 + 快速规划 + 已批工业地 <span class="conf y">🟡</span></div></div>
+        <div class="metric"><div class="v">99 → 29 天</div><div class="l">规划准证 KM：标准 vs 快速通道</div></div>
+        <div class="metric"><div class="v">2027-12-31</div><div class="l">DESAC 激励申请截止——这是个隐性的时间窗</div></div>
+      </div>
+      <div class="callout info"><p><strong>把时间线读成窗口：</strong>从今天（2026-06）算起，即便走最快路径（20-24 月），也要到 2028 上半年才投产，正好踩在窗口（2026-2028）的尾巴上。这强化了一个判断——<strong>自建大型项目从时间上已经偏晚</strong>，越往后越接近过剩期；轻资产路线（参股已批项目、租 colo、neocloud）的时间优势在此凸显（Ch13）。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5" data-nav="05 监管收紧分水岭">
+    <h2><span class="num">05</span><span class="title-text">⚠️ 监管收紧：2025 下半年这道分水岭</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这一章是整份报告里"低端窗口已关"判断的证据核心。2025 下半年，Johor 和马来西亚联邦层面连续出手，把准入门槛抬到了一个新台阶。</p>
+      <h3>Johor 停批 Tier1/2（2025-11-28）</h3>
+      <p>柔佛州 2025-11-28 宣布<strong>停止审批 Tier1/2 数据中心</strong>，理由是用水过度——Tier1/2 用水可达 5000 万升/天，约为 Tier3/4 的 200 倍<sup class="cite" data-refid="3">[3]</sup>。现在仅批 <strong>Tier3/4</strong>，且必须：① 落在指定工业区（Ibrahim Technopolis/Sedenak/Pasir Gudang）；② 用再生水；③ 气冷或减水冷却；④ 通过 5 级审批<sup class="cite" data-refid="25">[25]</sup>。<strong>湿冷（蒸发冷却）已暂停至 2027 年中</strong><sup class="cite" data-refid="43">[43]</sup>。</p>
+      <h3>申请漏斗：拒批率已经很高</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">~30%</div><div class="l">Johor 2024-06 已拒批的申请比例<sup class="cite" data-refid="44">[44]</sup></div></div>
+        <div class="metric"><div class="v">51 个</div><div class="l">累计获批（17 运营 + 11 在建 + 23 新批）<sup class="cite" data-refid="44">[44]</sup></div></div>
+        <div class="metric"><div class="v">42 个</div><div class="l">Q2 2025 单季获批数<sup class="cite" data-refid="44">[44]</sup></div></div>
+      </div>
+      <h3>非 AI DC 的非正式 moratorium</h3>
+      <p>除了 Johor 的水驱动停批，联邦层面还有一道更隐蔽的闸门：<strong>非 AI / 非高科技 DC 申请已被非正式停批</strong>。2026-02-24 总理 Anwar 在国会确认了这一点<sup class="cite" data-refid="6">[6]</sup>。没有正式公告、但实际执行。这背后是电力——TNB 收到的 DC 申请已超 11,000MW（超半岛装机 27GW 的 40%），2024-12 已签 ESA（电力供应协议）38 个 = 5.9GW（占 TNB 供应 43%），2025-09 升到 49 个 = 7.1GW，而实际运行负荷只有 603MW<sup class="cite" data-refid="6">[6]</sup>。瓶颈是<u>输配电网升级滞后，不是发电不足</u>。</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>项目类型</th><th>2024 上半年</th><th>2025 下半年起</th></tr></thead>
+        <tbody>
+          <tr><td>Tier1/2（湿冷小项目）</td><td class="check p">可申请</td><td class="check n">⛔ 停批</td></tr>
+          <tr><td>非 AI 通用 colo</td><td class="check p">可申请</td><td class="check n">⛔ 非正式 moratorium</td></tr>
+          <tr><td>Tier3/4 + 液冷 + 再生水 + 真 AI 需求</td><td class="check y">可申请</td><td class="check y">✅ 仍批（5 级审批）</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout bad"><p><strong>这道分水岭的含义：低端项目的窗口已经焊死。</strong>如果阿杰原来的设想是"建个中小型通用 colo、用便宜的蒸发冷却、卖给本地企业"——这条路在 2025 下半年已经从政策层面被关掉了。能进的只剩"Tier3/4 + 液冷/再生水 + 真实 AI 负荷"这一个组合，而这个组合的资本门槛和合规门槛都显著更高（Ch7/Ch8/Ch10）。这不是劝退，是把可选项从"很多"压缩到了"一个"。<span class="conf g">🟢</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6" data-nav="06 电力 TNB/Green Lane/电价">
+    <h2><span class="num">06</span><span class="title-text">电力：TNB、Green Lane、RP4 电价、绿电</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>电力是 Johor DC 的第一瓶颈，也是经济性被侵蚀最快的地方。</p>
+      <h3>TNB Green Lane Pathway：把并网从 4 年压到 1 年</h3>
+      <p>TNB 2023-08 推出的 <strong>Green Lane Pathway</strong> 把 DC 并网周期从 36-48 个月压缩到约 12 个月，配一站式 OSC<sup class="cite" data-refid="45">[45]</sup>。实证：PDG Sedenak 190MW 实际 14 个月并网；DayOne 2025-06 经 CRESS 签 1GW+ 绿电<sup class="cite" data-refid="45">[45]</sup>。注意：<strong>最低 MW 门槛未公开，但所有公开案例都是 100MW+</strong>——这暗示 Green Lane 是给大项目开的快车道，中小项目能否走、走多快，是个需要直接问 TNB 的未知数。<span class="conf y">🟡</span></p>
+      <h3>RP4 电价改革：经济性被吃掉的关键</h3>
+      <p>RP4（第四监管期，2025-07-01 生效至 2027-12-31）是这份报告里对回收期影响最大的单一变量：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>项目</th><th>数值</th></tr></thead>
+        <tbody>
+          <tr><td>基准电价</td><td>39.96 → 45.62 sen/kWh（↑14%）<sup class="cite" data-refid="46">[46]</sup></td></tr>
+          <tr><td><strong>DC 超高压综合电价</strong></td><td><strong>约 60 sen/kWh</strong><sup class="cite" data-refid="46">[46]</sup></td></tr>
+          <tr><td>E3 高压工业峰期</td><td>30.80 sen/kWh + MD 费 RM37/kW<sup class="cite" data-refid="46">[46]</sup></td></tr>
+          <tr><td>E1 中压</td><td>33.70 sen/kWh<sup class="cite" data-refid="46">[46]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <p>新机制改为分项计费（发电/容量/网络/零售）+ ToU（工作日 22:00-14:00 与周末为离峰）<sup class="cite" data-refid="46">[46]</sup>。</p>
+      <div class="callout bad"><p><strong>电价优势大幅收窄——但要把币种算清楚（一处常见误读）。</strong>有说法称马来西亚 DC 电价"已反超新加坡"，<u>这是跨币种比较的陷阱</u>：马来西亚 DC 约 60 sen/kWh ≈ <strong>$0.13-0.14/kWh</strong>，新加坡约 27.27 新分/kWh ≈ <strong>$0.20/kWh</strong>（USD/SGD≈1.34）<sup class="cite" data-refid="47">[47]</sup>。<strong>按美元口径，新加坡仍然更贵，"反超"说法不成立</strong>（🟡 证据包亦标注汇率换算需注意）。真正发生的是：RP4 把马来西亚电价抬高约 14%、DC 综合价冲到 60 sen<sup class="cite" data-refid="46">[46]</sup>，<strong>原本两三倍的电价优势被压缩到约 1.4 倍</strong>——优势还在，但已大幅收窄，且承接新加坡需求的"便宜电"卖点被削弱。部分运营商已公开抵制 RP4，并有"投资可能因电价外流"的警告<sup class="cite" data-refid="48">[48]</sup>。叠加 ICPT（燃料成本传导）季度浮动，电价的可预测性也变差了。</p></div>
+      <h3>绿电：CRESS / GET，但 RE 供应跟不上</h3>
+      <ul>
+        <li><strong>CRESS（2024）</strong>：第三方 IPP 绿电经 TNB 电网直供，系统接入费 SAC——确定输出 25 sen/kWh、非确定 45 sen/kWh，仅大用户可用；DayOne 2025-06 签 500MW/21 年<sup class="cite" data-refid="49">[49]</sup>。</li>
+        <li><strong>GET（绿电税，2025-07 溢价最高降 80%）</strong>：中高压 1 年 20 / 2 年 19 / 3 年 18 sen/kWh<sup class="cite" data-refid="50">[50]</sup>。</li>
+        <li><strong>RE 供应缺口</strong>：TNB 当前 RE 4303MW 占 26.5%、目标 2030 年 10GW RE；NETR 目标 2050 年 70% 装机 RE；但当前煤+气占约 75%<sup class="cite" data-refid="51">[51]</sup>。而 hyperscaler 普遍承诺 100% RE——<strong>供需之间存在结构性缺口</strong>，PwC/TransitionZero 都点名了这个"清洁能源跟不上"的问题<sup class="cite" data-refid="52">[52]</sup>。</li>
+      </ul>
+      <h3>Johor 电力图景</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">10MW→1500MW+</div><div class="l">Johor DC 电力 2021→2024<sup class="cite" data-refid="1">[1]</sup></div></div>
+        <div class="metric"><div class="v">~5.7GW</div><div class="l">Johor 规划<u>电力</u>需求，2030 估占全马 DC 电力 60%（电力口径，非已运营 IT 容量）<sup class="cite" data-refid="53">[53]</sup></div></div>
+        <div class="metric"><div class="v">19.5GW</div><div class="l">上行情景 2035 年 DC 电力（占半岛峰值 78%，需 RM1000 亿+ 电网投资）<sup class="cite" data-refid="52">[52]</sup></div></div>
+        <div class="metric"><div class="v">1.26→2.53GW</div><div class="l">全马<u>已运营 IT</u> 容量 2025 下半年→2030（与上面电力口径不同，勿混用）<sup class="cite" data-refid="53">[53]</sup></div></div>
+      </div>
+      <p style="font-size:14px"><strong>口径提醒：</strong>"规划电力需求/申请量"（5.7GW、11GW、19.5GW）与"已运营 IT 容量"（897MW、1.26GW）是两套数字——前者是申请/规划的设施总用电（含 PUE），后者是已建成的 IT 关键负荷。两者差几倍很正常，做模型时务必标清是哪一套，<u>本报告凡引用容量数字均已注明口径</u>。</p>
+      <div class="callout warn"><p><strong>电力章的决策含义：</strong>① Green Lane 是真实存在的快车道，但偏向大项目，中小项目并网时间是个未知数，拿地前必须拿到 TNB 并网意向；② RP4 抬高了电价但按美元口径仍低于新加坡（Ch6 已纠"反超"误读），做经济性模型时用 60 sen/kWh（约 $0.14/kWh）而不是旧的低价；③ 真 AI 客户要 100% RE，但 RE 供应不足 + CRESS SAC 溢价，绿电是隐性成本，要么自己解决（自建光伏/签 CRESS）要么接受客户流失风险。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7" data-nav="07 供水与冷却">
+    <h2><span class="num">07</span><span class="title-text">供水与冷却技术：再生水是隐性门槛</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>DC 到底有多耗水</h3>
+      <p>口径有出入：100MW 约 4.16 MLD（≈0.0416 MLD/MW，蒸发冷却口径；交叉验算：4.16 MLD/天×365≈151.8 万 m³/年，与下方年耗水一致）或另一来源约 6 MLD，差异源于 WUE 和满载假设<sup class="cite" data-refid="54">[54]</sup>。按 4.16 MLD 算，100MW 年耗水约 151.8 万 m³，按 DC 专项水价 RM5.33/m³ 约 <strong>RM810 万/年</strong><sup class="cite" data-refid="54">[54]</sup>。</p>
+      <h3>Johor 的水账：缺口持续到 2027 中</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>口径</th><th>数值</th></tr></thead>
+        <tbody>
+          <tr><td>已批 DC 用水</td><td>142 MLD（占 2025 总供水 2037 MLD 的 7%）<sup class="cite" data-refid="55">[55]</sup></td></tr>
+          <tr><td>101 个待批若全批</td><td>808 MLD（占 2030 需求 2700 MLD 的 30%）<sup class="cite" data-refid="55">[55]</sup></td></tr>
+          <tr><td>部长预测 2030 年 DC 用水</td><td>384 MLD（较 2025 年约 21 MLD 增 18 倍）<sup class="cite" data-refid="56">[56]</sup></td></tr>
+          <tr><td>新供水产能（主要在 2027 后）</td><td>Semanggar 50MLD(2026)、Layang2 P2 160MLD(2027)、Semanggar3 120MLD(规划)<sup class="cite" data-refid="57">[57]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <h3>水价与再生水强制</h3>
+      <ul>
+        <li>供水商 Ranhill SAJ；<strong>DC 专项水价 2025-08-01 起 RM5.33/m³</strong>（较前涨 23-49%），居民仅 RM1.05-3.15/m³<sup class="cite" data-refid="58">[58]</sup>——DC 被单独划成高价档。</li>
+        <li><strong>再生水强制</strong>：SPAN 2025-09 指引，新批 DC 须优先用再生水，否则做零排放气冷<sup class="cite" data-refid="59">[59]</sup>。IWK+JSW 2025-08-11 起供 12 MLD 废水给 Bridge DC/Computility；Bridge 自费数百万美元建再生水厂（Ulu Tiram MBR+RO，5→20MLD）<sup class="cite" data-refid="60">[60]</sup>。但 <strong>12 MLD 只够约 2-3 个 100MW DC</strong>——再生水本身就是稀缺资源。</li>
+      </ul>
+      <div class="callout bad"><p><strong>再生水自建厂是中小项目的隐性杀手。</strong>政策强制用再生水，但市政再生水供应（12 MLD）杯水车薪，意味着新项目大概率得<u>自建再生水处理厂</u>（Bridge 的做法）。这笔数百万美元的固定投入对大项目可摊销，对小于 50MW 的项目难以摊销——<strong>这等于给项目设了一个事实上的最小规模门槛</strong>。再生水定价未公开（🟡），是个待核实的成本黑盒。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8" data-nav="08 WUE/PUE 合规硬指标">
+    <h2><span class="num">08</span><span class="title-text">可持续合规硬指标：WUE / PUE 与冷却选型</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>三种冷却的 WUE/PUE 与 AI 适配</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>冷却方式</th><th>WUE</th><th>PUE</th><th>柜密度</th><th>AI 适配</th></tr></thead>
+        <tbody>
+          <tr><td>风冷</td><td>≈0</td><td>1.4-1.8</td><td>≤15kW/柜</td><td class="check n">撑不了 AI</td></tr>
+          <tr><td>蒸发冷（湿冷）</td><td>1.8-2.5</td><td>1.1-1.3</td><td>物理极限 ~41kW</td><td class="check n">⛔ 已禁 + 覆盖不了</td></tr>
+          <tr><td>直接液冷 DLC</td><td>≈0</td><td>1.05-1.2</td><td>50-240kW/柜</td><td class="check y">✅ AI 唯一解</td></tr>
+        </tbody>
+      </table></div>
+      <p>关键物理事实：NVIDIA GB200 是 132kW/柜，下一代 240kW<sup class="cite" data-refid="61">[61]</sup>；蒸发冷的物理极限约 41kW/柜——<strong>湿冷在物理上就覆盖不了 AI 机柜</strong>。这和 Johor 的湿冷禁令（Ch5）形成合流：政策禁湿冷 + 物理上 AI 也不能用湿冷 = <u>做 AI DC 就必须液冷</u>。Microsoft 在 Johor 已宣称闭环液冷零蒸发<sup class="cite" data-refid="62">[62]</sup>。</p>
+      <h3>冷却 capex 对比</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>方案</th><th>capex</th></tr></thead>
+        <tbody>
+          <tr><td>风冷</td><td>USD 1.5-2M/MW<sup class="cite" data-refid="63">[63]</sup></td></tr>
+          <tr><td>液冷</td><td>USD 3-4M/MW（省 60% 机房面积）<sup class="cite" data-refid="63">[63]</sup></td></tr>
+          <tr><td>DLC 溢价</td><td>USD 2500-4500/kW<sup class="cite" data-refid="63">[63]</sup></td></tr>
+          <tr><td>浸没式</td><td>USD 4300-6500/kW<sup class="cite" data-refid="63">[63]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <p>液冷 capex 更高，但 5-10 年 TCO 省 30-40%<sup class="cite" data-refid="63">[63]</sup>。</p>
+      <h3>MITI 可持续 DC 指南：拿激励的硬门槛</h3>
+      <p>MITI 2024-12-30 发布、作为 DESAC 条件：<strong>WUE ≤2.2 m³/MWh（10 年后 ≤2.0）；超大规模（&gt;21MW）PUE ≤1.4；水压力指数 &lt;0.8 区域禁建 DC</strong><sup class="cite" data-refid="64">[64]</sup>。MCMC 口径：PUE&gt;1.9 不合格、&lt;1.5 为"绿色"。重要区分：<strong>这些指标是"拿 DESAC 激励"的强制条件，不一定是"直接拒批"的条件</strong>——达不到主要是失去税务激励，而非项目被毙（🟡，DESAC 是硬拒批还是仅失激励，证据未完全明确）<sup class="cite" data-refid="64">[64]</sup>。GBI 认证为自愿。</p>
+      <h3>水费对比：液冷省下的钱</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">RM840 万/年</div><div class="l">100MW 蒸发冷年水费</div></div>
+        <div class="metric"><div class="v">RM50 万/年</div><div class="l">100MW 液冷（WUE≈0.1）年水费</div></div>
+        <div class="metric"><div class="v">省 RM790 万/年</div><div class="l">液冷 vs 湿冷水费差</div></div>
+        <div class="metric"><div class="v">$100-200M</div><div class="l">液冷比风冷多出的 capex（/100MW，按 $1-2M/MW 增量）<span class="conf y">🟡</span></div></div>
+      </div>
+      <p style="font-size:14px"><strong>关于"回收期"的诚实说明：</strong>水费节省（RM790 万/年 ≈ $170 万/年）单独<u>远不足以</u>在 10-15 年内回收 $100-200M 的增量 capex（仅靠水费要几十年）。液冷的经济性不来自省水，而来自<strong>① 省 60% 机房面积（少建楼/省地）② PUE 从 1.4-1.8 降到 1.05-1.2 带来的电费节省（这才是大头）③ 支撑高密度 AI 机柜从而每平米租金/算力收入更高 ④ 整体 5-10 年 TCO 省 30-40%</strong><sup class="cite" data-refid="63">[63]</sup>。把"回收靠省水"当卖点是误导——真正的账在能耗和密度上。⚠️ 精确回收期取决于电价、密度和租金，证据未给统一财模。</p>
+      <div class="callout info"><p><strong>合规章的决策含义：</strong>做 Johor 的 AI DC，液冷不是选项而是默认配置（政策禁湿冷 + 物理必须 + 拿 DESAC 要求 PUE≤1.4）。把液冷的高 capex（$3-4M/MW）算进基准成本，但它换来的是合规资格 + 拿激励资格 + 能耗/密度经济性 + 客户认可——<strong>这是进入"高端合规"赛道的入场券，不是可选项</strong>。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9" data-nav="09 商业模式对比">
+    <h2><span class="num">09</span><span class="title-text">五种商业模式对比</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>五种模式速览</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>模式</th><th>定价/特征</th><th>资本</th><th>主要风险</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Hyperscale BTS 长租</strong></td><td>预租 70-90%，JHB1/2 近满租<sup class="cite" data-refid="65">[65]</sup></td><td>重</td><td>单客集中、议价弱</td></tr>
+          <tr><td><strong>Wholesale colo</strong></td><td>≥250kW-数十 MW，按 kW/月；新加坡含电 all-in 约 $310-470/kW/月，仅空间+容量约 $166-250/kW/月（$2-3M/MW/年）<sup class="cite" data-refid="66">[66]</sup></td><td>重</td><td>需自己获客</td></tr>
+          <tr><td><strong>Retail colo</strong></td><td>机柜 3-5kW；全球均 $217/kW/月、新加坡 $450+<sup class="cite" data-refid="66">[66]</sup></td><td>中</td><td>运营重、获客碎</td></tr>
+          <tr><td><strong>Self-build 自用</strong></td><td>自有负荷</td><td>重</td><td>需自有 AI 业务</td></tr>
+          <tr><td><strong>DC REIT</strong></td><td>新加坡上市 DC REIT 分红 4.4-8.2%<sup class="cite" data-refid="67">[67]</sup></td><td>金融</td><td>当前是开发期非持有期</td></tr>
+        </tbody>
+      </table></div>
+      <h3>马来西亚/Johor 的 per kW 定价：数据很薄</h3>
+      <p>诚实地说，<strong>Johor 的 per kW 月租公开数字极少，多藏在付费报告里</strong>（🔴）。已知锚点：新加坡批发（仅空间+容量口径）约 $2-3M/MW/年（$166-250/kW/月）<sup class="cite" data-refid="66">[66]</sup>；马来西亚 DC 电价 RP4 后约 $0.14/kWh vs 新加坡约 $0.20/kWh（与 Ch6 口径一致；含电 all-in 价两地差距因此小于"仅空间"价差）。据此估算：<strong>Johor 仅空间+容量批发价比新加坡低约 30-50%，约 $80-175/kW/月；零售约 $150-250/kW/月</strong>（🔴 估算，未经付费报告核实）<sup class="cite" data-refid="68">[68]</sup>。注意 per kW 报价是"含电 all-in"还是"仅空间"差异巨大，谈判时必须先对齐口径。</p>
+      <h3>自持 vs JV vs REIT vs 纯租：权衡</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>结构</th><th>资本强度</th><th>回报上限</th><th>风险</th><th>对中等资本的适配</th></tr></thead>
+        <tbody>
+          <tr><td>自持自建</td><td class="check n">极重</td><td class="check y">最高（yield on cost &gt;20%）</td><td class="check n">单点暴露全部风险</td><td class="check n">门槛太高</td></tr>
+          <tr><td>与本地持牌运营商 JV/参股</td><td class="check p">中-重</td><td class="check p">中-高</td><td class="check y">分散、借本地牌照与电水配额</td><td class="check y">✅ 最适配</td></tr>
+          <tr><td>DC REIT/基金</td><td class="check y">轻（金融）</td><td class="check p">稳定但当前非时点</td><td class="check y">流动性好</td><td class="check p">⚠️ 现在是开发期不是持有期</td></tr>
+          <tr><td>纯租 colo 自营 neocloud</td><td class="check y">轻</td><td class="check p">中（受芯片管制掣肘）</td><td class="check n">获客+管制双风险</td><td class="check p">⚠️ 看身份</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout purple"><p><strong>一个被忽略的时点信号：</strong>Keppel DC REIT 2026 年要出售其马来西亚 Basis Bay 资产（被解读为对超供的预防性重配），但同时 AirTrunk/Bridge 等私募在加速囤 Johor 地<sup class="cite" data-refid="69">[69]</sup>。两件事放一起读出的是：<strong>当前是"开发期超额回报窗口"，不是"REIT 稳定持有期"</strong>——开发商在抢建抢卖、稳定持有者在减仓。这正好对应了 CBRE 调查里 49% 投资者首选 Hyperscale BTS（2024 仅 31%）、62% 偏机会型开发<sup class="cite" data-refid="70">[70]</sup>。对中等资本投资人，这意味着<u>参与开发期（JV/参股）的逻辑成立，而买 REIT 当稳定收息现在不是最佳时点</u>。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10" data-nav="10 经济性测算">
+    <h2><span class="num">10</span><span class="title-text">经济性：capex / 收入 / 回收期 / 规模</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>Capex：约 $8-11M/MW</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>口径</th><th>数值</th></tr></thead>
+        <tbody>
+          <tr><td>全球基准 2025 / 2026</td><td>$10.7M / $11.3M per MW<sup class="cite" data-refid="71">[71]</sup></td></tr>
+          <tr><td>马来西亚</td><td>$8-10M/MW（低端 $6.9M、中位 $9.6M，C&amp;W）<sup class="cite" data-refid="72">[72]</sup></td></tr>
+          <tr><td>AirTrunk JHB3+4</td><td>$3B / 280MW ≈ $10.7M/MW<sup class="cite" data-refid="73">[73]</sup></td></tr>
+          <tr><td>AI fit-out（租户自担）</td><td>可 +$25M/MW<sup class="cite" data-refid="74">[74]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <p>capex 构成：电气 40-45% / 机械冷却 15-20% / 建筑 10-15% / 土地+变电 5-10% / 软成本 20-30%<sup class="cite" data-refid="74">[74]</sup>。注意土地只占 5-10%——再次印证 Ch2 的"地不是瓶颈"。</p>
+      <h3>规模与占地</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>实例</th><th>规模</th><th>占地</th><th>acre/MW</th></tr></thead>
+        <tbody>
+          <tr><td>AirTrunk JHB2</td><td>270MW</td><td>27 acres</td><td>0.10</td></tr>
+          <tr><td>STT</td><td>120MW</td><td>22 acres</td><td>0.18</td></tr>
+          <tr><td>Vantage</td><td>300MW+</td><td>73 acres</td><td>0.24</td></tr>
+          <tr><td>NTT</td><td>290MW</td><td>68.5 acres</td><td>0.24</td></tr>
+        </tbody>
+      </table></div>
+      <p>典型 0.10-0.25 acre/MW（含绿化 20-30 acres/100MW）<sup class="cite" data-refid="75">[75]</sup>。规模分层：Edge 1-5MW；中型 5-20MW；Hyperscale ≥50-100MW；超大 100-500MW+<sup class="cite" data-refid="76">[76]</sup>。</p>
+      <h3>回报指标</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">40-60%</div><div class="l">成熟马来西亚 DC EBITDA 利润率<sup class="cite" data-refid="77">[77]</sup></div></div>
+        <div class="metric"><div class="v">4-10 年</div><div class="l">ASEAN 回收期（利润率 15-40%）<sup class="cite" data-refid="78">[78]</sup></div></div>
+        <div class="metric"><div class="v">7-8.5%</div><div class="l">全球 DC 5 年无杠杆 IRR；cap rate 最低 ~4.4%<sup class="cite" data-refid="79">[79]</sup></div></div>
+        <div class="metric"><div class="v">&gt;20%</div><div class="l">开发商 stabilized yield on cost（6% cap 退出≈3.3x）<sup class="cite" data-refid="79">[79]</sup></div></div>
+      </div>
+      <h3>一个 100MW（IT 负荷）项目的粗算（⚠️估算）</h3>
+      <p>把上面的数字串起来做个数量级感受。<strong>口径前提：100MW 指 IT 关键负荷，设 PUE=1.4（液冷口径），则设施总用电峰值约 140MW；满租满载、不计利用率爬坡</strong>（⚠️ 全部为本报告估算量级，非精确财模）：</p>
+      <ul>
+        <li><strong>Capex</strong>：100MW × $9.6M/MW（马来西亚中位，含液冷）≈ <strong>$9.6 亿</strong>（不含租户 AI fit-out）<sup class="cite" data-refid="72">[72]</sup>。</li>
+        <li><strong>租金收入</strong>：wholesale $120/kW/月（Johor 估算中位，🔴）× 100,000kW × 12 ≈ <strong>$1.44 亿/年</strong>（满租；此为<u>不含电费</u>的空间/电力容量租金）。</li>
+        <li><strong>电费</strong>：100MW × 1.4(PUE) × 8760h × RM0.60 ≈ <strong>RM7.36 亿/年 ≈ $1.6 亿/年</strong>（满载上限；实际利用率达不到 100%，按 70-80% 利用率约 $1.1-1.3 亿/年）。</li>
+        <li><strong>关键机制——电费 pass-through</strong>：colo/wholesale 模式下，<u>电费通常按表计量直接转嫁给租户</u>（power pass-through），运营商赚的是空间+容量租金+服务，不自己吞电费。所以"电费 &gt; 租金"不构成亏损——这正是为什么上面租金 $1.44 亿能成立。<strong>真正吃电费的是 self-build 自用（Ch9）和 neocloud（自己买电跑 GPU）</strong>，这两种模式才对 RP4 涨价直接敏感。</li>
+        <li><strong>结论</strong>：对 colo 运营商，电价上涨主要影响<u>客户的总拥有成本（进而影响入租意愿和议价）</u>，而非运营商自身利润表；EBITDA 40-60% 仍可成立，但客户对高电价的敏感会压低可收租金。对 self-build/neocloud，电费是直接成本，RP4 后回收期落在 ASEAN 4-10 年区间偏后段。<u>电价是经济性里最敏感的变量，但它打击谁取决于你选哪种模式。</u></li>
+      </ul>
+      <div class="callout warn"><p><strong>经济性章的核心判断：</strong>Johor 的 capex 比新加坡便宜（$8-10M vs 全球 $10.7M）是真的；电价虽被 RP4 抬高，但按美元口径仍低于新加坡（Ch6），只是优势收窄。对 colo 模式电费可转嫁，对 self-build/neocloud 则是直接成本。开发期 yield on cost &gt;20% 的诱人数字是给"在低成本期建、在需求高峰卖"的开发商的——越晚进场，越吃不到这个差。这进一步指向"轻资产、快进快退"优于"自建长持"（Ch13）。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11" data-nav="11 客户获取">
+    <h2><span class="num">11</span><span class="title-text">客户获取与 anchor tenant</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>建出来没人租 = 最致命的失败模式。这一章看中等资本投资人到底能切到哪些客户。</p>
+      <h3>四类客户与可达性</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>客户类型</th><th>体量</th><th>中等资本可达性</th></tr></thead>
+        <tbody>
+          <tr><td>Hyperscaler（AWS/Google/Microsoft）</td><td class="check y">巨大</td><td class="check n">走自建/BTS，难直接切入<sup class="cite" data-refid="80">[80]</sup></td></tr>
+          <tr><td>GPU 云租赁（neocloud）</td><td class="check p">中-大</td><td class="check p">合同 1-3 年、受芯片管制<sup class="cite" data-refid="81">[81]</sup></td></tr>
+          <tr><td>本地企业（银行/电信/政府云）</td><td class="check p">体量小</td><td class="check y">合规门槛低、可达</td></tr>
+          <tr><td>Forest City SEZ 等增量需求</td><td class="check p">新增</td><td class="check p">区域性机会</td></tr>
+        </tbody>
+      </table></div>
+      <h3>现实路径</h3>
+      <p>对中等资本投资人，最现实的客户获取路径是：① <strong>与持牌运营商 JV/参股</strong>——借对方既有的 anchor tenant 管线；② <strong>GPU 云租赁（neocloud）</strong>——但合同短（1-3 年）、风险高、且受美国芯片管制（Ch12）致命掣肘；③ <strong>本地企业</strong>——体量小、合规要求低，适合小规模 colo；④ <strong>Forest City SEZ</strong> 的增量需求<sup class="cite" data-refid="81">[81]</sup>。次级市场（非头部园区）价格在急涨，但 anchor tenant 也更难找。</p>
+      <div class="callout warn"><p><strong>注意一个看似矛盾、实则不矛盾的点：</strong>Ch5 说"非 AI 通用 colo 已撞非正式 moratorium"，本章又说"本地企业适合小规模 colo"——这两者的区别在<strong>新建 vs 转租</strong>。停批针对的是<u>新建</u>非 AI DC 的审批；而在<u>已批/已建</u>的园区里<strong>转租/分租</strong>现成容量给本地企业，不触发新建审批，是可行的。所以路线②（小规模试水，Ch13）强调的是"转租现成机房"而非"自建小 colo"。<span class="conf y">🟡</span></p></div>
+      <h3>客户质量比客户类型更决定成败</h3>
+      <p>对融资和稳定运营而言，<strong>"客户是谁"不如"合同长什么样"重要</strong>。要逐条看：① <strong>合同期限</strong>（hyperscaler 通常 15-20 年，neocloud 仅 1-3 年）<sup class="cite" data-refid="84">[84]</sup>；② <strong>信用质量</strong>（投资级 vs 初创 neocloud）；③ <strong>take-or-pay</strong>（保底付费 vs 用多少付多少）；④ <strong>电费 pass-through</strong>（colo 标配"+E"，把电价波动转嫁租户）<sup class="cite" data-refid="85">[85]</sup>；⑤ <strong>termination rights</strong> 与 ⑥ <strong>GPU 到货条件</strong>（AI 客户的计费起点常绑定 GPU 实际交付，若芯片被卡，计费起点后延甚至落空）<sup class="cite" data-refid="85">[85]</sup>。一份"15 年、投资级、take-or-pay、+E、无苛刻 GPU 到货前置"的合同，价值远高于一份"3 年、初创、用量计费、绑 GPU 到货"的合同——哪怕后者报价更高。</p>
+      <div class="callout bad"><p><strong>anchor tenant 集中度是隐形炸弹。</strong>Hyperscale BTS 模式预租 70-90% 听起来很安全，但反面是<u>单客集中</u>——一旦 anchor tenant（很可能是一家中资或受管制实体）因芯片管制无法到货、或缩减扩张，整个项目的现金流就断了。这把 Ch12 的芯片管制风险和 Ch11 的客户集中风险焊在了一起：<strong>对中等资本投资人，"谁是你的 anchor tenant、它的资本和客户身份干不干净"比"租约签了多少"更重要</strong>。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12" data-nav="12 风险全景+芯片管制">
+    <h2><span class="num">12</span><span class="title-text">风险全景：电价、水、过剩、美国芯片管制</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>本章把全报告的风险收口，并把权重最高的美国芯片管制单独讲透。</p>
+      <h3>美国 AI 芯片管制：最大且在恶化的不确定性</h3>
+      <p>这是整份报告里唯一可能让一个合法、合规、建好的项目<u>一夜之间失去客户和芯片来源</u>的风险，时间线如下：</p>
+      <div class="step"><div class="step-head"><span class="sn">1</span>2025-01 · Biden AI Diffusion Rule</div><div class="step-body">马来西亚被列 Tier2，需许可证。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>2025-05 · Trump 废除该规则但 BIS 出新指引</div><div class="step-body">"终极母公司在中国/澳门"的实体，无论注册在哪，出口 H100/H200 须许可<sup class="cite" data-refid="7">[7]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>2025-06/07 · 执法升级</div><div class="step-body">MITI 调查中企违规用 Nvidia；美国起草针对马来西亚/泰国的额外限制<sup class="cite" data-refid="82">[82]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>2026-03/05 · 转运案坐实</div><div class="step-body">Super Micro 联创涉转运被捕；Megaspeed 经马来西亚为中国客户购近 $20 亿 Nvidia 芯片<sup class="cite" data-refid="8">[8]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">5</span>2026-05-31 · 安全港关闭</div><div class="step-body">BIS 明确"中资实体"穿透至终极母公司，<strong>马来西亚子公司不再是安全港</strong><sup class="cite" data-refid="7">[7]</sup>。</div></div>
+      <div class="callout bad"><p><strong>芯片管制的决策含义（最重要的一条结论）：</strong>风险等级由<u>资本身份 + 客户身份</u>共同决定，而不是项目本身合不合规。<strong>中资背景运营商 + 中资终端客户的 GPU 云租赁模式风险最高</strong>——这正是当前最赚钱、也最危险的组合；<strong>美欧资本 + 合规（非受管制）客户相对安全</strong>。对阿杰，这意味着：如果资金或意向客户带中资色彩，neocloud 路线（Ch13 路线③）的风险已经从"高"升到"可能整盘归零"。这一条几乎单独筛掉了一整条路线。<span class="conf g">🟢</span></p></div>
+      <h3>别把"身份干净"想得太简单：四类风险拆开看</h3>
+      <p>"中资 vs 非中资"的二分太粗。芯片管制其实是<u>四层独立风险</u>，非中资资本也可能踩中其中几层：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>风险层</th><th>触发条件</th><th>谁会中招</th></tr></thead>
+        <tbody>
+          <tr><td><strong>① GPU 出口许可</strong></td><td>终极母公司在中国/澳门，无论注册地<sup class="cite" data-refid="7">[7]</sup></td><td>中资穿透实体</td></tr>
+          <tr><td><strong>② 云服务使用限制</strong></td><td>把算力以云服务形式提供给受限主体</td><td>neocloud（即便自己非中资，客户是中资）</td></tr>
+          <tr><td><strong>③ 最终用户 KYC</strong></td><td>未能证明终端用户/用途合规</td><td>任何转租/批发给不透明下游的运营商</td></tr>
+          <tr><td><strong>④ 转运/二级制裁</strong></td><td>被用作向中国转运芯片的通道（Megaspeed 案）<sup class="cite" data-refid="8">[8]</sup></td><td>任何被中资客户当通道的项目</td></tr>
+        </tbody>
+      </table></div>
+      <p style="font-size:14px">所以"美欧资本"只解决了第①层，第②③④层要靠<strong>客户 KYC + 用途审查 + 供应链合规 memo</strong>来管。一个美资 colo 如果把容量批发给一家"母公司在开曼、实控人在中国"的 neocloud，照样可能在第③④层翻车。这就是 Ch13 把"BIS/法律 memo"列为硬门槛的原因。</p>
+      <h3>其余四大风险</h3>
+      <div class="callout warn"><h3 style="margin-top:0">⚡ 电价优势大幅收窄</h3><p>RP4 把 DC 电价推到约 60 sen/kWh（≈$0.13-0.14/kWh），对新加坡（≈$0.20/kWh）的优势从两三倍压缩到约 1.4 倍<sup class="cite" data-refid="47">[47]</sup>（按美元口径仍便宜，"反超"是跨币种误读），叠加 ICPT 季度浮动。承接新加坡需求的"便宜电"卖点被显著削弱，部分运营商警告投资可能外流<sup class="cite" data-refid="48">[48]</sup>。OPEX 端优势被侵蚀，是经济性模型里最敏感的变量。</p></div>
+      <div class="callout warn"><h3 style="margin-top:0">💧 水与再生水门槛</h3><p>Tier1/2 因水停批、湿冷暂停到 2027 中、再生水强制但供应（12 MLD）杯水车薪<sup class="cite" data-refid="3">[3]</sup><sup class="cite" data-refid="60">[60]</sup>。自建再生水厂的数百万美元固定投入给小项目设了事实最小规模门槛。供水缺口持续到 2027 中，新产能要 2027 后才上来。</p></div>
+      <div class="callout warn"><h3 style="margin-top:0">📉 供给过剩</h3><p>Johor 约 3.3-4.0GW pipeline，2029+ 大量入市；carrier-neutral colo 过供已被多家分析点名<sup class="cite" data-refid="16">[16]</sup>；Keppel DC REIT 减仓马来西亚资产是预警信号<sup class="cite" data-refid="69">[69]</sup>；DeepSeek 效应可能压缩单位算力需求。越晚进场，越接近过剩期。</p></div>
+      <div class="callout warn"><h3 style="margin-top:0">🏗️ 监管与电网</h3><p>Tier1/2 停批 + 非 AI 非正式 moratorium（Ch5）；TNB 收到 11GW 申请远超可供、输配电网升级滞后<sup class="cite" data-refid="6">[6]</sup>；Johor/Selangor 局部电网拥塞。审批 5 级 + 实际用时不透明，是时间风险。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13" data-nav="13 阿杰路线建议">
+    <h2><span class="num">13</span><span class="title-text">阿杰路线建议：决策树与四档下一步</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把前 12 章收敛成一个问题：<strong>一个中等资本的投资人，现在该不该进 Johor 数据中心、怎么进？</strong>下面先给决策树，再给四档可执行路线。</p>
+      <h3>决策树</h3>
+      <div class="tree">
+        <div class="node q">Q1 · 你的资本/意向客户带中资背景吗？</div>
+        <div class="node"><span class="lbl n">是（中资资本或中资客户）</span>⛔ neocloud/GPU 租赁路线风险已升到"可能整盘归零"（Ch12）→ 只考虑参股美欧主导的合规项目，或暂不进</div>
+        <div class="node"><span class="lbl y">否（美欧/本地干净资本+合规客户）</span>✅ 全部路线可选 → 继续 Q2</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q2 · 你的资本量级能扛 $1 亿+ 的重资产 + 30-42 月周期吗？</div>
+        <div class="node"><span class="lbl n">不能</span>→ 走轻资产：参股 JV（路线①）或小规模 colo（路线②）或 neocloud（路线③，前提身份干净）</div>
+        <div class="node"><span class="lbl m">勉强能但想分散</span>⚠️ 与本地持牌运营商 JV/参股（路线①）→ 借电水配额+牌照+anchor tenant，最适配</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q3 · 你现在就要进，还是能等？</div>
+        <div class="node"><span class="lbl y">现在进</span>→ 窗口 2026-2028 还在，但只走 Tier3/4+液冷+再生水+真 AI 需求；轻资产优先</div>
+        <div class="node"><span class="lbl m">能等 12-18 个月</span>⚠️ 等 2027 供水产能 + RP4 期满（2027-12）+ 过剩信号明朗再决策（路线④）</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q4 · 你有真实 AI 负荷/客户管线吗？</div>
+        <div class="node"><span class="lbl n">没有</span>⛔ 别自建——非 AI 项目已被非正式停批，建出来也租不掉</div>
+        <div class="node"><span class="lbl y">有（自有 AI 业务或锁定的合规客户）</span>✅ 这是唯一能支撑重资产的前提</div>
+      </div>
+      <h3>四档路线：优劣 / 触发条件 / 第一步</h3>
+      <div class="step"><div class="step-head"><span class="sn">①</span>与本地持牌运营商 JV / 参股（首选）</div><div class="step-body">
+        <p><strong>优：</strong>借本地公司的电水配额、牌照、anchor tenant 管线和审批经验；资本可控、风险分散；规避外资购地门槛（Ch3）。<strong>劣：</strong>话语权弱、回报被分；要做透对方的资本/客户身份尽调（芯片管制连坐风险）。</p>
+        <p><strong>触发条件：</strong>资本量级中等、想进但不想扛全部重资产风险、能找到资本/客户身份干净的本地伙伴（Bridge/DayOne/AirTrunk 等头部已满，更现实的是 STeP 散售拿地的二线开发商）。</p>
+        <p><strong>第一步：</strong>列出 5-8 家在 Sedenak/Ibrahim Technopolis/Pasir Gudang 已获 Tier3/4 批文 + 已拿 TNB 并网意向的运营商，逐一核实其 ① 资本背景（是否中资穿透）② anchor tenant 身份 ③ 再生水来源是否落实，作为参股标的清单。</p>
+      </div></div>
+      <div class="step"><div class="step-head"><span class="sn">②</span>小规模 colo / edge 试水</div><div class="step-body">
+        <p><strong>优：</strong>资本轻、周期短、可服务本地企业（合规门槛低）；用真实运营数据验证需求再扩张。<strong>劣：</strong>小项目难摊销再生水自建厂成本（Ch7 隐性最小规模门槛）；非 AI 通用 colo 已撞非正式 moratorium（Ch5）；运营碎、获客难。</p>
+        <p><strong>触发条件：</strong>想用最小代价验证"自己到底有没有获客能力和运营能力"、有本地企业客户线索、能接受小规模的水/电门槛。</p>
+        <p><strong>第一步：</strong>找一个已批 Tier3/4 园区内的现成机房做<u>转租/分租</u>（而非自建），签 1-2 个本地企业客户跑通运营，验证 per kW 实际可收价格（填补 Ch9 的数据黑洞）。</p>
+      </div></div>
+      <div class="step"><div class="step-head"><span class="sn">③</span>GPU 云租赁 neocloud</div><div class="step-body">
+        <p><strong>优：</strong>资本相对轻（租机柜+买/租 GPU）、贴 AI 红利、定价灵活。<strong>劣（致命）：</strong>合同短（1-3 年）；<u>受美国芯片管制致命掣肘</u>——若资本/客户带中资色彩，芯片可能拿不到、客户可能被切，整盘归零（Ch12）；窗口最短（2-3 年）。</p>
+        <p><strong>触发条件：</strong><strong>仅当</strong>资本和客户身份完全干净（美欧/本地、非中资穿透）+ 能锁定合规 AI 客户 + 接受 2-3 年短窗口套利逻辑。</p>
+        <p><strong>第一步：</strong>先做 BIS 合规尽调——确认 GPU 供应链（Nvidia 授权经销）和目标客户的"终极母公司"均不触发出口许可；不过这一关，此路线直接放弃。</p>
+      </div></div>
+      <div class="step"><div class="step-head"><span class="sn">④</span>暂不进 / 等窗口</div><div class="step-body">
+        <p><strong>优：</strong>规避当前最差的进入时点（电价优势收窄 + 过剩临近 + 管制恶化）；等 2027 供水产能上线、RP4 期满重定价、过剩信号明朗。<strong>劣：</strong>错过 2026-2028 开发期超额回报；等的过程中头部可能进一步固化坑位。</p>
+        <p><strong>触发条件：</strong>资本/客户身份不干净（中资连坐风险）、或没有真实 AI 客户管线、或对 2029+ 过剩判断悲观、或能等 12-18 个月。</p>
+        <p><strong>第一步：</strong>设三个观察触发器——① 2027-12 RP4 期满后的新电价；② 2027 中 Layang2/Semanggar 供水产能是否如期；③ Johor 季度获批数 + 空置率（若空置率开始上行=过剩信号）。任一恶化则继续等，三者转好则切回路线①。</p>
+      </div></div>
+      <h3>投资前的五道决策门槛（缺一项就别进）</h3>
+      <p>无论选哪条路线，下面五件事是"立项的硬门槛"——它们大多在你买地/签约之前就要锁死，因为它们的失败模式都是<u>项目建好了也跑不起来</u>。这也回应了一个比 IRR 更早卡死人的现实：<strong>能不能融到资</strong>。</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>门槛</th><th>具体要件</th><th>缺失后果</th></tr></thead>
+        <tbody>
+          <tr><td><strong>① TNB 并网意向</strong></td><td>书面并网容量确认 + connection charge + 变电站归属 + energization milestone</td><td>建好通不上电（11GW 申请挤兑）<sup class="cite" data-refid="6">[6]</sup></td></tr>
+          <tr><td><strong>② 再生水合同</strong></td><td>市政再生水供应协议或自建再生水厂方案（含 capex 摊销）</td><td>过不了 SPAN 强制再生水审批<sup class="cite" data-refid="59">[59]</sup></td></tr>
+          <tr><td><strong>③ Anchor tenant 可融资性</strong></td><td>已签 MSA（非 LOI）+ 投资级信用 + take-or-pay/15-20 年期 + 电费 pass-through 条款<sup class="cite" data-refid="83">[83]</sup><sup class="cite" data-refid="84">[84]</sup></td><td>拿不到 60-80% 项目融资（DSCR 1.35-1.45x 要求）<sup class="cite" data-refid="83">[83]</sup></td></tr>
+          <tr><td><strong>④ BIS/法律 memo</strong></td><td>资本与客户"终极母公司"穿透尽调 + GPU 供应链合规意见</td><td>芯片拿不到/客户被切（Ch12）</td></tr>
+          <tr><td><strong>⑤ JV 退出条款</strong></td><td>drag/tag、ROFR、put option、开发期退出路径、稳定期卖 REIT/基金的估值约定</td><td>钱进得去出不来</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout purple"><p><strong>融资是比 IRR 更早的闸门。</strong>2025 年全球 DC 募集了近 $2000 亿债务<sup class="cite" data-refid="83">[83]</sup>——资本充裕，但只给"可融资"的项目。可融资的核心是 <strong>anchor tenant 的信用 + 已签 MSA（LOI 不算）+ take-or-pay 锁定的现金流</strong><sup class="cite" data-refid="84">[84]</sup>。这把 Ch11 的客户问题升级了：不是"有没有客户"，而是"客户的信用和合同能不能撑起 60-80% 杠杆"。一个看似预租 80% 但 anchor 是中资受管制实体、合同只是 LOI 的项目，<u>银行不会放款</u>——这才是中等资本投资人最现实的死法。</p></div>
+      <div class="callout accent"><p><strong>一句话版本：</strong>窗口（2026-2028）还在但低端已关——中等资本投资人现在进的最优解是<strong>「身份干净 + 与本地持牌运营商 JV/参股 + 只碰 Tier3/4 液冷再生水真 AI 项目」（路线①）</strong>；想轻量验证就先小规模转租试水（路线②）；neocloud（路线③）只在资本和客户都绝对干净时才碰；身份有中资色彩或没有真客户，就老实等窗口（路线④）。<u>这份报告 80+ 来源收敛出的唯一确定结论是：决定成败的不是地、也不是技术，是「电水可得性 + 资本/客户身份 + anchor tenant 可融资性」这三件你买地之前就必须锁死的事。</u></p></div>
+      <h3>本季度可执行清单（按顺序）</h3>
+      <div class="check-box">
+        <strong>① 资本/客户身份自查</strong>：把资金来源和意向客户的"终极母公司"画出来，确认不触发 BIS 穿透——这决定你能选哪几条路线。<br>
+        <strong>② 找 1 家柔佛本地律所</strong>，书面确认外资公司购地门槛口径（Ch3 待证项）+ Sdn Bhd 100% 外资持有结构。<br>
+        <strong>③ 列参股标的清单</strong>：5-8 家已拿 Tier3/4 批文 + TNB 并网意向 + 再生水落实的运营商，做身份尽调。<br>
+        <strong>④ 小规模转租试水</strong>（可选）：在已批园区签 1-2 个本地客户跑运营，实测 per kW 可收价格。<br>
+        <strong>⑤ 设三个观察触发器</strong>（RP4 新电价 / 2027 供水产能 / 空置率），定期复盘是进是等。
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq" data-nav="FAQ 常见问题">
+    <h2><span class="num">Q</span><span class="title-text">FAQ：12 个最可能被问到的问题</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">现在进 Johor 数据中心，是不是已经太晚了？</span><span class="toggle">＋</span></div><div class="faq-a"><p>低端太晚了，高端没有。低端（小型、非 AI、湿冷、通用 colo）的窗口在 2025 下半年已被政策关闭（Tier1/2 停批 + 非 AI 非正式 moratorium）<sup class="cite" data-refid="3">[3]</sup><sup class="cite" data-refid="6">[6]</sup>。高端（Tier3/4 液冷 + 再生水 + 真 AI 需求）窗口约到 2028。但要注意：即便走最快路径（20-24 月）也要 2028 才投产，自建大项目时间上已偏晚，轻资产路线（参股/转租）时间优势明显（Ch4/Ch13）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">外资能 100% 持有马来西亚的数据中心吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能。DC 运营公司不在外资限制名单上（受限的是电信牌照运营商、油气、批发零售），可以注册 100% 外资的本地 Sdn Bhd 持有<sup class="cite" data-refid="29">[29]</sup>。但购地另有门槛：外资购地须州政府书面同意 + 柔佛 4% 审批费（2025.7 起翻倍）+ 印花税 4%<sup class="cite" data-refid="26">[26]</sup><sup class="cite" data-refid="27">[27]</sup>。现实做法是用 100% 外资 Sdn Bhd 买已批工业地，别碰农转工。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">为什么说瓶颈是电和水不是地？</span><span class="toggle">＋</span></div><div class="faq-a"><p>地价虽涨（DC 专用地 RM500-800 万/acre）但只占 capex 5-10%<sup class="cite" data-refid="74">[74]</sup>，不是经济性决定项。真正的卡口：TNB 收到超 11,000MW DC 申请、远超可供、电网升级滞后<sup class="cite" data-refid="6">[6]</sup>；Johor 因水把 Tier1/2 全停、强制再生水而再生水供应只够 2-3 个 100MW DC<sup class="cite" data-refid="3">[3]</sup><sup class="cite" data-refid="60">[60]</sup>。所以选址要按"能拿到电+再生水"反推，买地前先拿 TNB 并网意向和供水确认。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">听说马来西亚电价"反超"新加坡了，是真的吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不准确，这是跨币种比较的误读。RP4（2025-07 生效）把 DC 综合电价推到约 60 sen/kWh ≈ <strong>$0.13-0.14/kWh</strong>；新加坡约 27.27 新分/kWh ≈ <strong>$0.20/kWh</strong>（USD/SGD≈1.34）<sup class="cite" data-refid="46">[46]</sup><sup class="cite" data-refid="47">[47]</sup>。<strong>按美元口径新加坡仍更贵，"反超"不成立</strong>（🟡 证据包亦标注汇率需注意）。真正发生的是优势从两三倍收窄到约 1.4 倍——"便宜电"卖点被削弱但没消失。做经济性模型时用 60 sen/kWh（$0.14），别用旧低价。部分运营商已警告投资可能外流<sup class="cite" data-refid="48">[48]</sup>。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">美国芯片管制具体怎么影响我？</span><span class="toggle">＋</span></div><div class="faq-a"><p>看你的资本和客户身份。2026-05-31 BIS 明确"中资实体"穿透至终极母公司，马来西亚子公司不再是安全港<sup class="cite" data-refid="7">[7]</sup>；Megaspeed 经马来西亚为中国客户购 $20 亿 Nvidia 芯片的案子坐实了执法方向<sup class="cite" data-refid="8">[8]</sup>。结论：中资背景运营商+中资客户的 GPU 租赁风险最高（可能拿不到芯片、客户被切、整盘归零）；美欧资本+合规客户相对安全。这一条几乎单独决定你能不能碰 neocloud 路线。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">建一个 100MW 数据中心要花多少钱、多久回本？</span><span class="toggle">＋</span></div><div class="faq-a"><p>Capex 约 $8-10M/MW（马来西亚口径），100MW 约 $9.6 亿（含液冷、不含租户 AI fit-out）<sup class="cite" data-refid="72">[72]</sup>。回收期 ASEAN 口径 4-10 年、EBITDA 40-60%<sup class="cite" data-refid="77">[77]</sup><sup class="cite" data-refid="78">[78]</sup>。但 RP4 后电价把 OPEX 抬高，Johor 项目利润率处于行业区间下沿、回收期偏后段。占地约 0.10-0.25 acre/MW<sup class="cite" data-refid="75">[75]</sup>。注意这些是 ⚠️估算量级，不是精确财模。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">为什么一定要用液冷？风冷便宜不行吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>三重原因合流：① 政策禁湿冷（蒸发冷）至 2027 中<sup class="cite" data-refid="43">[43]</sup>；② 物理上蒸发冷极限约 41kW/柜，而 NVIDIA GB200 是 132kW/柜、下代 240kW，AI 机柜风冷/湿冷都撑不住<sup class="cite" data-refid="61">[61]</sup>；③ 拿 DESAC 激励要求超大规模 PUE≤1.4<sup class="cite" data-refid="64">[64]</sup>。液冷 capex 更高（$3-4M/MW）但水费骤降（100MW 从 RM840 万降到 RM50 万/年）、TCO 省 30-40%<sup class="cite" data-refid="63">[63]</sup>。做 AI DC，液冷是入场券不是选项。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">中等资本投资人最现实的进入方式是什么？</span><span class="toggle">＋</span></div><div class="faq-a"><p>与本地持牌运营商 JV/参股（Ch13 路线①）。理由：借对方的电水配额、牌照、anchor tenant 管线、审批经验；资本可控、风险分散；规避外资购地门槛。前提是把对方的资本/客户身份做透尽调（芯片管制连坐风险）。Hyperscale BTS 主赛道坑位已被 Bridge/DayOne/AirTrunk 占满（合计占 74%）<sup class="cite" data-refid="13">[13]</sup>，正面竞争不现实。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">REIT 现在是好的买入时点吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不是最佳时点。新加坡上市 DC REIT 分红 4.4-8.2% 看着稳<sup class="cite" data-refid="67">[67]</sup>，但当前是"开发期"不是"稳定持有期"：Keppel DC REIT 2026 要出售马来西亚资产（防超供），而 AirTrunk/Bridge 私募在加速囤地<sup class="cite" data-refid="69">[69]</sup>——稳定持有者在减仓、开发商在抢建。超额回报现在在开发期（yield on cost &gt;20%），不在 REIT 的稳定分红里。想吃 Johor 红利，参与开发期（JV/参股）的逻辑比买 REIT 收息更顺。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">小规模（&lt;50MW）项目能做吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>很难独立自建。再生水强制 + 市政再生水供应杯水车薪，意味着大概率要自建再生水厂（数百万美元固定投入），这笔钱小项目难摊销，等于设了事实上的最小规模门槛<sup class="cite" data-refid="60">[60]</sup>；加上非 AI 通用 colo 已撞非正式 moratorium。小规模更现实的玩法是<u>在已批园区转租/分租现成机房</u>验证运营和获客（路线②），而非自建。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">拿地到通电运营要多久？能不能加速？</span><span class="toggle">＋</span></div><div class="faq-a"><p>保守 30-42 个月，最快 20-24 个月（前提：TNB Green Lane 并网并行 + 规划快速通道 + 买已批工业地）<sup class="cite" data-refid="41">[41]</sup>。加速关键：① Green Lane 把并网从 36-48 月压到约 12 月（但偏向大项目）<sup class="cite" data-refid="45">[45]</sup>；② 规划准证 KM 走快速通道 22-29 天 vs 标准 99 天<sup class="cite" data-refid="41">[41]</sup>；③ 绝不碰农转工（省 6-12 月）。另注意 DESAC 激励申请 2027-12-31 截止<sup class="cite" data-refid="36">[36]</sup>，是个隐性时间窗。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q12</span><span class="qtext">如果我现在还不确定，等多久、等什么信号？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能等 12-18 个月就设三个触发器（Ch13 路线④）：① 2027-12 RP4 期满后的新电价（电价是最敏感变量）；② 2027 中 Layang2(160MLD)/Semanggar 供水产能是否如期上线（决定水门槛是否松动）<sup class="cite" data-refid="57">[57]</sup>；③ Johor 季度获批数 + 空置率（空置率上行 = 过剩信号）。任一恶化继续等，三者转好切回参股路线。注意等的代价是错过 2026-2028 开发期超额回报、头部进一步固化坑位。</p></div></div>
+    </div>
+  </section>
+
+  <!-- ===== REFS ===== -->
+  <section class="chapter" id="refs" data-nav="References">
+    <h2><span class="num">R</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13.5px">共 85 条。访问日期均为 2026-06-17。价格、电价、政策类信息以访问当日页面为准；标 🟡 处为单一来源未交叉验证，🔴 为本报告估算。本报告基于 6 份证据包（土地选址 / 审批准入 / 电力 / 供水冷却可持续 / 商业模式经济性 / 市场格局窗口期）整理。</p>
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://w.media/johor-from-10mw-to-1500mw-in-three-years/" target="_blank" rel="noopener">Johor: From 10MW to 1500MW in Three Years — W.Media</a><span class="ref-meta">· 2026-06-17 · 引用 4 次</span></li>
+        <li id="ref-2"><a href="https://www.cushmanwakefield.com/en/singapore/news/2026/03/apac-data-centre-development-pipeline-hits-record-in-2025" target="_blank" rel="noopener">APAC Data Centre Development Pipeline Hits Record in 2025 — Cushman &amp; Wakefield</a><span class="ref-meta">· 2026-06-17 · 引用 3 次</span></li>
+        <li id="ref-3"><a href="https://w.media/johor-stops-approving-tier-1-and-tier-2-data-centers-due-to-water-overuse/" target="_blank" rel="noopener">Johor Stops Approving Tier 1 and Tier 2 Data Centers Due to Water Overuse — W.Media</a><span class="ref-meta">· 2026-06-17 · 引用 6 次</span></li>
+        <li id="ref-4"><a href="https://www.lightreading.com/data-centers/electricity-tariffs-spike-puts-malaysia-s-data-center-hub-status-at-risk" target="_blank" rel="noopener">Electricity tariffs spike puts Malaysia's data center hub status at risk — Light Reading</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-5"><a href="https://www.industrial2u.com.my/property/johor-sedenak-tech-park-step-land-for-sale/" target="_blank" rel="noopener">Johor Sedenak Tech Park (STeP) Land for Sale — Industrial2u</a><span class="ref-meta">· 2026-06-17 · 引用 3 次</span></li>
+        <li id="ref-6"><a href="https://www.techwireasia.com/2026/03/malaysia-data-centre-policy-ai-moratorium/" target="_blank" rel="noopener">Malaysia data centre policy: AI moratorium and the 11GW grid problem — Tech Wire Asia</a><span class="ref-meta">· 2026-06-17 · 引用 6 次</span></li>
+        <li id="ref-7"><a href="https://www.gtlaw.com/en/insights/2025/12/navigating-gpu-export-controls-and-ai-use-restrictions-in-data-center-operations" target="_blank" rel="noopener">Navigating GPU Export Controls and AI Use Restrictions in Data Center Operations — Greenberg Traurig</a><span class="ref-meta">· 2026-06-17 · 引用 4 次</span></li>
+        <li id="ref-8"><a href="https://asiatimes.com/2026/06/nvidia-gpu-crackdown-hits-china-linked-southeast-asia-data-centers/" target="_blank" rel="noopener">Nvidia GPU crackdown hits China-linked Southeast Asia data centers — Asia Times</a><span class="ref-meta">· 2026-06-17 · 引用 3 次</span></li>
+        <li id="ref-9"><a href="https://www.mordorintelligence.com/industry-reports/malaysia-data-center-market" target="_blank" rel="noopener">Malaysia Data Center Market Size &amp; Forecast 2026-2031 (CAGR 19.5%) — Mordor Intelligence</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-10"><a href="https://www.malaymail.com/news/money/2024/12/23/knight-frank-malaysia-is-number-one-again-for-data-centre-investment-in-asean/" target="_blank" rel="noopener">Knight Frank: Malaysia is number one again for data centre investment in ASEAN (RM105b) — Malay Mail</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-11"><a href="https://www.datacenterdynamics.com/en/analysis/after-the-moratorium-how-singapore-plans-to-stay-in-data-center-race/" target="_blank" rel="noopener">After the moratorium: how Singapore plans to stay in the data center race — DCD</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-12"><a href="https://www.cushmanwakefield.com/en/singapore/news/2026/03/apac-data-centre-development-pipeline-hits-record-in-2025" target="_blank" rel="noopener">APAC new supply 2025: Indonesia + Malaysia 58% of region — Cushman &amp; Wakefield</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-13"><a href="https://www.globenewswire.com/news-release/2025/01/28/3016000/0/en/Malaysia-Data-Center-Market.html" target="_blank" rel="noopener">Malaysia Data Center Market — player share 2024 (Bridge 32%/DayOne 29%/AirTrunk 13%) — GlobeNewswire</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-14"><a href="https://www.datacenterdynamics.com/en/news/ytl-power-and-nvidia-to-invest-23bn-in-ai-data-center-park-in-malaysia/" target="_blank" rel="noopener">YTL Power and Nvidia to invest $2.3bn in AI data center park in Malaysia — DCD</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-15"><a href="https://www.mida.gov.my/mida-news/data-centre-players-pour-in-investments/" target="_blank" rel="noopener">Data centre players pour in investments (AWS/Microsoft/Google/Oracle/Nvidia) — MIDA</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-16"><a href="https://www.ropesgray.com/en/insights/viewpoints/102mvfl/data-center-investment-in-2026" target="_blank" rel="noopener">Data Center Investment in 2026: oversupply and overhang risks — Ropes &amp; Gray</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-17"><a href="https://fortune.com/asia/2025/04/17/malaysia-ai-data-centers-johor/" target="_blank" rel="noopener">Malaysia's AI data center boom in Johor (PDG CEO; mayor on power/water) — Fortune</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-18"><a href="https://technode.global/2026/04/28/malaysia-emerges-as-data-center-safe-haven/" target="_blank" rel="noopener">Malaysia emerges as data center safe haven — TechNode Global</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-19"><a href="https://topjohorfactory.com/property/20acres-data-center-land-nusajaya-tech-park/" target="_blank" rel="noopener">20 acres Data Center Land, Nusajaya Tech Park (RM157m freehold) — TopJohorFactory</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-20"><a href="https://www.propertyguru.com.my/property-news/2024/8/211820/" target="_blank" rel="noopener">NTT/ZData acquire Tropicana Johor land for data centres — PropertyGuru</a><span class="ref-meta">· 2026-06-17 · 引用 3 次</span></li>
+        <li id="ref-21"><a href="https://baxtel.com/news/bridge-data-centres-acquires-land-in-johor-malaysia-for-22-4million" target="_blank" rel="noopener">Bridge Data Centres acquires land in Johor for $22.4M (48 acres from Paragon) — Baxtel</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-22"><a href="https://www.smartinvestmalaysia.com/trends/johor-industrial-land-investment-2025-data-center-boom-analysis" target="_blank" rel="noopener">Johor Industrial Land Investment 2025: Data Center Boom Analysis — SmartInvest Malaysia</a><span class="ref-meta">· 2026-06-17 · 引用 3 次</span></li>
+        <li id="ref-23"><a href="https://www.jlandgroup.com.my/princeton-digital-group-acquires-land-from-jland-group/" target="_blank" rel="noopener">Princeton Digital Group acquires land from JLand Group (STeP 31 acres → 150MW) — JLand Group</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-24"><a href="https://www.datacenterdynamics.com/en/news/singapores-sea-to-be-anchor-tenant-of-ytls-johor-data-center-park/" target="_blank" rel="noopener">YTL Green DC Park Kulai (275 acres, self-held) — DCD</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-25"><a href="https://www.nst.com.my/news/nation/2025/11/1324188/" target="_blank" rel="noopener">Johor only approving Tier3/4 in designated zones with reclaimed water (5-tier approval) — New Straits Times</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-26"><a href="https://professionalharvest.com/land-titles-restrictions-approvals-what-foreign-buyers-need-to-know/" target="_blank" rel="noopener">Land Titles, Restrictions &amp; Approvals: What Foreign Buyers Need to Know (NLC 433E, state consent) — Professional Harvest</a><span class="ref-meta">· 2026-06-17 · 引用 3 次</span></li>
+        <li id="ref-27"><a href="https://www.far.academy/minimum-property-price-that-a-foreigner-can-buy-in-2025/" target="_blank" rel="noopener">Minimum property price a foreigner can buy 2025 + Johor 4% approval fee — FAR Academy</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-28"><a href="https://www.terraadvisoryservices.com/js-sez-guide/" target="_blank" rel="noopener">JS-SEZ Guide (IMFC-J one-stop, 5% corporate tax 15 years) — Terra Advisory Services</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-29"><a href="https://www.mondaq.com/inward-foreign-investment/1667706/" target="_blank" rel="noopener">100% foreign ownership of DC operating company in Malaysia — Mondaq</a><span class="ref-meta">· 2026-06-17 · 引用 3 次</span></li>
+        <li id="ref-30"><a href="https://www.hhq.com.my/posts/acquisition-of-property-by-non-citizen-foreign-companies-in-malaysia/" target="_blank" rel="noopener">Acquisition of property by non-citizen/foreign companies (EPU &gt;RM20m bumi dilution) — HHQ</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-31"><a href="https://www.industrialmalaysia.com.my/article/land-conversion-premium" target="_blank" rel="noopener">Land conversion premium Malaysia (6-12 months, ~20% of converted value) — Industrial Malaysia</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-32"><a href="https://www.industrialmalaysia.com.my/article/stamp-duty-malaysia" target="_blank" rel="noopener">Stamp Duty Malaysia (MOT, foreign flat 4%) — Industrial Malaysia</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-33"><a href="https://www.oneindustrialspecialist.com/rpgt-rate-2025/" target="_blank" rel="noopener">RPGT rate 2025 (foreign company &lt;5y 30% / ≥6y 10%) — One Industrial Specialist</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-34"><a href="https://www.mishu.my/blog/paid-up-capital-foreign-company/" target="_blank" rel="noopener">Paid-up capital for foreign company in Malaysia (~RM500k practical) — Mishu</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-35"><a href="https://www.businesstoday.com.my/2025/07/22/mida-appointed-lead-agency-for-all-data-centre-project-approval/" target="_blank" rel="noopener">MIDA appointed lead agency for all data centre project approval (DCTF 2025-07-21) — Business Today</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-36"><a href="https://www.mida.gov.my/setting-up-content/incentives/" target="_blank" rel="noopener">MIDA Incentives — DESAC (ITA 100% capex, 10-15% rate, deadline 2027-12-31) — MIDA</a><span class="ref-meta">· 2026-06-17 · 引用 3 次</span></li>
+        <li id="ref-37"><a href="https://www.mdec.my/announcement/md-tax-incentive-revised-guidelines" target="_blank" rel="noopener">MD Tax Incentive Revised Guidelines (MDTI) — MDEC</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-38"><a href="https://www.mcmc.gov.my/en/sectors/licensing/class-licence-nfp-nsp-asp-casp" target="_blank" rel="noopener">Class Licence NFP/NSP/ASP/CASP (colo not requiring NFP; CMA 1998 s126) — MCMC</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-39"><a href="https://cms-lawnow.com/en/ealerts/2025/06/malaysian-guidelines-on-cross-border-data-transfers" target="_blank" rel="noopener">Malaysian guidelines on cross-border data transfers (PDPA 2024, DPO, 2025-04-29) — CMS Law-Now</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-40"><a href="https://www.bernama.com/en/news.php?id=2349911" target="_blank" rel="noopener">PLANMalaysia DC Planning Guideline (GPP) cabinet-approved Oct 2024; Johor JPBD 2025-02 — Bernama</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-41"><a href="https://www.linkedin.com/pulse/simple-guide-obtaining-km-bp-ccc" target="_blank" rel="noopener">A Simple Guide to obtaining KM, BP, CCC in Malaysia (planning 99/22-29 days, BP 4-6m, CCC 1-3m) — LinkedIn</a><span class="ref-meta">· 2026-06-17 · 引用 4 次</span></li>
+        <li id="ref-42"><a href="https://www.industrialmalaysia.com.my/article/data-centre" target="_blank" rel="noopener">Data Centre development in Malaysia (EIA not mandatory prescribed; DOE discretion) — Industrial Malaysia</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-43"><a href="https://www.asianews.it/news-en/Johor-State-halts-development-of-water-based-data-centres-until-2027-64302.html" target="_blank" rel="noopener">Johor halts development of water-based data centres until 2027 — AsiaNews</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-44"><a href="https://www.lowyat.net/2025/374704/johor-data-centre-approvals/" target="_blank" rel="noopener">Johor data centre approvals (~30% rejected; 51 approved: 17 ops/11 building/23 new) — Lowyat.net</a><span class="ref-meta">· 2026-06-17 · 引用 3 次</span></li>
+        <li id="ref-45"><a href="https://www.tnb.com.my/announcements/tnb-establishes-exclusive-green-lane-pathway" target="_blank" rel="noopener">TNB establishes exclusive Green Lane Pathway (grid connection ~12 months) — TNB</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-46"><a href="https://www.trexon.my/guides/tnb-tariff-2026" target="_blank" rel="noopener">TNB Tariff 2026 / RP4 (base 45.62 sen, DC ~60 sen, E3/E1 rates, ToU) — Trexon</a><span class="ref-meta">· 2026-06-17 · 引用 4 次</span></li>
+        <li id="ref-47"><a href="https://www.globalpetrolprices.com/Singapore/electricity_prices/" target="_blank" rel="noopener">Singapore electricity prices (~27.27 SG cents/kWh) — GlobalPetrolPrices</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-48"><a href="https://w.media/malaysia-risks-investment-in-data-centers-fleeing-after-power-hike-costs/" target="_blank" rel="noopener">Malaysia risks data center investment fleeing after power hike — W.Media</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-49"><a href="https://fulcrum.sg/malaysias-corporate-renewable-energy-supply-scheme-cress/" target="_blank" rel="noopener">Malaysia's CRESS (SAC 25/45 sen; DayOne 500MW/21yr) — Fulcrum</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-50"><a href="https://www.mytnb.com.my/business/special-schemes/greenelectricitytariff" target="_blank" rel="noopener">Green Electricity Tariff (GET) rates 2025 (MV/HV 18-20 sen) — myTNB</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-51"><a href="https://theedgemalaysia.com/node/799547" target="_blank" rel="noopener">TNB RE 4303MW (26.5%), 2030 target 10GW; NETR 70% by 2050 — The Edge Malaysia</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-52"><a href="https://www.transitionzero.org/insights/malaysia-data-centres-can-clean-energy-keep-up" target="_blank" rel="noopener">Malaysia data centres: can clean energy keep up (2035 upside 19.5GW = 78% peak) — TransitionZero</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-53"><a href="https://www.datacenterdynamics.com/en/analysis/the-past-present-and-future-of-johor/" target="_blank" rel="noopener">The past, present and future of Johor (5.7GW planned; 1.26→2.53GW Malaysia) — DCD</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-54"><a href="https://w.media/special-report-how-johor-deals-with-thirsty-data-centers/" target="_blank" rel="noopener">Special Report: How Johor deals with thirsty data centers (0.416 MLD/MW; RM5.33/m³) — W.Media</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-55"><a href="https://newslab.malaysiakini.com/johor-data-centres/en" target="_blank" rel="noopener">Johor data centres water (approved 142 MLD; pending 808 MLD) — Malaysiakini NewsLab</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-56"><a href="https://www.bloomberg.com/news/articles/2025-11-26/malaysia-s-data-center-hub-tightens-approvals-on-water-worries" target="_blank" rel="noopener">Malaysia's Data Center Hub Tightens Approvals on Water Worries (2030: 384 MLD) — Bloomberg</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-57"><a href="https://www.malaymail.com/news/malaysia/2024/11/26/johor-to-develop-four-new-water-treatment-plants/" target="_blank" rel="noopener">Johor to develop new water treatment plants (Semanggar 50MLD 2026; Layang2 P2 160MLD 2027) — Malay Mail</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-58"><a href="https://www.thestar.com.my/news/nation/2025/08/02/" target="_blank" rel="noopener">Data centres to pay more for water (DC tariff RM5.33/m³ from 2025-08-01) — The Star</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-59"><a href="https://waterwastewaterasia.com/higher-costs-tighter-rules-johors-data-centres-turn-to-reclaimed-water/" target="_blank" rel="noopener">Higher costs, tighter rules: Johor's data centres turn to reclaimed water (SPAN 2025-09) — Water &amp; Wastewater Asia</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-60"><a href="https://technode.global/2025/08/14/bdc-partners-jsw/" target="_blank" rel="noopener">Bridge DC partners JSW: 12 MLD wastewater; self-built reclaimed plant 5→20MLD — TechNode Global</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-61"><a href="https://introl.com/blog/water-usage-efficiency-wue-ai-data-center-cooling-guide-2025" target="_blank" rel="noopener">WUE/PUE AI cooling guide 2025 (GB200 132kW, 240kW next-gen; evap limit ~41kW) — Introl</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-62"><a href="https://www.techwireasia.com/2025/11/microsoft-zero-water-datacenter-cooling-johor-bahru/" target="_blank" rel="noopener">Microsoft zero-water datacenter cooling in Johor Bahru (closed-loop liquid) — Tech Wire Asia</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-63"><a href="https://introl.com/blog/liquid-vs-air-cooling-ai-data-centers" target="_blank" rel="noopener">Liquid vs Air cooling AI data centers (air $1.5-2M/MW; liquid $3-4M/MW; TCO -30-40%) — Introl</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-64"><a href="https://www.businesstoday.com.my/2024/12/10/miti-releases-new-metrics-for-sustainable-data-centre-development/" target="_blank" rel="noopener">MITI releases new metrics for sustainable DC (WUE≤2.2; PUE≤1.4 for &gt;21MW; water stress &lt;0.8) — Business Today</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-65"><a href="https://www.datacenters.com/news/100mw-wholesale-colocation-deals-inside-the-hyperscaler-surge" target="_blank" rel="noopener">100MW wholesale colocation deals: inside the hyperscaler surge (pre-lease 70-90%) — Datacenters.com</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-66"><a href="https://www.cbre.com/insights/reports/global-data-center-trends-2025" target="_blank" rel="noopener">Global Data Center Trends 2025 (SG wholesale $310-470/kW/mo; retail global $217) — CBRE</a><span class="ref-meta">· 2026-06-17 · 引用 3 次</span></li>
+        <li id="ref-67"><a href="https://growbeansprout.com/data-centre-reits-dividend-june-2026" target="_blank" rel="noopener">Data Centre REITs dividend June 2026 (SG DC REITs 4.4-8.2%) — Beansprout</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-68"><a href="https://www.edgeconnex.com/news/edge-blog/southeast-asias-data-center-powerhouse-malaysia/" target="_blank" rel="noopener">Southeast Asia's data center powerhouse: Malaysia (MY electricity $0.10 vs SG $0.27/kWh) — EdgeConneX</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-69"><a href="https://www.datacenterrealestate.com/news/reits-and-real-estate-funds-double-down" target="_blank" rel="noopener">REITs and real estate funds: Keppel DC REIT sells Basis Bay; private capital piles into Johor — Data Center Real Estate</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-70"><a href="https://www.cbre.com/insights/reports/2025-global-data-center-investor-intentions-survey" target="_blank" rel="noopener">2025 Global Data Center Investor Intentions Survey (49% prefer Hyperscale BTS; 62% opportunistic) — CBRE</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-71"><a href="https://www.jll.com/en-us/insights/market-outlook/data-center-outlook" target="_blank" rel="noopener">Data Center Outlook (global capex 2025 $10.7M/MW; 2026 $11.3M/MW) — JLL</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-72"><a href="https://www.businesstoday.com.my/2026/04/07/construction-costs-for-data-centre-in-malaysia-relatively-affordable/" target="_blank" rel="noopener">Construction costs for DC in Malaysia relatively affordable ($8-10M/MW; low $6.9M, median $9.6M) — Business Today</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-73"><a href="https://www.airtrunk.com/airtrunk-doubles-down-in-malaysia/" target="_blank" rel="noopener">AirTrunk doubles down in Malaysia (JHB3+4 $3B/280MW ≈ $10.7M/MW; JHB2 270MW/27acres) — AirTrunk</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-74"><a href="https://umbrex.com/resources/data-center-primer/economics-business-models/" target="_blank" rel="noopener">Data Center Economics &amp; Business Models (capex breakdown; AI fit-out +$25M/MW) — Umbrex</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-75"><a href="https://datacentermap.com/malaysia/johor-bahru/" target="_blank" rel="noopener">Johor Bahru data center map (STT/Vantage/NTT MW + acreage) — Data Center Map</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-76"><a href="https://www.ibm.com/think/topics/hyperscale-data-center" target="_blank" rel="noopener">Hyperscale data center (scale tiers: Edge 1-5MW; mid 5-20MW; hyperscale ≥50-100MW) — IBM</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-77"><a href="https://www.hhq.com.my/posts/the-ultimate-guide-to-corporate-investments-in-malaysias-data-center-sector/" target="_blank" rel="noopener">Ultimate guide to corporate investments in Malaysia's DC sector (EBITDA 40-60%) — HHQ</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-78"><a href="https://arc-group.com/asean-data-center-boom-opportunities/" target="_blank" rel="noopener">ASEAN data center boom opportunities (payback 4-10y; margin 15-40%) — ARC Group</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-79"><a href="https://www.rclco.com/publication/data-centers-capitalizing-on-the-data-explosion/" target="_blank" rel="noopener">Data Centers: capitalizing on the data explosion (cap rate ~4.4%; IRR 7-8.5%; yield on cost &gt;20%) — RCLCO</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-80"><a href="https://www.cbre.com/insights/reports/asia-pacific-data-centre-trends-opportunities" target="_blank" rel="noopener">Asia Pacific Data Centre Trends &amp; Opportunities (customer acquisition paths) — CBRE</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-81"><a href="https://www.mckinsey.com/capabilities/tech-and-ai/our-insights/the-evolution-of-neoclouds-and-their-next-moves" target="_blank" rel="noopener">The evolution of neoclouds and their next moves — McKinsey</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-82"><a href="https://www.datacenterdynamics.com/en/news/trump-administration-planning-to-restrict-ai-chip-exports-to-malaysia-and-thailand-report/" target="_blank" rel="noopener">Trump administration planning to restrict AI chip exports to Malaysia and Thailand — DCD</a><span class="ref-meta">· 2026-06-17 · 引用 1 次</span></li>
+        <li id="ref-83"><a href="https://www.foley.com/insights/publications/2026/04/financing-the-data-center-boom-trends-structures-and-considerations-for-market-participants/" target="_blank" rel="noopener">Financing the Data Center Boom (project finance 60-80% LTC; DSCR 1.35-1.45x; ~$200B debt 2025) — Foley &amp; Lardner</a><span class="ref-meta">· 2026-06-17 · 引用 3 次</span></li>
+        <li id="ref-84"><a href="https://www.projectfinance.law/publications/data-center-financing-structures" target="_blank" rel="noopener">Data Center Financing Structures (anchor tenant bankability; signed MSA &gt; LOI; 15-20yr terms) — Project Finance Law</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+        <li id="ref-85"><a href="https://www.morganlewis.com/blogs/datacenterbytes/2026/05/activating-the-colo-model-what-really-matters-in-data-center-colocation-agreements" target="_blank" rel="noopener">Activating the Colo Model: power pass-through "+E", take-or-pay, GPU delivery-conditioned billing — Morgan Lewis</a><span class="ref-meta">· 2026-06-17 · 引用 2 次</span></li>
+      </ol>
+    </div>
+  </section>
+  <footer>
+    无忌 · Deep Research（L2）· 2026-06-17 · 仅供阿杰个人决策参考；数据与判例以原始来源为准。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('malaysia-datacenter-johor-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('malaysia-datacenter-johor-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>人的智能 vs 人工智能：大脑能类比芯片吗，以及如何科学训练自己的智能 · 无忌 Deep Research · 2026-06-18</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 01 智能本质对比</a>
+    <a href="#ch2" data-target="ch2">02 02 AI 突破链</a>
+    <a href="#ch3" data-target="ch3">03 03 训练范式三段</a>
+    <a href="#ch4" data-target="ch4">04 04 脑能类比芯片吗</a>
+    <a href="#ch5" data-target="ch5">05 05 当大脑是芯片</a>
+    <a href="#ch6" data-target="ch6">06 06 天生还是练的</a>
+    <a href="#ch7" data-target="ch7">07 07 能不能练出来</a>
+    <a href="#ch8" data-target="ch8">08 08 练记忆理解表达</a>
+    <a href="#ch9" data-target="ch9">09 09 练创造与想象</a>
+    <a href="#ch10" data-target="ch10">10 10 读书是好方法吗</a>
+    <a href="#ch11" data-target="ch11">11 11 每天该做什么</a>
+    <a href="#ch12" data-target="ch12">12 12 阿杰路线建议</a>
+    <a href="#faq" data-target="faq">Q FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">R References</a>
+  </div>
+</nav>
+
+<main>  <div class="hero">
+    <h1>人的智能 vs 人工智能：大脑能类比芯片吗，以及如何科学训练自己的智能</h1>
+    <div class="hero-meta">
+      <span>📅 2026-06-18</span>
+      <span>🔍 6 个证据包 · 64 条来源（核心为同行评议论文/元分析，部分为权威机构页/百科/二次综述）</span>
+      <span>🧠 智能本质 × 训练证据 × 每日方案</span>
+      <span>🌏 立场：写给自学者阿杰（产品人 · 马来西亚）</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>一句话定调：你问的「大脑像不像芯片」是一个好用的提问框架，但每一步都会在某处破裂——一颗只用约 20 瓦持续运转的大脑，在样本效率、因果、具身上做的事，是今天烧着兆瓦级算力的训练集群仍做不到的；而真正能回答你「每天怎么 practice 变更聪明」的，不是这个类比，是另外三条被同行评议反复验证的硬事实。</strong></p>
+      <p>本报告分三段走。第一段（Ch1–5）用「大脑=芯片」这条线索把 AI 怎么学、人脑怎么学讲透，每一步诚实戳破类比边界。第二段（Ch6–7）回答「聪明是天生还是练的」——遗传度真相 + 认知训练里哪些是真证据哪些已被证伪。第三段（Ch8–12）落到你的真问题：记忆/理解/表达怎么练、创造力怎么练、读书是不是好方法、每天该做什么——最后一章是给你的一张可执行每日动作表 + 30 天起步路径 + 「停止做什么」清单。全程严格区分 🟢同行评议证据 / 🟡单源 / 🔴争议或已证伪，不灌「努力就能天才」鸡汤，也不灌「天生定死」宿命。</p>
+    </div>
+  </div>
+
+  <div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+    <p style="margin:0"><strong>📌 三条最关键发现（先扫这个，反鸡汤三主轴）：</strong></p>
+    <ul style="margin:8px 0 0">
+      <li><strong>没有「通用变聪明」的捷径——far transfer（远迁移）几乎为零。</strong>你练 n-back、玩脑训练 App、做泛泛的「思维训练」，练的那个具体任务会变好，但<u>不会</u>外溢成「整个人变聪明」。两次大型二阶元分析把远迁移总效应钉在了零附近<sup class="cite" data-refid="40">[40]</sup>，Lumosity 因为吹「让你更聪明、防痴呆」被美国 FTC 罚 200 万美元<sup class="cite" data-refid="38">[38]</sup>。能练的是<strong>具体能力</strong>（记某类东西、解某类问题），不是一个抽象的「聪明」总开关。<span class="conf g">🟢</span></li>
+      <li><strong>智力大半是遗传的，但「遗传度高」≠「你改不了」——这是全领域被媒体误读最狠的一点。</strong>认知能力的遗传度从童年的 ~0.3 升到成年的 ~0.8（Wilson 效应）<sup class="cite" data-refid="29">[29]</sup>，可同一个时代里 IQ 每十年还在涨约 3 分（Flynn 效应，百年涨了约 30 分）<sup class="cite" data-refid="32">[32]</sup>——遗传度是<strong>群体方差分解</strong>，描述的是「人和人之间的差异有多少来自基因」，不是「你这个人有 80% 被基因锁死」。环境（尤其童年、尤其贫困家庭）有真实的、可移动的空间<sup class="cite" data-refid="34">[34]</sup>。<span class="conf g">🟢</span></li>
+      <li><strong>真正能让你变能干的方法，全是「主动提取 + 输出」，不是「被动输入 + 囤积」。</strong>检索练习（合书回忆/自测）效应量 g≈0.50<sup class="cite" data-refid="36">[36]</sup>、间隔重复几乎无边界条件地提升长期保留<sup class="cite" data-refid="37">[37]</sup>、自我解释/费曼 g≈0.55<sup class="cite" data-refid="42">[42]</sup>；而读完就忘的被动重读、划线高亮被评为「低效用」<sup class="cite" data-refid="56">[56]</sup>。再往下一层，<strong>有氧运动是认知最硬的地基</strong>（海马体长大、BDNF 升、机制最清）<sup class="cite" data-refid="60">[60]</sup>，睡眠是记忆巩固的生物必需<sup class="cite" data-refid="62">[62]</sup>。每天该做什么，第 12 章给你一张表。<span class="conf g">🟢</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1" data-nav="01 智能本质对比">
+    <h2><span class="num">01</span><span class="title-text">开篇定调：表面越来越像，内核全然不同</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>2026 年的大模型能写代码、能解奥数、能跟你聊一整天——表面上，它和人的智能越来越像。但「像」是行为层的，内核是另一回事。把人脑和今天的 AI 放在同一张桌子上比，至少有六个维度差到不是「程度」而是「种类」的不同：</p>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">~20 W</div><div class="l">人脑<strong>功率</strong>（约两个 LED 灯泡，持续一生）；前沿模型一次<strong>训练总能耗</strong>达 GWh 级（GPT-4 估 ~50 GWh⚠️，OpenAI 未公布）——功率 vs 能量不可直接除，但量级差已极悬殊<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="11">[11]</sup></div></div>
+        <div class="metric"><div class="v">1 vs 万亿</div><div class="l">人能 one-shot 学一个新概念；LLM 预训练要吃数万亿 token<sup class="cite" data-refid="2">[2]</sup></div></div>
+        <div class="metric"><div class="v">相关 ≠ 因果</div><div class="l">LLM 学的是统计相关，缺真正的因果推理<sup class="cite" data-refid="3">[3]</sup></div></div>
+        <div class="metric"><div class="v">灾难性遗忘</div><div class="l">AI 学新任务会忘旧任务；人脑靠睡眠回放 + 突触可塑解决<sup class="cite" data-refid="3">[3]</sup></div></div>
+      </div>
+      <h3>六个维度，逐条拆</h3>
+      <p>这六条是贯穿全报告的底色，先一次性说清，后面各章再展开机制：</p>
+      <ul>
+        <li><strong>样本效率：</strong>人类小孩看几次就认得「猫」，能 few-shot、one-shot 学习；LLM 的「few-shot」是推理时在上下文里做模式匹配（in-context learning），<u>并不更新权重</u>，本质和人类「学会」是两码事<sup class="cite" data-refid="2">[2]</sup>。<span class="conf g">🟢</span></li>
+        <li><strong>能耗：</strong>大脑 ~20 W 跑完一生；前沿模型一次训练耗能可比上百户家庭一年（GPT-3 单次训练耗能 ≈ 120 户美国家庭一年）<sup class="cite" data-refid="11">[11]</sup>。注意 GPT-4 的 ~50 GWh 是<strong>估计值</strong>，OpenAI 从未官方公布 ⚠️。</li>
+        <li><strong>因果：</strong>当前的<u>基座</u> LLM 主要靠相关性预测，在<u>无外部脚手架</u>时的稳健因果/反事实推理较弱<sup class="cite" data-refid="3">[3]</sup>——但这不是绝对：配上工具、检索（RAG）、结构化推理脚手架后能部分弥补，所以准确说法是「裸模型弱、可被缓解」，而非「永远不能」。<span class="conf g">🟢</span></li>
+        <li><strong>具身：</strong>LLM 只从文本学世界，没有身体、没有和物理世界的感觉-运动闭环；人类的概念扎根在具身经验里<sup class="cite" data-refid="2">[2]</sup>。<span class="conf g">🟢</span></li>
+        <li><strong>灾难性遗忘：</strong>朴素地连续训练时，神经网络学任务 B 会冲掉任务 A 的权重（catastrophic forgetting）；已有 rehearsal、EWC、adapter、持续学习等缓解手段，但都不如人脑天生优雅——人脑靠突触可塑性 + 睡眠期的记忆回放从机制上规避了这个问题<sup class="cite" data-refid="3">[3]</sup>。<span class="conf g">🟢</span></li>
+        <li><strong>意识：</strong>AI 可能有「access consciousness」（信息可被调用）的迹象，但「phenomenal consciousness」（有主观体验、有 qualia）未被证实；2024 年一项调研显示约 2/3 的意识研究者认为某些架构下 AI 意识「plausible（有可能）」——注意这是<u>争议</u>不是结论<sup class="cite" data-refid="4">[4]</sup>。<span class="conf r">🔴</span></li>
+      </ul>
+      <div class="callout info"><p><strong>为什么先讲这个：</strong>因为「大脑像不像芯片」这个问题，答案高度取决于你站在哪个维度看。行为层越来越像，但能耗、样本效率、因果、具身这几条是<strong>结构性</strong>的差异——它们不会因为模型变大而消失。记住这条底色，下面我们顺着 AI 的发展史，看它是怎么一步步走到「表面像人」的。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2" data-nav="02 AI 突破链">
+    <h2><span class="num">02</span><span class="title-text">AI 如何走到今天：六十年突破链</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>今天的大模型不是凭空冒出来的，是一条清晰的突破链。把它捋成时间线，你会发现每一次跃迁都是「某个旧瓶颈被一个新点子打穿」——这对理解「AI 怎么学」很重要。</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>年份</th><th>突破</th><th>打穿了什么瓶颈</th></tr></thead>
+        <tbody>
+          <tr><td><strong>1958</strong></td><td>感知机 Perceptron（Rosenblatt）</td><td>第一个能从数据「学习」的模型；但 1969 Minsky &amp; Papert 证明它连 XOR 都学不了 → 第一次 AI 寒冬<sup class="cite" data-refid="5">[5]</sup></td></tr>
+          <tr><td><strong>1986</strong></td><td>反向传播 Backprop（Rumelhart/Hinton/Williams, Nature）</td><td>多层网络终于能高效训练，破了 XOR 的局限<sup class="cite" data-refid="5">[5]</sup></td></tr>
+          <tr><td><strong>2012</strong></td><td>AlexNet（Krizhevsky/Sutskever/Hinton）</td><td>深层 CNN + GPU + Dropout，ImageNet Top-5 错误率 15.3%（第二名 26.2%），LeCun 称「计算机视觉明确转折点」<sup class="cite" data-refid="6">[6]</sup></td></tr>
+          <tr><td><strong>2013–14</strong></td><td>word2vec / seq2seq</td><td>词被编码成向量（「king−man+woman≈queen」）、序列到序列的 encoder-decoder 框架<sup class="cite" data-refid="7">[7]</sup></td></tr>
+          <tr><td><strong>2017</strong></td><td>Transformer（《Attention Is All You Need》）</td><td>纯 attention 抛弃 RNN/CNN，可完全并行 → 今天所有大模型的地基；截至 2026 被引超 25 万次<sup class="cite" data-refid="8">[8]</sup></td></tr>
+          <tr><td><strong>2020–22</strong></td><td>Scaling laws + RLHF</td><td>发现「越大越强」有规律可循；RLHF 让模型「听话、有用」<sup class="cite" data-refid="9">[9]</sup><sup class="cite" data-refid="12">[12]</sup></td></tr>
+          <tr><td><strong>2024–25</strong></td><td>推理模型 o1/o3</td><td>回答前先「想」（生成 reasoning tokens），把算力从训练挪到推理时<sup class="cite" data-refid="15">[15]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <h3>三个最关键的拐点，说透</h3>
+      <div class="callout good"><h4>🟢 2012 AlexNet：深度学习的「证明可行」时刻</h4><p>在 AlexNet 之前，神经网络是学术边缘。AlexNet 把三样东西凑在一起——更深的卷积网络、用 GPU 训练、Dropout 防过拟合——一举把 ImageNet 图像分类的 Top-5 错误率从 26.2% 砍到 15.3%<sup class="cite" data-refid="6">[6]</sup>。这不是渐进改良，是断崖式领先，让整个领域相信「深 + 数据 + 算力」这条路是对的。Yann LeCun 直接称它是计算机视觉的明确转折点。从这一刻起，「算力 + 数据」成了 AI 的主旋律。</p></div>
+      <div class="callout good"><h4>🟢 2017 Transformer：可并行 = 可无限扩大</h4><p>RNN 的致命伤是「必须一个词一个词按顺序算」，没法并行，规模上不去。Transformer 的核心 idea 是 self-attention——让每个词直接「看」序列里所有其他词，<u>完全抛弃循环结构</u>，于是整个序列可以一次性并行计算<sup class="cite" data-refid="8">[8]</sup>。这一下解锁了 GPU 集群的全部威力，也直接让「把模型和数据一起做大」变得在工程上可行。没有 Transformer，就没有后面的 scaling，也没有 GPT。它在 WMT2014 英德翻译上拿到 28.4 BLEU，但真正的遗产是那个可并行的架构本身。</p></div>
+      <div class="callout good"><h4>🟢 2022 RLHF：从「会预测文字」到「像个助手」</h4><p>预训练完的模型会续写文本，但不一定「有用」「听话」。InstructGPT（2022-03）引入 RLHF——先用人类示范做监督微调（SFT），再训一个奖励模型学人类偏好，再用强化学习（PPO）去优化<sup class="cite" data-refid="12">[12]</sup>。结果惊人：1.3B 参数的 InstructGPT 在人类偏好上<strong>胜过 175B 的 GPT-3</strong>，即用 1/100 的参数赢了——证明「对齐人类意图」比「单纯堆参数」对体验的贡献更大。两个月后基于同思路的 ChatGPT 上线，2 个月破 1 亿用户。</p></div>
+      <h3>一个必须标的争议：「涌现能力」可能是幻觉</h3>
+      <div class="trap-box"><strong>⚠️ 别把「涌现」当确立事实：</strong>2022 年 Wei 等人报告，某些能力在模型规模过了某个阈值后「突然」出现（emergent abilities）。但 2023 年 NeurIPS 一篇《Are Emergent Abilities a Mirage?》论证：这种「突然涌现」很大程度是<u>度量选择的假象</u>——换成连续、平滑的度量指标，曲线就变成渐进的，没有突变<sup class="cite" data-refid="16">[16]</sup>。所以「大模型会突然涌现新能力」这个流行说法，证据并不牢，是个 🔴 争议点。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3" data-nav="03 训练范式三段">
+    <h2><span class="num">03</span><span class="title-text">AI 怎么「学」：预训练 / 后训练 / 推理时计算</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>现代大模型的「学习」分三段，每一段干的事完全不同。理解这三段，是后面把「人类学习」往上对照的前提（Ch5 会做这个对照）。</p>
+      <div class="step"><div class="step-head"><span class="sn">1</span>预训练 Pre-training（计算最重的一段）</div><div class="step-body">自监督的 next-token prediction：给一段文本，让模型猜下一个词，错了就调权重。吃数万亿 token，烧掉绝大部分算力。这一段决定了模型的「世界知识」和语言能力底座<sup class="cite" data-refid="15">[15]</sup>。Scaling law 管的就是这一段：Kaplan 2020 发现 loss 随算力/参数/数据呈幂律下降<sup class="cite" data-refid="9">[9]</sup>；Chinchilla 2022（DeepMind 训了 400+ 个模型）发现参数量和数据量应该<strong>等比例增长</strong>，最优约 20 token/参数——结果 70B 的 Chinchilla 击败了 280B 的 Gopher，而 GPT-3 用的数据其实只有 Chinchilla 最优值的约 1/11（即「训练不足」）<sup class="cite" data-refid="10">[10]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>后训练 Post-training（SFT + RLHF/DPO）</div><div class="step-body">预训练出的是个「博学但不听话」的底模，后训练把它调成「有用、安全、对齐人类」的助手。先 SFT（监督微调，学人类示范），再 RLHF（学人类偏好）或它的变体——RLAIF（用 AI 反馈）、DPO（直接偏好优化，跳过显式奖励模型）、DeepSeek-R1 引入的 GRPO<sup class="cite" data-refid="15">[15]</sup>。这一段算力比预训练小得多，但对「用起来像不像个好助手」是决定性的（见 Ch2 的 InstructGPT 案例）<sup class="cite" data-refid="12">[12]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>推理时计算 Inference-time compute（o1/o3 范式）</div><div class="step-body">2024 年起的新范式：让模型在<u>回答前先生成一长串「思考过程」（reasoning tokens）</u>，把更多算力花在推理时而非训练时。这背后是 Chain-of-Thought（分步推理，≥100B 参数才显著）<sup class="cite" data-refid="13">[13]</sup>的工程化。效果显著：o1 在 AIME/IMO 类资格赛上相对 GPT-4o 是数量级的跃升（不同报道口径下约 74%–83% vs 约 9%–13%，⚠️ 具体数字随测试版本/题集而变）；o3 在 <strong>ARC-AGI-1</strong> 上达 87.5%——但这是 <u>高算力设置</u>下的成绩，低算力部署版本分数大幅下降，而到了更难的 <strong>ARC-AGI-2</strong> 同款模型仅个位数<sup class="cite" data-refid="15">[15]</sup>。⚠️ 这些榜单数字高度依赖「哪个版本、哪个题集、给多少算力」，别当成裸的能力定论。<span class="conf y">🟡</span></div></div>
+      <h3>算力是必要非充分：算法优化贡献略大于芯片</h3>
+      <p>很多人以为 AI 进步全靠堆 GPU。算力确实是硬约束——H100（2023，FP16 1979 TFLOPS，700W）、B200（2025，训练快 4×、推理快 15×）一代代更强<sup class="cite" data-refid="14">[14]</sup>。但 Stanford 一项「每瓦智能（Intelligence Per Watt）」研究给出一个反直觉的拆解：2023→2025 年 AI 效率提升了 5.3 倍，其中 <strong>3.1 倍来自模型/算法改进，1.7 倍来自硬件</strong>——也就是说<u>算法优化的贡献略大于芯片</u><sup class="cite" data-refid="14">[14]</sup>。<span class="conf g">🟢</span></p>
+      <div class="callout warn"><p><strong>这一点对「大脑=芯片」的类比是个伏笔：</strong>如果连 AI 自己的进步都不是「光靠更强的芯片」，那把「人变聪明」简单类比成「升级硬件」就更站不住。对人来说，「算法」（怎么学、怎么练）的可改进空间，可能比「硬件」（天生的脑力）更大、更可控。这正是本报告后半部分的落点。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4" data-nav="04 脑能类比芯片吗">
+    <h2><span class="num">04</span><span class="title-text">人脑能类比芯片吗：像在哪，根本不同在哪</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是阿杰的核心提问，正面回答：<strong>在「功能比喻」层面，类比能成立好几处；在「机制」层面，几乎每一处都破裂。</strong>先给数字打底——大脑约 860 亿神经元、约 100 万亿突触、约 20 W 功耗（约两个 LED 灯泡，Azevedo 2009）<sup class="cite" data-refid="17">[17]</sup><sup class="cite" data-refid="25">[25]</sup>。GPT-3 单次训练耗能 ≈ 120 户家庭一年，量级对比触目惊心<sup class="cite" data-refid="28">[28]</sup>。下面分「像在哪」和「根本不同在哪」两栏说。</p>
+
+      <h3>像在哪（类比成立的地方）</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>大脑机制</th><th>AI 对应</th><th>相似的是什么</th></tr></thead>
+        <tbody>
+          <tr><td>LTP 长时程增强</td><td>权重更新</td><td>都是「连接强度随经验改变」<sup class="cite" data-refid="20">[20]</sup></td></tr>
+          <tr><td>突触修剪</td><td>网络剪枝 pruning</td><td>都是「删掉冗余连接让系统更高效」<sup class="cite" data-refid="21">[21]</sup></td></tr>
+          <tr><td>髓鞘化锁定关键期</td><td>参数冻结 freezing</td><td>都是「到某阶段把一部分参数固定下来」<sup class="cite" data-refid="22">[22]</sup></td></tr>
+          <tr><td>稀疏激活</td><td>MoE / sparse attention</td><td>都是「任一时刻只激活一小部分单元」<sup class="cite" data-refid="18">[18]</sup></td></tr>
+          <tr><td>预测编码</td><td>误差最小化</td><td>功能上都在「最小化预测和现实的差」<sup class="cite" data-refid="19">[19]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <p>这些相似不是巧合——很多 AI 概念本来就是从神经科学借来的隐喻。但「功能上像」不等于「机制上同」，下面是破裂处。</p>
+
+      <h3>根本不同在哪（四个机制级断裂，各自一个框）</h3>
+      <div class="callout bad"><h4>⛔ 断裂一：存算一体 vs 冯诺依曼瓶颈</h4><p>芯片是冯诺依曼架构——存储和计算分离，数据要在内存和 CPU 之间来回搬，这条「总线」是性能和能耗的瓶颈。大脑根本没这个问题：<strong>突触既是存储也是计算单元，存算一体（in-memory computing）</strong><sup class="cite" data-refid="17">[17]</sup>。这是大脑能用 20 W 干活、而 GPU 集群要烧兆瓦的结构性原因之一。神经形态计算（neuromorphic computing）整个领域就是想在硅上模仿这一点，至今远未追平。<span class="conf g">🟢</span></p></div>
+      <div class="callout bad"><h4>⛔ 断裂二：大脑不做反向传播，做预测编码</h4><p>反向传播（backprop）是今天所有深度学习的学习算法，但它在生物上有<strong>三条不可行</strong>：要求权重对称（前向和反向用同一组权重）、要求全局误差信号、要求严格的前向-反向时序<sup class="cite" data-refid="19">[19]</sup>。真实大脑都不满足。<strong>「大脑不做精确 backprop」是站得住的；但「大脑到底用什么替代」仍是开放问题、各家在争。</strong>其中最有影响力的一家是 Friston 的<strong>自由能原理 / 预测编码</strong>——大脑不断生成对世界的预测，前馈通路传「预测误差」、反馈通路传「预测」，靠局部地最小化误差来学习<sup class="cite" data-refid="19">[19]</sup><sup class="cite" data-refid="26">[26]</sup>。但它只是候选之一，并存的还有：局部 Hebbian/STDP（「fire together wire together」，局部、无监督、无全局误差，与梯度下降根本不同）、树突层面的信用分配、神经调质驱动的强化学习、Equilibrium Propagation、Direct Feedback Alignment 等<sup class="cite" data-refid="27">[27]</sup>。结论稳的那部分：大脑和 AI 学习的<u>底层算法不是一回事</u>；至于大脑「正解」是哪个，别下定论。<span class="conf g">🟢</span></p></div>
+      <div class="callout bad"><h4>⛔ 断裂三：化学双系统（多巴胺/血清素），AI 没有</h4><p>2024 年斯坦福/Nature 的研究揭示：纹状体里的<strong>多巴胺（油门/奖励信号）和血清素（刹车/抑制信号）相互拮抗</strong>，共同驱动强化学习，缺一不可<sup class="cite" data-refid="23">[23]</sup>。大脑的学习是浸在一锅神经化学汤里的——还有激素、神经调质等多个维度在调制。而 AI 的梯度下降是<u>单向的纯数学过程</u>，没有化学刹车、没有情绪化、没有激素周期。这意味着人类的「动机、情绪、注意力波动」是学习机制的<strong>内生部分</strong>，不是 bug。<span class="conf y">🟡</span></p></div>
+      <div class="callout bad"><h4>⛔ 断裂四：具身认知，大脑长在身体里</h4><p>大脑的概念扎根在感觉-运动经验里——你理解「重」是因为你抱过重的东西，理解「冷」是因为你冻过。Clark 的「扩展心智（extended mind）」更进一步：认知不止在颅内，还分布在身体和工具里。AI 只从文本/像素学，<u>没有身体、没有和物理世界的因果互动闭环</u><sup class="cite" data-refid="2">[2]</sup>。此外大脑是模拟/脉冲信号（spiking），芯片是数字信号，连信息的物理载体都不同。<span class="conf g">🟢</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5" data-nav="05 当大脑是芯片">
+    <h2><span class="num">05</span><span class="title-text">若把大脑当芯片：人类的「预训练/后训练/模型」是什么</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>好，既然类比有成立的地方，我们就玩到底——如果硬把 Ch3 那三段 AI 范式往人身上套，对应得上吗？答案是：<strong>对得上得惊人地工整，但也正因为太工整，才要小心它是修辞不是机制。</strong></p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>AI 范式</th><th>人类对应</th><th>机制</th></tr></thead>
+        <tbody>
+          <tr><td><strong>预训练（吃海量数据建底座）</strong></td><td>童年关键期</td><td>0–7 岁语言关键期，大脑像海绵吸收，1–2 岁突触密度达峰值（比成人高约 50%）<sup class="cite" data-refid="21">[21]</sup></td></tr>
+          <tr><td><strong>剪枝优化</strong></td><td>突触修剪</td><td>2–10 岁剪掉约 50% 冗余突触，青春期前额叶继续大修剪；「用进废退」——不活跃的连接被删<sup class="cite" data-refid="21">[21]</sup></td></tr>
+          <tr><td><strong>参数冻结</strong></td><td>髓鞘化锁定</td><td>髓鞘化关闭关键期，把回路「固化」下来；2024 Nature 小鼠实验：阻断髓鞘化 → 成年仍保留青春期可塑性<sup class="cite" data-refid="22">[22]</sup></td></tr>
+          <tr><td><strong>后训练/微调</strong></td><td>成年后学习</td><td>底座基本定型，但仍能在「微调」层面学新技能（只是更慢、更需主动）</td></tr>
+        </tbody>
+      </table></div>
+      <p>看着是不是特别顺？童年=预训练窗口、突触修剪=剪枝、髓鞘化=冻结参数。但正是这种「太顺」，是个陷阱——</p>
+      <div class="trap-box"><strong>⚠️ 戳破类比边界（本章的魂）：每个时代都用当时最先进的技术来比喻大脑——这是修辞，不是机制。</strong>古希腊用水力学（体液），17 世纪用钟表/水管，19 世纪用电报，20 世纪用电话交换机，现在用计算机/芯片。Robert Epstein 在 2016 年那篇著名的「空脑（empty brain）」文章里抓住了这个历史规律：每一代人都坚信大脑「就是」他们时代最厉害的机器<sup class="cite" data-refid="24">[24]</sup>。<br><br>Epstein 走极端说「大脑根本不处理信息、不存记忆」，论证太薄弱（忽视了分布式表征的大量证据），这个结论是错的 🟡。但他那个<u>合理内核</u>必须记住：<strong>「大脑=芯片」是一个我们这个时代的隐喻，方便思考，但不要把隐喻当成对机制的描述。</strong>真正有价值的辩论不是「大脑是不是计算机」，而是「计算隐喻的边界在哪里」——Ch4 的四个断裂，就是这条边界。</div>
+      <div class="callout info"><p><strong>⚖️ 给类比留个公道（最强反驳，必须放进来）：「大脑≠芯片」不等于「大脑不是在计算」。</strong>用 Marr 的三层框架（计算层 = 在解什么问题 / 算法层 = 用什么表征和步骤 / 实现层 = 物理底物）：Ch4 的四个断裂全发生在<u>实现层</u>（硅 vs 碳、冯诺依曼 vs 存算一体、backprop vs 别的）——它们说明大脑不是<u>一颗冯诺依曼芯片</u>，<strong>但完全没否定大脑在「计算层/算法层」意义上是个信息处理系统</strong>。所以诚实的措辞是：大脑<u>不是芯片</u>（实现层不同），但很可能<u>是某种计算</u>（功能层成立）。这也是为什么本报告后半部分敢谈「用对算法去训练」——「算法」这个层面对大脑是适用的。</p></div>
+      <div class="callout info"><p><strong>这对阿杰意味着什么：</strong>「童年=预训练窗口」是真的——童年的环境对认知底座影响巨大，这有神经发育证据。但「成年就没法变聪明了」是<u>把类比推过头</u>了：成年大脑没有「freeze 全部参数」，它的可塑性下降但远没归零，只是从「自动吸收」切换成「需要主动、刻意、用对方法」。这正是为什么后面的训练章节重要——成年人的「微调」要靠方法，不能再指望关键期那种被动吸收。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6" data-nav="06 天生还是练的">
+    <h2><span class="num">06</span><span class="title-text">聪明是天生还是练的：nature × nurture 真相</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是所有人最想知道、也最容易被误读的一章。先给结论：<strong>智力很大程度上是遗传的，遗传度还随年龄上升；但「遗传度高」绝不等于「不可改变」。</strong>这两句话同时为真，理解它们怎么共存，是这一章的全部价值。</p>
+
+      <h3>事实一：遗传度随年龄上升（反直觉的 Wilson 效应）</h3>
+      <p>大多数人以为「小时候像白纸，长大被环境塑造」，所以会猜遗传影响随年龄<u>下降</u>。真相相反：认知能力的遗传度（h²）从 5 岁的 ~0.45，升到 11–17 岁的 0.67–0.70，再升到成年的约 0.80 渐近——这叫 <strong>Wilson 效应</strong><sup class="cite" data-refid="29">[29]</sup>。Polderman 2015 那篇史上最大双生子元分析（2748 篇文献、1455 万对双生子、17804 个特征）也支持：成年认知的遗传比重高，而共享环境（同一个家庭带来的相似性）极小，收养同胞成年后 IQ 相关性接近零<sup class="cite" data-refid="30">[30]</sup>。<span class="conf g">🟢</span></p>
+      <p><strong>为什么会上升？</strong>机制是主动基因-环境相关（active rGE）：青春期后你开始<u>自己选择环境</u>——爱读书的人找更多书读、有数学天赋的人选更难的数学，于是基因倾向被自己创造的环境不断放大<sup class="cite" data-refid="33">[33]</sup>。Colorado 收养研究显示：婴儿期 IQ 遗传度 ~20%，到青少年 >50%，主要就由这个主动 rGE 解释<sup class="cite" data-refid="33">[33]</sup>。</p>
+
+      <h3>事实二：环境能整体移动一代人（Flynn 效应）</h3>
+      <p>20 世纪每十年 IQ 上升约 3 分，一百年涨了约 30 分——这就是 <strong>Flynn 效应</strong><sup class="cite" data-refid="32">[32]</sup>。机制是营养改善、教育年限延长、减少铅暴露、抽象思维的普及。<u>注意</u>：近年发达国家已停滞甚至逆转（德国 2012–2022 图形推理每十年降 4.68–5.17 分），而发展中国家还在升<sup class="cite" data-refid="32">[32]</sup>（逆转原因仍有争议 🟡）。</p>
+      <div class="callout accent"><p><strong>📌 核心诚实点（请反复读这一段）：遗传度是群体统计，不是个人命运。</strong>h²=0.80 的意思是「在这个群体里，人和人的 IQ 差异有 80% 可归因于基因差异」——它<u>不</u>等于「你这个人的智力有 80% 被基因锁死、只剩 20% 能动」。证据就是：h²=0.80 和「整代人百年涨 30 分（Flynn）」完全兼容，因为 Flynn 效应改变的是整个群体的<u>均值</u>，而遗传度描述的是群体内的<u>方差分配</u>，两者是正交的。所以「遗传度高」≠「个人改不了」。这是这个领域被媒体误读最多的一点，也是阿杰最该把它从脑子里清掉的一个错误直觉<sup class="cite" data-refid="29">[29]</sup><sup class="cite" data-refid="32">[32]</sup>。</p></div>
+
+      <h3>事实三：贫困会「关掉」遗传，富裕环境才让遗传充分表达（Turkheimer）</h3>
+      <p>Turkheimer 2003 发现一个关键的交互效应：在<strong>低 SES（社会经济地位）家庭</strong>，IQ 的遗传度 h²≈10%、共享环境 ≈60%；在<strong>高 SES 家庭</strong>，h²≈72%、共享环境 ≈15%<sup class="cite" data-refid="34">[34]</sup>。换句话说，<u>贫困把遗传潜力压住了，富裕环境才让基因充分表达</u>（Scarr-Rowe 假说）。这意味着环境的可改变空间在低 SES 群体里巨大。⚠️ 注意这个效应在北欧（普遍福利、贫富差距小）复制困难，可能与社会保障水平有关 🟡<sup class="cite" data-refid="34">[34]</sup>。</p>
+
+      <h3>背景知识：g 因子、Gf vs Gc</h3>
+      <p>支撑这一切的是「g 因子」——Spearman 1904 发现各种认知测验都正相关（正流形），背后有个一般智力因子 g，这是「心理学被重复最多的发现」之一，g 与综合 IQ 相关 r&gt;0.95，与大脑体积相关 r≈0.3–0.4<sup class="cite" data-refid="31">[31]</sup>。CHC 模型把智力分三层（g → 10 个宽泛能力 → 70+ 窄能力）<sup class="cite" data-refid="54">[54]</sup>。其中两个对训练最相关：<strong>Gf 流体智力</strong>（推理全新问题的能力）和 <strong>Gc 晶体智力</strong>（积累的知识/经验）——Gf 像「CPU 算力」，Gc 像「硬盘里的存货」，而且 Gf 驱动 Gc 的获取<sup class="cite" data-refid="31">[31]</sup>。工作记忆和流体智力高度相关（r=0.30–0.80），最聪明者往往不是「神经更活跃」而是额顶网络「更高效」（神经效率假说）<sup class="cite" data-refid="55">[55]</sup>。坏消息：Gf 最难练（见 Ch7）；好消息：Gc 一辈子都能涨，而且很多「显得聪明」其实是 Gc 在起作用。<span class="conf g">🟢</span></p>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7" data-nav="07 能不能练出来">
+    <h2><span class="num">07</span><span class="title-text">智力到底能不能「练出来」：强证据 vs 已证伪</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>上一章说「环境有空间」，这一章给最关键的限定：<strong>能练的是「具体能力」，不是一个抽象的「变聪明」总开关。</strong>这题伪科学密集，必须严格区分同行评议证据和营销话术。先给最重要的概念。</p>
+      <div class="callout warn"><p><strong>核心难题：far transfer（远迁移）几乎为零。</strong>「近迁移」=练 A 让相似的 A' 变好（这个常成立）；「远迁移」=练 A 让<u>不相似的领域 B</u>也变好（比如练记忆数字让你数学/推理整体变强）——<strong>这个几乎不存在</strong>。Sala 2019 的二阶元分析（汇总了多个领域的元分析）发现远迁移的<u>总效应为零</u>；唯一的例外是有氧运动这种生理干预，而不是任何认知训练<sup class="cite" data-refid="40">[40]</sup>。这就是为什么「玩个游戏就能整体变聪明」的承诺基本都是假的。<span class="conf g">🟢</span></p></div>
+
+      <h3>已被证伪的那一拨（别浪费时间）</h3>
+      <div class="callout bad"><h4>⛔ n-back / 工作记忆训练 → 提升流体智力：已被否定</h4><p>2008 年 Jaeggi 的原始研究声称 n-back 训练能提升流体智力，引爆了整个脑训练产业。但它缺合适的对照组，后续重复屡屡失败：Melby-Lervåg &amp; Hulme 2013（23 项研究）发现<u>近迁移有、远迁移无</u>；2016 年再次确认；Simons 2016 的大型综述结论是「没有强证据」<sup class="cite" data-refid="35">[35]</sup>。简单说：练 n-back 会让你 n-back 变强，不会让你变聪明。<span class="conf g">🟢</span></p></div>
+      <div class="callout bad"><h4>⛔ 脑训练 App（Lumosity 等）：被 FTC 罚款的商业噱头</h4><p>2014 年 10 月，Stanford + 马普所 70 多名科学家发联名公开信，否定脑训练能防认知衰退；12 月有 127 名科学家（部分有产业利益）反驳，但他们多只能引「近迁移」证据<sup class="cite" data-refid="35">[35]</sup>。2016 年 1 月，<strong>FTC 因 Lumosity 虚假宣传「改善工作/学业表现、预防痴呆」而罚款 200 万美元</strong>（原判 5000 万，因财务状况减免），认定它「未能提供科学证据」<sup class="cite" data-refid="38">[38]</sup>。2025 年一项 Peak app 的 RCT 再次确认：训练任务本身都提升了，但迁移到认知测量上和对照组无差异——「practice makes perfect, but does not transfer」<sup class="cite" data-refid="64">[64]</sup>。<span class="conf g">🟢</span></p></div>
+      <div class="callout warn"><h4>⚠️ Cogmed：近迁移真实，远迁移被过度宣称</h4><p>Cogmed 的工作记忆训练，视空间/言语 WM 的<u>近迁移</u>是可见的（可持续约 6 个月），但<u>远迁移</u>有争议。问题在于支持它的研究多由 Cogmed 资助，独立复现偏弱<sup class="cite" data-refid="39">[39]</sup>。所以它不是骗局，但「让孩子整体变聪明/改善学业」的宣称超出了证据。<span class="conf y">🟡</span></p></div>
+
+      <h3>有强证据的那一拨（这些值得做）</h3>
+      <p>注意一个关键区别：上面证伪的是「<u>练某个游戏 → 整体智力提升</u>」；下面成立的是「<u>用对的学习方法 → 你真的记住、理解、能用更多东西</u>」。后者不是在练抽象的 g，而是在让你的学习效率翻倍。下一章（Ch8）会逐个展开方法，这里先给一句话定调和强弱对照表。</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>方法</th><th>证据强度</th><th>效应量 / 结论</th></tr></thead>
+        <tbody>
+          <tr><td>间隔重复 Spaced repetition</td><td class="check y">🟢 极强</td><td>「几无边界条件」地提升长期保留<sup class="cite" data-refid="37">[37]</sup></td></tr>
+          <tr><td>检索练习 Retrieval / 自测</td><td class="check y">🟢 强</td><td>g≈0.50，81% 的比较中检索胜<sup class="cite" data-refid="36">[36]</sup></td></tr>
+          <tr><td>自我解释 / 费曼</td><td class="check y">🟢 中强</td><td>g≈0.55（64 项研究）<sup class="cite" data-refid="42">[42]</sup></td></tr>
+          <tr><td>记忆宫殿 Method of loci</td><td class="check y">🟢 中强</td><td>6 周训练词表回忆 26→62 词，持续 4 月<sup class="cite" data-refid="41">[41]</sup></td></tr>
+          <tr><td>写作（涉及检索的）</td><td class="check p">🟡 中</td><td>生成效应；弱于纯检索练习<sup class="cite" data-refid="43">[43]</sup></td></tr>
+          <tr><td>n-back → 流体智力</td><td class="check n">🔴 已证伪</td><td>远迁移无<sup class="cite" data-refid="35">[35]</sup></td></tr>
+          <tr><td>脑训练 App（Lumosity）</td><td class="check n">🔴 商业噱头</td><td>FTC 罚 200 万美元<sup class="cite" data-refid="38">[38]</sup></td></tr>
+          <tr><td>通用防痴呆</td><td class="check n">🔴 无证据</td><td>科学家联名否定<sup class="cite" data-refid="35">[35]</sup></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8" data-nav="08 练记忆理解表达">
+    <h2><span class="num">08</span><span class="title-text">怎么练记忆 / 理解 / 表达：四个有证据的引擎</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是「能练的具体能力」里证据最硬的一组。它们的共同内核是一句话：<strong>大脑靠「提取（retrieval）」而不是「再次看见（re-exposure）」来巩固记忆。</strong>下面四个引擎，按证据强度排，每个都给你怎么用。</p>
+
+      <div class="callout good"><h4>🟢 引擎一：检索练习 / Testing effect（g≈0.50）</h4><p>Roediger &amp; Karpicke 2008（Science）的经典实验：学完一段材料后，「再读一遍」组 vs「测一遍（合书回忆）」组，<strong>测验组在延迟后的回忆显著更好</strong>——而且学生们普遍<u>低估</u>测验的效益，主观上觉得重读更有用（这是个危险的错觉）<sup class="cite" data-refid="36">[36]</sup>。Rowland 2014 的元分析（159 项研究）给出 g≈0.50，81% 的比较中检索组胜<sup class="cite" data-refid="36">[36]</sup>。Dunlosky 2013 把它评为「高效用」<sup class="cite" data-refid="56">[56]</sup>。<strong>怎么用：</strong>学完一章<u>合上书，把能想起来的全写下来</u>，再翻回去对照补漏。这一个动作，就能取代你 80% 的低效复习。</p></div>
+
+      <div class="callout good"><h4>🟢 引擎二：间隔重复 / Spaced repetition（几乎无边界条件）</h4><p>把复习分散到多天，而不是一次性塞满，长期保留显著更好。Kim &amp; Webb 2022 的元分析（48 个实验、3411 人）在二语学习上达到中到大效应；Kang 2016 总结「数百项研究证明它提升长期保留，几乎没有边界条件」<sup class="cite" data-refid="37">[37]</sup>，Dunlosky 同样评「高效用」<sup class="cite" data-refid="56">[56]</sup>。<strong>怎么用：</strong>一个新概念，在第 1、3、7、14 天各重新<u>提取</u>一次（注意是提取不是重读）。Anki 这类 SRS 工具就是把这个自动化。配合引擎一威力最大：间隔 + 检索 = 黄金组合。</p></div>
+
+      <div class="callout good"><h4>🟢 引擎三：自我解释 / 费曼技巧（g≈0.55）</h4><p>Bisra 2018 的元分析（64 项研究、6000+ 人）给出 g≈0.55<sup class="cite" data-refid="42">[42]</sup>。「费曼技巧」（假装要把概念教给一个外行，用大白话讲清楚）底层就是<u>自我解释 + 元认知 + 生成效应</u>的组合——你被迫发现自己「以为懂其实不懂」的地方。Dunlosky 评它「中等效用」<sup class="cite" data-refid="56">[56]</sup>。<strong>一个时序细节：</strong>自我解释在<u>检索练习之前</u>做效果更好；和检索同时做会认知过载<sup class="cite" data-refid="42">[42]</sup>。<strong>怎么用：</strong>学完一个东西，用自己的话（不许抄原文）写一段「讲给小白听」的解释，卡住的地方就是你的漏洞。</p></div>
+
+      <div class="callout good"><h4>🟢 引擎四：记忆宫殿 / Method of loci（专项记忆神器）</h4><p>Dresler 2017（Neuron）：6 周的记忆宫殿训练，让普通人的词表回忆从 26 个升到 62 个，效果持续 4 个月，而且大脑连接模式向「记忆运动员」靠拢<sup class="cite" data-refid="41">[41]</sup>。<strong>但要诚实标边界：</strong>它的迁移是「近到中等」——让你更会记<u>那类</u>有序信息（名单、流程、演讲要点），<u>不</u>提升流体智力<sup class="cite" data-refid="41">[41]</sup>。<strong>怎么用：</strong>把要记的东西挂在你熟悉路线上的固定位置（家→公司沿途的地标），靠空间记忆调取。适合记演讲、清单、外语词。</p></div>
+
+      <h3>写作：被低估但要用对</h3>
+      <p>写作能促进思考，但有讲究：<strong>涉及检索的写作（写 essay、自由回忆、把概念默写出来）效果好，不涉及检索的写作（抄笔记、做高亮）几乎没用</strong><sup class="cite" data-refid="43">[43]</sup>。这背后是生成效应（Slamecka &amp; Graf 1978）——自己生成的内容比被动读到的记得牢。但要诚实：写作的证据是「中等」，不及纯检索练习<sup class="cite" data-refid="43">[43]</sup>。所以别把「记了一大本漂亮笔记」当成学到了——那可能只是在抄。</p>
+      <div class="callout warn"><h4>⚠️ 这些方法也有失效模式（别盲用，要配反馈）</h4><p>有证据 ≠ 万无一失。每个引擎都有它的坑，关键是<strong>都要配一个「对答案/找反馈」的闭环</strong>，否则会越练越错：</p>
+      <ul style="margin:6px 0 0">
+        <li><strong>检索练习</strong>：如果你<u>不对答案</u>，会把错误答案也一起巩固进去（检索本身不分对错，只巩固你提取出来的东西）→ 每次回忆后<u>必须翻回原文核对</u>。</li>
+        <li><strong>间隔重复/Anki</strong>：容易把知识<u>切成碎片孤岛</u>——记住一堆零散卡片却串不成理解 → 卡片要带「为什么/和什么相关」，定期做整合性复盘，别只刷原子卡。</li>
+        <li><strong>费曼/自我解释</strong>：可能产生<u>「流畅的误解」</u>——你讲得很顺、自我感觉良好，但讲的是错的 → 需要外部校验（找懂的人、对权威材料、或用 AI 反问你「这里真的对吗」）。</li>
+        <li><strong>记忆宫殿</strong>：擅长记<u>有序清单</u>，不擅长记<u>需要深度理解的关系</u> → 别拿它硬记需要推理的东西。</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9" data-nav="09 练创造与想象">
+    <h2><span class="num">09</span><span class="title-text">怎么练创造力与想象力：协同、循环、孵化</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>创造力不是「天马行空」，神经科学给出的图景是「两个网络的精密配合」。先讲机制，再讲练法，最后纠正几个流行误解（这些误解阿杰很可能也信着）。</p>
+
+      <h3>机制：默认模式网络 × 执行控制网络的协同</h3>
+      <p>创造力的神经基础是 <strong>DMN（默认模式网络，负责自由联想、白日梦）和 FPN（额顶执行控制网络，负责聚焦、评估）的同步增强耦合</strong>——这反常识，因为这两个网络平时是相互抑制的<sup class="cite" data-refid="44">[44]</sup>。2024 年一项 stereo-EEG 研究用皮层电刺激干扰 DMN，导致<u>独创性下降</u>（但流畅性不变），提供了因果证据<sup class="cite" data-refid="44">[44]</sup>。配套的是<strong>发散思维（生成大量可能）和聚合思维（筛选收敛）的迭代循环</strong>——它们互补不对立，灵活切换（metacontrol）是关键<sup class="cite" data-refid="45">[45]</sup>。<span class="conf g">🟢</span></p>
+
+      <h3>能练吗：能，但要用对框架</h3>
+      <p>Scott 2004 的元分析（70 个项目）发现创造力训练有效，<u>基于认知框架的训练优于非认知型</u>；近年元分析（332 个效应）给出 g≈0.53<sup class="cite" data-refid="46">[46]</sup>。有效的共同点：扎实的认知理论框架 + 足够时长 + 多技能。<strong>但要诚实标一个大坑 ⚠️</strong>：这些研究大多用 TTCT（托兰斯创造性思维测验）来测效果，而 TTCT 是计时的人工任务，<u>它能预测真实创造成就，但只是中等相关</u>，不测动机和领域知识<sup class="cite" data-refid="47">[47]</sup>。换句话说，「TTCT 分数提高了」不等于「你真的更有创造力了」——迁移到真实成就的证据是弱的。<span class="conf y">🟡</span></p>
+
+      <h3>孵化效应：真实但小，且不是「放空就灵感」</h3>
+      <p>「想不出来时去散个步，回来突然就通了」——孵化效应（incubation）是真的，但 Sio &amp; Ormerod 2009 的元分析（117 项研究）给出的效应量只有 d≈0.29（小）<sup class="cite" data-refid="48">[48]</sup>。关键的两个条件：① <strong>必须先有充分的前期准备</strong>（不是放空就灵感，是「准备够了再放下」）；② 孵化期最好做<u>低认知负荷</u>的事（散步、洗澡，而非刷手机）。REM 睡眠对创造力的提升可达约 40%<sup class="cite" data-refid="48">[48]</sup>。<span class="conf g">🟢</span></p>
+
+      <h3>纠正三个流行误解（每个都配证据）</h3>
+      <div class="callout bad"><h4>⛔ 误解一：「群体头脑风暴更能出点子」——次优</h4><p>Diehl &amp; Stroebe 1987 + Mullen 1991 的元分析（38 个实验）结论很硬：<strong>同样人数，让大家各自独立想，产出的点子在数量和质量上都优于一起开会头脑风暴，优势约 83%</strong><sup class="cite" data-refid="49">[49]</sup>。原因是「生产阻塞」（要等别人说完）、社会懈怠、评价焦虑。唯一的例外是在线异步的头脑风暴。<strong>所以：先各自憋点子，再聚合，别一上来就开会群想。</strong><span class="conf g">🟢</span></p></div>
+      <div class="callout warn"><h4>⚠️ 误解二：「IQ 要过 120 才有创造力」——强版本不成立</h4><p>「门槛理论」流传甚广，但证据混乱。一项大型元分析（21 项研究、45880 人）发现 IQ 与创造力相关仅 r≈0.17，且 120 上下相关几乎相同，<u>不支持</u>硬门槛<sup class="cite" data-refid="50">[50]</sup>。Jauk 2013 用分段回归发现门槛随「创造力标准」浮动（流畅性约 85、独创性约 100、高质量独创约 120）——所以「弱版本」部分成立，「120 这个硬数字」是后人传播固化出来的<sup class="cite" data-refid="50">[50]</sup>。<strong>对阿杰：别用「我 IQ 够不够」来判断自己能不能创造，这个门槛大概率不卡你。</strong><span class="conf r">🔴</span></p></div>
+      <div class="callout warn"><h4>⚠️ 误解三：「左脑理性、右脑创意」——神话</h4><p>「左右脑分工」是被反复辟谣的神经神话。创造力恰恰是<u>全脑多网络协同</u>（DMN×FPN×顶叶），不是某半边脑的专属<sup class="cite" data-refid="44">[44]</sup>。另外补一个 AI 时代的有用区分：<strong>AI 的创造力是「组合式」（combinatorial，重排已有元素），人类独特在「变换式」（transformational，改写底层规则、范式转变）</strong><sup class="cite" data-refid="51">[51]</sup> 🟡——这是你做产品时的差异化抓手：让 AI 做组合，你做范式跳跃。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10" data-nav="10 读书是好方法吗">
+    <h2><span class="num">10</span><span class="title-text">读书是不是好的训练方式：正面回应你的直觉</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>阿杰你大概隐隐觉得「读了那么多书好像没怎么变」——这个直觉是对的，而且有证据。<strong>被动阅读是效率最低的学习方式之一。</strong></p>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">~57%</div><div class="l">主动回忆（active recall）后的保留率<sup class="cite" data-refid="57">[57]</sup>（⚠️ 此数为二次整理）</div></div>
+        <div class="metric"><div class="v">~29%</div><div class="l">被动阅读后的保留率<sup class="cite" data-refid="57">[57]</sup>（⚠️ 此数为二次整理）</div></div>
+        <div class="metric"><div class="v">低效用</div><div class="l">Dunlosky 给「重读 / 划线」的评级<sup class="cite" data-refid="56">[56]</sup></div></div>
+        <div class="metric"><div class="v">~40%</div><div class="l">「自己造答案」比「再读一遍」记得更深的幅度（生成效应）<sup class="cite" data-refid="59">[59]</sup></div></div>
+      </div>
+      <h3>为什么读完就忘：「熟悉感假象」</h3>
+      <p>读书时你会产生一种 <strong>fluency illusion（流畅性/熟悉感错觉）</strong>——读得顺、眼熟，大脑就误判「我懂了」。但「眼熟」和「能自己提取出来」是两回事。Dunlosky 2013 把重读、划线、高亮全部评为「低效用」，原因正是它们只制造熟悉感、<u>不制造提取</u><sup class="cite" data-refid="56">[56]</sup>。读书缺的就是 Ch8 的那个核心动作——<strong>提取</strong>。<span class="conf g">🟢</span></p>
+
+      <h3>怎么把「读书」变成真训练</h3>
+      <p>读书本身不是没用，是「只读不提取」没用。把下面四个动作加上去，读书就从「输入」变成「训练」：</p>
+      <div class="step"><div class="step-head"><span class="sn">1</span>合书自由回忆</div><div class="step-body">读完一章<u>合上书</u>，把记得的全写下来（检索练习，Ch8 引擎一），再翻回去补漏<sup class="cite" data-refid="36">[36]</sup>。这是把读书变训练的<strong>第一杠杆</strong>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>生成效应：自己造答案</div><div class="step-body">遇到一个观点，先<u>自己推一遍/自己造个例子</u>，再看作者怎么说——自己生成比再读一遍深约 40%（Slamecka &amp; Graf 1978）<sup class="cite" data-refid="59">[59]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>费曼 / 教别人（protégé effect）</div><div class="step-body">合上书用大白话把这章讲给外行听。Koh 2018：以「准备要教别人」的心态学习的组，测试成绩更好（protégé effect）<sup class="cite" data-refid="58">[58]</sup>。讲不顺的地方=没真懂。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>间隔复习 + 应用到真问题</div><div class="step-body">第 1/3/7/14 天重新提取（Ch8 引擎二）；最关键的——把书里的东西<u>用到你真实的产品决策/问题上</u>。能用，才算学会。</div></div>
+      <div class="callout info"><p><strong>一个温和的好消息：</strong>阅读对老年人工作记忆有温和的保护作用（2022 年一项 8 周 RCT）<sup class="cite" data-refid="58">[58]</sup>，「读闲书」不是浪费。但作为<strong>变能干的训练手段</strong>，纯读弱于主动解题、写作、教学。结论给你：<u>读书是好的「输入源」，但它本身不是好的「训练」——训练发生在你合上书之后做的那些事里。</u></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11" data-nav="11 每天该做什么">
+    <h2><span class="num">11</span><span class="title-text">每天该做什么：认知的「地基」</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>前面讲的都是「怎么学」。但在「学什么、怎么学」之上，还有一层更底层的<strong>生理地基</strong>——它决定了你大脑这台机器的「基础性能」。好消息：这层的证据，比任何认知训练都硬。</p>
+
+      <div class="callout good"><h4>🟢 地基一：有氧运动——效应最大、机制最清的一个</h4><p>这是整份报告里证据<strong>最硬</strong>的干预，没有之一。Erickson 2011（PNAS）：120 名老人 RCT，一年有氧运动让<u>海马体前部体积增大 2%</u>（对照组缩小 1.4%），空间记忆改善，BDNF（脑源性神经营养因子，相当于「大脑的肥料」）升高<sup class="cite" data-refid="60">[60]</sup>。BDNF 的元分析：单次运动 g≈0.46、长期 g≈0.58<sup class="cite" data-refid="61">[61]</sup>。Hillman/Erickson/Kramer 2008（Nature Rev Neurosci）：有氧提升执行功能、注意力、处理速度<sup class="cite" data-refid="61">[61]</sup>。回忆 Ch7：远迁移几乎全军覆没，<u>唯一的例外就是有氧运动</u>——它是生理干预，能跨领域提升认知<sup class="cite" data-refid="40">[40]</sup>。<strong>剂量：中等强度有氧，30–45 分钟，每周 3 次以上。</strong><span class="conf g">🟢</span></p></div>
+
+      <div class="callout good"><h4>🟢 地基二：睡眠——记忆巩固的生物必需，不是可选项</h4><p>睡眠不是「休息」，是大脑<strong>主动把白天的记忆从海马体转移到长期存储</strong>的工序——靠慢波、纺锤波、海马涟漪三种脑电活动完成<sup class="cite" data-refid="62">[62]</sup>。睡眠剥夺组的情景记忆、陈述性记忆显著劣于正常睡眠组<sup class="cite" data-refid="62">[62]</sup>。残酷的推论：<u>你白天再努力检索、间隔、费曼，如果当晚睡不够，巩固这一步直接断掉，等于白学一半。</u>睡前不学新内容、保证 7–8 小时，是性价比最高的「认知动作」之一。<span class="conf g">🟢</span></p></div>
+
+      <div class="callout warn"><h4>⚠️ 地基三：冥想——中等、参差，别神化</h4><p>冥想对注意力有<u>中等</u>效应，但证据参差：2023 年一项元分析（111 项 RCT、9538 人）给出「小到中等」效应，且<strong>很多研究缺乏主动对照组</strong>（即没排除安慰剂），效应也<u>小于运动</u><sup class="cite" data-refid="63">[63]</sup>。所以：冥想可以做，对专注和情绪调节有帮助，但别把它当成「变聪明」的主力，它的证据等级排在运动和睡眠之后。<span class="conf y">🟡</span></p></div>
+
+      <h3>真有效 vs 浪费时间（一张对照）</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>真有效（做这些）</th><th>浪费时间（停掉这些）</th></tr></thead>
+        <tbody>
+          <tr><td class="check y">练习测试 / 主动回忆<sup class="cite" data-refid="36">[36]</sup></td><td class="check n">被动重读 / 划线高亮<sup class="cite" data-refid="56">[56]</sup></td></tr>
+          <tr><td class="check y">间隔重复<sup class="cite" data-refid="37">[37]</sup></td><td class="check n">脑训练 App<sup class="cite" data-refid="64">[64]</sup></td></tr>
+          <tr><td class="check y">写作输出 / 教别人费曼<sup class="cite" data-refid="42">[42]</sup></td><td class="check n">泛读打卡 / 看视频囤积<sup class="cite" data-refid="56">[56]</sup></td></tr>
+          <tr><td class="check y">有氧运动 30–45min×3+/周<sup class="cite" data-refid="60">[60]</sup></td><td class="check n">追求记一大本漂亮笔记（在抄）<sup class="cite" data-refid="43">[43]</sup></td></tr>
+          <tr><td class="check y">充足睡眠 7–8 小时<sup class="cite" data-refid="62">[62]</sup></td><td class="check n">熬夜学习（断掉巩固）<sup class="cite" data-refid="62">[62]</sup></td></tr>
+          <tr><td class="check y">解决真实问题（刻意练习）<sup class="cite" data-refid="52">[52]</sup></td><td class="check n">朴素重复（开车 20 年≠赛车手）<sup class="cite" data-refid="52">[52]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info"><p><strong>关于「刻意练习」和那个 10000 小时：</strong>「10000 小时定律」是 Gladwell 的二次创作，Ericsson 原书<u>从没用过这个词</u><sup class="cite" data-refid="52">[52]</sup>。真正重要的是「刻意练习」四标准：老师/框架设计的任务 + 清晰目标 + 即时反馈 + 反复修正<sup class="cite" data-refid="52">[52]</sup>。而且 Macnamara 2014 的元分析（88 项研究）泼了盆冷水：刻意练习能解释的成就差异，棋类 26%、音乐 21%、体育 18%、教育 4%、专业领域&lt;1%<sup class="cite" data-refid="53">[53]</sup>——也就是说，越是开放、复杂的领域（比如做产品），<u>练习之外的因素（天赋、起步年龄、动机、机遇）占比越大</u>。这不是叫你别练，是叫你别迷信「光靠时长堆」，要练得「刻意」（有目标、有反馈），还要接受运气和时机的客观权重。<span class="conf g">🟢</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12" data-nav="12 阿杰路线建议">
+    <h2><span class="num">12</span><span class="title-text">【阿杰路线建议】每日训练方案 + 30 天起步 + 停止清单</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把前 11 章压成你明天就能执行的东西。先用一棵决策树回答「此刻该做什么」，再给每日动作表、30 天路径和停止清单。</p>
+
+      <h3>决策树：现在这一刻，该做哪个动作？</h3>
+      <div class="tree">
+        <div class="node q">Q1 · 你现在的目标是什么？</div>
+        <div class="node"><span class="lbl y">记住某些东西（概念/词/流程）</span>→ 检索练习 + 间隔重复（Ch8 引擎 1+2），别重读 → Q2</div>
+        <div class="node"><span class="lbl y">真正理解一个难概念</span>→ 费曼/自我解释：用大白话写「讲给小白」（Ch8 引擎 3）→ Q2</div>
+        <div class="node"><span class="lbl m">想出新点子/做创意</span>→ 先各自憋（别群想）+ 充分准备后散步孵化（Ch9）→ Q2</div>
+        <div class="node"><span class="lbl n">想「整体变聪明」走捷径</span>⛔ 没有这种捷径（far transfer≈0）→ 别买脑训练 App，回到上面三条具体动作</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q2 · 今天的「地基」到位了吗？</div>
+        <div class="node"><span class="lbl n">昨晚没睡够 7 小时</span>→ 今天学习产出会打折（巩固断掉），优先补觉，别硬堆量（Ch11）</div>
+        <div class="node"><span class="lbl n">这周还没做有氧</span>→ 先去运动 30–45min，它是唯一能跨领域提认知的干预（Ch11/Ch7）</div>
+        <div class="node"><span class="lbl y">睡眠+运动都在线</span>✅ 地基稳，学习效率才拉得满 → Q3</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q3 · 你在「输入」还是「训练」？</div>
+        <div class="node"><span class="lbl n">在被动读/看/囤</span>⚠️ 这是输入不是训练 → 合书回忆 / 写一段 / 用到真问题，立刻转成训练（Ch10）</div>
+        <div class="node"><span class="lbl y">在主动提取/输出/解真问题</span>✅ 这才是在变能干 → 保持，并安排明天的间隔复习</div>
+      </div>
+
+      <h3>每日可执行动作表（贴墙上那种）</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>时段</th><th>动作</th><th>证据</th></tr></thead>
+        <tbody>
+          <tr><td><strong>早晨</strong></td><td>中等强度有氧 30–45 分钟（跑步/快走/骑行）</td><td class="check y">🟢 海马体+BDNF，全报告最硬<sup class="cite" data-refid="60">[60]</sup></td></tr>
+          <tr><td><strong>学习时</strong></td><td>读完一段<u>合书自由回忆</u>，写下来——<strong>取代</strong>高亮/重读</td><td class="check y">🟢 检索练习 g≈0.50<sup class="cite" data-refid="36">[36]</sup></td></tr>
+          <tr><td><strong>学习时</strong></td><td>难概念用自己的话写「讲给外行」（费曼）</td><td class="check y">🟢 自我解释 g≈0.55<sup class="cite" data-refid="42">[42]</sup></td></tr>
+          <tr><td><strong>跨天</strong></td><td>新东西在第 1/3/7/14 天各<u>重新提取</u>一次（Anki）</td><td class="check y">🟢 间隔重复，几无边界<sup class="cite" data-refid="37">[37]</sup></td></tr>
+          <tr><td><strong>晚间</strong></td><td>把当天最难的概念用推理写清一段</td><td class="check p">⚠️ 写作中等效用<sup class="cite" data-refid="43">[43]</sup></td></tr>
+          <tr><td><strong>全天</strong></td><td>遇到不懂主动追「为什么」，不接受「大概懂了」</td><td class="check p">⚠️ 对抗熟悉感假象<sup class="cite" data-refid="56">[56]</sup></td></tr>
+          <tr><td><strong>睡前</strong></td><td>不学新内容，保证 7–8 小时睡眠</td><td class="check y">🟢 记忆巩固生物必需<sup class="cite" data-refid="62">[62]</sup></td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>30 天起步路径（别一次全上，循序）</h3>
+      <div class="step"><div class="step-head"><span class="sn">1</span>第 1–7 天：先装地基（最容易、回报最稳）</div><div class="step-body">只做两件事：① 每周 3 次有氧（先从快走开始）；② 固定睡眠 7–8 小时、睡前不学新东西。<u>什么学习技巧都先不动</u>——地基没稳，技巧白搭。一周后你会感觉脑子「清楚」一点，这是 BDNF 和睡眠在起作用<sup class="cite" data-refid="60">[60]</sup><sup class="cite" data-refid="62">[62]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>第 8–14 天：加一个动作——合书回忆</div><div class="step-body">学任何东西（看产品文档、读书、学技术），<strong>每读完一段就合上，把记得的写下来再对照补漏</strong>。只加这<u>一个</u>动作，是性价比最高的杠杆<sup class="cite" data-refid="36">[36]</sup>。这一周的目标就是把「重读=学习」这个习惯改掉。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>第 15–21 天：加间隔复习 + 费曼</div><div class="step-body">用 Anki（或任何 SRS）把要长期记的东西做成卡片，按 1/3/7/14 天间隔提取<sup class="cite" data-refid="37">[37]</sup>；每周挑 2–3 个最重要的概念，写一段「讲给外行听」的费曼解释<sup class="cite" data-refid="42">[42]</sup>。讲不顺的就是你的认知漏洞。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>第 22–30 天：把学的东西用到真问题上</div><div class="step-body">这是最关键的迁移环节——把这个月学的，<strong>用到你真实的半米产品决策/技术选型上</strong>。刻意练习的内核是「有目标 + 即时反馈 + 反复修正」<sup class="cite" data-refid="52">[52]</sup>，做产品天然提供反馈。学了不用＝Gc 进不了你的工具箱。</div></div>
+
+      <div class="callout info"><h4>📏 让方案可证伪：先定基线，再看有没有动（别凭感觉）</h4><p>「感觉脑子清楚了」不算数——给自己几个能测的指标，第 0 天记基线，第 30 天再测一次。注意：这套是练「具体能力 + 学习效率 + Gc」，<u>不是</u>去刷一个抽象的 IQ 分（那个练不动，见 Ch7）。</p>
+      <ul style="margin:6px 0 0">
+        <li><strong>记忆/保留：</strong>挑一组要学的材料，第 30 天做<u>延迟回忆测验</u>，看正确率比月初是否提升。</li>
+        <li><strong>理解/迁移：</strong>能不能把这个月学的东西<u>用到一个新的真实产品问题</u>上（迁移任务），讲得清逻辑。</li>
+        <li><strong>输出质量：</strong>留一篇月初、一篇月末的费曼解释/决策笔记，对比清晰度（可让 AI 或懂的人按同一标准打分）。</li>
+        <li><strong>地基依从性：</strong>客观记录这 30 天的<u>有氧次数</u>和<u>平均睡眠时长</u>——这两个是因，认知改善是果，先确保因到位。</li>
+      </ul>
+      <p style="margin-top:6px;font-size:14px">如果地基依从性达标但指标没动 → 调整方法（可能没真在「提取」）；如果连地基都没做到 → 别怪方法，先补地基。这样它就是个能自我纠错的实验，而不是一句口号。</p></div>
+
+      <h3>停止做什么清单（反鸡汤，直接砍）</h3>
+      <div class="check-box">
+        <strong>⛔ 停掉脑训练 App / n-back 刷分</strong>：练那个游戏只让你那个游戏变强，不会整体变聪明（far transfer≈0，Lumosity 被罚 200 万美元）<sup class="cite" data-refid="40">[40]</sup><sup class="cite" data-refid="38">[38]</sup>。<br>
+        <strong>⛔ 停掉「读完/看完就算学了」</strong>：被动阅读保留率最低之一，没有合书提取的阅读≈白读<sup class="cite" data-refid="56">[56]</sup>。<br>
+        <strong>⛔ 停掉划线/高亮/抄漂亮笔记当主力</strong>：制造熟悉感假象，是低效用的代表<sup class="cite" data-refid="56">[56]</sup>。<br>
+        <strong>⛔ 停掉熬夜学习</strong>：当晚睡不够直接掐断记忆巩固，白天的努力打对折<sup class="cite" data-refid="62">[62]</sup>。<br>
+        <strong>⛔ 停掉「等我 IQ 够了/天赋够了再做创意」</strong>：120 硬门槛大概率不卡你，创造力靠的是 DMN×执行网络的可练协同 + 充分准备后的孵化<sup class="cite" data-refid="50">[50]</sup><sup class="cite" data-refid="44">[44]</sup>。<br>
+        <strong>⛔ 停掉一上来就开会群想点子</strong>：群体头脑风暴次优，先各自憋再聚合<sup class="cite" data-refid="49">[49]</sup>。
+      </div>
+      <div class="callout accent"><p><strong>📌 一句话收口（这份报告的魂）：</strong>大脑不是芯片——它不靠升级硬件变强，靠的是「用对算法 + 养好地基」。你变不聪明的总开关不存在（far transfer≈0），但你能让具体能力实打实变强：<u>主动提取代替被动输入、间隔代替突击、输出代替囤积、运动和睡眠托住底座、把学的东西用到真问题上</u>。智力大半是遗传的，可这跟你没关系——遗传度是描述群体的统计，不是给你个人判的刑；属于你的那块可改变空间，全在你每天合书回忆、写费曼、去跑步、睡够觉这些动作里。明天就从「装地基」的第 1 天开始。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq" data-nav="FAQ 常见问题">
+    <h2><span class="num">Q</span><span class="title-text">FAQ 常见问题</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">大脑到底是不是计算机/芯片？一句话给我个判断。</span><span class="toggle">＋</span></div><div class="faq-a"><p>功能层面像（都在处理信息、改连接强度），机制层面几乎处处不同：大脑存算一体没有冯诺依曼瓶颈、不做反向传播而做预测编码、泡在多巴胺/血清素的化学汤里、长在身体上（具身）<sup class="cite" data-refid="17">[17]</sup><sup class="cite" data-refid="19">[19]</sup><sup class="cite" data-refid="23">[23]</sup>。最实用的判断：「大脑=芯片」是我们这个时代的<u>隐喻</u>，每个时代都用当时最先进的技术比喻大脑——拿它来思考可以，别当成对机制的真实描述<sup class="cite" data-refid="24">[24]</sup>。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">成年了还能变聪明吗？还是关键期一过就定型？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能，但方式变了。童年关键期是「预训练窗口」，大脑像海绵被动吸收；髓鞘化把一部分回路「锁定」<sup class="cite" data-refid="22">[22]</sup>。但成年大脑没有冻结全部参数，可塑性下降而非归零——它从「自动吸收」切换成「需要主动、刻意、用对方法」。所以成年人变能干靠的是 Ch8 那些有证据的方法，不能再指望被动吸收。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">智力 80% 遗传，那我后天努力不是没用？</span><span class="toggle">＋</span></div><div class="faq-a"><p>这是最大的误读。h²=0.80 是「群体里人和人的差异有 80% 来自基因差异」，<u>不是</u>「你这个人 80% 被基因锁死」。证据：遗传度这么高的同时，整代人靠环境百年涨了约 30 分（Flynn 效应）<sup class="cite" data-refid="32">[32]</sup>——因为遗传度描述群体内的方差分配，Flynn 改变的是群体均值，两者正交。而且贫困会把遗传度压到 ~10%（环境空间巨大）<sup class="cite" data-refid="34">[34]</sup>。结论：遗传度高 ≠ 个人改不了。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">有没有一个练习能让我整体变聪明？</span><span class="toggle">＋</span></div><div class="faq-a"><p>没有。这就是「far transfer（远迁移）≈0」——练某个具体任务，那个任务会变好，但不会外溢成整体智力提升。两次大型二阶元分析把远迁移总效应钉在零附近<sup class="cite" data-refid="40">[40]</sup>。唯一的跨领域例外是有氧运动（生理干预，不是认知训练）<sup class="cite" data-refid="40">[40]</sup>。能练的是「具体能力」（记某类东西、解某类问题、某个领域的创造），不是一个抽象的「聪明」总开关。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">脑训练 App（Lumosity 那种）值得花钱吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不值得。Lumosity 因虚假宣传「改善工作/学业、防痴呆」被 FTC 罚 200 万美元，认定「未能提供科学证据」<sup class="cite" data-refid="38">[38]</sup>。2025 年 Peak app 的 RCT 再次确认「practice makes perfect, but does not transfer」——App 里的任务你会越玩越溜，但不迁移到真实认知<sup class="cite" data-refid="64">[64]</sup>。这钱拿去买跑鞋（有氧）回报高得多。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">我读了很多书但感觉没变，是我的问题吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不是你的问题，是方法的问题。被动阅读是保留率最低的学习方式之一（主动回忆约 57% vs 被动约 29%，此为二次整理数据）<sup class="cite" data-refid="57">[57]</sup>，因为读书制造「熟悉感假象」却不制造「提取」<sup class="cite" data-refid="56">[56]</sup>。修法：读完合书回忆、自己造例子、讲给外行、间隔复习、用到真问题——加上这五个动作，读书就从输入变成训练（Ch10）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">检索练习和间隔重复，哪个更该先用？</span><span class="toggle">＋</span></div><div class="faq-a"><p>一起用，威力最大。检索练习（合书回忆/自测，g≈0.50）解决「怎么学一次」<sup class="cite" data-refid="36">[36]</sup>；间隔重复解决「怎么不忘」（几乎无边界条件地提升长期保留）<sup class="cite" data-refid="37">[37]</sup>。组合方式：用 Anki 这类 SRS，卡片正面是问题、背面是答案——你被迫「提取」（检索），系统按间隔安排复习（间隔），两个黄金机制一次拿下。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">费曼技巧是不是被吹过头了？真有用吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>真有用，但要知道它为什么有用。它底层是「自我解释」，元分析 g≈0.55（64 项研究）<sup class="cite" data-refid="42">[42]</sup>，Dunlosky 评中等效用<sup class="cite" data-refid="56">[56]</sup>。有效是因为用大白话讲给外行会逼你发现「以为懂其实不懂」的地方（生成效应+元认知）。一个时序细节：自我解释放在<u>检索练习之前</u>更好，同时做会过载<sup class="cite" data-refid="42">[42]</sup>。它不是魔法，是个扎实的中上等工具。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">创造力能练吗？我是不是天生没创意？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能练，元分析 g≈0.53，基于认知框架的训练最有效<sup class="cite" data-refid="46">[46]</sup>。但诚实地说：这些研究多用 TTCT 测分，而「TTCT 分提高」迁移到真实创造成就的证据较弱<sup class="cite" data-refid="47">[47]</sup>。机制上创造力是 DMN×执行网络的协同<sup class="cite" data-refid="44">[44]</sup>，不是某种天生开关。「天生没创意」多半是误会——「IQ 过 120 才有创造力」的硬门槛证据不成立<sup class="cite" data-refid="50">[50]</sup>。要练就练发散×聚合的循环 + 充分准备后的孵化。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">运动 vs 冥想 vs 睡眠，时间有限先做哪个？</span><span class="toggle">＋</span></div><div class="faq-a"><p>优先级：<strong>睡眠 ≈ 运动 &gt; 冥想</strong>。睡眠是记忆巩固的生物必需（缺了白天努力打对折）<sup class="cite" data-refid="62">[62]</sup>；有氧运动是证据最硬、唯一能跨领域提认知的干预（海马体+BDNF）<sup class="cite" data-refid="60">[60]</sup>；冥想对注意力有小到中等效应但证据参差、且小于运动<sup class="cite" data-refid="63">[63]</sup>。时间紧就保睡眠+每周 3 次有氧，冥想锦上添花。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">「10000 小时定律」靠谱吗？我刻意练够久就能成专家？</span><span class="toggle">＋</span></div><div class="faq-a"><p>「10000 小时」是 Gladwell 的二次创作，Ericsson 原书没用过这个数<sup class="cite" data-refid="52">[52]</sup>。真正的内核是「刻意练习」四条件（设计好的任务+清晰目标+即时反馈+反复修正），不是单纯堆时长——开车 20 年也成不了赛车手<sup class="cite" data-refid="52">[52]</sup>。而且 Macnamara 2014 元分析：刻意练习解释的成就差异，棋类 26%、专业领域&lt;1%<sup class="cite" data-refid="53">[53]</sup>——越复杂开放的领域，天赋/时机/动机占比越大。练，但要练得刻意，并接受运气的客观权重。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q12</span><span class="qtext">AI 都这么强了，我训练自己的脑子还有意义吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>有，而且现在更该把 AI 当成「认知工具」用进训练里。一个有用（但要诚实）的区分：<u>现阶段的 LLM 在「重组已有元素」上很强，在「自主的范式级跳跃」上还弱</u>（Boden 的 combinational vs transformational 框架）<sup class="cite" data-refid="51">[51]</sup> 🟡——注意人类也大量靠重组，而人+AI 协作也可能催生变换式成果，所以这是程度差异不是铁壁。<strong>把 AI 接进 Ch12 方法的具体打法</strong>：① 让 AI 帮你生成 Anki 卡片/出测验题（省制卡时间）；② 用苏格拉底式追问让它一直反问你「为什么」，逼出你的认知漏洞（费曼的外部校验）；③ 在代码/数学上拿它当即时反馈源（刻意练习要的就是即时反馈）。<strong>一个硬提醒 ⚠️</strong>：AI 会一本正经地编（hallucination），所以凡是事实/数字，必须把它当「会犯错的助教」交叉核对，别让它的流畅性变成你的「流畅的误解」。把脑力投到「定义对的问题、做范式级判断、把知识用到真实决策」上——这是 Ch12 那套方法在养、AI 暂时替不了的能力。</p></div></div>
+    </div>
+  </section>
+
+  <!-- ===== REFS ===== -->
+  <section class="chapter" id="refs" data-nav="References">
+    <h2><span class="num">R</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13.5px">共 64 条。访问日期均为 2026-06-18。来源以同行评议论文、元分析、官方/权威机构页面与百科为主；标 🟡 处为单一来源或个案，标 🔴 处为学界争议或已被证伪的流行说法。效应量与统计数字以来源原文为准；少数「二次整理」数字（如保留率 57%/29%）已在正文标注。</p>
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://www.ideasthesia.org/brain-efficiency-20-watts/" target="_blank" rel="noopener">The brain runs on ~20 watts — brain efficiency（Ideasthesia）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次</span></li>
+        <li id="ref-2"><a href="https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2024.1364714/full" target="_blank" rel="noopener">Human few-shot learning vs LLM in-context learning &amp; embodiment（Frontiers in Psychology, 2024）</a><span class="ref-meta">· 2026-06-18 · 引用 4 次</span></li>
+        <li id="ref-3"><a href="https://arxiv.org/html/2403.05175v1" target="_blank" rel="noopener">Causal reasoning &amp; catastrophic forgetting limits of LLMs（arXiv 2403.05175）</a><span class="ref-meta">· 2026-06-18 · 引用 4 次</span></li>
+        <li id="ref-4"><a href="https://www.alphanome.ai/post/the-ghost-in-the-machine-learning-the-problem-of-qualia-in-ai" target="_blank" rel="noopener">The problem of qualia / consciousness in AI（Alphanome AI）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次 · 🔴争议</span></li>
+        <li id="ref-5"><a href="https://en.wikipedia.org/wiki/History_of_artificial_neural_networks" target="_blank" rel="noopener">History of artificial neural networks（Perceptron 1958 / Backprop 1986）— Wikipedia</a><span class="ref-meta">· 2026-06-18 · 引用 2 次</span></li>
+        <li id="ref-6"><a href="https://spectrum.ieee.org/alexnet-source-code" target="_blank" rel="noopener">AlexNet 2012: ImageNet 转折点（IEEE Spectrum）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次</span></li>
+        <li id="ref-7"><a href="https://en.wikipedia.org/wiki/Word2vec" target="_blank" rel="noopener">word2vec / seq2seq（Wikipedia）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次</span></li>
+        <li id="ref-8"><a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">Attention Is All You Need — Transformer 原始论文（Vaswani et al., 2017）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次</span></li>
+        <li id="ref-9"><a href="https://mbrenndoerfer.com/writing/chinchilla-scaling-laws-compute-optimal-llm-training" target="_blank" rel="noopener">Scaling laws：Kaplan 2020 / Chinchilla 2022 解读</a><span class="ref-meta">· 2026-06-18 · 引用 2 次</span></li>
+        <li id="ref-10"><a href="https://lifearchitect.ai/chinchilla/" target="_blank" rel="noopener">Chinchilla 最优计算：20 token/参数、击败 Gopher（LifeArchitect）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次</span></li>
+        <li id="ref-11"><a href="https://medium.com/@aahanabisoi2020/your-brain-runs-on-20-watts-929861bbafd1" target="_blank" rel="noopener">Your brain runs on 20 watts vs AI training energy（Medium）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次</span></li>
+        <li id="ref-12"><a href="https://arxiv.org/pdf/2203.02155" target="_blank" rel="noopener">Training language models to follow instructions — InstructGPT/RLHF（Ouyang et al., 2022）</a><span class="ref-meta">· 2026-06-18 · 引用 3 次</span></li>
+        <li id="ref-13"><a href="https://queirozf.com/entries/paper-summary-chain-of-thought-prompting-elicits-reasoning-in-large-language-models" target="_blank" rel="noopener">Chain-of-Thought Prompting（Wei et al., 2022）摘要</a><span class="ref-meta">· 2026-06-18 · 引用 1 次</span></li>
+        <li id="ref-14"><a href="https://hazyresearch.stanford.edu/blog/2025-11-11-ipw" target="_blank" rel="noopener">Intelligence Per Watt：算法 3.1× vs 硬件 1.7×（Stanford HazyResearch）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次</span></li>
+        <li id="ref-15"><a href="https://en.wikipedia.org/wiki/OpenAI_o1" target="_blank" rel="noopener">推理时计算 / o1 / o3 范式与三段训练（Wikipedia + arXiv 2502.21321）</a><span class="ref-meta">· 2026-06-18 · 引用 4 次</span></li>
+        <li id="ref-16"><a href="https://papers.neurips.cc/paper_files/paper/2023/file/adc98a266f45005c403b8311ca7e8bd7-Paper-Conference.pdf" target="_blank" rel="noopener">Are Emergent Abilities of LLMs a Mirage?（Schaeffer et al., NeurIPS 2023）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次 · 🔴争议</span></li>
+        <li id="ref-17"><a href="https://www.sciencedirect.com/topics/materials-science/neuromorphic-computing" target="_blank" rel="noopener">Neuromorphic computing：存算一体 vs 冯诺依曼瓶颈（ScienceDirect）</a><span class="ref-meta">· 2026-06-18 · 引用 3 次</span></li>
+        <li id="ref-18"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4529320/" target="_blank" rel="noopener">大脑稀疏激活：任一时刻仅 0.5%–2% 神经元激活（PMC）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次</span></li>
+        <li id="ref-19"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2666703/" target="_blank" rel="noopener">大脑不做精确 backprop / 自由能原理 / 预测编码（PMC）</a><span class="ref-meta">· 2026-06-18 · 引用 3 次</span></li>
+        <li id="ref-20"><a href="https://royalsocietypublishing.org/rstb/article/379/1906/20230218" target="_blank" rel="noopener">LTP 长时程增强：NMDA→Ca²⁺→AMPA，真实「权重更新」（Phil Trans R Soc B）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次</span></li>
+        <li id="ref-21"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7368197/" target="_blank" rel="noopener">突触修剪：发育剪除约 50% 冗余、活动依赖、小胶质细胞清除（PMC）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次</span></li>
+        <li id="ref-22"><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11424474/" target="_blank" rel="noopener">髓鞘化关闭关键期：阻断髓鞘化→成年保留可塑性（2024 Nature/PMC）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次</span></li>
+        <li id="ref-23"><a href="https://neuroscience.stanford.edu/news/dopamine-and-serotonin-work-opposition-shape-learning" target="_blank" rel="noopener">多巴胺与血清素拮抗共同驱动强化学习（Stanford/Nature, 2024）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次 · 🟡</span></li>
+        <li id="ref-24"><a href="https://arxiv.org/pdf/2107.14042" target="_blank" rel="noopener">大脑隐喻史与「空脑」论辩（计算隐喻的边界 / 评 Epstein）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次 · 🟡</span></li>
+        <li id="ref-25"><a href="https://www.brainfacts.org/brain-anatomy-and-function/anatomy/2019/how-much-energy-does-the-brain-use-020119" target="_blank" rel="noopener">大脑能耗约 20W / 神经元与突触数量（BrainFacts）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次</span></li>
+        <li id="ref-26"><a href="https://www.nature.com/articles/nrn2787" target="_blank" rel="noopener">预测编码 / 自由能原理（Friston, Nature Reviews Neuroscience）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次</span></li>
+        <li id="ref-27"><a href="https://www.cell.com/current-biology/fulltext/S0960-9822(24)00606-7" target="_blank" rel="noopener">Hebbian 可塑性「fire together wire together」的局部性（Current Biology, 2024）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次</span></li>
+        <li id="ref-28"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12595464/" target="_blank" rel="noopener">大脑能耗与 AI 训练能耗对比（PMC）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次</span></li>
+        <li id="ref-29"><a href="https://www.cambridge.org/core/journals/twin-research-and-human-genetics/article/wilson-effect.../FF406CC4CF286D78AF72C9E7EF9B5E3F" target="_blank" rel="noopener">Wilson 效应：遗传度随年龄升至成年约 0.80（Twin Research &amp; Human Genetics）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次</span></li>
+        <li id="ref-30"><a href="https://www.nature.com/articles/ng.3285" target="_blank" rel="noopener">Polderman 2015：史上最大双生子元分析（1455 万对，平均 h²=49%）（Nature Genetics）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次</span></li>
+        <li id="ref-31"><a href="https://en.wikipedia.org/wiki/G_factor_(psychometrics)" target="_blank" rel="noopener">g 因子 / Spearman 正流形 / CHC / Gf vs Gc（Wikipedia）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次</span></li>
+        <li id="ref-32"><a href="https://en.wikipedia.org/wiki/Flynn_effect" target="_blank" rel="noopener">Flynn 效应：每十年约 +3 分，近年发达国家停滞/逆转（Wikipedia + PMC）</a><span class="ref-meta">· 2026-06-18 · 引用 3 次</span></li>
+        <li id="ref-33"><a href="https://www.sciencedirect.com/topics/biochemistry-genetics-and-molecular-biology/gene-environment-correlation" target="_blank" rel="noopener">基因-环境相关 rGE（被动/唤起/主动）与 Colorado 收养研究（ScienceDirect）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次</span></li>
+        <li id="ref-34"><a href="https://journals.sagepub.com/doi/10.1046/j.0956-7976.2003.psci_1475.x" target="_blank" rel="noopener">Turkheimer 2003：低 SES 家庭遗传度趋零、共享环境主导（Psychological Science）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次 · 🟡</span></li>
+        <li id="ref-35"><a href="https://journals.sagepub.com/doi/10.1177/1745691616635612" target="_blank" rel="noopener">Simons 2016 综述 + Melby-Lervåg/Hulme：n-back 远迁移被否定（Psych Sci Public Interest）</a><span class="ref-meta">· 2026-06-18 · 引用 4 次</span></li>
+        <li id="ref-36"><a href="http://psychnet.wustl.edu/memory/wp-content/uploads/2018/04/Karpicke-Roediger-2008_Sci.pdf" target="_blank" rel="noopener">Roediger &amp; Karpicke 2008 检索练习（Science）+ Rowland 2014 元分析 g=0.50</a><span class="ref-meta">· 2026-06-18 · 引用 7 次</span></li>
+        <li id="ref-37"><a href="https://onlinelibrary.wiley.com/doi/abs/10.1111/lang.12479" target="_blank" rel="noopener">Kim &amp; Webb 2022 间隔重复元分析 + Kang 2016「几无边界条件」（Language Learning）</a><span class="ref-meta">· 2026-06-18 · 引用 5 次</span></li>
+        <li id="ref-38"><a href="https://www.ftc.gov/news-events/news/press-releases/2016/01/lumosity-pay-2-million-settle-ftc-deceptive-advertising-charges-its-brain-training-program" target="_blank" rel="noopener">FTC：Lumosity 因虚假宣传罚款 200 万美元（FTC 新闻稿）</a><span class="ref-meta">· 2026-06-18 · 引用 3 次</span></li>
+        <li id="ref-39"><a href="https://www.sciencedirect.com/science/article/abs/pii/S0306452225007158" target="_blank" rel="noopener">Cogmed 工作记忆训练：近迁移可见、远迁移争议、独立复现弱（ScienceDirect）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次 · 🟡</span></li>
+        <li id="ref-40"><a href="https://online.ucpress.edu/collabra/article/5/1/18/113004" target="_blank" rel="noopener">Sala 2019 二阶元分析：认知训练远迁移总效应为零（Collabra: Psychology）</a><span class="ref-meta">· 2026-06-18 · 引用 4 次</span></li>
+        <li id="ref-41"><a href="https://www.sciencedaily.com/releases/2017/03/170308131236.htm" target="_blank" rel="noopener">Dresler 2017 记忆宫殿训练：词表回忆 26→62 持续 4 月（Neuron / ScienceDaily）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次</span></li>
+        <li id="ref-42"><a href="https://www.bps.org.uk/research-digest/self-explanation-powerful-learning-technique-according-meta-analysis-64-studies" target="_blank" rel="noopener">Bisra 2018 自我解释/费曼元分析（64 研究，g=0.55）（BPS Research Digest）</a><span class="ref-meta">· 2026-06-18 · 引用 5 次 · 🟡</span></li>
+        <li id="ref-43"><a href="https://files.eric.ed.gov/fulltext/ED600474.pdf" target="_blank" rel="noopener">写作促思考：涉及检索的写作优于不涉及的（ERIC）+ 生成效应</a><span class="ref-meta">· 2026-06-18 · 引用 3 次 · 🟡</span></li>
+        <li id="ref-44"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11449134/" target="_blank" rel="noopener">创造力 = DMN×执行控制网络协同；stereo-EEG 因果证据（PMC, 2024）</a><span class="ref-meta">· 2026-06-18 · 引用 4 次</span></li>
+        <li id="ref-45"><a href="https://www.sciencedirect.com/science/article/pii/S1053811920300598" target="_blank" rel="noopener">发散 vs 聚合思维互补 / metacontrol 灵活性（NeuroImage）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次</span></li>
+        <li id="ref-46"><a href="https://onlinelibrary.wiley.com/doi/10.1002/j.2162-6057.2004.tb01238.x" target="_blank" rel="noopener">Scott 2004 创造力训练元分析（70 项目）+ 近年 g=0.53（J Creative Behavior / Creativity &amp; Innovation Mgmt）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次</span></li>
+        <li id="ref-47"><a href="https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2022.1000385/full" target="_blank" rel="noopener">TTCT 长期预测效度与批评（Frontiers in Psychology, 2022）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次 · 🟡</span></li>
+        <li id="ref-48"><a href="https://gwern.net/doc/psychology/writing/2009-sio.pdf" target="_blank" rel="noopener">Sio &amp; Ormerod 2009 孵化效应元分析（117 研究，d=0.29）+ REM 睡眠</a><span class="ref-meta">· 2026-06-18 · 引用 2 次</span></li>
+        <li id="ref-49"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8051498/" target="_blank" rel="noopener">群体头脑风暴次优：个体独立产想法优于群体（Diehl/Stroebe 1987, Mullen 1991 元分析）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次</span></li>
+        <li id="ref-50"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3682183/" target="_blank" rel="noopener">IQ 阈值理论（120）证据混乱：Jauk 2013 分段回归 + 大型元分析 r=0.17（PMC）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次 · 🔴</span></li>
+        <li id="ref-51"><a href="https://medium.com/@adnanmasood/the-illusion-of-machine-creativity" target="_blank" rel="noopener">AI 组合式创造力 vs 人类变换式创造力（Boden 框架，Medium）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次 · 🟡</span></li>
+        <li id="ref-52"><a href="https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2019.02396/full" target="_blank" rel="noopener">刻意练习四标准 + 「10000 小时」是 Gladwell 二次创作（Frontiers in Psychology）</a><span class="ref-meta">· 2026-06-18 · 引用 4 次</span></li>
+        <li id="ref-53"><a href="https://pubmed.ncbi.nlm.nih.gov/24986855/" target="_blank" rel="noopener">Macnamara 2014 元分析：刻意练习解释成就差异（棋 26%/专业&lt;1%）（PubMed）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次</span></li>
+        <li id="ref-54"><a href="https://en.wikipedia.org/wiki/Cattell%E2%80%93Horn%E2%80%93Carroll_theory" target="_blank" rel="noopener">CHC 三层智力模型 / Gf 流体 vs Gc 晶体（Wikipedia）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次</span></li>
+        <li id="ref-55"><a href="https://www.sciencedirect.com/science/article/abs/pii/S0885201411000335" target="_blank" rel="noopener">工作记忆×流体智力相关 r=0.30–0.80 / 神经效率假说（Learning &amp; Individual Differences）</a><span class="ref-meta">· 2026-06-18 · 引用 1 次</span></li>
+        <li id="ref-56"><a href="https://www.kent.edu/psychology/all-study-strategies-not-created-equal-according-kent-state-researchers" target="_blank" rel="noopener">Dunlosky 2013 十大学习技巧评级：重读/划线低效用、练习测试/间隔高效用（Kent State）</a><span class="ref-meta">· 2026-06-18 · 引用 6 次</span></li>
+        <li id="ref-57"><a href="https://deepterm.tech/blog/active-recall-vs-passive-reading-what-research-shows" target="_blank" rel="noopener">主动回忆约 57% vs 被动阅读约 29% 保留率（二次整理，需注意原始来源）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次 · 🟡二次整理</span></li>
+        <li id="ref-58"><a href="https://glasp.co/articles/protege-effect" target="_blank" rel="noopener">protégé effect / 教别人促学习（Koh 2018）+ 阅读对老年工作记忆温和保护（Beckman/Illinois RCT）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次 · 🟡</span></li>
+        <li id="ref-59"><a href="https://www.structural-learning.com/post/generation-effect-active-learning" target="_blank" rel="noopener">生成效应（Slamecka &amp; Graf 1978）：自己造答案比再读深约 40%（Structural Learning）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次 · 🟡</span></li>
+        <li id="ref-60"><a href="https://www.pnas.org/doi/10.1073/pnas.1015950108" target="_blank" rel="noopener">Erickson 2011：一年有氧运动使海马体增大 2%、BDNF 升（PNAS）</a><span class="ref-meta">· 2026-06-18 · 引用 6 次</span></li>
+        <li id="ref-61"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4314337/" target="_blank" rel="noopener">运动-BDNF 元分析（单次 g=0.46/长期 g=0.58）+ Hillman 2008（Nat Rev Neurosci）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次</span></li>
+        <li id="ref-62"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9616732/" target="_blank" rel="noopener">睡眠对记忆巩固的生物必需性（慢波/纺锤波/涟漪；剥夺组记忆劣）（PMC + PubMed 39288097）</a><span class="ref-meta">· 2026-06-18 · 引用 6 次</span></li>
+        <li id="ref-63"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10902202/" target="_blank" rel="noopener">冥想对注意力 2023 元分析（111 RCT，小到中等，缺主动对照）（PMC）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次 · 🟡</span></li>
+        <li id="ref-64"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11933127/" target="_blank" rel="noopener">2025 Peak app RCT：练习提升但不迁移（practice makes perfect, does not transfer）（PMC）</a><span class="ref-meta">· 2026-06-18 · 引用 2 次</span></li>
+      </ol>
+    </div>
+  </section>
+  <footer>
+    无忌 · Deep Research（L2）· 2026-06-18 · 仅供阿杰个人决策参考；数据与判例以原始来源为准。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('human-vs-ai-intelligence-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('human-vs-ai-intelligence-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

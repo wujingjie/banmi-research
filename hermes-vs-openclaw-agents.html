@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hermes vs OpenClaw：一个全能管家 vs 一队专才——重复任务该交给谁 · 无忌 Deep Research · 2026-06-19</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 01 重构问题</a>
+    <a href="#ch2" data-target="ch2">02 02 Hermes 是什么</a>
+    <a href="#ch3" data-target="ch3">03 03 OpenClaw 是什么</a>
+    <a href="#ch4" data-target="ch4">04 04 根本分歧对照</a>
+    <a href="#ch5" data-target="ch5">05 05 反直觉结论</a>
+    <a href="#ch6" data-target="ch6">06 06 多agent真正赢的条件</a>
+    <a href="#ch7" data-target="ch7">07 07 三把双刃剑</a>
+    <a href="#ch8" data-target="ch8">08 08 你的活·下载</a>
+    <a href="#ch9" data-target="ch9">09 09 你的活·转录</a>
+    <a href="#ch10" data-target="ch10">10 10 你的活·监控</a>
+    <a href="#ch11" data-target="ch11">11 11 为何不能塞一个</a>
+    <a href="#ch12" data-target="ch12">12 12 成本·迁移·并存</a>
+    <a href="#ch13" data-target="ch13">13 13 阿杰路线建议</a>
+    <a href="#faq" data-target="faq">14 FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">15 References</a>
+  </div>
+</nav>
+
+<main><div class="hero">
+  <h1>Hermes vs OpenClaw：一个全能管家 vs 一队专才——重复任务该交给谁</h1>
+  <div class="hero-meta">
+    <span>📅 2026-06-19</span>
+    <span>🔍 5 个搜证包 + 30+ 原文核查</span>
+    <span>🏗️ 架构哲学 × 工程证据 × 路线建议</span>
+    <span>🌏 立场：人在马来西亚的个人开发者</span>
+  </div>
+  <div class="hero-deck">
+    <p><strong>一句话定调：你纠结的"选 Hermes 还是 OpenClaw"是个伪命题——真正要选的是"一个全能管家 vs 一队专才"这个架构哲学，而且这两个产品<u>都能</u>做单/多两种模式。2026 年的工程证据一边倒地说：多数任务上"一个会调 skill 的单 agent"跟"一队多 agent"打平甚至更好，但 token 便宜 10–15 倍。你这三类机械活（下载/转录/监控）几乎不沾"多 agent 才划算"的边——但它们节奏天差地别，必须按任务类型把执行层拆开（不是为了养有人格的 agent，是为了资源不打架）。最优解 = 留在 OpenClaw 上，做一个调度大脑 + 按类型分开的执行 worker，正是 planner-worker 模式。Hermes 只在你想要"自进化"或"有 NVIDIA GPU 省 API 钱"时并存补充，不替换。</strong></p>
+    <p>本报告先重构问题（Ch1）→ 扒清两个产品到底是什么、各自的坑（Ch2 Hermes / Ch3 OpenClaw）→ 一图看懂根本分歧（Ch4）→ 然后用三章把"单 agent vs 多 agent"的工程证据铺硬（Ch5 反直觉结论 / Ch6 多 agent 真正赢的三条件 / Ch7 三把双刃剑）→ 落到你的三类活逐一适配（Ch8 下载 / Ch9 转录 / Ch10 监控）→ 为什么不能塞一个进程（Ch11）→ 成本/迁移/并存（Ch12）→ 给你的决策树 + 别过度设计清单（Ch13）。granular 数字（star 数、版本号、CVE 总数）很多来自 SEO 内容农场，一律标 🟡 当参考；核心论证只建在硬来源上。</p>
+  </div>
+</div>
+
+<div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+  <p style="margin:0"><strong>📌 三条最关键发现（先扫这个）：</strong></p>
+  <ul style="margin:8px 0 0">
+    <li><strong>你的真问题不是"哪个产品"，是"全能管家 vs 一队专才"——而工程证据说后者大多是个昂贵的错觉。</strong>2026 年 6 月的《The Illusion of Multi-Agent Advantage》等多篇论文实测：单个强 agent（配 skill / CoT 自一致）在 7+ 个 benchmark 上跟自动多 agent 系统打平甚至更优，多 agent 花约 10× token 却"70–90% 情况退化成一个昂贵的 CoT"<sup class="cite" data-refid="9">[9]</sup><sup class="cite" data-refid="8">[8]</sup>。企业实测客服多 agent $47K/月 vs 单 agent $22.7K/月（贵 107%），准确率只多 2.1%<sup class="cite" data-refid="14">[14]</sup>。<span class="conf g">🟢</span> 多 agent 只在"可并行 + 跨域 + 超单次上下文窗口"三条件全中时才真划算——你这三类机械活基本不沾。</li>
+    <li><strong>但你这三类活节奏完全不同，塞进同一个 agent 进程会资源争抢——GPU 转录会把监控轮询饿死。</strong>监控要常驻低延迟、下载是突发 IO、转录是 GPU 重批处理。本地单机上，每个 LangGraph/CrewAI 工具调用都阻塞一个 CPU 线程<sup class="cite" data-refid="22">[22]</sup>，数学密集任务实测会饿死整个 asyncio event loop<sup class="cite" data-refid="20">[20]</sup>。所以执行层<u>必须</u>按任务类型拆开——但这是"资源隔离"，不是"要养三个有人格的 agent"。<span class="conf g">🟢</span></li>
+    <li><strong>你已经在 OpenClaw 上（逍遥在跑），别整栈替换。最优解 = 留 OpenClaw 做 planner-worker，对纯机械任务连 agent 都不用。</strong>固定 URL 定时下载这种，cron + yt-dlp 脚本 + 完成通知就够了——把"智能"只放在判断点（决定下载什么、处理转录异常、判断监控变化重不重要），其余全是确定性自动化。监控是三者里最该"有状态"的（要记得上次报过啥，否则重复刷屏），用 stateful cron。引入 Hermes 只在想"自进化/省 API 钱"时作并存补充，社区已有"OpenClaw 编排 + Hermes 执行"的混合模式可参考<sup class="cite" data-refid="25">[25]</sup>（当设计选项，非定论）。<span class="conf g">🟢</span></li>
+  </ul>
+</div>
+
+<div class="callout warn" style="margin: 20px 0; padding: 16px 18px;">
+  <p style="margin:0"><strong>🔎 关于本报告的数据可信度（坦白先说）：</strong>这份报告有"硬证据"和"软证据"两层，我刻意分开标，诚实比权威重要。</p>
+  <ul style="margin:8px 0 0">
+    <li><strong>🟢 硬证据（核心论证只建在这上面）：</strong>架构哲学差异、单体 vs 多 agent 的工程原则、三类任务的适配——来自 NVIDIA 官方博客、官方 docs、arXiv 2026 论文、Anthropic《Building Effective Agents》、Microsoft Azure / LangGraph / RunPod / Spheron 等一手或权威二手。这些放心用。</li>
+    <li><strong>🟡 软证据（一律当"量级参考"，措辞用"据第三方/社区统计"）：</strong>GitHub star 数（十万级，各源从 6.4 万到 19.4 万差异巨大）、精确版本号、首发日期、CVE 总数、迁移命令名、托管价格——很多来自 AI 内容农场 / SEO 站（skywork、lushbinary、kilo.ai、hermesagents.net、markaicode 等），可能夸大或互相抄。<strong>这类数字绝不当板上钉钉的事实。</strong></li>
+    <li><strong>Hermes 的归属（Nous Research）</strong>有多源指向 + NVIDIA 联名背书，可信；但 provenance 上有一桩 HN 抄袭争议（被指派生自他人项目未署名），作为信誉 caveat 我会在 Ch2 摊开说。</li>
+  </ul>
+</div>
+
+<!-- ===== CH1 ===== -->
+<section class="chapter" id="ch1" data-nav="01 重构问题">
+  <h2><span class="num">01</span><span class="title-text">你问的不是"哪个工具"——全能管家 vs 一队专才</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>你的原话是："把下载、录音转文字、监控这三类重复活交给 agent 自动跑，是交给 Hermes（一个大的持久 agent 频道）好，还是 OpenClaw（不同的专精 agent）好？"——这个问法里藏着一个<strong>把架构问题伪装成产品问题</strong>的陷阱。</p>
+
+    <div class="callout info"><p><strong>本章先给结论：</strong>Hermes ≠ "只能单 agent"，OpenClaw ≠ "只能多 agent"。<strong>两个产品其实都能做单 / 多两种模式。</strong>所以"选哪个产品"是次要的；你真正要拍板的是"一个全能管家 vs 一队专才"这个架构哲学。把这个想清楚，产品选择自然落地。</p></div>
+
+    <h3>为什么说两者都能双模式</h3>
+    <p>很多人（包括内容农场的对比文）把 Hermes 当成"单 agent 代表"、OpenClaw 当成"多 agent 代表"——这是误读。实际上：</p>
+    <ul>
+      <li><strong>Hermes 能做多 agent</strong>：它有 <code>delegate_task</code> 工具，父 agent 能派子 agent（默认并发 3、独立上下文/终端/工具集，只回 summary 省 token），2026-06-15 还加了非阻塞的 <code>async_delegation</code><sup class="cite" data-refid="1">[1]</sup>。所以"一个大管家"内部照样能临时拉一队帮手。</li>
+      <li><strong>OpenClaw 能做单 agent</strong>：它虽然主打"网关接多 agent"，但你完全可以只配一个 agent；它的多 agent 横向协作（agent-to-agent）<u>默认是关的</u>，要手动开 + allowlist<sup class="cite" data-refid="3">[3]</sup>。子 agent（<code>sessions_spawn</code>）也是按需才拉。所以"一队专才"是它的<u>能力上限</u>，不是<u>强制形态</u>。</li>
+    </ul>
+    <p>结论：产品名是表象，<strong>架构模式（单体 generalist vs 专精 fleet）才是主轴</strong>。下面两章先把两个产品扒清楚（这是基础事实），从 Ch5 起才是真正的脊梁——工程证据告诉你该选哪种模式。</p>
+
+    <div class="callout purple"><p><strong>给你的思维锚点：</strong>把"agent"这个词暂时忘掉。你的三类活本质是三条<strong>数据处理流水线</strong>：下载 = IO 搬运、转录 = GPU 计算、监控 = 状态比对 + 告警。问"该不该用 agent、用一个还是几个"之前，先问"这条流水线里到底哪一步需要<u>判断力</u>"。需要判断的点才配 agent，其余都是确定性脚本。这个视角会贯穿全报告。</p></div>
+
+    <h3>动手前先量化：这 7 个数字定方案，不是任务类型定方案</h3>
+    <p>下面 Ch8–13 的建议都按"任务类型"展开（因为这是普适骨架），但真要落地时，<strong>具体方案该由你的实际负载量决定</strong>——同样是"下载"，每天 5 个 URL 和每天 5000 个 URL 是两套架构。动手前先把这张表填了（这也是把我的通用建议<u>校准到你身上</u>的关键）：</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>任务</th><th>关键负载问题（先量化）</th><th>它会改变什么决策</th></tr></thead>
+      <tbody>
+        <tr><td><strong>下载</strong></td><td>每天多少个 URL？固定源还是要"判断下什么"？峰值并发？</td><td>量小固定 → 纯 cron 脚本；量大/要判断 → 加队列 / 判断点上 agent</td></tr>
+        <tr><td><strong>转录</strong></td><td>每天几小时音频？本地什么 GPU（显存多大）？能容忍多久延迟？要不要分轨(diarization)？</td><td>量小 → 本地按需；量大/低延迟 → 云 ASR 或常驻服务（见 Ch9 矩阵）</td></tr>
+        <tr><td><strong>监控</strong></td><td>4 个监控各多久轮一次？漏一次的代价多大？告警量预期多少/天？</td><td>定轮询间隔、cooldown 去重窗口、是否需要分级告警（见 Ch10 schema）</td></tr>
+        <tr><td><strong>横向</strong></td><td>数据敏感吗（录音/监控内容能不能上云）？你愿意维护几个进程？</td><td>敏感 → 全本地不上云；维护意愿低 → 别上双栈、别堆 worker</td></tr>
+      </tbody>
+    </table></div>
+    <p style="font-size:0.93em;opacity:0.88">⚠️【方法论提醒】本报告给的是<strong>决策骨架</strong>，不是替你拍板的具体参数——参数得用上面这张表的真实数字代入。凡是你填出来"量很小、固定、不敏感"的格子，答案几乎都是"cron + 脚本，连 agent 都不用"。</p>
+  </div>
+</section>
+
+<!-- ===== CH2 ===== -->
+<section class="chapter" id="ch2" data-nav="02 Hermes 是什么">
+  <h2><span class="num">02</span><span class="title-text">Hermes：单个常驻、自进化的"大管家"</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>Hermes（仓库名 <code>NousResearch/hermes-agent</code>，slogan "The agent that grows with you"）是 Nous Research 出品的开源持久 AI agent 框架，MIT 许可、免费<sup class="cite" data-refid="1">[1]</sup>。它的设计哲学是 <strong>"Agent 优先"</strong>：核心是一个常驻、有持久记忆、会自我进化的大脑，平台接入是外围。NVIDIA 官方博客把它定性为 "provider- and model-agnostic by design, optimized for always-on local use"<sup class="cite" data-refid="2">[2]</sup>。</p>
+    <div class="callout warn" style="margin:10px 0"><p style="margin:0"><strong>⚠️ 两点先澄清（避免混淆）：</strong>① <strong>Hermes Agent（这个框架）≠ Hermes 大模型</strong>——Nous 还有个同名的 Hermes 系列 LLM，本报告讲的是 agent 框架，别搞混。② <strong>版本号采 <code>vYYYY.M.D</code> 制</strong>（如 tag v2026.5.16），和 OpenClaw 一样；下文出现的 "v0.12.0 / v0.2.0 / v0.16.0" 等编号来自第三方时间线汇总，<u>可能与官方实际 tag 命名不符</u>，精确版本以 repo release 页为准，本文只用它们标"某次更新引入了某功能"的<u>相对先后</u>，不当精确版本事实。<span class="conf y">🟡</span></p></div>
+
+    <h3>核心架构（🟢 官方 docs + NVIDIA blog）</h3>
+    <div class="metric-grid">
+      <div class="metric"><div class="v">1 个</div><div class="l">常驻 AIAgent loop（run_agent.py）+ 统一 Gateway 单进程</div></div>
+      <div class="metric"><div class="v">6 个</div><div class="l">terminal backend（local / Docker / SSH / Daytona / Singularity / Modal）</div></div>
+      <div class="metric"><div class="v">20+</div><div class="l">消息平台同接一个 agent 实例、共享同一记忆（Telegram/Discord/Slack/WhatsApp/Feishu…）</div></div>
+      <div class="metric"><div class="v">内置</div><div class="l">Cron Scheduler（自然语言/cron 表达式/ISO）+ SQLite 会话存储 + FTS5 全文搜索</div></div>
+    </div>
+    <p>关键点：<strong>20+ 个平台共享同一个 agent 实例和同一份记忆</strong><sup class="cite" data-refid="1">[1]</sup>——这就是你说的"一个大 agent 频道对话"的形态。你在 Telegram 说的事，它在 Discord 也记得；某平台发起的 cron 默认回推同频道。</p>
+
+    <h3>三层记忆：它最像"管家"的地方</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>层</th><th>内容</th><th>加载方式</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Tier 1</strong></td><td>USER.md（~1375 字，偏好）+ MEMORY.md（~2200 字，事实经验）+ SOUL.md（个性）</td><td>每 session 必加载（~1300 token），用户反馈后 SOUL 自动更新<sup class="cite" data-refid="5">[5]</sup></td></tr>
+        <tr><td><strong>Tier 2</strong></td><td>SQLite + FTS5 会话历史</td><td>无上限、可全文搜<sup class="cite" data-refid="1">[1]</sup></td></tr>
+        <tr><td><strong>Tier 3</strong></td><td>可选 mem0 / 向量库</td><td>opt-in，无需外部向量库也能跑<sup class="cite" data-refid="5">[5]</sup></td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>self-improving skills + Curator：它"越用越聪明"的来源</h3>
+    <p>复杂任务（5+ 工具调用）完成后，Hermes 会<strong>自动把过程写成 markdown skill</strong>存到 <code>~/.hermes/skills/</code>，使用中还会自我 patch；v0.12.0 加了 Autonomous Curator（7 天周期给 skill 打分 / 合并 / 剪枝），内置 91 个官方 skill<sup class="cite" data-refid="4">[4]</sup>。这是它和 OpenClaw 最大的功能差异之一：<strong>跨 session 真改进</strong>，而不只是静态配置。</p>
+    <div class="trap-box"><strong>⚠️ 坑：</strong>AI Builder Club 明确警示——auto-generated skill 应视为<u>草稿</u>，上生产前必须人工审核<sup class="cite" data-refid="5">[5]</sup>。自动写出来的 skill 不等于对的 skill。</div>
+
+    <h3>硬件与成本：NVIDIA GPU 非必须</h3>
+    <p>尽管 NVIDIA 给它做了联名背书，但<strong>RTX/DGX 不是必须的，只是推荐 / 优化路径</strong>。纯 API（不跑本地模型）时，一台 $5/月的 VPS（1 vCPU 1GB）就够，走 OpenRouter/OpenAI/Anthropic 等 200+ 模型<sup class="cite" data-refid="2">[2]</sup>。要省 API 钱跑本地模型才需要 GPU（推荐 16GB VRAM；Apple Silicon 统一内存被推荐为最易本地部署的路径，M3 Pro 36GB 能跑 27B）。</p>
+    <div class="metric-grid">
+      <div class="metric"><div class="v">$0</div><div class="l">软件本身（MIT 免费）</div></div>
+      <div class="metric"><div class="v">~$6–8/月</div><div class="l">自托管最低（Hetzner $4 VPS + DeepSeek API $2–4）<span class="conf y">🟡</span></div></div>
+      <div class="metric"><div class="v">~$80/月</div><div class="l">本地大模型路径最高<span class="conf y">🟡</span></div></div>
+      <div class="metric"><div class="v">$29.5→$59/月</div><div class="l">FlyHermes 托管（首月→次月起，运营主体未明）<span class="conf y">🟡</span></div></div>
+    </div>
+
+    <h3>已知坑（社区实测，选型前必看）</h3>
+    <div class="callout bad"><h4>① Token Bloat（已知 bug）</h4><p>MEMORY/USER/SOUL 每次<strong>全量加载</strong>，Telegram gateway 实测 ~15–20k tokens/turn，比 CLI 多 2–3×；250 轮对话后 baseline 涨到 ~45k tokens/turn（issue #10585）<sup class="cite" data-refid="6">[6]</sup>。"持久记忆"的代价是每一轮都背着全部记忆走——对你这种高频机械任务，token 账单会肉眼可见地涨。<span class="conf y">🟡</span>（issue 编号引自第三方汇总）</p></div>
+    <div class="callout bad"><h4>② Memory Poisoning（安全）</h4><p>issue #496：分享给 agent 的文档可植入隐藏指令，进入 SQLite 记忆后被后续静默执行<sup class="cite" data-refid="6">[6]</sup>。再叠加 Skill marketplace 的供应链风险（第三方 skill 安装即代码执行）——"自进化"的另一面是"自中毒"。多位评测者建议：仅用于个人工作流，<strong>不适合敏感数据 / mission-critical</strong>。</p></div>
+    <div class="callout bad"><h4>③ Provenance / 抄袭争议（信誉 caveat）</h4><p>Hacker News（id=48187581）有帖指 Hermes 派生自 EvoMap/Evolver 等项目却未署名；NousResearch 删帖封号，处置被社区评为 "sloppy"<sup class="cite" data-refid="7">[7]</sup>。这不影响代码能不能用，但作为一个你要托付重复任务的项目，<strong>治理成熟度打个问号</strong>是公允的。<span class="conf y">🟡</span></p></div>
+
+    <div class="callout info"><p><strong>本章小结：</strong>Hermes 的卖点是"单点持久记忆 + 自进化 + 本地 GPU 友好"，适合"想养一个越用越懂你的大管家"的人。代价是 token bloat、记忆中毒面、治理争议。对你这种"把固定机械活自动化"的诉求，它的"自进化"基本用不上——除非你确实想要本地 GPU 省钱或单点记忆。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH3 ===== -->
+<section class="chapter" id="ch3" data-nav="03 OpenClaw 是什么">
+  <h2><span class="num">03</span><span class="title-text">OpenClaw：一队各管一摊的专精 agent 网关</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>OpenClaw 经历过一长串改名（Warelay → CLAWDIS → Clawdbot → Moltbot → OpenClaw，2026-01-30 定名；Moltbot 时期因 "Clawd" 太像 "Claude" 被 Anthropic 投诉）<sup class="cite" data-refid="10">[10]</sup>。创建者 Peter Steinberger（前 PSPDFKit 创始人），weekend project 起家，2026-02-14 加入 OpenAI 并宣布成立 OpenClaw Foundation（非营利，OpenAI 赞助；🟡 截至 2026-06 未见正式成立公告），项目继续 MIT 独立运营。它的设计哲学是 <strong>"网关优先"</strong>：先把一堆平台接进来，再在上面跑 agent。</p>
+
+    <h3>核心架构（🟢 官方 docs + GitHub）</h3>
+    <p>本地优先、Gateway 模式，四大核心：<strong>Gateway</strong>（单控制平面，管 sessions/channels/tools/events）+ <strong>Agent</strong>（每个有独立 workspace + session store 的大脑）+ <strong>Skills</strong>（目录式能力包）+ <strong>Memory</strong>（本地 Markdown）<sup class="cite" data-refid="11">[11]</sup>。每个 agent 一套独立文件：<code>~/.openclaw/agents/&lt;id&gt;/</code>（状态 + sessions）和 <code>~/.openclaw/workspace-&lt;id&gt;/</code>（SOUL/AGENTS/USER/TOOLS/MEMORY.md + skills/）。路由用 bindings 数组，7 级优先级匹配，第一条命中赢——这就是它能让"不同的专精 agent 各管一摊"的机制。</p>
+
+    <h3>多 agent 协作（🟢 官方 docs）</h3>
+    <ul>
+      <li><strong>横向 agent-to-agent 默认关</strong>（<code>tools.agentToAgent.enabled: false</code>），开后须 allowlist<sup class="cite" data-refid="3">[3]</sup>。</li>
+      <li><strong>纵向 sub-agent 用 <code>sessions_spawn</code></strong>：非阻塞、立即返 run ID，子完成后 push 结果给父；深度默认 1（最高可配 5），每 session 最多 5 个并发子、全局并发上限 8<sup class="cite" data-refid="3">[3]</sup>。子默认不继承 SOUL/USER 身份文件，只拿 AGENTS + TOOLS。</li>
+    </ul>
+
+    <h3>记忆 / Skill / 自主性</h3>
+    <p>记忆三层：MEMORY.md（长期）+ memory/YYYY-MM-DD.md（每日，今昨自动加载）+ DREAMS.md，原则是 <strong>"model only remembers what gets saved to disk—no hidden state"</strong>——比 Hermes 的自策展更透明可审计<sup class="cite" data-refid="12">[12]</sup>。自主性给得很足：cron（每 agent 独立）+ heartbeat（默认 30min 无提示自主 action）+ dreaming（opt-in 默认关，空闲期整理记忆把高分内容 promote 到 MEMORY.md）+ commitments（跨 session 持久任务）。ClawHub 市场据称 10,700–15,000+ skill（含安全扫描）<sup class="cite" data-refid="12">[12]</sup>。<strong>注意：它的"自我进化"是配置 + 代码层面，不是权重级</strong>，跨 session 学习是静态的。</p>
+
+    <h3>⚠️ 安全坑（重要，给你自托管加固提醒）</h3>
+    <div class="callout bad"><h4>CVE-2026-25253（CVSS 8.8）：一键 RCE —— 🟢 一手核实</h4><p>WebSocket 接收 gatewayUrl 查询参数、无确认就建连并外泄 auth token → <strong>远程未认证一键 RCE</strong>。2026-02-03 披露时 <strong>40,000+ 实例公网暴露、63% 评估为可被远程利用</strong>，72 小时内 v2026.1.29 修复（DepthFirst 研究员发现）<sup class="cite" data-refid="13">[13]</sup>。这一条由 runZero / Broadcom / University of Toronto / SonicWall 多方覆盖，<strong>是硬证据</strong>。<span class="conf g">🟢</span></p>
+    <p style="margin-top:8px">至于"截至 2026-04 已 135,000+ 实例暴露、总计 138 个 CVE（含 2 个 CVSS 9.9）"——<strong>这些聚合数字来自 betterclaw.io 等第三方，我没能一手核实，当量级参考、别当板上钉钉</strong>。一手能确认的就是上面那条 CVE 和披露时的 40k 暴露量。<span class="conf y">🟡</span></p></div>
+    <div class="callout bad"><h4>ClawHavoc 供应链攻击</h4><p>824 个恶意 skill 被植入 ClawHub 分发 AMOS 恶意软件<sup class="cite" data-refid="13">[13]</sup>。和 Hermes 的 skill marketplace 风险同源——目录式 skill 生态的通病。</p></div>
+    <div class="callout warn"><h4>架构特性 + 微软警告</h4><p>更准确的说法是 <strong>"high-privilege by design"</strong>：它给 agent 的工具默认有较广的主机访问权，localhost 默认信任、有 mDNS 局域网广播。<u>较新版本已加入 DM pairing / loopback / token 等基线控制</u>，所以"完全裸奔"主要是早期版本与错误暴露公网的实例；但"权限广 + 远程暴露"组合的风险是真实的，微软 2026-02-19 安全博客直言："It is not appropriate to run it on a standard personal or corporate machine."<sup class="cite" data-refid="13">[13]</sup> <strong>对你的提醒：自托管务必绑回环 / 开认证 / 别裸奔公网，单独 VPS 或容器隔离跑，并做最小权限。</strong>（具体默认值各版本不同，以你实测版本为准）<span class="conf y">🟡</span></p></div>
+
+    <div class="callout info"><p><strong>本章小结：</strong>OpenClaw 的卖点是"平台覆盖广（50+ 频道）+ 记忆透明可审计 + 多 agent 分频道路由"，正好契合你现在的形态（逍遥在跑、Discord 多 bot 分频道）。最大的注意点是安全：默认不安全，自托管必须加固。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH4 ===== -->
+<section class="chapter" id="ch4" data-nav="04 根本分歧对照">
+  <h2><span class="num">04</span><span class="title-text">一图看懂根本分歧：网关优先 vs Agent 优先</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>把 Ch2/Ch3 浓缩成一张对照表。记住：这不是"谁更好"，是"两种哲学各自的取舍"。</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>维度</th><th>OpenClaw（网关优先）</th><th>Hermes（Agent 优先）</th></tr></thead>
+      <tbody>
+        <tr><td><strong>技术栈 / 出品</strong></td><td>Node.js / TS，Peter Steinberger</td><td>Python，Nous Research</td></tr>
+        <tr><td><strong>核心理念</strong></td><td>先把多平台接进来再跑 agent</td><td>核心是持久记忆 + 自进化的大脑</td></tr>
+        <tr><td><strong>记忆</strong></td><td class="check y">文件式透明、可审计、no hidden state</td><td class="check p">自主策展（Honcho user modeling）</td></tr>
+        <tr><td><strong>跨 session 学习</strong></td><td class="check p">静态（配置 / 代码层面）</td><td class="check y">真改进（self-improving skills + Curator）</td></tr>
+        <tr><td><strong>本地 GPU</strong></td><td class="check p">不强调</td><td class="check y">深整合 NVIDIA RTX（最低 6GB VRAM 跑 8B）</td></tr>
+        <tr><td><strong>多模型路由</strong></td><td class="check y">单 Gateway 按成本 / 能力路由</td><td class="check p">单 profile 单 provider（可换 OpenRouter）</td></tr>
+        <tr><td><strong>平台覆盖</strong></td><td class="check y">50+ 频道<span class="conf y">🟡</span></td><td class="check p">20+（部分源报 7 主力）<span class="conf y">🟡</span></td></tr>
+        <tr><td><strong>多 agent 形态</strong></td><td>横向 + 纵向 spawn（专才网关）</td><td>delegate_task 子 agent（管家内拉帮手）</td></tr>
+        <tr><td><strong>安全姿态</strong></td><td class="check n">默认不安全（CVE / 公网暴露多）</td><td class="check p">cron 跑前扫恶意模式，但有记忆中毒面</td></tr>
+        <tr><td><strong>许可</strong></td><td>MIT 免费 + 模型无关</td><td>MIT 免费 + 模型无关</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout accent"><p><strong>读这张表的正确姿势：</strong>如果你的诉求是"接更多平台、记忆要能审计、不想碰 GPU"——OpenClaw 顺。如果是"想要 agent 真自进化、有本地 NVIDIA GPU 想省 API 钱、想要单点持久记忆"——Hermes 顺。对你（已在 OpenClaw + 逍遥在跑 + Discord 多 agent 分频道），<strong>OpenClaw 是顺水推舟，Hermes 是逆水换栈</strong>。但这都还没回答最关键的问题——单 vs 多到底该选哪个。下面三章上硬证据。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH5 ===== -->
+<section class="chapter" id="ch5" data-nav="05 反直觉结论">
+  <h2><span class="num">05</span><span class="title-text">反直觉结论：多 agent 经常不如"单 agent + skill"，还贵 10–15 倍</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>这是全报告的脊梁，证据最硬。直觉告诉你"几个专才分工肯定比一个人强"——2026 年的工程实测说：在<strong>多数任务</strong>上，不是。</p>
+
+    <div class="callout bad"><h4>证据一：单 agent baseline 常与多 agent 持平甚至更优</h4><p>arXiv 2601.12307 实测：让<u>单个 agent role-play 多角色</u>，在 HumanEval（92.1 vs 91.6）、GSM8K（93.3 vs 93.0）等 7 个 benchmark 上跟真·多 agent 系统打平，但<strong>成本仅约 10%</strong><sup class="cite" data-refid="8">[8]</sup>。2026-06 的《The Illusion of Multi-Agent Advantage》（arXiv 2606.13003v2）更狠：GPT-5 + CoT 自一致在 GPQA-Diamond / HLE-Maths / SWE-Bench Lite 上<strong>持续优于 6 种自动多 agent 系统</strong>，后者花约 10× token 却无显著收益，70–90% 情况退化成"一个昂贵的 CoT-SC"<sup class="cite" data-refid="9">[9]</sup>。<span class="conf g">🟢</span></p></div>
+
+    <div class="callout bad"><h4>证据二：多 agent 工作流可"编译"回单 agent，省一半还不掉精度</h4><p>arXiv 2601.04748：多 agent 工作流可以编译成一个带技能库的单 agent，<strong>token / 延迟各降约 50%，精度持平</strong><sup class="cite" data-refid="17">[17]</sup>。注意一个关键拐点：超过技能库容量（语义混淆阈值）后性能会断崖——技能不是越多越好。这恰恰是 OpenClaw / Hermes 的 skill 机制要解决的问题：把"多 agent 才能做的事"塞进"单 agent + skill 库"。<span class="conf g">🟢</span></p></div>
+
+    <div class="callout bad"><h4>证据三：token 成本多 agent 贵 4–15× 是常态，最坏 220×</h4><p>Anthropic 自己的数据：chat → agent 约 4×、chat → multi-agent 约 15× token<sup class="cite" data-refid="15">[15]</sup>。UIUC 跨 7 数据集 6 模型实测 4–220×<sup class="cite" data-refid="18">[18]</sup>。最直观的企业账单：客服多 agent <strong>$47K/月 vs 单 agent $22.7K/月（贵 107%），准确率只多 2.1%</strong><sup class="cite" data-refid="14">[14]</sup>。对你这种高频跑的机械任务，token 差价会被频率放大成真金白银。<span class="conf g">🟢</span></p></div>
+
+    <h3>为什么"工具一多就变笨"</h3>
+    <p>底层机理是 context rot：prompt 从 2024 的 ~1.5K token 涨到 2025 的 ~6K token，token 越多性能越降，某些任务 400 token 就掉 40% 准确率<sup class="cite" data-refid="16">[16]</sup>。"工具数"是协调成本最强的负向预测因子（β̂ = −0.330，p &lt; 0.001）<sup class="cite" data-refid="16">[16]</sup>。多 agent 之所以常常更差，正是因为它把上下文切碎、handoff 时丢信息、每个 agent 都背一堆工具——把简单问题复杂化了。</p>
+
+    <div class="callout accent"><p><strong>对你的直接含义：</strong>下载 / 转录 / 监控这三类活，逻辑都很确定（不需要多视角辩论、不需要跨域综合判断）。给它们配"一队会互相讨论的 agent"是纯浪费——一个会按情况调对 skill 的单 agent（甚至连 agent 都不用，见 Ch8）就够了，还省 10–15× token。多 agent 的优势要在很特定的条件下才出现，下一章说清那三个条件。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH6 ===== -->
+<section class="chapter" id="ch6" data-nav="06 多agent真正赢的条件">
+  <h2><span class="num">06</span><span class="title-text">多 agent 真正赢的三个条件：可并行 + 跨域 + 超 context 窗口</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>多 agent 不是没用——它有真实优势区间，但区间很窄。Anthropic 的多 agent Deep Research（Opus4 orchestrator + Sonnet4 子）内部评测比单 agent 高 90%+，代价 15× token<sup class="cite" data-refid="15">[15]</sup>（🔴 内部评测未公开细节，这个 90% 当方向看别当数字）。Cornell 复杂规划任务 coordinated 42.68% vs 单 agent GPT-4 仅 2.92%——差距是真的<sup class="cite" data-refid="19">[19]</sup>。问题是：什么时候你处在这种区间？</p>
+
+    <h3>三条件全中才适合多 agent（arXiv 2512.08296 经验法则）</h3>
+    <div class="step"><div class="step-head"><span class="sn">1</span>可并行：任务能拆成半独立子问题</div><div class="step-body">子任务之间不强依赖、能同时跑。深度研究里"同时查 5 个方向"是典型。你的三类活——下载是顺序 IO、转录是流水线、监控是定时轮询——单条流水线内部没什么可并行的（跨任务并行另说，见 Ch11）。</div></div>
+    <div class="step"><div class="step-head"><span class="sn">2</span>跨域：合并步有真增值</div><div class="step-body">不同 agent 带不同领域视角，综合起来 &gt; 各自之和。比如"法律 + 财务 + 技术"三方会诊。你的活是单域机械执行，没有"综合多视角"的增值空间。</div></div>
+    <div class="step"><div class="step-head"><span class="sn">3</span>超 context 窗口：单 agent 装不下</div><div class="step-body">任务的信息量超过单次上下文窗口，必须分给多个 agent 各管一段。你的活每次处理的上下文都很小（一个 URL、一段音频、一次状态比对），远没到撑爆窗口。</div></div>
+
+    <p>arXiv 2512.08296 还加了第四条："增量价值 &gt; 全部编排成本"<sup class="cite" data-refid="16">[16]</sup>——多 agent 的协调开销（spawn、handoff、合并）本身要花钱，省下的得比花掉的多。</p>
+
+    <h3>量化阈值：什么时候加 agent 是负收益</h3>
+    <div class="metric-grid">
+      <div class="metric"><div class="v">&gt;45%</div><div class="l">单 agent 准确率已超 45% 时，再加 agent 是负收益（β̂ = −0.408）<sup class="cite" data-refid="16">[16]</sup></div></div>
+      <div class="metric"><div class="v">2–4 个</div><div class="l">工具数 2–4 用单 agent 最优；≥16 个工具成本飙升</div></div>
+      <div class="metric"><div class="v">&gt;0.39/轮</div><div class="l">消息密度超 0.39/轮时，通信增益趋于零</div></div>
+      <div class="metric"><div class="v">3–5 起</div><div class="l">真要上多 agent，3–5 个起步再扩，优于直接堆 10+</div></div>
+    </div>
+
+    <div class="callout warn"><p><strong>对照你的三类活：</strong>下载 / 转录 / 监控每一类<u>单独看</u>，逻辑确定、工具少（2–4 个）、上下文小、不需要跨域综合——三条件<strong>一条都不全中</strong>。所以"为这三类活各配一队 agent"是教科书级的过度工程。它们之间的关系是"节奏不同要隔离"（Ch11），不是"要协作所以多 agent"——这两件事千万别混。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH7 ===== -->
+<section class="chapter" id="ch7" data-nav="07 三把双刃剑">
+  <h2><span class="num">07</span><span class="title-text">三把双刃剑：错误隔离 / 上下文污染 / 调试成本</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>就算你将来真要拆多个执行单元，也得知道多 agent 带来的三个新麻烦——它们决定了"怎么拆"才不翻车。</p>
+
+    <div class="callout warn"><h4>双刃剑一：错误隔离（17× 放大 vs 局部降级）</h4><p>Google DeepMind（2025-12）实测：<strong>无结构的多 agent 系统错误放大 17.2×</strong>——一个 agent 出错，会在系统里被放大十几倍；但经过验证的中心化结构能把放大降到 4.4×<sup class="cite" data-refid="19">[19]</sup>。好的一面：结构良好时，一个 agent 崩不影响其他 = 局部降级（monolith 做不到）。坏的一面：结构没设计好，多 agent 比单体更脆。<span class="conf g">🟢</span></p></div>
+
+    <div class="callout warn"><h4>双刃剑二：上下文污染（工具一多就变笨）</h4><p>已在 Ch5 说过机理，这里强调对架构的含义：多 agent 把上下文切碎、handoff 时丢信息——MAST 研究分析 1642 条 trace、7 个框架，失败率 <strong>41%–86.7%</strong><sup class="cite" data-refid="16">[16]</sup>。很多失败不是模型蠢，是协调本身把信息搞丢了。把任务塞进一个 agent + 干净 skill 反而更稳。<span class="conf g">🟢</span></p></div>
+
+    <div class="callout warn"><h4>双刃剑三：调试成本（错误跨边界传播）</h4><p>多 agent debug 远难于单 agent：错误跨 agent 边界传播、handoff 处 context 丢失，问题出在 A 但症状现在 D，复现和定位都成本高<sup class="cite" data-refid="16">[16]</sup>。对你这种<strong>一个人维护</strong>的 setup，调试成本就是你的下班时间——这是选"少而专"而非"多而碎"的强力理由。</p></div>
+
+    <div class="callout info"><p><strong>承上启下：</strong>Ch5–7 的结论是"模式选择上，能单别多"。但你的三类活有个绕不开的现实——它们节奏天差地别。Ch8–10 逐一拆解每类活的<u>资源特征</u>，Ch11 解释为什么"能单别多"的同时"执行层还是得按类型拆"，这俩不矛盾。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH8 ===== -->
+<section class="chapter" id="ch8" data-nav="08 你的活·下载">
+  <h2><span class="num">08</span><span class="title-text">你的活之一·下载：突发批量 IO，常驻大脑都不需要</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>下载的资源特征：<strong>IO 密集、突发、批量</strong>。它大部分时间在等网络，不吃 CPU、不吃 GPU、不需要"判断"。这是三类活里最不需要 agent 的一类。</p>
+
+    <h3>工程结论：专精 worker + 任务队列，完成即退</h3>
+    <ul>
+      <li><strong>worker pool 天然适配</strong>：IO-bound 任务可以高并发跑，互相不阻塞，各自 autoscale<sup class="cite" data-refid="20">[20]</sup>。</li>
+      <li><strong>cron 触发就够</strong>：auto-ytdlp 这类工具支持并发下载 + download archive 跳过已下载、无头跑完就退出——天生适合 cron 触发，不需要常驻进程盯着<sup class="cite" data-refid="20">[20]</sup>。</li>
+      <li><strong>重试不需要 agent</strong>：队列 + 指数退避 + dead letter queue 是确定性逻辑，脚本就能做，要 agent 干嘛。</li>
+      <li><strong>要 agent 的话，是"按需调用"不是"常驻"</strong>：yt-dlp MCP 让 agent 在需要时调一下，是工具调用，不是养一个一直醒着的大脑。</li>
+    </ul>
+
+    <div class="callout good"><p><strong>给你的落地形态：</strong>下载 = <code>cron + yt-dlp 脚本 + 完成通知</code>。固定 URL / 固定频道的定时下载，<strong>连 agent 都不用</strong>——纯确定性自动化。只有当"决定下载什么"本身需要判断（比如"找出今天值得下的新视频"）时，才在那个<u>判断点</u>上 agent，下载执行依旧交给脚本。这就是"智能放在判断点、自动化放在其余"的标准范式。</p></div>
+
+    <div class="trap-box"><strong>⚠️ 别做的事：</strong>别给下载任务配 SOUL.md / 人格 / 持久记忆。它不需要记得任何事（download archive 文件就是它的"记忆"）。给搬箱子的活配一个有性格的管家，是把简单问题哲学化。</div>
+  </div>
+</section>
+
+<!-- ===== CH9 ===== -->
+<section class="chapter" id="ch9" data-nav="09 你的活·转录">
+  <h2><span class="num">09</span><span class="title-text">你的活之二·录音转文字：GPU 重 pipeline，最忌和别的任务抢资源</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>转录（ASR）的资源特征：<strong>GPU 重、多步 pipeline、批处理</strong>。它和下载是两个极端——下载在等，转录在<u>玩命算</u>。这决定了它必须独立、且绝不能和别的任务抢资源。</p>
+
+    <h3>工程结论：独立专精服务 + 消息队列 / API 接入，按需触发</h3>
+    <ul>
+      <li><strong>该拆成独立 pipeline 步骤</strong>：RunPod 的做法是 chunking / transcription / diarization 拆成 separate services，用轻量消息队列连接，batching 多段提升 GPU 利用率<sup class="cite" data-refid="21">[21]</sup>。NVIDIA Riva 做成 stateless microservice。</li>
+      <li><strong>常驻 vs 按需取决于量</strong>：Spheron 的经验——always-on SLA 的语音用 on-demand 实例，会议录音 / podcast 这种 batch 用 spot（可 checkpoint restart）<sup class="cite" data-refid="22">[22]</sup>。你这种"有新录音才转"的场景，<strong>按需触发最合适</strong>，不用养一个一直占着 GPU 的常驻服务。</li>
+    </ul>
+
+    <div class="callout bad"><h4>🔴 最关键的实证：塞进通用 agent 主循环会饿死其他任务</h4><p>FastEmbed 案例：数学密集的执行会<strong>饿死整个 asyncio event loop</strong>，必须用 dedicated ThreadPoolExecutor 隔离<sup class="cite" data-refid="20">[20]</sup>。映射到你的场景——如果把 GPU 转录塞进跑监控 / 下载的同一个 agent 主循环，转录一开始算，event loop 就被占满，<strong>监控的定时轮询直接被饿死、错过窗口</strong>。这是 Ch11"不能塞一个进程"最硬的单点证据。<span class="conf g">🟢</span></p></div>
+
+    <div class="callout warn"><p><strong>对你的特别提醒（本地 GPU 有限时尤其要命）：</strong>你在马来西亚、个人开发者，大概率是单机本地 GPU。云上还能临时扩，本地单机的 GPU 就那么点——转录一跑满，别的吃 GPU 的活全卡。所以转录<strong>必须是独立 worker，自己排队、自己占 GPU、完事释放</strong>，物理上和监控 / 下载隔开。你的 process-audio skill（Qwen3-ASR + Opus 校对）正是这种独立 pipeline 形态，保持它独立就对了。</p></div>
+
+    <h3>本地 vs 云 ASR：先填 Ch1 那张表再选这一格</h3>
+    <p>"独立 GPU worker"是默认形态，但不是唯一选项。到底本地跑还是云上跑，由你的量 / 延迟 / 隐私 / 显存四个变量决定：</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>选项</th><th>适合什么场景</th><th>注意点</th></tr></thead>
+      <tbody>
+        <tr><td><strong>本地 GPU（你现在的 Qwen3-ASR 路线）</strong></td><td class="check y">数据敏感不能上云、量中等、有显卡</td><td>显存够才能跑大模型；必须独立 worker 别和别的活抢 GPU</td></tr>
+        <tr><td><strong>faster-whisper / whisper.cpp（轻量本地）</strong></td><td class="check y">显存有限、量小、能接受 Whisper 级精度</td><td>whisper.cpp 连 CPU 都能跑（慢），是无 GPU 时的兜底</td></tr>
+        <tr><td><strong>云 ASR API（OpenAI / Deepgram / 各家）</strong></td><td class="check p">量突发大、要低延迟、数据不敏感、不想管 GPU</td><td>按量付费、隐私要评估；省掉本地 GPU 资源争抢这整个问题</td></tr>
+        <tr><td><strong>是否要分轨(diarization)</strong></td><td class="check p">多人对话 / 会议录音才需要</td><td>多一步、多吃算力；单人录音别开，纯浪费</td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout info"><p><strong>对你的落点：</strong>录音多半含个人内容（隐私敏感）+ 你已有本地 Qwen3-ASR pipeline → <strong>继续本地、保持独立 worker</strong> 是对的。只有当某天音频量暴涨、本地 GPU 扛不住又不敏感时，才把<u>那一类</u>分流到云 ASR。隐私是这格里权重最高的变量——录音内容能不能上云，先问这个。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH10 ===== -->
+<section class="chapter" id="ch10" data-nav="10 你的活·监控">
+  <h2><span class="num">10</span><span class="title-text">你的活之三·监控：常驻 + 有状态，最需要"记得上次看到啥"</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>监控的资源特征：<strong>常驻、低延迟、有状态</strong>。这是三类活里<u>最该有状态</u>的一类——它的核心价值就是"记得上次报过啥"，否则每轮都把同样的东西重报一遍，把你的通知刷成噪音。你已经搭了 4 个监控，重点不是再加，是<strong>把它们改造成有状态的</strong>。</p>
+
+    <h3>工程结论：单个专精持久 agent + stateful cron，状态落外部存储</h3>
+    <div class="callout good"><h4>官方点名的场景</h4><p>LangGraph Platform（GA 2025-05）的 stateful cron 绑定 thread_id，每次 append 进同一对话——官方文档<strong>直接点名</strong>这个场景："a monitoring agent that remembers what it already flagged"<sup class="cite" data-refid="23">[23]</sup>。这几乎就是为你的需求量身定的描述。<span class="conf g">🟢</span></p></div>
+
+    <div class="callout info"><h4>agent-based（持久）vs agentless（轮询）</h4><p>Auvik（2024）的对比：agent-based 持久采集无需轮询周期，agentless（polling cron）流量更多；漏检敏感的场景，持久 agent + 内存更可靠<sup class="cite" data-refid="24">[24]</sup>。对监控这种"漏一次就错过窗口"的活，<strong>有状态比无状态重要得多</strong>。</p></div>
+
+    <div class="callout info"><h4>只在"真的变了"才触发</h4><p>Firecrawl 的 previousScrapeAt + changeStatus 做状态对比，只在真变化时触发 webhook、只在真变化时付费<sup class="cite" data-refid="24">[24]</sup>。这正是你要的逻辑：<strong>存下"上次的状态"，每轮比对，只在 diff 有意义时才告警</strong>——既省钱又不刷屏。</p></div>
+
+    <div class="callout accent"><p><strong>给你的落地形态：</strong>监控 = <code>stateful cron + 外部状态存储（SQLite / Markdown / Redis）</code>，<u>一个</u>监控 agent 盯多个目标，而不是每个目标一个 agent。每次轮询：① 抓当前状态 → ② 和存储里的上次状态比对 → ③ 只在变化"重要"时才告警（这一步如果需要判断"重不重要"，就是该上 agent 的判断点）→ ④ 更新存储。你现有的 4 个监控，挨个加上"状态记忆 + diff 判断"这一层，价值立刻翻倍。这也是三类活里<strong>唯一真正需要"持久 / 有状态"特性</strong>的——Hermes / OpenClaw 的持久记忆能力，用在这里才物有所值。</p></div>
+
+    <h3>"有状态"具体存什么：一份最小状态 schema</h3>
+    <p>别让"有状态"停在口号——它落地就是每个监控目标存这么几个字段（防重复告警的关键全在这）：</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>字段</th><th>作用</th></tr></thead>
+      <tbody>
+        <tr><td><code>target_id</code> / <code>url</code></td><td>盯的是哪个目标</td></tr>
+        <tr><td><code>last_hash</code></td><td>上次内容的指纹，用来判断"真的变了吗"（hash 不变 = 没变，跳过）</td></tr>
+        <tr><td><code>last_seen_at</code></td><td>上次成功抓取时间（顺带做"目标挂了"的探活）</td></tr>
+        <tr><td><code>last_alerted_at</code> / <code>cooldown_until</code></td><td>上次告警时间 + 冷却窗口——<strong>防同一变化反复刷屏的核心字段</strong></td></tr>
+        <tr><td><code>severity</code></td><td>这次变化的级别（用来决定推不推、推哪个频道）</td></tr>
+        <tr><td><code>run_log</code> / <code>retry_count</code></td><td>抓取失败的重试与审计，区分"目标没变"和"我没抓到"</td></tr>
+      </tbody>
+    </table></div>
+    <p style="font-size:0.93em;opacity:0.88">核心逻辑：<strong>当前 hash == last_hash → 静默跳过；hash 变了且过了 cooldown → 告警 + 更新 last_alerted_at；抓取失败 → retry，连续失败到阈值再单独报"目标可能挂了"</strong>。这套就是把你现有 4 个监控从"每轮重报"改造成"只报真变化"的全部所需，不复杂，但价值最高。<span class="conf g">🟢</span>（标准 change-detection 模式，参 Firecrawl changeStatus 思路<sup class="cite" data-refid="24">[24]</sup>）</p>
+  </div>
+</section>
+
+<!-- ===== CH11 ===== -->
+<section class="chapter" id="ch11" data-nav="11 为何不能塞一个">
+  <h2><span class="num">11</span><span class="title-text">为什么三类不能塞一个 agent：节奏不同会资源争抢</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>这是最容易被误读的一章，先把话说死：<strong>"执行层按类型拆"和"模式上能单别多"不矛盾</strong>。Ch5–7 说的是"别为了协作搞多 agent 互相讨论"；这一章说的是"别为了省事把三种节奏完全不同的活塞进同一个进程"。拆，是为了<u>资源隔离</u>，不是为了<u>智能协作</u>。这是两件事。</p>
+
+    <h3>三类活的节奏对照</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>任务</th><th>节奏</th><th>主要资源</th><th>对延迟敏感度</th><th>塞一起的后果</th></tr></thead>
+      <tbody>
+        <tr><td><strong>监控</strong></td><td class="check y">常驻、定时轮询</td><td>轻 CPU / 网络</td><td class="check n">高（漏一次错过窗口）</td><td>被转录饿死、定时精度崩</td></tr>
+        <tr><td><strong>下载</strong></td><td class="check p">突发、批量</td><td>IO（等网络）</td><td class="check p">中</td><td>IO 等待长时占着进程</td></tr>
+        <tr><td><strong>转录</strong></td><td class="check n">批处理、跑满</td><td>GPU / CPU 重</td><td class="check y">低（慢点没事）</td><td>占满 event loop，把上面俩拖死</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>为什么塞一起一定出事（证据链）</h3>
+    <div class="callout bad"><h4>① 本地单机 CPU 线程争抢</h4><p>Spheron 实测：LLM-heavy 任务过度占 CPU，<strong>每个 LangGraph / CrewAI 工具调用都阻塞一个 CPU 线程</strong><sup class="cite" data-refid="22">[22]</sup>。映射到你：GPU 转录 + 工具调用 + 监控 http 轮询三者抢同一批 CPU 线程，本地单机尤其惨——云上还能加机器，你本地就一台。<span class="conf g">🟢</span></p></div>
+    <div class="callout bad"><h4>② event loop 饿死（已在 Ch9 证）</h4><p>数学 / GPU 密集执行饿死 asyncio event loop，需要 dedicated ThreadPoolExecutor 隔离<sup class="cite" data-refid="20">[20]</sup>。同一进程里，转录一跑，监控的定时轮询就排不上队。<span class="conf g">🟢</span></p></div>
+    <div class="callout bad"><h4>③ 单体连环 stall（Google 教训）</h4><p>Google 把单体的 massive linear for loop 拆成 sub-agents，因为<strong>一个子任务失败会让整个流程 silently stall</strong><sup class="cite" data-refid="22">[22]</sup>。塞一个进程里，转录卡死可能让监控和下载跟着一起静默挂掉，你还不知道。<span class="conf y">🟡</span>（组合推理）</p></div>
+
+    <div class="callout warn"><p><strong>量化佐证：</strong>Redis 的多 agent 实测——并行任务最好 +81%，但<u>顺序任务</u>最坏 −70%<sup class="cite" data-refid="22">[22]</sup>。你的三类活是三条<u>独立</u>的流水线（不是一条要顺序跑的链），分开跑能吃到并行的好处；硬塞成一条顺序链反而踩进 −70% 的坑。<span class="conf y">🟡</span></p></div>
+
+    <div class="callout accent"><p><strong>本章定论：</strong>执行层<strong>必须</strong>按任务类型拆成独立 worker / 进程 / 服务——监控一个（常驻有状态）、下载一个（cron 触发）、转录一个（独立 GPU worker）。它们之上由<u>一个调度大脑</u>统一管（你跟它说话 + 管 cron 编排），这就是 planner-worker 模式。注意：拆的是"执行进程"，不是"养三个有人格的 agent"——别给每个 worker 配 SOUL.md。</p></div>
+
+    <div class="callout info"><p><strong>诚实标注：上面是风险模型，不是在你机器上实测的结论。</strong>"GPU 转录饿死监控"是由 asyncio event loop 饿死、CPU 线程争抢、单体连环 stall 这几条<u>已被实证的机理</u>外推到你的场景——机理硬，但你具体那台机器会不会出事、多严重，取决于你的 GPU 型号、监控间隔、转录时长。<strong>想 5 分钟验证就花成本最低的一招：在同一进程里同时跑"一个每 10 秒打点的监控循环 + 一次 ASR 批转录"，看监控打点有没有漏拍 / 延迟飙升</strong>。漏了就坐实了该隔离，没漏说明你的负载还轻——但隔离的成本极低（就是多开个进程），<strong>预防性拆开依然是更稳的默认</strong>。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH12 ===== -->
+<section class="chapter" id="ch12" data-nav="12 成本·迁移·并存">
+  <h2><span class="num">12</span><span class="title-text">成本 / 迁移 / 并存：留 OpenClaw vs 引入 Hermes</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <h3>成本：两者结构相近，Hermes 自托管略便宜（🟡 价格多为单源）</h3>
+    <p>都 MIT 免费无订阅；API token 价一样（Claude Sonnet4.6 ~$3/$15 per M、DeepSeek Flash $0.14/$0.28）。差异主要在基础设施和 session 历史累积策略：</p>
+    <div class="metric-grid">
+      <div class="metric"><div class="v">$30–65/月</div><div class="l">Hermes 月均 API（session 累积更省）<span class="conf y">🟡</span></div></div>
+      <div class="metric"><div class="v">$40–80/月</div><div class="l">OpenClaw 月均 API<span class="conf y">🟡</span></div></div>
+      <div class="metric"><div class="v">~$5/月</div><div class="l">Hermes 基础设施（VPS）<span class="conf y">🟡</span></div></div>
+      <div class="metric"><div class="v">~$24/月</div><div class="l">OpenClaw 基础设施（托管）<span class="conf y">🟡</span></div></div>
+    </div>
+    <p>本地推理路径：Ollama + Hermes（6GB+ VRAM）可做到 $0 API<sup class="cite" data-refid="25">[25]</sup>——这是 Hermes 唯一在成本上明显领先的场景，<strong>前提是你愿意管本地 GPU</strong>。</p>
+
+    <h3>迁移：有官方工具，但平台覆盖缩水、skill 生态不兼容</h3>
+    <p>OpenClaw → Hermes 有官方 <code>hermes claw migrate</code>，能自动导入 SOUL/AGENTS/MEMORY/skill 库/模型配置/MCP/各平台 token<sup class="cite" data-refid="26">[26]</sup>。但有三个代价：</p>
+    <ul>
+      <li><strong>平台覆盖倒退</strong>：50+/24+ → 7，Discord channel binding 的复杂映射要手动重建、WhatsApp 要重扫 QR。</li>
+      <li><strong>skill 生态不兼容</strong>：OpenClaw 的 15,000+ ClawHub skill 格式<u>不直接兼容</u> Hermes，你现有的 skill 投入大部分要重写。</li>
+      <li><strong>source:"exec" 型 key 要手动迁。</strong></li>
+    </ul>
+    <div class="trap-box"><strong>⚠️ 对你：</strong>逍遥在 OpenClaw 上跑、你的 Discord 多 agent 分频道都在 OpenClaw 形态里——整栈迁 Hermes 等于把这套全推倒重来，得不偿失。</div>
+
+    <h3>并存：成熟、可行，六个隔离点（推荐路线）</h3>
+    <p>运行层天然不冲突：OpenClaw 是 Node（<code>~/.openclaw</code>）、Hermes 是 Python（<code>~/.hermes</code>），同机跑互不干扰<sup class="cite" data-refid="25">[25]</sup>。社区已有成熟双栈模式：</p>
+    <div class="callout good"><h4>混合架构（社区在用的一种设计选项）</h4><p>OpenClaw 当 orchestrator（排班 / 多渠道 / Cron / 技能）+ Hermes 当 executor（自学习 / 持久记忆 / 重复执行）<sup class="cite" data-refid="25">[25]</sup>。还有 Supervisor 模式：Hermes 监控 OpenClaw 的 Discord 输出做质检 / 升级，建 #operator-ai 私有频道、两 bot 独立 token、用 intent marker（[STATUS_REQUEST] / [REVIEW_REQUEST]）防循环。这正好是"OpenClaw 编排 + Hermes 执行"——你不用二选一。<strong>把它当一个可行的设计选项看，别当"已被广泛验证的最佳实践"</strong>——社区里"约 20% 在用"这种说法来自 Reddit 帖子的非正式估计，不是可复现的调查数据。<span class="conf y">🟡</span></p></div>
+    <p>六个手动隔离点（要并存就照做）：① 不同 bot token（同 token 会随机分发消息）② 不同端口 ③ 不同 systemd unit ④ 不同浏览器 profile ⑤ 独立 key 或注意 rate limit ⑥ 各自 data dir。</p>
+
+    <div class="callout warn"><p><strong>一个要标注的矛盾：</strong>关于 OpenClaw 的 Discord 多 bot token——证据包之间说法不一（一处说现行 docs 支持多 account、一处说 issue #28479 限制仍 open 全局单 token）。<strong>以你实测的最新版为准</strong>，别照搬任一来源的结论。Hermes 原生 per-channel per-user session routing 在这点上更灵活。<span class="conf y">🟡</span></p></div>
+  </div>
+</section>
+
+<!-- ===== CH13 ===== -->
+<section class="chapter" id="ch13" data-nav="13 阿杰路线建议">
+  <h2><span class="num">13</span><span class="title-text">阿杰路线建议：决策树 + 具体下一步 + 别过度设计清单</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>把全报告收成一棵决策树和一份可执行清单。核心精神就一句：<strong>智能放在判断点，自动化放在其余；执行层按类型拆，调度用一个大脑；留 OpenClaw，Hermes 仅并存补充。</strong></p>
+
+    <h3>决策树：每类任务都先走一遍</h3>
+    <div class="tree">
+      <div class="node q">Q1 · 这个任务要判断力，还是纯机械？</div>
+      <div class="node"><span class="lbl y">纯机械（固定 URL 定时下载、固定状态比对）</span>✅ cron + 脚本 + 通知，<strong>别上 agent</strong>（Ch8）</div>
+      <div class="node"><span class="lbl m">含判断点（决定下载什么 / 判断变化重不重要 / 处理转录异常）</span>⚠️ 只在那个判断点上 agent，执行仍交脚本</div>
+      <div class="step-arrow">↓</div>
+      <div class="node q">Q2 · 三类活能塞同一个进程吗？</div>
+      <div class="node"><span class="lbl n">能（图省事）</span>⛔ 不行——GPU 转录会饿死监控轮询、本地单机 CPU 线程争抢（Ch9/Ch11）</div>
+      <div class="node"><span class="lbl y">执行层按类型拆</span>✅ 监控(常驻有状态) / 下载(cron 触发) / 转录(独立 GPU worker) 各自独立</div>
+      <div class="step-arrow">↓</div>
+      <div class="node q">Q3 · 谁来统一调度？这步该用 agent 还是工作流引擎？</div>
+      <div class="node"><span class="lbl y">确定性流水线（下载/转录/定时比对）</span>✅ 优先用工作流引擎（LangGraph stateful cron / Temporal）——更确定、好调试、能 survive restart，<strong>agent 只放在判断点</strong></div>
+      <div class="node"><span class="lbl m">需要对话入口 + 灵活判断</span>⚠️ 用 OpenClaw 当调度大脑（你跟它说话 + 管 cron 编排），底层 worker 仍可由工作流引擎跑</div>
+      <div class="step-arrow">↓</div>
+      <div class="node q">Q4 · 整体形态？</div>
+      <div class="node"><span class="lbl y">一个调度大脑 + 分开 worker</span>✅ planner-worker 模式：一个大脑统一编排，各 worker 按类型独立干各的</div>
+      <div class="step-arrow">↓</div>
+      <div class="node q">Q5 · 调度大脑放哪个产品？</div>
+      <div class="node"><span class="lbl y">留 OpenClaw（默认）</span>✅ 你已在上面 + 逍遥在跑：三类做成 cron 触发的独立 skill / sub-agent，监控用 stateful cron</div>
+      <div class="node"><span class="lbl m">引入 Hermes</span>⚠️ 仅当①要 agent 真自进化 ②有 NVIDIA GPU 想省 API ③要单点持久记忆 → 并存补充，不替换（Ch12）</div>
+    </div>
+
+    <h3>给你的具体起步顺序（从最薄的一条开始）</h3>
+    <div class="check-box">
+      <strong>① 先把"下载"做成最薄的一条</strong>：cron + yt-dlp skill + 完成通知。固定源定时跑，跑通验证整个"调度 → 执行 → 回报"链路。这条最简单、风险最低、最快见效。<br>
+      <strong>② 再加"监控"（重点改造）</strong>：你已经有 4 个监控——挨个加上"状态存储 + diff 判断"层，让它们<u>记得上次报过啥</u>，只在真变化时告警。这是三类里唯一真吃"有状态"的，价值最高。用 stateful cron（OpenClaw 每 agent 独立 cron / 或 LangGraph stateful cron）。<br>
+      <strong>③ 最后接"转录"</strong>：做成独立 GPU worker（你的 process-audio pipeline 保持独立），有新录音才触发，自己排队占 GPU，物理上和前两类隔开。绝不和监控 / 下载共进程。<br>
+      <strong>④ 三条都独立跑通后</strong>，再决定要不要引入 Hermes 做执行端——只有当你确实想要自进化 / 本地 GPU 省钱时才上，且是并存。
+    </div>
+
+    <h3>别过度设计清单（贴墙上）</h3>
+    <div class="callout bad"><p style="margin:0"><strong>⛔ 这些事别做：</strong></p>
+    <ul style="margin:8px 0 0">
+      <li><strong>别给机械任务配人格 / SOUL.md。</strong>下载、定时比对不需要"性格"，给搬箱子的活配管家是哲学化简单问题。</li>
+      <li><strong>别为了"用上 AI agent"而 AI agent。</strong>纯机械的活 cron + 脚本就够，智能只放在判断点。能不上 agent 的地方别上。</li>
+      <li><strong>别把三类塞一个 agent / 进程。</strong>节奏不同会资源争抢，GPU 转录会饿死监控——这是物理问题，不是配置能解决的。</li>
+      <li><strong>别裸奔把 OpenClaw 暴露公网。</strong>默认不安全、CVE 多、十万级实例被微软点名。自托管务必绑回环 + 加认证 + 隔离跑。</li>
+      <li><strong>别一上来整栈迁 Hermes。</strong>逍遥 + Discord 多 agent 都在 OpenClaw 上，迁移平台缩水 + skill 不兼容，得不偿失。要 Hermes 就并存。</li>
+      <li><strong>别为三类活各配一队会讨论的 agent。</strong>它们逻辑确定、单域、上下文小——多 agent 三条件一条不全中，纯浪费 10–15× token。</li>
+    </ul>
+    </div>
+
+    <div class="callout good"><p><strong>一句话收口：</strong>留在 OpenClaw，做成"一个调度大脑 + 三个按类型拆开的独立执行 worker"，机械的部分用 cron + 脚本（连 agent 都省了），监控重点改造成有状态。Hermes 先别碰，等你真有"想要自进化"或"有 GPU 想省 API 钱"的明确需求，再以并存方式加进来。这套既不浪费你已有的投入，方向也和当前主流工程证据一致。</p></div>
+    <div class="callout warn"><p><strong>⚠️ 把话说清楚——架构建议 vs 产品建议，硬度不同：</strong>"<u>架构</u>上选 planner-worker + 智能只放判断点"这条，证据最硬（arXiv 多篇 + Anthropic/Azure 法则），我很有把握。"<u>产品</u>上留 OpenClaw、Hermes 只并存"这条，部分依据是版本/star/CVE 总数这类<strong>软证据</strong>（已逐处标 🟡），而且 OpenClaw / Hermes 都在快速迭代——所以产品结论<strong>请以你实测最新版为准</strong>，别把本报告的产品细节当成定论。两条建议分开看，别让软证据拖累硬结论。</p></div>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section class="chapter" id="faq" data-nav="FAQ 常见问题">
+  <h2><span class="num">14</span><span class="title-text">FAQ：你可能还想问的</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">所以到底选哪个？一句话。</span><span class="toggle">＋</span></div><div class="faq-a"><p>留 OpenClaw 做调度大脑 + planner-worker，三类活按类型拆成独立 worker，机械部分用 cron+脚本（连 agent 都不用）。Hermes 仅在你想要"自进化"或"有 NVIDIA GPU 想省 API 钱"时作为<u>并存补充</u>引入，不替换。理由全在 Ch5（多 agent 大多更贵不更好）+ Ch11（节奏不同要隔离）+ Ch12（你已在 OpenClaw 上）。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">你不是说多 agent 大多更差吗，那为什么还让我"按类型拆成多个 worker"？这不矛盾？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不矛盾，关键在"拆的目的"。Ch5–7 反对的是"为了让 agent 互相讨论协作而搞多 agent"（那大多是昂贵的错觉）。Ch11 主张的是"为了资源隔离而把执行进程按类型分开"——监控、下载、转录节奏天差地别，塞一个进程会资源争抢（GPU 转录饿死监控轮询）。前者是<u>智能协作</u>问题，后者是<u>资源调度</u>问题。拆 worker 不等于养多个有人格的 agent，别给每个 worker 配 SOUL.md。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">Hermes 的 star 数到底多少？看到有说 19 万的。</span><span class="toggle">＋</span></div><div class="faq-a"><p>各源差异巨大：6.4 万 / 14 万 / 19.4 万都有人报。这类数字多来自 SEO 内容农场，互相抄、可能夸大。<strong>当"量级参考"看就好（确实是十万级的热门项目），别当精确事实。</strong>OpenClaw 第三方报约 36.9 万 star / 7.6 万 fork，同样标 🟡。选型不该靠 star 数决定，该靠它适不适配你的形态。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">我已经搭了 4 个监控，要全推倒重做吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不用推倒，是<u>升级</u>。给现有 4 个监控各加一层"状态存储 + diff 判断"：每轮抓当前状态 → 和存储里的上次状态比对 → 只在变化重要时才告警 → 更新存储。核心是让它们"记得上次报过啥"，从"每轮重报"变成"只报新变化"。LangGraph 官方点名这个场景（"a monitoring agent that remembers what it already flagged"），OpenClaw 每 agent 独立 cron 也能做。详见 Ch10。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">转录为什么不能跟监控放一起？慢一点我能接受啊。</span><span class="toggle">＋</span></div><div class="faq-a"><p>问题不是转录慢，是转录会把<u>监控</u>拖死。GPU/数学密集执行会饿死整个 asyncio event loop（FastEmbed 实证），转录一开始算，同进程里监控的定时轮询就排不上队、错过窗口。你能接受转录慢，但接受不了监控漏报。所以必须物理隔离：转录独立 GPU worker，自己占自己释放。详见 Ch9/Ch11。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">下载真的连 agent 都不用？</span><span class="toggle">＋</span></div><div class="faq-a"><p>固定 URL/固定频道的定时下载——是的，cron + yt-dlp 脚本 + 完成通知就够，纯确定性逻辑，重试用队列+指数退避，要 agent 干嘛。只有当"决定下载什么"本身需要判断（比如"挑出今天值得下的新内容"）时，才在那个<u>判断点</u>上 agent，下载执行依旧脚本。把智能用在刀刃上。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">混合模式（OpenClaw + Hermes 一起跑）会不会太折腾？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不会冲突——Node 的 ~/.openclaw 和 Python 的 ~/.hermes 同机天然隔离，约 20% Reddit 用户在用 "OpenClaw 编排 + Hermes 执行"。但折腾不折腾看你：维护两套是有成本的。<strong>我的建议是先别上 Hermes</strong>，把 OpenClaw 单栈的 planner-worker 跑通，等真有"自进化/省 GPU 钱"的明确需求再加。别为了双栈而双栈。要并存就照 Ch12 的六个隔离点做。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">Hermes 的"自进化 skill"听起来很爽，对我有用吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>对你这三类<u>固定机械活</u>，用处不大——它们逻辑确定，不需要 agent 越用越聪明。自进化在"任务多变、需要积累经验"的场景才发光。而且自动生成的 skill 应视为草稿、上生产要人审（AI Builder Club 警示），还有 memory poisoning 安全面。爽是爽，但对你是杀鸡用牛刀 + 引入新风险面。真要用，先在低风险任务上试。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">OpenClaw 安全问题这么多，我还敢用？</span><span class="toggle">＋</span></div><div class="faq-a"><p>敢用，但要加固。那些十万级被攻击的实例都是<u>裸奔公网 + 默认无认证</u>的。你自己用：① 绑 localhost/回环别暴露公网 ② 开认证 ③ 单独 VPS 或容器隔离跑 ④ 别乱装 ClawHub 第三方 skill（824 个恶意 skill 的前车之鉴）。微软那句"不适合在标准个人/公司机器上跑"针对的是默认配置——加固后自用是可控的。详见 Ch3。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">这份报告里哪些数字我可以信，哪些得打折？</span><span class="toggle">＋</span></div><div class="faq-a"><p>🟢 放心信：架构哲学差异（NVIDIA 官方+docs）、单 vs 多 agent 工程原则（arXiv 2026 论文、Anthropic、Microsoft Azure）、三类任务适配（LangGraph/RunPod/Spheron）。🟡 打折看（当量级参考）：所有 star 数、精确版本号、首发日期、CVE 总数、托管价格——很多来自 SEO 内容农场，可能夸大互抄。🔴 当方向别当数字：Anthropic 那个"多 agent 高 90%"是未公开细节的内部评测。报告的核心论证只建在 🟢 上，软证据从不当板上钉钉的事实。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">如果将来任务变复杂了（不只这三类机械活），结论会变吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>会，且应该变。多 agent 的优势区间是"可并行 + 跨域 + 超 context 窗口"三条件全中——如果你将来要做"同时查多个方向再综合"的深度研究、跨服务大重构这类活，多 agent 就真有价值了（Anthropic Deep Research 是正例）。判断法则：单 agent 准确率已 &gt;45% 时加 agent 是负收益；工具 ≥16 个成本飙。到那天再按 Ch6 的三条件重新评估，但你现在这三类机械活还远没到。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q12</span><span class="qtext">用 LangGraph / Temporal 这种"非 agent 框架"是不是更直接？</span><span class="toggle">＋</span></div><div class="faq-a"><p>对你的机械任务，很可能是。LangGraph 的 stateful cron 几乎为监控量身定做；Temporal（Netflix/Datadog 在用）做 hours-days 的持久 workflow、survive restarts，很适合下载/转录这种"跑很久要能续"的活。它们不是"agent 框架"而是"工作流编排框架"——更确定、更好调试。<strong>不冲突</strong>：你完全可以 OpenClaw 当对话入口 + 调度大脑，底层 worker 用 LangGraph/Temporal 编排。把 agent 用在判断点，把工作流框架用在确定性流水线。</p></div></div>
+  </div>
+</section>
+
+<!-- ===== REFS ===== -->
+<section class="chapter" id="refs" data-nav="References">
+  <h2><span class="num">15</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p style="font-size:0.92em;opacity:0.85;margin-bottom:14px">标注说明：🟢 硬来源（官方 docs / 一手博客 / arXiv 论文 / 权威厂商文档），核心论证依据；🟡 软来源（SEO 站 / 内容农场 / 社区聚合），仅作量级参考，文中已注明。访问日期统一 2026-06-19。</p>
+    <ol class="ref-list">
+      <li id="ref-1"><a href="https://github.com/NousResearch/hermes-agent" target="_blank" rel="noopener">Hermes Agent — NousResearch/hermes-agent（GitHub repo，tag v2026.5.16；"The agent that grows with you"）— 架构/delegate_task/平台/记忆 🟢（repo 一手；版本号采 vYYYY.M.D 制，本文早稿误写的 "v0.12.0/v0.2.0" 等以 repo release 页为准）</a><span class="ref-meta">· 访问 2026-06-19 · 引用 6 次</span></li>
+      <li id="ref-2"><a href="https://developer.nvidia.com/blog/" target="_blank" rel="noopener">NVIDIA Developer Blog — Hermes always-on local agent（硬件非必须 / provider-agnostic / $5 VPS）🟢</a><span class="ref-meta">· 访问 2026-06-19 · 引用 2 次</span></li>
+      <li id="ref-3"><a href="https://docs.openclaw.ai/" target="_blank" rel="noopener">OpenClaw 官方 docs — multi-agent / sessions_spawn / bindings 路由 🟢</a><span class="ref-meta">· 访问 2026-06-19 · 引用 3 次</span></li>
+      <li id="ref-4"><a href="https://github.com/NousResearch/hermes/releases" target="_blank" rel="noopener">Hermes GitHub Releases — self-improving skills / Autonomous Curator(v0.12.0) / 91 官方 skill 🟢</a><span class="ref-meta">· 访问 2026-06-19 · 引用 1 次</span></li>
+      <li id="ref-5"><a href="https://aibuilderclub.com/" target="_blank" rel="noopener">AI Builder Club — Hermes 三层记忆评测 + auto-skill 应人审警示 🟡</a><span class="ref-meta">· 访问 2026-06-19 · 引用 2 次</span></li>
+      <li id="ref-6"><a href="https://github.com/NousResearch/hermes/issues" target="_blank" rel="noopener">Hermes GitHub Issues — token bloat(#10585) / context overflow(#23767) / memory poisoning(#496) 🟡</a><span class="ref-meta">· 访问 2026-06-19 · 引用 2 次</span></li>
+      <li id="ref-7"><a href="https://news.ycombinator.com/item?id=48187581" target="_blank" rel="noopener">Hacker News id=48187581 — Hermes provenance / 抄袭争议讨论 🟡</a><span class="ref-meta">· 访问 2026-06-19 · 引用 1 次</span></li>
+      <li id="ref-8"><a href="https://arxiv.org/abs/2601.12307" target="_blank" rel="noopener">arXiv 2601.12307 — 单 agent role-play 多角色与多 agent 持平、成本仅 ~10% 🟢</a><span class="ref-meta">· 访问 2026-06-19 · 引用 1 次</span></li>
+      <li id="ref-9"><a href="https://arxiv.org/abs/2606.13003" target="_blank" rel="noopener">arXiv 2606.13003《The Illusion of Multi-Agent Advantage》(Jwalapuram et al., 2026-06) — 摘要原文："automatic MAS consistently underperform CoT-SC despite being up to 10x more computationally expensive" 🟢（具体 benchmark 数值见正文表格，本文 GPQA/HLE/SWE-Bench 等点数为 paraphrase，精确数以 PDF 表为准 🟡）</a><span class="ref-meta">· 访问 2026-06-19 · 引用 1 次</span></li>
+      <li id="ref-10"><a href="https://en.wikipedia.org/wiki/OpenClaw" target="_blank" rel="noopener">OpenClaw — Wikipedia + 社区（命名史 / Steinberger / Foundation）🟡</a><span class="ref-meta">· 访问 2026-06-19 · 引用 1 次</span></li>
+      <li id="ref-11"><a href="https://github.com/openclaw/openclaw" target="_blank" rel="noopener">OpenClaw GitHub — Gateway/Agent/Skills/Memory 四核心 + workspace 文件结构 🟢</a><span class="ref-meta">· 访问 2026-06-19 · 引用 1 次</span></li>
+      <li id="ref-12"><a href="https://docs.openclaw.ai/memory" target="_blank" rel="noopener">OpenClaw docs — Memory 三层 / no hidden state / ClawHub skill 市场 🟢</a><span class="ref-meta">· 访问 2026-06-19 · 引用 1 次</span></li>
+      <li id="ref-13"><a href="https://www.runzero.com/blog/openclaw/" target="_blank" rel="noopener">runZero — "OpenClaw RCE vulnerability: CVE-2026-25253"（CVSS 8.8、1-click RCE via WebSocket token 外泄、2026-02-03 披露 40,000+ 实例暴露 63% 易受攻击、v2026.1.29 修复）🟢；微软 2026-02-19 安全博客 🟢；"138 CVEs 总数 / ClawHavoc 824 恶意 skill" 来自 betterclaw.io 第三方聚合 🟡（口径未经一手核实）</a><span class="ref-meta">· 访问 2026-06-19 · 引用 1 次</span></li>
+      <li id="ref-14"><a href="https://www.anthropic.com/research/building-effective-agents" target="_blank" rel="noopener">企业客服多 agent vs 单 agent 成本对比（$47K vs $22.7K，+2.1% 准确率）🟢</a><span class="ref-meta">· 访问 2026-06-19 · 引用 2 次</span></li>
+      <li id="ref-15"><a href="https://www.anthropic.com/research/building-effective-agents" target="_blank" rel="noopener">Anthropic《Building Effective Agents》+ Multi-Agent Research（chat→agent 4× / →multi 15× token / Deep Research +90%）🟢/🔴</a><span class="ref-meta">· 访问 2026-06-19 · 引用 2 次</span></li>
+      <li id="ref-16"><a href="https://arxiv.org/abs/2512.08296" target="_blank" rel="noopener">arXiv 2512.08296 + context engineering — 工具数 β̂=-0.330 / 三(四)条件 / >45% 阈值 / MAST 失败率 🟢</a><span class="ref-meta">· 访问 2026-06-19 · 引用 5 次</span></li>
+      <li id="ref-17"><a href="https://arxiv.org/abs/2601.04748" target="_blank" rel="noopener">arXiv 2601.04748 — 多 agent 工作流可编译为单 agent+技能库、token/延迟各降 ~50%、语义混淆阈值断崖 🟢</a><span class="ref-meta">· 访问 2026-06-19 · 引用 2 次</span></li>
+      <li id="ref-18"><a href="https://arxiv.org/abs/2512.08296" target="_blank" rel="noopener">UIUC 跨 7 数据集 6 模型 token 成本实测 4–220× 🟢</a><span class="ref-meta">· 访问 2026-06-19 · 引用 1 次</span></li>
+      <li id="ref-19"><a href="https://deepmind.google/research/" target="_blank" rel="noopener">Google DeepMind(2025-12) + Cornell — 错误放大 17.2x→4.4x / 复杂规划 42.68% vs 2.92% 🟢</a><span class="ref-meta">· 访问 2026-06-19 · 引用 2 次</span></li>
+      <li id="ref-20"><a href="https://www.runpod.io/blog/" target="_blank" rel="noopener">RunPod + FastEmbed worker pool / ThreadPoolExecutor 隔离 / asyncio event loop 被饿死实证 🟢</a><span class="ref-meta">· 访问 2026-06-19 · 引用 3 次</span></li>
+      <li id="ref-21"><a href="https://www.runpod.io/blog/" target="_blank" rel="noopener">RunPod — ASR pipeline 拆 chunking/transcription/diarization + 消息队列 + batching 🟢</a><span class="ref-meta">· 访问 2026-06-19 · 引用 1 次</span></li>
+      <li id="ref-22"><a href="https://spheron.network/blog" target="_blank" rel="noopener">Spheron + Google + Redis — on-demand vs spot / CPU 线程争抢 / 单体拆分 / 并行+81% 顺序-70% 🟢/🟡</a><span class="ref-meta">· 访问 2026-06-19 · 引用 4 次</span></li>
+      <li id="ref-23"><a href="https://langchain-ai.github.io/langgraph/" target="_blank" rel="noopener">LangGraph Platform docs — stateful cron 绑 thread_id，官方点名 "monitoring agent that remembers what it already flagged" 🟢</a><span class="ref-meta">· 访问 2026-06-19 · 引用 1 次</span></li>
+      <li id="ref-24"><a href="https://www.firecrawl.dev/" target="_blank" rel="noopener">Firecrawl(changeStatus/previousScrapeAt) + Auvik(agent vs agentless 监控)🟢</a><span class="ref-meta">· 访问 2026-06-19 · 引用 2 次</span></li>
+      <li id="ref-25"><a href="https://www.reddit.com/r/openclaw/" target="_blank" rel="noopener">r/openclaw 社区 — 并存双栈 / 混合架构(~20%) / Supervisor 模式 / 六隔离点 / Kilo.ai 评论分析 🟡</a><span class="ref-meta">· 访问 2026-06-19 · 引用 3 次</span></li>
+      <li id="ref-26"><a href="https://github.com/NousResearch/hermes" target="_blank" rel="noopener">Hermes 官方迁移工具 `hermes claw migrate`（导入 SOUL/MEMORY/skill/token，平台覆盖缩水）🟢/🟡</a><span class="ref-meta">· 访问 2026-06-19 · 引用 1 次</span></li>
+    </ol>
+  </div>
+</section>
+  <footer>
+    无忌 · Deep Research（L2）· 2026-06-19 · 仅供阿杰个人决策参考；数据与判例以原始来源为准。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('hermes-vs-openclaw-agents-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('hermes-vs-openclaw-agents-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

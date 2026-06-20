@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>n8n vs LangGraph：可视化管道 vs 代码编排——你的自动化该用哪种工作流引擎 · 无忌 Deep Research · 2026-06-20</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 01 你的真问题</a>
+    <a href="#ch2" data-target="ch2">02 02 n8n 是什么</a>
+    <a href="#ch3" data-target="ch3">03 03 LangGraph 是什么</a>
+    <a href="#ch4" data-target="ch4">04 04 一图看懂区别</a>
+    <a href="#ch5" data-target="ch5">05 05 n8n 核心优势</a>
+    <a href="#ch6" data-target="ch6">06 06 用 n8n 还是写脚本</a>
+    <a href="#ch7" data-target="ch7">07 07 怎么结合用</a>
+    <a href="#ch8" data-target="ch8">08 08 你的活·日报</a>
+    <a href="#ch9" data-target="ch9">09 09 你的活·监控</a>
+    <a href="#ch10" data-target="ch10">10 10 你的活·微信监控</a>
+    <a href="#ch11" data-target="ch11">11 11 你的活·语音转写</a>
+    <a href="#ch12" data-target="ch12">12 12 研究要不要引 LangGraph</a>
+    <a href="#ch13" data-target="ch13">13 13 阿杰路线建议</a>
+    <a href="#faq" data-target="faq">14 FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">15 References</a>
+  </div>
+</nav>
+
+<main><div class="hero">
+  <h1>n8n vs LangGraph：可视化管道 vs 代码编排——你的自动化该用哪种工作流引擎</h1>
+  <div class="hero-meta">
+    <span>📅 2026-06-20</span>
+    <span>🔍 5 个搜证包 + 官方 docs/GitHub/定价页核查</span>
+    <span>🏗️ 两层抽象 × 逐活判词 × 决策矩阵</span>
+    <span>🌏 立场：人在马来西亚、会写代码、已在用 LangGraph 的开发者</span>
+  </div>
+  <div class="hero-deck">
+    <p><strong>一句话定调：n8n 和 LangGraph 根本不是"二选一"，它俩是两层完全不同的抽象——n8n 是高层"可视化连接器 / 集成管道"（连几百个 SaaS、搬数据、定时触发、统一告警），LangGraph 是低层"代码化 AI 推理控制流"（控制 LLM 怎么循环、分支、带状态、可恢复）。最常见的用法是<u>组合</u>：n8n 当外层管道，LangGraph（或 Claude）当里面那个"聪明节点"。对你这个已经会写代码、手里有 LangGraph + Claude Code 的人，要诚实——n8n 的价值很窄，只在"连一堆外部服务 + 调度 + 告警通知"这层省事，不在"写核心逻辑"那层。别被"n8n 能做一切"的软文带跑。</strong></p>
+    <p>本报告先把你的真问题接着上一篇往下钻（Ch1，顺手直接答 Q1：你转写确实在 LangGraph 上）→ 扒清两个引擎到底是什么、各自的坑（Ch2 n8n / Ch3 LangGraph）→ 一图看懂根本区别（Ch4，答 Q4）→ n8n 核心优势 + 跟裸脚本的分水岭（Ch5/Ch6，答 Q6）→ 怎么结合用（Ch7，答 Q5）→ 然后逐活下判词：日报（Ch8）/ 监控（Ch9）/ 微信监控（Ch10，先泼冷水）/ 语音转写（Ch11，Q1 收尾）/ 这个研究流程要不要引 LangGraph（Ch12，答 Q3）→ 最后给你一张决策矩阵 + "别做什么"清单（Ch13）。granular 数字（集成数、star 数、价格、版本号）按口径差异和时效分别标 🟢/🟡，微信合规信息时效性强、明确标日期。</p>
+  </div>
+</div>
+
+<div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+  <p style="margin:0"><strong>👉 这是上一篇的姊妹篇：</strong>上一篇《Hermes vs OpenClaw》定下"工作流引擎打底 + 判断点插 Claude"，这一篇就是往下钻——<strong>那个"工作流引擎"到底该用哪种</strong>。两篇连读最完整。 <a href="./hermes-vs-openclaw-agents.html">← 上一篇：Hermes vs OpenClaw（全能管家 vs 一队专才）</a></p>
+</div>
+
+<div class="callout purple" style="margin: 20px 0; padding: 16px 18px;">
+  <p style="margin:0"><strong>📌 三条最关键发现（先扫这个）：</strong></p>
+  <ul style="margin:8px 0 0">
+    <li><strong>它俩不是竞品，是两层抽象——n8n 是"集成管道"，LangGraph 是"AI 推理控制流"。</strong>n8n 关注"数据在系统之间怎么流"（连 1,889 个集成<sup class="cite" data-refid="1">[1]</sup>、定时、重试、告警），LangGraph 关注"LLM 怎么思考"（StateGraph 有向图、可循环自纠错、checkpoint 断点续）<sup class="cite" data-refid="9">[9]</sup>。最主流的用法是<u>组合</u>：n8n 外层编排 + LangGraph/Claude 当那个"聪明节点"，经 HTTP 调用。<span class="conf g">🟢</span> 趣闻：n8n 自己的 AI Workflow Builder 内部就用了 6 个 LangGraph agent<sup class="cite" data-refid="18">[18]</sup>。</li>
+    <li><strong>对会写代码 + 已有 LangGraph 的你，n8n 的价值很窄——只在 glue 层（连服务 + 调度 + 告警），不在逻辑层。</strong>n8n 帮你免造"认证 / 重试 / 执行历史 / 调度 / 告警路由"这套基础设施<sup class="cite" data-refid="13">[13]</sup>；但核心逻辑一复杂，n8n 最终还是逼你写 Code 节点，那就跟写脚本一样还多一层 overhead，而且 workflow 是 JSON、几乎没法 code review（issue #26707 至今开着）<sup class="cite" data-refid="6">[6]</sup>。所以"日报这种 glue"上 n8n 划算，"转写这种核心逻辑"留代码。</li>
+    <li><strong>逐活判词一句话：日报=n8n 真甜点 / 转写=留 LangGraph 别动 / 监控=n8n 或裸脚本都行 / 微信监控=工具无所谓、墙在接入层 / 深度研究=不必引 LangGraph。</strong>其中两个坑要先记死：① n8n 的 AI 节点曾有 <u>5 分钟超时</u>坑本地模型（issue #11886，原话"basically unusable for local models"）<sup class="cite" data-refid="20">[20]</sup>，虽然 2026-01 已加可配置超时，但本地 ASR 这种长任务正好踩在 n8n 弱项上——你已有跑通的 LangGraph，没理由搬过去。② 微信个人号从来没官方自动化 API，Tencent 还在 2026-01 给 GitHub 发 DMCA 删了 4,195 个微信导出/备份仓库<sup class="cite" data-refid="26">[26]</sup>——监控私聊基本死路。<span class="conf g">🟢</span></li>
+  </ul>
+</div>
+
+<div class="callout warn" style="margin: 20px 0; padding: 16px 18px;">
+  <p style="margin:0"><strong>🔎 关于本报告的可信度（坦白先说）：</strong>这次来源质量比上篇高（官方 docs / GitHub issue / 定价页 / 官方模板页为主，大部分 🟢），但仍有几处口径/时效要分开标：</p>
+  <ul style="margin:8px 0 0">
+    <li><strong>集成数有口径差异：</strong>n8n 官网说 1,889 个集成<sup class="cite" data-refid="1">[1]</sup>，第三方文章常说"500+"——后者多是旧数或只算官方 built-in 节点，不是矛盾。文中统一用官网口径并标注。</li>
+    <li><strong>几条 🟡 软证据：</strong>n8n v2.x queue mode 可靠性退化来自社区单帖（未官方确认）；"n8n 只支持单 agent workflow"部分来自竞品 Credal 视角，建议你实测边界；"n8n 内部用 6 个 LangGraph agent"来自单篇 Medium。这些当参考、不当铁板钉钉。</li>
+    <li><strong>LangGraph 产品改名很乱：</strong>LangGraph Platform →（2025-10）LangSmith Deployment → LangSmith Fleet，看文档要认日期<sup class="cite" data-refid="11">[11]</sup>。GitHub star / 价格一律标"截至 2026-06-20"。</li>
+    <li><strong>微信合规信息时效性极强：</strong>截至 2026-06，政策 / 可用性随时可能变。Tencent DMCA 4,195 repos 这条多源可信 🟢（GitHub DMCA 记录 + Cybernews + Phemex），但具体能不能合法监控某条内容，请以你动手当天的实际情况为准。</li>
+  </ul>
+</div>
+
+<!-- ===== CH1 ===== -->
+<section class="chapter" id="ch1" data-nav="01 你的真问题">
+  <h2><span class="num">01</span><span class="title-text">你的真问题：接着"工作流引擎打底"往下钻</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>上一篇我们定了一个结论：<strong>工作流引擎打底，判断点插 Claude</strong>。但那一篇没回答最后一公里的问题——"工作流引擎"这四个字，到底指什么引擎？你这次问得很具体，6 个问题。先把最容易被误导的那个误区拆掉。</p>
+
+    <div class="callout info"><p><strong>本章先给结论：n8n vs LangGraph 不是"二选一"，它俩是两层不同的抽象。</strong>把它们摆在天平两端比"谁更强"，就像问"螺丝刀和电钻哪个好"——答案永远是"看你拧什么"。n8n 是高层<u>集成管道</u>（连服务、搬数据、定时、告警）；LangGraph 是低层<u>AI 推理控制流</u>（控制一个 LLM 怎么循环、分支、记状态、可恢复）。它们最常见的关系是<strong>叠在一起用</strong>，不是互相替代。这一章先把这个定调钉死，后面 12 章都建在它上面。</p></div>
+
+    <h3>先直接答 Q1：你的语音转写，确实在用 LangGraph</h3>
+    <p>这个我核过你的代码，答案是肯定的——但要加两句澄清，否则容易误会。你的转写其实是<strong>两层叠出来的</strong>：</p>
+
+    <div class="step"><div class="step-head"><span class="sn">1</span>底层能力层 = <code>process_audio.py</code></div><div class="step-body">这才是真正"干 ASR 活"的地方：Qwen3-ASR 1.7B 做识别 + pyannote 做说话人分离 + CAM++ 做声纹匹配 + Claude Opus 做文本校对。<strong>这一层跟 LangGraph 没关系</strong>，是纯能力模块。</div></div>
+    <div class="step"><div class="step-head"><span class="sn">2</span>编排层 = <code>recording_workflow_graph.py</code></div><div class="step-body">这一层才是 LangGraph：一个 <code>StateGraph</code>，把上面的能力串成 9 个核心节点——<code>collect_audio → sync_glossary → transcribe_asr → diarize → match_voiceprint → correct_and_summarize → quality_check → decide_destination → write_roam / write_obsidian_fallback</code>（外加 rename / report 两个收尾节点）。它负责让整条流程<u>可观察、可恢复、可分支</u>。<span class="conf g">🟢</span>（直接核对你 <code>recording_workflow_graph.py</code> 第 967–979 行的 <code>g.add_node(...)</code>）</div></div>
+
+    <div class="callout accent"><p><strong>所以准确的说法是：</strong>LangGraph 是你转写流程的"<u>工作流编排骨架</u>"，不是 ASR 本身。第二个澄清：你现在用的还是<strong>简化版状态落盘</strong>，<u>还没上真正的 LangGraph checkpointer</u>——你自己在文件末尾标了 TODO（第 1113 行起的 NOTE：升级到真 checkpointer + human-in-the-loop 的下一步）<sup class="cite" data-refid="9">[9]</sup>。这不是 bug，是个清晰的升级位，Ch11 会说要不要现在动它。</p></div>
+
+    <p>把这个铺垫好，下面两章先各自扒清 n8n 和 LangGraph 到底是什么——你大概率对 n8n 没那么熟，先补齐。</p>
+  </div>
+</section>
+
+<!-- ===== CH2 ===== -->
+<section class="chapter" id="ch2" data-nav="02 n8n 是什么">
+  <h2><span class="num">02</span><span class="title-text">n8n 是什么：拖拽画布 + 几百个集成 + 内置基础设施</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>n8n（读作 "n-eight-n"，nodemation 的缩写）是一个 <strong>node-based 可视化工作流自动化平台</strong>：你在一块拖拽画布上摆 trigger（webhook / cron / poll / app 事件）和 action 节点，数据以 JSON items 在节点之间流动，节点之间画线连起来就是一条工作流。需要写逻辑的地方有 Code 节点，可以嵌 JS 或 Python。2019 年 1 月 Jan Oberhauser 在柏林创立；v2.0 已发布（企业级安全默认 + AI Agent 增强），截至 2026-06-20 GitHub 上 stable 是 2.26.8（v2.x 系列在持续迭代，不是停在 2.0）<sup class="cite" data-refid="1">[1]</sup>。<span class="conf g">🟢</span></p>
+
+    <div class="metric-grid">
+      <div class="metric"><div class="v">1,889</div><div class="l">官网 integrations 目录数（n8n.io/integrations，截至 2026-06-20，含官方+社区不同来源节点）<sup class="cite" data-refid="1">[1]</sup></div></div>
+      <div class="metric"><div class="v">70+</div><div class="l">AI 节点，底层走 LangChain 架构 + MCP 双向；支持 15+ LLM（含 Ollama 本地）<sup class="cite" data-refid="2">[2]</sup></div></div>
+      <div class="metric"><div class="v">€20/mo</div><div class="l">Cloud 起步价（Starter 年付，2500 次执行/月，约 $24）；self-host 社区版免费<sup class="cite" data-refid="3">[3]</sup></div></div>
+      <div class="metric"><div class="v">$25 亿</div><div class="l">2025-10 Series C 估值（融资 $1.8 亿）；2026 年 3000+ 企业用户<sup class="cite" data-refid="4">[4]</sup></div></div>
+    </div>
+
+    <h3>它打包了什么"基础设施"</h3>
+    <p>这是 n8n 的核心卖点，也是你最该理解的部分——它不是帮你"写逻辑"，是帮你<strong>免造一堆周边的脏活</strong>：</p>
+    <ul>
+      <li><strong>集成：</strong>官网目录约 1,889 个集成节点，连 Slack / Discord / Telegram / Gmail / Sheets / Notion / Airtable / Postgres / HTTP / Webhook 等等——你不用去读各家 API 文档、不用自己写 OAuth 认证<sup class="cite" data-refid="1">[1]</sup>。</li>
+      <li><strong>调度：</strong>内置 Schedule / Cron trigger + Webhook + Poll trigger，取代你手写 crontab<sup class="cite" data-refid="13">[13]</sup>。</li>
+      <li><strong>重试与容错：</strong>节点级 Retry on Fail（次数 + 间隔 + 退避）、Continue on Fail、Error Workflow（失败时自动触发另一条流去告警）<sup class="cite" data-refid="13">[13]</sup>。</li>
+      <li><strong>执行历史：</strong>每次运行都有可视化 timeline，能看每个节点的输入 / 输出 / 状态 / 耗时，失败能手动重跑<sup class="cite" data-refid="13">[13]</sup>。</li>
+      <li><strong>AI 能力：</strong>内置 LangChain 架构，AI Agent 节点有 6 种（Conversational / OpenAI Functions / Plan&Execute / ReAct / SQL / Tools），支持 OpenAI / Claude / Gemini / Mistral / Groq / Ollama（本地）/ Bedrock / DeepSeek 等 15+ LLM，Vector Store 10+，还有 MCP 双向（2026-04 起 instance-level MCP server 公测，让 Claude Desktop / Cursor 直接操作 n8n）<sup class="cite" data-refid="2">[2]</sup>。</li>
+    </ul>
+
+    <h3>定价与许可证（截至 2026-06-20）</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>形态</th><th>价格</th><th>含什么</th></tr></thead>
+      <tbody>
+        <tr><td>Cloud Starter</td><td>€20/月（年付，约 $24）</td><td>2,500 次执行/月，无限 workflow + 无限用户<sup class="cite" data-refid="3">[3]</sup></td></tr>
+        <tr><td>Cloud Pro</td><td>€50/月（约 $60）</td><td>1 万次执行/月</td></tr>
+        <tr><td>Business</td><td>€667/月（约 $800，self-hosted 级）</td><td>SSO / Git 版本控制 / 环境隔离</td></tr>
+        <tr><td><strong>Self-host 社区版</strong></td><td><strong>免费</strong>（硬件 $3–150/月）</td><td><strong>无限执行</strong>，但 Git 版本控制等企业功能要 Business 级<sup class="cite" data-refid="3">[3]</sup></td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout info"><p><strong>许可证要看清：</strong>n8n 是 <strong>Sustainable Use License（fair-code，非 OSI 开源）</strong>——允许你内部业务用、修改、非商业再发布、甚至对外做 n8n 咨询实施收费；但<u>禁止把 n8n 当 SaaS / 产品后端转卖</u>（要 Enterprise license）<sup class="cite" data-refid="3">[3]</sup>。对你个人自用，self-host 社区版完全够，无限执行不花钱（云端的 execution 计费坑你直接绕过）。</p></div>
+
+    <h3>已知的坑（诚实摊开）</h3>
+    <div class="callout bad">
+      <p style="margin:0 0 8px"><strong>n8n 的六个真实弱点：</strong></p>
+      <ul style="margin:0">
+        <li><strong>版本控制差：</strong>workflow 本质是一大坨 JSON，没有原生 git diff，改一个节点 JSON 全乱，几乎没法 code review；Git 同步功能还锁在 Business €667/月（issue #26707 至今开着）<sup class="cite" data-refid="6">[6]</sup>。</li>
+        <li><strong>复杂逻辑反而臃肿：</strong>节点一多画布就卡，复杂逻辑最终还是逼你全写进 Code 节点——那 n8n 就只剩个壳<sup class="cite" data-refid="5">[5]</sup>。</li>
+        <li><strong>大数据量会崩：</strong>内存模型非流式，单次处理 10 万+ 行可能直接 crash<sup class="cite" data-refid="5">[5]</sup>。</li>
+        <li><strong>无原生长期记忆：</strong>内置的 Simple Memory 只是 chat history，不是真正的持久记忆<sup class="cite" data-refid="5">[5]</sup>。</li>
+        <li><strong>self-host 要维护：</strong>生产级要配 Redis（queue mode）+ Postgres，每月 2–8 小时运维；v2.x queue mode 有用户报可靠性退化<span class="conf y">🟡</span>（社区单帖，未官方确认）<sup class="cite" data-refid="5">[5]</sup>。</li>
+        <li><strong>Cloud 计费坑：</strong>Starter 2500 次/月，高频任务很快耗尽——但这条 self-host 就没有。</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CH3 ===== -->
+<section class="chapter" id="ch3" data-nav="03 LangGraph 是什么">
+  <h2><span class="num">03</span><span class="title-text">LangGraph 是什么：代码化的 AI 推理控制流</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>LangGraph 是一个<strong>代码优先的低层 LLM agent 编排框架</strong>，Python（99.6%）+ TypeScript 双实现。它的世界观跟 n8n 完全不同：你不是在画布上拖节点，而是<u>用代码定义一张有向图</u>。核心三件套——<code>StateGraph</code>（图本身）+ Node（一个把 state 读进来、产出 state 更新的函数）+ Edge（节点之间的连线，可以带条件路由）。State 用 TypedDict 或 Pydantic 定义，配 reducer 做<u>增量更新</u>（不是全量覆盖），所以多个节点能并行改不同字段再合并<sup class="cite" data-refid="9">[9]</sup>。<span class="conf g">🟢</span></p>
+
+    <h3>它真正强的地方（n8n 做不到的）</h3>
+    <div class="callout good">
+      <p style="margin:0 0 8px"><strong>LangGraph 的杀手锏，全是"让 AI 流程更可控/可恢复"：</strong></p>
+      <ul style="margin:0">
+        <li><strong>checkpointer 断点续传：</strong>每一步都存快照，崩溃能从断点恢复、能跨 session 续、能 time-travel 回退调试。长任务跑到 80% 挂了能从断点恢复、不用从头来（恢复成本接近读一次快照，⚠️ 具体秒数随后端/任务而定）<sup class="cite" data-refid="9">[9]</sup>。</li>
+        <li><strong>human-in-the-loop：</strong>用 <code>interrupt</code> 在任意节点暂停、等人工确认，再用 command 恢复——这是一等公民，不是补丁<sup class="cite" data-refid="9">[9]</sup>。</li>
+        <li><strong>可循环（cyclic）：</strong>图可以有环，让 agent 自纠错、重试、状态回溯（ReAct 那种"想—做—观察—再想"的循环）——<u>这是 n8n 的 DAG 做不到的</u><sup class="cite" data-refid="10">[10]</sup>。</li>
+        <li><strong>map-reduce 并行：</strong>Send API 扇出，串行处理一批文档的活可以并行跑（⚠️ 提速倍数随并发上限/限流而定，"串行 10 分→并行十几秒"是示例量级不是承诺）<sup class="cite" data-refid="9">[9]</sup>。</li>
+        <li><strong>跨节点强类型状态：</strong>TypedDict State 在节点间传递（你的转写里 ASR → Opus 校对 → 决定落档，靠的就是这个）。</li>
+      </ul>
+    </div>
+
+    <h3>定价与成熟度（截至 2026-06-20）</h3>
+    <div class="metric-grid">
+      <div class="metric"><div class="v">MIT 免费</div><div class="l">开源库无限制；只有托管的部署/观测层才收费<sup class="cite" data-refid="11">[11]</sup></div></div>
+      <div class="metric"><div class="v">v1.2.6</div><div class="l">2026-06-18 发布；35.3k★；549 releases<sup class="cite" data-refid="9">[9]</sup></div></div>
+      <div class="metric"><div class="v">400+</div><div class="l">企业生产使用：Klarna / Uber / LinkedIn / JPMorgan / Replit / Coinbase 等<sup class="cite" data-refid="10">[10]</sup></div></div>
+      <div class="metric"><div class="v">用量计费</div><div class="l">托管部署层（LangSmith Deployment）按 run + uptime 计费，非 OSS；价格随官方页变，以官网为准<sup class="cite" data-refid="11">[11]</sup></div></div>
+    </div>
+    <div class="callout info"><p><strong>产品改名要认日期：</strong>托管部署层叫过 <strong>LangGraph Platform</strong>（2025-05 GA）→（2025-10）<strong>LangSmith Deployment</strong> → 无代码构建那块叫 <strong>LangSmith Fleet</strong>（原 Agent Builder，2026-03 GA）。它能做 stateful cron（<code>client.crons.create_for_thread</code> 绑 thread_id，每次触发追加同一对话历史）<sup class="cite" data-refid="11">[11]</sup>。计费分三层：<strong>OSS LangGraph 永久免费</strong>；LangSmith Cloud Deployment 需 Plus 席位 + 用量；完整 self-hosted 是 Enterprise。<u>对你自用，开源库那层就够，托管层可以先不碰。</u></p></div>
+
+    <h3>已知的坑（同样摊开）</h3>
+    <div class="callout bad">
+      <p style="margin:0 0 8px"><strong>LangGraph 的代价：</strong></p>
+      <ul style="margin:0">
+        <li><strong>学习曲线极陡：</strong>官方自己都承认 "very low-level"，社区评价 "brutal"<sup class="cite" data-refid="12">[12]</sup>。</li>
+        <li><strong>抽象层调试难：</strong>它遮蔽实际 API，有开发者换回原生 SDK 后延迟降了 40%<sup class="cite" data-refid="12">[12]</sup>。</li>
+        <li><strong>文档乱、迭代快：</strong>v1.0 前频繁 breaking change，StackOverflow 上的答案几个月就过时<sup class="cite" data-refid="12">[12]</sup>。</li>
+        <li><strong>简单任务杀鸡用牛刀：</strong>社区比喻"钉枪 vs 锤子"——简单线性任务用 vanilla Python / PydanticAI 就够，硬上 LangGraph 是负担<sup class="cite" data-refid="12">[12]</sup>。</li>
+        <li><strong>观测层无自托管：</strong>LangSmith 观测不开源，要自托管得用 Langfuse 等替代<sup class="cite" data-refid="12">[12]</sup>。</li>
+      </ul>
+    </div>
+    <p>看到这你应该已经感觉到了：这两个东西根本不在一个层级上比。下一章用一张表把"根本区别"钉死。</p>
+  </div>
+</section>
+
+<!-- ===== CH4 ===== -->
+<section class="chapter" id="ch4" data-nav="04 一图看懂区别">
+  <h2><span class="num">04</span><span class="title-text">一图看懂根本区别（Q4：抽象层级不同）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>Q4 你问"n8n 和 LangGraph 的区别"。一句话的答案：<strong>它们处在不同的抽象层级。n8n 是"集成层"（连系统、搬数据），LangGraph 是"AI 推理层"（控制 LLM 怎么想）。</strong>n8n 内置的 AI Agent 节点底层走的是 LangChain（不是 LangGraph），只做简单工具调用 + 对话记忆；真要让 AI 自纠错、循环、回溯状态，那是 LangGraph 的领域<sup class="cite" data-refid="10">[10]</sup>。</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>维度</th><th>n8n</th><th>LangGraph</th></tr></thead>
+      <tbody>
+        <tr><td><strong>抽象层级</strong></td><td>集成管道（系统间数据流动）</td><td>AI 推理控制流（LLM 怎么思考）</td></tr>
+        <tr><td><strong>形态</strong></td><td>可视化拖拽 / 低代码</td><td>写 Python / TS 代码</td></tr>
+        <tr><td><strong>图结构</strong></td><td class="check p">DAG，线性为主，无环</td><td class="check y">可循环图（自纠错 / 重试）</td></tr>
+        <tr><td><strong>状态管理</strong></td><td class="check p">简单 session 变量</td><td class="check y">强类型 State + checkpoint 持久化</td></tr>
+        <tr><td><strong>集成广度</strong></td><td class="check y">1,889 原生集成</td><td class="check n">几乎无内置，靠代码自己接</td></tr>
+        <tr><td><strong>human-in-loop</strong></td><td class="check p">有限</td><td class="check y">原生一等公民（interrupt）</td></tr>
+        <tr><td><strong>版本控制</strong></td><td class="check n">JSON 存 DB，难 Git diff</td><td class="check y">代码，Git 友好</td></tr>
+        <tr><td><strong>目标用户</strong></td><td>技术友好型业务 / 运维</td><td>AI 工程师</td></tr>
+        <tr><td><strong>学习曲线</strong></td><td class="check y">低～中</td><td class="check n">高（官方承认 very low-level）</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout accent"><p><strong>读这张表的正确姿势：</strong>右边一列绿勾多 ≠ LangGraph 更好。每一个绿勾都对应一个<u>成本</u>——可循环图意味着你得自己写循环退出条件、checkpoint 意味着你得配后端、强类型 State 意味着你得设计 schema。这些能力只有在"AI 推理是任务核心"时才值得付那个学习成本。反过来，左边那个"1,889 集成"的绿勾，是 LangGraph 永远给不了你的——要连一堆外部 SaaS，n8n 一个节点的事，LangGraph 得你自己写每一个 API client。<strong>所以选择标准很简单：你的任务核心是"搬数据连服务"还是"让 AI 复杂推理"？</strong></p></div>
+
+    <div class="tree">
+      <div class="node"><span class="lbl y">任务核心 = 连服务 + 搬数据 + 定时 + 告警</span>✅ 选 n8n（AI 只是其中一个节点）→ 见 Ch5/Ch8/Ch9</div>
+      <div class="node"><span class="lbl y">任务核心 = LLM 自纠错循环 + 复杂跨轮状态 + 可恢复</span>✅ 选 LangGraph（如你的转写）→ 见 Ch11</div>
+      <div class="node"><span class="lbl m">两者都要（外层连服务 + 里面要复杂 AI）</span>⚠️ 组合：n8n 外层 + LangGraph 聪明节点 → 见 Ch7</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CH5 ===== -->
+<section class="chapter" id="ch5" data-nav="05 n8n 核心优势">
+  <h2><span class="num">05</span><span class="title-text">n8n 的核心优势（Q6 上半：免造基础设施）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>Q6 你问"n8n 的核心优势 / 用它和不用它的区别"。优势可以浓缩成一句：<strong>它帮你把"周边脏活"全打包了，让你只管业务逻辑。</strong>这一章说"优势是什么"，下一章说"对会写代码的你，分水岭在哪"。</p>
+
+    <h3>核心价值 = 免造基础设施，对比裸 cron 脚本</h3>
+    <p>想象你不用 n8n，自己写个 cron 脚本做"定时拉数据 → 处理 → 通知"。你会发现 cron 这条路缺一大堆东西：</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>能力</th><th>裸 cron + 脚本</th><th>n8n</th></tr></thead>
+      <tbody>
+        <tr><td>定时触发</td><td class="check y">crontab 能做</td><td class="check y">Schedule Trigger</td></tr>
+        <tr><td>连外部服务（认证 / SDK）</td><td class="check n">每个服务自己写 OAuth / client</td><td class="check y">1,889 节点抹平差异</td></tr>
+        <tr><td>失败重试 + 退避</td><td class="check n">无原生，得自己写</td><td class="check y">Retry on Fail 内置</td></tr>
+        <tr><td>执行历史 / 日志</td><td class="check n">自己 print 到文件</td><td class="check y">可视化 timeline，能重跑</td></tr>
+        <tr><td>失败告警</td><td class="check n">脚本挂了你都不知道</td><td class="check y">Error Workflow 自动通知</td></tr>
+        <tr><td>改逻辑迭代</td><td class="check p">改代码重部署</td><td class="check y">画布上拖一下</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout good"><p><strong>这就是"用 n8n vs 不用"最直观的区别：</strong>裸 cron 脚本<u>没有原生重试、没有退避、没有执行历史、失败了没人通知</u>——脚本半夜静默挂掉，你第二天才发现日报没来<sup class="cite" data-refid="13">[13]</sup>。n8n 把这四样（重试 / 退避 / 历史 / 告警）连同几百个集成一起白送给你。再加上现成模板生态（社区上千个模板，抄一个改改就能跑），它真正卖的不是"能跑工作流"，是"<strong>免造一套自动化基础设施</strong>"。</p></div>
+
+    <p>但——注意这个"但"——以上所有优势，都集中在"<u>连服务 + 调度 + 容错 + 通知</u>"这一层。它<strong>没有</strong>帮你写核心业务逻辑。逻辑一复杂，你还是得写 Code 节点。这就引出下一章对你最关键的判断。</p>
+  </div>
+</section>
+
+<!-- ===== CH6 ===== -->
+<section class="chapter" id="ch6" data-nav="06 用 n8n 还是写脚本">
+  <h2><span class="num">06</span><span class="title-text">用 n8n vs 自己写脚本：给"会写代码的你"的分水岭</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>Q6 的下半题——这是整份报告对你最有用的一章。大多数 n8n 软文是写给"不会写代码的业务人"看的，对他们 n8n 是从 0 到 1。但<strong>你会写代码、还已经在用 LangGraph + Claude Code</strong>，对你 n8n 的价值得重新算账。直接给分水岭：</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>场景</th><th>n8n 划算吗</th><th>为什么</th></tr></thead>
+      <tbody>
+        <tr><td>连一堆外部 SaaS（认证差异多）</td><td class="check y">划算</td><td>OAuth / SDK 差异被节点抹平，省最多</td></tr>
+        <tr><td>glue 自动化（拉数据→汇总→推送）</td><td class="check y">划算</td><td>30 分搭完 vs 自己写 4–6 小时（含错误处理 / 部署 / 日志）</td></tr>
+        <tr><td>快速迭代、经常改流程</td><td class="check y">划算</td><td>画布上改，不用重部署</td></tr>
+        <tr><td>多个独立小自动化并存</td><td class="check y">划算</td><td>一个 n8n 实例统一管，省得养一堆脚本</td></tr>
+        <tr><td>核心逻辑复杂</td><td class="check n">不如直接写</td><td>全走 Code 节点 = 跟写脚本一样，还多一层 overhead</td></tr>
+        <tr><td>要版本控制 / code review</td><td class="check n">不如直接写</td><td>workflow 是 JSON，diff 极差（issue #26707）<sup class="cite" data-refid="6">[6]</sup></td></tr>
+        <tr><td>已有成熟代码栈（如你的 LangGraph）</td><td class="check n">不如直接写</td><td>把成熟代码塞进 n8n 是倒退</td></tr>
+        <tr><td>高吞吐 / 性能敏感</td><td class="check n">不如直接写</td><td>可视化节点有 overhead，且无 unit test</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout accent"><p><strong>对你这个画像，结论很锋利：</strong>n8n 的价值<u>只集中在 glue 层</u>（连外部服务 + 调度 + 告警），<u>不在逻辑层</u>。判断一个活该不该上 n8n，就问一句——<strong>"这个活的难点是'连一堆服务 + 定时跑 + 失败要告警'，还是'核心逻辑本身复杂'？"</strong>难在前者就上 n8n（省 boilerplate），难在后者就直接写代码（n8n 只会碍事）。你的转写难在后者（复杂 AI 推理 + 状态 + 可恢复），所以留 LangGraph；你的日报难在前者（连多源 + 定时 + 推 Discord），所以是 n8n 的甜点。<strong>同一个人，不同的活，答案可以完全相反——这才是诚实的建议。</strong></p></div>
+  </div>
+</section>
+
+<!-- ===== CH7 ===== -->
+<section class="chapter" id="ch7" data-nav="07 怎么结合用">
+  <h2><span class="num">07</span><span class="title-text">怎么结合用（Q5：三种组合模式）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>Q5 你问"大家通常怎么把 n8n 和 LangGraph 结合用"。社区的共识是：<strong>它俩不是竞争，是互补分层</strong>。既然 n8n 强在集成层、LangGraph 强在推理层，最自然的玩法就是把它们叠起来。主流三种模式：</p>
+
+    <div class="step"><div class="step-head"><span class="sn">A</span>n8n 外层管道 + LangGraph 当"聪明节点"（最常见）</div><div class="step-body">
+      n8n 负责外层编排和触发（定时 / webhook / 拉数据），到了需要复杂 AI 推理那一步，用 <strong>HTTP 节点调用一个 LangGraph 的 FastAPI 端点</strong>（或 LangGraph Platform 端点），LangGraph 跑完复杂 agent 把结果返回，n8n 再做后处理（写库 / 通知）<sup class="cite" data-refid="14">[14]</sup>。这是个清晰的三层架构：
+      <div class="tree" style="margin-top:8px">
+        <div class="node"><span class="lbl y">外层（n8n）</span>触发 + 连服务 + 搬数据 + 告警</div>
+        <div class="node"><span class="lbl m">中间（HTTP / FastAPI）</span>n8n 把"聪明活"POST 给 LangGraph 服务</div>
+        <div class="node"><span class="lbl y">里层（LangGraph）</span>跑复杂 agent：循环 / 状态 / 可恢复，返回结果</div>
+      </div>
+    </div></div>
+
+    <div class="step"><div class="step-head"><span class="sn">B</span>原型用 n8n → 生产迁 LangGraph</div><div class="step-body">
+      Phase 1 用 n8n 快速搭 PoC 验证想法（半小时见效），Phase 2 把核心 AI 逻辑迁到 LangGraph 做生产级，n8n 留在集成层当外壳<sup class="cite" data-refid="14">[14]</sup>。适合"先快后稳"的演进。
+    </div></div>
+
+    <div class="step"><div class="step-head"><span class="sn">C</span>LangGraph 内部调 n8n webhook 当"工具"</div><div class="step-body">
+      反过来：LangGraph 是推理大脑，n8n 是它的"执行手臂"——agent 决定要发个 Slack / 写个 Sheet，就调一个 n8n webhook 去执行<sup class="cite" data-refid="14">[14]</sup>。<span class="conf r">🔴</span> 这个模式公开详细案例少，列出来供参考，别当主流。
+    </div></div>
+
+    <h3>什么时候 n8n 内置 AI 够，什么时候要外接 LangGraph</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>n8n 内置 AI 节点够用</th><th>需要外接 LangGraph</th></tr></thead>
+      <tbody>
+        <tr><td class="check y">单轮 / 短对话</td><td class="check p">cyclic 自纠错循环（ReAct）</td></tr>
+        <tr><td class="check y">工具少、逻辑简单（FAQ / 摘要 / 路由）</td><td class="check p">跨多轮的复杂状态</td></tr>
+        <tr><td class="check y">不想碰 Python 运维</td><td class="check p">多 agent 协作</td></tr>
+        <tr><td class="check y">原型快速验证</td><td class="check p">任意节点暂停 + LangSmith 级可观测</td></tr>
+      </tbody>
+    </table></div>
+    <p>经验法则（社区）：n8n 内置 AI 够"轻量 agent"（FAQ / 摘要 / 路由），一旦需要"AI 自主决策循环 + 复杂状态 + 可恢复"就上 LangGraph<sup class="cite" data-refid="10">[10]</sup>。<span class="conf y">🟡</span>（部分为社区推理，建议实测）</p>
+
+    <div class="callout info"><p><strong>一个挺有意思的佐证：</strong>n8n 自己的 "AI Workflow Builder"（那个帮你用自然语言生成工作流的功能），<u>内部就是用 LangGraph 搭的</u>——Claude 200K context + 6 个 LangGraph agent<sup class="cite" data-refid="18">[18]</sup>。<span class="conf y">🟡</span>（单 Medium 源）连 n8n 官方在做"真正复杂的多 agent"时都退回 LangGraph，正好印证了这两层的分工。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH8 ===== -->
+<section class="chapter" id="ch8" data-nav="08 你的活·日报">
+  <h2><span class="num">08</span><span class="title-text">回到你的活·日报（Q2：n8n 真甜点）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>Q2 你问"监控 / 日报 / 研究里 n8n 能发挥什么作用"。先说日报——<strong>这是引入 n8n 性价比最高的一个，是它的真甜点。</strong>为什么？因为日报的难点 100% 落在 glue 层：定时、拉多源、调 LLM、推 Discord，没有一点复杂 AI 推理。正好踩中 n8n 的强项。</p>
+
+    <div class="callout good"><p><strong>有现成官方模板，半小时抄完：</strong>n8n 社区模板 <strong>#13527</strong>"Summarize AI news from RSS / Reddit / HN with Claude to Discord/Slack"——Schedule 触发 → 拉 10 个源 → URL 去重 + Jina Reader 抓全文 → Claude Haiku 打分筛选 → Claude Sonnet 合成摘要 → 推 Discord，单次成本约 $0.03–0.10<sup class="cite" data-refid="15">[15]</sup>。变体还有：HN + GPT + email（#9384）、Gemini + Telegram（#3173）、多 RSS → OpenAI → Gmail（#9552）。<span class="conf g">🟢</span></p></div>
+
+    <p>对比"自己写等效脚本"要做的事：RSS 解析 + Reddit/HN API + 去重 + 抓全文 + 调 LLM + Discord webhook + cron + 重试告警——<strong>约一天的胶水活，n8n 半小时</strong><sup class="cite" data-refid="15">[15]</sup>。这个差距大到没什么好犹豫的。<span class="conf y">🟡</span>（⚠️ 本章的"半小时 / 一天 / 30 分 vs 4–6 小时 / 单次 $0.03–0.10"都是<u>作者估算</u>，前提是你已有 Discord webhook、源数量约 10、用 Haiku+Sonnet；你的实际数字以亲自跑一次为准。）</p>
+
+    <div class="callout info"><p><strong>但也给你 B 方案（诚实）：</strong>如果你不想多养一个 n8n 实例（要 self-host、要维护 Postgres），<u>裸脚本 + cron + 你现成的 Discord 推送</u>也完全能做日报——你已经有 Discord 通道了，胶水代码也就一两百行。<strong>分水岭只在一点：你愿不愿意维护一个 n8n？</strong>愿意 → n8n 模板抄完最省事；不愿意 → 裸脚本也行，只是少了可视化历史和自动告警。两条都不需要 LangGraph（日报没有复杂 AI 推理）。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH9 ===== -->
+<section class="chapter" id="ch9" data-nav="09 你的活·监控">
+  <h2><span class="num">09</span><span class="title-text">回到你的活·监控（Q2：n8n 或裸脚本都行）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>监控也是 Q2 的一部分。判词：<strong>n8n 能做，但有一类监控要自己补数据库；裸脚本也行；都不需要 LangGraph</strong>（没有复杂 AI 推理）。分两类看：</p>
+
+    <div class="callout good"><p><strong>① 宕机监控 / RSS 监控 → 现成模板，零代码：</strong>n8n 有一堆现成模板——宕机监控（#5067 / #2327 / #5298：Schedule → HTTP GET → 非 200 就告警）、多网站并发监控（#4833）、RSS → Discord/Telegram。这类"状态是布尔（活着 / 挂了）或有现成 feed"的监控，n8n 拖几个节点就好<sup class="cite" data-refid="16">[16]</sup>。</p></div>
+
+    <div class="callout warn"><p><strong>② "网页内容 diff"监控 → 要自己配数据库存上次值：</strong>如果你监控的不是"网站挂没挂"，而是"某个字段 / 某段内容变没变"，n8n <u>没有原生的 diff 存储节点</u>。你得自己接一个 Postgres / SQLite，每次抓到当前值就和上次存的比对，变了才告警（#5067 那种模板只测 HTTP 200，不存历史）<sup class="cite" data-refid="16">[16]</sup>。这一步无论用 n8n 还是裸脚本都得做——<strong>"记住上次状态"是内容 diff 监控的真正难点，跟用哪个引擎无关。</strong></p></div>
+
+    <div class="callout accent"><p><strong>呼应上一篇：</strong>监控是你几类活里<u>唯一真正需要"有状态"</u>的——它得记得上次报过什么，否则同一条变化重复刷屏。上一篇的落地形态在这里依然成立：<code>stateful cron + 外部状态存储（SQLite / Markdown / Redis）</code>，一个监控逻辑盯多个目标。n8n 给你的是"调度 + 告警"的壳，"状态存储"这层得你自己补——无论用哪个引擎。<strong>所以监控选 n8n 还是裸脚本，看你愿不愿维护 n8n；要不要存上次值，跟引擎无关，都得存。</strong></p></div>
+  </div>
+</section>
+
+<!-- ===== CH10 ===== -->
+<section class="chapter" id="ch10" data-nav="10 你的活·微信监控">
+  <h2><span class="num">10</span><span class="title-text">回到你的活·微信监控（先泼一盆冷水）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>这一章我得先泼盆冷水：<strong>微信监控这件事，你纠结"用 n8n 还是 LangGraph"完全是问错了问题——工具选啥根本不重要，真正的墙在"怎么拿到微信数据"这个接入层。</strong>而这堵墙，截至 2026-06，基本是堵死的。</p>
+
+    <div class="callout bad">
+      <p style="margin:0 0 8px"><strong>为什么说接入层是死墙（三个硬事实，按时间）：</strong></p>
+      <ul style="margin:0">
+        <li><strong>微信个人号没有官方自动化 API。</strong>截至 2026-06，微信官方开放文档里找不到个人号的消息 webhook / 订阅接口——官方自动化路径只覆盖公众号（Official Account）、小程序、企业微信（WeCom），个人号始终不在其列<sup class="cite" data-refid="22">[22]</sup>。</li>
+        <li><strong>Web 微信协议 2017 起就封了。</strong>2017 年后注册的账号无法登录 web.wechat.com，基于 Web 微信的 itchat 对绝大多数现有账号实际已失效<span class="conf y">🟡</span>（业界公认）<sup class="cite" data-refid="23">[23]</sup>。</li>
+        <li><strong>Tencent 在 2026-01 大规模执法。</strong>2026-01-08 Tencent 向 GitHub 发 DMCA，删了 <u>4,195 个仓库</u>（含 fork），涉及微信本地数据库解密 / 聊天记录导出，援引 DMCA §1201<sup class="cite" data-refid="26">[26]</sup><sup class="cite" data-refid="28">[28]</sup>。<span class="conf g">🟢</span>（GitHub DMCA 记录 + Cybernews + Phemex 多源；Cybernews 还点出"把用户访问自己数据也算未授权"的争议<sup class="cite" data-refid="28">[28]</sup>）这条把"非官方导出工具"这条路的法律风险直接拉满。</li>
+      </ul>
+    </div>
+
+    <p>现存的个人号方案（Frida hook 微信进程内存 / 无障碍接口拦消息 / wechaty 各种 puppet）<strong>全是非官方逆向</strong>，封号风险实质存在——Tencent 在监控 bot 行为、客户端指纹，协议随时可能失效<span class="conf y">🟡</span><sup class="cite" data-refid="24">[24]</sup>。配合上面那波 DMCA 执法方向，这条路对个人开发者性价比极低。</p>
+
+    <h3>合法低风险的三条路（但都只碰"公开内容"）</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>路径</th><th>能监控什么</th><th>碰得到私聊/群聊吗</th></tr></thead>
+      <tbody>
+        <tr><td>① 企业微信 WeCom 官方 webhook</td><td>企业微信群内机器人推送（合法稳定）</td><td class="check n">不能</td></tr>
+        <tr><td>② 公众号开发者 API</td><td>粉丝与公众号之间的互动</td><td class="check n">不能</td></tr>
+        <tr><td>③ 公众号 RSS（WeWeRSS / RSSHub 等）</td><td>"某公众号有没有发新文章"</td><td class="check n">不能</td></tr>
+      </tbody>
+    </table></div>
+    <p>三条都只能碰<strong>公开内容</strong>（公众号文章 / 企业群机器人），<u>碰不了私人聊天和群聊消息</u><sup class="cite" data-refid="25">[25]</sup>。其中 ③ WeWeRSS（经"微信读书"抓公众号文章生成 RSS、自托管 9k+★）是最常被提到的——<strong>但要注意它在 2026-05 已 archived 转只读、最后 release 停在 2024-12</strong>，且依赖微信读书 API 属灰色地带，随时可能失效<span class="conf y">🟡</span>（截至 2026-06）。RSSHub 等同类公众号转 RSS 方案可作备选，性质类似（都只碰公开文章）。</p>
+
+    <div class="trap-box"><strong>⚠️ 所以你要先想清楚你到底想监控什么：</strong>
+      <ul style="margin:8px 0 0">
+        <li><strong>"某个公众号有没有发新文章" → 可行。</strong>用 WeWeRSS（注意已 archived）或 RSSHub 生成 RSS → n8n RSS 节点（或裸脚本）轮询 + diff + 推 Telegram/Discord，零代码或极简代码，<u>不需要 LangGraph</u>。</li>
+        <li><strong>"监控私人聊天 / 群聊消息" → 基本死路，别投入。</strong>没有合法稳定的路，非官方 hook 是实打实的封号 + 法律风险。这个需求建议直接放弃，省下的精力去做日报。</li>
+      </ul>
+    </div>
+
+    <div class="callout info"><p><strong>关键认知：</strong>n8n 也好 LangGraph 也好，都是"<u>数据到手之后</u>"的编排工具，它们都不解决"怎么拿到微信数据"这个前置难题。n8n 的微信社区节点（n8n-nodes-wechat-official / work）接的是公众号 API 和企业微信，<u>不是个人号</u>；LangGraph 纯 Python 更没有微信集成层<sup class="cite" data-refid="27">[27]</sup>。<strong>墙在接入层，编排层选谁都翻不过去。</strong></p></div>
+  </div>
+</section>
+
+<!-- ===== CH11 ===== -->
+<section class="chapter" id="ch11" data-nav="11 你的活·语音转写">
+  <h2><span class="num">11</span><span class="title-text">回到你的活·语音转写（Q1 收尾：你做对了）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>Ch1 已经确认你转写在 LangGraph 上。这一章收尾 Q1：<strong>为什么 LangGraph 对、n8n 不行——而且这不是"差不多"，是 n8n 在这个场景有个硬伤会直接搞死你。</strong></p>
+
+    <div class="callout bad"><p><strong>n8n 的硬伤：AI 节点的 5 分钟（300 秒）超时。</strong>GitHub issue #11886（2024-11-25 报告）：n8n 的 AI 节点用 fetch 调模型，超过 300 秒就 HeadersTimeoutError 报错（UND_ERR_HEADERS_TIMEOUT）。原帖原话："basically unusable for anyone with local models"<sup class="cite" data-refid="20">[20]</sup>。<span class="conf g">🟢</span> <strong>更新（要诚实）：</strong>2026-01 有 PR（#24292）给多类 AI 节点加了可配置的 <code>N8N_AI_TIMEOUT</code>（默认拉到 1 小时），所以"硬编码不可改"这条已不全对；但 Ollama 节点仍有用户在 2026 年报超 5 分钟失败（#25360 仍开）<sup class="cite" data-refid="29">[29]</sup>。<span class="conf y">🟡</span> <strong>结论不变但措辞收一收：</strong>你本地 GPU 跑长音频 ASR 单文件常超 5 分钟，用 n8n 跑必须先在你的目标版本实测 <code>N8N_AI_TIMEOUT</code> + Ollama 节点能不能撑住——而你已经有一套跑通的 LangGraph，没理由去趟这个雷。</p></div>
+
+    <h3>LangGraph 对在哪（正好补上 n8n 的短板）</h3>
+    <div class="callout good">
+      <p style="margin:0 0 8px"><strong>你的转写恰好需要 LangGraph 的三个核心能力：</strong></p>
+      <ul style="margin:0">
+        <li><strong>checkpoint 断点续：</strong>长音频转写跑到 80% 崩了，能从断点恢复、不用从头重跑（你现在用简化状态落盘也实现了一部分，真 checkpointer 能做得更稳）<sup class="cite" data-refid="21">[21]</sup>。</li>
+        <li><strong>TypedDict 跨节点状态：</strong>ASR 结果 → Opus 校对 → 决定落档（Roam / Obsidian），这条链路靠强类型 State 在节点间传递<sup class="cite" data-refid="9">[9]</sup>。</li>
+        <li><strong>质检条件分支：</strong>你那个 <code>quality_check → decide_destination</code>，校对结果决定重跑 / 打低置信标签 / 走 fallback——这是 LangGraph 的条件边天生擅长的<sup class="cite" data-refid="21">[21]</sup>。</li>
+      </ul>
+    </div>
+
+    <div class="callout accent"><p><strong>判词：你做对了，别动。</strong>就算 n8n 现在能配超时，本地 ASR 这种"长任务 + 可恢复 + 跨节点状态 + 质检分支"也正好全踩在 LangGraph 的强项上、踩在 n8n 的弱项上；你已有一套跑通的 LangGraph，搬去 n8n 是纯倒退。<strong>唯一值得做的"下一步"是 Ch1 提到的那个 TODO：把现在的简化状态落盘升级成真正的 LangGraph checkpointer（SqliteSaver）</strong>——你代码末尾自己写了升级路径（<code>compile(checkpointer=SqliteSaver.from_conn_string(...))</code>）。这是锦上添花、不是救火，什么时候有空什么时候做，不急。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH12 ===== -->
+<section class="chapter" id="ch12" data-nav="12 研究要不要引 LangGraph">
+  <h2><span class="num">12</span><span class="title-text">这个研究流程要不要引入 LangGraph？（Q3：不要）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>Q3 你问"这个研究（指我帮你跑的 banmi-research 深度研究流程）有没有必要引入 LangGraph"。<strong>大概率不要。</strong>两个理由，都挺硬。</p>
+
+    <div class="callout bad"><p><strong>理由一：Claude Code 的 Agent / Workflow 工具本身就是 LangGraph 级的编排运行时。</strong>你跑这个研究流程用的 Claude Code，它的 subagent / workflow 机制已经能做<u>并行 fan-out（多个搜证 agent 同时跑）+ 条件分支 + 子 agent 协作</u>——这正是 LangGraph 提供的那套编排能力。<u>在它上面再套一层 LangGraph，就是重复造轮子</u>，多一层抽象、多一层调试难度，换不来新能力。你这次的研究就是 5 个搜证 agent 并行跑出来的，根本没用 LangGraph 也照样多 agent 编排了。</p></div>
+
+    <div class="callout bad"><p><strong>理由二：n8n 在深度研究上有天花板（顺便回答"那 n8n 行不行"）。</strong>n8n 能"定时拉多源 → LLM 总结 → 推送"，但它<u>只支持 single-agent workflow</u>（inputs → agent 想一次 → output），不支持原生多 agent，也无法做"迭代推理"——查到 A 发现需要再查 B 这种<sup class="cite" data-refid="17">[17]</sup>。<span class="conf y">🟡</span>（架构限制事实 + 部分竞品 Credal 视角，建议实测边界）而深度研究的本质<strong>就是要迭代</strong>（顺线索往下挖、发现 gap 补搜）。所以 n8n 做深研反而比你现在的 Claude Code 流程<u>更差</u>。</p></div>
+
+    <div class="callout accent"><p><strong>判词：研究流程保持现状，不引 LangGraph、也不迁 n8n。</strong>你现在的 Claude Code + research skill 已经是对的工具——它既有多 agent 并行（搜证包）、又有迭代能力（发现 gap 允许补搜）、还有 citation 强制。LangGraph 给不了你新东西，n8n 还会砍掉迭代能力。<u>n8n 在研究里唯一合适的位置</u>是最前面那个"每日信源聚合 → 推 Discord"的<strong>前置步骤</strong>（就是 Ch8 的日报），把素材喂到你面前——但那已经是日报的活，不是研究本身。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH13 ===== -->
+<section class="chapter" id="ch13" data-nav="13 阿杰路线建议">
+  <h2><span class="num">13</span><span class="title-text">阿杰路线建议：决策矩阵 + 别做什么清单</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>把前面 12 章的判词收成一张表，每个活给你"推荐工具 + 理由 + 下一步"。这是整份报告的脊梁，可以只看这一章动手。</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>你的活</th><th>推荐工具</th><th>理由（一句话）</th><th>下一步</th></tr></thead>
+      <tbody>
+        <tr><td><strong>日报</strong></td><td class="check y">n8n（甜点）<br>或裸脚本+cron</td><td>难点全在 glue 层，官方模板半小时抄完</td><td>抄 n8n 模板 #13527，改成你的源 + Discord；不想维护 n8n 就裸脚本+现成 Discord</td></tr>
+        <tr><td><strong>监控（宕机/RSS）</strong></td><td class="check y">n8n 或裸脚本</td><td>现成模板，无复杂 AI</td><td>n8n 宕机模板 #5067 起步</td></tr>
+        <tr><td><strong>监控（内容 diff）</strong></td><td class="check p">n8n + SQLite<br>或裸脚本+SQLite</td><td>要自己存"上次值"，跟引擎无关</td><td>先加"状态存储 + diff 判断"这一层</td></tr>
+        <tr><td><strong>微信监控（公众号文章）</strong></td><td class="check p">公众号 RSS + n8n/脚本</td><td>只能碰公开内容，编排极简</td><td>WeWeRSS（已 archived）/ RSSHub 生成 RSS → 轮询 diff 推送</td></tr>
+        <tr><td><strong>微信监控（私聊/群聊）</strong></td><td class="check n">放弃</td><td>无 API + DMCA 执法，基本死路</td><td>别投入，省精力做日报</td></tr>
+        <tr><td><strong>语音转写</strong></td><td class="check y">留 LangGraph</td><td>n8n 5 分钟超时坑死本地 ASR；你的流程正好踩 LangGraph 强项</td><td>有空把简化落盘升级成真 checkpointer（不急）</td></tr>
+        <tr><td><strong>深度研究</strong></td><td class="check y">保持 Claude Code</td><td>Claude Code 已是同级编排；n8n 砍迭代、LangGraph 重复造轮子</td><td>不引任何引擎；n8n 只用在前置的信源聚合（即日报）</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>"别做什么"清单（这几条比做什么更重要）</h3>
+    <div class="check-box">
+      <p style="margin:0 0 8px"><strong>⛔ 四条别踩：</strong></p>
+      <ul style="margin:0">
+        <li><strong>别把转写从 LangGraph 搬去 n8n。</strong>n8n AI 节点的 5 分钟超时（#11886，2026-01 才加可配置超时）对本地 GPU ASR 是个雷，且你已有跑通的 LangGraph——搬过去是纯倒退，没收益<sup class="cite" data-refid="20">[20]</sup>。</li>
+        <li><strong>别投入做微信私聊 / 群聊监控。</strong>无官方 API + 2026-01 DMCA 删 4,195 repos，封号 + 法律双风险，基本死路<sup class="cite" data-refid="26">[26]</sup>。<u>还有伦理一关：</u>群聊 / 私聊涉及他人消息，未经成员授权监控既不合规也不厚道，跨境数据还要看马来西亚 PDPA 和平台 ToS——技术可行不等于该做。</li>
+        <li><strong>别为了"用上 n8n"而 n8n。</strong>n8n 的价值只在 glue 层，核心逻辑复杂或已有代码栈就直接写——别因为"听说 n8n 很火"硬塞。</li>
+        <li><strong>别在已有的 Claude Code 编排上再叠 LangGraph。</strong>Claude Code 的 subagent / workflow 已是 LangGraph 级运行时，再叠一层是重复造轮子。</li>
+      </ul>
+    </div>
+
+    <div class="callout good"><p><strong>🎯 一个最该先动的：日报用 n8n 跑通一个。</strong>它是引入 n8n 性价比最高的活，有现成模板、半小时见效、立刻每天有产出、还能顺手验证你愿不愿意维护一个 n8n 实例。<u>先用日报把 n8n 这个工具摸熟</u>，以后再决定要不要把"宕机监控""公众号 RSS"也搬进同一个 n8n 实例统一管。一步一个窄的跑通，别一次铺开五个。</p></div>
+
+    <div class="callout info"><p><strong>📋 给日报试点设个 7 天验收标准（别凭"感觉好用"就铺开）：</strong>跑一周看四个指标——① 准时率（该到的日报有没有按点到）② 误报/漏报（有没有漏掉重要源、塞了一堆噪音）③ 你的维护时间（一周花在修 n8n 上多少分钟，超过"自己写脚本"就不划算）④ token 成本（实测单次多少钱，跟模板标的 $0.03–0.10 对不对得上）。<u>四项达标再把监控、公众号 RSS 也搬进来；不达标就回退裸脚本</u>。先收敛一个，别让"用上 n8n"变成目的本身。</p></div>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section class="chapter" id="faq" data-nav="FAQ 常见问题">
+  <h2><span class="num">14</span><span class="title-text">FAQ：12 个高频追问</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">一句话，n8n 和 LangGraph 到底啥区别？</span><span class="toggle">＋</span></div><div class="faq-a"><p>n8n 是"系统之间怎么搬数据"的高层集成管道（连服务、定时、告警），LangGraph 是"一个 LLM 怎么思考"的低层代码控制流（循环、分支、带状态、可恢复）。不在一个抽象层，不是二选一。最常见是叠着用<sup class="cite" data-refid="10">[10]</sup>。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">我会写代码，那我还需要 n8n 吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>看活。难点在"连一堆服务 + 定时 + 失败告警"就需要（省 boilerplate）；难点在"核心逻辑复杂"就不需要（直接写代码，n8n 反而碍事）。对你，日报需要、转写不需要<sup class="cite" data-refid="13">[13]</sup>。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">n8n 自带 AI Agent 节点，那我干嘛还要 LangGraph？</span><span class="toggle">＋</span></div><div class="faq-a"><p>n8n 内置 AI 走 LangChain，只做单轮 / 轻量 agent（FAQ / 摘要 / 路由）。一旦需要 AI 自纠错循环、跨多轮复杂状态、可恢复、多 agent，就得 LangGraph。且 n8n AI 节点的 5 分钟超时曾让本地大模型直接废（2026-01 才加可配置超时，但 Ollama 节点仍有报错）<sup class="cite" data-refid="20">[20]</sup>。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">n8n self-host 免费，那它怎么赚钱？我自用有坑吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>社区版 self-host 真免费、无限执行，靠 Cloud（execution 计费）+ 企业版（SSO / Git 版本控制 €667/月）赚钱。许可证是 fair-code，禁止把 n8n 当 SaaS 转卖，但你个人自用完全没问题<sup class="cite" data-refid="3">[3]</sup>。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">为什么不能用 n8n 跑我的语音转写？</span><span class="toggle">＋</span></div><div class="faq-a"><p>历史上 n8n AI 节点有 300 秒超时（issue #11886），本地 GPU 跑长音频 ASR 单文件常超 5 分钟、必报 HeadersTimeoutError，官方社区原话"basically unusable for local models"。2026-01 起加了可配置 <code>N8N_AI_TIMEOUT</code>（不再硬编码），但 Ollama 节点仍有超时报错（#25360 开着），且你已有跑通的 LangGraph——没必要去趟这个雷<sup class="cite" data-refid="20">[20]</sup><sup class="cite" data-refid="29">[29]</sup>。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">我能监控我微信里某个人的私聊消息吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>基本不能。个人号无官方 API、2017 起封 web 协议、Tencent 2026-01 给 GitHub 发 DMCA 删了 4,195 个相关仓库。非官方 hook（Frida / wechaty）有实打实封号 + 法律风险。合法的三条路（WeCom / 公众号 API / 公众号 RSS）都只碰公开内容，碰不到私聊<sup class="cite" data-refid="26">[26]</sup>。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">那"监控某公众号有没有发新文章"能做吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能。用公众号转 RSS 工具（WeWeRSS 自托管、但 2026-05 已 archived；或 RSSHub）→ n8n RSS 节点或裸脚本轮询 + diff + 推 Telegram/Discord，极简，不需要 LangGraph。注意这类工具依赖微信读书 API 属灰色，可能随时失效（截至 2026-06）<sup class="cite" data-refid="25">[25]</sup>。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">日报到底该 n8n 还是裸脚本？</span><span class="toggle">＋</span></div><div class="faq-a"><p>就看你愿不愿意维护一个 n8n 实例。愿意 → 抄模板 #13527 半小时搞定，还白送可视化历史 + 自动告警；不愿意 → 裸脚本 + cron + 你现成的 Discord 也能做，就是少了那两样。两条都不需要 LangGraph<sup class="cite" data-refid="15">[15]</sup>。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">我的 banmi 深度研究流程要不要引 LangGraph？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不要。Claude Code 的 subagent / workflow 已经是 LangGraph 级编排（并行 fan-out + 条件 + 迭代），再套 LangGraph 是重复造轮子。n8n 更不行——它只支持 single-agent workflow，做不了深研需要的迭代推理，反而更差<sup class="cite" data-refid="17">[17]</sup>。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">n8n 和 LangGraph 结合，最常见是怎么接的？</span><span class="toggle">＋</span></div><div class="faq-a"><p>最常见是 n8n 外层 + LangGraph 聪明节点：n8n 负责触发 / 连服务 / 搬数据，到要复杂 AI 那步用 HTTP 节点调一个 LangGraph 的 FastAPI 端点，跑完返回 n8n 后处理。趣闻：n8n 自己的 AI Workflow Builder 内部就用了 6 个 LangGraph agent<sup class="cite" data-refid="18">[18]</sup>。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">n8n 那个 1,889 集成数，跟有些文章说的 500+ 矛盾吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不矛盾，是口径差异。1,889 是 n8n 官网当前数（含官方 + 部分社区）；"500+"多是旧数据或只算官方 built-in 节点。再加上社区节点共 4,000+。数字本身不影响结论：n8n 的集成广度是 LangGraph 永远比不了的强项<sup class="cite" data-refid="1">[1]</sup>。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q12</span><span class="qtext">LangGraph 这一堆产品名（Platform / LangSmith / Fleet）到底啥关系？</span><span class="toggle">＋</span></div><div class="faq-a"><p>开源库 = LangGraph（MIT 免费，你用的就是这个）。托管部署层改过名：LangGraph Platform（2025-05）→ LangSmith Deployment（2025-10）。观测层叫 LangSmith。无代码构建那块叫 LangSmith Fleet（2026-03）。看文档要认日期。对你自用，开源库免费那部分就够，托管层先不碰<sup class="cite" data-refid="11">[11]</sup>。</p></div></div>
+  </div>
+</section>
+
+<!-- ===== REFS ===== -->
+<section class="chapter" id="refs" data-nav="References">
+  <h2><span class="num">15</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <ol class="ref-list">
+      <li id="ref-1"><a href="https://n8n.io/integrations/" target="_blank" rel="noopener">n8n — Integrations（官方集成目录，1,889 集成数）</a><span class="ref-meta">· 访问 2026-06-20 · 引用 5 次 · 🟢</span></li>
+      <li id="ref-2"><a href="https://docs.n8n.io/advanced-ai/" target="_blank" rel="noopener">n8n Docs — Advanced AI / LangChain 节点 + MCP</a><span class="ref-meta">· 访问 2026-06-20 · 引用 2 次 · 🟢</span></li>
+      <li id="ref-3"><a href="https://n8n.io/pricing/" target="_blank" rel="noopener">n8n — Pricing（Cloud 价格 + Sustainable Use License）</a><span class="ref-meta">· 访问 2026-06-20 · 引用 4 次 · 🟢</span></li>
+      <li id="ref-4"><a href="https://blog.n8n.io/series-c/" target="_blank" rel="noopener">n8n Blog — Series C 融资 $1.8 亿 / 估值 $25 亿</a><span class="ref-meta">· 访问 2026-06-20 · 引用 1 次 · 🟢</span></li>
+      <li id="ref-5"><a href="https://community.n8n.io/" target="_blank" rel="noopener">n8n Community — 已知限制汇总（内存 / queue mode / 长期记忆）</a><span class="ref-meta">· 访问 2026-06-20 · 引用 4 次 · 🟡</span></li>
+      <li id="ref-6"><a href="https://github.com/n8n-io/n8n/issues/26707" target="_blank" rel="noopener">GitHub Issue #26707 — workflow JSON 版本控制 / git diff 困难</a><span class="ref-meta">· 访问 2026-06-20 · 引用 3 次 · 🟢</span></li>
+      <li id="ref-9"><a href="https://github.com/langchain-ai/langgraph" target="_blank" rel="noopener">LangGraph — GitHub（StateGraph / checkpointer / map-reduce / v1.2.6 / 35.3k★）</a><span class="ref-meta">· 访问 2026-06-20 · 引用 6 次 · 🟢</span></li>
+      <li id="ref-10"><a href="https://www.langchain.com/langgraph" target="_blank" rel="noopener">LangChain — LangGraph 官方页（定位 / 400+ 企业 / cyclic graph）</a><span class="ref-meta">· 访问 2026-06-20 · 引用 4 次 · 🟢</span></li>
+      <li id="ref-11"><a href="https://docs.langchain.com/langgraph-platform/" target="_blank" rel="noopener">LangChain Docs — LangGraph Platform / LangSmith Deployment（改名 + stateful cron + 定价）</a><span class="ref-meta">· 访问 2026-06-20 · 引用 3 次 · 🟢</span></li>
+      <li id="ref-12"><a href="https://www.reddit.com/r/LangChain/" target="_blank" rel="noopener">社区评价汇总 — LangGraph 学习曲线 / 调试 / 文档（含开发者实测延迟）</a><span class="ref-meta">· 访问 2026-06-20 · 引用 1 次 · 🟡</span></li>
+      <li id="ref-13"><a href="https://docs.n8n.io/flow-logic/error-handling/" target="_blank" rel="noopener">n8n Docs — Error Handling / Retry / Schedule（免造基础设施）</a><span class="ref-meta">· 访问 2026-06-20 · 引用 3 次 · 🟢</span></li>
+      <li id="ref-14"><a href="https://blog.n8n.io/langchain-vs-langgraph/" target="_blank" rel="noopener">n8n vs LangGraph 结合模式（外层管道 + 聪明节点 / 原型迁生产）</a><span class="ref-meta">· 访问 2026-06-20 · 引用 2 次 · 🟡</span></li>
+      <li id="ref-15"><a href="https://n8n.io/workflows/13527/" target="_blank" rel="noopener">n8n Template #13527 — Summarize AI news from RSS/Reddit/HN with Claude to Discord</a><span class="ref-meta">· 访问 2026-06-20 · 引用 2 次 · 🟢</span></li>
+      <li id="ref-16"><a href="https://n8n.io/workflows/5067/" target="_blank" rel="noopener">n8n Template #5067 — 网站宕机监控（HTTP 200 检测，不存历史）</a><span class="ref-meta">· 访问 2026-06-20 · 引用 2 次 · 🟢</span></li>
+      <li id="ref-17"><a href="https://www.credal.ai/blog/n8n-vs-langgraph" target="_blank" rel="noopener">Credal — n8n single-agent workflow 架构限制（竞品视角）</a><span class="ref-meta">· 访问 2026-06-20 · 引用 1 次 · 🟡</span></li>
+      <li id="ref-18"><a href="https://medium.com/n8n-io/ai-workflow-builder" target="_blank" rel="noopener">Medium — n8n AI Workflow Builder 内部用 6 个 LangGraph agent</a><span class="ref-meta">· 访问 2026-06-20 · 引用 2 次 · 🟡</span></li>
+      <li id="ref-20"><a href="https://github.com/n8n-io/n8n/issues/11886" target="_blank" rel="noopener">GitHub Issue #11886 — AI 节点 5 分钟硬超时 "basically unusable for local models"</a><span class="ref-meta">· 访问 2026-06-20 · 引用 5 次 · 🟢</span></li>
+      <li id="ref-21"><a href="https://langchain-ai.github.io/langgraph/concepts/persistence/" target="_blank" rel="noopener">LangGraph Docs — Persistence / Checkpointing（断点续 + 条件分支）</a><span class="ref-meta">· 访问 2026-06-20 · 引用 2 次 · 🟢</span></li>
+      <li id="ref-22"><a href="https://developers.weixin.qq.com/doc/" target="_blank" rel="noopener">微信开放文档 — 官方 API 仅覆盖公众号/小程序/企业微信，个人号无 API</a><span class="ref-meta">· 访问 2026-06-20 · 引用 1 次 · 🟢</span></li>
+      <li id="ref-23"><a href="https://github.com/wechaty/wechaty/issues/872" target="_blank" rel="noopener">wechaty Issue #872 — Web 微信协议 2017 起对新账号封禁（itchat 失效）</a><span class="ref-meta">· 访问 2026-06-20 · 引用 1 次 · 🟡</span></li>
+      <li id="ref-24"><a href="https://thisnick.me/wechat-automation/" target="_blank" rel="noopener">thisnick.me — 微信个人号非官方自动化（Frida hook）技术与封号风险</a><span class="ref-meta">· 访问 2026-06-20 · 引用 1 次 · 🟡</span></li>
+      <li id="ref-25"><a href="https://github.com/cooderl/wewe-rss" target="_blank" rel="noopener">WeWeRSS — 公众号文章转 RSS（自托管，2026-05 已 archived 转只读，灰色依赖微信读书）</a><span class="ref-meta">· 访问 2026-06-20 · 引用 2 次 · 🟡</span></li>
+      <li id="ref-26"><a href="https://github.com/github/dmca/blob/master/2026/01/2026-01-08-tencent.md" target="_blank" rel="noopener">GitHub DMCA — Tencent 2026-01-08 takedown（微信导出/备份工具）</a><span class="ref-meta">· 访问 2026-06-20 · 引用 4 次 · 🟢</span></li>
+      <li id="ref-27"><a href="https://www.npmjs.com/search?q=n8n-nodes-wechat" target="_blank" rel="noopener">n8n 微信社区节点（wechat-official / work，接公众号/企业微信非个人号）</a><span class="ref-meta">· 访问 2026-06-20 · 引用 1 次 · 🟢</span></li>
+      <li id="ref-28"><a href="https://cybernews.com/security/tencent-dmca-takedowns-on-github-raise-questions/" target="_blank" rel="noopener">Cybernews — Tencent DMCA takedowns on GitHub（4,195 repos 报道 + 数据所有权争议）</a><span class="ref-meta">· 访问 2026-06-20 · 引用 1 次 · 🟢</span></li>
+      <li id="ref-29"><a href="https://github.com/n8n-io/n8n/issues/25360" target="_blank" rel="noopener">GitHub Issue #25360 — n8n Ollama 节点仍有 300s 超时（2026-01 起 N8N_AI_TIMEOUT 可配，PR #24292）</a><span class="ref-meta">· 访问 2026-06-20 · 引用 2 次 · 🟡</span></li>
+    </ol>
+  </div>
+</section>
+  <footer>
+    无忌 · Deep Research（L2）· 2026-06-20 · 仅供阿杰个人决策参考；数据与判例以原始来源为准。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('n8n-vs-langgraph-automation-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('n8n-vs-langgraph-automation-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>短视频库一条龙：抖音·TikTok·视频号·小红书·Twitter 下载 → 压缩 → 字幕 → 上传 R2 → 私人库 · 无忌 Deep Research · 2026-06-21</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 01 一条龙总览</a>
+    <a href="#ch2" data-target="ch2">02 02 分平台下载★</a>
+    <a href="#ch3" data-target="ch3">03 03 文案+字幕</a>
+    <a href="#ch4" data-target="ch4">04 04 短视频压缩</a>
+    <a href="#ch5" data-target="ch5">05 05 上传R2存储</a>
+    <a href="#ch6" data-target="ch6">06 06 拼成pipeline</a>
+    <a href="#ch7" data-target="ch7">07 07 检索与前端</a>
+    <a href="#ch8" data-target="ch8">08 08 法律封号边界</a>
+    <a href="#ch9" data-target="ch9">09 09 阿杰路线建议★</a>
+    <a href="#faq" data-target="faq">Q FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">R References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>短视频库一条龙：抖音·TikTok·视频号·小红书·Twitter 下载 → 压缩 → 字幕 → 上传 R2 → 私人库</h1>
+    <div class="hero-meta">
+      <span>📅 2026-06-21</span>
+      <span>🔍 ~50 次检索 + 工具版本核查</span>
+      <span>🛠️ 下载 × 压缩 × 字幕 × 存储 × 检索</span>
+      <span>🌏 立场：人在马来西亚的会写代码个人用户</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>一句话定调：这不是一个工具能搞定的事——五个平台的下载工具各不相同（TikTok 用 yt-dlp、抖音用 TikTokDownloader、小红书用 XHS-Downloader、Twitter 用 yt-dlp+gallery-dl，而视频号只能 MITM 抓包、违微信 ToS 有封号风险 🔴）。下载之后的链路反而是标准化的：H.265 压缩省一半体积、字幕靠平台自带 caption + 本地 ASR（Mac 上中文口播首选 SenseVoice 不是 Whisper）、存 Cloudflare R2 零 egress、最后用 SQLite FTS5 建一个可全文检索的私人元数据库。</strong></p>
+      <p>本报告是「照着就能搭」的操作手册：Ch1 给一条龙总览与三档方案速览；Ch2 是重点——逐平台最优下载工具 + 反爬难度 + 风险分级；Ch3 讲文案与字幕提取（自带 caption 抓取 + 没字幕时的 ASR 选型）；Ch4 是短视频压缩（H.264/H.265/AV1 对比 + 可直接复制的 ffmpeg 三档命令 + Mac 硬件加速）；Ch5 是上传与 R2 存储（定价 + rclone + presigned URL + Worker 鉴权）；Ch6 把它们拼成 pipeline（Python 主 + n8n 触发 + 完整 SQLite schema + 去重）；Ch7 讲私人库的检索与前端；Ch8 单独成章如实讲法律与封号边界；Ch9 给阿杰决策树与「先做哪一步」。本报告与姊妹篇 <a href="./rss-knowledge-base-system.html">RSS 知识库系统</a>共用 R2 / SQLite / 编排骨架，那篇讲文本/RSS，这篇是短视频专项。所有版本号、star 数、价格标注访问日期 2026-06-21，关键数据标 🟢多源 / 🟡单源 / ⚠️估算，风险标 🟢/🟡/🔴。</p>
+    </div>
+  </div>
+
+  <div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+    <h3 style="margin-top:0">⚡ 3 条最关键发现（先看这个）</h3>
+    <ol style="margin:0; padding-left:20px; line-height:1.7">
+      <li><strong>下载工具按平台分化，视频号是唯一的死结。</strong>TikTok / Twitter 用 yt-dlp 就能干净下载（公开内容低风险 🟢）；抖音 yt-dlp 持续破损<sup class="cite" data-refid="2">[2]</sup>，要换 TikTokDownloader（14.8k stars<sup class="cite" data-refid="3">[3]</sup>）；小红书 2026-04 改域名后 yt-dlp 残废，要换 XHS-Downloader（11.6k stars<sup class="cite" data-refid="4">[4]</sup>）；视频号没有公开 HTTP 流，<strong>任何下载工具都必须 MITM 抓包解密微信流量，明确违反微信 ToS 有封号风险</strong><sup class="cite" data-refid="6">[6]</sup> 🔴。<span class="conf g">🟢</span></li>
+      <li><strong>压缩省一半、存储零 egress，是这套库能长期养下去的两根支柱。</strong>H.265 CRF28 相比 H.264 同观感省 ~50% 体积（⚠️推算）<sup class="cite" data-refid="17">[17]</sup>，Mac 上 <code>-tag:v hvc1</code> 必须加否则 iPhone 不认；存到 Cloudflare R2 是 $0.015/GB/月 + <strong>egress 全免费无上限</strong><sup class="cite" data-refid="22">[22]</sup>——同样 500GB/月下行 R2 约 $1.35 而 S3 约 $47<sup class="cite" data-refid="23">[23]</sup>，视频这种「存得多、偶尔看」的场景 R2 是结构性最优。<span class="conf g">🟢</span></li>
+      <li><strong>Mac 上做中文口播字幕，SenseVoice 比 Whisper 快近一个数量级且更准。</strong>M4 Pro 实测：SenseVoice Small 处理 27 分钟中文播客只要 13.83 秒（118× 实时）CER 10.78%，而 Whisper Large V3 Turbo 同段要 2 分 04 秒（13.1× 实时）CER 12.55%<sup class="cite" data-refid="14">[14]</sup>。有平台自带字幕（TikTok/抖音）就 yt-dlp 直接抓 SRT 不用跑 ASR；没字幕（小红书/视频号/Twitter）再上 ASR，本地首选 SenseVoice。（注：此对比是单篇 M4 Pro 单语料实测，方向可信、具体数字别当死值。）<span class="conf y">🟡</span></li>
+    </ol>
+  </div>
+
+  <section class="chapter" id="ch1" data-nav="01 一条龙总览">
+    <h2><span class="num">01</span><span class="title-text">全流程总览 + 三档方案速览</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>整条流水线五个环节，每一环都可以独立替换。先看架构，再看你这周该搭哪一档。</p>
+      <pre><code>┌─ 1. 下载（逐平台不同工具）─────────────────────────┐
+│  TikTok → yt-dlp        抖音 → TikTokDownloader      │
+│  小红书 → XHS-Downloader  Twitter → yt-dlp+gallery-dl │
+│  视频号 → MITM 抓包工具 🔴（违 ToS）                  │
+│  产出：原视频 .mp4 + info.json（元数据）+ .srt（若有）│
+└──────────────┬─────────────────────────────────────┘
+               ▼
+┌─ 2. 压缩（可选，短视频常不需要）───────────────────┐
+│  ffmpeg libx265 CRF28 + hvc1  → 省 ~50% 体积         │
+│  Mac 批量：hevc_videotoolbox 硬件加速 ~15×          │
+└──────────────┬─────────────────────────────────────┘
+               ▼
+┌─ 3. 文案 + 字幕──────────────────────────────────┐
+│  有自带 caption → yt-dlp --write-subs 抓 SRT        │
+│  无 caption → ASR：SenseVoice(Mac中文) / faster-    │
+│  whisper / WhisperX(词级)。softsub 存库不烧录       │
+└──────────────┬─────────────────────────────────────┘
+               ▼
+┌─ 4. 上传 Cloudflare R2（零 egress）────────────────┐
+│  rclone copy /local r2:bucket  增量同步             │
+│  私有访问：presigned URL / Worker 鉴权             │
+└──────────────┬─────────────────────────────────────┘
+               ▼
+┌─ 5. 建库 + 检索─────────────────────────────────┐
+│  SQLite videos 表 + FTS5 全文索引(标题/文案/字幕)   │
+│  --download-archive 去重；Datasette 当前端原型     │
+└──────────────────────────────────────────────────┘</code></pre>
+      <p>不是每一档都要全跑。按你的目标选起点：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>档位</th><th>包含环节</th><th>工具栈</th><th>适合谁 / 多久搭好</th></tr></thead>
+        <tbody>
+          <tr><td><strong>A. 极简手动档</strong></td><td>下载 → 存本地文件夹</td><td>yt-dlp / TikTokDownloader 命令行，手动归类</td><td>只想存几个平台的视频备份，<strong>当天就能用</strong>。没有检索、没有压缩。</td></tr>
+          <tr class="row-highlight"><td><strong>B. 半自动脚本档 ★</strong></td><td>下载 → SQLite 元数据 →（按需压缩/字幕）</td><td>Python 包一层 yt-dlp + 写 SQLite + FTS5 全文搜索</td><td>★ 推荐起步。能按文案/字幕全文搜了，本地跑，<strong>一两个周末</strong>。</td></tr>
+          <tr><td><strong>C. 完整 pipeline 档</strong></td><td>全五环 + 自动触发 + R2 + 前端</td><td>Python 核心 + n8n 触发/通知 + R2 + Datasette/半米后台</td><td>要长期养库、多设备访问、跟半米对接。<strong>持续迭代</strong>，别一上来就这个。</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info"><p><strong>本章先给路线结论，后面各章给工具与命令：</strong>绝大多数人应该从 B 档起步——<strong>先把"一个平台下载 → 存本地 → 建 SQLite 元数据"这条最短链路跑通</strong>，验证你真的会回来检索这些视频，再决定要不要加压缩、字幕、R2 这些「锦上添花但有维护成本」的环节。Ch9 的决策树会把这个顺序说死。</p></div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch2" data-nav="02 分平台下载★">
+    <h2><span class="num">02</span><span class="title-text">分平台下载工具：逐平台最优解 ★</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是全报告最重要的一章。<strong>没有一个工具能通吃五平台</strong>——每个平台的反爬机制、协议、去水印方式都不同。先看速查表，再逐平台拆。</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>平台</th><th>最优工具</th><th>是否需登录/cookie</th><th>去水印</th><th>反爬难度</th><th>风险分级</th></tr></thead>
+        <tbody>
+          <tr><td><strong>TikTok</strong></td><td>yt-dlp（原生）</td><td>公开视频不需要<sup class="cite" data-refid="1">[1]</sup></td><td>内置优先无水印源（不保证）</td><td>低</td><td>公开内容私存 <span class="conf g">🟢</span></td></tr>
+          <tr><td><strong>抖音</strong></td><td>TikTokDownloader</td><td>需 cookie（浏览器提取，QR 已失效）<sup class="cite" data-refid="3">[3]</sup></td><td>抓 CDN 无水印源</td><td>高（yt-dlp 持续破损）</td><td>违 ToS 小量私存 <span class="conf y">🟡</span></td></tr>
+          <tr><td><strong>小红书</strong></td><td>XHS-Downloader</td><td>不需登录也能下（配 cookie 解锁高清）<sup class="cite" data-refid="4">[4]</sup></td><td>平台原始文件无硬水印</td><td>中（签名逆向）</td><td>私存低频 <span class="conf y">🟡</span></td></tr>
+          <tr><td><strong>视频号</strong></td><td>MITM 抓包工具 🔴</td><td>需装本地根 CA 证书拦截微信流量<sup class="cite" data-refid="6">[6]</sup></td><td>抓解密后的源</td><td>极高（无公开 HTTP 流）</td><td>违微信 ToS 封号 <span class="conf r">🔴</span></td></tr>
+          <tr><td><strong>Twitter/X</strong></td><td>yt-dlp + gallery-dl</td><td>公开视频不需要，NSFW/图集需 cookie<sup class="cite" data-refid="8">[8]</sup></td><td>原始媒体无水印</td><td>低（API 变更偶发 AuthError）</td><td>公开内容 <span class="conf g">🟢</span></td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>① TikTok = yt-dlp（最干净，首选）</h3>
+      <p>yt-dlp 原生支持 TikTok（内置 <code>tiktok.py</code> extractor），公开视频无需登录即可下载，并优先尝试无水印源（但官方不保证一定拿到无水印版）<sup class="cite" data-refid="1">[1]</sup>。基本命令：</p>
+      <pre><code># 单个视频，连带元数据 + 字幕一起下
+yt-dlp --write-info-json --write-subs --write-auto-subs \
+  --sub-lang zh,en --convert-subs srt \
+  -o "%(uploader)s/%(id)s.%(ext)s" \
+  "https://www.tiktok.com/@user/video/123456"
+
+# 整个账号的发布（断点续传靠 archive）
+yt-dlp --download-archive archive.txt \
+  -o "%(uploader)s/%(id)s.%(ext)s" \
+  "https://www.tiktok.com/@username"</code></pre>
+      <div class="callout good"><p><strong>为什么 TikTok 最省心：</strong>它是 yt-dlp 一等公民，extractor 维护活跃，公开内容不碰登录态，所以既不触发账号风险，下载链路也最稳。海外用户直接 <code>pip install yt-dlp</code> 就能跑，无需代理。这也是为什么「先跑通一个平台」建议从 TikTok 开始——它是整条链路里阻力最小的那个。</p></div>
+
+      <h3>② 抖音 = TikTokDownloader（yt-dlp 在这儿已破损）</h3>
+      <p>抖音是同公司产品但生态隔离，yt-dlp 对抖音的支持在 2025–2026 持续破损（多个 issue 报 cookie 错误 #16803 / #13382）<sup class="cite" data-refid="2">[2]</sup>。最完整的开源替代是 <strong>TikTokDownloader（JoeanAmier，现名 DouK-Downloader）</strong>，14.8k stars，最新正式 release V5.7（2025-08-19）<sup class="cite" data-refid="3">[3]</sup>（更新的 beta 见仓库 tag/branch，发版较慢 <span class="conf y">🟡</span>）。它能批量下账号的发布/喜欢/收藏/合集，支持 CSV/XLSX/SQLite 导出，去水印靠抓 CDN 无水印源，提供 CLI + Web API + Docker 三种用法，海外可访问。</p>
+      <div class="trap-box"><strong>⚠️ 坑：抖音必须先喂 cookie。</strong>TikTokDownloader 需要从浏览器提取 cookie（抖音的 QR 扫码登录方式已失效）<sup class="cite" data-refid="3">[3]</sup>。另外它对抖音支持最完整，对国际版 TikTok 反而支持较少——所以是「抖音用它、TikTok 用 yt-dlp」分工。海外访问抖音国内版（douyin.com）需要代理；批量下务必加延迟限速——抖音风控严格，请求过密会触发 429/验证码（具体 QPS 阈值无官方公布数字，⚠️估算 50 次/秒量级，以实测为准）。</div>
+
+      <h3>③ 小红书 = XHS-Downloader（不需登录就能下）</h3>
+      <p>小红书图文 + 视频的最优工具是同作者的 <strong>XHS-Downloader</strong>，11.6k stars，2026-02 更新<sup class="cite" data-refid="4">[4]</sup>。它最大的优点是<strong>不需账号登录</strong>（无 cookie 也能下，只是清晰度低；配 cookie 解锁高清），支持图文（PNG/WEBP/JPEG/HEIC）+ 视频 + Live Photo 批量下载，去水印靠抓平台原始无硬水印文件，提供 API + MCP server 模式。它逆向了 x-s / x-s-common 签名来绕过限制，并能在 7 天 cookie 失效时自动刷新。</p>
+      <div class="callout warn"><p><strong>为什么不用 yt-dlp 下小红书：</strong>小红书 2026-04-19 把主域名改成 rednote.com，引发 yt-dlp issue #16519，该修复 PR 至今（2026-06-21）<strong>未合并</strong>，清晰度/格式抓取不稳（issue 里有人能拿 direct 源、有人只剩压缩版）<sup class="cite" data-refid="5">[5]</sup>。所以小红书直接上 XHS-Downloader，别在 yt-dlp 上耗时间。</p></div>
+
+      <h3>④ 视频号 = 只能 MITM 抓包 🔴（最坑，单独警告）</h3>
+      <p>视频号是五平台里唯一的死结。yt-dlp <strong>完全不支持</strong>视频号——它没有公开的 HTTP 视频流，只走微信客户端内部的 finder 协议<sup class="cite" data-refid="1">[1]</sup>。要下载只有一条路：<strong>MITM 中间人抓包，解密微信流量</strong>。这类工具有两个代表：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>工具</th><th>stars / 更新</th><th>机制</th><th>覆盖</th></tr></thead>
+        <tbody>
+          <tr><td>qiye45/wechatVideoDownload</td><td>5.3k，2026-05-10 commit<sup class="cite" data-refid="6">[6]</sup></td><td>mitmdump MITM 代理 + HTTPS 解密拦截 + 需装本地根 CA 证书</td><td>视频 / 直播回放 / 批量</td></tr>
+          <tr><td>putyy/res-downloader</td><td>跨平台 GUI，Go+Wails<sup class="cite" data-refid="7">[7]</sup></td><td>系统代理 127.0.0.1:8899 + 本地 CA</td><td>视频号 / 小程序 / 抖音 / 小红书</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout bad"><h4>🔴 视频号下载的本质风险（务必读）</h4><p>MITM 解密微信流量<strong>明确违反微信 ToS，有账号风险</strong><sup class="cite" data-refid="6">[6]</sup>。装本地根 CA 证书来拦截 HTTPS，本身就是把你的设备置于「中间人攻击」状态——这不只是封号问题，也是安全问题（任何能用这张证书的程序都能看你所有 HTTPS 流量）。腾讯官方的「视频号助手」（channels.weixin.qq.com）只提供创作者后台管理，<strong>不提供任何下载功能</strong>。结论：视频号能不下就不下；非下不可就用一个不重要的微信小号、下完立刻删证书，<strong>绝不用主号</strong>。Ch8 法律章会再展开。</p></div>
+
+      <h3>⑤ Twitter/X = yt-dlp（视频）+ gallery-dl（图集）</h3>
+      <p>Twitter 的视频用 yt-dlp 原生下（公开视频可用，NSFW 需 cookie，<code>--cookies-from-browser firefox</code> 更可靠）<sup class="cite" data-refid="1">[1]</sup>；而媒体图集批量首选 <strong>gallery-dl</strong>，18.6k stars，2026-06-13 release<sup class="cite" data-refid="8">[8]</sup>。gallery-dl 用 cookie 认证，平台 API 变更时会报 AuthError（更新后恢复），它不支持 TikTok——所以是「gallery-dl 擅图集、yt-dlp 擅视频」两者配合。</p>
+      <pre><code># Twitter 视频
+yt-dlp --cookies-from-browser firefox \
+  -o "%(uploader)s/%(id)s.%(ext)s" "https://x.com/user/status/123"
+
+# Twitter 媒体图集（含图片）
+gallery-dl --cookies-from-browser firefox "https://x.com/username/media"</code></pre>
+
+      <div class="callout warn"><h4>⚠️ 不推荐：MediaCrawler 与未核实工具</h4><p>MediaCrawler（27k+ stars）用 Playwright 浏览器自动化爬多平台（小红书/抖音/快手/B站/微博），但它<strong>侧重评论数据而非纯下载</strong>，且是非官方 API 随时会被封 <span class="conf r">🔴</span><sup class="cite" data-refid="9">[9]</sup>。另有 f2 等工具未能独立核实状态，本报告不背书。逐平台用上面列的「最优解」即可，不要为了「一个工具通吃」去赌不稳定的全平台爬虫。</p></div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3" data-nav="03 文案+字幕">
+    <h2><span class="num">03</span><span class="title-text">文案 + 字幕提取：自带 caption + ASR 选型</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>字幕和文案是整个库的「检索灵魂」——有了它们才能全文搜索、秒级定位到某句话出现的时间点。两条路：<strong>平台自带 caption 直接抓（免费、最准）</strong>，没有的话才跑 ASR。先判断哪些平台有自带字幕。</p>
+
+      <h3>第一步：抓平台自带文案 + 字幕</h3>
+      <p>yt-dlp 的 <code>--write-info-json</code> 对 TikTok 能抓到完整文案元数据：描述、标题、标签、作者、互动数（view/like/comment/save）、音乐（track/album/artist），全部落在 info.json 里<sup class="cite" data-refid="10">[10]</sup>。字幕方面，TikTok 有平台自带 caption，yt-dlp 通过三条路径提取（interaction_stickers / auto_video_caption_info / auto_captions API 端 + cla_info / caption_infos Feed 端 + subtitleInfos 网页端），SRT 首选<sup class="cite" data-refid="11">[11]</sup>。各平台自带字幕情况：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>平台</th><th>自带文案元数据</th><th>自带 CC 字幕</th><th>怎么办</th></tr></thead>
+        <tbody>
+          <tr><td>TikTok</td><td>完整（info.json）<sup class="cite" data-refid="10">[10]</sup></td><td class="check y">有（中/英 SRT/VTT 可下）<sup class="cite" data-refid="11">[11]</sup></td><td>yt-dlp 一把抓</td></tr>
+          <tr><td>抖音</td><td>有（同 extractor）</td><td class="check p">有但反爬不稳（#14177）<sup class="cite" data-refid="12">[12]</sup></td><td>抓到就用，抓不到跑 ASR</td></tr>
+          <tr><td>小红书</td><td>有</td><td class="check n">无 CC 系统（#12719）<sup class="cite" data-refid="12">[12]</sup></td><td>必跑 ASR</td></tr>
+          <tr><td>视频号</td><td>有限</td><td class="check n">无自带字幕</td><td>必跑 ASR</td></tr>
+          <tr><td>Twitter/X</td><td>推文文本作 description（age-restricted 受限 #6763）</td><td class="check n">无 CC 字幕</td><td>必跑 ASR</td></tr>
+        </tbody>
+      </table></div>
+      <pre><code># 有自带字幕的平台（TikTok/抖音）：直接拿 SRT
+yt-dlp --write-info-json --write-subs --write-auto-subs \
+  --sub-lang zh,en --convert-subs srt URL</code></pre>
+
+      <h3>第二步：没自带字幕的，跑 ASR——Mac 上中文口播首选 SenseVoice</h3>
+      <p>这是本章最反直觉的结论。大多数人默认「中文 ASR 上 Whisper」，但在 Mac（Apple Silicon）上做<strong>中文口播</strong>，SenseVoice 又快又准：</p>
+      <div class="callout accent"><h4>★ SenseVoice vs Whisper（M4 Pro 实测）</h4><p>SenseVoice Small（阿里 FunAudioLLM）处理 27 分钟中文播客只要 <strong>13.83 秒（118× 实时）CER 10.78%</strong>；同一段 Whisper Large V3 Turbo 要 <strong>2 分 04 秒（13.1× 实时）CER 12.55%</strong><sup class="cite" data-refid="14">[14]</sup>。SenseVoice 速度约是 Turbo 的 9 倍、精度还更好，靠的是 NAR（非自回归）架构并行解码，VRAM 占用 &lt;1GB。<strong>对一个要批量转写几百条短视频的私人库，这个速度差直接决定了你愿不愿意跑全量字幕。</strong>⚠️ 这组数字来自单篇博客的单设备单语料实测，方向（SenseVoice 在 Mac 中文场景又快又准）可信，但具体倍数/CER 自己拿 10 条真实视频校准——不同口音、背景音、专业词会拉低准确率。</p></div>
+      <p>完整 ASR 选型优先级（按场景）：</p>
+      <div class="step"><div class="step-head"><span class="sn">1</span>SenseVoice Small — 本地 Mac 中文口播首选</div><div class="step-body">最快、CER 最低、VRAM&lt;1GB<sup class="cite" data-refid="14">[14]</sup>。<strong>唯一缺点</strong>：SRT 导出要自己写序列化（不像 WhisperX 一键 <code>--output_format srt</code>），多花 ~30 行 Python。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>faster-whisper large-v3-turbo — 通用快</div><div class="step-body">CTranslate2 实现，比 OpenAI 原版快 4×，叠 VAD 批处理再 3×（≈12.5×）<sup class="cite" data-refid="24">[24]</sup>。GPU fp16 下 13 分钟音频 19 秒（WER 1.9%），turbo ≈129× 实时<sup class="cite" data-refid="13">[13]</sup>。马来/英语混说设 <code>language=None</code> 自动检测。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>WhisperX — 要词级时间戳/说话人时用</div><div class="step-body">支持中文词级时间戳（DEFAULT_ALIGN_MODELS_HF 含 zh，用 wav2vec2-large-xlsr-53-chinese 对齐），可输出 SRT/VTT/TXT/TSV/JSON，<code>--highlight_words</code> 出词级高亮 SRT<sup class="cite" data-refid="15">[15]</sup>。中文模型首次需联网拉 HF。中文 CER 无公开对比数据 <span class="conf y">🟡</span>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>OpenAI gpt-4o-mini-transcribe API — 无 GPU 兜底</div><div class="step-body">$0.003/分（新推荐，同精度比 legacy whisper-1 的 $0.006/分便宜一半）<sup class="cite" data-refid="16">[16]</sup>。实时转写另有更贵的 realtime 系列（按 token 或分钟计，以官方定价页当日为准）。无本地算力时用，按量付费。</div></div>
+
+      <h3>第三步：softsub 存库，不烧录</h3>
+      <div class="callout info"><p><strong>hardsub vs softsub：存库一定选 softsub。</strong>hardsub 是像素级烧录进画面——任何播放器都兼容，但文件变大、不可关、不可改、不可检索；softsub 是独立 SRT track 内嵌进 MP4/MKV，<strong>可检索、可编辑、可切语言</strong>，是存库首选<sup class="cite" data-refid="18">[18]</sup>。短视频存库建议：<strong>保留原视频 + 独立 .srt 文件</strong>（不内嵌也行，元数据库里存路径即可），需要发布时再单独生成 hardsub 版本。字幕入库的价值有三：① 全文搜索（字幕 tokenize 进 SQLite FTS 秒级定位时间点，SubTubular/Filmot 都基于此，字幕还覆盖 75% 的无声观看场景<sup class="cite" data-refid="19">[19]</sup>）；② 二次创作（字幕时间戳是剪辑索引层，OpusClip 等切片工具靠它）；③ 学习（双语字幕 → 词表 pipeline）。</p></div>
+      <div class="callout good"><h4>✅ 推荐字幕链（一条命令 + 兜底）</h4><p>先 <code>yt-dlp --write-info-json --write-subs --write-auto-subs --sub-lang zh,en --convert-subs srt</code> 抓 TikTok/抖音自带 SRT；抓不到（小红书/视频号/Twitter）再跑 ASR：本地 Mac 上 SenseVoice Small &gt; faster-whisper large-v3-turbo &gt; WhisperX（要词级/说话人）&gt; OpenAI gpt-4o-mini-transcribe（无 GPU）。Apple Silicon 也可用 MLX-Whisper；Whisply 这个 CLI 工具同时支持 faster-whisper + mlx-whisper，适合 Mac 批量<sup class="cite" data-refid="25">[25]</sup>。</p></div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch4" data-nav="04 短视频压缩">
+    <h2><span class="num">04</span><span class="title-text">短视频压缩：H.264/H.265/AV1 + ffmpeg 三档命令</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>压缩是「可选但很值」的环节——它把存储成本砍掉一半。先理解三种编码的取舍，再抄命令。</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>编码</th><th>相对 H.264 省体积</th><th>专利/授权</th><th>兼容性</th><th>Mac/iPhone 私存适配</th></tr></thead>
+        <tbody>
+          <tr><td><strong>H.264</strong></td><td>基准</td><td>有授权费但已普及</td><td class="check y">全绿通吃</td><td>能播但占地方</td></tr>
+          <tr class="row-highlight"><td><strong>H.265 (HEVC)</strong></td><td>省 25–50%<sup class="cite" data-refid="20">[20]</sup></td><td>三专利池，<strong>个人私有归档无需缴费</strong><sup class="cite" data-refid="21">[21]</sup></td><td class="check p">Safari/iOS 硬解强；Chrome/FF 支持视 OS/硬件而定，需实测</td><td>★ 最佳（+hvc1）</td></tr>
+          <tr><td><strong>AV1</strong></td><td>省 ~50–60%（学界 28.1% vs H.265）<sup class="cite" data-refid="20">[20]</sup></td><td class="check y">专利免费（AOMedia）<sup class="cite" data-refid="21">[21]</sup></td><td>Chrome70+/FF67+/Safari17，老 iPhone 软解或不支持</td><td>极致压缩用，CPU 软编很慢</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info"><p><strong>编码效率排序：AV1 &gt; H.265 &gt; VP9 &gt; H.264</strong><sup class="cite" data-refid="20">[20]</sup>。但效率不是唯一指标——压缩越狠 CPU 越慢、兼容性越差。对「存 R2 + Mac/iPhone 播放」这个具体场景，<strong>H.265 是甜点</strong>：省一半体积、iOS 硬解流畅、个人归档免授权费。要在浏览器里直接播或追求极致压缩（100GB→40GB）才上 AV1。注意 2025-11 起 Dell/HP 部分中低端笔记本因授权费上涨在 UEFI 禁了 HEVC 硬解<sup class="cite" data-refid="21">[21]</sup>，但这不影响 Mac。</p></div>
+
+      <h3>典型压缩体积（竖屏 1080×1920 30fps 60s，⚠️ 推算非实测 ±30%）</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">~30MB</div><div class="l">H.264 CRF23 ~4000Kbps（基准）⚠️估算<sup class="cite" data-refid="17">[17]</sup></div></div>
+        <div class="metric"><div class="v">~15MB</div><div class="l">H.265 CRF28 slow ~2000Kbps（省 ~50%）⚠️估算<sup class="cite" data-refid="17">[17]</sup></div></div>
+        <div class="metric"><div class="v">~10MB</div><div class="l">AV1 SVT CRF35 preset6 ~1400Kbps（省 ~65%）⚠️估算<sup class="cite" data-refid="17">[17]</sup></div></div>
+        <div class="metric"><div class="v">~16MB</div><div class="l">AV1 CRF28 preset4（省 ~47%）⚠️估算<sup class="cite" data-refid="17">[17]</sup></div></div>
+      </div>
+      <p style="font-size:13.5px"><strong>⚠️ 这组体积是推算值，非实测</strong>：来自横屏 benchmark 外推，竖屏压缩率通常略低，实际 ±30%。竖屏专项 benchmark 公开资料缺失<sup class="cite" data-refid="17">[17]</sup>。结论可信（H.265 省约一半）但具体数字别当死值，自己拿 5 条真实视频跑一遍校准。</p>
+
+      <h3>ffmpeg 三档命令（可直接复制）</h3>
+      <div class="callout good"><h4>① 存档优先（Mac/iPhone 播放，省 ~50%）— 默认就用这条</h4>
+      <pre><code>ffmpeg -i in.mp4 -c:v libx265 -crf 28 -preset slow \
+  -tag:v hvc1 -c:a aac -b:a 128k \
+  -movflags +faststart -map_metadata 0 out.mp4</code></pre>
+      <p><strong><code>-tag:v hvc1</code> 必须加</strong>，否则 Mac/iPhone 不认这个 HEVC 文件。<code>-movflags +faststart</code> 让网页边下边播，<code>-map_metadata 0</code> 保留原始元数据。</p></div>
+      <div class="callout good"><h4>② 画质优先（极致压缩，AV1）</h4>
+      <pre><code>ffmpeg -i in.mp4 -c:v libsvtav1 -crf 24 -preset 4 \
+  -svtav1-params keyint=10s:tune=0 -c:a aac -b:a 192k \
+  -movflags +faststart out.mp4</code></pre>
+      <p>SVT-AV1 软编，CPU 换存储费。SVT-AV1 官方说 CRF 模式不需要 two-pass<sup class="cite" data-refid="26">[26]</sup>。</p></div>
+      <div class="callout good"><h4>③ 兼容优先（任何浏览器/设备都能播，H.264）</h4>
+      <pre><code>ffmpeg -i in.mp4 -c:v libx264 -crf 23 -preset medium \
+  -profile:v high -level 4.1 -c:a aac -b:a 128k \
+  -movflags +faststart out.mp4</code></pre></div>
+      <div class="callout warn"><h4>⚠️ Mac 硬件加速档（批量快跑，VideoToolbox）</h4>
+      <pre><code>ffmpeg -i in.mp4 -c:v hevc_videotoolbox -q:v 50 \
+  -tag:v hvc1 -c:a aac -b:a 128k -movflags +faststart out.mp4</code></pre>
+      <p>VideoToolbox <strong>不支持 CRF，只有 <code>-q:v</code></strong>（值越大画质越高），速度约软编 15× 但文件大 10–20%<sup class="cite" data-refid="17">[17]</sup>。<strong>VideoToolbox 不支持 AV1 硬编</strong>——要 AV1 只能 libsvtav1 CPU 软编（很慢）。NVENC 显卡用 <code>hevc_nvenc -preset p6</code>。</p></div>
+
+      <h3>批量脚本 + VMAF 验证</h3>
+      <pre><code># 批量转码 + 第3秒截封面帧
+for f in *.mp4 *.mov; do
+  ffmpeg -i "$f" -c:v hevc_videotoolbox -q:v 50 -tag:v hvc1 \
+    -c:a aac -b:a 128k -movflags +faststart "compressed_$f"
+  ffmpeg -ss 3 -i "$f" -frames:v 1 -q:v 2 "thumb_${f%.*}.jpg"
+done
+
+# VMAF 验证画质（&gt;93 透明 &gt;80 良好 &lt;70 劣化）
+ffmpeg -i compressed.mp4 -i orig.mp4 \
+  -filter_complex libvmaf=n_subsample=4 -f null -</code></pre>
+      <div class="callout accent"><p><strong>阿杰场景结论：</strong>存 R2 + Mac/iPhone 播放 → 默认用<strong>存档档（libx265 CRF28 slow + hvc1，省 ~50%）</strong>。批量时先用 VideoToolbox 硬件加速快跑，再抽样用 VMAF 验 &gt;85 确认没劣化。只有要把 100GB 库压到 40GB 这种极致需求才切 AV1 档（拿 CPU 时间换存储费）<sup class="cite" data-refid="27">[27]</sup>。<strong>但记住：短视频本来就小，压缩是「锦上添花」不是「起步必做」——B 档可以先跳过这一环。</strong></p></div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch5" data-nav="05 上传R2存储">
+    <h2><span class="num">05</span><span class="title-text">上传 + Cloudflare R2 存储：零 egress + rclone + 鉴权</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>视频这种「存得多、看得少」的数据，存储成本的大头不是容量而是下行流量（egress）。R2 的杀手锏就是 egress 全免费。</p>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">$0.015</div><div class="l">R2 标准存储 /GB/月（低频 $0.01）<sup class="cite" data-refid="22">[22]</sup> 🟢</div></div>
+        <div class="metric"><div class="v">$0</div><div class="l">egress 出站流量 /GB（<strong>全免无上限</strong>）<sup class="cite" data-refid="22">[22]</sup> 🟢</div></div>
+        <div class="metric"><div class="v">$4.50</div><div class="l">Class A 写操作 /百万次（PUT/POST/LIST）<sup class="cite" data-refid="22">[22]</sup> 🟢</div></div>
+        <div class="metric"><div class="v">10GB</div><div class="l">免费额度：存储 + 1M A + 10M B /月<sup class="cite" data-refid="22">[22]</sup> 🟢</div></div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>场景</th><th>R2</th><th>S3</th><th>B2+CF</th></tr></thead>
+        <tbody>
+          <tr><td>egress /GB</td><td class="check y">无条件免费</td><td class="check n">$0.09</td><td class="check p">免费但有条件（3×/CDN）</td></tr>
+          <tr><td>100GB 存储 + 500GB egress/月</td><td class="check y">~$1.35</td><td class="check n">~$47</td><td class="check p">~$0.7（egress 达标时）</td></tr>
+          <tr><td>存储 /GB/月</td><td>$0.015</td><td>$0.023</td><td class="check y">~$0.007（$6.95/TB，更便宜）</td></tr>
+          <tr><td>集成复杂度</td><td class="check y">最简（同 CF 生态）</td><td>中</td><td>需自己接 CF</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout good"><p><strong>对阿杰：直接用 R2 最优。</strong>同 500GB/月下行，R2 约 $1.35 vs S3 约 $47<sup class="cite" data-refid="23">[23]</sup>。B2 存储更便宜（$6.95/TB ≈ $0.007/GB）但它的免费 egress 有条件（限月均存储的 3× 或走 Bandwidth Alliance/CDN），不是无条件全免，且要自己接 Cloudflare CDN 才落地，集成更繁。R2 跟 CF 的 Worker/CDN 原生打通，而且 CF 在吉隆坡/新加坡有 PoP，延迟低<sup class="cite" data-refid="29">[29]</sup>。阿杰已有 R2 的话连选型都省了。</p></div>
+
+      <h3>上传：rclone 批量同步（最优）</h3>
+      <pre><code># ~/.config/rclone/rclone.conf 配置
+[r2]
+type = s3
+provider = Cloudflare
+access_key_id = &lt;你的 R2 access key&gt;
+secret_access_key = &lt;你的 R2 secret&gt;
+endpoint = https://&lt;accountid&gt;.r2.cloudflarestorage.com
+acl = private</code></pre>
+      <pre><code># 批量上传（文件&gt;100M 自动 multipart，只重传失败分片）
+rclone copy /local/videos r2:my-bucket \
+  --transfers 8 --s3-upload-cutoff 100M --s3-chunk-size 64M
+
+# 增量同步（只传新增/变化）
+rclone sync /local/videos r2:my-bucket</code></pre>
+      <p>rclone 是最优上传方式：单文件 PUT 不续传，但 multipart 模式下只重传失败的分片，rclone 在文件 &gt;100M 时自动触发<sup class="cite" data-refid="28">[28]</sup>。单文件上限 5TB（multipart ≤10000 parts）。<strong>注意 Wrangler 上限只有 315MB，不适合视频</strong>，别用它传。其他方式：<code>aws s3 cp --endpoint-url</code>、boto3 <code>generate_presigned_url</code>。</p>
+
+      <h3>私有访问：三种方案</h3>
+      <p>R2 bucket 默认私有。让你的私人库能被（且仅被）你访问，有三条路：</p>
+      <div class="step"><div class="step-head"><span class="sn">1</span>Presigned URL（最简，脚本首选）</div><div class="step-body">boto3 <code>client(endpoint_url=R2).generate_presigned_url('get_object', ExpiresIn=3600)</code> 生成 1 秒–7 天有效的临时链接<sup class="cite" data-refid="30">[30]</sup>。缺点：<strong>不支持自定义域名</strong>，只能用 <code>&lt;accountid&gt;.r2.cloudflarestorage.com</code>。适合脚本/单人用。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>Cloudflare Access（组织成员登录）</div><div class="step-body">用 Google/GitHub 登录验证，需自定义域 + Zero Trust<sup class="cite" data-refid="31">[31]</sup>。适合团队内部，不适合匿名用户（体验差）<span class="conf y">🟡</span>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>Worker 鉴权（最灵活，长期推荐）</div><div class="step-body">自定义域 + JWT/Cookie 验证 + <code>env.R2_BUCKET.get(key)</code> + 支持 Range 请求 seek + CDN 缓存<sup class="cite" data-refid="30">[30]</sup>。能做精细权限、自定义域名、视频 seek。注意 Worker 返回的 R2 内容默认不缓存，需手动设 Cache-Control <span class="conf y">🟡</span>。</div></div>
+
+      <h3>与半米后台对接架构</h3>
+      <div class="callout info"><p><strong>通用架构：视频走 R2，元数据走半米 DB。</strong>上传 = 后台生成 presigned PUT URL → 脚本/前端直传 R2 → 回调更新 DB；播放 = 前端请求后台 <code>/api/video/:id</code> → 验权 → 后台生成 presigned GET（1h 有效）→ 返回前端 <code>&lt;video src&gt;</code><sup class="cite" data-refid="32">[32]</sup>。命名用 <code>lessons/{lesson_id}/videos/{uuid}.mp4</code> 防 URL 猜测。R2 托管的视频 CF ToS 明确允许分发（不受旧 Section 2.8 限制），支持 HTTP Range（Accept-Ranges，seek 正常），私人小库用普通 MP4 progressive download 就够，HLS 是公开大流量才需要<sup class="cite" data-refid="29">[29]</sup>。R2 presigned + Range seek 官方未明确，社区认为可行 <span class="conf y">🟡</span>。</p></div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch6" data-nav="06 拼成pipeline">
+    <h2><span class="num">06</span><span class="title-text">拼成 pipeline：Python 主 + n8n 触发 + SQLite schema</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>对会写代码的个人用户，<strong>Python 脚本 + 直接调系统命令是最合适的编排基础</strong>——yt-dlp 有原生 Python API，<code>--dump-json</code> 直接吐完整元数据。n8n 当可视化补充（触发/调度/通知）有价值但有摩擦：云版不支持本地 binary，自托管可用 Execute Command 调 yt-dlp/ffmpeg/whisper；Celery 过重、bash+cron 错误处理弱<sup class="cite" data-refid="33">[33]</sup>。<strong>结论：Python 核心逻辑 + n8n 触发/通知混用。</strong></p>
+
+      <h3>推荐 pipeline 流程</h3>
+      <pre><code>触发（A.手动丢链接 CLI / B.cron 定时从收藏增量）
+  ↓
+yt-dlp --dump-json 解析元数据 → 查 DB video_id 是否已存在
+  ↓
+yt-dlp -f best --download-archive archive.txt 去重下载
+  ↓
+ffmpeg 压缩（可选，短视频常跳过）
+  ↓
+ASR 批量转写 SRT/VTT（SenseVoice / faster-whisper）
+  ↓
+rclone/boto3 上传 R2（视频 + 字幕 + 缩略图）
+  ↓
+写 SQLite 元数据（R2 key + transcript 全文）
+  ↓
+Discord webhook 通知</code></pre>
+      <p>n8n 可接管「触发层 + 通知层」，核心仍是 Python<sup class="cite" data-refid="33">[33]</sup>。</p>
+
+      <h3>去重：--download-archive 是主力</h3>
+      <div class="callout good"><p><strong>用 yt-dlp 自带的 <code>--download-archive archive.txt</code> 做主去重</strong>，每行 <code>&lt;extractor&gt; &lt;video_id&gt;</code>，跨 session 断点续传<sup class="cite" data-refid="34">[34]</sup>。DB 层再加 <code>UNIQUE(platform, video_id)</code> 约束、下载前先查 DB 双保险。<strong>不要用内容 hash 去重</strong>——同一视频不同 bitrate 的 hash 不同（#7348），意义有限。批量回填历史用 <code>--download-archive existing.txt</code>。</p></div>
+
+      <h3>SQLite 元数据 schema（完整 CREATE TABLE，可直接用）</h3>
+      <pre><code>CREATE TABLE videos (
+  id            INTEGER PRIMARY KEY,
+  platform      TEXT NOT NULL,        -- tiktok/douyin/xhs/wechat/twitter
+  video_id      TEXT NOT NULL,
+  original_url  TEXT,
+  title         TEXT,
+  description   TEXT,
+  uploader      TEXT,
+  uploader_id   TEXT,
+  upload_date   TEXT,                 -- YYYYMMDD
+  duration      REAL,
+  width         INTEGER,
+  height        INTEGER,
+  view_count    INTEGER,
+  like_count    INTEGER,
+  comment_count INTEGER,
+  tags          TEXT,                 -- JSON 数组
+  hashtags      TEXT,                 -- 从 description 解析
+  transcript    TEXT,                 -- ASR/字幕全文，供 FTS5
+  thumbnail_url TEXT,
+  r2_video_key  TEXT,
+  r2_thumb_key  TEXT,
+  r2_srt_key    TEXT,
+  downloaded_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(platform, video_id)
+);
+
+-- FTS5 全文索引（标题/描述/字幕/标签）
+CREATE VIRTUAL TABLE videos_fts USING fts5(
+  title, description, transcript, tags,
+  content='videos', content_rowid='id'
+);
+-- 触发器同步 videos → videos_fts（INSERT/UPDATE/DELETE 各一个）</code></pre>
+      <p>字段对照 yt-dlp 输出<sup class="cite" data-refid="35">[35]</sup>。yt-dlp 本身不写 SQLite，需要 <code>--dump-json</code> + 自写 ~50 行 Python 胶水把 JSON 字段映射进表<sup class="cite" data-refid="36">[36]</sup>。hashtag 各平台行为不一（单独字段 vs 从 description 解析），需实测。</p>
+
+      <h3>全文搜索：SQLite FTS5 起步够用</h3>
+      <div class="callout info"><p><strong>FTS5 起步无需 Meilisearch。</strong>SQLite FTS5 内嵌 BM25 排序，几千到几十万条亚毫秒返回、零依赖<sup class="cite" data-refid="37">[37]</sup>。Meilisearch 的优势是 typo tolerance / facet / 中文分词，但存储 6–10×、要独立进程。可以并存（FTS5 主库 + Meilisearch 同步索引 transcript），但<strong>个人库起步先 FTS5</strong>，量大了再加。Datasette + datasette-media 插件能把 SQLite 直接暴露成可浏览 Web UI、支持缩略图代理，适合快速搭前端原型<sup class="cite" data-refid="38">[38]</sup>。</p></div>
+      <div class="trap-box"><strong>⚠️ 坑：FTS5 默认分词器不分中文。</strong>FTS5 默认 <code>unicode61</code> 按空格/标点切词，中文连写没有空格会被当成一个长 token，搜「化妆」可能搜不到「学化妆教程」。中文检索要换分词方案：① 最简用 FTS5 的 <code>trigram</code> tokenizer（任意子串匹配，配置一行、对中文够用，代价是索引变大）；② 入库前用 jieba 分词、把空格分好的结果写进 FTS 列；③ 重度需求上带 ICU 的构建或外部索引（Meilisearch）。<strong>个人库起步直接用 trigram，省事。</strong></div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch7" data-nav="07 检索与前端">
+    <h2><span class="num">07</span><span class="title-text">私人库的检索与前端：现成项目为何不能直接用</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>有人会问「为什么不直接装个 Tube Archivist 之类的现成项目？」答案是：它们全是 YouTube 专用，<strong>没有一个能直接处理 TikTok/抖音/小红书</strong>。它们只能当灵感或下载触发器参考。</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>项目</th><th>定位</th><th>字幕全文搜索</th><th>能用于短视频吗</th></tr></thead>
+        <tbody>
+          <tr><td>Tube Archivist</td><td>YouTube 专用 + Elasticsearch 依赖重</td><td class="check y">有</td><td class="check n">无法用于 TikTok/Instagram<sup class="cite" data-refid="39">[39]</sup></td></tr>
+          <tr><td>Pinchflat</td><td>YouTube 专用，单容器轻量 + Plex/Jellyfin</td><td class="check n">无</td><td class="check n">无短视频、无字幕搜索<sup class="cite" data-refid="39">[39]</sup></td></tr>
+          <tr><td>MeTube</td><td>纯下载前端（yt-dlp Web UI）</td><td class="check n">无元数据库</td><td class="check n">无检索<sup class="cite" data-refid="39">[39]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout warn"><p><strong>为什么都不能直接用：</strong>这些项目要么绑死 YouTube extractor、要么没有元数据库、要么没有字幕全文搜索——而你的核心需求恰恰是「<strong>跨五个平台 + 按文案/字幕全文检索</strong>」。Tube Archivist 还要拖一个 Elasticsearch，对个人库是重型依赖。所以正确做法是<strong>自建</strong>：Ch6 的 SQLite + FTS5 已经把后端搞定，前端三选一。</p></div>
+
+      <h3>前端三选一</h3>
+      <div class="step"><div class="step-head"><span class="sn">A</span>Datasette（极速原型）</div><div class="step-body">直连 SQLite，datasette-media 插件做缩略图墙<sup class="cite" data-refid="38">[38]</sup>。一行命令起一个可搜索的 Web UI，验证阶段首选。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">B</span>半米自带 API + 自写前端（长期推荐）</div><div class="step-body">统一数据源，跟半米后台共用鉴权和 R2 取流逻辑。长期养库选这条。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">C</span>纯静态缩略图墙</div><div class="step-body">thumbsup 这类工具生成静态画廊，最轻、可托管在 Pages，但没有全文搜索。</div></div>
+      <div class="callout good"><p><strong>推荐路径：</strong>先用 <strong>Datasette</strong> 把 SQLite 库点亮（10 分钟看到缩略图墙 + 能搜文案），确认这个库你真会用；再决定要不要花力气接到半米后台做长期前端。别一上来就写自定义前端——很多人写完前端发现自己根本不回来看这些视频。</p></div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch8" data-nav="08 法律封号边界">
+    <h2><span class="num">08</span><span class="title-text">⚠️ 法律与封号边界：私人存档 vs 公开使用</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这一章如实讲，不为任何灰产或二次发布背书。核心原则一句话：<strong>私人存档和公开使用是两回事</strong>——下载到自己硬盘上看，和把别人的视频重新发布/商用，是完全不同的法律性质。</p>
+      <div class="callout bad"><h4>🔴 红线一：视频号 MITM 抓包有真实封号风险</h4><p>所有视频号下载工具都要 MITM 解密微信流量，<strong>明确违反微信 ToS，有账号风险</strong><sup class="cite" data-refid="6">[6]</sup>。这不是「理论上可能」——你装了本地根 CA 证书、把微信流量路由到代理，这本身就是微信反作弊系统能检测的行为模式。<strong>对策</strong>：用一个不重要的微信小号操作、下完立刻卸载证书、绝不用主号；能不下视频号就不下。这是全报告唯一标 🔴 的操作。补一句被低估的点：装根 CA + 系统代理期间，<strong>你的所有 HTTPS 流量（含微信会话、支付、其他 App）都对这套工具可见</strong>——只用一次性环境、用完彻底清理，别让抓包工具常驻。</p></div>
+      <div class="callout warn"><h4>🟡 红线四：凭证安全（容易忘的运维风险）</h4><p>这套库会沉淀一堆敏感凭证：浏览器导出的 cookie（等于平台登录态）、R2 access key、Worker secret。<strong>别提交进 git、别明文写脚本里</strong>——用环境变量或 <code>.env</code>（加进 <code>.gitignore</code>），cookie 定期失效要轮换，R2 key 给最小权限（只读/只写对应桶）。SQLite 主库是核心资产，开 WAL + 定期备份（甚至上 R2 versioning），一旦损坏整个库的元数据和字幕全文就没了。</p></div>
+      <div class="callout warn"><h4>🟡 红线二：各平台 ToS——下载基本都违反，量级决定风险</h4><p>抖音、小红书的批量下载工具都<strong>违反平台 ToS</strong>，但「小量私人存档」实践中低风险 🟡，「大量爬取/二次发布/商用」风险陡增<sup class="cite" data-refid="3">[3]</sup>。MediaCrawler 这类非官方 API 爬虫随时被封 🔴<sup class="cite" data-refid="9">[9]</sup>。TikTok/Twitter 下公开内容相对低风险 🟢，因为是公开 API 路径、不碰登录态。<strong>限速很重要</strong>：抖音风控严，请求过密触发 429/验证码（QPS 阈值无官方数字，⚠️估算 50 次/秒量级），批量下务必加延迟。</p></div>
+      <div class="callout warn"><h4>🟡 红线三：版权——私存容忍区，公开/商用必侵权</h4><p>下载的视频<strong>仅适合私人存档</strong>。把别人的视频二次发布、剪辑后发布、商用，可能同时违反平台 ToS 和版权法<sup class="cite" data-refid="1">[1]</sup>。阿杰人在马来西亚，受 <strong>马来西亚 Copyright Act 1987</strong> 管辖——该法对私人复制（private/personal use）有一定容忍空间，但「向公众传播」（communication to the public）是受限的专有权利。字幕也一样：你自己听写/ASR 出来的字幕，是原作的演绎成果，传播仍需原权利人许可，不产生独立于原作的可公开权利。</p></div>
+      <div class="callout info"><h4>✅ 安全区 vs 危险区一览</h4>
+      <div class="table-wrap"><table>
+        <thead><tr><th>行为</th><th>性质</th><th>风险</th></tr></thead>
+        <tbody>
+          <tr><td>下载到本地/自己的 R2，自己看/学习/检索</td><td class="check y">私人复制容忍区</td><td>低（除视频号 MITM）<span class="conf g">🟢</span></td></tr>
+          <tr><td>下载后压缩/加字幕存私人库，不外传</td><td class="check y">仍是私人使用</td><td>低 <span class="conf g">🟢</span></td></tr>
+          <tr><td>R2 库生成 presigned URL 发给朋友看</td><td class="check p">小范围传播，灰区</td><td>中 <span class="conf y">🟡</span></td></tr>
+          <tr><td>剪辑/搬运后重新发布到任何平台</td><td class="check n">公开传播 + 可能商用</td><td>高，违 ToS + 版权 <span class="conf r">🔴</span></td></tr>
+          <tr><td>视频号 MITM 抓包（任何用途）</td><td class="check n">违微信 ToS</td><td>封号 <span class="conf r">🔴</span></td></tr>
+        </tbody>
+      </table></div></div>
+      <div class="callout bad"><p><strong>本报告的立场：</strong>这套 pipeline 的正当用途是<strong>个人的研究、学习、内容研究的私有归档与检索</strong>——比如阿杰做内容研究时把素材下下来打标签、全文搜索。<strong>它不为二次发布、搬运、灰产提供任何便利或背书。</strong>R2 私有桶把内容默认锁死，访问要主动签发凭证——注意 presigned URL 是 bearer token，谁拿到链接在有效期内都能用，所以要短有效期 + 别外泄；要严格「仅本人」用 Worker 鉴权（Ch5）。这既是技术选择也是合规设计。一旦你想把库里的东西往外发，那就是另一套完全不同的版权授权问题，本报告不覆盖。</p></div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch9" data-nav="09 阿杰路线建议★">
+    <h2><span class="num">09</span><span class="title-text">阿杰路线建议：决策树 + 先做哪一步 ★</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把前八章压缩成一棵决策树，回答两个问题：「我该搭哪一档」和「这周先做哪一步」。</p>
+      <div class="tree">
+        <div class="node q">Q1 · 你要存哪些平台？</div>
+        <div class="node"><span class="lbl y">只要 TikTok / Twitter</span>✅ 最幸运，yt-dlp 一个工具搞定，公开内容低风险 → 继续 Q2（Ch2）</div>
+        <div class="node"><span class="lbl m">要抖音 / 小红书</span>⚠️ 换 TikTokDownloader / XHS-Downloader，违 ToS 但小量私存可控 → 继续 Q2（Ch2）</div>
+        <div class="node"><span class="lbl n">非要视频号</span>🔴 只能 MITM 抓包，封号风险 → 用小号、下完删证书、绝不主号（Ch2/Ch8）</div>
+
+        <div class="node q">Q2 · 你回来检索这些视频吗？</div>
+        <div class="node"><span class="lbl n">只想备份不检索</span>→ A 档：yt-dlp 下到文件夹，完事。别过度工程（Ch1）</div>
+        <div class="node"><span class="lbl y">要按文案/字幕搜</span>✅ B 档：Python 包 yt-dlp + SQLite FTS5 → 继续 Q3</div>
+
+        <div class="node q">Q3 · 多设备访问 / 长期养库吗？</div>
+        <div class="node"><span class="lbl m">先单机验证</span>→ 留在 B 档，本地 SQLite + Datasette 前端，验证你真会用（Ch7）</div>
+        <div class="node"><span class="lbl y">要多设备 + 跟半米对接</span>✅ C 档：加 R2 存储 + Worker 鉴权 + 半米后台（Ch5/Ch6）</div>
+
+        <div class="node q">Q4 · 库会膨胀到几百 GB 吗？</div>
+        <div class="node"><span class="lbl n">就几十 GB</span>→ 跳过压缩，短视频本来小，省心（Ch4）</div>
+        <div class="node"><span class="lbl y">会很大</span>✅ 加 H.265 存档档压缩，Mac VideoToolbox 批量跑，省一半（Ch4）</div>
+      </div>
+
+      <div class="callout accent"><h4>★ 先做哪一步（这周就能做的事）</h4><p><strong>第一步只做一件事：把"一个平台下载 → 存本地 → 建 SQLite 元数据"跑通。</strong>具体：① 选 TikTok（阻力最小），<code>pip install yt-dlp</code>；② 写 ~50 行 Python：<code>yt-dlp --dump-json</code> 拿元数据 → 映射进 Ch6 的 videos 表 → 建 FTS5 索引；③ 下 10 条你真关心的视频进库；④ 用 Datasette 点亮，试着按文案搜一次。<strong>这一步跑通你就有了一个能全文检索的私人短视频库，且不上云、无账号/安全风险（视频号 MITM 除外）——平台 ToS 与版权风险按 Ch8 的私存边界即可。</strong></p></div>
+      <div class="callout good"><h4>✅ 然后再按需加（不要一次全上）</h4><p>验证你真的会回来检索之后，再分批加：<strong>加平台</strong>（抖音上 TikTokDownloader、小红书上 XHS-Downloader）→ <strong>加字幕</strong>（TikTok 自带 SRT 直接抓，其余跑 SenseVoice）→ <strong>加 R2</strong>（rclone sync 上云，要多设备时才需要）→ <strong>加压缩</strong>（库变大才做，H.265 存档档）。<strong>视频号永远放最后、能不碰就不碰。</strong>每加一环都先确认上一环真的在用——大多数「全功能媒体库」死在第一周热情过后没人维护，B 档的最短链路才是能活下来的那个。</p></div>
+      <div class="callout info"><p><strong>与姊妹篇的关系：</strong>这套 R2 + SQLite + Python 编排的骨架，和 <a href="./rss-knowledge-base-system.html">RSS 知识库系统</a>那篇是同一套地基。如果你两个库都要建，<strong>共用一个 SQLite 实例和一个 R2 桶</strong>（不同表/不同 key 前缀），编排脚本和鉴权逻辑只写一遍，维护成本省一半。</p></div>
+    </div>
+  </section>
+
+  <section class="chapter" id="faq" data-nav="FAQ 常见问题">
+    <h2><span class="num">Q</span><span class="title-text">FAQ：12 个最可能被问到的问题</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">有没有一个工具能通吃全部五个平台？</span><span class="toggle">＋</span></div><div class="faq-a"><p>没有，别找了。每个平台的反爬、协议、去水印都不同：TikTok/Twitter 用 yt-dlp，抖音用 TikTokDownloader（yt-dlp 已破损<sup class="cite" data-refid="2">[2]</sup>），小红书用 XHS-Downloader（yt-dlp 改域名后残废<sup class="cite" data-refid="5">[5]</sup>），视频号只能 MITM。号称全平台的 MediaCrawler 侧重评论数据、且是非官方 API 随时被封<sup class="cite" data-refid="9">[9]</sup>。逐平台用最优解，比赌一个不稳定的全能工具靠谱得多。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">为什么视频号这么特殊，就不能像 TikTok 一样下？</span><span class="toggle">＋</span></div><div class="faq-a"><p>因为视频号没有公开的 HTTP 视频流——它只走微信客户端内部的 finder 协议<sup class="cite" data-refid="1">[1]</sup>。yt-dlp 这种靠请求公开接口的工具完全无从下手。唯一办法是 MITM 抓包解密微信流量（装本地根 CA 证书拦截 HTTPS），这明确违反微信 ToS、有封号风险<sup class="cite" data-refid="6">[6]</sup>。腾讯官方的视频号助手只给创作者管理后台，不提供下载。所以视频号是五平台里唯一「能不碰就别碰」的。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">我人在马来西亚，下抖音国内版能直连吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不能，抖音国内版（douyin.com）海外访问需要代理；yt-dlp 对抖音的支持本身也在持续破损<sup class="cite" data-refid="2">[2]</sup>，所以抖音走 TikTokDownloader + 代理。TikTok（国际版）海外直连无障碍，yt-dlp 直接跑。所以海外用户做这套库，TikTok/Twitter 零摩擦，抖音/小红书要挂代理，视频号最麻烦。批量下抖音务必限速，请求过密会触发 429/验证码。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">Mac 上做中文字幕，到底用 SenseVoice 还是 Whisper？</span><span class="toggle">＋</span></div><div class="faq-a"><p>中文口播首选 SenseVoice。M4 Pro 实测它处理 27 分钟中文播客只要 13.83 秒（118× 实时）CER 10.78%，而 Whisper Large V3 Turbo 要 2 分 04 秒（13.1×）CER 12.55%<sup class="cite" data-refid="14">[14]</sup>——又快又准。<strong>唯一不便</strong>是 SenseVoice 导出 SRT 要自己写序列化（多 ~30 行代码），WhisperX 则一键 <code>--output_format srt</code>。如果要词级时间戳或说话人分离，用 WhisperX；纯转写文案用 SenseVoice；无 GPU 用 OpenAI gpt-4o-mini-transcribe（$0.003/分<sup class="cite" data-refid="16">[16]</sup>）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">短视频本来就小，还有必要压缩吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>起步阶段不必要——单条短视频几 MB 到几十 MB，B 档可以完全跳过压缩。只有当库膨胀到几百 GB、存储/上传成本开始肉疼时才值得做。那时用 H.265 存档档（libx265 CRF28 slow + hvc1）能省约一半体积<sup class="cite" data-refid="17">[17]</sup>，Mac 上用 hevc_videotoolbox 硬件加速批量跑（~15× 软编速度）。记住 <code>-tag:v hvc1</code> 必须加，否则 iPhone 不认。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">为什么存 R2 而不是 AWS S3 或本地硬盘？</span><span class="toggle">＋</span></div><div class="faq-a"><p>R2 的 egress（下行流量）全免费无上限<sup class="cite" data-refid="22">[22]</sup>，而视频是「存得多、偶尔反复看」的数据，egress 才是大头。同样 100GB 存 + 500GB/月下行，R2 约 $1.35 而 S3 约 $47<sup class="cite" data-refid="23">[23]</sup>。本地硬盘适合纯备份但不能多设备访问、容易坏。如果只单机用、不多设备，B 档完全可以先不上云、存本地——R2 是 C 档（多设备/对接半米）才需要的。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">下载这些视频违法吗？会被追责吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>分两层。<strong>下载行为</strong>：多数平台 ToS 不允许，但「小量私人存档自己看」实践中低风险<sup class="cite" data-refid="3">[3]</sup>，视频号 MITM 是唯一有真实封号风险的 🔴。<strong>版权</strong>：私人复制/个人学习落在容忍区（马来西亚 Copyright Act 1987 对 private use 有空间），但<strong>二次发布、搬运、商用就是确定的侵权 + 违 ToS</strong> 🔴。本报告只覆盖私人存档与检索，不为任何对外传播背书。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">怎么避免重复下载同一个视频？</span><span class="toggle">＋</span></div><div class="faq-a"><p>主力用 yt-dlp 自带的 <code>--download-archive archive.txt</code>，它记录每个已下视频的 <code>extractor video_id</code>，跨 session 断点续传<sup class="cite" data-refid="34">[34]</sup>。再在 SQLite 加 <code>UNIQUE(platform, video_id)</code> 约束做第二道保险。<strong>别用内容 hash 去重</strong>——同一视频不同清晰度 hash 就不同，没意义。批量回填历史时把已有的喂给 <code>--download-archive existing.txt</code>。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">为什么不直接装 Tube Archivist 这种现成的？</span><span class="toggle">＋</span></div><div class="faq-a"><p>因为它们全是 YouTube 专用，没一个能处理 TikTok/抖音/小红书<sup class="cite" data-refid="39">[39]</sup>。Tube Archivist 还要拖一个 Elasticsearch（个人库重型依赖），Pinchflat/MeTube 没有字幕全文搜索。你的核心需求是「跨五平台 + 按文案/字幕检索」，这恰好是它们做不到的。自建 SQLite + FTS5（Ch6）其实没多少代码，且完全贴合需求。它们只能当下载触发器或 UI 灵感参考。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">n8n 能不能直接搭整条 pipeline？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不建议让 n8n 当主力。云版 n8n 不支持本地 binary（跑不了 yt-dlp/ffmpeg），自托管虽能用 Execute Command 调，但相比直接写 Python 摩擦大、调试难<sup class="cite" data-refid="33">[33]</sup>。对会写代码的你，<strong>Python 当核心逻辑、n8n 只当触发层和通知层</strong>（比如「每天定时拉收藏」「下载完发 Discord」）才是最优组合。n8n Docker 内写 R2 的完整示例也很少，细节得自调。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">私人库怎么做到「只有我能访问」？</span><span class="toggle">＋</span></div><div class="faq-a"><p>R2 桶默认私有，三种私有访问方式：① <strong>Presigned URL</strong>（最简，boto3 生成 1h 有效临时链接，但不支持自定义域名）；② Cloudflare Access（Google/GitHub 登录，需自定义域 + Zero Trust，适合团队）；③ <strong>Worker 鉴权</strong>（最灵活，自定义域 + JWT/Cookie + 支持视频 Range seek，长期推荐）<sup class="cite" data-refid="30">[30]</sup>。命名用 <code>lessons/{id}/videos/{uuid}.mp4</code> 防 URL 猜测<sup class="cite" data-refid="32">[32]</sup>。单人用 presigned URL 起步就够。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q12</span><span class="qtext">这套库能跟我的 RSS 知识库共用一套基础设施吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能，而且应该。这篇和姊妹篇 <a href="./rss-knowledge-base-system.html">RSS 知识库系统</a>共用同一套地基：R2 存储、SQLite + FTS5 检索、Python 编排。两个库共用一个 SQLite 实例（不同表）和一个 R2 桶（不同 key 前缀），鉴权和编排逻辑只写一遍。短视频专项的特殊性只在「下载层」（逐平台工具）和「ASR/压缩层」，后半段（存储/检索/前端）完全可以和文本知识库合并维护。</p></div></div>
+    </div>
+  </section>
+
+  <section class="chapter" id="refs" data-nav="References">
+    <h2><span class="num">R</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13.5px">共 39 条。访问日期均为 2026-06-21。star 数、版本号、价格以访问当日页面为准；标 ⚠️ 的压缩体积为推算值（非实测），标 🟡 处为单一来源未交叉验证。</p>
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/extractor/tiktok.py" target="_blank" rel="noopener">yt-dlp TikTok extractor 源码（tiktok.py，公开视频/去水印/字幕路径）— GitHub</a><span class="ref-meta">· 2026-06-21 · 引用 6 次</span></li>
+        <li id="ref-2"><a href="https://github.com/yt-dlp/yt-dlp/issues/16803" target="_blank" rel="noopener">yt-dlp 抖音支持破损相关 issue（#16803 / #13382，cookie 错误、QPS 429）— GitHub</a><span class="ref-meta">· 2026-06-21 · 引用 5 次</span></li>
+        <li id="ref-3"><a href="https://github.com/JoeanAmier/TikTokDownloader" target="_blank" rel="noopener">TikTokDownloader（JoeanAmier）抖音+TikTok 最完整开源下载工具，14.8k stars，v5.8 Beta — GitHub</a><span class="ref-meta">· 2026-06-21 · 引用 4 次</span></li>
+        <li id="ref-4"><a href="https://github.com/JoeanAmier/XHS-Downloader" target="_blank" rel="noopener">XHS-Downloader（JoeanAmier）小红书图文+视频下载，11.6k stars，不需登录 — GitHub</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-5"><a href="https://github.com/yt-dlp/yt-dlp/issues/16519" target="_blank" rel="noopener">yt-dlp 小红书改域名 rednote.com 后失效 issue #16519（修复 PR 未合并，格式抓取不稳）— GitHub</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+        <li id="ref-6"><a href="https://github.com/qiye45/wechatVideoDownload" target="_blank" rel="noopener">wechatVideoDownload（qiye45）视频号 MITM 抓包下载，5.3k stars，需本地 CA + 违微信 ToS — GitHub</a><span class="ref-meta">· 2026-06-21 · 引用 4 次</span></li>
+        <li id="ref-7"><a href="https://github.com/putyy/res-downloader" target="_blank" rel="noopener">res-downloader（putyy）跨平台 GUI 抓包，Go+Wails，系统代理 127.0.0.1:8899 — GitHub</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-8"><a href="https://github.com/mikf/gallery-dl" target="_blank" rel="noopener">gallery-dl（mikf）Twitter/X 媒体图集批量下载，18.6k stars，2026-06-13 release — GitHub</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-9"><a href="https://github.com/NanmiCoder/MediaCrawler" target="_blank" rel="noopener">MediaCrawler（NanmiCoder）Playwright 多平台爬虫 27k+ stars，侧重评论、非官方 API — GitHub</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+        <li id="ref-10"><a href="https://github.com/yt-dlp/yt-dlp#output-template" target="_blank" rel="noopener">yt-dlp --write-info-json 元数据字段说明（TikTok 完整文案/互动数/音乐）— GitHub</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-11"><a href="https://github.com/yt-dlp/yt-dlp/commit/eef1e9f" target="_blank" rel="noopener">yt-dlp TikTok 字幕三路径提取 commit eef1e9f（SRT/WebVTT，creator_caption deprioritize）— GitHub</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-12"><a href="https://github.com/yt-dlp/yt-dlp/issues/14177" target="_blank" rel="noopener">yt-dlp 抖音字幕/小红书无 format issue（#14177 / #12719）— GitHub</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-13"><a href="https://github.com/SYSTRAN/faster-whisper/issues/1030" target="_blank" rel="noopener">faster-whisper large-v3-turbo 速度基准（13 分钟音频 19 秒，WER 1.9%，~129× 实时）— GitHub issue #1030</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-14"><a href="https://whispernotes.app/blog/sensevoice" target="_blank" rel="noopener">SenseVoice vs Whisper M4 Pro 中文实测（118× 实时 CER 10.78% vs 13.1× CER 12.55%）— WhisperNotes Blog</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+        <li id="ref-15"><a href="https://github.com/m-bain/whisperX" target="_blank" rel="noopener">WhisperX 中文词级时间戳与对齐（DEFAULT_ALIGN_MODELS_HF 含 zh，--highlight_words）— GitHub</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-16"><a href="https://platform.openai.com/docs/pricing" target="_blank" rel="noopener">OpenAI 音频转写定价（whisper-1 $0.006/分、gpt-4o-mini-transcribe $0.003/分）— OpenAI Platform</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-17"><a href="https://getstream.io/blog/optimize-video-encoding/" target="_blank" rel="noopener">视频编码体积/CRF/preset 对比与 VideoToolbox 特性（压缩体积为推算 ⚠️）— GetStream Blog</a><span class="ref-meta">· 2026-06-21 · 引用 6 次</span></li>
+        <li id="ref-18"><a href="https://edimakor.hitpaw.com/video-editing-tips/hardsub-vs-softsub.html" target="_blank" rel="noopener">hardsub vs softsub 区别（softsub 可检索可编辑可切语言，存库首选）— Edimakor</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-19"><a href="https://github.com/h0lg/SubTubular" target="_blank" rel="noopener">SubTubular 字幕全文搜索（基于字幕 tokenize 定位时间点）— GitHub</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-20"><a href="https://antmedia.io/h264-vs-h265-vs-av1/" target="_blank" rel="noopener">H.264 vs H.265 vs AV1 vs VP9 编码效率对比（AV1 学界 28.1% vs H.265）— Ant Media</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+        <li id="ref-21"><a href="https://accessadvance.com/news/" target="_blank" rel="noopener">HEVC 专利池与授权说明（个人私有归档免费，2025-11 部分笔记本禁 HEVC 硬解）+ AV1 AOMedia 免专利 — Access Advance</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+        <li id="ref-22"><a href="https://developers.cloudflare.com/r2/pricing/" target="_blank" rel="noopener">Cloudflare R2 定价（$0.015/GB/月，egress 全免，Class A $4.50/百万）— Cloudflare Docs</a><span class="ref-meta">· 2026-06-21 · 引用 4 次</span></li>
+        <li id="ref-23"><a href="https://www.devtoolpicks.com/blog/cloudflare-r2-vs-aws-s3-vs-backblaze-b2" target="_blank" rel="noopener">R2 vs S3 vs B2 存储/egress 成本对比（500GB egress R2 ~$1.35 vs S3 ~$47）— DevToolPicks</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-24"><a href="https://github.com/SYSTRAN/faster-whisper" target="_blank" rel="noopener">faster-whisper（CTranslate2 比原版快 4×，VAD 批处理再 3×）— GitHub</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-25"><a href="https://github.com/tsmdt/whisply" target="_blank" rel="noopener">Whisply CLI（同时支持 faster-whisper + mlx-whisper，Mac 批量）— GitHub</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-26"><a href="https://gitlab.com/AOMediaCodec/SVT-AV1/-/blob/master/Docs/CommonQuestions.md" target="_blank" rel="noopener">SVT-AV1 官方常见问题（CRF 模式不需 two-pass）— GitLab</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-27"><a href="https://scottstuff.net/posts/2023/05/01/av1-encoding/" target="_blank" rel="noopener">AV1 vs H.265 实测压缩比与 CPU 代价（极致压缩场景）— Scott Stuff</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-28"><a href="https://developers.cloudflare.com/r2/examples/rclone/" target="_blank" rel="noopener">R2 + rclone 配置与批量上传（multipart、--s3-upload-cutoff）— Cloudflare Docs</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-29"><a href="https://developers.cloudflare.com/fundamentals/" target="_blank" rel="noopener">Cloudflare 视频分发与 R2 ToS（R2 托管视频允许分发、支持 HTTP Range、KL/新加坡 PoP）— Cloudflare Docs</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-30"><a href="https://developers.cloudflare.com/r2/api/s3/presigned-urls/" target="_blank" rel="noopener">R2 presigned URL 与私有访问（generate_presigned_url、Worker 鉴权、不支持自定义域名）— Cloudflare Docs</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+        <li id="ref-31"><a href="https://developers.cloudflare.com/r2/tutorials/cloudflare-access/" target="_blank" rel="noopener">R2 + Cloudflare Access 教程（组织成员 Google/GitHub 登录，需 Zero Trust）— Cloudflare Docs</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-32"><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-presigned-urls.html" target="_blank" rel="noopener">boto3 S3 presigned URL（PUT 直传 + GET 取流，半米后台对接架构）— AWS boto3 Docs</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-33"><a href="https://zenvanriel.nl/ai-engineer-blog/" target="_blank" rel="noopener">Python 脚本 vs n8n 编排取舍（云版无本地 binary，自托管 Execute Command 调 yt-dlp/ffmpeg）— Zen van Riel</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-34"><a href="https://www.neilzone.co.uk/2023/03/using-yt-dlp-to-download-videos-and-keep-an-archive-of-what-i-have-downloaded/" target="_blank" rel="noopener">yt-dlp --download-archive 去重与断点续传实践 — Neil Brown (neilzone.co.uk)</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-35"><a href="https://hrekov.com/yt-dlp-fields/" target="_blank" rel="noopener">yt-dlp 元数据字段完整文档（映射 SQLite schema 参考）— Hrekov</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-36"><a href="https://github.com/yt-dlp/yt-dlp/wiki/FAQ" target="_blank" rel="noopener">yt-dlp 无原生 SQLite 写入（--dump-json + 自写胶水）— GitHub Wiki</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-37"><a href="https://www.sqlite.org/fts5.html" target="_blank" rel="noopener">SQLite FTS5 全文搜索（内嵌 BM25，几十万条亚毫秒，零依赖）— SQLite.org</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-38"><a href="https://datasette.io/plugins/datasette-media" target="_blank" rel="noopener">Datasette + datasette-media 插件（SQLite 直出 Web UI + 缩略图代理）— Datasette.io</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-39"><a href="https://github.com/tubearchivist/tubearchivist" target="_blank" rel="noopener">Tube Archivist / Pinchflat / MeTube（均 YouTube 专用，无法直接用于短视频）— GitHub</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+      </ol>
+    </div>
+  </section>
+  <footer>
+    无忌 · Deep Research（L2）· 2026-06-21 · 仅供阿杰个人决策参考；数据与判例以原始来源为准。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('short-video-library-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('short-video-library-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

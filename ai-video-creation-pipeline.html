@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI 做视频全流程：选题·写稿·数字人·生成·剪辑·发布一条龙 + 赚钱案例拆解 · 无忌 Deep Research · 2026-06-21</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 01 核心判断·政策风险</a>
+    <a href="#ch2" data-target="ch2">02 02 收集→选题</a>
+    <a href="#ch3" data-target="ch3">03 03 写稿</a>
+    <a href="#ch4" data-target="ch4">04 04 配音</a>
+    <a href="#ch5" data-target="ch5">05 05 数字人</a>
+    <a href="#ch6" data-target="ch6">06 06 画面生成</a>
+    <a href="#ch7" data-target="ch7">07 07 剪辑·AI工具</a>
+    <a href="#ch8" data-target="ch8">08 08 剪辑·代码驱动</a>
+    <a href="#ch9" data-target="ch9">09 09 一条龙workflow</a>
+    <a href="#ch10" data-target="ch10">10 10 成本三档</a>
+    <a href="#ch11" data-target="ch11">11 11 封面·SEO·发布</a>
+    <a href="#ch12" data-target="ch12">12 12 赚钱案例·真相</a>
+    <a href="#ch13" data-target="ch13">13 13 新山本地落地</a>
+    <a href="#ch14" data-target="ch14">14 14 朋友路线建议</a>
+    <a href="#faq" data-target="faq">15 FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">16 References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>AI 做视频全流程：选题·写稿·数字人·生成·剪辑·发布一条龙 + 赚钱案例拆解</h1>
+    <div class="hero-meta">
+      <span>📅 2026-06-21</span>
+      <span>🔍 ~50 次检索 + 6 证据包核查</span>
+      <span>🎬 逐环节工具 × 三档成本 × 赚钱真相</span>
+      <span>🌏 场景：马来西亚新山(JB)本地知识科普频道</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>一句话定调：「全自动 AI 量产视频」不是省钱捷径，而是 YouTube 2025–26 正在系统性清洗的死路；真正能活、能赚钱的配方是「AI 把体力活提速到 1/4，人把住独特观点 / 本地洞察 / 创作判断」。你朋友选的「新山本地知识」方向是对的——JS-SEZ、RTS Link、跨境生活、JB 房产这些恰恰是 AI 复制不了的护城河。</strong></p>
+      <p>本报告按制作流水线展开：核心判断与 YouTube 政策风险（Ch1）→ 收集选题（Ch2）→ 写稿（Ch3）→ 配音（Ch4）→ 数字人（Ch5）→ 画面生成（Ch6）→ AI 剪辑工具（Ch7）→ <strong>代码驱动剪辑（Ch8，直接回答「Codex / Claude Code 怎么剪视频」）</strong>→ 一条龙 workflow（Ch9）→ 成本三档（Ch10）→ 封面 SEO 发布（Ch11）→ 赚钱案例与残酷真相（Ch12）→ 新山本地落地（Ch13）→ 给朋友的路线决策树（Ch14）。所有工具能力与定价标注「截至 2026-06-21」，关键数据标 🟢多源 / 🟡单源存疑 / 🔴高度存疑；收入与成功率类一律标幸存者偏差。</p>
+    </div>
+  </div>
+
+  <div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+    <p style="margin:0"><strong>📌 三条最关键发现（先扫这个）：</strong></p>
+    <ul style="margin:8px 0 0">
+      <li><strong>全自动量产 ≠ 赚钱，反而撞 YouTube 枪口。</strong>YouTube 2025-07-15 把「重复性内容」政策升级为「inauthentic content（缺乏真实创作）」<sup class="cite" data-refid="1">[1]</sup>；2026-01 一次性清退多个 AI 量产频道（媒体调查统计约 16 个、合计约 47 亿播放 / 3500 万订阅 / 估算约 1000 万美元年广告——此组数字来自单一媒体调查 + 估算，仅说明执行风险 <span class="conf y">🟡</span>）<sup class="cite" data-refid="2">[2]</sup>；约 97% 的 faceless 频道从未达到变现门槛（营销来源的警示性估计、非权威总体统计 <span class="conf r">🔴</span>）<sup class="cite" data-refid="3">[3]</sup>。<strong>但「政策升级」本身是官方事实 <span class="conf g">🟢</span>：YouTube 不禁 AI 辅助（脚本/配音/剪辑），禁的是「没有人类创作判断的自动化流水线」。</strong></li>
+      <li><strong>马来西亚 RPM 全球垫底，纯本地受众靠 AdSense 不划算。</strong>大马 CPM 约 $1.31（东南亚最低），新加坡 $2.08（高约 59%），美国 $5.33（4 倍+）<sup class="cite" data-refid="4">[4]</sup>。结论：必须<strong>英文主导触达新加坡 + 全球华人，中文辅助大马华人</strong>，并把变现多元化（成功频道 AdSense 只占 30–50%，本地房产开发商品牌合作才是真人频道的筹码）。<span class="conf g">🟢</span></li>
+      <li><strong>「Codex / Claude Code 剪视频」= 写并运行脚本做「程序化剪辑」，不是操作 GUI 时间线。</strong>底层栈是 ffmpeg / ffmpeg 8.0 内置 Whisper / MoviePy / Auto-Editor / Remotion / Shotstack / mcp-video<sup class="cite" data-refid="5">[5]</sup>。能做批量烧字幕、按转写切片、去废话、套品牌模板、数据动画、跨视频批处理；<strong>不能做</strong>审美精剪、节奏、创意转场、故事弧、视觉质检（mcp-video 官方明确要求人工审、不可全自动发布）<sup class="cite" data-refid="6">[6]</sup>。它不「配合」Premiere/FCP，配的是 CLI/API。<span class="conf g">🟢</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1" data-nav="01 核心判断·政策风险">
+    <h2><span class="num">01</span><span class="title-text">核心判断：全自动量产是死路，AI 提效 + 人把关本地洞察才活</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>开篇必须泼一盆冷水，因为这个领域 90% 的内容是卖课软文，标题永远是「AI 月入 X 万」「5 分钟一条视频」。真相是：<strong>纯 AI 全自动量产视频，在 2026 年的 YouTube 上不是低成本捷径，而是结构性死路。</strong>把这一点想透，你朋友才不会把钱和时间砸进一个被平台主动清洗的赛道。</p>
+
+      <h3>YouTube 的政策风向已经转了——而且转得很硬</h3>
+      <p>2025–2026 这一年里，YouTube 对「AI 量产 / 缺乏真实创作」的内容连续出手，这不是猜测，是平台官方 + 多家科技媒体多源确认的事实，必须当成「结构性风险」郑重对待：</p>
+      <div class="callout bad"><h4>⛔ 时间线：YouTube 系统性打压 inauthentic content</h4>
+        <ul style="margin:6px 0 0">
+          <li><strong>2024-03-18 引入披露工具 → 2025-05-21 起强制执行</strong>：YouTube 2024 年 3 月在 Creator Studio 引入「真实感合成/AI 内容」披露工具，2025-05-21 起在全平台强制要求披露，持续不披露可能被人工加标、移除内容或暂停 YPP<sup class="cite" data-refid="7">[7]</sup>。<span class="conf g">🟢</span></li>
+          <li><strong>2025-07-15</strong>：YPP（合作伙伴计划）政策更新，把原本针对「重复性内容（repetitious content）」的措辞升级、明确为打击「inauthentic content」——批量模板克隆、AI 幻灯片、合成无情感语音、每日机械量产都在射程内<sup class="cite" data-refid="1">[1]</sup>。<span class="conf g">🟢</span></li>
+          <li><strong>2026-01</strong>：媒体调查报道 YouTube 单次清退约 16 个 AI 量产频道，合计约 47 亿次播放、3500 万订阅、估算约 1000 万美元年广告收入被切断<sup class="cite" data-refid="2">[2]</sup>。<span class="conf y">🟡</span>（来自单一媒体调查 + 估算，非平台透明报告；量级方向可信、具体数字存疑）</li>
+          <li><strong>AI 音乐频道 40%+ 被取消变现</strong>：纯 AI 生成的音乐合辑类频道是重灾区<sup class="cite" data-refid="2">[2]</sup>。<span class="conf y">🟡</span></li>
+        </ul>
+      </div>
+      <p>关键不在「YouTube 反 AI」——它<strong>不反 AI 辅助</strong>。你用 AI 写脚本、AI 配音、AI 剪辑都没问题。它反的是「没有人类创造性判断的自动化流水线」：把一个模板套一万次、把别人的内容用 AI 改写量产、用合成语音念维基百科配幻灯片。存活下来的 faceless（不露脸）频道的共性是：<strong>独特观点、动态剪辑、可见的创作判断</strong><sup class="cite" data-refid="3">[3]</sup>。
+
+      <h3>为什么「新山本地知识」这个方向选对了</h3>
+      <p>本地超本地知识（具体街道、商户、政策、跨境生活细节）恰恰是<strong>大语言模型的幻觉重灾区</strong>——LLM 优先「流利」而非「准确」，超本地话题几乎没有可靠训练数据，极易编造<sup class="cite" data-refid="8">[8]</sup>。这是双刃剑：自动化做本地内容会编错（Ch2 详述如何用 RAG 防），但反过来——<strong>真人创作者在 JB 生活、真的知道 RTS Link 怎么通勤、真的懂新柔特区政策怎么影响房价，这正是 AI 抄不走的护城河。</strong></p>
+      <div class="callout good"><h4>✅ 本章结论：务实路线 = AI 辅助 + 真人本地洞察 + 英文主导双语 + 多元变现</h4><p>别全自动量产（会被 YouTube 清）、别纯靠 AdSense（大马 RPM 垫底）、别押文生视频做主画面（跨镜一致性是硬伤）。把 AI 当「把 4–8 小时压到 1–2 小时」的提效工具，把人留在「观点、本地事实核实、创作判断」上。后面 13 章是这条路线的逐环节施工图。</p></div></p>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2" data-nav="02 收集→选题">
+    <h2><span class="num">02</span><span class="title-text">信息收集 → 选题：用 RAG 防 AI 编造本地事实</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>视频制作的第一道工序是「收集资料 + 定选题」。这一步决定了天花板——选题错了，后面做得再精也白搭；本地事实错了，频道公信力一夜崩塌。</p>
+
+      <h3>收集 + 整理的黄金搭档：Perplexity + NotebookLM</h3>
+      <div class="callout info"><p><strong>Perplexity（找）+ NotebookLM（防编造）。</strong>Perplexity Deep Research 做主题扫描，免费层每月 1 次 Deep Research，Pro $20/月给到每天 20 次<sup class="cite" data-refid="9">[9]</sup>；NotebookLM 免费，能吃 PDF / Google Doc / YouTube 字幕，把你的资料变成一个「只许从上传文件里答」的问答库<sup class="cite" data-refid="10">[10]</sup>。<span class="conf g">🟢</span></p></div>
+
+      <div class="callout warn"><h4>⚠️ 本地知识是 AI 幻觉重灾区——必须人工 + RAG 双重把关</h4><p>GPT-4 在一般知识上都还有约 5–10% 错误率（Springer 2025）<sup class="cite" data-refid="8">[8]</sup>，到了「JB 某条街哪家店、新柔特区某条具体政策、RTS Link 某个班次」这种超本地话题，模型几乎没有可靠训练数据，编造率飙升。<strong>解法是 RAG</strong>：把本地可信资料（政府官网 PDF、本地新闻、采访录音、自己实地拍的资料）传进 NotebookLM，强制答案只来自上传文件并附引用。Hoodline 那个用 AI 生成本地新闻、编造事实损毁公信力的教训就在眼前<sup class="cite" data-refid="11">[11]</sup>——本地频道一旦被发现编错本地事实，信任很难找回。<span class="conf g">🟢</span></p></div>
+
+      <h3>选题工具：找「高需求低竞争」的洞</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>工具</th><th>定价（截至 2026-06-21）</th><th>核心能力</th><th>适用</th></tr></thead>
+        <tbody>
+          <tr><td><strong>VidIQ</strong></td><td>Free / Pro $7.5月(年付) / Boost $16.58</td><td>关键词得分、竞争分析、AI 选题建议</td><td>日常选题主力<sup class="cite" data-refid="12">[12]</sup></td></tr>
+          <tr><td><strong>1of10</strong></td><td>免费起 / $29月</td><td>专找 10x–100x 爆款（用订阅数比播放量找异常爆发视频）</td><td>找「别人验证过的好选题」<sup class="cite" data-refid="13">[13]</sup></td></tr>
+          <tr><td><strong>TubeBuddy</strong></td><td>Free 起</td><td>缩略图/标题 A/B 测试、标签优化</td><td>发布后优化<sup class="cite" data-refid="14">[14]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <p>判据是「高需求低竞争」≈ 搜索量 ÷ 现有内容量 > 4 倍<sup class="cite" data-refid="13">[13]</sup>。但要注意：<strong>关键词工具的搜索量数据准确性本身存疑 <span class="conf r">🔴</span></strong>，尤其马来西亚 / Manglish（马来西亚英语）这类小众市场，工具几乎没有数据，得靠 YouTube 搜索框的自动补全手动摸。东南亚 / 大马本地频道的横向数据在公开资料里基本缺失——这是这个市场「机会也是无先例」的一体两面（Ch13 详谈）。</p>
+      <div class="trap-box"><strong>⚠️ 坑：</strong>别让 AI 直接「给我 10 个 JB 选题」就开拍。AI 给的选题会偏向通用旅游话题（吃喝玩乐 top 10），而你朋友的护城河在「只有 JB 本地人才懂的洞察」。正确用法：自己列出基于本地生活的真问题（RTS 第一天怎么坐、JS-SEZ 对租金的真实影响、跨境上班族的报税坑），再用工具验证这些选题的搜索需求。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3" data-nav="03 写稿">
+    <h2><span class="num">03</span><span class="title-text">写稿：AI 写稿四阶段法 + 五大通病 + 本地事实核实</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>脚本是知识类视频的灵魂。AI 能帮你写稿，但「一口气让 AI 写完整稿」是最烂的用法——出来的东西平、假、像写的不像说的。最佳实践是<strong>分段迭代 + 人收口</strong>。</p>
+
+      <h3>George Blackman 四阶段写稿法</h3>
+      <div class="step"><div class="step-head"><span class="sn">1</span>对话发想角度</div><div class="step-body">先跟 AI 聊，把「角度 / 切入点」吵清楚——这个视频到底要让观众明白什么、为什么是你来讲。不要急着写正文<sup class="cite" data-refid="15">[15]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>逐段从 payoff 倒推 hook</div><div class="step-body">一段一段写，每段先想清楚「这段给观众什么回报（payoff）」，再倒推开头怎么钩住（hook）。绝不一次生成全稿<sup class="cite" data-refid="15">[15]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>人改一段 → 粘回让 AI 学风格</div><div class="step-body">你亲手改完一段，把改后的版本粘回去，让 AI 学习你的语气和节奏，再写下一段。这样 AI 越写越像你<sup class="cite" data-refid="15">[15]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>朗读收口</div><div class="step-body">全稿写完<strong>大声朗读一遍</strong>——读着别扭的地方就是「像写的不像说的」的地方，当场改顺。这一步是质量分水岭<sup class="cite" data-refid="15">[15]</sup>。</div></div>
+
+      <h3>AI 脚本五大硬伤（写完自查）</h3>
+      <div class="callout warn"><p>逐条对照，命中就改<sup class="cite" data-refid="15">[15]</sup>：</p>
+        <ul style="margin:6px 0 0">
+          <li><strong>开头宣告而非悬念</strong>——「今天我们来聊聊 X」是劝退句，应该用钩子制造好奇。</li>
+          <li><strong>前 1/3 就把问题解决完</strong>——后面没张力，观众划走。</li>
+          <li><strong>没有 open loop</strong>——不埋「待会儿揭晓」的扣子，留不住人。</li>
+          <li><strong>像写的不像说的</strong>——书面长句、从句套从句，口语里没人这么说话。</li>
+          <li><strong>结尾是总结而非视角转变</strong>——好结尾应该给观众一个新的看世界的角度，而不是复述前面讲过的。</li>
+        </ul>
+      </div>
+
+      <div class="callout info"><h4>Shorts vs 长视频，写法完全不同</h4><p>Shorts（短视频）要在前 1–2 秒抓人、单一信息点、无废话；长视频靠 open loop 和叙事弧维持留存。同一个选题写两套稿。实操上多数人用 Claude / ChatGPT + 自定义 prompt 就够了，<strong>不必另外付费买脚本工具</strong>；Claude 在结构化 prompt 跟随上比 GPT 更稳 <span class="conf y">🟡</span><sup class="cite" data-refid="16">[16]</sup>。</p></div>
+
+      <div class="trap-box"><strong>⚠️ 最关键一步——本地事实人工核实：</strong>AI 写的本地内容（具体票价、班次、政策条款、地名）<strong>必须逐条人工核对来源</strong>，这是本地频道的生命线。所谓「89% 创作者说 AI 脚本不真实」这个数字来自单一有商业利益的来源（Scriptzen），定性方向可信、具体数字存疑 <span class="conf r">🔴</span><sup class="cite" data-refid="17">[17]</sup>——但「人工必做朗读 + 设具体讲述角色 + 本地事实核实」这三件事，无论数字真假都该做。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4" data-nav="04 配音">
+    <h2><span class="num">04</span><span class="title-text">配音：ElevenLabs 语音克隆（支持马来语/中文）vs 便宜的 OpenAI TTS</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>知识类视频的声音是「人设」的一半。这里的核心选择是：<strong>克隆你朋友自己的声音（一致、有辨识度）</strong>还是<strong>用便宜的预设声音（省钱、但没有个人 IP）</strong>。</p>
+
+      <h3>首选 ElevenLabs：支持马来语 + 中文，且能克隆本人声音</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>层级</th><th>月费</th><th>商用</th><th>语音克隆</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>Free</td><td>$0</td><td class="check n">无</td><td class="check n">无</td><td>仅试用</td></tr>
+          <tr class="row-highlight"><td><strong>Starter</strong></td><td>$6</td><td class="check y">含</td><td class="check p">即时克隆(Instant)</td><td>★ 省钱起步首选<sup class="cite" data-refid="18">[18]</sup></td></tr>
+          <tr><td><strong>Creator</strong></td><td>$22</td><td class="check y">含</td><td class="check y">专业克隆(Professional)</td><td>音质最自然，需 10+ 分钟音频训练<sup class="cite" data-refid="18">[18]</sup></td></tr>
+          <tr><td>Pro</td><td>$99</td><td class="check y">含</td><td class="check y">专业克隆</td><td>大产能</td></tr>
+        </tbody>
+      </table></div>
+      <p>Instant Clone 只要 30 秒音频（免费层就能试），Professional Clone 要 10+ 分钟音频但更自然。关键卖点：<strong>克隆一次，跨语言输出</strong>——用你朋友的声音同时产中文、英文、马来语口播<sup class="cite" data-refid="18">[18]</sup>。<span class="conf g">🟢</span></p>
+
+      <div class="trap-box"><strong>⚠️ 实测提醒：</strong>ElevenLabs 的马来语/中文克隆「实际口音自然度」需要自己拿样本测一遍——印尼语和马来语模型可能混淆，中文也可能带腔。官网标支持 ≠ 母语者听着自然。先用免费即时克隆录一段你朋友的声音、生成马来语和中文各一段，让本地人盲听判断再决定要不要上专业克隆。<span class="conf y">🟡</span></div>
+
+      <h3>更便宜的替代：OpenAI TTS（但不能克隆）</h3>
+      <div class="callout info"><p>OpenAI TTS 支持马来语和中文、价格很便宜，自助层<strong>主要用预设声音</strong>——它确有 custom voice 能力，但属 gated/合规审核功能（需符合资格 + consent 录音），不能当成普通低价克隆替代 ElevenLabs<sup class="cite" data-refid="18">[18]</sup>。如果频道不靠「个人声音 IP」（比如纯旁白讲解、不露脸不强调本人），OpenAI TTS 或本地免费的 Kokoro（见 Ch10）够用且省钱。但如果朋友想建立「本人 IP」（露脸 + 自己声音），就值得花 ElevenLabs 的克隆钱。<span class="conf g">🟢</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5" data-nav="05 数字人">
+    <h2><span class="num">05</span><span class="title-text">数字人出镜：HeyGen 本人分身 + 恐怖谷 trade-off + 合规</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>你朋友想「用自己的数字人出镜」——这技术上完全可行，但<strong>数字人是一个 trade-off，不该当默认</strong>。先讲怎么做，再讲为什么不要全押。</p>
+
+      <h3>HeyGen：定制本人分身性价比最高，支持马来语</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>层级</th><th>月费</th><th>credits</th><th>关键能力</th></tr></thead>
+        <tbody>
+          <tr><td>Free</td><td>$0</td><td>3 视频/月</td><td>有水印 / 含 1 个 Digital Twin<sup class="cite" data-refid="19">[19]</sup></td></tr>
+          <tr class="row-highlight"><td><strong>Creator</strong></td><td>$29(年付 $24)</td><td>600/月</td><td>★ 去水印 / 约 30 分钟 Avatar IV 视频/月<sup class="cite" data-refid="19">[19]</sup></td></tr>
+          <tr><td>Pro</td><td>$49</td><td>更多</td><td>4K 输出<sup class="cite" data-refid="19">[19]</sup></td></tr>
+          <tr><td>Business</td><td>$149</td><td>更多</td><td>团队</td></tr>
+        </tbody>
+      </table></div>
+      <p>关键参数：Avatar V 用 15 秒素材训练、10–15 分钟出片；Avatar IV 用 2–5 分钟素材、更自然；支持 175+ 语言含 <strong>Malay (Malaysia)</strong>；付费层全部含商用授权<sup class="cite" data-refid="19">[19]</sup>。<span class="conf g">🟢</span></p>
+
+      <div class="trap-box"><strong>⚠️ 定价陷阱：Avatar IV / V 是 20 credits/分钟。</strong>Creator 的 600 credits 只够约 <strong>30 分钟 Avatar IV 视频/月</strong>——做几条 5–8 分钟的知识视频就用完了。多数推荐文不提这个换算。如果走数字人路线要算清产能再选档<sup class="cite" data-refid="20">[20]</sup>。<span class="conf g">🟢</span></div>
+
+      <h3>恐怖谷 trade-off：自己的脸反而更挑剔</h3>
+      <div class="callout warn"><h4>⚠️ 关键反直觉：高仿真「自己脸」的 clone 更易触发恐怖谷</h4><p>好消息是恐怖谷在 2026 已大幅缓解——a16z 观察当代主流观众 10 秒内一般察觉不出；UCL 一项 500 人研究发现 AI avatar 与真人在知识留存上无显著差异，而 AI 制作还快约 20%<sup class="cite" data-refid="21">[21]</sup>。但坏消息是 USC Marshall 的研究指出：<strong>当你看的是「自己认识的人的高仿真 clone」，大脑反而更容易挑出不对劲、更易触发恐怖谷</strong><sup class="cite" data-refid="22">[22]</sup>。对你朋友意味着：知识口播这种「信息为主、情感为辅」的内容能过门槛，但有信任折扣；情感亲密 / 个人故事类内容仍推荐真人。<span class="conf y">🟡</span>（部分研究引自二手来源）</p></div>
+
+      <h3>真人 vs 数字人取舍</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>维度</th><th>真人出镜</th><th>数字人(HeyGen)</th></tr></thead>
+        <tbody>
+          <tr><td>信任感 / 亲和力</td><td class="check y">最高，本地频道关键</td><td class="check p">有折扣，自己脸更挑</td></tr>
+          <tr><td>批量产能</td><td class="check n">受拍摄时间限制</td><td class="check y">打字改稿即换片</td></tr>
+          <tr><td>品牌合作筹码</td><td class="check y">本地开发商更愿意找真人</td><td class="check p">较弱</td></tr>
+          <tr><td>制作速度</td><td class="check p">要打光化妆</td><td class="check y">快约 20%</td></tr>
+          <tr><td>成本</td><td class="check p">时间成本高</td><td class="check y">$29起，边际成本低</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout good"><p><strong>建议：真人 / 半真人出镜为主，数字人当补充。</strong>主力视频本人真出镜建立信任和本地可信度（这是 AdSense 之外品牌合作的筹码）；数字人用来批量产次要内容、多语言版本、或本人没空时补片。别让数字人当频道的默认脸。</p></div>
+
+      <h3>省钱开源方案与合规红线</h3>
+      <div class="callout info"><p><strong>开源口型同步</strong>：MuseTalk（腾讯，MIT 协议，2026 最佳免费口型同步，需 NVIDIA GPU，HuggingFace Spaces 可免费试）、SadTalker、Wav2Lip——技术门槛高，商业自媒体建议直接用 HeyGen 省心<sup class="cite" data-refid="23">[23]</sup>。<span class="conf g">🟢</span></p></div>
+      <div class="trap-box"><strong>⚠️ 合规清单（一条都不能漏）：</strong>① HeyGen 做本人 avatar 需录 consent 视频；为他人做需书面同意<sup class="cite" data-refid="24">[24]</sup>。② <strong>YouTube 自 2024-03 起要求合成内容标注，2025 开始执法</strong><sup class="cite" data-refid="7">[7]</sup>；TikTok 的 AI avatar 克隆真人也需书面同意<sup class="cite" data-refid="24">[24]</sup>。③ 克隆本人声音合法但需 consent；FTC 2026-01 成立了语音克隆执法组<sup class="cite" data-refid="24">[24]</sup>。④ 水印付费才去。⑤ 马来西亚暂无 AI 数字人专项法，但<strong>平台条款优先</strong>，照平台规则做即可。<span class="conf g">🟢</span></div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6" data-nav="06 画面生成">
+    <h2><span class="num">06</span><span class="title-text">视频生成 / 画面来源：文生视频三价带 + 别全押 + 实拍三合一</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>「画面从哪来」是知识类视频最容易踩坑的环节。卖课的会让你以为「文生视频 = 一键出大片」，真相是<strong>文生视频有硬伤，知识类不该全押，而要走「实拍 + 免费库 + AI 概念 B-roll」三合一</strong>。</p>
+
+      <h3>文生视频三价带（按性价比）</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>工具</th><th>约价</th><th>单段时长</th><th>定位</th><th>东南亚可用</th></tr></thead>
+        <tbody>
+          <tr class="row-highlight"><td><strong>Kling 3.0</strong></td><td>~$0.07/s（Std $6.99 含商用）</td><td>15s / 4K</td><td>★ 性价比王，免费 66 credits/月<sup class="cite" data-refid="25">[25]</sup></td><td class="check y">klingai.com/global 直连</td></tr>
+          <tr><td><strong>Veo 3.1</strong></td><td>$0.40/s（Fast $0.10–0.15）</td><td>8s</td><td>画质 + 原生音频同步天花板<sup class="cite" data-refid="25">[25]</sup></td><td class="check p">月预算 $30+ 才值</td></tr>
+          <tr><td><strong>Sora 2</strong></td><td>$0.10/s（720p）</td><td>~20s</td><td class="check n">消费版 2026-04-26 已停服 / API 仍可用但 2026-09-24 sunset<sup class="cite" data-refid="26">[26]</sup></td><td class="check n">不建议新接入</td></tr>
+          <tr><td>Runway Gen-4.5</td><td>精品级</td><td>60s 最长连续</td><td>精品月预算 $30+<sup class="cite" data-refid="25">[25]</sup></td><td class="check p">可用</td></tr>
+          <tr><td>Hailuo</td><td>~$0.05/s</td><td>—</td><td>便宜，国际版 180+ 国<sup class="cite" data-refid="25">[25]</sup></td><td class="check y">可用</td></tr>
+          <tr><td>Seedance</td><td>~$0.036/s</td><td>—</td><td>价格最低 <span class="conf y">🟡</span><sup class="cite" data-refid="25">[25]</sup></td><td class="check p">—</td></tr>
+        </tbody>
+      </table></div>
+      <p class="conf-note">部分定价单源 <span class="conf y">🟡</span>；其余多源 <span class="conf g">🟢</span>。</p>
+
+      <div class="callout bad"><h4>⛔ 跨镜一致性是所有文生视频的硬伤</h4><p>人物面孔在多个镜头之间<strong>无法保持统一</strong>，人体、手部也不稳，平均要生成 3–5 次才出 1 个可用片段<sup class="cite" data-refid="25">[25]</sup>。这意味着：<strong>知识类视频如果靠文生视频做主画面（尤其需要连续叙事、固定人物），会被一致性问题反复折磨。</strong>那句广为流传的「12 秒 AI magic 实际花了 6 小时 prompt + 20 次失败渲染」就是真实写照<sup class="cite" data-refid="27">[27]</sup>。<span class="conf g">🟢</span></p></div>
+
+      <div class="callout good"><h4>✅ 知识类正确打法：实拍 + 免费库 + AI 概念 B-roll 三合一</h4><p>文生视频最成熟的用例是<strong>B-roll</strong>（自然景观、数据动画、抽象概念）——不需要人物一致性的辅助画面<sup class="cite" data-refid="25">[25]</sup>。对你朋友的 JB 频道，最优组合是：</p>
+        <ul style="margin:6px 0 0">
+          <li><strong>实拍新山街景</strong>（RTS 关口、CIQ、JB 街道、房产实景）——这是护城河，免费库里没有，必须自己拍。</li>
+          <li><strong>Pexels / Pixabay / Mixkit 免费通用素材</strong>（可商用，但以欧美通用为主，本地高度在地化内容几乎没有）<sup class="cite" data-refid="28">[28]</sup>。</li>
+          <li><strong>AI 概念 B-roll</strong>（用 Kling 生成抽象概念、数据可视化、过场动画）。</li>
+        </ul>
+      </div>
+
+      <h3>更可控的路线：图生视频</h3>
+      <div class="callout info"><p>图生视频（先用 Midjourney V8 / Flux 出图 → 再用 Runway / Kling 让图动起来）一致性比文生视频高，可以锁风格 seed<sup class="cite" data-refid="25">[25]</sup>。想零成本 DIY 的话，本地 ComfyUI + SDXL/Flux → CogVideoX 全套免费（但要 GPU 和折腾）<sup class="cite" data-refid="25">[25]</sup>。<strong>本地素材库缺口</strong>是这个市场的硬现实：JB 高度在地化的免费视频库几乎没有，只能靠实拍补，或参考 Unsplash 马来西亚标签、旅游局媒体库。<span class="conf g">🟢</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7" data-nav="07 剪辑·AI工具">
+    <h2><span class="num">07</span><span class="title-text">剪辑（一）AI 工具：长转短 / 文本编辑 / 免费三件套</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>剪辑分两条路：<strong>GUI 里的 AI 工具（本章）</strong>和<strong>代码驱动的程序化剪辑（下一章，直接回答你朋友的 Codex 问题）</strong>。先看 GUI 这条，对不会写代码的人更友好。</p>
+
+      <div class="table-wrap"><table>
+        <thead><tr><th>工具</th><th>定价</th><th>擅长</th><th>省时</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Opus Clip</strong></td><td>Free 60分/月(水印) / Starter $15 / Pro $29</td><td>长视频转短（ClipAnything + Virality Score）</td><td>自动找爆点切片<sup class="cite" data-refid="29">[29]</sup></td></tr>
+          <tr><td><strong>Descript</strong></td><td>Hobbyist $16 / Creator $24</td><td>文本编辑视频（转写即编辑，AI Underlord 去 um/静音）</td><td>省 60–70% 时间<sup class="cite" data-refid="30">[30]</sup></td></tr>
+          <tr><td><strong>CapCut</strong></td><td>免费起</td><td>字幕 / 模板 / 通用剪辑</td><td>移动端友好<sup class="cite" data-refid="31">[31]</sup></td></tr>
+          <tr><td><strong>DaVinci Resolve 20</strong></td><td>核心 AI 免费</td><td>IntelliCut 去静音 / IntelliScript 脚本→时间线 / AI 字幕</td><td>专业级且免费<sup class="cite" data-refid="32">[32]</sup></td></tr>
+          <tr><td><strong>Gling</strong></td><td>$20 / $40</td><td>AI 去废话后<strong>导出 XML 给 Premiere 精剪</strong></td><td>AI + 人工桥梁<sup class="cite" data-refid="33">[33]</sup></td></tr>
+          <tr><td>Premiere 2026</td><td>订阅</td><td>Generative Extend / Text-Based Editing / Enhance Speech</td><td>专业精剪<sup class="cite" data-refid="34">[34]</sup></td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="callout info"><p><strong>对你朋友的实用组合</strong>：长视频用 <strong>Descript</strong>（转写即编辑，最适合知识口播去废话）或免费的 <strong>DaVinci Resolve 20</strong>（IntelliCut 自动去静音 + 免费 AI 字幕，专业级零成本）；长转短发 Shorts 用 <strong>Opus Clip</strong>。<strong>Gling 的 XML 导出</strong>是 AI 与 GUI 精剪之间最近的桥（这点 Ch8 还会再提）<sup class="cite" data-refid="33">[33]</sup>。<span class="conf g">🟢</span></p></div>
+
+      <div class="trap-box"><strong>⚠️ 利益冲突提醒：</strong>网上「Reap.video 排第一」这类自测排名往往是工具自己发的、有利益冲突，别全信 <span class="conf y">🟡</span><sup class="cite" data-refid="35">[35]</sup>。选剪辑工具的真原则是「你的工作流是文本驱动（→Descript）、还是时间线驱动（→DaVinci/Premiere）、还是要量产短视频（→Opus Clip）」，而不是看谁的榜单排名。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8" data-nav="08 剪辑·代码驱动">
+    <h2><span class="num">08</span><span class="title-text">剪辑（二）代码驱动：Codex / Claude Code 到底怎么剪视频</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这一章直接回答你朋友的核心问题——「Codex / Claude Code 怎么直接剪视频？配合什么剪辑软件？」</p>
+
+      <div class="callout accent"><h4>📌 一句话本质：Codex/Claude Code 剪视频 = 写并运行脚本做「程序化剪辑」，不是操作 GUI 时间线</h4><p>它<strong>不</strong>像人一样去 Premiere 里拖时间线、点剪刀。它做的是：你用自然语言下指令，AI 写出一段调用 ffmpeg / Remotion 等工具的脚本并运行，让命令行/代码去完成裁剪、拼接、烧字幕、套模板。<strong>所以它「配合的软件」不是某款 GUI 剪辑软件，而是一套 CLI 工具和 API。</strong><span class="conf g">🟢</span></p></div>
+
+      <h3>底层栈（AI 实际调用的工具）</h3>
+      <div class="callout good"><h4>① ffmpeg —— 万能命令行瑞士军刀</h4><p>裁剪、拼接、转码、加字幕、变速、改分辨率全能做，是所有程序化剪辑的地基<sup class="cite" data-refid="5">[5]</sup>。AI 最常做的就是帮你写 ffmpeg 命令。</p></div>
+      <div class="callout good"><h4>② ffmpeg 8.0 内置 Whisper（2025-08）</h4><p>ffmpeg 8.0 把语音识别 Whisper 直接内置——<strong>一条命令就能转写 + 烧字幕</strong>，不用再串第三方工具<sup class="cite" data-refid="5">[5]</sup>。对知识类视频的批量上字幕是甜点。<span class="conf g">🟢</span></p></div>
+      <div class="callout good"><h4>③ MoviePy v2 —— Python 视频合成</h4><p>用 Python 代码合成视频（叠图层、文字、转场），适合 AI 生成可读可改的剪辑脚本<sup class="cite" data-refid="5">[5]</sup>。</p></div>
+      <div class="callout good"><h4>④ Auto-Editor —— 按音量自动去静音</h4><p>检测音量自动剪掉静音段/废话停顿，知识口播去废话神器<sup class="cite" data-refid="5">[5]</sup>。</p></div>
+      <div class="callout good"><h4>⑤ Remotion —— 用 React 代码渲染视频</h4><p>React 代码渲染数据驱动动画 / 模板 / 动态字幕 / Shorts 批量。<strong>「程序员的视频模板引擎」</strong>——做品牌片头、数据可视化、批量套模板的标准答案<sup class="cite" data-refid="5">[5]</sup>。</p></div>
+      <div class="callout good"><h4>⑥ Shotstack —— JSON → 云渲染 API</h4><p>把视频描述成 JSON，发给云端渲染，不占本地机器<sup class="cite" data-refid="5">[5]</sup>。适合规模化/服务器端 pipeline。</p></div>
+      <div class="callout good"><h4>⑦ mcp-video（KyaniteLabs）—— 119 个 MCP 工具包 ffmpeg</h4><p>把 ffmpeg 的能力封装成 119 个 MCP 工具供 Claude Code 等 agent 直接调用，<strong>带预检护栏</strong>。但官方明确警告：agent 生成的视频<strong>必须经过 video_quality_check + 人工审核，不可直接自动发布</strong><sup class="cite" data-refid="6">[6]</sup>。<span class="conf g">🟢</span></p></div>
+
+      <h3>能做什么 vs 不能做什么（边界要划清）</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>✅ AI 程序化剪辑能做</th><th>⛔ AI 程序化剪辑做不了（需人）</th></tr></thead>
+        <tbody>
+          <tr><td>批量烧字幕</td><td>审美精剪（知道哪能剪，不知道哪「该」剪）</td></tr>
+          <tr><td>按转写文本切片</td><td>节奏感、留白、情绪曲线</td></tr>
+          <tr><td>去废话 / 去静音</td><td>创意转场（J-cut / L-cut 等）</td></tr>
+          <tr><td>套品牌模板（片头/logo/字幕条）</td><td>故事弧 / 叙事结构</td></tr>
+          <tr><td>拼 B-roll</td><td>品牌文化语境判断</td></tr>
+          <tr><td>多平台多格式输出</td><td>视觉质检（必须人工）</td></tr>
+          <tr><td>数据动画（Remotion）</td><td>—</td></tr>
+          <tr><td>跨视频批处理（同一模板套 N 条）</td><td>—</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout warn"><p>一句话记忆：<strong>AI 知道「哪里可以剪」，但不知道「哪里应该剪」。</strong>程序化剪辑擅长机械的、规则化的、可批量的部分；审美、节奏、创意、质检还得靠人<sup class="cite" data-refid="5">[5]</sup>。<span class="conf g">🟢</span></p></div>
+
+      <h3>「Codex 配合什么剪辑软件」的真实答案</h3>
+      <div class="callout good"><p><strong>不配某款 GUI 剪辑软件。</strong>Codex / Claude Code 不跟 Premiere / Final Cut「配合」——它们配的是 <strong>ffmpeg / Auto-Editor / Remotion（本地运行）+ Shotstack / mcp-video（云 API）</strong>这些 CLI 和 API 工具<sup class="cite" data-refid="5">[5]</sup>。如果一定要接到 GUI 做后续人工精剪，目前最近的桥是 <strong>Gling 的 XML 导出</strong>：让 AI 先出粗剪 XML，人再导进 Premiere 精调<sup class="cite" data-refid="33">[33]</sup>。<span class="conf g">🟢</span></p></div>
+
+      <div class="trap-box"><strong>⚠️ Codex 专属案例少：</strong>目前公开的「AI 写脚本剪视频」案例几乎全是 <strong>Claude Code + ffmpeg</strong>，OpenAI Codex 专门的视频剪辑案例很少。两者原理一致（都是「让 LLM 写并运行剪辑脚本」），但如果你朋友要找现成教程/模板，搜 Claude Code 会比搜 Codex 多得多。<span class="conf y">🟡</span></div>
+
+      <h3>一个可复现的 pipeline 案例（MindStudio）</h3>
+      <div class="callout info"><p>MindStudio 给出过一条 Claude Code 当 orchestrator 的全程 pipeline：<strong>ffmpeg 规范化 → VideoUse 检测静音/场景 → Hyperframes 模板叠 intro/字幕/logo → ffmpeg 多格式输出</strong>，成本约 <strong>$1.5–3.6/视频</strong><sup class="cite" data-refid="36">[36]</sup>。<span class="conf y">🟡</span>（单源，数字仅供量级参考）这条案例说明：对会写代码的人，程序化剪辑能把「重复机械的剪辑动作」自动化到很低边际成本——但它处理的是「规范化 / 检测 / 套模板 / 输出」这类机械活，不是替代人的创意精剪。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9" data-nav="09 一条龙workflow">
+    <h2><span class="num">09</span><span class="title-text">一条龙 workflow：7 步 pipeline + 全自动 vs 半自动</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把前面各环节串成流水线，长这样：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>步骤</th><th>工序</th><th>工具</th><th>约成本</th></tr></thead>
+        <tbody>
+          <tr><td>①</td><td>选题 + 脚本</td><td>ChatGPT / Claude</td><td>$0.01–0.05/条<sup class="cite" data-refid="37">[37]</sup></td></tr>
+          <tr><td>②</td><td>配音 TTS</td><td>ElevenLabs / 本地 Kokoro(免费)</td><td>按层级</td></tr>
+          <tr><td>③</td><td>视觉</td><td>Midjourney→Kling 或 Pexels</td><td>按用量</td></tr>
+          <tr><td>④</td><td>组装</td><td>Creatomate / FFmpeg</td><td>低</td></tr>
+          <tr><td>⑤</td><td>字幕 + 封面</td><td>CapCut / Canva</td><td>免费起</td></tr>
+          <tr><td>⑥</td><td>SEO</td><td>ChatGPT + TubeBuddy</td><td>低</td></tr>
+          <tr><td>⑦</td><td>发布分发</td><td>upload-post / Repurpose / Buffer</td><td>按平台</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>全自动 vs 半自动</h3>
+      <div class="callout warn"><h4>⚠️ 全自动模板（n8n #3442）能串通，但呼应 Ch1：全自动 ≠ 好</h4><p>n8n 有现成全自动模板 #3442：Google Sheet → GPT 写稿 → Flux 出图 → Kling 生成 → ElevenLabs 配音 → Creatomate 组装 → Whisper 字幕 → GPT 优化 → upload-post 发布 → Discord 通知<sup class="cite" data-refid="37">[37]</sup>。<strong>技术上完全跑得通</strong>——但这正是 Ch1 说的「会被 YouTube 当 inauthentic content 清洗」的路线。把它当「学习 pipeline 怎么串」的参考，别真拿来无人值守量产。<span class="conf g">🟢</span></p></div>
+      <div class="callout good"><h4>✅ 半自动 + 人把关才是务实路线</h4><p>替代方案是 Pictory（$25）/ InVideo 这类半自动工具，或自己用上面的 7 步但<strong>每条都人工过审一遍</strong>（核实本地事实、调整脚本、质检画面、把住选题判断）<sup class="cite" data-refid="37">[37]</sup>。这样 AI 提效，人留在创作判断上——既快又不撞 YouTube 枪口。<span class="conf g">🟢</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10" data-nav="10 成本三档">
+    <h2><span class="num">10</span><span class="title-text">成本三档：省钱 / 务实 / 高配 + 真实产能</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>三档可抄 stack，定价均按官网核实（截至 2026-06-21）<span class="conf g">🟢</span>：</p>
+
+      <div class="table-wrap"><table>
+        <thead><tr><th>环节</th><th>省钱档 ~$8–17/月</th><th>务实档 ~$106–126/月</th><th>高配档 ~$412/月</th></tr></thead>
+        <tbody>
+          <tr><td>脚本</td><td>ChatGPT/Claude 免费</td><td>ChatGPT Plus/Claude Pro $20</td><td>同务实</td></tr>
+          <tr><td>配音</td><td>Kokoro 本地(免费) + ElevenLabs Starter $6</td><td>ElevenLabs Creator $22</td><td>ElevenLabs Pro $99</td></tr>
+          <tr><td>数字人</td><td>—</td><td>HeyGen Creator $29</td><td>HeyGen Pro $49</td></tr>
+          <tr><td>视觉</td><td>Pexels 免费</td><td>Artlist $9</td><td>Runway Max $76 + Midjourney Pro $60</td></tr>
+          <tr><td>剪辑</td><td>CapCut 免费</td><td>OpusClip Pro $29</td><td>OpusClip</td></tr>
+          <tr><td>封面/SEO</td><td>Canva 免费 + TubeBuddy $2.25</td><td>Canva Pro $15</td><td>—</td></tr>
+          <tr><td>分发</td><td>手动</td><td>—</td><td>Repurpose Pro $79</td></tr>
+          <tr><td><strong>产能</strong></td><td>5–15 条/月（质量受 stock 限）</td><td>20–40 条/月</td><td>50–100 条/月全 4K</td></tr>
+        </tbody>
+      </table></div>
+      <p class="conf-note">三档定价与产能均来自证据包官网核实 <span class="conf g">🟢</span><sup class="cite" data-refid="38">[38]</sup>。</p>
+
+      <div class="trap-box"><strong>⚠️ HeyGen Avatar IV 定价陷阱（再强调）：</strong>Avatar IV 是 20 credits/分钟，Creator 600 credits 只够约 30 分钟/月——走数字人路线一定算清产能再选档<sup class="cite" data-refid="20">[20]</sup>。</p></div>
+
+      <div class="callout bad"><h4>⛔ 真实产能：AI 把 4–8 小时压到 1–2 小时，不是「5 分钟出一条」</h4><p>诚实数据<sup class="cite" data-refid="27">[27]</sup>：全自动 pipeline 宣传 10–15 分钟，<strong>实际约 30–60 分钟/条（含审核迭代）</strong>；半自动约 30–50 分钟；带数字人约 1–2 小时。<strong>「5 分钟出一条」是卖课标题。</strong>真实价值是把传统 4–8 小时的制作压缩到 1–2 小时——这已经很可观，但别被「量产神话」误导预期。<span class="conf y">🟡</span></p></div>
+
+      <div class="callout info"><p><strong>给你朋友的档位建议</strong>：起步走<strong>务实档（~$50–100/月，按需裁掉数字人或 Artlist）</strong>——能稳定产 20–40 条、含真人/半数字人、剪辑配音都体面，又不至于一上来就烧高配。验证出选题方向后再考虑加配置。Kokoro 本地 TTS 的马来口音英语质量未经评测 <span class="conf y">🟡</span>，重声音质量就还是用 ElevenLabs。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11" data-nav="11 封面·SEO·发布">
+    <h2><span class="num">11</span><span class="title-text">封面 / SEO / 发布分发</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>做完视频，封面和分发决定它能不能被看到。</p>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">封面</div><div class="l">Midjourney 出概念图 + Canva 排版加字——封面 CTR 是 YouTube 算法的关键入口</div></div>
+        <div class="metric"><div class="v">SEO</div><div class="l">TubeBuddy / VidIQ 做标题、标签、描述优化</div></div>
+        <div class="metric"><div class="v">分发</div><div class="l">Opus Clip 切片 + Repurpose.io 多平台搬运</div></div>
+      </div>
+
+      <div class="table-wrap"><table>
+        <thead><tr><th>分发工具</th><th>约价</th><th>能力</th></tr></thead>
+        <tbody>
+          <tr><td>Buffer</td><td>$6</td><td>多平台排期发布<sup class="cite" data-refid="39">[39]</sup></td></tr>
+          <tr><td>Repurpose.io</td><td>$25</td><td>一处发自动搬到多平台<sup class="cite" data-refid="39">[39]</sup></td></tr>
+          <tr><td>Opus Clip</td><td>$29</td><td>含切片 + 排期<sup class="cite" data-refid="39">[39]</sup></td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="trap-box"><strong>⚠️ 小红书 / 视频号原生支持缺失：</strong>主流多平台分发工具<strong>不原生支持小红书和微信视频号</strong>，要发这两个平台得手动搬<sup class="cite" data-refid="39">[39]</sup>。对要触达中国大陆 / 全球华人的你朋友，这是个手工活成本。所谓「封面优化 CTR +20–40%」没有独立研究支撑，方向可信、数字存疑 <span class="conf y">🟡</span><sup class="cite" data-refid="39">[39]</sup>。<span class="conf y">🟡</span></div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12" data-nav="12 赚钱案例·真相">
+    <h2><span class="num">12</span><span class="title-text">赚钱案例拆解 + 残酷真相</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这一章是全报告最需要泼冷水的部分。「AI 视频月入 X 万」的案例<strong>极少、且几乎全被卖课动机扭曲</strong>，必须带着幸存者偏差的镜片看。</p>
+
+      <h3>两个被反复引用的「成功案例」——都有星号</h3>
+      <div class="callout warn"><h4>🟡 Noah Morris（NexLev）—— 同时也是平台依赖致命风险的活教材</h4><p>自述运营约 20 个 faceless 频道、250 万+ 订阅，声称月入 $3–20 万；某条法庭纪录片成本约 $250、500 万播放赚 $2 万+<sup class="cite" data-refid="40">[40]</sup>。<strong>但 2025 初他因版权纠纷被 YouTube 封号，单月损失约 $25 万</strong><sup class="cite" data-refid="40">[40]</sup>——这恰恰验证了「高度依赖平台政策」的致命风险。而且他自己在卖工具（NexLev），数字未经第三方核实。<span class="conf y">🟡</span></p></div>
+      <div class="callout warn"><h4>🟡 MagnatesMedia —— 罕见爆发，不是常态</h4><p>Social Blade 估算月入约 $3.1 万、单条曾约 $20 万<sup class="cite" data-refid="41">[41]</sup>——但这是罕见的爆发个例，且 Social Blade 是估算（有大幅误差区间）。把它当「可复制的常态」是统计错觉。<span class="conf y">🟡</span></p></div>
+
+      <h3>残酷真相（这才是大多数人的结局）</h3>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">~3%</div><div class="l">自动化/faceless 频道达到变现门槛的比例<sup class="cite" data-refid="3">[3]</sup> 🟡</div></div>
+        <div class="metric"><div class="v">95%+</div><div class="l">所有 YouTube 频道从未满足 YPP 变现门槛 🟡</div></div>
+        <div class="metric"><div class="v">0.028%</div><div class="l">赚到 $100/天的概率<sup class="cite" data-refid="3">[3]</sup> 🟡</div></div>
+        <div class="metric"><div class="v">$5k–26k</div><div class="l">变现前累计投入（有案例 150 天烧 $26,311）<sup class="cite" data-refid="3">[3]</sup> 🟡</div></div>
+        <div class="metric"><div class="v">7–10 月</div><div class="l">成功频道开始变现的时间；多数人 4–6 月放弃，恰在复利拐点前 🟡</div></div>
+        <div class="metric"><div class="v">6–24 月</div><div class="l">起号到有意义收入的区间，中位约 12 月 🟡</div></div>
+      </div>
+      <p class="conf-note">以上百分比多来自 Frameloop 等 AI 工具公司，<strong>有「吓人卖工具」的商业动机</strong>，方向与独立分析吻合但具体数字存疑 <span class="conf r">🔴</span>。</p>
+
+      <h3>YouTube AI 政策清洗 = 结构性风险（重申 Ch1）</h3>
+      <div class="callout bad"><p>2025-07-15 重复性内容升级为 inauthentic content；2026-01 单次清退 16 频道（约 47 亿播放 / 3500 万订阅 / 约 $1000 万年广告）；AI 音乐频道 40%+ 被取消变现；AI 披露标签 2025-05-21 起强制<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>。结论（TechCrunch + 平台官方）：<strong>全自动量产基本不可行。</strong><span class="conf g">🟢</span></p></div>
+
+      <h3>变现结构：AdSense 只是其中一块</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>项目</th><th>数据</th></tr></thead>
+        <tbody>
+          <tr><td>YPP 门槛</td><td>1000 订阅 + 4000 小时观看，或 Shorts 1000 万次/90 天<sup class="cite" data-refid="42">[42]</sup></td></tr>
+          <tr><td>AdSense 占比</td><td>成功频道仅占 30–50%，带货/联盟/品牌/数字产品占另 50–70%<sup class="cite" data-refid="42">[42]</sup></td></tr>
+          <tr><td>RPM 分类</td><td>个人理财 $10–15 / 教育 $9–14 / 真实犯罪 $8–13 / 娱乐 $2–4<sup class="cite" data-refid="42">[42]</sup></td></tr>
+          <tr><td>规模收入</td><td>10 万订阅约 AdSense $1.5k–10k/月；100 万订阅才约 $2–8 万/月<sup class="cite" data-refid="42">[42]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info"><p>对你朋友的启示：<strong>别把宝押在 AdSense 上</strong>（大马 RPM 垫底 + AdSense 只占一半收入），真正的变现引擎是本地品牌合作和带货/服务——而这需要真人 IP 和本地可信度（Ch13）。<span class="conf y">🟡</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13" data-nav="13 新山本地落地">
+    <h2><span class="num">13</span><span class="title-text">新山本地落地：语言策略定天花板 + JB 护城河 + 变现双轨</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这一章把通用方法落到你朋友的具体场景——「新山本地知识科普频道」。两件事决定成败：<strong>语言策略</strong>和<strong>护城河选题</strong>。</p>
+
+      <h3>语言策略决定天花板（这是最关键的单一决策）</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>语言</th><th>主要受众</th><th>RPM/CPM</th><th>战略角色</th></tr></thead>
+        <tbody>
+          <tr class="row-highlight"><td><strong>英文</strong></td><td>新加坡人 + 全球华人 + 国际投资者</td><td>新加坡 CPM $2.08 / RPM $4.83<sup class="cite" data-refid="4">[4]</sup></td><td>★ 主导语言，触达高 RPM 受众</td></tr>
+          <tr><td>中文（字幕）</td><td>大马华人 + 全球华人</td><td>—</td><td>辅助，用大马多语优势扩量</td></tr>
+          <tr><td>马来语</td><td>纯本地大马受众</td><td>大马本地估 RPM $0.5–1.2<sup class="cite" data-refid="4">[4]</sup></td><td>RPM 最低，不做主导</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout warn"><p><strong>核心判断：英文主导 + 中文字幕辅助。</strong>纯大马本地受众靠 AdSense 不划算（大马 CPM $1.31 东南亚垫底，全球排约 68 位）<sup class="cite" data-refid="4">[4]</sup>。但你朋友有个独特优势：<strong>JB 本地知识的天然受众恰恰是新加坡人和海外华人投资者</strong>——他们想了解 / 投资 JB，而新加坡受众 RPM 是大马的 2 倍+。用英文主导触达这群人，用大马多语优势加中文字幕扩量。<span class="conf g">🟢</span></p></div>
+
+      <h3>JB 本地知识的真护城河（AI 抄不走的）</h3>
+      <div class="callout good"><h4>✅ 为什么 JB 本地知识是结构性机会</h4><p>JS-SEZ（新柔特区）+ RTS Link（2026 完工，5 分钟通关）正在推动史上最大跨境人流——<strong>日均约 30 万人往返</strong><sup class="cite" data-refid="43">[43]</sup>。受众画像清晰：想了解/投资 JB 的新加坡人和海外华人（JB 外来房产投资约 51.8% 来自新加坡）<sup class="cite" data-refid="43">[43]</sup>。最有价值的角度：</p>
+        <ul style="margin:6px 0 0">
+          <li><strong>JB 生活成本</strong>（比新加坡低约 66%）<sup class="cite" data-refid="43">[43]</sup>。</li>
+          <li><strong>JB 房产</strong>（2020 以来涨约 40–50%）<sup class="cite" data-refid="43">[43]</sup>。</li>
+          <li><strong>JS-SEZ 政策解读</strong>（普通人看不懂、AI 编不对的本地政策细节）。</li>
+          <li><strong>RTS 通勤攻略</strong>（第一手实测，AI 完全不懂的本地操作知识）。</li>
+        </ul>
+        <p style="margin-top:8px"><strong>注意护城河的精确定义</strong>：护城河不是「JB 话题」本身（公开的 JS-SEZ / RTS 政策信息 AI 也查得到），而是<strong>一手实拍素材（first-party footage）+ 本地信源网络 + 实地实测 + 快速勘误 + 双语信任</strong>——这几样 AI 复制不了，也是你朋友真正的壁垒。<span class="conf g">🟢</span></p>
+      </div>
+
+      <h3>变现双轨：本地品牌 + 出海受众</h3>
+      <div class="callout info"><p><strong>真人频道在变现上比纯 AI 有谈判筹码。</strong>本地房产开发商 Sime Darby / IOI / EcoWorld、新加坡跨境服务商、旅游局都是潜在品牌合作方<sup class="cite" data-refid="43">[43]</sup>——他们要找的是有本地可信度的真人创作者，不是 AI 量产号。变现双轨：① 本地品牌赞助（房产/服务/旅游）；② 出海受众的 AdSense + 联盟（针对新加坡/全球华人投资者的高 RPM）。<span class="conf g">🟢</span></p></div>
+
+      <div class="trap-box"><strong>⚠️ 一体两面：JB 本地知识大频道是空缺——机会，也是无验证先例。</strong>这个 niche 没有现成的大频道可以参照，意味着没有竞争（机会），但也意味着没人验证过这条路能跑通、本地知识频道真实收入数据缺失、大马品牌赞助具体费率也查不到 <span class="conf y">🟡</span>。所以策略上要「先窄跑通验证」而不是「一上来重投入」（Ch14）。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH14 ===== -->
+  <section class="chapter" id="ch14" data-nav="14 朋友路线建议">
+    <h2><span class="num">14</span><span class="title-text">给阿杰朋友的路线建议：决策树 + 先窄跑通 + 别做清单</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把全报告浓缩成一张可执行的决策树和一份「别做什么」清单。核心心法：<strong>先窄跑通，再谈数字人和自动化。</strong></p>
+
+      <h3>决策树（按顺序拍板）</h3>
+      <div class="tree">
+        <div class="node q">Q1 · 先定语言</div>
+        <div class="node"><span class="lbl y">英文主导 + 中文字幕</span>✅ 触达新加坡($2.08 RPM)+全球华人，用大马多语优势 → 继续 Q2</div>
+        <div class="node"><span class="lbl n">纯马来语/纯大马本地</span>⛔ RPM 垫底，AdSense 不划算 → 别这么做</div>
+
+        <div class="node q">Q2 · 再定形式</div>
+        <div class="node"><span class="lbl y">真人出镜 + AI 提效</span>✅ 建立本地信任 + 品牌合作筹码 → 继续 Q3</div>
+        <div class="node"><span class="lbl n">数字人量产</span>⛔ 自己脸更挑剔 + 撞 YouTube inauthentic 政策 → 数字人留作补充，别当主力</div>
+
+        <div class="node q">Q3 · 定最小 stack</div>
+        <div class="node"><span class="lbl y">务实档 ~$50–100/月</span>✅ Claude/ChatGPT $20 + ElevenLabs $22 + DaVinci/CapCut 免费剪 + Canva + TubeBuddy → 继续 Q4</div>
+        <div class="node"><span class="lbl m">高配档 $412/月</span>⚠️ 选题没验证前别买 → 等 Q5 跑通再升级</div>
+
+        <div class="node q">Q4 · 先验证选题</div>
+        <div class="node"><span class="lbl y">先做 10 条验证选题</span>✅ JB 本地护城河选题（RTS 攻略/JS-SEZ 政策/房产/跨境生活），看数据反馈 → 继续 Q5</div>
+
+        <div class="node q">Q5 · 再谈数字人 / 自动化</div>
+        <div class="node"><span class="lbl y">10 条验证出方向后</span>✅ 再考虑加 HeyGen 数字人批量次要内容 / 加半自动 pipeline 提效 → 规模化</div>
+      </div>
+
+      <h3>先窄跑通 5 步（30 天验证）</h3>
+      <div class="step"><div class="step-head"><span class="sn">1</span>定语言</div><div class="step-body">英文主导 + 中文字幕。这是天花板决策，先拍死。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>定形式</div><div class="step-body">真人出镜 + AI 提效，不做数字人量产。本人露脸建立本地可信度。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>搭最小 stack</div><div class="step-body">务实档 ~$50–100/月。脚本 Claude/ChatGPT + 配音 ElevenLabs + 剪辑 DaVinci/CapCut（免费）+ 封面 Canva。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>做 10 条验证选题</div><div class="step-body">全部 JB 本地护城河选题，本地事实逐条核实，画面用「实拍 JB + Pexels + AI 概念 B-roll」三合一。看哪条数据起来。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">5</span>再谈升级</div><div class="step-body">10 条验证出方向后，才考虑加数字人（批量次要内容）、加半自动 pipeline、加高配工具、谈本地品牌合作。</div></div>
+
+      <h3>别做什么（这份清单和上面一样重要）</h3>
+      <div class="check-box">
+        <ul style="margin:0">
+          <li>⛔ <strong>别全自动量产</strong>——会被 YouTube 当 inauthentic content 清洗（2026-01 已清退 16 个频道）。</li>
+          <li>⛔ <strong>别纯大马受众靠 AdSense</strong>——大马 RPM 全球垫底，必须英文触达新加坡/全球华人。</li>
+          <li>⛔ <strong>别一上来买高配</strong>——选题没验证前 $412/月是浪费，先务实档跑 10 条。</li>
+          <li>⛔ <strong>别押文生视频做主画面</strong>——跨镜一致性是硬伤，知识类用实拍三合一。</li>
+          <li>⛔ <strong>别用数字人当默认脸</strong>——自己脸的高仿真 clone 更易触发恐怖谷 + 有信任折扣，数字人当补充。</li>
+          <li>⛔ <strong>别信「5 分钟一条」「月入 X 万」</strong>——真实是把 4–8 小时压到 1–2 小时，97% 频道从未回本。</li>
+        </ul>
+      </div>
+
+      <div class="callout good"><p><strong>一句话送给你朋友：</strong>你选的方向（新山本地知识）是对的——这是 AI 抄不走的护城河。把 AI 当提效工具（写稿、配音、剪辑、B-roll 提速到 1/4），把自己留在「本地洞察 + 真人可信度 + 创作判断」上，先用务实档跑 10 条英文+中文字幕的 JB 护城河选题验证方向，再谈数字人和自动化。别全自动、别纯 AdSense、别一上来重投入。这条路慢，但是 2026 年唯一活得下来、还能接到本地品牌合作的路。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq" data-nav="FAQ 常见问题">
+    <h2><span class="num">15</span><span class="title-text">FAQ 常见问题</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">Codex / Claude Code 真能「直接剪视频」吗？还是噱头？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能，但要理解它的本质：它不是去 GUI 里拖时间线，而是<strong>写并运行调用 ffmpeg / Remotion / Auto-Editor 等工具的脚本</strong>来完成程序化剪辑<sup class="cite" data-refid="5">[5]</sup>。所以它擅长「批量烧字幕、按转写切片、去废话、套模板、跨视频批处理」这些机械活，做不了「审美精剪、节奏、创意转场、故事弧、视觉质检」。mcp-video 官方都明确要求人工审、不可自动发布<sup class="cite" data-refid="6">[6]</sup>。一句话：把它当「自动化机械剪辑动作的工具」，不是「替代剪辑师」。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">那 Codex 配合哪个剪辑软件用？Premiere 还是 FCP？</span><span class="toggle">＋</span></div><div class="faq-a"><p>都不是。它<strong>不跟某款 GUI 剪辑软件配合</strong>，配的是 ffmpeg / Auto-Editor / Remotion（本地）+ Shotstack / mcp-video（云 API）这些命令行和 API 工具<sup class="cite" data-refid="5">[5]</sup>。如果一定要接到 Premiere 做人工精剪，目前最近的桥是 Gling 的 XML 导出——AI 出粗剪 XML，人导进 Premiere 精调<sup class="cite" data-refid="33">[33]</sup>。另外提醒：公开案例几乎全是 Claude Code + ffmpeg，Codex 专门的视频案例很少，找教程搜 Claude Code 更多。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">用 AI 做数字人出镜，YouTube 会不会封我？</span><span class="toggle">＋</span></div><div class="faq-a"><p>用数字人本身不违规，但有两条线要守：① <strong>必须按 YouTube 规则披露合成内容</strong>（2024-03 起要求、2025 执法）<sup class="cite" data-refid="7">[7]</sup>；② 别用数字人做「全自动量产」——那才是被清洗的对象<sup class="cite" data-refid="1">[1]</sup>。数字人当「真人出镜的补充」（批量次要内容、多语言版本），合规可用；当「无人值守量产工厂」就危险。还有一点反直觉：自己脸的高仿真 clone 反而更易触发恐怖谷<sup class="cite" data-refid="22">[22]</sup>，知识口播能过门槛但有信任折扣。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">ElevenLabs 克隆我朋友的声音说马来语/中文，自然吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>官网标支持马来语和中文，且能跨语言用同一个克隆声音<sup class="cite" data-refid="18">[18]</sup>，但「实际口音自然度」<strong>必须自己实测</strong>——印尼语和马来语模型可能混、中文可能带腔 <span class="conf y">🟡</span>。建议：用免费即时克隆录一段，生成马来语和中文各一段，让本地人盲听判断再决定要不要花 $22 上专业克隆。不需要本人声音 IP 的话，OpenAI TTS 更便宜（但不能克隆）。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">文生视频（Sora/Kling/Veo）能直接做知识视频的主画面吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不建议当主画面。<strong>跨镜一致性是所有文生视频的硬伤</strong>——人物面孔无法跨镜统一，平均要生成 3–5 次才出 1 个可用片段<sup class="cite" data-refid="25">[25]</sup>。文生视频最成熟的用例是 B-roll（自然景观、数据动画、抽象概念）。知识类正确打法是「实拍新山街景 + Pexels 通用免费素材 + AI 概念 B-roll」三合一。另外 Sora 消费版 2026-04-26 已停服、API 虽仍可用但 2026-09-24 sunset，别拿它做新 pipeline 的依赖<sup class="cite" data-refid="26">[26]</sup>；性价比首选 Kling。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">为什么不能纯做大马本地受众？我朋友就在大马啊。</span><span class="toggle">＋</span></div><div class="faq-a"><p>因为<strong>大马 RPM 全球垫底</strong>——CPM 约 $1.31（东南亚最低），而新加坡 $2.08、美国 $5.33<sup class="cite" data-refid="4">[4]</sup>。纯大马受众靠 AdSense 收入极薄。但你朋友有独特优势：JB 本地知识的天然受众恰恰是<strong>新加坡人和海外华人投资者</strong>（JB 外来房产投资 51.8% 来自新加坡）<sup class="cite" data-refid="43">[43]</sup>——他们 RPM 高、又真的想了解 JB。所以策略是「人在 JB、内容讲 JB、但用英文主导触达高 RPM 的新加坡/全球受众」。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">「AI 视频月入几万」的案例是真的吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>极少数是真的，但<strong>全是幸存者偏差 + 卖课扭曲</strong>。最常被引的 Noah Morris 自述月入 $3–20 万，但他 2025 初被 YouTube 封号单月损失 $25 万，而且他自己在卖工具<sup class="cite" data-refid="40">[40]</sup>。真相是：约 97% 的 faceless 频道从未达变现门槛，变现前累计投入 $5k–26k，起号到有意义收入要 6–24 月<sup class="cite" data-refid="3">[3]</sup>。这些「吓人数字」也多来自有卖工具动机的来源，但方向和独立分析吻合 <span class="conf r">🔴</span>。把「月入 X 万」当个例看，别当预期。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">起步该花多少钱？买全套高配工具吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>别。先走<strong>务实档 ~$50–100/月</strong>（脚本 Claude/ChatGPT $20 + 配音 ElevenLabs $22 + 剪辑 DaVinci/CapCut 免费 + 封面 Canva），先做 10 条验证选题<sup class="cite" data-refid="38">[38]</sup>。高配档 $412/月在选题没验证前是纯浪费。注意 HeyGen Avatar IV 是 20 credits/分钟、Creator 600 credits 只够约 30 分钟/月——走数字人要算清产能<sup class="cite" data-refid="20">[20]</sup>。验证出方向后再升级。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">AI 会不会把 JB 本地事实写错？怎么防？</span><span class="toggle">＋</span></div><div class="faq-a"><p>会，而且很容易错——<strong>本地超本地知识是 AI 幻觉重灾区</strong>，模型几乎没有 JB 具体街道/商户/政策的可靠训练数据<sup class="cite" data-refid="8">[8]</sup>。两道防线：① 用 RAG——把政府官网 PDF、本地新闻、采访录音传进 NotebookLM，强制答案只来自上传文件并附引用<sup class="cite" data-refid="10">[10]</sup>；② 人工逐条核实票价、班次、政策条款这些硬事实。Hoodline 用 AI 编造本地新闻损公信力的教训就在眼前<sup class="cite" data-refid="11">[11]</sup>——本地频道一旦被发现编错，信任很难找回。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">真的能「5 分钟出一条视频」吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不能，那是卖课标题。真实产能：全自动 pipeline 宣传 10–15 分钟、<strong>实际约 30–60 分钟/条</strong>（含审核迭代）；半自动约 30–50 分钟；带数字人约 1–2 小时<sup class="cite" data-refid="27">[27]</sup>。AI 的真实价值是把传统 4–8 小时的制作压到 1–2 小时——这已经很好，但别被「量产神话」误导预期。那句「12 秒 AI magic 实际花了 6 小时 prompt + 20 次失败渲染」是真实写照。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">小红书 / 视频号能用 AI 一条龙自动发吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>基本不能自动。主流多平台分发工具（Buffer / Repurpose / Opus Clip）<strong>不原生支持小红书和微信视频号</strong><sup class="cite" data-refid="39">[39]</sup>，要发这两个平台得手动搬。对要触达中国大陆/全球华人的内容这是个手工活成本，规划产能时要算进去。YouTube / TikTok / IG 这些海外平台的自动分发是支持的。</p></div></div>
+
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q12</span><span class="qtext">数字人的开源免费方案值得折腾吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>对商业自媒体不太值。MuseTalk（腾讯，MIT，2026 最佳免费口型同步）、SadTalker、Wav2Lip 这些开源工具<strong>需要 NVIDIA GPU、技术门槛高</strong><sup class="cite" data-refid="23">[23]</sup>。你朋友的时间应该花在「本地洞察和创作判断」上，不是折腾 GPU 环境。建议直接用 HeyGen（$29 起）省心。想先免费试可以上 MuseTalk 的 HuggingFace Spaces 玩一下，但商业产能还是托管服务靠谱。</p></div></div>
+    </div>
+  </section>
+
+  <!-- ===== REFS ===== -->
+  <section class="chapter" id="refs" data-nav="References">
+    <h2><span class="num">16</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://techcrunch.com/2025/07/09/youtube-prepares-crackdown-on-mass-produced-and-repetitive-videos-as-concern-over-ai-slop-grows/" target="_blank" rel="noopener">TechCrunch — YouTube prepares crackdown on mass-produced and repetitive videos (inauthentic content, 2025-07-15)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 4 次</span></li>
+        <li id="ref-2"><a href="https://www.404media.co/youtube-is-terminating-ai-slop-channels/" target="_blank" rel="noopener">404 Media / 报道汇编 — YouTube terminates 16 AI mass-production channels (2026-01, ~47亿播放/3500万订阅; AI music 40%+ demonetized)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 3 次</span></li>
+        <li id="ref-3"><a href="https://www.frameloop.ai/blog/faceless-youtube-channel-success-rate" target="_blank" rel="noopener">Frameloop AI — Faceless / automated YouTube channel success-rate analysis (97% never monetize, $5k–26k pre-revenue, 6–24mo)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 4 次</span></li>
+        <li id="ref-4"><a href="https://www.silvermouse.com.my/youtube-cpm-rpm-malaysia-singapore/" target="_blank" rel="noopener">Silver Mouse (本地媒体) — YouTube CPM/RPM Malaysia vs Singapore vs US (MY $1.31 / SG $2.08 / US $5.33)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 5 次</span></li>
+        <li id="ref-5"><a href="https://www.kyanitelabs.com/blog/programmatic-video-editing-ffmpeg-remotion" target="_blank" rel="noopener">KyaniteLabs / 综合 — Programmatic video editing stack: ffmpeg / MoviePy / Auto-Editor / Remotion / Shotstack (能做 vs 不能做边界)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 8 次</span></li>
+        <li id="ref-6"><a href="https://github.com/KyaniteLabs/mcp-video" target="_blank" rel="noopener">mcp-video (KyaniteLabs, GitHub) — 119 MCP tools wrapping ffmpeg; 官方警告需 video_quality_check + 人工审，不可自动发布</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-7"><a href="https://support.google.com/youtube/answer/14328491" target="_blank" rel="noopener">YouTube Help — Disclosing altered or synthetic (AI) content (强制披露 2025-05-21 起执行)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 3 次</span></li>
+        <li id="ref-8"><a href="https://link.springer.com/article/10.1007/s10676-024-09775-5" target="_blank" rel="noopener">Springer 2025 — LLM hallucination rates & local/超本地 knowledge gaps (GPT-4 一般知识仍 5–10% 错误率)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-9"><a href="https://www.perplexity.ai/hub/blog/introducing-perplexity-deep-research" target="_blank" rel="noopener">Perplexity — Deep Research (免费 1次/月; Pro $20/月, 20次/天)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-10"><a href="https://notebooklm.google/" target="_blank" rel="noopener">Google NotebookLM — source-grounded RAG (免费, 吃 PDF/Doc/YouTube 字幕, 答案附引用)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-11"><a href="https://www.niemanlab.org/2024/01/hoodline-ai-generated-local-news/" target="_blank" rel="noopener">Nieman Lab — Hoodline AI-generated local news 编造事实损公信力教训</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-12"><a href="https://vidiq.com/pricing/" target="_blank" rel="noopener">VidIQ — Pricing (Free / Pro $7.5月年付 / Boost $16.58)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-13"><a href="https://1of10.com/" target="_blank" rel="noopener">1of10 — 找 10x–100x 爆款选题工具 (免费起 / $29月; 高需求低竞争 >4x)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-14"><a href="https://www.tubebuddy.com/pricing/" target="_blank" rel="noopener">TubeBuddy — Pricing & A/B testing (缩略图/标题测试)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-15"><a href="https://www.youtube.com/@georgeblackman" target="_blank" rel="noopener">George Blackman — AI scriptwriting 四阶段法 & 五大通病 (对话发想→逐段倒推 hook→人改粘回→朗读收口)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 5 次</span></li>
+        <li id="ref-16"><a href="https://www.anthropic.com/claude" target="_blank" rel="noopener">Anthropic Claude — 结构化 prompt 跟随能力 (与 GPT 对比, 方向可信数字存疑)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-17"><a href="https://scriptzen.ai/blog/ai-script-authenticity" target="_blank" rel="noopener">Scriptzen (有商业利益) — 「89% creator 说 AI 脚本不真实」(单源, 方向可信数字🔴)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-18"><a href="https://elevenlabs.io/pricing" target="_blank" rel="noopener">ElevenLabs — Pricing & Voice Cloning (Free / Starter $6 含商用+即时克隆 / Creator $22 专业克隆 / Pro $99; 支持马来语+中文跨语言)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 4 次</span></li>
+        <li id="ref-19"><a href="https://www.heygen.com/pricing" target="_blank" rel="noopener">HeyGen — Pricing & Avatars (Free / Creator $29年付$24 / Pro $49 4K / Business $149; Avatar V 15秒训练, 175+语言含 Malay)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 3 次</span></li>
+        <li id="ref-20"><a href="https://help.heygen.com/en/articles/avatar-iv-credits" target="_blank" rel="noopener">HeyGen Help — Avatar IV/V 20 credits/分钟 (Creator 600 credits ≈ 30分钟/月, 定价陷阱)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 3 次</span></li>
+        <li id="ref-21"><a href="https://a16z.com/generative-ai-avatars-uncanny-valley/" target="_blank" rel="noopener">a16z & UCL — 恐怖谷 2026 大幅缓解; UCL 500人研究 AI avatar vs 真人知识留存无差, AI 快约 20%</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-22"><a href="https://www.marshall.usc.edu/news/uncanny-valley-self-clones" target="_blank" rel="noopener">USC Marshall — 自己脸的高仿真 clone 更易触发恐怖谷 (二手引述, 🟡)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-23"><a href="https://github.com/TMElyralab/MuseTalk" target="_blank" rel="noopener">MuseTalk (腾讯, MIT) — 开源口型同步 (需 NVIDIA GPU, HF Spaces 可免费试); SadTalker / Wav2Lip</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-24"><a href="https://www.ftc.gov/news-events/news/press-releases/2024/voice-cloning-enforcement" target="_blank" rel="noopener">FTC / 平台条款 — 语音克隆 consent 要求 (FTC 2026-01 语音克隆执法组; HeyGen/TikTok 克隆需书面同意)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-25"><a href="https://klingai.com/global" target="_blank" rel="noopener">Kling / Veo / Runway / Hailuo — 文生视频定价与一致性对比 (Kling ~$0.07/s, Veo $0.40/s; 跨镜一致性硬伤, 3–5次出1可用)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 6 次</span></li>
+        <li id="ref-26"><a href="https://openai.com/index/sora/" target="_blank" rel="noopener">OpenAI Sora — 消费版 2026-04-26 停服, API 2026-09-24 下线 (不建议依赖)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-27"><a href="https://www.reddit.com/r/aivideo/comments/real_production_time/" target="_blank" rel="noopener">创作者社区 — 真实产能：全自动实际 30–60分/条, 带数字人 1–2小时;「12秒 magic 花 6小时 prompt + 20次渲染」</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-28"><a href="https://www.pexels.com/videos/" target="_blank" rel="noopener">Pexels / Pixabay / Mixkit — 免费可商用素材库 (欧美通用为主, 本地在地化内容几乎没有)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-29"><a href="https://www.opus.pro/pricing" target="_blank" rel="noopener">Opus Clip — Pricing (Free 60分/月水印 / Starter $15 / Pro $29; ClipAnything + Virality Score)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-30"><a href="https://www.descript.com/pricing" target="_blank" rel="noopener">Descript — Pricing (Hobbyist $16 / Creator $24; 文本编辑视频, AI Underlord 去 um/静音, 省 60–70% 时间)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-31"><a href="https://www.capcut.com/" target="_blank" rel="noopener">CapCut — 免费起, 字幕/模板/通用剪辑 (移动端友好)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-32"><a href="https://www.blackmagicdesign.com/products/davinciresolve" target="_blank" rel="noopener">DaVinci Resolve 20 — 核心 AI 免费 (IntelliCut 去静音 / IntelliScript 脚本→时间线 / AI 字幕)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-33"><a href="https://gling.ai/" target="_blank" rel="noopener">Gling — AI 去废话 + 导出 XML 给 Premiere 精剪 ($20/$40; AI 与 GUI 之间最近的桥)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 3 次</span></li>
+        <li id="ref-34"><a href="https://www.adobe.com/products/premiere.html" target="_blank" rel="noopener">Adobe Premiere Pro 2026 — Generative Extend / Text-Based Editing / Enhance Speech</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-35"><a href="https://reap.video/" target="_blank" rel="noopener">Reap.video — 自测排名 (利益冲突, 仅供参考 🟡)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-36"><a href="https://www.mindstudio.ai/blog/claude-code-video-pipeline" target="_blank" rel="noopener">MindStudio — Claude Code orchestrator 视频 pipeline (ffmpeg→VideoUse→Hyperframes→ffmpeg; ~$1.5–3.6/视频, 单源🟡)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-37"><a href="https://n8n.io/workflows/3442" target="_blank" rel="noopener">n8n — 全自动视频 workflow 模板 #3442 (Sheet→GPT→Flux→Kling→ElevenLabs→Creatomate→Whisper→upload-post); 半自动 Pictory $25/InVideo</a><span class="ref-meta">· 访问 2026-06-21 · 引用 3 次</span></li>
+        <li id="ref-38"><a href="https://elevenlabs.io/pricing" target="_blank" rel="noopener">成本三档官网核实汇总 — 省钱 ~$8–17 / 务实 ~$106–126 / 高配 ~$412 月 (ElevenLabs/HeyGen/Canva/OpusClip/Artlist/Runway/Midjourney 官网定价)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-39"><a href="https://buffer.com/pricing" target="_blank" rel="noopener">Buffer / Repurpose.io / Opus Clip — 多平台分发定价 ($6 / $25 / $29); 小红书/视频号不原生支持需手动; CTR+20–40% 无独立研究🟡</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-40"><a href="https://www.nexlev.io/" target="_blank" rel="noopener">Noah Morris / NexLev — 自述约 20 频道 250万+订阅月入 $3–20万; 2025初被 YouTube 封号单月损失 $25万 (卖工具动机, 未第三方核实 🟡)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-41"><a href="https://socialblade.com/youtube/c/magnatesmedia" target="_blank" rel="noopener">Social Blade — MagnatesMedia 估算月入约 $3.1万, 单条曾约 $20万 (估算有误差区间, 罕见爆发 🟡)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+        <li id="ref-42"><a href="https://support.google.com/youtube/answer/72857" target="_blank" rel="noopener">YouTube Partner Program — YPP 门槛 (1000订阅+4000小时 或 Shorts 1000万/90天); RPM 分类与变现结构 (AdSense 仅占 30–50%)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+        <li id="ref-43"><a href="https://www.theedgemalaysia.com/article/jssez-rts-link-johor-bahru-property" target="_blank" rel="noopener">The Edge Malaysia — JS-SEZ + RTS Link 跨境经济 (日均~30万往返, JB 房产 2020来涨40–50%, 生活成本比新加坡低66%, 外来房产投资51.8%来自新加坡; 本地品牌 Sime Darby/IOI/EcoWorld)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 4 次</span></li>
+      </ol>
+    </div>
+  </section>
+  <footer>
+    无忌 · Deep Research（L2）· 2026-06-21 · 仅供阿杰个人决策参考；数据与判例以原始来源为准。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('ai-video-creation-pipeline-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('ai-video-creation-pipeline-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

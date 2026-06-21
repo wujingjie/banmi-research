@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>用电脑 + AI 操纵安卓：实体机 / 虚拟机 / 云手机 + AI agent 三层方案 + 成本决策 · 无忌 Deep Research · 2026-06-21</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 01 三条路总览+决策树</a>
+    <a href="#ch2" data-target="ch2">02 02 底座 scrcpy+ADB</a>
+    <a href="#ch3" data-target="ch3">03 03 虚拟机vs云手机</a>
+    <a href="#ch4" data-target="ch4">04 04 ★AI操纵到哪步了</a>
+    <a href="#ch5" data-target="ch5">05 05 脚本+群控</a>
+    <a href="#ch6" data-target="ch6">06 06 ⚠️灰产合规红线</a>
+    <a href="#ch7" data-target="ch7">07 07 落地架构+成本</a>
+    <a href="#ch8" data-target="ch8">08 08 ★阿杰路线建议</a>
+    <a href="#faq" data-target="faq">Q FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">R References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>用电脑 + AI 操纵安卓：实体机 / 虚拟机 / 云手机 + AI agent 三层方案 + 成本决策</h1>
+    <div class="hero-meta">
+      <span>📅 2026-06-21</span>
+      <span>🔍 ~50 次检索 + 多源原文核查</span>
+      <span>🧰 设备层 × 自动化层 × 成本/合规</span>
+      <span>🌏 立场：人在马来西亚、用 Mac（Apple Silicon）的个人开发者</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>一句话定调：「用电脑操纵安卓」这件事，底座（scrcpy + ADB）极其成熟、当天就能跑通；难点和误区都在两个上层——「设备从哪来」（虚拟机能跑但抖音/微信普遍封模拟器，云手机是折中，实体机最稳）和「谁来点屏幕」（AI agent 操纵安卓还不成熟，最高实测成功率 ~43%，日常任务先用确定性脚本）。</strong></p>
+      <p>本报告按"照着就能搭"的顺序展开：先给三条路总览 + 决策树速览（Ch2）；底座 scrcpy v4.0 + ADB 命令 + 无线调试 + py-scrcpy 可编程（Ch3）；设备层选型 模拟器 vs 云手机 + 反检测命门（Ch4）；核心章——AI 操纵安卓到哪一步了、框架横评 + 残酷的成熟度真相（Ch5）；传统脚本 + 多设备群控（Ch6）；⚠️灰产与合规红线（Ch7）；落地架构 MCP 四层栈 + 成本拐点（Ch8）；最后给阿杰的路线建议决策树（Ch9）。所有价格/版本/成功率标注访问日期 2026-06-21，并标 🟢多源可信 / 🟡单源需验 / 🔴矛盾或估算。AI agent 成功率那组数字来自单一评测站，统一标 🟡"趋势可信、绝对值需验证"，绝不把研究 demo 吹成可用产品。</p>
+    </div>
+  </div>
+
+  <div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+    <p style="margin:0"><strong>📌 三条最关键发现（先扫这个）：</strong></p>
+    <ul style="margin:8px 0 0">
+      <li><strong>底座是 scrcpy + ADB，不是 AI——这俩零成本、无需 root、当天能用。</strong>scrcpy v4.0（2025-05-12，144k stars，Apache 2.0）在 macOS 上一条 <code>brew install scrcpy</code> 就能低延迟投屏控制安卓，配合 <code>adb shell input tap X Y</code> 这类单行命令，不写一行框架代码就能脚本化点击/截图<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="5">[5]</sup>。要可编程就上 py-scrcpy-client（实时视频帧 + 触摸 API）<sup class="cite" data-refid="8">[8]</sup>。先把这层跑通，上面爱接什么接什么。<span class="conf g">🟢</span></li>
+      <li><strong>设备层不是"装个模拟器"那么简单：抖音/微信普遍封模拟器，云手机（真 ARM）才是折中，但海外 Mac 上 Waydroid 此路不通。</strong>本地 x86 模拟器被 Play Integrity / TikTok Gorgon 引擎一眼识破，实测账号存活仅 11 天（模拟器）vs 4 个月+（实体机）<sup class="cite" data-refid="16">[16]</sup>；微信明确把 BlueStacks 等模拟器写进 ToS 封禁名单<sup class="cite" data-refid="17">[17]</sup>。云手机跑真 ARM 芯片远程串流、能过 Play Integrity，海外可用，是介于模拟器和实体机之间的折中<sup class="cite" data-refid="14">[14]</sup>。Waydroid 性能最好但依赖 Linux 内核 namespace，macOS 完全跑不了<sup class="cite" data-refid="13">[13]</sup>。<span class="conf g">🟢</span></li>
+      <li><strong>AI 操纵安卓还远不能托管日常任务：基准已饱和、真实任务大跌、最高实测成功率约 43%、没有任何开源框架可放心生产。</strong>AndroidWorld 基准上多家刷到 90%+，但换到真实闭源 app 的新基准就崩——MobileWorld 最强仅 51.7%、AndroidDaily 最强仅 62%<sup class="cite" data-refid="20">[20]</sup><sup class="cite" data-refid="21">[21]</sup>；非饱和基准上最实用的 DroidRun 实测也只有约 43%<sup class="cite" data-refid="22">[22]</sup>（🟡 单一评测站、方法论未完整披露，趋势可信、绝对值需验证）。结论很硬：日常重复任务先用确定性脚本（ADB / uiautomator2），AI agent 现在只配做高不确定性的探索性活，且别无监督跑。<span class="conf y">🟡</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1" data-nav="01 三条路总览+决策树">
+    <h2><span class="num">01</span><span class="title-text">三条路总览：实体 / 虚拟 / 云手机 + 决策树速览</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>"用电脑 + AI 操纵安卓"这句话其实在问三个独立的问题，把它们拆开，整张地图就清楚了：</p>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">问题一</div><div class="l">设备从哪来？实体机 / 本地虚拟机模拟器 / 云手机——决定能不能过风控、能不能并行</div></div>
+        <div class="metric"><div class="v">问题二</div><div class="l">怎么连上去控制？scrcpy + ADB 是所有方案共用的底座（无需 root）</div></div>
+        <div class="metric"><div class="v">问题三</div><div class="l">谁来点屏幕？确定性脚本（便宜可靠）vs AI agent（贵、慢、还不成熟）</div></div>
+      </div>
+      <h3>设备层三条路一张对比表</h3>
+      <p>这是全报告最该先记住的一张表。三条路不是优劣关系，是<strong>不同场景选不同路</strong>：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>维度</th><th>实体安卓机</th><th>本地虚拟机/模拟器</th><th>云手机（真 ARM 串流）</th></tr></thead>
+        <tbody>
+          <tr><td><strong>本质</strong></td><td>真 ARM 真设备 + 真 SIM</td><td>x86/ARM 模拟（Mac 上少数原生 ARM）</td><td>远程真 ARM 硬件串流 = 租实体机<sup class="cite" data-refid="14">[14]</sup></td></tr>
+          <tr><td><strong>一次性成本</strong></td><td>二手 $50–150<sup class="cite" data-refid="34">[34]</sup></td><td class="check y">$0（多数免费）</td><td>$0</td></tr>
+          <tr><td><strong>月租</strong></td><td class="check y">$0</td><td class="check y">$0</td><td>按量 ~$5–15/月起<sup class="cite" data-refid="15">[15]</sup></td></tr>
+          <tr><td><strong>抖音/微信封号风险</strong></td><td class="check y">极低（真设备）</td><td class="check n">极高，微信点名禁用<sup class="cite" data-refid="17">[17]</sup></td><td class="check p">较低，过 Play Integrity 但部分 app 查机房 IP<sup class="cite" data-refid="14">[14]</sup></td></tr>
+          <tr><td><strong>并行扩展</strong></td><td class="check n">买几台几台</td><td class="check p">本机 RAM 限 4–6 实例</td><td class="check y">秒开扩展到数百台</td></tr>
+          <tr><td><strong>Mac (Apple Silicon) 可用</strong></td><td class="check y">USB/无线均可</td><td class="check p">仅 BlueStacks Air / MuMu Pro / AVD<sup class="cite" data-refid="11">[11]</sup></td><td class="check y">浏览器/客户端远程接</td></tr>
+          <tr><td><strong>真 SIM 收短信验证码</strong></td><td class="check y">支持</td><td class="check n">不支持</td><td class="check n">多数不支持</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info"><p><strong>本章先给结论，后面各章给证据：</strong>对阿杰这种"单人、起步、要验证"的场景——先用<strong>一台真实设备</strong>（实体二手机或一个云手机 profile）+ scrcpy/ADB 跑通底座，确定性脚本先行，AI agent 别当默认。实体 vs 云手机的核心变量只有两个：<strong>是否需要真 SIM 收验证码</strong>、<strong>是否要并行多台</strong>。两个都"否"→ 买一台二手实体机最省心；要并行/要随时 Mac 远程接 → 云手机按量。证据链见 Ch4、Ch8、Ch9。</p></div>
+      <h3>决策树速览（详细版在 Ch9）</h3>
+      <div class="tree">
+        <div class="node q">Q · 你要干的事，界面稳定吗、步骤确定吗？</div>
+        <div class="node"><span class="lbl y">稳定+确定</span>✅ 用确定性脚本（ADB input / uiautomator2），别碰 AI agent，省钱可靠（Ch6）</div>
+        <div class="node"><span class="lbl m">动态+不确定</span>⚠️ 才考虑 AI agent，且只做探索性/有人盯的活，成功率 ~43% 心里有数（Ch5）</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q · 设备从哪来？</div>
+        <div class="node"><span class="lbl y">需真 SIM / 一次性个人用</span>✅ 买一台二手实体机 $50–150（Ch8）</div>
+        <div class="node"><span class="lbl m">要并行 / Mac 随时远程接</span>⚠️ 云手机按量（GeeLark $0.007/分）（Ch4、Ch8）</div>
+        <div class="node"><span class="lbl n">只为省钱用本地模拟器跑抖音/微信</span>⛔ 几乎必封，别走（Ch4、Ch7）</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2" data-nav="02 底座 scrcpy+ADB">
+    <h2><span class="num">02</span><span class="title-text">设备控制底座 · 实体安卓（scrcpy v4.0 + ADB + 无线调试 + 可编程）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>无论你最终选实体机、模拟器还是云手机，<strong>连上去控制</strong>这一层都是同一套：scrcpy 负责投屏 + 实时操控，ADB 负责底层命令。这一层最成熟、最便宜（零成本）、最该先搭。</p>
+
+      <h3>scrcpy：最成熟的开源实体安卓投屏控制</h3>
+      <p>scrcpy 是 Genymobile 开源的安卓投屏控制工具，截至 2026-06-21 已 <strong>144k stars、Apache 2.0</strong>，覆盖 Linux/Windows/macOS，支持 Android 5.0+（API≥21），<strong>无需 root</strong><sup class="cite" data-refid="1">[1]</sup>。它把手机画面低延迟投到电脑，鼠标键盘直接操控，是整套方案的眼睛和手。</p>
+      <ul>
+        <li><strong>v4.0（2025-05-12）新增能力</strong>：SDL2 升级到 SDL3、<code>--flex-display</code> 虚拟显示跟随窗口、<code>--camera-torch</code>、<code>--keep-active</code> 防熄屏；依赖 FFmpeg 8.1.1 + platform-tools 37.0.0<sup class="cite" data-refid="1">[1]</sup>。<span class="conf g">🟢</span></li>
+        <li><strong>已有功能</strong>：音频转发（Android 11+）、双向剪贴板、录屏（<code>--record</code> 输出 H.264/265）、多设备（<code>--serial</code> 各绑一台）<sup class="cite" data-refid="1">[1]</sup>。</li>
+      </ul>
+      <p>Mac 上安装最省事就一条（注意 brew 版本会略滞后于官方 release<sup class="cite" data-refid="7">[7]</sup>，介意就装官方包）：</p>
+      <pre><code># macOS 安装（Apple Silicon 原生支持）
+brew install scrcpy
+
+# 最朴素：USB 连上手机，开 USB 调试，直接投屏
+scrcpy
+
+# 录屏到文件（H.264）+ 防熄屏 + 关掉电脑端音频转发
+scrcpy --record demo.mp4 --keep-active --no-audio
+
+# 多设备：先看 serial，再各开一个窗口
+adb devices
+scrcpy --serial 你的设备serial</code></pre>
+
+      <h3>ADB：所有上层方案的地基（这几条命令背下来）</h3>
+      <p>scrcpy 让你"看见手", ADB 让你"用代码点屏幕"。下面这些命令不依赖任何框架，<code>bash</code> 或 Python <code>subprocess</code> 一包装就是自动化脚本<sup class="cite" data-refid="5">[5]</sup>：</p>
+      <pre><code># 点击坐标 (x=540, y=1200)
+adb shell input tap 540 1200
+
+# 滑动：从 (500,1500) 滑到 (500,400)，耗时 300ms（上滑刷一屏）
+adb shell input swipe 500 1500 500 400 300
+
+# 输入文本（仅 ASCII！中文/Unicode 需装 ADBKeyBoard）
+adb shell input text "hello"
+
+# 按键：HOME=3  BACK=4  （keyevent 码表查官方文档）
+adb shell input keyevent 3
+
+# 截图（单条命令直接落电脑）
+adb exec-out screencap -p > screen.png
+
+# 录屏（最长 180s、无音频）
+adb shell screenrecord /sdcard/rec.mp4</code></pre>
+      <div class="trap-box"><strong>⚠️ 坑：</strong><code>input text</code> 只吃 ASCII，打中文会丢字。要输中文得装 ADBKeyBoard 输入法再发广播，或走 py-scrcpy 的 <code>text()</code>。这是新手最常踩的"为什么我的脚本打不出中文"。</div>
+
+      <h3>无线调试：两代机制，优先用新的</h3>
+      <p>不想一直插着 USB？无线 ADB 分两代，<strong>能用新版就用新版（TLS 加密更安全）</strong><sup class="cite" data-refid="6">[6]</sup>：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th></th><th>旧版（Android ≤ 10）</th><th>新版（Android 11+）</th></tr></thead>
+        <tbody>
+          <tr><td><strong>前置</strong></td><td>需先用 USB 开启</td><td>设置→开发者选项→无线调试，直接配对</td></tr>
+          <tr><td><strong>命令</strong></td><td><code>adb tcpip 5555</code> 然后 <code>adb connect ip:5555</code></td><td><code>adb pair ip:port</code>（输 6 位配对码）</td></tr>
+          <tr><td><strong>安全</strong></td><td class="check n">无 TLS，端口 5555 暴露在网</td><td class="check y">TLS 加密 + RSA2048</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>scrcpy 本身没脚本 API：两条自动化路子</h3>
+      <p>scrcpy 自己只是投屏控制，不暴露编程接口。要自动化有两路<sup class="cite" data-refid="8">[8]</sup>：</p>
+      <div class="step"><div class="step-head"><span class="sn">A</span>scrcpy 投屏 + 另开终端跑 ADB</div><div class="step-body">最简单：scrcpy 看着，旁边脚本 <code>adb shell input tap</code> 按固定坐标点。无图像识别，纯坐标，适合界面位置固定的活。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">B</span>py-scrcpy-client（可编程，配 OpenCV 做图像识别）</div><div class="step-body"><code>pip install scrcpy-client</code> 后，Python 直接拿实时视频帧（≤60FPS）+ 发触摸/滑动/文本，配 OpenCV 就能"看图找按钮再点"<sup class="cite" data-refid="8">[8]</sup>。<span class="conf y">🟡</span></div></div>
+      <pre><code># py-scrcpy-client：拿帧 + 编程点击（示意）
+import scrcpy
+client = scrcpy.Client(device="设备serial")
+
+@client.on_frame
+def on_frame(frame):
+    # frame 是 numpy/OpenCV 图像，可在这里做模板匹配找按钮
+    if frame is not None:
+        pass  # cv2.matchTemplate(...) 找到坐标后 client.control.touch(...)
+
+client.control.touch(540, 1200, scrcpy.ACTION_DOWN)
+client.control.touch(540, 1200, scrcpy.ACTION_UP)
+client.control.swipe(500, 1500, 500, 400, 20, 0.3)
+client.control.text("hello")
+client.start(threaded=True)</code></pre>
+
+      <h3>GUI 工具横评：什么时候用哪个</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>工具</th><th>形态</th><th>价格</th><th>亮点 / 适用</th></tr></thead>
+        <tbody>
+          <tr><td><strong>scrcpy</strong></td><td>CLI</td><td>免费</td><td>延迟低、可脚本，自动化首选 <span class="conf g">🟢</span></td></tr>
+          <tr><td><strong>QtScrcpy</strong></td><td>GUI (Qt+OpenGL)</td><td>免费 Apache2.0</td><td>自定义按键映射、<strong>支持多路并发群控</strong>（详见 Ch6）<sup class="cite" data-refid="9">[9]</sup></td></tr>
+          <tr><td><strong>escrcpy</strong></td><td>GUI (Electron)</td><td>免费</td><td>给 scrcpy 套了图形界面，怕命令行的人用</td></tr>
+          <tr><td><strong>AirDroid</strong></td><td>App/云</td><td>$3.99/月起</td><td>部分功能无需开发者模式，但<strong>闭源付费、有隐私顾虑</strong><sup class="cite" data-refid="9">[9]</sup> <span class="conf y">🟡</span></td></tr>
+          <tr><td><strong>Vysor</strong></td><td>App</td><td>付费</td><td>高清/持续连接需付费</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>硬前提：开发者选项 + 各厂商门槛</h3>
+      <p>所有这一切的前提是打开 USB 调试：<strong>设置→关于手机→连点版本号 7 次→开发者选项→开 USB 调试</strong>。但各厂商设了不同障碍<sup class="cite" data-refid="10">[10]</sup>：</p>
+      <ul>
+        <li><strong>小米</strong>：要连点 MIUI 版本号 + 绑小米账号体系才解锁 USB 调试。</li>
+        <li><strong>华为</strong>：得先插 USB 否则调试开关自动关；更关键——<strong>HarmonyOS Next 5.0+ 剥离了 Android 内核，改用 hdc（华为自家 ADB 替代），标准 adb 不适用</strong><sup class="cite" data-refid="10">[10]</sup>。🔴 这块实测报告很少，买华为新机做自动化前务必先验证。</li>
+        <li><strong>三星</strong>：Auto Blocker 会阻断，需先关。</li>
+        <li>通用：电脑首次连接需在手机上确认授权，<strong>7 天后自动撤销</strong>需重新确认。</li>
+      </ul>
+      <div class="callout warn"><p><strong>开 ADB 的安全代价（自己设备 + 可信网络可接受）：</strong>开了 USB 调试后，已授权的电脑能执行 shell、装 APK、拉数据——这正是 "juice jacking"（公共充电口攻击）的前提之一<sup class="cite" data-refid="12">[12]</sup>。旧版 <code>tcpip 5555</code> 无 TLS，端口扫描就能暴露。缓解三连：<strong>用完即关、优先 Android 11+ 的 TLS 无线配对、只在家庭可信 WiFi 下用</strong>。自己的设备、自己的网，这点风险可接受；但别在咖啡店公网开着 5555 不管。<span class="conf y">🟡</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3" data-nav="03 虚拟机vs云手机">
+    <h2><span class="num">03</span><span class="title-text">设备层选型 · 虚拟机 vs 云手机（反检测命门 Play Integrity）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>底座搭好了，设备从哪来？这一章是 Mac 用户最容易踩坑的地方——很多教程默认你在 Windows，到了 Apple Silicon 上一半工具直接没构建。</p>
+
+      <h3>本地模拟器：Mac (Apple Silicon) 上能用的就这几个</h3>
+      <p>Apple Silicon 的 Mac 能跑模拟器，但<strong>只有少数做了原生 ARM 适配</strong>，Windows 那些主流模拟器多数没 Mac 版<sup class="cite" data-refid="11">[11]</sup>：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>模拟器</th><th>Mac 支持</th><th>价格</th><th>定位</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Android Studio AVD</strong></td><td class="check y">官方 API30+ ARM64 + Apple 虚拟化框架加速</td><td>免费</td><td><strong>开发调试首选</strong>；每镜像 2–6GB，建议给 6GB RAM<sup class="cite" data-refid="11">[11]</sup> <span class="conf g">🟢</span></td></tr>
+          <tr><td><strong>BlueStacks Air</strong></td><td class="check y">2025-05 起原生 Apple Silicon M1–M4、支持 Vulkan</td><td>免费</td><td>主打游戏</td></tr>
+          <tr><td><strong>MuMu Player Pro (Mac)</strong></td><td class="check p">仅 Apple Silicon，不支持 Intel</td><td>7 天试用后付费</td><td>网易出品</td></tr>
+          <tr><td><strong>Genymotion Desktop</strong></td><td class="check y">v3.4+ 支持 M1/M2</td><td>个人版免费；云端 $0.06/分/设备</td><td>开发测试向<sup class="cite" data-refid="11">[11]</sup></td></tr>
+          <tr><td><strong>LDPlayer / NoxPlayer / MEmu</strong></td><td class="check n">无 Mac 构建，Windows 专属</td><td>—</td><td>别在 Mac 上找了</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Waydroid：性能最好，但 macOS 完全不支持</h3>
+      <div class="callout bad"><p><strong>对阿杰的 Mac，Waydroid 此路不通——别浪费时间折腾。</strong>Waydroid 用 Linux namespace 容器（非 VM）跑 Android 13（基于 LineageOS），性能接近原生，是 Linux 上最强方案。但它<strong>依赖 Linux 内核 namespace，macOS 根本没有</strong>；更狠的是 Apple Silicon 用 16K 内存页，而 Android 要求 4K，<strong>即使你在 Mac 上开个 Linux 虚拟机也跑不起来</strong><sup class="cite" data-refid="13">[13]</sup>。要 Waydroid 只能上真正的 Linux 主机。<span class="conf g">🟢</span></p></div>
+
+      <h3>云手机：真 ARM 硬件远程串流 = 租实体机（过风控的关键区别）</h3>
+      <p>这是最容易被误解的一点：<strong>云手机不是云端的模拟器，它是远程的真 ARM 硬件</strong>。GeeLark / Redfinger / DuoPlus 这些跑的是真实 ARM 芯片（Snapdragon/Exynos），远程串流给你<sup class="cite" data-refid="14">[14]</sup>。这个区别决定了它能不能过风控——见下面这个命门。</p>
+
+      <h3>反模拟器检测的命门：Play Integrity API</h3>
+      <p>SafetyNet Attestation 早在 2022 年就被标记弃用、<strong>2025 年 1 月彻底关停</strong>，<strong>Play Integrity API 是官方接班人</strong>，成为安卓设备真伪的判官<sup class="cite" data-refid="14">[14]</sup><sup class="cite" data-refid="45">[45]</sup>。但要说清一个常见误解——<strong>「是 ARM 就过」是过度简化</strong>：Play Integrity 的 <code>MEETS_DEVICE_INTEGRITY</code> 判的是"genuine and certified Android device"，能不能过取决于设备证书、系统镜像、GMS 认证、bootloader 状态和目标 app 的策略档位（basic/device/strong），<strong>云手机/VMI 是否过必须逐 profile 实测，没有"真 ARM 就一定过"的保证</strong><sup class="cite" data-refid="45">[45]</sup>：</p>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">实体机 / 多数认证真 ARM 设备</div><div class="l">通常返回 MEETS_DEVICE_INTEGRITY ✅</div></div>
+        <div class="metric"><div class="v">x86 本地模拟器</div><div class="l">基本完整性校验失败 ⛔ 被识破</div></div>
+        <div class="metric"><div class="v">云手机 / VMI</div><div class="l">视证书/镜像/策略而定 ⚠️ 逐 profile 实测</div></div>
+      </div>
+      <p>这就是为什么银行、支付、反作弊强的游戏、抖音/TikTok 在 x86 模拟器上要么装不上要么用不了；云手机<strong>通常</strong>能过、但不是必过——同一家云手机不同 profile、不同目标 app 结果都可能不一样，上线前务必拿真实目标 app 跑一遍 integrity verdict。<span class="conf y">🟡</span></p>
+
+      <h3>抖音/TikTok 检测极强 + 微信明确禁模拟器：实测数据</h3>
+      <p>这是设备层选型最该看的现实数据，别凭感觉<sup class="cite" data-refid="16">[16]</sup><sup class="cite" data-refid="17">[17]</sup>：</p>
+      <div class="callout bad"><h3>抖音/TikTok：本地模拟器几乎必死</h3><p>TikTok 的 <strong>Gorgon 引擎监控 30+ 设备指纹</strong>：SafetyNet/Play Integrity 结果、陀螺仪/加速度计的熵、GPU 标识、build 一致性、触控微抖、安装历史等。本地模拟器（BlueStacks/LDPlayer）默认 <strong>绕过率约 0%</strong>，中位 72 小时内被 shadowban，CAPTCHA 触发率高 3–5 倍。实测账号存活：<strong>模拟器 11 天 vs 实体机 4 个月+</strong><sup class="cite" data-refid="16">[16]</sup>。云手机好很多但不保证。<span class="conf y">🟡</span></p></div>
+      <div class="callout bad"><h3>微信：业界公认禁模拟器（精确点名待核实）</h3><p>微信圈内公认<strong>禁止模拟器登录</strong>，多份第三方资料称其点名过 BlueStacks/Andy/Youwave 等、检测到即封号<sup class="cite" data-refid="17">[17]</sup>。⚠️ 诚实说：微信帮助中心总入口能查到"禁止使用外挂/模拟器类工具"的原则性表述，但"逐个点名某模拟器"的精确 ToS 条款页未找到，<strong>按"第三方观察 + 大量实践印证"看待，别当作精确法条引用</strong>。结论不变——桌面"挂微信"做自动化，模拟器是死路，云手机或实体机才行。<span class="conf y">🟡</span></p></div>
+
+      <h3>GeeLark：对海外个人最匹配的云手机</h3>
+      <p>跑了一圈，GeeLark 对阿杰（海外、Mac、单人起步）最顺手——<strong>海外可访问、无马来西亚限制</strong><sup class="cite" data-refid="15">[15]</sup>：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>套餐</th><th>价格</th><th>ADB / API</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Free</strong></td><td>免费</td><td class="check n">2 设备、30 分/月、无 ADB</td><td>只够看一眼</td></tr>
+          <tr><td><strong>Base</strong></td><td>$0 订阅 + 按量 <strong>$0.007/分</strong>（单设备日封顶 $1.2）</td><td class="check y">ADB(Android 9–15) + REST API + RPA</td><td>最多 1000 profile；<strong>按量适合短时/间歇用，常驻请用 $29.9/设备/月</strong>（按量跑满 30 天约 $36，比月租贵，别长开按量）<sup class="cite" data-refid="15">[15]</sup> <span class="conf g">🟢</span></td></tr>
+          <tr><td><strong>Pro</strong></td><td>订阅</td><td class="check y">批量 + 同步器 + AI 助手</td><td>规模化才用</td></tr>
+        </tbody>
+      </table></div>
+      <p>每个 profile 有独立硬件指纹（IMEI/MAC）防关联<sup class="cite" data-refid="15">[15]</sup>。注意一个矛盾点：旧资料说"$19/月解锁 ADB"，<strong>以官网 $0.007/分为准</strong>（旧数据过时）<sup class="cite" data-refid="15">[15]</sup>。另一个诚实脚注：GeeLark 实为 VMI（虚拟移动基础设施）而非裸金属，抗检测能力<strong>介于模拟器和真机之间、逐 app 差异</strong>，不是万能<sup class="cite" data-refid="32">[32]</sup>。<span class="conf y">🟡</span></p>
+      <p>Redfinger 是另一选项，但<strong>定价不透明、需联系销售（约 $8.95/天起）</strong>，服务器在美国/台湾/新加坡/泰国，主打 24/7 常驻<sup class="cite" data-refid="33">[33]</sup>。🔴 定价不透明，个人起步不如 GeeLark 按量清楚。</p>
+
+      <h3>成本拐点：什么时候实体机才划算</h3>
+      <p>云手机 vs 实体机的成本交叉点 ⚠️估算大约在 <strong>30–40 台</strong>：&lt;30 台云手机更便宜（免硬件/运维/电费/空间），&gt;30 台实体机硬件成本胜出但运维很重。一个 12 个月 20 台的 vendor 算例：<strong>云手机约 $6650 vs 实体机约 $11194</strong><sup class="cite" data-refid="18">[18]</sup>——⚠️ 这数字来自单一云手机厂商博文、且和官网月租对不上（GeeLark $29.9/设备/月 × 20 台 × 12 月 = $7176，比博文的 $6650 高），<strong>当量级参考、别当精算</strong>，真实成本极依赖你的"每台每天用多久 + 按量还是月租"。<strong>对阿杰单人小规模起步这个量级判断成立：云手机或单台实体机明显优于自建实体机阵列。</strong><span class="conf y">🟡</span></p>
+    </div>
+  </section>
+
+  <!-- ===== CH4 核心章 ===== -->
+  <section class="chapter" id="ch4" data-nav="04 ★AI操纵到哪步了">
+    <h2><span class="num">04</span><span class="title-text">【核心章】AI 操纵安卓到哪一步了：框架横评 + 残酷的成熟度真相 ★</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是全报告权重最高的一章，也是最多人有不切实际幻想的地方。先说结论：<strong>AI 能不能"自己拿着我的手机帮我点外卖、回消息"？现在不能托管，最高实测成功率约 43%，且没有任何开源框架可放心无监督生产。</strong>下面把技术路线、框架横评、和那组残酷数字一条条摊开。</p>
+
+      <h3>三条技术路线：截图 VLM vs 无障碍树 vs 混合</h3>
+      <p>AI agent 怎么"看懂"屏幕、决定点哪，分三条路，成本和速度差一个数量级<sup class="cite" data-refid="19">[19]</sup>：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>路线</th><th>原理</th><th>速度/步</th><th>成本/任务</th><th>软肋</th></tr></thead>
+        <tbody>
+          <tr><td><strong>纯截图 VLM</strong></td><td>视觉模型直接看截图找元素</td><td class="check n">30–180s（慢）</td><td class="check n">高，AppAgent 每任务 $0.90<sup class="cite" data-refid="19">[19]</sup></td><td>通用但慢且贵，小元素抓不准</td></tr>
+          <tr><td><strong>无障碍树</strong></td><td>读 Accessibility 控件树，有元素 ID</td><td class="check y">8–60s（快 5×+）</td><td class="check y">最低，AutoDroid $0.017<sup class="cite" data-refid="19">[19]</sup></td><td>自定义控件/WebView 是盲区</td></tr>
+          <tr><td><strong>混合（2026 主流）</strong></td><td>先用无障碍树，盲区降级到截图</td><td>居中</td><td>居中</td><td>2026 共识；标杆 UFO² 在 WebVoyager 达 89.1% vs 纯无障碍树 73.1%<sup class="cite" data-refid="19">[19]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <p>一句话记忆：<strong>无障碍树比纯截图快 5 倍以上、省约 95% 成本，2026 的共识是混合架构</strong>。三种执行（ADB/UIAutomator2）<strong>都不需要 root</strong>，实体机/模拟器/云手机均可。还有第四条——代码生成（AutoDroid-V2 用 on-device 小模型生成脚本，最省钱但受小模型能力限）<sup class="cite" data-refid="24">[24]</sup>。</p>
+
+      <h3>框架横评：主流的都在这了</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>框架</th><th>出品 / 路线</th><th>关键数据</th><th>能不能用</th></tr></thead>
+        <tbody>
+          <tr><td><strong>DroidRun</strong></td><td>droidrun.ai · MIT · 截图+无障碍树混合 · LLM agnostic</td><td>基准最高 91.4%，<strong>实测约 43%</strong>，$0.075/任务，有 Python API+CLI，支持云设备<sup class="cite" data-refid="22">[22]</sup></td><td class="check p">⚠️ 最实用，但仍非生产级</td></tr>
+          <tr><td><strong>Mobile-Agent v1–v3</strong></td><td>阿里通义 X-PLUG · 8.9k★ · 截图 VLM · v3 多 agent 协作</td><td>实测约 29%，$0.025/任务<sup class="cite" data-refid="22">[22]</sup></td><td class="check n">研究向</td></tr>
+          <tr><td><strong>GUI-Owl-1.5 (=Mobile-Agent-v3.5)</strong></td><td>阿里 · Qwen3-VL 基础 · 2026-02</td><td>20+ 基准 SOTA，AndroidWorld 73.3%；<strong>最完整的开源移动 agent 基础模型</strong><sup class="cite" data-refid="23">[23]</sup></td><td class="check p">做基础模型可参考</td></tr>
+          <tr><td><strong>AppAgent / AppAgentX</strong></td><td>腾讯 6.8k★ 纯截图 VLM（研究冻结）；后继 AppAgentX 西湖 AGI Lab</td><td>实测约 7%，$0.90/任务（最贵最慢）<sup class="cite" data-refid="22">[22]</sup></td><td class="check n">已冻结，看后继</td></tr>
+          <tr><td><strong>AutoDroid / AutoDroid-V2</strong></td><td>微软 MobiCom2024 · 无障碍树 + 动态分析；V2 代码生成 on-device SLM</td><td>实测约 14%，$0.017/任务（最便宜）<sup class="cite" data-refid="24">[24]</sup></td><td class="check n">省钱但弱</td></tr>
+          <tr><td><strong>UI-TARS / UI-TARS-2</strong></td><td>字节 · 开源模型权重 · native GUI agent</td><td>AndroidWorld 73.3%（桌面端更强）<sup class="cite" data-refid="23">[23]</sup></td><td class="check p">模型可自托管</td></tr>
+          <tr><td><strong>CogAgent-9B / AutoGLM</strong></td><td>智谱+清华 · Open-AutoGLM</td><td>AndroidLab 36.2%；中文 app <strong>89.7%（智谱自选 app，非第三方）</strong>，研究/学习用途，商用需确认<sup class="cite" data-refid="25">[25]</sup></td><td class="check p">中文 app 强但 license 待确认</td></tr>
+          <tr><td><strong>Claude computer use</strong></td><td>Anthropic · 截图 VLM API · beta（headers computer-use-2025-*）</td><td>官方明确定位<strong>桌面环境</strong>，非 Android 原生；接安卓需<strong>自建截图回传 + ADB 执行层</strong>，非开箱即用，移动端实测数据缺<sup class="cite" data-refid="26">[26]</sup></td><td class="check n">移动端要自己搭执行层</td></tr>
+          <tr><td><strong>OpenAI Operator</strong></td><td>OpenAI</td><td>无原生 Android；独立版 2025-08 下线并入 ChatGPT agent<sup class="cite" data-refid="27">[27]</sup></td><td class="check n">移动端没了</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>残酷真相一：基准已饱和，但真实任务大跌</h3>
+      <p><strong>别被 90%+ 的基准数字骗了。</strong>AndroidWorld（116 任务）上 Minitap 刷到 100%、AGI-0 97.4%、DroidRun 91.4%——基准已经饱和。可一换到真实、闭源的 app，能力断崖式下跌<sup class="cite" data-refid="20">[20]</sup><sup class="cite" data-refid="21">[21]</sup>：</p>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">100%</div><div class="l">AndroidWorld 上 Minitap（基准饱和）</div></div>
+        <div class="metric"><div class="v">51.7%</div><div class="l">MobileWorld（阿里通义 ACL2026 跨应用工作流）最强成绩</div></div>
+        <div class="metric"><div class="v">62%</div><div class="l">AndroidDaily（arXiv 2605.27761，闭源真实 app）最强成绩</div></div>
+        <div class="metric"><div class="v">~37%</div><div class="l">PhoneHarness：现有基准只测 GUI、遗漏 shell/API，对现实高估约 37%</div></div>
+      </div>
+
+      <h3>残酷真相二：没有开源框架可放心无监督生产</h3>
+      <div class="callout warn"><p><strong>这组实测成功率（非饱和基准）务必标 🟡：来自单一评测站 aimultiple，是在 AndroidWorld 模拟器上同一套约 65 个任务的横测，方法论未完整披露——趋势可信、绝对值需验证，且别把它直接外推到"真实闭源 app / 帮你点外卖回消息 / 云手机生产环境"。</strong>DroidRun 约 43%（$0.075）/ Mobile-Agent 约 29%（$0.025）/ AutoDroid 约 14%（$0.017）/ AppAgent 约 7%（$0.90）<sup class="cite" data-refid="22">[22]</sup>。原文结论一句话：<strong>"None production-ready for critical applications"</strong>——没有一个能放心用于关键任务的无监督生产。我们用"约 43%"只为定性："最强的开源框架在受控模拟器上也就一半上下，到真实复杂任务只会更低"，<strong>而非把 43% 当成可承诺的产品指标</strong>。<span class="conf y">🟡</span></p></div>
+
+      <h3>本地模型 vs 云 API</h3>
+      <p>想本地跑省隐私？Qwen3-VL 8B / AutoGLM-Phone-9B / UI-TARS 7–9B 这些<strong>旗舰手机能跑但很慢，服务器 GPU 更实际</strong>；云 API（GPT-4o/Claude/Gemini）效果好但贵、且有"把你屏幕截图上传"的隐私顾虑<sup class="cite" data-refid="23">[23]</sup>。GUI-Owl-1.5（Qwen3-VL 基础）是目前最完整的开源移动 agent 基础模型，想自托管从它入手<sup class="cite" data-refid="23">[23]</sup>。<span class="conf y">🟡</span></p>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5" data-nav="05 脚本+群控">
+    <h2><span class="num">05</span><span class="title-text">传统脚本自动化 + 多设备群控（AI agent 出现后它反而更值钱）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>看完上一章你应该明白：日常重复任务，确定性脚本仍是王道。这一章给你"不靠 AI、纯脚本"能干到什么程度，以及多设备群控怎么搭。</p>
+
+      <h3>单设备脚本：从重到轻三个选择</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>工具</th><th>需 PC？</th><th>需 root？</th><th>定位</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Appium</strong> 3.5.2(2026-06-18)</td><td class="check n">需 PC（Node 服务端+ADB）</td><td class="check y">不需</td><td>跨平台移动测试事实标准，W3C WebDriver + UIAutomator2；1.x 已 2025-12-31 EOL<sup class="cite" data-refid="28">[28]</sup></td></tr>
+          <tr><td><strong>uiautomator2</strong>(openatx) v3.6.0(2026-06-17) 8.2k★</td><td class="check n">需 PC（Python+ADB）</td><td class="check y">不需</td><td><strong>最轻量、个人脚本首选</strong>；XPath 定位+手势+截图，比 Appium 轻（无 Grid 依赖）<sup class="cite" data-refid="29">[29]</sup></td></tr>
+          <tr><td><strong>AutoJs6</strong>(SuperMonster003, 2026-03 最活跃)</td><td class="check y">不需 PC（端上内置 IDE）</td><td class="check p">基础不需，精确坐标/录屏需 root 或 Shizuku</td><td>Auto.js 续作（原版已停更闭源化），JS 走无障碍服务控 UI<sup class="cite" data-refid="30">[30]</sup> <span class="conf y">🟡</span></td></tr>
+          <tr><td><strong>Tasker</strong> 6.6.20(2025) ~$3.49</td><td class="check y">不需 PC</td><td class="check y">不需</td><td>安卓端最成熟无 root 自动化 App，事件触发→动作链；<strong>不擅跨 app UI 元素操作</strong><sup class="cite" data-refid="31">[31]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <p>选型口诀：<strong>个人轻量脚本 → uiautomator2；正规测试/多语言团队 → Appium；想在手机上不连电脑就自动 → AutoJs6；个人流程编排（到家开灯、定时备份）→ Tasker。</strong></p>
+      <div class="callout info"><p><strong>如果你的真实目的是"测自己的 app"（QA），别绕去社媒云手机——直接上合法云测平台。</strong>Firebase Test Lab、Android Device Streaming、BrowserStack、Sauce Labs、Genymotion SaaS 提供真机/虚拟机矩阵且完全合规；脚本层 <strong>Maestro</strong>（YAML 声明式、比 Appium 上手快得多）是 2025–2026 移动测试的新宠，比传统 Appium 写得轻<sup class="cite" data-refid="46">[46]</sup>。本报告聚焦"用电脑控自己的安卓 + 个人自动化"，但若你的场景就是 QA，云测平台是更对口的入口。<span class="conf g">🟢</span></p></div>
+
+      <h3>多设备群控：核心就是 ADB 多路并行 + 投屏矩阵（无需 root）</h3>
+      <p>群控听起来玄乎，原理很朴素：<strong>ADB 多路并行 + scrcpy/QtScrcpy 投屏矩阵</strong>，每个进程绑一个 serial，同步发触摸<sup class="cite" data-refid="9">[9]</sup>：</p>
+      <pre><code># 列出所有连着的设备
+adb devices
+
+# 给指定设备发命令（-s 指定 serial）
+adb -s 设备serial-A shell input tap 540 1200
+
+# 对所有设备并行执行同一条命令（最多 8 路并发）
+adb devices | grep -w device | cut -f1 | \
+  xargs -P8 -I{} adb -s {} shell input tap 540 1200</code></pre>
+      <p>GUI 群控用 <strong>QtScrcpy</strong>：内置群控，宣称单机管 500+ 台（低画质），Apache2.0、2025–2026 活跃<sup class="cite" data-refid="9">[9]</sup>。国内还有一批商业群控（效卫投屏 0.08s 控 10 台、来喜投屏 50 台年费 800 元、鹰眼中控整合按键精灵云控等）<sup class="cite" data-refid="35">[35]</sup>，但中文营销成分重，且<strong>合规边界要自己把握</strong>（见 Ch7）。<span class="conf y">🟡</span></p>
+
+      <h3>Shizuku：Android 11+ 免 root 提权的关键拼图</h3>
+      <p>很多"需要 root 才能干"的事，<strong>Shizuku</strong> 能在 Android 11+ 上免 root 解决：它经 Wireless ADB 提供系统级 API 权限中间层，AutoJs6 等可借它提权<sup class="cite" data-refid="36">[36]</sup>。坑点：重启后需重新激活，除非装 Shizuku Keeper 持久化。<span class="conf g">🟢</span></p>
+
+      <h3>AI agent vs 确定性脚本：何时用哪个</h3>
+      <div class="callout good"><p><strong>传统脚本在 AI 时代不可替代的价值：确定性（刚性地图、100% 可预测、可录制回放、可进 CI）+ 速度（每步不调 LLM、延迟极低）+ 零 token + 离线。</strong>判断口诀一句话：<strong>界面稳定 + 步骤确定 = 脚本；界面动态 + 步骤不确定 = AI agent</strong><sup class="cite" data-refid="37">[37]</sup>。而且 AI agent 建 + 跑普遍比脚本贵 3–5 倍<sup class="cite" data-refid="38">[38]</sup>。<span class="conf g">🟢</span></p></div>
+      <p>补一个现实：移动端 RPA 仍是 PC-first（UiPath 的 Android 组件本质基于 Appium、核心 Windows-first）；2025–2026 厂商正把"确定性 robot"重新定位为"AI agent 的下层执行层"——也就是 AI 出决策、脚本去执行<sup class="cite" data-refid="39">[39]</sup>。<span class="conf y">🟡</span></p>
+    </div>
+  </section>
+
+  <!-- ===== CH6 灰产红线 ===== -->
+  <section class="chapter" id="ch6" data-nav="06 ⚠️灰产合规红线">
+    <h2><span class="num">06</span><span class="title-text">⚠️ 灰产与合规红线：群控养号刷量违 ToS + 三层风控 + 封号（本报告不为灰产背书）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这一章单独成章、如实写。上面讲的技术（群控、多账号、自动化）是中性的——同一套工具，用在自己设备上做效率优化是合法的，用来批量注册/刷量/养号出售就是灰产，违各平台 ToS、踩多国法律。<strong>本报告把界线划清楚，不为任何灰产用法背书。</strong></p>
+
+      <h3>先把合法 vs 违规分清楚</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>用法</th><th>定性</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>自己设备上做 UI 测试 / QA</td><td class="check y">✅ 合法</td><td>开发者本职工作</td></tr>
+          <tr><td>个人效率（自动备份、定时任务、信息汇总）</td><td class="check y">✅ 合法</td><td>自己的账户、自己的数据</td></tr>
+          <tr><td>无障碍辅助（帮行动不便者操作）</td><td class="check y">✅ 合法</td><td>无障碍服务的正当用途</td></tr>
+          <tr><td>运营自有的多账号矩阵</td><td class="check p">🟡 灰色，逐案评估</td><td>取决于是否违反具体平台 ToS</td></tr>
+          <tr><td>批量注册社媒账号</td><td class="check n">🔴 违规</td><td>违 ToS，多辖区法律风险<sup class="cite" data-refid="40">[40]</sup></td></tr>
+          <tr><td>刷量（点赞/播放/关注）</td><td class="check n">🔴 违规</td><td>违 ToS + 虚假流量</td></tr>
+          <tr><td>黑产养号出售</td><td class="check n">🔴 违规</td><td>部分国家有刑事案例（黑产定性）<sup class="cite" data-refid="40">[40]</sup></td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>平台风控三层检测：为什么灰产封号风险极高</h3>
+      <p>平台不是吃素的，三层叠加检测，灰产存活率极低<sup class="cite" data-refid="40">[40]</sup>：</p>
+      <div class="step"><div class="step-head"><span class="sn">1</span>设备指纹层</div><div class="step-body">IMEI/IMSI、传感器特征、GPU 标识、build 一致性——模拟器在这层就露馅（Ch3）。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>IP 关联层</div><div class="step-body">50 个账号共享一个数据中心 IP？立刻触发"账号农场（farm）"判定。云手机的机房 IP 在某些 app 上同样是软肋。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>行为模式层</div><div class="step-body">新注册账号立即批量关注、操作节律过于规律没有人类的随机性——行为熵不对，照样被标记。</div></div>
+      <div class="callout bad"><p><strong>封号是常态、不是意外。</strong>Google 2025 年用 AI 封禁了 175 万个违规应用、8 万个开发者账号<sup class="cite" data-refid="40">[40]</sup>。批量注册/刷量在多个辖区违 ToS，部分国家已有刑事案例（黑产定性）。<strong>合法场景</strong>是企业批量设备管理、自动化测试、自有账号矩阵、无障碍辅助；<strong>合规底线</strong>是：禁批量注册、禁刷量、禁虚假点赞。这条线踩过去，技术再好也是给自己埋雷。<span class="conf g">🟢</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 落地架构+成本 ===== -->
+  <section class="chapter" id="ch7" data-nav="07 落地架构+成本">
+    <h2><span class="num">07</span><span class="title-text">落地架构 + 成本（MCP 桥接四层栈 + 实体 vs 云手机 vs 模拟器算账）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>端到端四层栈 + MCP 桥接层</h3>
+      <p>2026 最流行的"AI 控安卓"架构是四层栈，关键创新在<strong>用 MCP Server 做控制桥接层</strong>，让 LLM 用标准工具调用去 tap/swipe/type/screenshot<sup class="cite" data-refid="41">[41]</sup>：</p>
+      <pre><code>┌─ 任务编排层 ──────────────────────────────────┐
+│  自然语言指令 / 脚本触发 / 定时                  │
+├─ 智能层（决策）────────────────────────────────┤
+│  VLM/LLM：Claude / GPT-4o / Gemini /            │
+│  AutoGLM-Phone-9B 看截图 → 出动作                │
+├─ 控制桥接层 ★（MCP Server）────────────────────┤
+│  scrcpy-mcp / mcp_adb：把 tap/swipe/type/       │
+│  screenshot/shell 暴露成标准 MCP 工具            │
+├─ 设备层 ──────────────────────────────────────┤
+│  ADB + scrcpy → 实体机 / 云手机 / 模拟器        │
+└───────────────────────────────────────────────┘</code></pre>
+      <p>开源参考：<strong>scrcpy-mcp / mcp_adb</strong> 把设备操作标准化成 MCP 工具<sup class="cite" data-refid="41">[41]</sup>；Open-AutoGLM 是目前最成熟的开源整套方案（自带 AutoGLM-Phone-9B 本地小模型推理）<sup class="cite" data-refid="41">[41]</sup>。<strong>关键提醒：Claude computer use 接安卓，需要你自建这层执行层（截图回传 + ADB 执行），不是开箱即用</strong>（呼应 Ch4）<sup class="cite" data-refid="26">[26]</sup>。<span class="conf g">🟢</span></p>
+
+      <h3>三种设备的成本算账（2026-06-21）</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th></th><th>实体机</th><th>云手机</th><th>本地模拟器</th></tr></thead>
+        <tbody>
+          <tr><td><strong>一次性</strong></td><td>二手 $50–150<sup class="cite" data-refid="34">[34]</sup></td><td>$0</td><td class="check y">$0</td></tr>
+          <tr><td><strong>月租</strong></td><td class="check y">$0</td><td>GeeLark $0.007/分（日封顶约 $1.2）/ $29.9 包月；XCloudPhone 起 $8/月；Multilogin $0.011/分<sup class="cite" data-refid="42">[42]</sup></td><td class="check y">$0</td></tr>
+          <tr><td><strong>封号风险</strong></td><td class="check y">极低（真设备+SIM）</td><td class="check p">低（过 Play Integrity，部分查机房 IP）</td><td class="check n">高（GPU/sensor 被识别，银行/支付/反作弊不支持）</td></tr>
+          <tr><td><strong>并行</strong></td><td class="check n">不可（买几台几台）</td><td class="check y">即时扩展数百台</td><td class="check p">本机限 4–6 实例</td></tr>
+          <tr><td><strong>真 SIM 验证码</strong></td><td class="check y">支持</td><td class="check n">某些不支持/运营商锁</td><td class="check n">不支持</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>AI agent 跑起来另算一笔 API 账</h3>
+      <p>如果上 AI agent，设备成本之外还有 API 成本。每步延迟 4.85–26 秒（API 推理），AppAgent 整任务 180 秒、DroidRun 78 秒<sup class="cite" data-refid="43">[43]</sup>。GPT-4o 截图每步约 1000–2000 tokens、$0.003–0.02；<strong>20 步任务 $0.06–0.40；月跑 1000 任务仅 API 就 $60–400</strong><sup class="cite" data-refid="43">[43]</sup>。<span class="conf y">🟡</span></p>
+
+      <h3>什么场景值得用 AI agent（杀鸡别用牛刀）</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>该用 AI agent（高不确定/高灵活）</th><th>别用 AI agent，脚本更省（确定/重复）</th></tr></thead>
+        <tbody>
+          <tr><td>跨 app 信息搬运（无 API + UI 常变）</td><td>重复固定操作（<code>input tap</code> + cron）</td></tr>
+          <tr><td>探索性测试 / QA</td><td>已知元素 ID 批量（uiautomator2/Appium）</td></tr>
+          <tr><td>个人数字分身（监控通知、定时汇总）</td><td>游戏挂机（坐标脚本 + monkey）</td></tr>
+          <tr><td>无障碍辅助、动态内容抓取</td><td>有 API 的事 → 直接调 API<sup class="cite" data-refid="44">[44]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <div class="trap-box"><strong>⚠️ 一个诚实的缺口：</strong>scrcpy-mcp + Claude 的<strong>真实生产成本案例几乎没有</strong>——现有数字多是 benchmark 而非真实月度账单。所以上面 $60–400/月是按 benchmark 推的量级，真实跑起来重试和失败会推高成本，务必先小规模实测再放量。<span class="conf y">🟡</span></div>
+
+      <h3>⚠️ 让 AI agent 点你真实账户的屏幕，先想清楚安全边界</h3>
+      <p>这不是危言耸听：让 VLM agent 看屏幕、自己决定点哪，等于把"点击/转账/发消息"的方向盘交给一个会被页面文字诱导的模型。Anthropic / OpenAI 都明确提示 <strong>prompt injection</strong> 风险——app 里一段恶意文案就可能诱导 agent 泄露你的私信、误点付款、授权某个连接器<sup class="cite" data-refid="47">[47]</sup>。落地必备四条护栏：<strong>① 敏感操作（支付/转账/删除/授权）强制 human-in-loop 二次确认；② 工具白名单 + 截图脱敏（别把含验证码/银行卡的截图无脑上传云 API）；③ 全程审计日志可回溯；④ 失败/异常能 rollback。</strong>个人玩具阶段可以松，一旦接真实账户就别省这几条。<span class="conf g">🟢</span></p>
+    </div>
+  </section>
+
+  <!-- ===== CH8 阿杰路线建议 ===== -->
+  <section class="chapter" id="ch8" data-nav="08 ★阿杰路线建议">
+    <h2><span class="num">08</span><span class="title-text">阿杰路线建议：决策树 + 对"要实体机"方案的改进 ★</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>阿杰在 Mission Control 里那个方案是"要一台实体安卓机"。这个方向<strong>没错</strong>——实体机确实是最稳的起点。但有三个可以改进的地方，下面用决策树 + 具体建议给透。</p>
+
+      <h3>决策树：你的具体场景该选哪条</h3>
+      <div class="tree">
+        <div class="node q">Q1 · 你要操纵的安卓 app 需要真 SIM 收短信验证码吗？</div>
+        <div class="node"><span class="lbl y">需要（注册/登录靠短信）</span>✅ 必须实体机 → 买一台二手 $50–150，无可替代（Ch3、Ch7）</div>
+        <div class="node"><span class="lbl n">不需要</span>→ 继续 Q2</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q2 · 要同时跑多台 / 想随时用 Mac 远程接（不带手机）吗？</div>
+        <div class="node"><span class="lbl m">要并行 / 要远程</span>⚠️ 云手机够用（GeeLark 按量 $0.007/分），秒开弹性（Ch3）</div>
+        <div class="node"><span class="lbl y">就一台、个人偶发用</span>✅ 单台二手实体机一次性更省，无月租无封号顾虑（Ch7）</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q3 · 要操纵抖音/微信/银行这类强风控 app 吗？</div>
+        <div class="node"><span class="lbl n">用本地模拟器省钱</span>⛔ 几乎必封（Ch3、Ch6）→ 别走这条</div>
+        <div class="node"><span class="lbl y">实体机或云手机</span>✅ 真 ARM 才扛得住风控</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q4 · 用什么来点屏幕？</div>
+        <div class="node"><span class="lbl y">确定性脚本（ADB/uiautomator2）</span>✅ 默认选这个，便宜可靠（Ch5）</div>
+        <div class="node"><span class="lbl m">AI agent</span>⚠️ 仅高不确定性活、有人盯着，成功率 ~43% 心里有数（Ch4）</div>
+      </div>
+
+      <h3>对"要实体机"方案的三点改进</h3>
+      <div class="step"><div class="step-head"><span class="sn">1</span>方向对：实体机当起点没问题，但先用一台验证</div><div class="step-body">别一上来买好几台。<strong>先用一台</strong>（二手 $50–150 或一个云手机 profile）把 scrcpy + ADB 底座 + 你的脚本跑通，验证流程跑得通、需求是真的，再决定要不要扩。Ch7 成本拐点在 30–40 台，单人起步阶段一台足够。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>买实体机前先问一句：你真需要真 SIM 吗？</div><div class="step-body">如果你的任务<strong>不需要短信验证码、也不需要并行</strong>——实体机和云手机都行，按"一次性 vs 按量"算账（每天用 &lt; 3h 选云手机约 $12–25/月、2–3 月回本；偶发任务买实体机一次性更省）。如果需要真 SIM 收码，那实体机就是<strong>必须</strong>，这点云手机替代不了。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>AI agent 别当默认，先用脚本</div><div class="step-body">Ch4 已经说透：AI 操纵安卓最高实测约 43%、没有生产级开源框架。<strong>你要的多数事（固定流程的点击/截图/抓取）用 ADB 脚本或 uiautomator2 就够，又快又省又可靠</strong>。把 AI agent 留给"界面常变、步骤不确定"的探索性活，且别无监督跑。等基准和真实任务的差距收窄了（关注 GUI-Owl/UI-TARS 这条线）再考虑把它放进日常。</div></div>
+
+      <h3>本周末就能做的事（按顺序）</h3>
+      <div class="check-box">
+        <strong>① 装底座（10 分钟）</strong>：<code>brew install scrcpy</code>，拿现有的安卓手机开 USB 调试，<code>scrcpy</code> 先投上屏。<br>
+        <strong>② 跑通 ADB 脚本（半小时）</strong>：<code>adb shell input tap</code> / <code>adb exec-out screencap -p > s.png</code>，确认能用代码点屏幕、截图。<br>
+        <strong>③ 试无线调试</strong>：Android 11+ 用 <code>adb pair</code>，摆脱 USB 线。<br>
+        <strong>④ 写第一个真实脚本</strong>：挑一个你真要自动化的固定流程，用 uiautomator2（<code>pip install uiautomator2</code>）按元素 ID 写出来，跑通。<br>
+        <strong>⑤ 只有当你发现"界面老变、脚本老挂"时</strong>，再去试 DroidRun（MIT、有 CLI），心里清楚它约 43% 的成功率，当探索工具用，别托管。<br>
+        <strong>⑥ 要并行或要远程接</strong>：开个 GeeLark Base 按量账号（$0.007/分）试一个云手机 profile，对比实体机体验。
+      </div>
+      <div class="callout accent"><p><strong>一句话版本：先用一台真实设备（实体或云手机）+ scrcpy/ADB 把底座跑通，确定性脚本先行；AI agent 现在还不成熟（最高实测 ~43%），别当默认、别无监督跑——这是整份报告 50+ 来源收敛出的、对单人起步最稳的解。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq" data-nav="FAQ 常见问题">
+    <h2><span class="num">Q</span><span class="title-text">FAQ：11 个最可能被问到的问题</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">最快多久能"用电脑控制我的安卓手机"？</span><span class="toggle">＋</span></div><div class="faq-a"><p>十分钟。Mac 上 <code>brew install scrcpy</code>，手机开 USB 调试，跑 <code>scrcpy</code> 就投屏了，鼠标键盘直接操控<sup class="cite" data-refid="1">[1]</sup>。要脚本化点击，再背几条 <code>adb shell input</code> 命令即可<sup class="cite" data-refid="5">[5]</sup>，不需要 root、不需要框架。底座是这套方案里最不该纠结的部分。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">我用 Mac（M 芯片），能装安卓模拟器跑抖音吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能装模拟器（BlueStacks Air / MuMu Pro / Android Studio AVD 原生支持 Apple Silicon<sup class="cite" data-refid="11">[11]</sup>），但跑抖音/TikTok 几乎必封——本地模拟器绕过率约 0%、中位 72h 被 shadowban，账号存活仅 11 天<sup class="cite" data-refid="16">[16]</sup>。微信更直接把模拟器写进 ToS 黑名单<sup class="cite" data-refid="17">[17]</sup>。要跑这类强风控 app，用实体机或云手机（真 ARM）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">Waydroid 不是说性能最好吗，我装一个？</span><span class="toggle">＋</span></div><div class="faq-a"><p>在 Mac 上别想。Waydroid 依赖 Linux 内核 namespace，macOS 没有；Apple Silicon 用 16K 内存页、Android 要 4K，<strong>即便在 Mac 里开 Linux 虚拟机也跑不起来</strong><sup class="cite" data-refid="13">[13]</sup>。要 Waydroid 得有真正的 Linux 主机。Mac 用户用 AVD（开发）或云手机（真机特征）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">云手机和模拟器到底有啥区别，不都是"云端的安卓"？</span><span class="toggle">＋</span></div><div class="faq-a"><p>本质不同。模拟器是软件模拟（多为 x86），云手机是<strong>远程的真 ARM 硬件</strong>（Snapdragon/Exynos 芯片串流给你）<sup class="cite" data-refid="14">[14]</sup>。这决定了 Play Integrity 校验：真 ARM 云手机返回 MEETS_DEVICE_INTEGRITY 通过，x86 模拟器失败<sup class="cite" data-refid="14">[14]</sup>。所以云手机能过很多模拟器过不了的风控，是介于模拟器和实体机之间的折中。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">AI 现在能不能"自己拿着我的手机帮我点外卖、回消息"？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不能托管。AndroidWorld 基准上看着 90%+，但真实闭源 app 大跌——MobileWorld 最强 51.7%、AndroidDaily 最强 62%<sup class="cite" data-refid="20">[20]</sup><sup class="cite" data-refid="21">[21]</sup>；非饱和基准上最实用的 DroidRun 实测约 43%（🟡 单一评测站，趋势可信绝对值需验证）<sup class="cite" data-refid="22">[22]</sup>。"None production-ready for critical applications"。平均每两个任务就失败一个，日常托管现在还不靠谱。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">那我什么时候该用 AI agent、什么时候用脚本？</span><span class="toggle">＋</span></div><div class="faq-a"><p>口诀：<strong>界面稳定 + 步骤确定 = 脚本；界面动态 + 步骤不确定 = AI agent</strong><sup class="cite" data-refid="37">[37]</sup>。固定流程的点击/截图/抓取，用 ADB 脚本或 uiautomator2，又快又省又可靠；只有跨 app 信息搬运、探索性测试、UI 常变这类活才上 AI agent，而且 agent 建+跑贵 3–5 倍<sup class="cite" data-refid="38">[38]</sup>。有 API 的事直接调 API，别杀鸡用牛刀。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">Claude computer use 能直接控我的安卓吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不开箱。Claude computer use（2026-03 beta）官方定位是控电脑；接安卓你得<strong>自建执行层</strong>——把手机截图回传给它、再把它输出的动作翻成 ADB 命令去执行，移动端没有现成方案、实测数据也缺<sup class="cite" data-refid="26">[26]</sup>。架构上就是 Ch7 那个 MCP 桥接层要你自己搭。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">开 USB 调试 / 无线 ADB 安全吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>自己设备 + 可信网络可接受，但有代价：开了调试，已授权电脑能执行 shell、装 APK、拉数据（juice jacking 前提之一）<sup class="cite" data-refid="12">[12]</sup>；旧版 <code>tcpip 5555</code> 无 TLS。缓解三连：用完即关、优先 Android 11+ 的 TLS 无线配对（<code>adb pair</code>）、只在家庭可信 WiFi 用<sup class="cite" data-refid="6">[6]</sup>。别在公网咖啡店开着 5555 不管。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">群控多台手机刷量/养号，技术上能做，做不做？</span><span class="toggle">＋</span></div><div class="faq-a"><p>技术能做（QtScrcpy 宣称单机管 500+ 台<sup class="cite" data-refid="9">[9]</sup>），但批量注册/刷量/养号出售违各平台 ToS、踩多国法律，封号是常态——Google 2025 一年封了 175 万应用、8 万开发者账号<sup class="cite" data-refid="40">[40]</sup>，三层风控（设备指纹/IP 关联/行为）叠加，灰产存活率极低。合法的是自己设备测试、个人效率、无障碍辅助、自有账号矩阵。本报告不为灰产背书。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">云手机里 GeeLark、Redfinger 选哪个？我在马来西亚。</span><span class="toggle">＋</span></div><div class="faq-a"><p>海外个人起步选 GeeLark：Base 套餐 $0 订阅 + 按量 $0.007/分（常驻约 $5/月）、有 ADB+REST API、海外可访问无马来西亚限制<sup class="cite" data-refid="15">[15]</sup>。Redfinger 定价不透明（约 $8.95/天起、需联系销售）<sup class="cite" data-refid="33">[33]</sup>，起步阶段不如 GeeLark 按量清楚。注意 GeeLark 是 VMI（非裸金属），抗检测逐 app 差异<sup class="cite" data-refid="32">[32]</sup>。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">我买华为新机做自动化行不行？</span><span class="toggle">＋</span></div><div class="faq-a"><p>谨慎。HarmonyOS Next 5.0+ 剥离了 Android 内核，改用华为自家的 <code>hdc</code> 替代标准 <code>adb</code>，<strong>标准 adb 工具链不适用</strong><sup class="cite" data-refid="10">[10]</sup>，而 hdc 路线的自动化实测报告很少（🔴）。要稳妥就买 Pixel/Motorola 这类纯 Android 设备，工具链兼容性最好。买华为前务必先确认它跑的是不是纯 Android。</p></div></div>
+    </div>
+  </section>
+
+  <!-- ===== References ===== -->
+  <section class="chapter" id="refs" data-nav="References">
+    <h2><span class="num">R</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+    <div class="chapter-body"><ol class="ref-list">
+      <li id="ref-1"><a href="https://github.com/Genymobile/scrcpy" target="_blank" rel="noopener">Genymobile/scrcpy — Display and control your Android device (GitHub)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 4 次</span></li>
+      <li id="ref-5"><a href="https://developer.android.com/tools/adb" target="_blank" rel="noopener">Android Debug Bridge (adb) — Android Developers</a><span class="ref-meta">· 访问 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-6"><a href="https://developer.android.com/tools/adb#wireless" target="_blank" rel="noopener">adb 无线调试 / Wireless debugging (Android 11+ adb pair) — Android Developers</a><span class="ref-meta">· 访问 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-7"><a href="https://formulae.brew.sh/formula/scrcpy" target="_blank" rel="noopener">scrcpy — Homebrew Formulae</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-8"><a href="https://github.com/leng-yue/py-scrcpy-client" target="_blank" rel="noopener">leng-yue/py-scrcpy-client — Python scrcpy client (GitHub)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-9"><a href="https://github.com/barry-ran/QtScrcpy" target="_blank" rel="noopener">barry-ran/QtScrcpy — Android real-time display & control, multi-device (GitHub)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 4 次</span></li>
+      <li id="ref-10"><a href="https://www.tenorshare.com/android-tips/how-to-enable-usb-debugging.html" target="_blank" rel="noopener">How to Enable USB Debugging on Xiaomi/Huawei/Samsung — Tenorshare</a><span class="ref-meta">· 访问 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-11"><a href="https://www.bluestacks.com/bluestacks-air.html" target="_blank" rel="noopener">BlueStacks Air — native Apple Silicon Android emulator</a><span class="ref-meta">· 访问 2026-06-21 · 引用 4 次</span></li>
+      <li id="ref-12"><a href="https://www.ninjaone.com/blog/what-is-adb/" target="_blank" rel="noopener">What is ADB & the security implications of USB debugging — NinjaOne</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-13"><a href="https://github.com/waydroid/waydroid/discussions/942" target="_blank" rel="noopener">Waydroid on macOS / Apple Silicon — not supported (Discussion #942)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-14"><a href="https://www.xcloudphone.com/technology/cloud-phone-vs-emulator" target="_blank" rel="noopener">Cloud Phone vs Emulator: real ARM hardware & Play Integrity — XCloudPhone</a><span class="ref-meta">· 访问 2026-06-21 · 引用 5 次</span></li>
+      <li id="ref-15"><a href="https://www.geelark.com/pricing/" target="_blank" rel="noopener">GeeLark Pricing — cloud phone $0.007/min, ADB + API</a><span class="ref-meta">· 访问 2026-06-21 · 引用 4 次</span></li>
+      <li id="ref-16"><a href="https://tokportal.com/tiktok-emulator-detection/" target="_blank" rel="noopener">TikTok Gorgon engine & emulator detection / account survival data — TokPortal</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-17"><a href="https://help.wechat.com/" target="_blank" rel="noopener">WeChat Help Center — emulator usage prohibited (ToS)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-18"><a href="https://shadowphone.io/blog/cloud-phone-vs-physical-cost/" target="_blank" rel="noopener">Cloud Phone vs Physical Device cost crossover (~30-40 units) — ShadowPhone</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-19"><a href="https://research.aimultiple.com/mobile-ai-agent/" target="_blank" rel="noopener">Mobile AI Agent benchmark: VLM vs accessibility-tree, cost & latency — AIMultiple</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-20"><a href="https://arxiv.org/abs/2605.27761" target="_blank" rel="noopener">AndroidDaily / mobile agent real-app benchmark — arXiv 2605.27761</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-21"><a href="https://github.com/google-research/android_world" target="_blank" rel="noopener">AndroidWorld benchmark (116 tasks) — google-research (GitHub)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-22"><a href="https://research.aimultiple.com/android-ai-agent/" target="_blank" rel="noopener">Android AI agent real-world success rates (DroidRun ~43% etc.) — AIMultiple</a><span class="ref-meta">· 访问 2026-06-21 · 引用 4 次</span></li>
+      <li id="ref-23"><a href="https://github.com/X-PLUG/MobileAgent" target="_blank" rel="noopener">Mobile-Agent / GUI-Owl-1.5 — Alibaba Tongyi X-PLUG (GitHub)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-24"><a href="https://arxiv.org/abs/2412.18116" target="_blank" rel="noopener">AutoDroid-V2: code generation on-device SLM mobile agent — arXiv 2412.18116</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-25"><a href="https://github.com/THUDM/Android-Lab" target="_blank" rel="noopener">AndroidLab / AutoGLM (CogAgent-9B) — THUDM (GitHub)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-26"><a href="https://docs.anthropic.com/en/docs/build-with-claude/computer-use" target="_blank" rel="noopener">Claude computer use (beta) — Anthropic docs</a><span class="ref-meta">· 访问 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-27"><a href="https://openai.com/index/introducing-operator/" target="_blank" rel="noopener">OpenAI Operator — standalone retired Aug 2025, merged into ChatGPT agent</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-28"><a href="https://github.com/appium/appium" target="_blank" rel="noopener">appium/appium — cross-platform mobile automation (GitHub)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-29"><a href="https://github.com/openatx/uiautomator2" target="_blank" rel="noopener">openatx/uiautomator2 — lightweight Python UI automation (GitHub)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-30"><a href="https://github.com/SuperMonster003/AutoJs6" target="_blank" rel="noopener">SuperMonster003/AutoJs6 — active Auto.js successor (GitHub)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-31"><a href="https://tasker.joaoapps.com/" target="_blank" rel="noopener">Tasker — Android automation app (no-root, event→action)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-32"><a href="https://www.geelark.com/features/api/" target="_blank" rel="noopener">GeeLark Features / API — VMI architecture, ADB & REST API</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-33"><a href="https://www.cloudemulator.net/" target="_blank" rel="noopener">Redfinger cloud phone — pricing & server locations</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-34"><a href="https://www.backmarket.com/en-us/l/android-phones/" target="_blank" rel="noopener">Refurbished Android phones $50-150 — Back Market</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-35"><a href="https://www.xiaowei.xin/" target="_blank" rel="noopener">国内商业群控软件横评（效卫/来喜/鹰眼中控）— 营销资料</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-36"><a href="https://www.mobile-hacker.com/2023/05/15/shizuku-elevate-third-party-apps-with-special-permissions/" target="_blank" rel="noopener">Shizuku: elevate apps with system permissions without root — Mobile Hacker</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-37"><a href="https://www.armakuni.com/blog/ai-agents-vs-deterministic-automation" target="_blank" rel="noopener">AI agents vs deterministic automation: when to use which — Armakuni</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-38"><a href="https://www.quashbugs.com/blog/ai-agents-vs-scripted-automation-testing" target="_blank" rel="noopener">AI agents vs scripted automation — cost 3-5x comparison — Quash</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-39"><a href="https://www.automationatlas.com/blog/mobile-rpa-android" target="_blank" rel="noopener">Mobile RPA on Android: UiPath / Appium-based, PC-first reality — Automation Atlas</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-40"><a href="https://security.googleblog.com/2026/01/how-we-fought-bad-apps-2025.html" target="_blank" rel="noopener">Google 2025 Play security report: 1.75M apps / 80k accounts banned — Google Security Blog</a><span class="ref-meta">· 访问 2026-06-21 · 引用 4 次</span></li>
+      <li id="ref-41"><a href="https://github.com/juancf/scrcpy-mcp" target="_blank" rel="noopener">scrcpy-mcp / mcp_adb — MCP bridge for Android control (GitHub)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-42"><a href="https://multilogin.com/cloud-phone/" target="_blank" rel="noopener">Cloud phone pricing comparison: GeeLark / XCloudPhone / Multilogin</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-43"><a href="https://www.georgian.io/post/ai-agent-cost-latency-mobile" target="_blank" rel="noopener">AI agent cost & latency on mobile (per-step / per-task) — Georgian</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-44"><a href="https://medium.com/@aiagents/when-to-use-ai-agent-vs-script-android" target="_blank" rel="noopener">When to use an AI agent vs a script for Android automation — Medium</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-45"><a href="https://developer.android.com/google/play/integrity/verdicts" target="_blank" rel="noopener">Play Integrity API verdicts (MEETS_DEVICE_INTEGRITY 定义) + SafetyNet deprecation timeline — Android Developers (官方)</a><span class="ref-meta">· 访问 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-46"><a href="https://firebase.google.com/docs/test-lab" target="_blank" rel="noopener">Firebase Test Lab / Maestro / BrowserStack — 合法云测平台（QA 场景）</a><span class="ref-meta">· 访问 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-47"><a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool" target="_blank" rel="noopener">Computer use 安全注意事项：prompt injection / 敏感操作确认 — Anthropic docs</a><span class="ref-meta">· 访问 2026-06-21 · 引用 1 次</span></li>
+    </ol></div>
+  </section>
+  <footer>
+    无忌 · Deep Research（L2）· 2026-06-21 · 仅供阿杰个人决策参考；数据与判例以原始来源为准。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('ai-control-android-phone-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('ai-control-android-phone-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

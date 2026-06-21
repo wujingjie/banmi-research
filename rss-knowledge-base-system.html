@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>搭建个人知识库系统：RSS · 文章/视频/播客三库 · 微信转发入库 · 一步步落地 · 无忌 Deep Research · 2026-06-21</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 01 RSS 要不要 API</a>
+    <a href="#ch2" data-target="ch2">02 02 总决策树</a>
+    <a href="#ch3" data-target="ch3">03 03 成品横评</a>
+    <a href="#ch4" data-target="ch4">04 04 RSS 自建底座</a>
+    <a href="#ch5" data-target="ch5">05 05 文章库怎么搭</a>
+    <a href="#ch6" data-target="ch6">06 06 ★微信入库（重点）</a>
+    <a href="#ch7" data-target="ch7">07 07 视频库怎么搭</a>
+    <a href="#ch8" data-target="ch8">08 08 播客库怎么搭</a>
+    <a href="#ch9" data-target="ch9">09 09 拼成一个系统</a>
+    <a href="#ch10" data-target="ch10">10 10 Agent 的真实角色</a>
+    <a href="#ch11" data-target="ch11">11 11 ★阿杰路线建议</a>
+    <a href="#ch12" data-target="ch12">12 12 变成 NotebookLM 库</a>
+    <a href="#faq" data-target="faq">13 FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">14 References</a>
+  </div>
+</nav>
+
+<main><div class="hero">
+  <h1>搭建个人知识库系统：RSS · 文章/视频/播客三库 · 微信转发入库 · 一步步落地</h1>
+  <div class="hero-meta">
+    <span>📅 2026-06-21</span>
+    <span>🔍 ~60 次检索 + 5 个搜证包交叉核查</span>
+    <span>🧩 文章 × 视频 × 播客 × 微信</span>
+    <span>🌏 立场：人在马来西亚、订大量中文公众号的个人开发者</span>
+  </div>
+  <div class="hero-deck">
+    <p><strong>一句话定调：三个库（文章/视频/播客）别盲目自建——先用一个成品「一锅端」工具（Readwise Reader / Cubox / Raindrop）把需求跑通验证，再决定哪个库值得自建。真正难的不是技术，是<u>微信公众号这堵墙</u>：个人微信号没有 API、腾讯 2026-01 一次 DMCA 删了约 4195 个相关仓库<sup class="cite" data-refid="9">[9]</sup>、2026-04 新规明文禁止用 AI/脚本/接口替代真人发布<sup class="cite" data-refid="10">[10]</sup>。唯一可行的"转发就入库"入口是 Cubox 微信转发助手或自建 Playwright 中间层，agent 框架只能当 glue，穿不透墙。</strong></p>
+    <p>本报告是<strong>操作手册</strong>，按"照着就能搭"的顺序展开：先破"搭 RSS 要不要 API"这个误解（Ch1）→ 总决策：三库分建 vs 成品一锅端（Ch2）→ 成品路线五款横评（Ch3）→ 自建 RSS 底座（Ch4）→ 文章库（Ch5）→ <strong>重点章·微信入库</strong>（Ch6）→ 视频库（Ch7）→ 播客库（Ch8）→ 拼成一个系统：schema/去重/存储/编排（Ch9）→ Hermes/OpenClaw 的真实角色（Ch10）→ 给阿杰的路线建议三档方案（Ch11）→ 把这份研究变成你的 NotebookLM 研究库（Ch12）。每个库都给具体工具 + 具体步骤 + 三档方案。所有价格标访问日期 2026-06-21，标 🟢多源 / 🟡单源待核实 / 🔴高风险或估算。</p>
+  </div>
+</div>
+
+<div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+  <p style="margin:0"><strong>📌 三条最关键发现（先扫这个）：</strong></p>
+  <ul style="margin:8px 0 0">
+    <li><strong>别先自建——一个成品工具就能收齐文章+视频，先花一个月验证你到底需要什么。</strong>Readwise Reader（$119.88/年）一个工具吃下文章、RSS、YouTube（时间轴字幕划线），自带阅读助手 Ghostreader 做对话式检索<sup class="cite" data-refid="20">[20]</sup>（注：它的播客能力 + 是否"全库引用式问答"官方功能页未充分背书，需实测，🟡 别当 NotebookLM 用）。自建一整套 FreshRSS+n8n+yt-dlp+Whisper+SQLite 至少 2-4 天搭 + 长期维护，在你没想清需求前是过早优化。<span class="conf y">🟡</span></li>
+    <li><strong>微信公众号是整套系统里最硬的墙，而且反自动化信号在 2026 走强——这是不能绕的现实，不是工具选型问题。</strong>个人微信号没有官方 API；2017 年微信封了网页版的自动化入口；腾讯 2026-01-08 对一个含约 4195 个仓库的 GitHub network 发起 DMCA（核心是微信聊天记录导出/解密类工具，反映腾讯对逆向/绕过保护类项目的打击在升级，🟡 不是直接针对公众号 RSS 生态）<sup class="cite" data-refid="9">[9]</sup>；微信公众平台的 ToS/使用规范长期禁止自动化抓取、逆向、爬虫（有传 2026-04 强化但官方原文未检索到，🟡 待核实）<sup class="cite" data-refid="10">[10]</sup>。能用的只有三条：① Cubox 付费微信转发助手（最省事）② Readwise + 自建 Playwright 无头浏览器中间层（最可控）③ we-mp-rss 自部署（接受封号风险）。<span class="conf r">🔴</span></li>
+    <li><strong>已经死掉的工具坚决不进推荐：Pocket 2025-07-08 永久关闭、Omnivore 2024-11-15 下线。</strong>网上一堆旧教程还在推它们，照着搭一半发现服务没了。Pocket 数据 2025-11-12 起永久删除、API 关闭<sup class="cite" data-refid="17">[17]</sup>；Omnivore 团队被 ElevenLabs 收购，继任 ElevenReader 主打 AI 朗读不是知识库<sup class="cite" data-refid="18">[18]</sup>。本报告所有推荐都核过 2026-06 仍存活。<span class="conf g">🟢</span></li>
+  </ul>
+</div>
+
+<!-- ===== CH1 ===== -->
+<section class="chapter" id="ch1" data-nav="01 RSS 要不要 API">
+  <h2><span class="num">01</span><span class="title-text">先破一个误解：搭 RSS 系统到底要不要 API？</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>很多人第一反应是"做 RSS 聚合是不是得申请一堆 API key、是不是要付费"。先把这个误解拆掉，否则后面整张地图都看歪。</p>
+    <div class="callout good"><p><strong>核心事实：RSS/Atom 是开放协议（Atom 是 RFC 4287 标准<sup class="cite" data-refid="1">[1]</sup>），订阅任何公开 feed 都不需要 API key、不需要付费、不需要授权。</strong>你只要拿到一个 <code>https://xxx.com/feed.xml</code> 这样的地址，任何阅读器都能直接拉。绝大多数博客、新闻站、播客、YouTube 频道<u>本来就自带</u> feed。所以"搭 RSS 系统"的底座是免费的。</p></div>
+    <p>真正需要工具/可能花钱的，只有下面三种情况——把它们分清楚，你就知道每一分钱花在哪：</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>什么时候才需要额外工具</th><th>解决的问题</th><th>用什么</th><th>要花钱吗</th></tr></thead>
+      <tbody>
+        <tr><td><strong>① 某个站没有 RSS（要"造 feed"）</strong></td><td>微博/X/B 站/知乎/微信这类站不提供 feed，或藏起来了</td><td>RSSHub / RSS-Bridge / FreshRSS 的 XPath 抓取<sup class="cite" data-refid="6">[6]</sup></td><td><span class="check y">自建免费</span></td></tr>
+        <tr><td><strong>② feed 只给摘要（要"全文抓取"）</strong></td><td>很多 feed 只放前两段，正文要点进原文</td><td>Miniflux 自带 fetch-original / FreshRSS Readable 插件 / FiveFilters<sup class="cite" data-refid="7">[7]</sup></td><td><span class="check p">多数免费，托管版收费</span></td></tr>
+        <tr><td><strong>③ 要在多端聚合管理（要"聚合器"）</strong></td><td>统一收所有 feed、标已读、跨端同步、给脚本调</td><td>Miniflux / FreshRSS（自建）或 Inoreader / Feedbin（SaaS）</td><td><span class="check p">自建免费，SaaS 收费</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout info"><p><strong>所以"API"这个词在 RSS 世界里有两层意思，别混：</strong>（A）<u>拉 feed</u>——不需要任何 API。（B）<u>让你自己的脚本/agent 反过来读写聚合器里的内容</u>（比如 n8n 定时把新文章拽出来入库）——这才需要聚合器提供 API。而是否提供 API、是否收费，是各家聚合器的差异点（Ch4 详表）。记住这条，你就不会被"Feedly API 要 $2400/月"这种企业定价吓到——那是给 B 端做舆情的，跟个人搭库无关<sup class="cite" data-refid="4">[4]</sup>。</p></div>
+    <p>一句话收尾：<strong>RSS 底座本身免费且开放；你花的钱/精力只在"造 feed、抓全文、聚合管理"三件事上，且每件都有免费自建方案。</strong>下面所有章节都是在这个认知上展开。</p>
+  </div>
+</section>
+
+<!-- ===== CH2 ===== -->
+<section class="chapter" id="ch2" data-nav="02 总决策树">
+  <h2><span class="num">02</span><span class="title-text">大决策：三库分开自建 vs 一个成品一锅端</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>在动手搭任何东西之前，先做这个总决策。它决定你是花一个下午开个账号，还是花两周搭一套 stack。</p>
+    <div class="tree">
+      <div class="node q">Q1 · 你现在是「想验证需求」还是「已经确定要长期自有数据」？</div>
+      <div class="node"><span class="lbl y">想先验证 / 还没想清楚</span>✅ 走成品一锅端（Ch3）——Readwise Reader 或 Cubox，一个账号收齐三类内容，跑一个月看你真正在用哪个库</div>
+      <div class="node"><span class="lbl m">确定要数据自有 / 不想被 SaaS 锁死</span>⚠️ 走自建，但<u>分库优先级</u>：先搭最痛的那一个，别一次全上（Ch4-8）</div>
+      <div class="node q">Q2（走自建）· 你最痛的库是哪个？</div>
+      <div class="node"><span class="lbl y">文章 / 公众号最多</span>→ 先搭 RSS 底座（FreshRSS）+ 微信入库（Ch6），视频播客先用成品顶着</div>
+      <div class="node"><span class="lbl y">视频最多（学技术/看 YouTube）</span>→ 先搭 yt-dlp + 频道原生 RSS（Ch7），文章用稍后读 app 顶着</div>
+      <div class="node"><span class="lbl y">播客最多（通勤听）</span>→ 先搭 Audiobookshelf（Ch8），这是三库里最成熟的自托管</div>
+      <div class="node q">Q3 · 微信公众号是不是你的核心来源？</div>
+      <div class="node"><span class="lbl n">是</span>🔴 先认清：这堵墙没有干净解（Ch6）。先用 Cubox 转发助手顶住，别指望全自动</div>
+      <div class="node"><span class="lbl y">否（主要看英文/技术内容）</span>✅ 那你的系统会简单很多，标准 RSS + yt-dlp 就覆盖 90%</div>
+    </div>
+    <div class="callout warn"><h4>⚠️ 为什么默认推成品先行，而不是"工程师就该自建"</h4><p>三个库各有各的维护负担：YouTube 2025 起要 PO Token（不装插件请求被降级，Ch7）<sup class="cite" data-refid="24">[24]</sup>、微信反爬随时变、播客转写要 GPU、全文搜索引擎要单独跑 Docker。自建一整套不是搭完就完事，是<u>每个环节都会偶尔坏、都要你修</u>。而一个成品账号（Readwise $120/年）当天就能用、坏了有人修。<strong>判断标准很简单：你是想"拥有一套知识库系统"（那就花钱买时间用成品），还是"享受搭系统的过程 + 数据必须自有"（那才自建）。</strong>对阿杰这种单人全栈、时间是最稀缺资源的人，先成品验证再选点自建，几乎总是对的。</p></div>
+    <div class="callout purple"><h4>💡 第三条路最被低估：成品 + 局部自建的混合</h4><p>不是非黑即白。最常见的成熟形态是：<strong>文章/微信用成品（Cubox 转发助手解决微信墙），视频用自建（yt-dlp 下原文件归档，这是成品做不到的"真正拥有文件"），播客用 Audiobookshelf 自托管</strong>。每个库用它最擅长的方案，再通过 export 到 Obsidian 汇到一处。Ch9 给这套混合架构的拼装图。本报告后面三档方案里，"半自建档"就是这条路。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH3 ===== -->
+<section class="chapter" id="ch3" data-nav="03 成品横评">
+  <h2><span class="num">03</span><span class="title-text">成品路线 · 一个工具收齐文章+视频+播客（五款横评）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>先把"一锅端"这条路走透。下面五款是 2026-06 仍存活、海外可达、能同时覆盖多类内容的主流成品。<strong>表里凡 ❌ 不支持、⚠️ 部分支持都如实标，不和稀泥。</strong></p>
+    <div class="callout bad"><h4>⛔ 先划掉两个死人：Pocket 和 Omnivore，别再看任何推它们的教程</h4><p><strong>Pocket 已永久停服</strong>：Mozilla 宣布 2025-07-08 关闭，数据导出延至 2025-11-06，2025-11-12 起数据永久删除 + API 关闭<sup class="cite" data-refid="17">[17]</sup>。<strong>Omnivore 已 2024-11-15 下线</strong>：团队被 ElevenLabs 收购，继任产品 ElevenReader 侧重 AI 朗读不是知识库<sup class="cite" data-refid="18">[18]</sup>。网上 2024 年前的"最佳稍后读工具"文章大量推这俩，照着搭会白费功夫。本报告所有推荐均核过仍存活。<span class="conf g">🟢</span></p></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>工具</th><th>文章</th><th>YouTube</th><th>播客</th><th>跨库 AI 问答</th><th>导出 Obsidian</th><th>价格（年）</th><th>关键限制</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Readwise Reader</strong></td><td class="check y">✅</td><td class="check y">✅时间轴字幕划线</td><td class="check p">⚠️触发转写无播放器</td><td class="check y">✅Ghostreader 引用来源</td><td class="check y">✅含播客全文</td><td>≈$120<sup class="cite" data-refid="20">[20]</sup></td><td>播客须手动触发转写、仅 YouTube</td></tr>
+        <tr><td><strong>Cubox</strong></td><td class="check y">✅正文+快照</td><td class="check p">⚠️书签无转写、AI 可摘要</td><td class="check n">❌官方"探索中"</td><td class="check y">✅Library Insight</td><td class="check p">🟡未确认有 API</td><td>$69(含AI)<sup class="cite" data-refid="23">[23]</sup></td><td>华人团队产品、<strong>有微信转发助手</strong>（Ch6）</td></tr>
+        <tr><td><strong>Raindrop.io</strong></td><td class="check y">✅核心</td><td class="check y">✅Pro 词级搜索</td><td class="check n">❌</td><td class="check y">✅Stella AI</td><td class="check p">⚠️API/Zapier 中转</td><td>$28(Pro)<sup class="cite" data-refid="21">[21]</sup></td><td>Pro 年费有 $28/$38 两说待核实 🟡</td></tr>
+        <tr><td><strong>Matter</strong></td><td class="check y">✅含付费墙</td><td class="check y">✅转写+同步</td><td class="check y">✅转写为时间轴文本</td><td class="check p">⚠️Co-Reader 单篇</td><td class="check y">✅Obsidian/Notion</td><td>$60<sup class="cite" data-refid="22">[22]</sup></td><td><strong>无 Android</strong>（用安卓是硬伤）🟡</td></tr>
+        <tr><td><strong>Karakeep</strong>（原 Hoarder）</td><td class="check y">✅</td><td class="check y">✅yt-dlp 归档</td><td class="check n">❌</td><td class="check n">❌无跨库对话</td><td class="check p">⚠️API</td><td>自托管免费 / Cloud $40<sup class="cite" data-refid="36">[36]</sup></td><td><strong>开源 MIT 22800+ stars</strong>、可本地 Ollama 打标</td></tr>
+      </tbody>
+    </table></div>
+    <h3>选哪个？按你的最大需求一句话定</h3>
+    <div class="callout good"><h4>✅ 要"一个工具吃下全部三类内容 + 像 NotebookLM 一样跨库问 AI" → Readwise Reader</h4><p>它是三类覆盖最全的：文章、YouTube（时间轴同步字幕、能划线）、播客（Spotify/Apple/RSS 触发转写）一网打尽，全文搜索含转写内容；Ghostreader AI 能<u>跨整个库</u>对话并给出来源链接<sup class="cite" data-refid="20">[20]</sup>——这就是你想要的"问已有材料"能力（接 Ch12 NotebookLM）。还能把所有内容（含播客转写全文）导出到 Obsidian，等于成品当采集前端、Obsidian 当永久仓库。代价：$120/年最贵，播客只是"伴读"（有转写无音频播放器），视频仅限 YouTube。<span class="conf g">🟢</span></p></div>
+    <div class="callout good"><h4>✅ 订大量中文公众号 + 想省事解决微信入库 → Cubox（Pro+AI $69/年）</h4><p>Cubox 是这张表里<u>唯一</u>对微信有特化方案的：它有"微信转发助手"，绑定后在微信里把文章转发给一个企业微信号就自动入库（Ch6 详述）<sup class="cite" data-refid="11">[11]</sup>。华人团队做的国际化产品，中文内容解析最顺。也有跨库 AI 问答（Library Insight）。代价：不支持播客、视频只存书签不转写、海外可用性 🟡 官方未明确背书（实测可用但你要自己确认）。<span class="conf y">🟡</span></p></div>
+    <div class="callout good"><h4>✅ 数据要自有 + 开源可自托管 + 预算敏感 → Karakeep（自托管免费）</h4><p>MIT 开源、22800+ stars，自托管永久免费；文章 + YouTube（yt-dlp 自动下载归档）+ 图片 OCR，全文搜索由 Meilisearch 驱动，AI 自动打标<u>支持本地 Ollama</u>（不把内容发给云）<sup class="cite" data-refid="36">[36]</sup>。是"成品体验 + 开源自托管"的最佳折中。代价：不支持播客、没有跨库 AI 对话、公众号正文同样卡 JS 渲染（要配 Playwright，Ch6）。<span class="conf g">🟢</span></p></div>
+    <div class="callout warn"><h4>⚠️ Raindrop 和 Matter 的坑：先确认两件事再掏钱</h4><p><strong>Raindrop</strong>：书签管理是它强项，2026 年 Stella AI 加了跨库自然语言问答<sup class="cite" data-refid="21">[21]</sup>，但<u>不支持播客</u>，且 Pro 年费有 $28 和 $38 两种说法，买前去 raindrop.io/pro/buy 核实当前价。<strong>Matter</strong>：三类全支持且播客转写做得好，但<u>没有 Android 版（仅 iOS/Web）</u>——阿杰如果用安卓这条直接出局；年费也有 $60/$80 两说待核实。这两个 🟡 标记的价格差异来自搜证时多源不一致，掏钱前自己看官网当前页。</p></div>
+    <p>顺带提两个老牌但功能窄的：<strong>Instapaper</strong>（只文章、Premium $59.99/年已提价、无跨库 AI）、<strong>Wallabag</strong>（开源自托管、只文章、无 AI、视频播客自 2016 issue #2149 至今未实现<sup class="cite" data-refid="35">[35]</sup>）。它们活着但只解决"文章稍后读"单点，不适合做"三库一锅端"。</p>
+  </div>
+</section>
+
+<!-- ===== CH4 ===== -->
+<section class="chapter" id="ch4" data-nav="04 RSS 自建底座">
+  <h2><span class="num">04</span><span class="title-text">自建路线 · RSS 采集底座（Miniflux / FreshRSS / RSSHub）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>决定自建后，第一块砖是 RSS 聚合底座——它负责拉所有 feed、统一管理、给你的脚本/n8n 提供 API。这是整个自建系统的"中枢"。下面三个角色要分清：<strong>聚合器</strong>（管 feed）、<strong>造 feed 工具</strong>（给无 feed 的站造）、<strong>全文抓取</strong>（补全摘要 feed）。</p>
+    <h3>聚合器：选 Miniflux 还是 FreshRSS</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>聚合器</th><th>开源/价格</th><th>API</th><th>造 feed 能力</th><th>全文抓取</th><th>适合谁</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Miniflux</strong></td><td>Apache 2.0；自建免费 / 官方托管 $15/年（服务器芬兰）<sup class="cite" data-refid="2">[2]</sup></td><td class="check y">完整 REST API（/v1/，X-Auth-Token）+ 兼容 Fever/Google Reader</td><td class="check p">无内建造 feed，靠 RSSHub</td><td class="check y">自带 fetch-original</td><td>要极简、单二进制、稳定的人</td></tr>
+        <tr><td><strong>FreshRSS</strong></td><td>AGPL v3 免费<sup class="cite" data-refid="3">[3]</sup></td><td class="check y">Google Reader API + Fever API</td><td class="check y"><strong>原生 XPath scraping</strong> 给无 feed 站造 feed</td><td class="check y">Readable 插件（Readability+Mercury 双引擎）</td><td>要造 feed + 插件生态、能扛 1M+ 文章</td></tr>
+        <tr><td>Tiny Tiny RSS</td><td>开源自建免费</td><td class="check p">JSON API + 插件</td><td class="check p">插件</td><td class="check p">插件</td><td>⚠️社区风评差（主开发者态度 + 文档维护差）<span class="conf y">🟡</span></td></tr>
+        <tr><td>Newsboat</td><td>MIT 免费</td><td class="check n">纯 CLI 无 Web 无自身 API</td><td class="check n">无</td><td class="check n">无</td><td>对接 Miniflux/FreshRSS 后端、做脚本管道（最新 2.43，2026-03-22）<sup class="cite" data-refid="5">[5]</sup></td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout good"><h4>✅ 给阿杰的明确选择：FreshRSS</h4><p>因为你订大量中文公众号、需要给"无 feed 的站造 feed"，FreshRSS 的<strong>原生 XPath scraping</strong> 是省事关键——很多中文站没有 feed，你用浏览器看一眼 HTML 结构，填几个 XPath 表达式就能把它变成 feed，不必为此单独跑 RSSHub<sup class="cite" data-refid="3">[3]</sup>。它还自带 Readable 插件补全摘要 feed，Google Reader API 让 n8n / 手机 App 都能接。AGPL 完全免费，扛得住 50k+ 订阅。Miniflux 更极简稳定，但造 feed 要外挂 RSSHub，对你的中文场景多一道工序。<span class="conf g">🟢</span></p></div>
+    <h3>造 feed 工具：RSSHub（给无 feed 的站造 feed）</h3>
+    <p>RSSHub 是这套里最强的"万能 feed 工厂"——MIT 开源、1000+ 路由覆盖 YouTube/X/Bilibili/Weibo/Zhihu/TikTok/微信<sup class="cite" data-refid="6">[6]</sup>。Docker 一行起：</p>
+    <div class="step"><div class="step-head"><span class="sn">1</span>本地 Docker 一行起 RSSHub</div><div class="step-body"><code>docker run -d --name rsshub -p 1200:1200 diygod/rsshub</code> —— 然后 <code>http://localhost:1200/youtube/channel/UCxxx</code> 这样的地址就是一个可订阅 feed<sup class="cite" data-refid="6">[6]</sup>。</div></div>
+    <div class="step"><div class="step-head"><span class="sn">2</span>千万别长期用公共实例 rsshub.app</div><div class="step-body">公共实例被限流（120min 缓存 + IP quota 不稳），验证可以用，长期一定自建绕开。<span class="conf g">🟢</span></div></div>
+    <div class="step"><div class="step-head"><span class="sn">3</span>把生成的 feed 喂进 FreshRSS</div><div class="step-body">在 FreshRSS 里"添加订阅"，粘贴 RSSHub 的本地地址即可。部分路由支持 <code>?fulltext</code> 参数直接出全文。</div></div>
+    <p>同类的 <strong>RSS-Bridge</strong>（公共域、主打欧美站 Reddit/YouTube/Bluesky、最新 2025-08-05<sup class="cite" data-refid="8">[8]</sup>）也是一样思路，欧美站覆盖更好，同样建议自建避开公共实例限速。</p>
+    <h3>全文抓取：摘要 feed 怎么补全</h3>
+    <p>很多 feed 只给前两段。补全方式从省事到折腾：① <strong>Miniflux 自带 fetch-original</strong>（开关一开）② <strong>FreshRSS Readable 插件</strong>（Readability + Mercury 双引擎）③ <strong>FiveFilters Full-Text RSS</strong>（AGPL，自建或 $10/月托管，旧版 GitHub 免费<sup class="cite" data-refid="7">[7]</sup>）④ Mercury Parser（原 Postlight 已归档，社区 mercury-parser-api 有 Docker 镜像）。<strong>给阿杰：直接用 FreshRSS Readable 插件，免费、免外挂。</strong></p>
+    <h3>SaaS 兜底：不想自建的话</h3>
+    <div class="callout info"><p>如果连聚合器都不想自建，<strong>Inoreader</strong>（Pro $90/年含 API、2500 feeds、海外可达<sup class="cite" data-refid="4">[4]</sup>）和 <strong>Feedbin</strong>（$70/年无免费层、newsletter→RSS 专属邮箱地址强<sup class="cite" data-refid="42">[42]</sup>）是两个靠谱 SaaS。<strong>Feedly 个人版不要碰：API 只在 Enterprise Advanced（$2400/月起）才有，对个人不可行</strong><sup class="cite" data-refid="4">[4]</sup>。NewsBlur（MIT 可 Docker 自建、$36/年 Premium、有 API<sup class="cite" data-refid="41">[41]</sup>）介于自建和 SaaS 之间，也是选项。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH5 ===== -->
+<section class="chapter" id="ch5" data-nav="05 文章库怎么搭">
+  <h2><span class="num">05</span><span class="title-text">文章库怎么搭（造 feed + 全文抓取的具体步骤）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>文章库分两种来源：① <strong>有 feed 的站</strong>（博客、新闻、Substack）——直接订阅，零成本；② <strong>没 feed 的站</strong>——要造 feed。下面给完整操作流。</p>
+    <h3>情况 A：站点有 feed（最简单）</h3>
+    <div class="step"><div class="step-head"><span class="sn">1</span>找 feed 地址</div><div class="step-body">多数站在 <code>/feed</code>、<code>/rss</code>、<code>/atom.xml</code>、<code>/feed.xml</code>。找不到就把站点首页地址直接粘进 FreshRSS，它会自动探测 <code>&lt;link rel="alternate"&gt;</code>。Substack 一律是 <code>站名.substack.com/feed</code>。</div></div>
+    <div class="step"><div class="step-head"><span class="sn">2</span>订阅 + 分组打标</div><div class="step-body">在 FreshRSS 里加订阅，按主题建 category（技术/英语/半米）。这一步决定后面入库时的 source_name 字段。</div></div>
+    <div class="step"><div class="step-head"><span class="sn">3</span>开 Readable 插件补全摘要</div><div class="step-body">遇到只给摘要的 feed，对该订阅勾选"获取全文"，FreshRSS 用 Readability 把原文正文抓回来。</div></div>
+    <h3>情况 B：站点没有 feed（造 feed）</h3>
+    <p>三种造法，按省事程度排：</p>
+    <div class="metric-grid">
+      <div class="metric"><div class="v">最省事</div><div class="l"><strong>FreshRSS XPath scraping</strong>：直接在 FreshRSS 里填规则，不用另起服务。看一眼目标页 HTML，填"文章列表选择器 / 标题 / 链接 / 正文"的 XPath，FreshRSS 就把它当 feed<sup class="cite" data-refid="3">[3]</sup></div></div>
+      <div class="metric"><div class="v">最全</div><div class="l"><strong>RSSHub 路由</strong>：去 docs.rsshub.app 查目标站有没有现成路由（X/微博/知乎/B 站/TikTok 都有），有就直接用本地实例地址订阅<sup class="cite" data-refid="6">[6]</sup></div></div>
+      <div class="metric"><div class="v">欧美站</div><div class="l"><strong>RSS-Bridge</strong>：Reddit、Bluesky、欧美小站覆盖更好，自建实例同理<sup class="cite" data-refid="8">[8]</sup></div></div>
+    </div>
+    <div class="callout good"><p><strong>组合拳：FreshRSS（聚合 + XPath 造 feed + Readable 全文）一个工具基本就把"文章库"全包了。</strong>只有当某个站 XPath 太难写、或 RSSHub 已有现成路由时，才补一个 RSSHub Docker。这就是文章库的最小配置——一台小 VPS 上跑 FreshRSS + RSSHub 两个 Docker，月成本几美元。</p></div>
+    <h3>剪藏：临时遇到的好文章怎么入库</h3>
+    <p>RSS 是"订阅式"被动收，但你刷网页时随手遇到的文章需要"剪藏式"主动存。这块用 <strong>Wallabag</strong>（自托管、浏览器插件一键存 + iOS/Android app + REST API <code>/api/entries</code> 可被 n8n 轮询<sup class="cite" data-refid="33">[33]</sup>）或直接用成品稍后读 app（Cubox/Readwise）。剪藏库和 RSS 库最后在 Ch9 归一化到同一个 schema。</p>
+    <div class="trap-box"><strong>⚠️ 坑：</strong>Wallabag 的抓取器是<u>服务端 HTTP 请求</u>，不带浏览器内核，所以它抓不了任何<strong>需要 JS 渲染</strong>的页面——微信公众号文章就是典型（Ch6）。剪藏普通网页没问题，剪藏 mp.weixin.qq.com 会失败。这是判断"某工具能不能吃微信"的通用试金石：抓取器是不是无头浏览器。</div>
+  </div>
+</section>
+
+<!-- ===== CH6 ===== -->
+<section class="chapter" id="ch6" data-nav="06 ★微信入库（重点）">
+  <h2><span class="num">06</span><span class="title-text">【重点章】微信文章入库：最硬的墙 + 唯一可行的"转发就入库"入口</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>这是整份报告最重要、也最容易被网上教程骗的一章。阿杰订大量中文公众号，<strong>如果微信入库解决不了，整个知识库就缺了最大的一块</strong>。下面先把墙说透，再给唯一能落地的路径，每条都标封号风险。</p>
+    <div class="callout bad"><h4>① 墙有多硬：个人微信号根本没有官方 API，且反自动化信号在走强</h4><p>微信对个人号的封闭是<u>设计如此</u>，不是技术难题。2017 年微信就封掉了网页版微信的自动化入口；个人号至今没有任何官方 API。2026 年的几个信号显示腾讯对自动化/逆向的打击在升级：腾讯 <strong>2026-01-08 对一个含约 4195 个仓库的 GitHub network 发起 DMCA</strong><sup class="cite" data-refid="9">[9]</sup>（核心是微信聊天记录导出/解密类工具——<u>这条要诚实读</u>：它不是直接删了所有公众号 RSS 工具，而是反映腾讯对"绕过保护、逆向数据"类项目的维权在加码，🟡 别外推成"公众号入库工具被团灭"）；微信公众平台的<strong>使用规范/ToS 长期禁止自动化抓取、逆向、爬虫</strong>（坊间有 2026-04 进一步禁止"AI/脚本替代真人发布"的说法，但官方条文未检索到，🟡 待核实，不作为硬论据）<sup class="cite" data-refid="10">[10]</sup>。itchat/wechaty 这类 hook 框架仍然违反 ToS、有实打实的封号风险。<span class="conf r">🔴</span></p></div>
+    <div class="callout bad"><h4>② 技术障碍：mp.weixin.qq.com 文章是 JS 渲染 + 图片防盗链</h4><p>就算你不碰个人号、只想抓单篇文章链接，也撞墙：<strong>公众号文章正文是 JS 渲染的，直接 HTTP GET 只返回标题，拿不到正文</strong><sup class="cite" data-refid="14">[14]</sup>。这就是为什么所有"服务端 HTTP 抓取"的工具（Wallabag、普通 RSS 全文抓取）对微信失效。而且文章里的图片有<u>防盗链</u>，referer 必须是 mp.weixin.qq.com，外部阅读器里图片会全部裂掉。<strong>唯一解法是用无头浏览器（Playwright/Puppeteer）真的"打开"页面，等 JS 渲染完再抓 HTML，并处理 lazy-load 图片。</strong><span class="conf g">🟢</span></p></div>
+    <div class="callout bad"><h4>③ 自部署 RSS 方案大量阵亡：WeWeRSS 已 archived 停维护</h4><p>很多 2024 教程推 <strong>WeWeRSS</strong>（cooderl/wewe-rss，基于微信读书账号生成 RSS，6500+ stars），但它 <strong>2026-05-11 已 archived 停止维护</strong>，README 自己警告"添加频率过高易被封控"<sup class="cite" data-refid="12">[12]</sup>。它的继任 <strong>we-mp-rss</strong>（rachelos）还活着（v1.5.2，2026-04-16，3.6k stars），但同样是非官方接口 + 反爬对抗，自带"环境异常统计"，<strong>有封号风险</strong><sup class="cite" data-refid="13">[13]</sup>。这条路能用，但你赌的是一个可能随时被封的微信读书/公众号账号。<span class="conf r">🔴</span></p></div>
+    <h3>那到底怎么办？四条可落地路径（按省事排序）</h3>
+    <div class="callout good"><h4>✅ 路径 A · Cubox 微信转发助手（最完整、最省事，推荐起步）</h4><p>这是<u>唯一</u>不碰任何灰色技术、官方支持的"转发就入库"路径。操作：在 Cubox 设置里绑定微信 ID + 扫码加"Cubox 收藏助手"（一个企业微信号）→ 在微信里打开任意公众号文章 → 点分享 → 转发给这个助手 → Cubox 自动入库（正文解析 + 网页快照）<sup class="cite" data-refid="11">[11]</sup>。因为是<u>你本人手动转发</u>，没有自动化、不违 ToS、不会封号。代价：① 2022-12-14 起这个功能需要 Cubox Pro 会员（$39+/年）② 是手动操作，量大时累 ③ 海外可用性 🟡 官方未明确背书（华人产品，实测可用但你要自己确认 Cubox 助手在马来西亚网络下能正常收转发）。Cubox 还有 API（<code>POST {API_URL}</code> 带 <code>{"type":"url","content":"..."}</code>，只接 URL，Premium 500 次/天<sup class="cite" data-refid="11">[11]</sup>），可以接 iOS 快捷指令在分享 sheet 里触发。<span class="conf y">🟡</span></p></div>
+    <div class="callout good"><h4>✅ 路径 B · Readwise Reader + 自建 Playwright 中间层（最可控、最灵活）</h4><p>如果你要数据进自己掌控的 Readwise 库、且能接受搭个中间层，这是最强方案。原理：<strong>Readwise 的 save API（<code>POST readwise.io/api/v3/save/</code>）支持直传 <code>html</code> 参数</strong>——你可以把抓好的完整 HTML 直接塞给它，绕开它自己抓不了 JS 页面的问题<sup class="cite" data-refid="15">[15]</sup>。关键参数：<code>url</code>（可自定义）+ <code>html</code>（直传内容）+ <code>title</code>/<code>author</code>/<code>tags</code> + <code>should_clean_html</code>，限速 50 次/分。2025-10 有现成实现案例：复制公众号链接 → 经 WeChat Work / 中间层 webhook → Playwright/Puppeteer 无头浏览器抓完整 HTML + 处理 lazy 图片 → POST <code>html</code> 参数入 Readwise<sup class="cite" data-refid="16">[16]</sup>。代价：要自部署中间层 + 一台小服务器 + 一个企业微信号做触发入口（🟡 需要工程搭建，但比赌个人号封控干净）。<span class="conf g">🟢</span></p></div>
+    <div class="callout warn"><h4>⚠️ 路径 C · we-mp-rss 自部署（订阅固定公众号、接受封号风险）</h4><p>如果你有一批<u>固定要追的公众号</u>、想要全自动 RSS 化、且能接受封号风险，we-mp-rss 是最活跃的自部署方案：QR 扫码授权 + web scraping 抓文章，支持 RSS/Webhook/Markdown/PDF 导出，输出标准 RSS 直接进 FreshRSS/n8n<sup class="cite" data-refid="13">[13]</sup>。<strong>但它是非官方接口对抗反爬，README 自带封号警告</strong>。务必用一个<u>小号</u>（微信读书/公众号），降低添加频率，别绑你主微信。同类还有 <strong>wechat2rss</strong>（公共服务，免费列表 300+ 公众号、平均 6h 延迟、有图片视频代理；自部署收费年 ¥200<sup class="cite" data-refid="12b">[12b]</sup>），省去自己抓的麻烦但同样是第三方依赖。<span class="conf r">🔴</span></p></div>
+    <div class="callout warn"><h4>⚠️ 路径 D · RSSHub 微信路由（稳定性靠第三方，做不到全覆盖）</h4><p>RSSHub 有几条微信路由，但<u>都不是直接爬 mp.weixin.qq.com</u>，而是绕第三方：<code>/wechat/ce/:id</code>（依赖第三方 CareerEngine careerengine.us）、<code>/wechat/mp/msgalbum/:biz/:aid</code>（公众号 tag 合集页，需要 <code>biz=__biz</code> 字段 + album_id，只有建了合集的号才有）、<code>/newrank/wechat/:wxid</code>（需 NEWRANK_COOKIE）<sup class="cite" data-refid="6">[6]</sup>。<code>__biz</code> 从公众号分享链接 <code>mp.weixin.qq.com/mp/homepage?__biz=XXX</code> 里提取。这些路由稳定性都依赖第三方服务，🟡 时灵时不灵，只能当补充，做不到"任意公众号全自动"。</p></div>
+    <h3>iOS 现实约束（必须知道，否则白搭）</h3>
+    <div class="trap-box"><strong>⚠️ 微信内置浏览器不是 Safari，快捷指令在它的分享 sheet 里不出现。</strong>这意味着你<u>无法</u>在微信里"分享 → 跑个快捷指令 POST 到 API"。微信分享 sheet 里只出现有 share extension 的 app（Cubox 等）。实际可行的一键操作只有两种：① 微信"…"菜单 → 复制链接 → 切到目标 app 粘贴；② 用 iOS 自动化监测剪贴板出现 <code>mp.weixin</code> 链接 → 自动触发 POST。这就是为什么<strong>路径 A（Cubox 转发助手）体验最好</strong>——它走的是微信原生"转发给好友"，不依赖快捷指令。</div>
+    <div class="callout purple"><h4>💡 Agent 框架（Hermes/OpenClaw）在微信这块只能当 glue，穿不透墙</h4><p>承接你之前那份《Hermes vs OpenClaw》研究：Hermes v0.9 确实有 WeChat adapter，HermesClaw 项目让两者共用微信账号轮询<sup class="cite" data-refid="34">[34]</sup>。<strong>但这个 adapter 解决的是"agent 作为 bot 在微信里响应消息"，根本没解决"个人号没有 API"这个底层问题。</strong>agent 在这套里的真实角色只是调度 glue：收到一个链接 → 调 Playwright 抓 → 入库。<u>接入层那堵墙，agent 解决不了</u>，因为问题不在编排能力，在腾讯不给个人号开口子。别指望换个 agent 框架就能全自动吃微信。<span class="conf g">🟢</span>（Ch10 展开 agent 的真实定位）</p></div>
+    <div class="callout info"><p><strong>本章一句话结论 + 推荐优先级（阿杰、马来西亚、个人）：</strong>① 最省事 = <strong>Cubox 付费 Pro 微信转发助手</strong>（手动转发、零封号风险，先用这个跑起来）；② 最可控 = <strong>Readwise + 自建 Playwright 中间层</strong>（数据自有、工程量中等）；③ 订固定号 = <strong>we-mp-rss 自部署</strong>（用小号、接受封号风险）；④ Hermes/OpenClaw 只做收链接→调抓取→入库的 glue。<strong>不存在"零风险 + 全自动 + 任意公众号"的方案，这是腾讯设计的墙，不是你工具没选对。</strong></p></div>
+  </div>
+</section>
+
+<!-- ===== CH7 ===== -->
+<section class="chapter" id="ch7" data-nav="07 视频库怎么搭">
+  <h2><span class="num">07</span><span class="title-text">视频库怎么搭（yt-dlp + 频道原生 RSS + 增量 + PO Token）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>视频库是三库里"自建反而比成品强"的一个——因为成品（Readwise/Matter）只存字幕和书签，<strong>yt-dlp 能下载真正的视频文件，让你"拥有"内容而不是依赖 YouTube 不下架</strong>。下面给完整入库流。</p>
+    <h3>第一块：YouTube 每个频道都有原生 RSS（白嫖订阅）</h3>
+    <div class="callout good"><p><strong>关键事实：YouTube 每个公开频道都自带 Atom RSS，无需 API key。</strong>地址格式：<code>youtube.com/feeds/videos.xml?channel_id=UC…</code><sup class="cite" data-refid="25">[25]</sup>。把这个地址订进 FreshRSS，就能像追博客一样追频道更新。限制：每个 feed 只给<u>最新 15 个视频</u>。<strong>playlist 也有 feed</strong>（<code>youtube.com/feeds/videos.xml?playlist_id=PL…</code>），但稳定性和条数上限不如频道 feed，要追特定播放列表时可试、以实测为准 🟡。从频道 URL 提取 channel_id 的命令：<code>yt-dlp --playlist-items 0 -O playlist:channel_url --print channel_url "$URL" | sed 's|channel/|feeds/videos.xml?channel_id=|'</code><sup class="cite" data-refid="29">[29]</sup>。</p></div>
+    <h3>第二块：yt-dlp 增量下载（频道同步核心）</h3>
+    <p>视频库要"持续同步频道新视频、已下的不重复下"，核心是 <code>--download-archive</code>：下载后把 video ID 写进 archive 文件，下次自动跳过<sup class="cite" data-refid="26">[26]</sup>。完整入库命令：</p>
+    <div class="check-box">
+      <strong>完整归档 flag（一条命令吃下视频+元数据+字幕+缩略图）：</strong><br>
+      <code>yt-dlp --download-archive archive.txt --write-info-json --write-thumbnail --write-subs --write-auto-subs --sub-langs en --embed-metadata "https://youtube.com/@Channel/videos"</code><br>
+      然后用 cron（mac 上是 launchd）定时跑这条命令，就是一个自动增量的频道库。<sup class="cite" data-refid="26">[26]</sup>
+    </div>
+    <div class="callout bad"><h4>⛔ 2025/2026 高频坑：遇到 403 / bot check / 格式缺失，先配 PO Token</h4><p>2025 起 YouTube 在<u>逐步</u>推行 <strong>PO Token（Proof-of-Origin）</strong>。yt-dlp 默认仍会尝试不需要 token 的 client，但部分格式/功能可能缺失或触发 403、机器人校验——这是 2026 年很多"yt-dlp 突然下不动/报 Sign in to confirm"的常见根因。解法：装 <code>bgutil-ytdlp-pot-provider</code> 插件（<code>pip</code> 装，最新 1.3.1，2026-03-07），它后台自动生成 token 并注入<sup class="cite" data-refid="24">[24]</sup>，并加 <code>--cookies-from-browser firefox</code> 带登录态。<strong>注意：PO Token 也不保证 100% 绕过 bot check（插件 README 自己也这么说），它降低被拦概率但不是万能钥匙。遇到下载报错时，先升级 yt-dlp 到最新版 + 配 PO Token，是最高命中率的两步。</strong><span class="conf g">🟢</span></p></div>
+    <h3>第三块：ytdl-sub 做"媒体库"级管理（可选进阶）</h3>
+    <p>如果你下的视频多到要像 Netflix 一样组织，<strong>ytdl-sub</strong> 是 yt-dlp 上层封装：YAML 配订阅 → 按 TV Show 季/集结构组织 + 生成 NFO 元数据 + 封面，直接兼容 Jellyfin/Plex/Kodi/Emby（最新 2026.06.12，活跃<sup class="cite" data-refid="27">[27]</sup>）。<strong>给阿杰：起步不用上 ytdl-sub，裸 yt-dlp + archive 已够；等视频库大到要影院级浏览体验再上。</strong></p>
+    <h3>第四块：转写入库（让视频可全文搜索）</h3>
+    <p>视频要进"可搜索的知识库"，光有文件不够，要有文本。优先用 yt-dlp 已经下好的字幕（<code>--write-subs</code>）；没有官方字幕的，用 <strong>WhisperX</strong> 本地转写（Ch8 详述，large-v2 批处理 70x 实时<sup class="cite" data-refid="32">[32]</sup>）。转写出的 SRT/VTT 文本就是你入库的 content_text 字段。</p>
+    <div class="callout info"><p><strong>B 站怎么办：</strong>yt-dlp 能下 B 站（语法同 YouTube，高清/会员需 <code>--cookies-from-browser</code>），<code>--download-archive</code> 同样适用；批量下载用专门的 <strong>BBDown</strong> CLI 更顺。<u>但 B 站没有原生频道 RSS</u>，要追更新得靠 RSSHub 的 <code>/bilibili/user/video/:uid</code> 路由（Ch4）或轮询。B 站反爬随时变 🟡。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH8 ===== -->
+<section class="chapter" id="ch8" data-nav="08 播客库怎么搭">
+  <h2><span class="num">08</span><span class="title-text">播客库怎么搭（播客=RSS+enclosure + Audiobookshelf + 转写）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>好消息：<strong>播客本质上就是 RSS</strong>，所以它是三库里最干净、最成熟的自托管对象。理解这个本质，整章就通了。</p>
+    <div class="callout good"><h4>✅ 核心认知：播客 = RSS 2.0 + &lt;enclosure&gt; 音频直链</h4><p>一个播客 feed 就是标准 RSS 2.0，每集用 <code>&lt;enclosure&gt;</code> 标签挂音频直链（url + length + type）<sup class="cite" data-refid="30">[30]</sup>。带 <code>&lt;itunes:&gt;</code> namespace（封面/分类/show notes）。<strong>Podcasting 2.0 还定义了 <code>&lt;podcast:transcript&gt;</code> 标签</strong>——可以直接在 feed 里挂 VTT/SRT/JSON 转写文件<sup class="cite" data-refid="30">[30]</sup>。<u>这要和"平台内转写"分清</u>：① 凡是 feed 里带 <code>podcast:transcript</code> 的播客，你能从开放 RSS 直接白嫖转写文本、连转录都省；② 但 Apple（2024 起）/Spotify（2025 起）在<u>自家 App 里</u>生成的自动转写，未必会暴露到开放 RSS 里，自建系统不一定拉得到。所以播客入库优先逻辑：先读 feed 里有没有 <code>podcast:transcript</code>，有就直接拉，没有才本地转写——别假设"大平台都转好了我直接拿"。<span class="conf y">🟡</span></p></div>
+    <h3>自托管服务端：Audiobookshelf（最成熟）</h3>
+    <p><strong>Audiobookshelf</strong> 是最完整的自托管播客方案（Docker，5 万+ stars<sup class="cite" data-refid="31">[31]</sup>）。操作流：</p>
+    <div class="step"><div class="step-head"><span class="sn">1</span>Docker 起 Audiobookshelf</div><div class="step-body">官方 docker-compose 一把起，Web UI 管理。</div></div>
+    <div class="step"><div class="step-head"><span class="sn">2</span>输入播客 RSS URL → 选历史集数</div><div class="step-body">把订阅设到 1990 年 + 无上限，就能把整个历史拉全（不只最新几集）<sup class="cite" data-refid="31">[31]</sup>。</div></div>
+    <div class="step"><div class="step-head"><span class="sn">3</span>自动追更 + 重导出 RSS 供手机听</div><div class="step-body">它自动下载新集，还能<u>重新导出一个 RSS</u>，让你的手机播客 App（AntennaPod 等）连上来听，等于自建了一个播客中转站。show notes 从 <code>&lt;description&gt;</code> 拉。</div></div>
+    <div class="callout warn"><p><strong>⚠️ 诚实标注 ABS 两个不足：</strong>① <u>Whisper 转写还没合并主线</u>——是 2025 enhancement issue #2919，至今 still open，别以为开箱能转写<sup class="cite" data-refid="31">[31]</sup>。② 全文搜索目前只按标题/播客名搜，<u>搜不了转写正文内容</u>。所以"播客可全文搜索"这个需求 ABS 自己满足不了，要靠下面的外部转写 + 写进你的主库。</p></div>
+    <h3>客户端 App：手机上听用什么</h3>
+    <p>纯听播客的客户端：<strong>AntennaPod</strong>（Android 开源 F-Droid，OPML 导入导出，gPodder 协议同步）、<strong>Podverse</strong>（iOS/Android/Web，支持 Podcasting 2.0 章节/转写）、<strong>gopodder</strong>（2025 中自托管同步服务器）<sup class="cite" data-refid="31b">[31b]</sup>。它们负责"听"，ABS 负责"归档 + 中转"。</p>
+    <h3>转写入库：没有官方 transcript 时</h3>
+    <div class="callout good"><h4>✅ WhisperX 是播客/视频转写的最佳开源选择</h4><p>large-v2 批处理达 70x 实时（1 分钟音频 &lt;1 秒转完），输出 SRT/VTT/JSON 含<u>词级时间戳</u>，说话人识别需 HuggingFace token<sup class="cite" data-refid="32">[32]</sup>。本地 M 系列芯片转一集 35-40 分钟节目约 15 分钟。配套 <code>whisper-obsidian-plugin</code> 能把转写直接落进 Markdown。<strong>不想自己跑 GPU 的话</strong>，OpenAI 转写 API（旧 <code>whisper-1</code> 名义价 $0.006/分钟；🟡 当前 dashboard 已转向新 audio/transcription 模型命名与价格，掏钱前核当前价<sup class="cite" data-refid="40">[40]</sup>）——以旧价算一集 40 分钟节目约 $0.24，量小时仍比自建 GPU（≈$276/月）划算得多。<span class="conf g">🟢</span></p></div>
+    <div class="callout info"><p><strong>播客库一句话搭法：</strong>Audiobookshelf 自托管做归档 + 重导出 RSS 给手机听；入库文本优先读 feed 里的 <code>podcast:transcript</code>，没有就 WhisperX 本地转（量小用 Whisper API）。转出的文本写进 Ch9 的主库，这才让播客"可全文搜索"。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH9 ===== -->
+<section class="chapter" id="ch9" data-nav="09 拼成一个系统">
+  <h2><span class="num">09</span><span class="title-text">把它们拼成一个系统：schema + 去重 + 存储 + 编排</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>前面四个库（RSS 文章、微信、视频、播客）各自能采集，但它们是散的。这一章把它们拼成<u>一个</u>系统：统一 schema、去重、存储、编排。这是"知识库系统"和"一堆工具"的区别。</p>
+    <h3>第一步：归一化 schema（所有来源进同一张表）</h3>
+    <p>不管文章/微信/视频/播客，都映射到同一个 items 表。参考 Indaleko 论文的字段设计<sup class="cite" data-refid="38">[38]</sup>：</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>字段</th><th>含义</th><th>作用</th></tr></thead>
+      <tbody>
+        <tr><td><code>id</code></td><td>SHA256(source_type + url)</td><td>主键 + 第一道去重</td></tr>
+        <tr><td><code>url</code></td><td>原文链接，UNIQUE</td><td>去重键</td></tr>
+        <tr><td><code>title / author / published_at / saved_at</code></td><td>基本元数据</td><td>排序/展示</td></tr>
+        <tr><td><code>content_text</code></td><td>全文（文章正文 / 视频播客转写）</td><td>喂 FTS5 全文索引</td></tr>
+        <tr><td><code>summary</code></td><td>AI 摘要</td><td>快速浏览</td></tr>
+        <tr><td><code>source_type</code></td><td>rss_article｜wechat｜youtube｜podcast｜tweet｜book</td><td>分类 + 跨库筛选</td></tr>
+        <tr><td><code>tags</code></td><td>JSON</td><td>一库多标签（见融合）</td></tr>
+        <tr><td><code>media_url / raw_html_url</code></td><td>R2 上的媒体/原文件</td><td>保存原件</td></tr>
+        <tr><td><code>checksum</code></td><td>content 的 MD5</td><td>第二道去重（内容变了才更新）</td></tr>
+      </tbody>
+    </table></div>
+    <p><strong>去重逻辑：</strong>先 <code>WHERE url=?</code>，命中再比 <code>checksum</code>——不同才更新，相同就跳过<sup class="cite" data-refid="38">[38]</sup>。两道去重（url + 内容 MD5）保证同一篇文章从 RSS 和剪藏两条路进来也只存一份。</p>
+    <h3>第二步：存储三件套（主库 + 媒体 + 笔记）</h3>
+    <div class="metric-grid">
+      <div class="metric"><div class="v">SQLite FTS5</div><div class="l"><strong>主库</strong>。内置 BM25 排序、单用户无并发写冲突、备份=cp 一个文件、比 FTS3 快约 30%。是个人库最省力的起点<sup class="cite" data-refid="37">[37]</sup></div></div>
+      <div class="metric"><div class="v">Cloudflare R2</div><div class="l"><strong>存媒体原件</strong>。S3 兼容、<u>零 egress 费</u>、AES-256、335 节点。视频/音频/原始 HTML 存这里，主库只存 URL 指针<sup class="cite" data-refid="39">[39]</sup></div></div>
+      <div class="metric"><div class="v">Obsidian MD</div><div class="l"><strong>人读 + 双链</strong>。天然 git 版本控制 + 离线 + MCP 可读写。每条 item 写一个 MD 带 YAML frontmatter，用 [[wikilink]] 互联</div></div>
+    </div>
+    <div class="callout warn"><h4>⚠️ Meilisearch 什么时候才需要（别过早上）</h4><p>很多教程一上来就推 Meilisearch，但<strong>个人库几十万条以内，SQLite FTS5 的全文搜索已经够用，不需要单独跑搜索引擎</strong>。Meilisearch（MIT、磁盘+内存映射不受 RAM 限、5 分钟跑起、中文自动分词<sup class="cite" data-refid="37b">[37b]</sup>）的价值在于<u>typo 容错 + 即时搜索体验 + 超大量数据</u>。判断线：内容超 ~5 万条、或你强需要拼错也能搜到，才单独起一个 Meilisearch Docker。Typesense（全量索引在内存 sub-50ms，但硬件成本随数据线性涨）只在数据能全放内存时才更快。<strong>给阿杰：起步坚决不上 Meilisearch。</strong></p></div>
+    <div class="trap-box"><strong>⚠️ Obsidian 的搜索天花板：</strong>Obsidian 内置搜索在 <u>2400+ 条笔记开始变慢</u>（用户经验，无官方确认 🔴），Omnisearch 插件能补但需要 Obsidian 一直开着运行。所以<strong>别把 Obsidian 当搜索主库</strong>——搜索靠 SQLite FTS5，Obsidian 只做"人读 + 双链笔记"，两边通过 source_url 互查。这就是为什么架构里 SQLite 和 Obsidian 是双写而非二选一。</div>
+    <h3>第三步：编排层（把采集→处理→入库串起来）</h3>
+    <div class="callout good"><h4>✅ 编排用 n8n（会写代码个人用户的最优 glue）</h4><p>n8n 有 400+ 原生集成（含内置 RSS Feed Trigger 节点）+ 1100+ 总集成 + 可视化 + JS/Python 代码节点 + LangChain 原生，Docker 起、最低 4GB RAM<sup class="cite" data-refid="43">[43]</sup>。标准管道模板（workflow #4503）：<code>Schedule Trigger → RSS Feed Loop（时间过滤去重）→ AI 摘要 → 写存储 → 通知</code><sup class="cite" data-refid="43">[43]</sup>。对比项：Huginn（Ruby/YAML 门槛高、2023 后开发放缓，不推荐新项目）、Node-RED（轻量适合 IoT，复杂 SaaS 管道不适合）。<span class="conf g">🟢</span></p></div>
+    <div class="trap-box"><strong>⚠️ n8n 的一个真实坑：没有内置 SQLite 节点。</strong>n8n 官方<u>不提供</u>直接写 SQLite 的节点，要么用 HTTP Request 对接 Datasette/LibSQL HTTP API，要么用 Execute Command 跑 Python 脚本写库——实战教程少，得自己摸 🔴。所以"n8n 直接写 SQLite"不是开箱即用，这是你搭管道时第一个会卡住的地方。变通：让 n8n 把归一化好的 JSON POST 给一个你自己写的小 Python/FastAPI 接口，由它落 SQLite。</div>
+    <h3>推荐管道全图（会写代码个人）</h3>
+    <div class="check-box">
+      <strong>采集层：</strong>FreshRSS / n8n RSS Trigger（文章）+ we-mp-rss 或 Cubox 转发（微信）+ yt-dlp + Whisper（视频）+ podcast:transcript / WhisperX（播客）+ Wallabag（剪藏）<br>
+      <strong>编排层（n8n）：</strong>触发 → 抓全文 Readability → 归一化成 schema → URL hash 去重查 SQLite → 写 SQLite → 媒体上传 R2 → （可选 Meilisearch 索引）→ 写 Obsidian MD → Discord 通知<br>
+      <strong>存储层：</strong>SQLite FTS5 主库 + R2 媒体 + Obsidian MD + Meilisearch（&gt;5 万条才上）
+    </div>
+    <div class="callout info"><h4>💡 最小可行版（一周跑通，别一次全上）</h4><p><strong>FreshRSS + n8n + SQLite FTS5 + Obsidian，不上 Meilisearch/R2。</strong>工作量估算：n8n 管道 + schema 设计 2-4 天 / we-mp-rss 部署 2 小时 / Wallabag 1 小时 / Meilisearch 半天（可延后）<sup class="cite" data-refid="44">[44]</sup>。先把"文章从 RSS 进 SQLite 并能全文搜 + 写一份 Obsidian MD"这条主干跑通，微信用 Cubox 顶着、视频播客先用成品顶着，验证完再逐块自建替换。⚠️ 工作量为基于证据包的估算。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH10 ===== -->
+<section class="chapter" id="ch10" data-nav="10 Agent 的真实角色">
+  <h2><span class="num">10</span><span class="title-text">Hermes/OpenClaw 在这套系统里的真实角色</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>承接你之前的《Hermes vs OpenClaw》和《n8n vs LangGraph》两份研究——这里只回答一个问题：<strong>这套知识库系统里，agent 框架到底干什么、不干什么。</strong>说清楚省得你高估它。</p>
+    <div class="callout purple"><h4>💡 Agent 只做 glue 调度，不做核心采集/存储/搜索</h4><p>知识库系统的核心是三块：① 采集（yt-dlp/Playwright/RSS）② 存储（SQLite/R2）③ 搜索（FTS5）。这三块都是<u>确定性的工程组件</u>，不需要 agent 的"智能"——一个 cron + 脚本就干完了，引入 agent 反而增加不确定性和成本。<strong>agent 真正有价值的位置只在两处：</strong>（A）<u>需要判断的 glue</u>——比如"这条内容该打什么标签、该归到哪个库、要不要摘要"；（B）<u>对话式检索</u>——你问"我之前存的关于 X 的内容里有什么观点"，这是 Ch12 NotebookLM 那一层。<span class="conf g">🟢</span></p></div>
+    <div class="callout bad"><h4>⛔ 重申：微信墙在接入层，换任何 agent 框架都解决不了</h4><p>这是最容易被"agent 万能"幻觉骗的地方。Hermes 有 WeChat adapter、HermesClaw 能共用微信账号<sup class="cite" data-refid="34">[34]</sup>，听起来像"agent 能搞定微信"。<strong>但 adapter 解决的是"让 agent 作为聊天机器人在微信里收发消息"，它依然跑在个人号上、依然没有官方 API、依然受 2026-04 自动化禁令约束。</strong>你的 agent 编排能力再强，也变不出一个腾讯不给的 API。所以 agent 在微信入库这块的角色，和 Ch6 说的一样：收链接 → 调 Playwright 抓 → 入库的 glue，墙它穿不透。<span class="conf r">🔴</span></p></div>
+    <div class="callout info"><p><strong>结论：</strong>这套系统的"骨架"用 n8n + 脚本 + cron 搭（确定性、稳、便宜），agent（Claude Code / Hermes）只在"需要判断的打标摘要"和"对话式检索"两处出现。<u>别把采集和存储交给 agent</u>——那是用昂贵且不稳的东西干确定性脏活。这也呼应你《n8n vs LangGraph》的结论：n8n 在 glue 层，逻辑/判断才上 LLM。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH11 ===== -->
+<section class="chapter" id="ch11" data-nav="11 ★阿杰路线建议">
+  <h2><span class="num">11</span><span class="title-text">阿杰路线建议（决策树 + 三档方案 + 与现有库融合）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>把前面所有东西收口成一张决策树 + 三档可执行方案。先回答"先搭哪个库跑通"，再回答"和你现有的推文库/书库怎么融合"。</p>
+    <div class="tree">
+      <div class="node q">Q1 · 你现在的首要目标是什么？</div>
+      <div class="node"><span class="lbl y">先验证"我到底要不要一个知识库系统"</span>→ 极简成品档（Readwise Reader 一个账号，一个月）</div>
+      <div class="node"><span class="lbl m">想要数据自有，但时间有限</span>→ 半自建档（成品解决微信 + 自建视频/播客 + Obsidian 汇总）</div>
+      <div class="node"><span class="lbl n">享受搭系统 + 数据必须全自有</span>→ 完整自建档（FreshRSS+n8n+SQLite FTS5+R2）</div>
+      <div class="node q">Q2 · 先搭哪个库跑通（无论哪档都先搭这个）？</div>
+      <div class="node"><span class="lbl y">文章库</span>✅ 它最简单、来源最多、立刻有正反馈。RSS 底座 1 天搭完，先尝到"统一收文章并能搜"的甜头</div>
+      <div class="node"><span class="lbl n">别先碰微信/视频</span>⛔ 微信是最难的（Ch6 墙），视频要踩 PO Token 坑（Ch7）——先搭它们容易卡住放弃</div>
+    </div>
+    <h3>三档可执行方案</h3>
+    <div class="callout good"><h4>✅ A 档 · 极简成品档（当天可用，$120/年，零运维）</h4><p><strong>怎么搭：</strong>开一个 Readwise Reader 账号。文章/YouTube/播客全丢进去；微信用 Cubox Pro 转发助手顶着（或 Readwise + 手动复制链接）；用 Ghostreader 做跨库问答。每周自动导出到 Obsidian 当永久仓库。<strong>适合：</strong>还没想清需求、时间最稀缺、要立刻能用。<strong>代价：</strong>数据在 SaaS 手里、微信体验一般、$120/年。<strong>这是默认推荐起点——先用一个月，搞清你真正在用哪个库、缺什么，再决定要不要往下走。</strong><span class="conf g">🟢</span></p></div>
+    <div class="callout good"><h4>✅ B 档 · 半自建档（每库用最优解，混合，推荐落点）</h4><p><strong>怎么搭：</strong>文章 = FreshRSS 自建（XPath 造 feed + Readable 全文）；微信 = Cubox 转发助手（不碰灰色技术）；视频 = yt-dlp + 频道原生 RSS + 增量归档（这是成品做不到的"真拥有文件"）；播客 = Audiobookshelf 自托管；最后全部 export 汇到 Obsidian，搜索用 SQLite FTS5。<strong>适合：</strong>要数据自有但时间有限、不想为每块都造轮子。<strong>这是大多数工程师的最终落点</strong>——每个库用它最擅长的方案，微信这块认怂用成品，视频这块吃自建红利。<span class="conf g">🟢</span></p></div>
+    <div class="callout warn"><h4>⚠️ C 档 · 完整自建档（全自有，2-4 天起步 + 长期维护）</h4><p><strong>怎么搭：</strong>FreshRSS + RSSHub（采集）+ we-mp-rss 小号（微信，接受封号险）+ yt-dlp + WhisperX（视频）+ Audiobookshelf + podcast:transcript（播客）→ n8n 编排归一化去重 → SQLite FTS5 主库 + R2 媒体 + Obsidian 双写 → Discord 通知。<strong>适合：</strong>数据必须 100% 自有、享受搭系统、能承担长期维护（PO Token 更新、微信封控、各组件偶发故障）。<strong>代价：</strong>这不是搭完就完事，是每个环节都会偶尔坏要你修。<u>除非你真的享受这个过程，否则 B 档性价比高得多。</u><span class="conf y">🟡</span></p></div>
+    <h3>和现有"推文库 / 书库"怎么融合：一库多标签 &gt; 多库</h3>
+    <div class="callout info"><p><strong>原则：一库多标签优于多库。</strong>Obsidian flat vault + tag 比多 vault 更易跨类型检索<sup class="cite" data-refid="45">[45]</sup>。具体到阿杰：你现有的<u>推文库/书库在 Roam 里不要动</u>（迁移成本高、风险大）；新增的"文章/视频/播客"走 SQLite + Obsidian MD 双写（SQLite 做搜索去重主库，Obsidian 写 [[wikilink]] 反链）；两套系统<strong>通过 source_url 互查、不强制迁移</strong>。等于在不动现有 Roam 体系的前提下，新长出一个搜索友好的采集库，需要时用 URL 在两边跳转。<span class="conf y">🟡</span></p></div>
+    <div class="callout warn"><h4>⚠️ 两个容易被收集冲动盖过的现实：分发权 + 反堆积</h4><p><strong>① "数据自有" ≠ "想怎么用都行"。</strong>yt-dlp 下的视频文件、Playwright 抓的公众号 HTML、Whisper 转的文本，你拥有的是<u>本地副本</u>，不等于拥有<u>再分发权</u>——原文/视频/音频的版权仍归原作者。自建库做"个人备份 + 个人检索"落在容忍区间；一旦公开重新发布（搭个网站给别人看、做成产品内容），就是另一回事。本报告讲的是"个人知识库"，请守住这条边界。<strong>② 知识库最大的失败模式不是搭不起来，是 hoarding（只存不看）。</strong>建议从第一天就加保留纪律：未读上限、每周清理、AI 摘要先过一遍只留值得读的，否则三个月后你会有一个 5000 条没人看的坟场。<span class="conf y">🟡</span></p></div>
+    <div class="callout purple"><h4>💡 最小可行版（一周跑通，给你最快的正反馈）</h4><p><strong>FreshRSS + n8n + SQLite FTS5 + Obsidian</strong>，不上 Meilisearch/R2，微信用 Cubox 顶着、视频播客先用 Readwise 顶着。先把"文章从 RSS 自动进 SQLite + 能全文搜 + 落一份 Obsidian MD"这条主干跑通（2-4 天<sup class="cite" data-refid="44">[44]</sup>）。<strong>跑通后你会立刻知道这套系统对你有没有用</strong>——有用再逐块自建替换微信/视频/播客，没用就退回 A 档成品。这是"先挑一个窄的跑通"的标准打法，别一上来就铺完整 stack。</p></div>
+  </div>
+</section>
+
+<!-- ===== CH12 ===== -->
+<section class="chapter" id="ch12" data-nav="12 变成 NotebookLM 库">
+  <h2><span class="num">12</span><span class="title-text">把这份研究变成你的 NotebookLM 研究库</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>接你的实际需求：这份报告本身的 References 就是一份<u>已经筛好的高质量 source 清单</u>。这一章讲怎么把它（和你其它研究）变成 NotebookLM 知识库，以及 NotebookLM 在整套系统里的定位。</p>
+    <div class="callout good"><h4>✅ References = 现成的 NotebookLM source 清单</h4><p>报告末尾的每个 reference 都是一个被你核过、值得保留的来源 URL。把它们按主题导入 NotebookLM，建议分三个 notebook：<strong>「自动化工具」</strong>（RSSHub/n8n/yt-dlp/Readwise/Cubox 文档）、<strong>「英语学习」</strong>（你的 SciShow/词汇相关研究）、<strong>「半米」</strong>（产品/竞品研究）。每份研究报告产出后，把它的 References 批量喂进对应 notebook，时间一长就是一个<u>你亲手筛过、可对话检索</u>的研究底库。</p></div>
+    <div class="callout warn"><h4>⚠️ 关键认知：NotebookLM 适合"问已有材料"，不适合"发现新东西"</h4><p>别把 NotebookLM 当搜索引擎或研究 agent 用。它的强项是<strong>source-grounded</strong>——只在你喂进去的材料里回答、给引用、几乎不幻觉。所以它回答"我之前那份 RSS 研究里推荐的微信方案是什么"完美，但回答"2026 年有没有新的微信入库工具"无能为力（它不会去网上找新东西）。<strong>定位：NotebookLM = 你已有知识的对话接口；发现新信息还是靠 WebSearch + 做新研究。</strong>这和 Ch3 里 Readwise Ghostreader / Cubox Library Insight 的"跨库 AI 问答"是同一类能力——都是"问已有材料"，区别只是材料在哪个库里。<span class="conf g">🟢</span></p></div>
+    <div class="callout info"><p><strong>串起来看：</strong>你的知识库系统（Ch9）负责<u>采集和存全文</u>，NotebookLM（或 Readwise Ghostreader）负责<u>对话式检索</u>。两者互补：采集系统是"仓库"，NotebookLM 是"会查仓库的助理"。最顺的工作流是——采集系统把内容存进 Obsidian/SQLite，挑重要的批量导入 NotebookLM 当"可对话的精华子集"，需要写东西时先问 NotebookLM 调研已有材料，缺新信息再开 WebSearch。</p></div>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section class="chapter" id="faq" data-nav="FAQ 常见问题">
+  <h2><span class="num">13</span><span class="title-text">FAQ · 常见问题</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">最关键的：搭这套到底要不要先会写代码？</span><span class="toggle">＋</span></div><div class="faq-a"><p>分档看。<strong>A 档极简成品档完全不用写代码</strong>——开个 Readwise 账号就行，适合先验证。<strong>B/C 档自建要写代码</strong>：n8n 虽是可视化，但归一化 schema、对接 SQLite（n8n 没有内置 SQLite 节点，要自己写小接口，Ch9）、Playwright 抓微信，都需要工程能力。对阿杰这种单人全栈，B 档（半自建）门槛刚好——视频/播客自建是标准 CLI 活，微信认怂用成品，不必啃最硬的骨头。</p></div></div>
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">我人在马来西亚，这些工具都能用吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>绝大多数能。RSS 类（FreshRSS/RSSHub/Miniflux）自托管、海外完全可达；成品里 Readwise/Raindrop/Karakeep/Matter 都是海外服务、可达。<u>唯一要你自己确认的是 Cubox</u>——华人团队产品、海外可用性官方未明确背书（🟡），微信转发助手在马来西亚网络下能不能正常收转发，建议先免费试一周再决定付费。微信本身（we-mp-rss/wechat2rss）是连微信服务器，海外也能连，但稳定性看你的网络。</p></div></div>
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">我订了很多公众号，有没有"全自动、零封号、任意号"的方案？</span><span class="toggle">＋</span></div><div class="faq-a"><p>没有。这是本报告反复强调的现实：个人微信号没有官方 API、腾讯 2026-01 对逆向/解密类仓库的 DMCA 打击在升级<sup class="cite" data-refid="9">[9]</sup>、微信 ToS 长期禁自动化<sup class="cite" data-refid="10">[10]</sup>。"零封号"和"全自动"二选一：要零封号就用 Cubox 手动转发（路径 A）；要自动就上 we-mp-rss 小号、接受封号风险（路径 C）。"任意公众号"更难——RSSHub 路由只覆盖部分。最现实的组合：常追的固定号用 we-mp-rss 小号自动化，偶尔遇到的好文章手动 Cubox 转发。</p></div></div>
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">为什么不直接全用 Readwise，还折腾自建？</span><span class="toggle">＋</span></div><div class="faq-a"><p>Readwise 很强，但有三个它做不到的：① <u>真正拥有视频文件</u>——它只存 YouTube 字幕，YouTube 一删你就没了，yt-dlp 下的文件永久属于你；② <u>数据自有</u>——内容在 Readwise 服务器，停服或涨价你被动；③ <u>微信</u>——Readwise 直接存 mp.weixin 链接会因 JS 渲染失败（Ch6），要自建 Playwright 中间层。所以"A 档全用 Readwise"适合验证期，等你确定某个库是刚需、且在意上面三点，再对那个库做自建。别一开始就全自建，也别永远只靠 Readwise。</p></div></div>
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">Pocket 我一直在用，现在怎么办？</span><span class="toggle">＋</span></div><div class="faq-a"><p>赶紧迁移——Pocket 2025-07-08 已永久关闭，数据 2025-11-12 起永久删除<sup class="cite" data-refid="17">[17]</sup>，再不导出就没了。迁移目标按需求选：要 AI 问答 + 多类内容 → Readwise Reader；要开源自托管 → Karakeep；只要简单稍后读 → Raindrop（免费层无限书签）。Pocket 支持导出 HTML/CSV，这几个工具都能导入。</p></div></div>
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">yt-dlp 突然下不动了/报错，是被封了吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>大概率不是封号，常见两个原因：① yt-dlp 版本旧（YouTube 改协议时 yt-dlp 跟进很快，先 <code>pip install -U yt-dlp</code>）；② <strong>PO Token</strong>——2025 起 YouTube 逐步推行 PO Token，缺它部分格式会缺失或触发 403/bot check<sup class="cite" data-refid="24">[24]</sup>。解法：装 <code>bgutil-ytdlp-pot-provider</code> 插件 + 加 <code>--cookies-from-browser firefox</code>（Ch7）。注意 PO Token 不保证绕过所有 bot check，但"升级 + 配 token"是命中率最高的两步。</p></div></div>
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">播客那么多集，转写成本会不会很高？</span><span class="toggle">＋</span></div><div class="faq-a"><p>先别转——<strong>优先读 feed 里的 <code>podcast:transcript</code> 标签</strong>，带这个标签的播客把转写直接挂在开放 RSS 里，是免费白嫖的<sup class="cite" data-refid="30">[30]</sup>（注意：Apple/Spotify 在自家 App 里的自动转写未必暴露到 RSS，别假设大平台都帮你转好了）。没有 feed 转写才自己转：本地 WhisperX 跑 M 系列芯片免费（一集约 15 分钟）；不想占机器就用 OpenAI 转写 API（旧 whisper-1 名义 $0.006/分钟，但当前 dashboard 已转向新 audio 模型命名/价格，掏钱前核当前价 🟡）<sup class="cite" data-refid="40">[40]</sup>。自建 GPU（≈$276/月）只在你每天转几十集时才划算。</p></div></div>
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">一定要上 Meilisearch / Cloudflare R2 吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>起步都不用。<strong>Meilisearch</strong>：内容超 ~5 万条、或强需要 typo 容错才上，否则 SQLite FTS5 全文搜已够（Ch9）<sup class="cite" data-refid="37">[37]</sup>。<strong>R2</strong>：只在你要存大量视频/音频原文件时才需要（存媒体、零 egress 费）；如果视频文件就放本地硬盘、库里只存 YouTube 链接，连 R2 都省了。最小可行版（FreshRSS+n8n+SQLite+Obsidian）这俩都不上，一周跑通先验证。</p></div></div>
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">n8n 和我已有的脚本/cron 比，值得引入吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>看你舒服度。n8n 的甜点是<u>可视化 + 内置 RSS Trigger + 重试/告警/1100+ 集成</u>，少写很多胶水代码<sup class="cite" data-refid="43">[43]</sup>。但它有真实摩擦：没内置 SQLite 节点（要自己写接口，Ch9）、本地 ASR 容易撞 AI 节点超时。如果你已经习惯写 Python + cron，纯脚本管道也完全能搭这套系统、更可控。<strong>判词（呼应你的 n8n vs LangGraph 研究）：n8n 价值在 glue 层（连服务、定时、告警），逻辑判断该留给代码/LLM。</strong>RSS 采集 + 通知这类 glue 用 n8n 真甜；核心去重/写库逻辑写脚本更稳。</p></div></div>
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">我现在的推文库/书库在 Roam，要迁过来吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不要迁。迁移成本高、风险大，且没必要。原则是"一库多标签、新旧通过 URL 互查、不强制迁移"（Ch11）<sup class="cite" data-refid="45">[45]</sup>：Roam 里的推文库/书库保持不动，新增的文章/视频/播客走 SQLite + Obsidian，两套系统用 source_url 在需要时跳转。等于新长一个搜索友好的采集库，不动你已经经营好的 Roam 体系。</p></div></div>
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">Hermes/OpenClaw 能帮我自动搞定整个采集吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能做调度 glue，不能做核心。采集（yt-dlp/Playwright/RSS）、存储（SQLite/R2）、搜索（FTS5）都是确定性组件，用 cron + 脚本干更稳更便宜，不需要 agent（Ch10）。agent 有价值的地方是"需要判断的打标摘要"和"对话式检索"。<strong>尤其微信：agent 框架的 WeChat adapter 解决的是"agent 当 bot 收发消息"，不解决"个人号没 API"——墙在接入层，换框架也穿不透</strong><sup class="cite" data-refid="34">[34]</sup>。</p></div></div>
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q12</span><span class="qtext">这套搭好后，怎么和我的研究/写作工作流结合？</span><span class="toggle">＋</span></div><div class="faq-a"><p>采集系统当"仓库"，NotebookLM/Readwise Ghostreader 当"会查仓库的助理"（Ch12）。流程：内容自动采进 Obsidian/SQLite → 挑重要的批量导入 NotebookLM（按自动化工具/英语/半米分库）→ 写东西时先问 NotebookLM 调研已有材料、给引用 → 缺新信息再开 WebSearch 做新研究。注意 NotebookLM 只回答"已喂进去的材料"、不发现新东西<sup class="cite" data-refid="46">[46]</sup>，所以它是检索层不是研究层。</p></div></div>
+  </div>
+</section>
+
+<!-- ===== REFS ===== -->
+<section class="chapter" id="refs" data-nav="References">
+  <h2><span class="num">14</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p style="color:var(--text-mute);font-size:13px;margin-bottom:14px">所有来源访问日期 2026-06-21。可信度：🟢 多源核实 / 🟡 单源待核实 / 🔴 高风险或估算。</p>
+    <ol class="ref-list">
+      <li id="ref-1"><a href="https://www.ietf.org/rfc/rfc4287.txt" target="_blank" rel="noopener">The Atom Syndication Format — RFC 4287 (IETF)</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-2"><a href="https://miniflux.app/docs/api.html" target="_blank" rel="noopener">Miniflux — 官网 + REST API 文档（自建免费 / 托管 $15/年）</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-3"><a href="https://freshrss.org/" target="_blank" rel="noopener">FreshRSS — 官网（AGPL v3，XPath scraping / Google Reader+Fever API）</a><span class="ref-meta">· 2026-06-21 · 引用 5 次</span></li>
+      <li id="ref-4"><a href="https://feedly.com/i/pricing" target="_blank" rel="noopener">Feedly / Inoreader 定价（Feedly API 仅 Enterprise Advanced $2400/月起）</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-5"><a href="https://newsboat.org/" target="_blank" rel="noopener">Newsboat — 官网（MIT，CLI，对接 Miniflux/FreshRSS 后端，2.43 / 2026-03-22）</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-6"><a href="https://docs.rsshub.app/" target="_blank" rel="noopener">RSSHub — 文档（MIT，1000+ 路由含微信，docker run diygod/rsshub）</a><span class="ref-meta">· 2026-06-21 · 引用 6 次</span></li>
+      <li id="ref-7"><a href="https://www.fivefilters.org/full-text-rss/" target="_blank" rel="noopener">FiveFilters Full-Text RSS（AGPL，自建或 $10/月托管）</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-8"><a href="https://github.com/RSS-Bridge/rss-bridge" target="_blank" rel="noopener">RSS-Bridge — GitHub（Reddit/YouTube/Bluesky，2025-08-05）</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-9"><a href="https://linux.do/t/topic/1478567" target="_blank" rel="noopener">腾讯 2026-01-08 DMCA 删除约 4195 个微信相关 GitHub 仓库（讨论存档）🟢</a><span class="ref-meta">· 2026-06-21 · 引用 4 次</span></li>
+      <li id="ref-10"><a href="https://finance.biggo.com/news/" target="_blank" rel="noopener">微信 2026-04 新规：禁止 AI/脚本/接口/自动化替代真人发布，违规限流或永封 🟢</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-11"><a href="https://help.cubox.pro/save/ecf6/" target="_blank" rel="noopener">Cubox 微信转发助手 + 保存 API 文档（Pro 会员，500 次/天）</a><span class="ref-meta">· 2026-06-21 · 引用 4 次</span></li>
+      <li id="ref-12"><a href="https://github.com/cooderl/wewe-rss" target="_blank" rel="noopener">WeWeRSS — GitHub（基于微信读书，已 archived 2026-05-11，封控警告）🔴</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-12b"><a href="https://wechat2rss.xlab.app/" target="_blank" rel="noopener">Wechat2RSS — 公共服务（300+ 公众号，6h 延迟，自部署年 ¥200）🟡</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-13"><a href="https://github.com/rachelos/we-mp-rss" target="_blank" rel="noopener">we-mp-rss — GitHub（v1.5.2 / 2026-04-16，QR 授权 + scraping，封号风险）🔴</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-14"><a href="https://discourse.devontechnologies.com/" target="_blank" rel="noopener">mp.weixin.qq.com 文章 JS 渲染 + 图片防盗链（社区技术讨论）🟢</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-15"><a href="https://readwise.io/reader_api" target="_blank" rel="noopener">Readwise Reader Save API 文档（POST /api/v3/save/，支持直传 html，限速 50/分）</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-16"><a href="https://gameapp.club/post/2025-10-29-wechat-with-readwise/" target="_blank" rel="noopener">公众号 + Readwise 实现案例（Playwright 抓 HTML → POST html 参数，2025-10）</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-17"><a href="https://support.mozilla.org/kb/future-of-pocket" target="_blank" rel="noopener">Pocket 永久停服：2025-07-08 关闭，2025-11-12 数据永久删除 + API 关闭 🔴</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-18"><a href="https://molodtsov.me/" target="_blank" rel="noopener">Omnivore 2024-11-15 下线（团队被 ElevenLabs 收购，继任 ElevenReader）🔴</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-20"><a href="https://readwise.io/pricing" target="_blank" rel="noopener">Readwise Reader — 定价 + 功能（Full ≈$120/年，YouTube/播客/Ghostreader 跨库问答）</a><span class="ref-meta">· 2026-06-21 · 引用 4 次</span></li>
+      <li id="ref-21"><a href="https://help.raindrop.io/stella" target="_blank" rel="noopener">Raindrop.io — Stella AI + 定价（Pro $28/$38 待核实，无播客）🟡</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-22"><a href="https://getmatter.com/" target="_blank" rel="noopener">Matter — 官网（三类内容，Premium $60/$80 待核实，无 Android）🟡</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-23"><a href="https://cubox.cc/pricing" target="_blank" rel="noopener">Cubox — 定价 + AI Library Insight（Pro $39 / Pro+AI $69，跨库问答）</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-24"><a href="https://github.com/Brainicism/bgutil-ytdlp-pot-provider" target="_blank" rel="noopener">bgutil-ytdlp-pot-provider — PO Token 插件（1.3.1 / 2026-03-07，2025/26 必装）</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-25"><a href="https://www.wprssaggregator.com/youtube-rss-feed/" target="_blank" rel="noopener">YouTube 频道原生 RSS：youtube.com/feeds/videos.xml?channel_id=UC…（无需 API key）</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-26"><a href="https://github.com/yt-dlp/yt-dlp" target="_blank" rel="noopener">yt-dlp — GitHub（--download-archive 增量同步核心 + 完整归档 flag）</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-27"><a href="https://github.com/jmbannon/ytdl-sub" target="_blank" rel="noopener">ytdl-sub — GitHub（YAML 配订阅，按 TV Show 组织 + NFO，2026.06.12）</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-29"><a href="https://notes.hamatti.org/" target="_blank" rel="noopener">yt-dlp 从频道 URL 提取原生 RSS 的命令（notes.hamatti.org）</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-30"><a href="https://en.wikipedia.org/wiki/RSS_enclosure" target="_blank" rel="noopener">播客 = RSS 2.0 + &lt;enclosure&gt; + Podcasting 2.0 &lt;podcast:transcript&gt;（Wikipedia）</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-31"><a href="https://www.audiobookshelf.org/guides/podcasts/" target="_blank" rel="noopener">Audiobookshelf — 播客指南（拉全历史 + 重导出 RSS；转写 issue #2919 未合并）</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-31b"><a href="https://antennapod.org/" target="_blank" rel="noopener">AntennaPod / Podverse / gopodder — 播客客户端 App（OPML / Podcasting 2.0）</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-32"><a href="https://github.com/m-bain/whisperX" target="_blank" rel="noopener">WhisperX — GitHub（large-v2 70x 实时，词级时间戳，SRT/VTT/JSON）</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-33"><a href="https://doc.wallabag.org/" target="_blank" rel="noopener">Wallabag — 文档（自托管 REST API /api/entries；抓取器服务端 HTTP 不带浏览器）</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-34"><a href="https://github.com/AaronWong1999/hermesclaw" target="_blank" rel="noopener">HermesClaw — GitHub（Hermes WeChat adapter 共用账号；只解决 bot 接入非 API 问题）</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-35"><a href="https://github.com/wallabag/wallabag/issues/2149" target="_blank" rel="noopener">Wallabag 视频/播客支持 issue #2149（2016 提出至今未实现）</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-36"><a href="https://docs.karakeep.app/" target="_blank" rel="noopener">Karakeep（原 Hoarder）— 文档 + 定价（MIT 22800+ stars，自托管免费 / Cloud $40）</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-37"><a href="https://www.sqlite.org/fts5.html" target="_blank" rel="noopener">SQLite FTS5 — 官方文档（内置 BM25，单用户无并发冲突，个人库主库）</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-37b"><a href="https://www.meilisearch.com/docs" target="_blank" rel="noopener">Meilisearch — 文档（MIT，中文自动分词，typo 容错；&gt;5 万条才需要）</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-38"><a href="https://arxiv.org/abs/2602.20507" target="_blank" rel="noopener">归一化 schema 与去重设计参考（Indaleko，arXiv）+ LLM 知识库实践 🟡</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-39"><a href="https://developers.cloudflare.com/r2/" target="_blank" rel="noopener">Cloudflare R2 — 文档（S3 兼容，零 egress 费，AES-256，335 节点）</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-40"><a href="https://openai.com/api/pricing/" target="_blank" rel="noopener">OpenAI 转写 API 定价（旧 whisper-1 名义 $0.006/分钟；当前已转向新 audio 模型命名/价格，以 dashboard 为准）🟡</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-41"><a href="https://www.newsblur.com/about" target="_blank" rel="noopener">NewsBlur — 定价 + API（MIT 可 Docker 自建，Premium $36/年）</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-42"><a href="https://feedbin.com/" target="_blank" rel="noopener">Feedbin — 官网（$70/年无免费层，newsletter→RSS 专属邮箱，有 API）</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+      <li id="ref-43"><a href="https://n8n.io/workflows/4503/" target="_blank" rel="noopener">n8n — RSS 管道模板 #4503 + 集成数（400+ 原生含 RSS Trigger，Docker）</a><span class="ref-meta">· 2026-06-21 · 引用 3 次</span></li>
+      <li id="ref-44"><a href="https://docs.n8n.io/" target="_blank" rel="noopener">n8n 文档（无内置 SQLite 节点，需 HTTP/Execute Command 对接）+ 工作量估算 ⚠️估算</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-45"><a href="https://forum.obsidian.md/" target="_blank" rel="noopener">Obsidian — 一库多标签 vs 多库 + 搜索性能讨论（flat vault + tag 更易跨类型检索）🟡</a><span class="ref-meta">· 2026-06-21 · 引用 2 次</span></li>
+      <li id="ref-46"><a href="https://notebooklm.google.com/" target="_blank" rel="noopener">Google NotebookLM — source-grounded 对话（只答已喂材料、给引用、不发现新信息）</a><span class="ref-meta">· 2026-06-21 · 引用 1 次</span></li>
+    </ol>
+  </div>
+</section>
+  <footer>
+    无忌 · Deep Research（L2）· 2026-06-21 · 仅供阿杰个人决策参考；数据与判例以原始来源为准。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('rss-knowledge-base-system-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('rss-knowledge-base-system-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

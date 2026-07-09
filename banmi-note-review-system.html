@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>半米学习系统:笔记+复习系统调研（RemNote/SuperMemo/Heptabase/Capacities 借鉴与落地） · 无忌 Deep Research · 2026-07-09</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 01 为何要一体化</a>
+    <a href="#ch2" data-target="ch2">02 02 市场全景与真空</a>
+    <a href="#ch3" data-target="ch3">03 03 RemNote 深扒</a>
+    <a href="#ch4" data-target="ch4">04 04 SuperMemo 深扒</a>
+    <a href="#ch5" data-target="ch5">05 05 Heptabase 深扒</a>
+    <a href="#ch6" data-target="ch6">06 06 Capacities 深扒</a>
+    <a href="#ch7" data-target="ch7">07 07 四款横向对比</a>
+    <a href="#ch8" data-target="ch8">08 08 复习引擎选型</a>
+    <a href="#ch9" data-target="ch9">09 09 学习科学地基</a>
+    <a href="#ch10" data-target="ch10">10 10 游戏化行为驱动</a>
+    <a href="#ch11" data-target="ch11">11 11 笔记⟷复习打通</a>
+    <a href="#ch12" data-target="ch12">12 12 随时可调出</a>
+    <a href="#ch13" data-target="ch13">13 13 半米路线建议 ★</a>
+    <a href="#faq" data-target="faq">Q FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">R References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>半米学习系统：笔记 + 复习系统调研</h1>
+    <div class="hero-meta">
+      <span>📅 2026-07-09</span>
+      <span>🔍 ~60 次检索 + 4 款标杆深扒</span>
+      <span>🧩 笔记形态 × SRS 打通 × 随时调出</span>
+      <span>🌏 立场：终端用户是东南亚 K12</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>一句话定调：「K12 儿童把课堂/阅读笔记自动变成复习卡、再由算法排期」这条管道，是被四款成人标杆和一票 K12 刷题产品共同漏掉的市场真空——半米不该照抄任何一款，而应该把 SuperMemo 的「增量阅读思想」、开源 FSRS 的「省 25–40% 复习」、Capacities 的「温故叙事」、Duolingo 的「streak 行为驱动」四样拆出来重新组装，做成「阅读/看视频时划一下 → 自动生填空卡 → FSRS 调度 → 游戏化催你回来」的儿童向闭环。</strong></p>
+      <p>本报告按认知顺序展开：先立地基（Ch1 三要求 + 学习科学，Ch2 市场全景与 K12 真空），再逐一深扒四款标杆（Ch3 RemNote / Ch4 SuperMemo / Ch5 Heptabase / Ch6 Capacities），然后横向对比收敛（Ch7 大表），接着钻三个技术决策（Ch8 复习引擎选型 / Ch9 学习科学深化 / Ch10 游戏化），再解两个「怎么落」的机制题（Ch11 笔记⟷复习打通 / Ch12 随时可调出），最后给决策树和 MVP（Ch13）。所有价格标注访问日期 2026-07-09，关键数据标 🟢 多源 / 🟡 单源 / 🔴 估算，市场规模等分歧大的数据额外标 ⚠️。</p>
+    </div>
+  </div>
+
+  <div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+    <p style="margin:0"><strong>📌 三条最关键发现（先扫这个）：</strong></p>
+    <ul style="margin:8px 0 0">
+      <li><strong>「K12 儿童：记笔记 → 自动生复习卡 → SRS 调度」一体化管道是真空，谁补上谁独一份。</strong>四款标杆没一款瞄准儿童——RemNote/SuperMemo 面向大学生与自学者、Heptabase/Capacities 明确成人研究者；主流 K12 产品（Quizlet 有闪卡无笔记、Anki 有算法不适合儿童、Duolingo/Khan Kids/Prodigy 偏刷题游戏化）没一个做「笔记即复习单元」的一体闭环<sup class="cite" data-refid="44">[44]</sup><sup class="cite" data-refid="51">[51]</sup>。早在 2014 年就有人指出「面向孩子的间隔重复市场根本不存在」，2025–2026 仍然空白<sup class="cite" data-refid="51">[51]</sup>。Readwise 用「高亮 → 每日复习」这条最朴素的输入闭环做到约 1400 万美元 ARR<sup class="cite" data-refid="49">[49]</sup>（⚠️ 单源），证明这条管道有真金白银价值。<span class="conf g">🟢</span></li>
+      <li><strong>复习引擎别自研，直接接开源 FSRS——省 25–40% 复习量，对儿童反而更贴。</strong>FSRS 已是事实标准：Anki 自 v23.10（2023-10）内置，同样 90% 保留率下比老 SM-2 少 25–40% 复习、预测误差 ±5.3%（SM-2 是 ±16.2%）<sup class="cite" data-refid="38">[38]</sup><sup class="cite" data-refid="39">[39]</sup>；有 ts-fsrs（浏览器直跑）、py-fsrs、fsrs-rs 全栈可用<sup class="cite" data-refid="40">[40]</sup><sup class="cite" data-refid="42">[42]</sup>。儿童遗忘曲线更陡、更个体化，FSRS 的自适应拟合正好比固定间隔更快贴合；遗忘指数用默认 10%（保留率 90%）即可<sup class="cite" data-refid="11">[11]</sup>。算法思想去学 SuperMemo 的「稳定性 S + 可提取性 R」双组件<sup class="cite" data-refid="11">[11]</sup>，代码用别人写好的。<span class="conf g">🟢</span></li>
+      <li><strong>SuperMemo 是「算法学它、体验千万别学」的双面教材——它自己都说不适合儿童。</strong>它的增量阅读流水线 Import → Read → Extract → Cloze → Review 是全行业最完整的「阅读→提取→回忆」闭环，思路完全可移植<sup class="cite" data-refid="15">[15]</sup><sup class="cite" data-refid="16">[16]</sup>；但官方专门写了《SuperMemo does not work for kids》，明说幼儿强记有害、外部激励（积分奖励）会形成「毒性关联」干扰内在动机，且官方正在<u>远离</u>游戏化<sup class="cite" data-refid="21">[21]</sup><sup class="cite" data-refid="22">[22]</sup>。半米要做的正好相反：让 AI/老师自动把内容切成 cloze，孩子只做题不建卡，再叠上正向反馈 + 可见进度 + 游戏化——把 SuperMemo 的引擎装进一辆孩子愿意开的车。<span class="conf g">🟢</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1" data-nav="01 为何要一体化">
+    <h2><span class="num">01</span><span class="title-text">半米为什么需要「笔记 + 复习一体」</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>半米是东南亚 K12 行为驱动的 AI 学习操作系统，阿杰单人全栈。要给它建笔记系统，阿杰定了三条硬要求，这三条不是并列的功能清单，而是层层递进的一条产品主线：</p>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">要求一</div><div class="l">笔记以卡片 Card / 块 Block 形态存在（可拆、可复用的原子单元）</div></div>
+        <div class="metric"><div class="v">要求二</div><div class="l">笔记 ⟷ 复习（SRS）系统打通（记下即可进复习队列）</div></div>
+        <div class="metric"><div class="v">要求三</div><div class="l">随时可调出，尤其是阅读时、看视频时（捕获零摩擦）</div></div>
+      </div>
+      <h3>三条要求其实是一个问题：怎么让「学过」变成「记住」</h3>
+      <p>K12 学习的真正瓶颈从来不是「看没看过」，而是「看过之后忘得多快」。要求一（卡片/块）解决的是<strong>复习单元的粒度</strong>——一整页笔记没法复习，一个知识点才能；要求二（打通 SRS）解决的是<strong>「复习」这个动作会不会真的发生</strong>——靠人自觉翻笔记必然失败，得让系统接管排期；要求三（随时调出）解决的是<strong>捕获成本</strong>——如果记一条笔记要切走应用、点五下，孩子就不记了。三条连起来是一句话：<strong>把「记笔记」这个孩子本来就会做的动作，无摩擦地变成一张会自动回来找他的复习卡。</strong></p>
+      <h3>学习科学地基：这不是产品经理的直觉，是几十年元分析的定论</h3>
+      <p>「间隔 + 提取」是被反复验证过的两个最强学习技术，证据体量之大在教育心理学里少见：</p>
+      <div class="callout info"><p><strong>间隔效应（spacing effect）：</strong>Cepeda 等 2006 年的元分析覆盖 <strong>254 项研究、14000+ 次观察</strong>，一致显示分散练习优于集中练习<sup class="cite" data-refid="52">[52]</sup>；Donoghue &amp; Hattie 2021 的元分析覆盖 <strong>242 项研究、约 169000 名被试</strong>，把「分散练习」和「提取练习」列为效应最稳的两类学习技术<sup class="cite" data-refid="53">[53]</sup>。<span class="conf g">🟢</span> 这正是 SRS（间隔重复系统）存在的理论基础——半米做复习系统不是赌一个趋势，是在一个几十年定论上盖房子。</p></div>
+      <div class="callout info"><p><strong>测试效应（testing effect / 主动回忆）：</strong>Roediger &amp; Karpicke 2006 的经典实验发现一个反直觉结论——学完仅 5 分钟后测，「重读组」略微领先；但 <strong>2 天后、1 周后再测，「提取练习组」显著反超</strong><sup class="cite" data-refid="54">[54]</sup><sup class="cite" data-refid="55">[55]</sup>。<span class="conf g">🟢</span> 换句话说：让孩子「再看一遍」感觉很努力、短期也见效，但真正把知识焊进长期记忆的是「合上书自己回忆一遍」。这决定了半米的复习卡必须是<strong>提取型</strong>（填空、问答）而不是<strong>重读型</strong>（把笔记再展示一遍）。</p></div>
+      <p>把这两块地基和三条要求叠在一起，半米笔记系统的产品定义就清晰了：<strong>一个让孩子在阅读/看视频时零摩擦记下原子卡片、由 FSRS 排期、以提取（而非重读）方式定期把卡片送回他面前、并用游戏化让他愿意回来的闭环。</strong>后面 12 章都是在回答「这个闭环的每一环，四款标杆各是怎么做的、半米该抄哪段、该躲哪个坑」。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2" data-nav="02 市场全景与真空">
+    <h2><span class="num">02</span><span class="title-text">市场全景：笔记 + 复习品类地图与 K12 儿童向真空</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>先把这个赛道的地图铺开。市面上的产品可以按「有没有笔记层」「有没有 SRS」两个轴切成四象限，一眼就能看出真空在哪：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>象限</th><th>代表产品</th><th>笔记层</th><th>SRS 复习层</th><th>目标人群</th></tr></thead>
+        <tbody>
+          <tr><td><strong>纯闪卡</strong></td><td>Anki / Quizlet / Mochi</td><td class="check n">无（只有卡）</td><td class="check y">有</td><td>大学生 / 医学生 / 语言学习者</td></tr>
+          <tr><td><strong>纯笔记</strong></td><td>Notion / Heptabase / Capacities</td><td class="check y">强</td><td class="check n">无或极弱</td><td>成人知识工作者 / 研究者</td></tr>
+          <tr><td><strong>笔记 + SRS 一体</strong></td><td>RemNote / Logseq / Obsidian+插件</td><td class="check y">有</td><td class="check y">有</td><td>大学生 / 自学者（成人）</td></tr>
+          <tr><td><strong>K12 儿童一体</strong></td><td class="check n" colspan="4"><strong>空——没有一款做「儿童记笔记 → 自动生卡 → SRS 调度」的一体化产品</strong></td></tr>
+        </tbody>
+      </table></div>
+      <h3>三条独立结论，各自说透</h3>
+      <div class="callout warn"><h4>① Quizlet 有闪卡但没有笔记，Anki 有最强算法但对儿童是灾难</h4><p>Quizlet 约 5000 万活跃用户，是闪卡赛道的量级王者<sup class="cite" data-refid="43">[43]</sup>，但它的模型是「先有卡片集，再来背」——没有「记笔记」这一层，孩子上课记的东西进不去。Anki 走另一极端：约 200 万活跃用户、美国医学生 86.2% 在用<sup class="cite" data-refid="43">[43]</sup>，算法与生态最强，但它的 UI「停留在 2008 年」、上手门槛陡<sup class="cite" data-refid="43">[43]</sup><sup class="cite" data-refid="44">[44]</sup>，让一个 8 岁孩子自己建卡、自己维护牌组是不现实的。就算是把上手做到极致的 Mochi（$5/月、$40/年、Markdown、分钟级 onboarding）也仍是 SM-2 变体、无 FSRS，且同样是「先有卡、再来背」的成人向工具<sup class="cite" data-refid="48">[48]</sup>。<strong>赛道王者一个缺笔记、一个缺儿童友好度——半米的机会正好卡在两者之间。</strong><span class="conf g">🟢</span></p></div>
+      <div class="callout warn"><h4>② 「笔记 + SRS 一体」这一格已经有人（RemNote/Logseq/Obsidian），但全是成人向</h4><p>RemNote 是这一格最完整的产品，每行皆 block、任意 block 一键转卡、可切 FSRS<sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>；Logseq 内置 SRS，任意 block 加 <code>#card</code> 即成卡、免费开源<sup class="cite" data-refid="47">[47]</sup>；Obsidian 生态有 26 个间隔重复插件，obsidian-spaced-repetition 同时支持 FSRS 和 SM-2<sup class="cite" data-refid="45">[45]</sup><sup class="cite" data-refid="46">[46]</sup>。<strong>但它们无一例外面向成人</strong>——语法多、需要自己组织知识库、没有家长端、没有游戏化。半米要做的不是再造一个 RemNote，而是把这套一体化能力「儿童化 + 移动化 + 游戏化」。<span class="conf g">🟢</span></p></div>
+      <div class="callout bad"><h4>③ K12 儿童向的「笔记→复习」管道，在本报告抽样范围内是结构性真空</h4><p>主流 K12 产品——Quizlet（刷卡）、Duolingo（游戏化练习）、Khan Academy Kids（视频+练习）、Prodigy（游戏化刷题）——没有一款做「记笔记 → 自动生复习卡 → SRS 调度」的一体化<sup class="cite" data-refid="44">[44]</sup>；早在 2014 年就有开发者撰文指出「面向孩子的间隔重复市场根本不存在」，2025–2026 复盘时这个空白依然在<sup class="cite" data-refid="51">[51]</sup>。<strong>准确表述应是：在本报告抽样的公开英文成人标杆 + 主流 K12 产品中，未发现成熟的儿童一体化方案</strong>——这不是穷举式市场普查（未系统覆盖中国、印度、各国本地学校 LMS 与家教机构工具），所以是「值得验证的强假设」而非「已证实的结论」。<span class="conf y">🟡</span></p></div>
+      <div class="callout warn"><h4>⚠️ 反方必须问：这个真空为什么长期没人填？可能不全是「难」</h4><p>「真空 = 机会」有确认偏差的风险，诚实地列出真空可能长期存在的原因，比一味乐观更有价值：<strong>① 孩子本来就不爱记笔记</strong>——需求可能是伪的，得先验证「划词生卡」这个动作孩子愿不愿意做；<strong>② 老师不愿审 AI 生成的卡</strong>——B 端管道多一道审核成本；<strong>③ 家长不愿单独为「复习工具」付费</strong>——复习是隐性价值，不如「提分/刷题」直观；<strong>④ 学校采购周期长</strong>；<strong>⑤ AI 卡片质量不可控</strong>（见 Ch11 的验证要求）。这五条里任何一条不成立，真空就还是真空。<strong>半米该做的不是假设它们都能解，而是把它们变成 MVP 阶段要逐个证伪的假设</strong>（Ch13 判停条件）。<span class="conf y">🟡</span></p></div>
+      <h3>市场规模：数据分歧极大，只能当量级参考</h3>
+      <p style="font-size:14px">闪卡/间隔重复软件的市场规模数据在各报告间差异悬殊：Verified Market Reports 给闪卡 App 市场约 <strong>13.2 亿美元</strong>（2025，CAGR 约 6.3%），另有报告给到约 <strong>25 亿美元</strong>（CAGR 约 15%），个别极端估值高达 220 亿美元但可信度低<sup class="cite" data-refid="50">[50]</sup>。⚠️ 这类数字口径混乱（是否含教育大盘、是否含企业培训各不相同），<strong>只能读作「十亿美元量级、增长为正」，不能用来做任何精确测算</strong>。<span class="conf r">🔴</span> 对半米更有意义的信号不是总盘子，而是 Readwise 用最朴素的「高亮→复习」闭环做到约 1400 万美元 ARR 这个具体点<sup class="cite" data-refid="49">[49]</sup>（⚠️ 单源）——它证明「输入 → SRS」这条管道单独就能撑起一门生意。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3" data-nav="03 RemNote 深扒">
+    <h2><span class="num">03</span><span class="title-text">RemNote 深扒：最接近半米想要的形态</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>四款里 RemNote 和半米的目标形态最像——它就是「笔记即卡片、卡片即复习单元」这条路走得最远的产品，是半米最该逐帧研究的对象。</p>
+      <h3>核心形态：每行皆 block + 双链</h3>
+      <ul>
+        <li><strong>Rem = outliner bullet</strong>：整个笔记是无限层级嵌套的大纲，每一个 bullet 就是一个「Rem」（block）。父级会自动成为子级复习时的上下文——你复习一张卡时，它所在的层级结构一并给你线索<sup class="cite" data-refid="1">[1]</sup>。</li>
+        <li><strong>双链 [[]]</strong>：引用任意 Rem 自动生成反向链接（backlink），沉淀出知识图谱<sup class="cite" data-refid="1">[1]</sup>。</li>
+      </ul>
+      <h3>杀手锏：任意 block 一键转卡，6 种语法</h3>
+      <p>这是 RemNote 最值得半米学的一点——<strong>记笔记和建卡是同一个动作</strong>，敲一个符号，这行笔记就变成了记忆任务：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>语法</th><th>卡片类型</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td><code>&gt;&gt;</code> / <code>==</code></td><td>正反卡（双向/单向）</td><td>问 → 答</td></tr>
+          <tr><td><code>::</code></td><td>Concept（概念）</td><td>术语 → 定义</td></tr>
+          <tr><td><code>;;</code></td><td>Descriptor（描述符）</td><td>属性 → 值</td></tr>
+          <tr><td><code>{{ }}</code></td><td>Cloze（填空）</td><td>句子挖空</td></tr>
+          <tr><td>多选语法</td><td>多选题</td><td>选择题</td></tr>
+          <tr><td>图片遮盖</td><td>Image Occlusion</td><td>图上挖区域</td></tr>
+        </tbody>
+      </table></div>
+      <p>来源：RemNote 官方创建闪卡文档<sup class="cite" data-refid="2">[2]</sup>。对半米的启示很直接：<strong>孩子（或 AI/老师）在笔记里敲一个符号，系统就把它激活成一张会自动排期的记忆卡</strong>——「记」和「学」之间零切换。</p>
+      <h3>复习引擎：默认 SM-2，可切 FSRS</h3>
+      <p>RemNote 复习默认用 SM-2 算法，用户可在设置里切换到 <strong>FSRS v6</strong>——切换后可减少复习量、且自适应无需手动调参<sup class="cite" data-refid="3">[3]</sup><sup class="cite" data-refid="4">[4]</sup>，还支持自定义调度器。<span class="conf y">🟡</span> 减少幅度口径不一：RemNote 官方文档多在「少 20–30%」区间、且标注 FSRS 需手动开启、优化前要积累足够复习历史，第三方 benchmark 则给到 25–40%（见 Ch8）——具体数字宜当量级看，别当通用事实。<strong>但方向是确定的</strong>：FSRS 已成一体化笔记产品的标配选项。</p>
+      <h3>增量阅读：原生 Reader + 第三方插件</h3>
+      <ul>
+        <li><strong>原生 RemNote Reader</strong>：支持 PDF 导入、高亮、划选转卡，配 Web Clipper 和 AI 批量转卡<sup class="cite" data-refid="6">[6]</sup>。</li>
+        <li><strong>SuperMemo 式增量阅读</strong>本身是第三方插件 <em>Incremental Everything</em>（开源，仿 SuperMemo 流程）实现的，不是原生功能<sup class="cite" data-refid="5">[5]</sup>。这说明「完整增量阅读」即使对 RemNote 也是进阶能力，半米初期做「划线→转卡」的简化版即可，不必一步到位做全套 IR。</li>
+      </ul>
+      <h3>平台与定价</h3>
+      <p>全平台覆盖（Web / Windows / Mac / Linux / iOS / Android）且支持离线<sup class="cite" data-refid="7">[7]</sup>。<strong>但 iOS 端频繁崩溃卡顿是长期痛点</strong>——即便 2026-04 有修复，仍有用户投诉<sup class="cite" data-refid="8">[8]</sup>。这对半米是一记警钟（见下方 callout）。定价（2026-07-09）：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>档位</th><th>价格</th><th>限制/权益</th></tr></thead>
+        <tbody>
+          <tr><td>Free</td><td>0</td><td>PDF 标注上限 3、100 AI credits<sup class="cite" data-refid="9">[9]</sup></td></tr>
+          <tr><td>Pro</td><td>$8/月（年付 $96；月付 $10）</td><td>核心功能全开<sup class="cite" data-refid="9">[9]</sup></td></tr>
+          <tr><td>Pro + AI</td><td>$18/月</td><td>含 AI 额度<sup class="cite" data-refid="9">[9]</sup></td></tr>
+          <tr><td>Life-Long</td><td>$395 买断</td><td>终身<sup class="cite" data-refid="9">[9]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <p>Pro 提供 <strong>25% 教育折扣</strong><sup class="cite" data-refid="9">[9]</sup>。K12 适用性：面向大学生/自学者，初中以上上手快，小学需引导（6 种语法对孩子偏多）；游戏化（每日目标/连续打卡/掌握度）激励做得不错；但<strong>无专门 K12 版、无家长后台</strong><sup class="cite" data-refid="8">[8]</sup>。</p>
+      <div class="callout good"><h4>✅ 半米该从 RemNote 抄的三样</h4><p><strong>① 「block 级可激活为记忆任务」的交互内核</strong>——记笔记即生卡，一个符号完成，这是把「笔记」和「复习」焊死的关键动作，半米应把它做成对孩子更友好的形态（比如长按选中→弹「变成一道题」）。<strong>② 直接采用开源 FSRS</strong>——RemNote 都从 SM-2 切过去了，半米没有理由自研。<strong>③ 语法要做减法</strong>——6 种语法对成人自学者合适，对小学生太多；半米初期只保留「填空」和「问答」两种，其余交给 AI 自动判断类型。</p></div>
+      <div class="trap-box"><strong>⚠️ 坑：iOS 稳定性。</strong>RemNote iOS 端长期崩溃卡顿是公开投诉<sup class="cite" data-refid="8">[8]</sup>。东南亚 K12 是移动优先、且中低端安卓/iOS 设备占比高的市场，<strong>移动端稳定性对半米是第一优先级，不是「以后优化」</strong>——一个上课想快速记一条却卡住闪退的应用，孩子第二次就不打开了。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4" data-nav="04 SuperMemo 深扒">
+    <h2><span class="num">04</span><span class="title-text">SuperMemo 深扒：算法学它，体验千万别学</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>SuperMemo 是间隔重复的鼻祖（1985 年起），它贡献了这个领域几乎所有的核心思想，但也是四款里体验最劝退、且<strong>官方明确说不适合儿童</strong>的一款。对半米，它是最好的「理论老师」和最好的「反面教材」，两个身份同时成立。</p>
+      <h3>算法演进：从单参数到「稳定性 + 可提取性」双组件</h3>
+      <ul>
+        <li><strong>SM-2（1987，已开源，Anki 至今在用）</strong>：只追踪重复次数、E-Factor（1.1–2.5）、间隔。问题在于单一 E-Factor <strong>混淆了「稳定性」和「可提取性」两件本质不同的事</strong><sup class="cite" data-refid="10">[10]</sup>。</li>
+        <li><strong>SM-17（2016）</strong>：引入记忆的<strong>双组件模型</strong>——稳定性 S（回忆概率降到 0.9 所需的间隔天数，衡量记忆有多「牢」）+ 可提取性 R（此刻能回忆起来的概率，随时间负指数衰减，衡量此刻有多「想得起」）<sup class="cite" data-refid="11">[11]</sup>。</li>
+        <li><strong>SM-18（2019）</strong>：小幅改进（难度计算 + 稳定化函数逼近）<sup class="cite" data-refid="12">[12]</sup>；SM-20 内置 5 种算法可选<sup class="cite" data-refid="18">[18]</sup>。</li>
+        <li><strong>遗忘指数</strong>：理论最优约 20–30%，实践默认 <strong>10%</strong>（即保留率 90%）<sup class="cite" data-refid="11">[11]</sup><sup class="cite" data-refid="12">[12]</sup>。这个「10%」是半米直接可用的默认参数。</li>
+      </ul>
+      <div class="callout info"><p><strong>FSRS 与 SM-x 谁更强？这是场双方各执一词的自测战。</strong>FSRS（2022，Jarrett Ye 发起）在 Anki 社区已全面赶超 SM-2，据 supermemo.guru 引述其覆盖了 99.6% 的相关用户群<sup class="cite" data-refid="13">[13]</sup>（🟡 该比例来自单一来源，宜当量级）；但 SuperMemo 官方发文自称 SM-19 仍「远胜 FSRS」<sup class="cite" data-refid="14">[14]</sup>。<strong>双方都是拿自家数据自测，属未决争议</strong><span class="conf y">🟡</span>。对半米的实操结论不受影响：FSRS 开源、有全栈库、比 SM-2 明显更好，选它；SM-x 是闭源商业算法，学它的<u>思想</u>即可。</p></div>
+      <h3>招牌功能：增量阅读（Incremental Reading）</h3>
+      <p>这是 SuperMemo 2000 年（SuperMemo 10）引入、竞品至今无人做全的招牌流水线，也是半米最该「移植思想」的一段：</p>
+      <div class="step"><div class="step-head"><span class="sn">1</span>Import 导入</div><div class="step-body">把文章/网页导入成一个 <strong>Topic</strong>（被动阅读单元），系统自动记住你读到的位置<sup class="cite" data-refid="15">[15]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>Read 阅读</div><div class="step-body">按优先级排期阅读 Topic（优先级 0% = 最高，这个反直觉设定见下方坑），不必一次读完<sup class="cite" data-refid="16">[16]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>Extract 提取</div><div class="step-body">读到关键段落，选中按 Alt+X，生成一个子 Topic——把长文逐步「熬」成精华<sup class="cite" data-refid="16">[16]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>Cloze 挖空</div><div class="step-body">在提取出的句子里选关键词按 Alt+Z，挖成填空，生成一个 <strong>Item</strong>（主动回忆卡）<sup class="cite" data-refid="16">[16]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">5</span>Review 复习</div><div class="step-body">Item 进入 SM 算法排期，按间隔反复回忆<sup class="cite" data-refid="15">[15]</sup>。</div></div>
+      <p><strong>关键区分：Topic = 被动阅读、Item = 主动回忆卡</strong><sup class="cite" data-refid="16">[16]</sup>。整条流水线的美妙在于它把「读一篇文章」和「记住其中知识」变成同一个连续动作，中间没有「另外找时间做卡」这一步。SuperMemo 还有<strong>知识树</strong>：树形 element 容器，节点颜色区分类型，内含概念图谱<sup class="cite" data-refid="17">[17]</sup>。</p>
+      <h3>产品现状：三分裂、Windows Only、来自另一个时代</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>产品</th><th>价格（2026-07-09）</th><th>增量阅读</th><th>平台</th></tr></thead>
+        <tbody>
+          <tr><td><strong>SuperMemo 20 for Windows</strong></td><td>$68 买断</td><td class="check y">完整（IR/知识树/5 算法/PDF/YouTube 导入）<sup class="cite" data-refid="18">[18]</sup></td><td class="check n">仅 Windows</td></tr>
+          <tr><td><strong>SuperMemo.com（web）</strong></td><td>约 $9/月、$90/年</td><td class="check n">无 IR（约 300 门语言课）<sup class="cite" data-refid="19">[19]</sup></td><td class="check p">Web</td></tr>
+          <tr><td><strong>移动端 App</strong></td><td>含订阅</td><td class="check n">无增量阅读<sup class="cite" data-refid="19">[19]</sup></td><td class="check p">iOS/Android</td></tr>
+        </tbody>
+      </table></div>
+      <p>核心桌面版用 Delphi 写、<strong>仅 Windows</strong>、UI「来自另一个时代」、优先级 0% = 最高极其反直觉、学习曲线极陡<sup class="cite" data-refid="20">[20]</sup>。最强的功能（增量阅读）恰恰锁在最难用、最不可移动的那个版本里——这本身就是给半米的产品警示。</p>
+      <div class="callout bad"><h4>⛔ 官方亲口：SuperMemo 不适合儿童，且正在远离游戏化</h4><p>SuperMemo 官方专门写了《SuperMemo does not work for kids》：<strong>幼儿记忆机制未成熟，强制双倍练习有害；9–12 岁需自愿参与 + 成人监督</strong><sup class="cite" data-refid="21">[21]</sup>。更关键的是它对游戏化的立场——官方认为<strong>外部激励（积分、奖励）会与学习内容形成「毒性关联」（toxic association），干扰内在动机</strong>，并明确表示官方正在<u>远离</u>游戏化<sup class="cite" data-refid="21">[21]</sup><sup class="cite" data-refid="22">[22]</sup>。<span class="conf g">🟢</span> 这是半米必须认真对待的一条反向证据：不能无脑堆积分奖励（详见 Ch10 的平衡设计）。</p></div>
+      <div class="callout good"><h4>✅ 半米该从 SuperMemo 抄的（只抄这些）</h4><p><strong>① 算法思想</strong>：用开源 FSRS，或至少参考「稳定性 S + 可提取性 R」双组件模型，遗忘指数默认 10%。<strong>② 内容原子化流水线</strong>：Topic → Extract → Cloze → Review 完全可移植——但要<u>反过来</u>：让 AI/老师自动完成 Extract 和 Cloze，孩子只做题，不承担建卡的认知负担（这正好绕开 SuperMemo「儿童建卡太难」的死穴）。<strong>③ 一切产品设计都要躲开它</strong>：算法学它，体验千万别学——半米要正向反馈、可见进度、即时成就，SuperMemo 一样都没有。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5" data-nav="05 Heptabase 深扒">
+    <h2><span class="num">05</span><span class="title-text">Heptabase 深扒：卡片 + 白板，SRS 还没上线的机会窗口</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>Heptabase 是「视觉化知识管理」的代表，它的形态对半米有借鉴价值，而它<strong>至今没上线 SRS</strong>这件事，本身就是给半米的一个机会信号。</p>
+      <h3>核心形态：Card + 无限白板</h3>
+      <ul>
+        <li><strong>Card = Markdown 原子笔记</strong>，Whiteboard = 无限 2D 画布，可在空间上排布卡片<sup class="cite" data-refid="23">[23]</sup>。</li>
+        <li><strong>同一张 Card 可同时出现在多个白板上（无副本）</strong>——单一来源、多处引用<sup class="cite" data-refid="23">[23]</sup>。</li>
+        <li>Card 即 Note，没有独立的「Note 层」——笔记的最小单位天然就是卡片<sup class="cite" data-refid="23">[23]</sup>。</li>
+      </ul>
+      <div class="callout warn"><h4>⚠️ 关键事实核对：Heptabase 的 SRS 尚未上线</h4><p>网上有第三方文章误报 Heptabase「已有 SRS」，<strong>以官方路线图为准：间隔重复功能仍未上线，官方路线图（2026-04-07）把它列为 Priority 1 待开发</strong>，当前需手动配合 Anki<sup class="cite" data-refid="24">[24]</sup>。<span class="conf y">🟡</span>（第三方与官方口径冲突，采信官方路线图）这意味着：<strong>连一个成熟的成人向卡片工具，都还没把「卡片 → 复习」这一步接上——半米如果先把这一步做扎实，就领先了一个身位。</strong></p></div>
+      <h3>杀手功能：PDF/视频 → 高亮卡片（学术圈公认的强项）</h3>
+      <ul>
+        <li>PDF 拖入生成 PDF Card，选中文字生成 Highlight Card，进 Library 后可拖上白板<sup class="cite" data-refid="25">[25]</sup>。</li>
+        <li>扩展生态成熟：Readwise / Zotero / Web Clipper / <strong>YouTube（字幕 + 时间戳）</strong> / Podcast（AI 转录）<sup class="cite" data-refid="25">[25]</sup>。</li>
+      </ul>
+      <p>这条「来源材料 → 高亮卡片 → 拖上知识地图」的三段式是 Heptabase 被称为「academic killer」的原因<sup class="cite" data-refid="27">[27]</sup>。对半米要求三（阅读/看视频时随时调出）极有参考价值——尤其它的 YouTube 字幕+时间戳集成，正是半米「看视频时划一句变成卡」的现成范本。</p>
+      <h3>定价与人群</h3>
+      <p>定价（2026-07-09）<strong>无免费层</strong>：Pro $8.99/月（年付）、Premium $17.99/月（年付 25% off）、Premium+ $53.99/月；7 天试用；<strong>无教育折扣</strong><sup class="cite" data-refid="26">[26]</sup>。痛点：无 SRS、无协作、移动端弱、大画布卡顿、对学生偏贵<sup class="cite" data-refid="27">[27]</sup><sup class="cite" data-refid="28">[28]</sup>。目标用户明确是成人/大学生/研究者，<strong>K12 明确不在受众</strong><sup class="cite" data-refid="29">[29]</sup>。</p>
+      <div class="callout good"><h4>✅ 半米该从 Heptabase 抄的三样</h4><p><strong>① 「笔记即卡片，卡片即复习单元」的一体化方向</strong>——Heptabase 把「Card 即 Note」做到了极致，半米应继承这个原子化哲学；而它 SRS 未上线 = 半米的机会窗口。<strong>② 「来源 → 高亮 → 知识地图」三段式</strong>，但半米做<u>简化版</u>：阅读→划线→自动进「单词/概念卡」→触发复习，<strong>少一层白板</strong>（无限画布对成人研究者是利器，对 K12 儿童是负担）。<strong>③ 同一知识单元跨情境复用</strong>——单一来源 + 多引用，一个「光合作用」概念卡可以在科学笔记、英语阅读、复习队列里同时出现，不产生副本。</p></div>
+      <div class="trap-box"><strong>⚠️ 坑：别抄白板。</strong>无限白板是 Heptabase 的招牌，但它服务的是「成人做研究、要在二维空间里理清复杂关联」的场景。K12 儿童的核心动作是「记一条、背一条」，不是「在画布上排布几百张卡」。大画布还会带来卡顿（Heptabase 自己的痛点<sup class="cite" data-refid="28">[28]</sup>）。半米要抵住「看起来很酷」的诱惑，把白板砍掉，留下卡片和复习。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6" data-nav="06 Capacities 深扒">
+    <h2><span class="num">06</span><span class="title-text">Capacities 深扒：对象化结构 + 温故叙事</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>Capacities 是「object-based（对象化）」笔记的代表，它的两个设计——「有类型的对象」和「Created on This Day 温故」——是半米可以直接借用的骨架和情感设计，尽管它本身<strong>没有原生 SRS</strong>。</p>
+      <h3>核心形态：一切皆 object，且必有 type</h3>
+      <ul>
+        <li>基本单元 = object，每个 object <strong>必有一个 type</strong>，type 决定它的结构和 properties<sup class="cite" data-refid="30">[30]</sup>。</li>
+        <li>内置 11 种 type（Page / Tag / Image / Weblink / Audio / PDF / Files / Tweet / AI Chat / Query / Table）+ 可自建 Custom Type<sup class="cite" data-refid="30">[30]</sup>。</li>
+        <li>block 是 object 的一个 property——<strong>type system 叠在块之上，加了一层「语义」</strong><sup class="cite" data-refid="30">[30]</sup>。这和 RemNote「每行皆 block」的纯结构不同：Capacities 让每个块「知道自己是什么」。</li>
+      </ul>
+      <h3>组织与温故</h3>
+      <ul>
+        <li><strong>Daily notes = 每日收件箱</strong>：可从 WhatsApp / Telegram / 邮件快速捕获<sup class="cite" data-refid="31">[31]</sup>——对东南亚（WhatsApp/Telegram 渗透率极高）尤其有参考价值。</li>
+        <li>backlinks 自动；<strong>Related Content（Pro/AI）</strong>实时展示最相关的 5 个内容<sup class="cite" data-refid="32">[32]</sup>；tags 跨库 + 层级；<strong>无文件夹</strong>。</li>
+        <li><strong>「Created on This Day」</strong>：按日期触发，展示历史上同一天创建的内容——这是四款里最接近「温故」的机制<sup class="cite" data-refid="31">[31]</sup>。</li>
+      </ul>
+      <div class="callout warn"><h4>⚠️ Capacities 没有原生 SRS，温故是「弱且被动」的</h4><p>Capacities <strong>无原生间隔重复</strong>：它的「温故」靠 Created on this day、Related Content、以及 Readwise 集成（真正的 SRS 在 Readwise 那一侧）<sup class="cite" data-refid="33">[33]</sup>；路线图提过「按时间上下文 resurface（重新浮现）」但未上线<sup class="cite" data-refid="34">[34]</sup>。<span class="conf g">🟢</span> 也就是说它的温故是<strong>被动的</strong>（等你翻到、等系统推给你看），而不是<strong>主动排期的提取练习</strong>——它能让你「又看见」，但不保证你「回忆得起」。这正是 Ch1 里 testing effect 强调的差别：半米必须做主动提取，不能只做被动 resurface。</p></div>
+      <h3>阅读闭环与定价</h3>
+      <p>Web Clipper 只存链接不抓正文，PDF 无原生批注层，阅读闭环靠 Readwise 集成打补丁<sup class="cite" data-refid="35">[35]</sup>——这是它相对 Heptabase 的短板。定价（2026-07-09）：Free 5GB / Pro $9.99/月（$119.88/年）/ Believer $12.49/月<sup class="cite" data-refid="36">[36]</sup>。人群是成人知识工作者/研究者/读书人，学生页面已 404、面向大学文科生，<strong>不面向 K12，无游戏化、无师生工作流</strong><sup class="cite" data-refid="37">[37]</sup>。</p>
+      <div class="callout good"><h4>✅ 半米该从 Capacities 抄的三样</h4><p><strong>① object-type 作内容语义骨架</strong>——给半米的每类学习内容定义结构化 type：单词卡 = {词性 / 例句 / 熟练度}，知识点卡 = {学科 / 前置知识 / 掌握度}，由系统管理结构，孩子只填内容。这比 RemNote 的纯 block 更适合 K12（结构化 = 可自动出题、可自动统计掌握度）。<strong>② 「Created on This Day」+ 注入 SRS 权重</strong>——优先展示「7 天前 / 30 天前的今天你记了什么」，对 K12 比纯 Anki 冷冰冰的调度更有<u>叙事感</u>和情感钩子（详见 Ch10、Ch12）。<strong>③ 快速捕获 → 事后分类</strong>——先记后整，Daily notes 当收件箱，降低当场记笔记的门槛，尤其借鉴它从 WhatsApp/Telegram 捕获的思路（东南亚场景高度契合）。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7" data-nav="07 四款横向对比">
+    <h2><span class="num">07</span><span class="title-text">横向对比大表：四款标杆一张图看清</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把四款拉平到同一张表上，半米该抄谁、该躲谁一目了然。这是本报告的核心表，建议对照 Ch3–6 一起看。</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>维度</th><th>RemNote</th><th>SuperMemo</th><th>Heptabase</th><th>Capacities</th></tr></thead>
+        <tbody>
+          <tr><td><strong>笔记形态</strong></td><td>每行皆 block + 双链<sup class="cite" data-refid="1">[1]</sup></td><td>知识树 element + 概念图<sup class="cite" data-refid="17">[17]</sup></td><td>Card + 无限白板<sup class="cite" data-refid="23">[23]</sup></td><td>object（有 type）+ block<sup class="cite" data-refid="30">[30]</sup></td></tr>
+          <tr><td><strong>复习 SRS</strong></td><td class="check y">SM-2 默认，可切 FSRS<sup class="cite" data-refid="3">[3]</sup></td><td class="check y">SM-17/18，最强算法<sup class="cite" data-refid="11">[11]</sup></td><td class="check n">未上线（路线图 P1）<sup class="cite" data-refid="24">[24]</sup></td><td class="check n">无原生 SRS<sup class="cite" data-refid="33">[33]</sup></td></tr>
+          <tr><td><strong>增量阅读</strong></td><td class="check p">插件 + 原生 Reader<sup class="cite" data-refid="5">[5]</sup></td><td class="check y">招牌，全行业最完整<sup class="cite" data-refid="15">[15]</sup></td><td class="check p">高亮卡成熟，无 IR<sup class="cite" data-refid="25">[25]</sup></td><td class="check n">靠 Readwise 补丁<sup class="cite" data-refid="35">[35]</sup></td></tr>
+          <tr><td><strong>阅读/视频支持</strong></td><td class="check y">PDF/Web/AI 转卡<sup class="cite" data-refid="6">[6]</sup></td><td class="check p">PDF/YouTube 导入（仅 Win）<sup class="cite" data-refid="18">[18]</sup></td><td class="check y">PDF/YouTube 字幕时间戳<sup class="cite" data-refid="25">[25]</sup></td><td class="check p">Web Clipper 仅存链接<sup class="cite" data-refid="35">[35]</sup></td></tr>
+          <tr><td><strong>平台</strong></td><td class="check y">全平台（iOS 不稳）<sup class="cite" data-refid="7">[7]</sup></td><td class="check n">桌面仅 Windows<sup class="cite" data-refid="20">[20]</sup></td><td class="check p">全平台但移动端弱<sup class="cite" data-refid="28">[28]</sup></td><td class="check p">全平台</td></tr>
+          <tr><td><strong>定价（2026-07-09）</strong></td><td>Free / $8 / $18 / $395 买断<sup class="cite" data-refid="9">[9]</sup></td><td>$68 买断（Win）/ ~$9 月<sup class="cite" data-refid="18">[18]</sup></td><td class="check n">无免费 $8.99+<sup class="cite" data-refid="26">[26]</sup></td><td>Free / $9.99 / $12.49<sup class="cite" data-refid="36">[36]</sup></td></tr>
+          <tr><td><strong>K12 适用性</strong></td><td class="check p">初中以上；语法偏多<sup class="cite" data-refid="8">[8]</sup></td><td class="check n">官方说不适合儿童<sup class="cite" data-refid="21">[21]</sup></td><td class="check n">明确不面向 K12<sup class="cite" data-refid="29">[29]</sup></td><td class="check n">面向大学文科生<sup class="cite" data-refid="37">[37]</sup></td></tr>
+          <tr><td><strong>杀手功能</strong></td><td>一键 block 转卡（6 语法）</td><td>增量阅读流水线</td><td>PDF/视频 → 高亮卡片</td><td>对象化 type + 温故</td></tr>
+          <tr><td><strong>半米该抄</strong></td><td class="check y">交互内核 + FSRS</td><td class="check y">算法思想 + Cloze 流水线</td><td class="check y">卡片一体化 + 视频卡</td><td class="check y">type 骨架 + 温故叙事</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout accent"><h4>★ 一句话读表</h4><p><strong>没有一款能直接给 K12 用——但四款各有一段可拆下来的「零件」：RemNote 的一键转卡交互 + FSRS、SuperMemo 的 Cloze 流水线 + S/R 算法思想、Heptabase 的卡片一体化 + 视频高亮卡、Capacities 的对象化 type 骨架 + 温故叙事。</strong>半米的产品设计不是「选一款抄」，而是「把这四段零件重新焊成一辆孩子愿意开、移动端跑得动、算法自动排期的车」。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8" data-nav="08 复习引擎选型">
+    <h2><span class="num">08</span><span class="title-text">复习引擎选型：FSRS vs SM-x vs 自研</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是半米最重要的一个技术决策，也是最容易被过度纠结的一个。结论先行：<strong>直接接开源 FSRS，别自研，也别硬啃 SM-x 闭源算法。</strong>下面是三条路的对比。</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>方案</th><th>成本</th><th>效果</th><th>可维护性</th><th>结论</th></tr></thead>
+        <tbody>
+          <tr class="row-highlight"><td><strong>接开源 FSRS</strong></td><td class="check y">近零（现成库）</td><td class="check y">比 SM-2 少 25–40% 复习<sup class="cite" data-refid="38">[38]</sup></td><td class="check y">社区活跃、多语言</td><td>✅ 直接选它</td></tr>
+          <tr><td><strong>移植 SM-17/18</strong></td><td class="check n">高（闭源，需逆向）</td><td class="check p">与 FSRS 争议中不分明<sup class="cite" data-refid="14">[14]</sup></td><td class="check n">无开源实现</td><td>⛔ 学思想即可，别实现</td></tr>
+          <tr><td><strong>自研算法</strong></td><td class="check n">极高（要数据 + 调参）</td><td class="check r">大概率不如 FSRS</td><td class="check n">全靠自己</td><td>⛔ 单人开发别碰</td></tr>
+        </tbody>
+      </table></div>
+      <h3>为什么是 FSRS：它已经是事实标准</h3>
+      <ul>
+        <li><strong>Anki v23.10（2023-10）内置 FSRS</strong>，如今已是主流选择<sup class="cite" data-refid="39">[39]</sup>。同样 90% 保留率下，据第三方 benchmark，FSRS-5 比 SM-2 <strong>减少约 25–40% 复习量</strong>，预测准确性 ±5.3%（SM-2 ±16.2%）<sup class="cite" data-refid="38">[38]</sup>；Anki 官方口径较保守，只说「更高效、少复习」不给精确区间<sup class="cite" data-refid="39">[39]</sup>，RemNote 官方文档则多说 20–30%（Ch3）。<span class="conf y">🟡</span>（区间因来源/数据集而异，取「明显少于 SM-2」这个方向即可）</li>
+        <li>SM-2 有著名的「ease hell」问题——难卡的 ease factor 不断下降、间隔卡死、复习队列饱和；FSRS 用记忆模型直接算，没有这个病<sup class="cite" data-refid="38">[38]</sup>。</li>
+      </ul>
+      <h3>全栈都有现成库，半米可以「即插即用」</h3>
+      <p>open-spaced-repetition 组织维护了 FSRS 的多语言实现<sup class="cite" data-refid="40">[40]</sup>：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>库</th><th>语言/位置</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td><strong>ts-fsrs</strong></td><td>TypeScript（浏览器可直接跑）</td><td>半米前端排期<sup class="cite" data-refid="42">[42]</sup></td></tr>
+          <tr><td><strong>py-fsrs</strong></td><td>Python（v6.3.1，约 450★）</td><td>半米后端排期<sup class="cite" data-refid="41">[41]</sup></td></tr>
+          <tr><td><strong>fsrs-rs</strong></td><td>Rust（含 Optimizer）</td><td>批量参数优化<sup class="cite" data-refid="40">[40]</sup></td></tr>
+          <tr><td>Node / Go / Java / Swift / Dart 绑定</td><td>多平台</td><td>移动端原生集成<sup class="cite" data-refid="40">[40]</sup></td></tr>
+        </tbody>
+      </table></div>
+      <p>API 极简——核心就三个概念：<strong>Card（卡片状态）/ Rating（用户打分：忘了/难/一般/简单）/ Scheduler（算下次何时复习）</strong><sup class="cite" data-refid="41">[41]</sup>。半米前端用 ts-fsrs 当场算下次复习时间、后端用 py-fsrs 存储和批量优化，一天就能接通。</p>
+      <div class="callout good"><h4>✅ 儿童场景，FSRS 反而比对成人更划算</h4><p>儿童的遗忘曲线通常更陡、个体差异更大。FSRS 是<strong>自适应</strong>的——它会根据每个孩子的实际回忆表现拟合出个人化的记忆参数，理论上比「所有人一套固定间隔」更快贴合一个具体孩子的遗忘节奏<sup class="cite" data-refid="41">[41]</sup>。<span class="conf y">🟡</span>（儿童场景 FSRS 拟合速度无专门实证，属基于算法机制的合理推断）遗忘指数用 FSRS 默认的 10%（保留率 90%）起步<sup class="cite" data-refid="11">[11]</sup>，等有了真实数据再按年龄段微调。</p></div>
+      <div class="callout info"><p><strong>算法学 SuperMemo，代码用 FSRS——这不矛盾。</strong>SuperMemo 贡献的是<u>思想</u>：把记忆拆成「稳定性 S（有多牢）+ 可提取性 R（此刻多想得起）」两个组件<sup class="cite" data-refid="11">[11]</sup>，这个心智模型帮你理解「为什么复习要在快忘时做、而不是天天做」，对你设计 UI 文案（比如「这张卡快忘了，复习一下能记更久」）很有用。FSRS 本身也是站在这套思想上用现代机器学习重新拟合出来的<sup class="cite" data-refid="13">[13]</sup>。所以：读 SuperMemo 的 wiki 建立直觉，装 ts-fsrs/py-fsrs 落地实现。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9" data-nav="09 学习科学地基">
+    <h2><span class="num">09</span><span class="title-text">学习科学地基：可产品化的范式与 K12 特殊性</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>Ch1 铺了间隔 + 提取两块地基，这一章往下钻：哪些学习法可以直接变成半米的功能，以及 K12 儿童和成人到底不一样在哪。</p>
+      <h3>两个最强的可产品化范式</h3>
+      <div class="callout info"><h4>① Cornell 笔记法：cue column 强制自测</h4><p>Cornell 笔记法的精髓不是「分三栏」，而是左侧的 <strong>cue column（线索栏）</strong>强制你把笔记转成问题、遮住右侧答案来自测——它天然把「记笔记」和「提取练习」缝在了一起。实证：Evans &amp; Shively 2019，101 名八年级学生，用 Cornell 笔记法的班级<strong>通过率 100% vs 对照组 70%</strong><sup class="cite" data-refid="56">[56]</sup>。<span class="conf g">🟢</span> 对半米：这就是「笔记的一部分自动变成问题」的学术依据——记下的知识点，系统自动生成一个 cue（问题面），复习时先问后答。</p></div>
+      <div class="callout info"><h4>② Incremental Reading：最完整的「阅读→提取→回忆」闭环</h4><p>SuperMemo 的增量阅读（Ch4）是目前唯一把「阅读→提取→回忆」做成完整闭环的范式<sup class="cite" data-refid="57">[57]</sup>。它证明了一件事：<strong>复习不必是「阅读之后的独立任务」，可以是「阅读过程本身的自然延伸」</strong>。半米做要求三（阅读/看视频时随时调出）时，Cornell（问题化）+ IR（阅读中提取）是两个最该产品化的原型。</p></div>
+      <p><strong>Atomic notes（原子笔记）</strong>：Zettelkasten 的「一条笔记只讲一个 idea」原则有两个复习价值——一是笔记粒度天然匹配复习单元的大小（一张卡背一个点），二是写的时候被迫把知识讲清楚（等于 Feynman 自测）<sup class="cite" data-refid="58">[58]</sup>。这为半米「笔记必须原子化」提供了依据：不是为了整洁，是为了可复习。</p>
+      <h3>K12 特殊性：儿童不是缩小版的成人</h3>
+      <div class="callout accent"><h4>★ 一项值得重视但需谨慎外推的儿童实证（Frontiers 2025）</h4><p>Frontiers in Psychology 2025 年一项针对意大利小学五年级（<strong>n=33，样本小</strong>）的研究发现两个结论：<strong>① 填空测试组正确率 67.0% vs 重读组 48.6%（差异显著）</strong>——testing effect 在儿童身上同样成立；<strong>② 该设计下间隔 1 天 vs 4 天无显著差异</strong><sup class="cite" data-refid="59">[59]</sup>。<span class="conf y">🟡</span> 第二条不能读成「儿童普遍对间隔不敏感」——原论文明确讨论：这个无差异可能来自实验操控方式，两个条件本身都<u>不是</u>零间隔，且作者呼吁后续研究确定最佳间隔。准确表述是：<strong>在该样本、该材料、1 vs 4 天设计下未观察到间隔主效应。</strong></p></div>
+      <p>即便谨慎解读，它给半米的产品优先级提示依然清晰：<strong>先把「让孩子真的做一次提取」这件事做到位，别一开始就把精力砸在「把间隔算法调到极致精准」上。</strong>成人 SRS 圈痴迷于算法优化，但对起步期的儿童产品，一个「够用的间隔 + 一定会发生的提取」大概率优于「完美的间隔 + 经常被跳过的提取」。这与 Ch8 的判断一致——FSRS 够好，先别自研调参，等有真实数据再按年龄段回校。</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>儿童特性</th><th>数据/结论</th><th>对半米的设计约束</th></tr></thead>
+        <tbody>
+          <tr><td>注意力时长短</td><td>约 = 年龄 ×2–3 分钟，小学 12–36 分钟；微学习每单元 5–15 分钟<sup class="cite" data-refid="60">[60]</sup></td><td>单次复习会话 ≤15 分钟，卡片切小</td></tr>
+          <tr><td>间隔精度或非首要（待验证）</td><td>该设计下间隔 1 天 vs 4 天无显著差异，样本 n=33<sup class="cite" data-refid="59">[59]</sup></td><td>先保证「测试发生」，间隔精度暂次要</td></tr>
+          <tr><td>提取 &gt; 重读</td><td>填空 67% vs 重读 48.6%<sup class="cite" data-refid="59">[59]</sup></td><td>复习卡一律做提取型（填空/问答）</td></tr>
+          <tr><td>元认知弱</td><td>儿童难以自我判断「学会没有」，需系统显式提示<sup class="cite" data-refid="59">[59]</sup></td><td>系统接管调度 + 掌握度可视化，别指望孩子自觉</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout good"><h4>✅ 半米从学习科学收敛出的四条设计原则</h4><p><strong>① 以「提取」替代「重读」</strong>：所有复习卡做成填空/问答，系统自动生成复习任务，绝不做「把笔记再展示一遍」。<strong>② 笔记粒度 = 一个知识点，系统接管调度</strong>：原子化不是洁癖，是可复习性 + 元认知补偿。<strong>③ 单次单元 ≤15 分钟 + 即时反馈</strong>：贴合儿童注意力。<strong>④ 别过度优化间隔精度</strong>：对儿童，「测试有没有发生」比「间隔算得多准」重要得多——这条直接为「用现成 FSRS、不自研」背书。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10" data-nav="10 游戏化行为驱动">
+    <h2><span class="num">10</span><span class="title-text">游戏化与行为驱动：半米的「行为」二字怎么落</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>半米的定位是「行为驱动」——这一章就是把「行为」二字落到复习系统上：怎么让孩子<strong>真的回来复习</strong>。这既是半米相对四款标杆最大的差异化（它们都不做或反对游戏化），也是一条要小心走的钢丝。</p>
+      <h3>正面证据：Duolingo 把行为设计做成了增长引擎</h3>
+      <div class="callout good"><h4>✅ streak（连续打卡）+ 即时反馈的威力</h4><p>广为流传的数字是 Duolingo 靠 streak + 社交 + 即时反馈把 30 天流失率从 <strong>约 47%（2020）降到约 28%（2024）</strong><sup class="cite" data-refid="61">[61]</sup>、streak + 里程碑让 DAU 高出约 <strong>40–60%</strong><sup class="cite" data-refid="62">[62]</sup>。<span class="conf y">🟡</span> 但要诚实标注可信度：这些数字来自二手分析（youngurbanproject 偏叙事）与营销供应商博客（Plotline），<strong>不是 Duolingo 官方 A/B 实验证据</strong>，40–60% 更是泛化陈述——引用时当「量级参考」，最稳的做法是找 Duolingo 年报/股东信复核。核心机制层面是稳的：<strong>损失厌恶 &gt; 奖励</strong>——「快要失去连续记录」的痛感比「完成后给金币」更能驱动回访<sup class="cite" data-refid="62">[62]</sup>。对半米，streak 是一个<strong>值得验证的强产品假设</strong>，不是已证结论：先在 MVP 上小规模验证它对 K12 复习回访的实际拉动，再决定加多重。</p></div>
+      <h3>方法论：Fogg 行为模型 B = MAP</h3>
+      <p>BJ Fogg 的行为模型：<strong>行为（Behavior）= 动机（Motivation）× 能力（Ability）× 提示（Prompt）三者同时越过阈值</strong>才会发生<sup class="cite" data-refid="63">[63]</sup>。落到半米复习上：</p>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">M 动机</div><div class="l">streak 损失厌恶 + 即时庆祝，不靠外部物质奖励</div></div>
+        <div class="metric"><div class="v">A 能力</div><div class="l">把「做一张卡」缩到 30 秒起步，越小越容易发生</div></div>
+        <div class="metric"><div class="v">P 提示</div><div class="l">绑已有日常触发点（放学后、睡前），推送到该复习的卡</div></div>
+      </div>
+      <p>习惯回路是 <strong>Cue → Routine → Reward（提示 → 行为 → 奖励）</strong>，且<strong>即时奖励对养成习惯远胜延迟奖励</strong><sup class="cite" data-refid="64">[64]</sup>——复习答对当场给正反馈（动画/音效/进度条动一下），别攒到周末发。</p>
+      <h3>钢丝的另一头：过度外部奖励会反噬</h3>
+      <div class="callout bad"><h4>⛔ SuperMemo 的警告不能无视：外部奖励会损伤内在动机</h4><p>Ch4 提过，SuperMemo 官方明确反对游戏化，认为积分/奖励会与学习内容形成<strong>「毒性关联」，干扰内在动机</strong><sup class="cite" data-refid="21">[21]</sup><sup class="cite" data-refid="22">[22]</sup>。这不是老古板——它触及一个真问题：<strong>当孩子「为了金币而学」，一旦金币停了，学习动机可能比没有金币时更低</strong>。同时，游戏化的新奇感会消退，新奇过后必须靠内容本身驱动<sup class="cite" data-refid="61">[61]</sup>。<span class="conf g">🟢</span></p></div>
+      <div class="callout accent"><h4>★ 半米的平衡点：用「行为脚手架」而非「物质贿赂」</h4><p>把 Duolingo 的有效机制和 SuperMemo 的警告合起来，半米的游戏化设计原则是：<strong>① 优先用 streak / 进度可视化 / 即时庆祝这类「过程性、非物质」的反馈</strong>（它们强化的是「我在坚持」的自我认同，不是「我在换奖品」）；<strong>② 损失厌恶 &gt; 奖励发放</strong>——快掉 streak 时提醒的权重，高于完成后发奖励；<strong>③ 绑日常触发点 + 把起步动作缩到最小</strong>（Fogg 的 A 和 P）；<strong>④ 游戏化是「把孩子领进门」的脚手架，不是学习的目的</strong>——内容有用、进步看得见，才是留住人的地基。金币/徽章可以有，但永远是配角，且要能优雅退场。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11" data-nav="11 笔记⟷复习打通">
+    <h2><span class="num">11</span><span class="title-text">打通机制：笔记 ⟷ 复习到底怎么连</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这一章回答阿杰的要求二——「笔记 ⟷ 复习系统打通」具体是怎么实现的。四款标杆给了三种不同的打通模式，半米要选对一种。</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>打通模式</th><th>代表</th><th>机制</th><th>对 K12 的适配</th></tr></thead>
+        <tbody>
+          <tr><td><strong>符号激活式</strong></td><td>RemNote / Logseq</td><td>笔记里敲符号（<code>{{}}</code>、<code>#card</code>）当场把这行标记为卡<sup class="cite" data-refid="2">[2]</sup><sup class="cite" data-refid="47">[47]</sup></td><td class="check p">最优雅，但要孩子学语法</td></tr>
+          <tr><td><strong>流水线提取式</strong></td><td>SuperMemo</td><td>读→Extract→Cloze→Review 逐步把文章熬成卡<sup class="cite" data-refid="16">[16]</sup></td><td class="check p">思路最完整，但操作重</td></tr>
+          <tr><td><strong>外接集成式</strong></td><td>Heptabase / Capacities</td><td>笔记在本体，SRS 靠 Anki/Readwise 外接<sup class="cite" data-refid="24">[24]</sup><sup class="cite" data-refid="33">[33]</sup></td><td class="check n">两个 App 来回切，孩子必弃</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout bad"><h4>⛔ 外接集成式对 K12 直接淘汰</h4><p>Heptabase 和 Capacities 都走「笔记在自己家、复习去 Anki/Readwise」的外接路线<sup class="cite" data-refid="24">[24]</sup><sup class="cite" data-refid="33">[33]</sup>。对成人研究者这尚可忍受，<strong>对 K12 儿童是死路</strong>——让一个孩子在两个 App 之间来回导数据、维护两套系统，这个摩擦足以让整个复习习惯崩掉。<span class="conf g">🟢</span> 半米必须做<strong>内生的、一体的</strong>打通，笔记和复习在同一个应用、同一份数据里。</p></div>
+      <div class="callout good"><h4>✅ 半米的打通设计：符号激活式的「AI 代劳」变体</h4><p>RemNote 的符号激活式最优雅，但要孩子学 6 种语法（Ch3）。半米的解法是<strong>把「建卡」这个动作从孩子身上卸下来，交给 AI/老师</strong>：<br><strong>① 孩子只管记</strong>——在阅读/看视频/上课时划一句、记一条，动作和普通记笔记完全一样，不学任何语法。<br><strong>② AI 自动判断并生卡</strong>——后台把这条笔记按 Capacities 式的 type（单词/知识点/概念）结构化，自动挑出可挖空的关键词生成 Cloze、或生成一个问答对（Cornell 式 cue，Ch9）。<br><strong>③ 生成的卡自动进 FSRS 队列</strong>（Ch8），从此系统接管排期。<br>这样就把 RemNote 的「记即生卡」内核 + SuperMemo 的「Extract→Cloze」流水线 + FSRS 排期，缝成了一条<strong>孩子零学习成本</strong>的打通链。SuperMemo 卡在「儿童不会建卡」，半米用 AI 把这一步吃掉。</p></div>
+      <h3>结构化 type 是自动生卡的前提</h3>
+      <p>为什么要借 Capacities 的 object-type（Ch6）？因为<strong>只有结构化的笔记，AI 才好自动出题</strong>。一条自由文本 AI 也能挖空，但如果笔记本身带 type——「这是一张单词卡，字段有 {词 / 词性 / 例句 / 熟练度}」——AI 就能精准地把「例句」挖成填空、把「词性」做成选择题、按「熟练度」字段回写 FSRS 状态。<strong>type 骨架 = 自动生卡的脚手架 + 掌握度统计的抓手</strong>，这是半米比纯 block 笔记（RemNote）更适合 K12 的地方。</p>
+      <div class="trap-box"><strong>⚠️ 最大的落地风险：AI 生卡质量必须先验证，不能默认它成立。</strong>「AI 自动挖空/出题」是整个方案的核心枢纽，但也是最没被证实的一环——AI 可能挖错关键词、生成不可答的问题、幻觉出错误答案、或生成不适合该年级的卡。<strong>这不该在 MVP 之后才管，而是 MVP 的验收前提。</strong>建议在 Ch13 的 MVP 里加一项 AI 生卡评测：取 100 条真实视频字幕/阅读段落，让老师打 gold label，测 AI 生成的 Cloze/问答的<u>正确率、可答性、年级适配度、拒绝率、老师平均编辑时长</u>；不过关就先做「AI 生草稿 + 老师一键确认」的半自动形态，别让不可控的卡直接进孩子的复习队列。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12" data-nav="12 随时可调出">
+    <h2><span class="num">12</span><span class="title-text">随时可调出：阅读时、看视频时的捕获与调用</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>阿杰的要求三——「随时可调出，尤其阅读 + 看视频时」——是三条要求里最考验工程细节、也最能决定「孩子到底会不会用」的一条。捕获成本每高一点，使用率就掉一截。</p>
+      <h3>四款在「阅读/视频捕获」上的成熟度</h3>
+      <ul>
+        <li><strong>Heptabase 最成熟</strong>：PDF 拖入生 PDF Card、选字生 Highlight Card；尤其 <strong>YouTube 集成带字幕 + 时间戳</strong>、Podcast 支持 AI 转录<sup class="cite" data-refid="25">[25]</sup>——这正是半米「看视频时划一句台词变成卡、点一下能跳回视频那一秒」的现成范本。</li>
+        <li><strong>RemNote 原生 Reader</strong>：PDF 导入/高亮/划选转卡 + Web Clipper + AI 批量转卡<sup class="cite" data-refid="6">[6]</sup>。</li>
+        <li><strong>Capacities 的快速捕获</strong>：Daily notes 当收件箱，可从 WhatsApp/Telegram/邮件快速丢内容进来<sup class="cite" data-refid="31">[31]</sup>——「先记后整」降低当场门槛。</li>
+        <li><strong>SuperMemo</strong>：桌面版支持 PDF/YouTube 导入进增量阅读，但仅 Windows、操作重<sup class="cite" data-refid="18">[18]</sup>。</li>
+      </ul>
+      <div class="callout good"><h4>✅ 半米的捕获设计：三个场景各给一个「一步动作」</h4><p><strong>① 看视频时</strong>（半米的强项场景）：借 Heptabase 的字幕+时间戳模型——播放中划一句台词/字幕，一步生成卡片，卡片记住视频时间戳，复习时点一下能跳回原视频那一秒重看。这是四款里最值得逐帧抄的一段。<br><strong>② 阅读时</strong>：借 RemNote Reader——PDF/文章里划选一段，一步转卡，AI 自动挖空（Ch11）。<br><strong>③ 随手记时</strong>：借 Capacities 的 Daily notes 收件箱 + 东南亚场景——「先记后整」，甚至考虑从 WhatsApp/Telegram 捕获（东南亚渗透率极高）。核心纪律：<strong>每个场景的捕获都必须是「一步」——划一下、点一下就完成，任何多出来的一步都会劝退孩子。</strong></p></div>
+      <h3>调出（温故）不止是「排期推送」，还可以有叙事</h3>
+      <div class="callout info"><p><strong>把 Capacities 的「Created on This Day」注入 SRS 权重。</strong>纯 Anki 式调度是冷冰冰的「今天该复习这 20 张」；Capacities 的「Created on This Day」提供了另一种情感钩子——「7 天前的今天你记下了这个」「一个月前你学会了这个词」<sup class="cite" data-refid="31">[31]</sup>。半米可以把两者合起来：<strong>FSRS 决定「该复习什么」，Created-on-this-day 式叙事决定「怎么把它呈现得有温度」</strong>。对 K12，「回顾你的学习足迹」比「完成今日复习任务」更有拉回来的力量（呼应 Ch10 的非物质激励）。这是半米把「调出」从功能升级成体验的机会。<span class="conf y">🟡</span>（叙事式温故对 K12 留存的增益无直接实证，属基于 Ch10 行为设计原理的推断）</p></div>
+      <div class="trap-box"><strong>⚠️ 坑：移动端才是主战场。</strong>东南亚 K12「阅读 + 看视频」绝大多数发生在手机上，不是桌面。SuperMemo 把最强的增量阅读锁死在 Windows 桌面（Ch4），是它对这个市场彻底无关的根本原因。半米的捕获与调出必须<strong>移动端优先设计</strong>，桌面反而是次要——这和绝大多数标杆的桌面优先路线相反，却是半米终端用户的真实场景。</div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13" data-nav="13 半米路线建议 ★">
+    <h2><span class="num">13</span><span class="title-text">半米路线建议：决策树 + MVP ★</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把前 12 章收敛成一套可执行的决策。先决策树，再 MVP，再分阶段路线。</p>
+      <div class="callout warn"><h4>⚠️ 两个先于决策树的前提（军师提醒，不在本报告展开）</h4><p>本报告聚焦「笔记 + 复习系统」的技术与产品形态，但落地前有两块必须单开研究的前置门槛，别默认它们不存在：<br><strong>① 「孩子」不是单一人群，路线要按年龄分层。</strong>8 岁 / 12 岁 / 17 岁在自控力、阅读能力、设备使用、考试压力上完全不同——<u>小学低年级</u>应偏「老师/家长代建卡、孩子只做题」，<u>小学高年级</u>可半自动，<u>中学</u>才开放更强的笔记结构与自主建卡。下面的 MVP 建议先锁定一个年龄段（如小学高年级）跑通，别一款通吃。<br><strong>② 儿童数据合规是「能不能做」的门槛，先于「怎么做」。</strong>面向东南亚 K12 涉及各国 PDPA、家长同意、学校数据处理、以及「把孩子笔记传给 LLM 生卡」的数据出境与删除策略——这些是硬约束，建议单开一份合规研究，别等产品做出来再补。<span class="conf y">🟡</span></p></div>
+      <h3>决策树：五个关键选择</h3>
+      <div class="tree">
+        <div class="node q">Q1 · 笔记形态选什么？</div>
+        <div class="node"><span class="lbl n">无限白板（Heptabase 式）</span>⛔ 对 K12 是负担 + 卡顿 → 不做（Ch5）</div>
+        <div class="node"><span class="lbl m">纯 block（RemNote 式）</span>⚠️ 灵活但不好自动出题/统计 → 不够</div>
+        <div class="node"><span class="lbl y">对象化 type 卡片（Capacities 式）</span>✅ 结构化 = 可自动生卡 + 统掌握度 → 选它（Ch6、Ch11）</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q2 · 复习引擎用什么？</div>
+        <div class="node"><span class="lbl n">自研 / 移植 SM-x</span>⛔ 单人开发成本极高、大概率不如 FSRS → 别碰（Ch8）</div>
+        <div class="node"><span class="lbl y">开源 FSRS（ts-fsrs + py-fsrs）</span>✅ 少 25–40% 复习、即插即用 → 选它（Ch8）</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q3 · 笔记怎么变成卡？</div>
+        <div class="node"><span class="lbl n">让孩子学语法建卡（RemNote 式）</span>⛔ 门槛太高 → 不行</div>
+        <div class="node"><span class="lbl n">外接 Anki/Readwise（Hepta/Capa 式）</span>⛔ 两 App 来回切，孩子必弃 → 不行（Ch11）</div>
+        <div class="node"><span class="lbl y">孩子只记，AI/老师自动生 Cloze/问答</span>✅ 零学习成本 → 选它（Ch11）</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q4 · 怎么让孩子回来复习？</div>
+        <div class="node"><span class="lbl n">堆物质奖励（金币换东西）</span>⚠️ 损内在动机、新奇会退 → 只做配角（Ch10）</div>
+        <div class="node"><span class="lbl y">streak 损失厌恶 + 即时庆祝 + 温故叙事</span>✅ 非物质、可持续 → 主力（Ch10、Ch12）</div>
+        <div class="step-arrow">↓</div>
+        <div class="node q">Q5 · 先做哪个端？</div>
+        <div class="node"><span class="lbl n">桌面优先（多数标杆的路）</span>⛔ 东南亚 K12 主战场不在桌面 → 反了</div>
+        <div class="node"><span class="lbl y">移动端优先，稳定性第一</span>✅ 贴合真实场景 + 避开 RemNote iOS 崩溃坑 → 选它（Ch3、Ch12）</div>
+      </div>
+      <h3>MVP：先做通的最小闭环</h3>
+      <div class="check-box">
+        <strong>① 一个场景先跑通：看视频划台词 → 生卡。</strong>选半米最强的视频场景（不要三个场景一起上），借 Heptabase 的字幕+时间戳模型：播放中划一句 → 一步生卡 → 卡记时间戳。<br>
+        <strong>② AI 自动把这句挖成填空 + 生成一个问答。</strong>孩子不学语法、不建卡（Ch11）。用 Capacities 式 type 给卡片结构（先只做「单词卡 / 句子卡」两种）。<br>
+        <strong>③ 接 ts-fsrs 排期。</strong>前端直接算下次复习时间，默认遗忘指数 10%，先不做参数优化（Ch8、Ch9：儿童对间隔不敏感，别先优化精度）。<br>
+        <strong>④ 复习一律提取型</strong>（填空/问答，禁止重读式），单次会话 ≤15 分钟（Ch9）。<br>
+        <strong>⑤ 加一条 streak + 即时庆祝。</strong>答对当场正反馈，快掉 streak 时提醒；先不做金币商店（Ch10）。<br>
+        <strong>⑥ 移动端优先 + 稳定性压测。</strong>先在中低端安卓 + iOS 上把「划词生卡不卡顿不闪退」这一条做扎实（Ch3、Ch12）。
+      </div>
+      <h3>分阶段路线</h3>
+      <div class="step"><div class="step-head"><span class="sn">1</span>Phase 1 · 单场景闭环（先验证「孩子会不会用 + 有没有效 + 卡质量够不够」）</div><div class="step-body">上面 6 条 MVP，只做视频场景。<strong>五项验收，任一不过关就不扩场景</strong>（呼应 Ch2 反方、Ch11 AI 生卡风险）：<strong>① AI 生卡质量</strong>——老师 gold label 下正确率/可答性/年级适配达标；<strong>② 儿童可用性</strong>——「划词生卡」日均触发次数、复习完成率上得来；<strong>③ 学习有效</strong>——不能只看使用量，要测 7/30 天延迟测验成绩、对照「同内容重读」组（否则证明不了真学到了）；<strong>④ 隐私合规</strong>——数据出境/家长同意/删除流程走通；<strong>⑤ 付费/GTM 信号</strong>——谁愿意付费（家长/老师/学校）有初步判断。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>Phase 2 · 扩捕获场景 + 温故叙事</div><div class="step-body">加阅读场景（PDF/文章划选转卡，RemNote Reader 式）+ 随手记（Daily notes 收件箱，Capacities 式，考虑 WhatsApp/Telegram 捕获）。把「调出」从冷调度升级成「Created on this day」式温故叙事（Ch12）。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>Phase 3 · 老师端 / 家长端 + 掌握度仪表盘</div><div class="step-body">四款标杆全都没有的东西：老师端批量生成班级复习卡（Readwise「输入→SRS」闭环证明了这条管道的价值<sup class="cite" data-refid="49">[49]</sup>）、家长端看掌握度。这是半米作为「学习操作系统」相对纯笔记工具的护城河。用 type 骨架统计的掌握度做仪表盘（Ch6、Ch11）。</div></div>
+      <div class="callout accent"><h4>★ 一句话版本</h4><p><strong>做一款「孩子看视频/读书时划一下、AI 自动变成填空卡、FSRS 排期、streak 催他回来」的移动端一体化 K12 复习应用——笔记形态学 Capacities 的对象化 type、算法用开源 FSRS、生卡流水线学 SuperMemo 但让 AI 代劳、行为驱动学 Duolingo 但躲开 SuperMemo 警告的过度奖励。这是四款标杆没一个覆盖、真空了十多年的一格，也是半米「行为驱动 AI 学习操作系统」定位下最该先啃的一块。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq" data-nav="FAQ 常见问题">
+    <h2><span class="num">Q</span><span class="title-text">FAQ：11 个最可能被问到的问题</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">半米直接用 RemNote/Logseq 的开源思路二次开发，不是更快吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>思路可以借，代码不建议直接扛。RemNote 是闭源商业产品，Logseq 虽开源但架构是为成人知识库设计的、语法门槛高<sup class="cite" data-refid="47">[47]</sup>。半米真正的差异化（AI 自动生卡让孩子零建卡、移动端优先、游戏化、老师/家长端）恰恰是这些成人工具没有、也不好硬改出来的。更务实的路是：算法直接接开源 FSRS 库（这个必须复用，别自研，Ch8），产品形态自己按 K12 重做。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">FSRS 和 SuperMemo 的 SM-18 到底哪个强？会不会选错？</span><span class="toggle">＋</span></div><div class="faq-a"><p>这是一场双方各拿自家数据自测、至今没有中立定论的争议：Anki 社区认为 FSRS 已全面超越 SM-2<sup class="cite" data-refid="13">[13]</sup>，SuperMemo 官方则称 SM-19 仍领先 FSRS<sup class="cite" data-refid="14">[14]</sup>（都标 🟡）。但对半米这不构成风险：SM-x 是闭源商业算法、没有开源实现、锁在 Windows 桌面里，你根本用不了；FSRS 开源、有全栈库、明确比 SM-2 好。所以答案是——两者思想都学，能落地的只有 FSRS，选它不会错。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">SuperMemo 官方都说间隔重复不适合儿童，半米这条路是不是走错了？</span><span class="toggle">＋</span></div><div class="faq-a"><p>它说的是「让幼儿自己按 SuperMemo 那套建卡、强记」不适合，尤其反对强制幼儿双倍练习<sup class="cite" data-refid="21">[21]</sup>——这恰恰是半米要绕开的。相反，儿童实证显示<strong>测试效应在孩子身上同样强</strong>（填空 67% vs 重读 48.6%）<sup class="cite" data-refid="59">[59]</sup>，问题从来不是「间隔重复对孩子没用」，而是「让孩子自己维护 SRS 系统太难」。半米用 AI 代劳建卡、系统接管调度、游戏化拉回访，正好把 SuperMemo 指出的三个死穴（建卡难、无正反馈、需自律）逐一填上。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">既然 SuperMemo 反对游戏化，半米还堆 streak 和金币，不会重蹈覆辙？</span><span class="toggle">＋</span></div><div class="faq-a"><p>关键在区分两类游戏化。SuperMemo 反对的是<strong>物质外部奖励</strong>（金币换东西），它会与学习形成「毒性关联」、损伤内在动机<sup class="cite" data-refid="21">[21]</sup><sup class="cite" data-refid="22">[22]</sup>。半米主力用的是<strong>过程性、非物质</strong>的机制——streak（连续记录）、进度可视化、即时庆祝，它们强化的是「我在坚持」的自我认同，而 Duolingo 证明这类机制能把流失率从 47% 砍到 28%<sup class="cite" data-refid="61">[61]</sup>。金币徽章可以有，但永远是配角、能优雅退场（Ch10）。这是有意识地走钢丝，不是无脑堆奖励。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">笔记形态到底选 block 还是 object-type？为什么不学 RemNote 的纯 block？</span><span class="toggle">＋</span></div><div class="faq-a"><p>选 object-type（Capacities 式）。纯 block（RemNote）灵活、适合成人自由组织知识库，但它的每个块「不知道自己是什么」，AI 不好自动出题、系统不好统计掌握度<sup class="cite" data-refid="1">[1]</sup>。object-type 给每类内容定义结构（单词卡 = {词/词性/例句/熟练度}），这层语义是<strong>自动生卡的脚手架 + 掌握度统计的抓手</strong><sup class="cite" data-refid="30">[30]</sup>——正是 K12「AI 代劳建卡 + 家长看掌握度」这两个核心需求的前提（Ch11）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">增量阅读那么强，半米第一版要不要做全套 Import→Extract→Cloze→Review？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不要。全套增量阅读连 RemNote 都是靠第三方插件实现<sup class="cite" data-refid="5">[5]</sup>、SuperMemo 的完整版锁在 Windows 桌面且操作极重<sup class="cite" data-refid="18">[18]</sup>——它是给硬核成人自学者的重型工具。半米第一版只取它的<strong>思想</strong>：把「划一段 → 挖成填空 → 进复习队列」这条最短路径做通（且让 AI 完成挖空），把「优先级排期、多层提取、自动记阅读位置」这些进阶能力留到后面。Ch13 的 MVP 就是这个简化版。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">Heptabase 的无限白板看起来很酷，半米真的完全不做吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>K12 第一版坚决不做。无限白板服务的是「成人做研究、在二维空间里理清复杂关联」的场景，而 K12 的核心动作是「记一条、背一条」，白板对孩子是认知负担，大画布还会卡顿（Heptabase 自己的痛点<sup class="cite" data-refid="28">[28]</sup>）。要抵住「看起来很酷」的诱惑。该抄 Heptabase 的是它的<strong>卡片一体化</strong>和<strong>视频高亮卡（字幕+时间戳）</strong><sup class="cite" data-refid="25">[25]</sup>，不是白板。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">遗忘指数设多少？间隔要不要按年龄精细调？</span><span class="toggle">＋</span></div><div class="faq-a"><p>起步用 FSRS 默认的遗忘指数 10%（保留率 90%）即可<sup class="cite" data-refid="11">[11]</sup>，先别精调。因为儿童实证显示<strong>间隔 1 天 vs 4 天对孩子无显著差异，「测试有没有发生」远比「间隔多准」重要</strong><sup class="cite" data-refid="59">[59]</sup>。把工程精力砸在「让孩子真的做一次提取」（捕获零摩擦、复习不卡顿、streak 拉回访）上，回报远高于调间隔算法。等积累了真实数据，再按年龄段微调遗忘指数不迟。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">为什么不能像 Heptabase/Capacities 那样，笔记归笔记、复习外接 Anki？</span><span class="toggle">＋</span></div><div class="faq-a"><p>因为对 K12 儿童，「两个 App 来回切、导数据、维护两套系统」的摩擦足以让整个复习习惯崩掉<sup class="cite" data-refid="24">[24]</sup><sup class="cite" data-refid="33">[33]</sup>。成人研究者能忍，孩子不能。半米必须做<strong>内生一体</strong>：笔记和复习在同一个 App、同一份数据里，记下即进队列，中间没有任何「导出/导入/切换」（Ch11）。这也正是半米相对这两款成人工具的结构性优势。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">市场真空说得挺好，但真空会不会是因为「这事根本做不成」？</span><span class="toggle">＋</span></div><div class="faq-a"><p>合理的怀疑。真空的成因更可能是「难做 + 没人认真做」，不是「做不成」：儿童建卡难（半米用 AI 代劳解决）、儿童需要外部驱动（半米用游戏化解决）、需要移动端 + 稳定性（多数标杆桌面优先没覆盖）——这些都是<strong>工程和产品难题，不是原理上的不可能</strong>。学习科学（测试效应在儿童身上同样成立<sup class="cite" data-refid="59">[59]</sup>）和商业验证（Readwise 用最朴素的输入→SRS 闭环做到约 1400 万 ARR<sup class="cite" data-refid="49">[49]</sup>）都指向「有效且有价值」。风险在执行难度，不在方向。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">这些价格、算法版本以后会变，报告还准吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>价格和版本号会变（都标了访问日期 2026-07-09），但报告的<strong>结论骨架是稳的</strong>：FSRS 是开源事实标准（趋势只会加强）、K12 一体化真空（存在十多年）、四款标杆各自的形态与人群定位、学习科学地基（元分析定论）——这些不会因为某款涨价或出新版本而翻转。价格类信息用时请以当日官网为准；算法类结论（FSRS vs SM-x 争议）已标 🟡，需要时再复核最新自测数据即可。</p></div></div>
+    </div>
+  </section>
+
+  <!-- ===== REFS ===== -->
+  <section class="chapter" id="refs" data-nav="References">
+    <h2><span class="num">R</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p style="font-size:13.5px">共 64 条。访问日期均为 2026-07-09。价格、定价档位以访问当日页面为准；算法性能对比（FSRS vs SM-x）多为各方自测，标 🟡 处为单一来源或未决争议；学习科学结论引自公开发表的元分析与实证研究。</p>
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://help.remnote.com/en/articles/8196578-outlines-and-terminology" target="_blank" rel="noopener">RemNote — Outlines and Terminology（Rem/block、无限嵌套、双链）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 4 次</span></li>
+        <li id="ref-2"><a href="https://help.remnote.com/en/articles/6025481-creating-flashcards" target="_blank" rel="noopener">RemNote — Creating Flashcards（6 种转卡语法）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 3 次</span></li>
+        <li id="ref-3"><a href="https://www.remnote.com/feature/fsrs" target="_blank" rel="noopener">RemNote — FSRS Feature（默认 SM-2 可切 FSRS，减 20–40% 复习）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 3 次</span></li>
+        <li id="ref-4"><a href="https://help.remnote.com/en/articles/9124137-the-fsrs-spaced-repetition-algorithm" target="_blank" rel="noopener">RemNote — The FSRS Spaced Repetition Algorithm（自适应无需调参）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-5"><a href="https://github.com/bjsi/incremental-everything" target="_blank" rel="noopener">GitHub — bjsi/incremental-everything（RemNote 仿 SuperMemo 增量阅读插件）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 3 次</span></li>
+        <li id="ref-6"><a href="https://help.remnote.com/en/articles/6690975-learning-from-pdfs-and-files-with-the-remnote-reader" target="_blank" rel="noopener">RemNote — Learning from PDFs and Files with the RemNote Reader（PDF 高亮/划选转卡/AI 批量）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 3 次</span></li>
+        <li id="ref-7"><a href="https://www.remnote.com/download" target="_blank" rel="noopener">RemNote — Download（全平台 Web/Win/Mac/Linux/iOS/Android，离线）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 2 次</span></li>
+        <li id="ref-8"><a href="https://tldv.io/blog/remnote/" target="_blank" rel="noopener">tl;dv — RemNote 评测（iOS 崩溃卡顿、K12 适用性、游戏化、无家长后台）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 4 次</span></li>
+        <li id="ref-9"><a href="https://www.remnote.com/pricing" target="_blank" rel="noopener">RemNote — Pricing（Free / Pro $8 / Pro+AI $18 / Life-Long $395 / 25% edu）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 5 次</span></li>
+        <li id="ref-10"><a href="https://supermemo.guru/wiki/History_of_SuperMemo_algorithm" target="_blank" rel="noopener">SuperMemo Guru — History of SuperMemo algorithm（SM-2、E-Factor 混淆 S 与 R）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-11"><a href="https://supermemo.guru/wiki/Algorithm_SM-17" target="_blank" rel="noopener">SuperMemo Guru — Algorithm SM-17（稳定性 S + 可提取性 R 双组件、遗忘指数）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 6 次</span></li>
+        <li id="ref-12"><a href="https://supermemo.guru/wiki/Algorithm_SM-18" target="_blank" rel="noopener">SuperMemo Guru — Algorithm SM-18（难度计算 + 稳定化函数逼近）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 2 次</span></li>
+        <li id="ref-13"><a href="https://supermemo.guru/wiki/FSRS" target="_blank" rel="noopener">SuperMemo Guru — FSRS（FSRS 起源与 Anki 社区采用率）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 3 次</span></li>
+        <li id="ref-14"><a href="https://www.supermemo.com/en/blog/supermemo-is-better-than-fsrs-by-far" target="_blank" rel="noopener">SuperMemo Blog — SuperMemo is better than FSRS by far（官方自测立场）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 3 次</span></li>
+        <li id="ref-15"><a href="https://super-memory.com/help/il.htm" target="_blank" rel="noopener">SuperMemo — Incremental Learning Help（增量学习总览、Topic/Item）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 3 次</span></li>
+        <li id="ref-16"><a href="https://super-memory.com/help/read.htm" target="_blank" rel="noopener">SuperMemo — Incremental Reading Help（Import→Read→Extract→Cloze→Review、Alt+X/Alt+Z、优先级）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 4 次</span></li>
+        <li id="ref-17"><a href="https://help.supermemo.org/wiki/Building_the_knowledge_tree" target="_blank" rel="noopener">SuperMemo Help — Building the knowledge tree（树形 element 容器、节点颜色、概念图）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 2 次</span></li>
+        <li id="ref-18"><a href="https://supermemo.store/products/supermemo-20-for-windows" target="_blank" rel="noopener">SuperMemo Store — SuperMemo 20 for Windows（$68 买断、完整 IR/知识树/5 算法/PDF/YouTube 导入，仅 Win）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 4 次</span></li>
+        <li id="ref-19"><a href="https://www.supermemo.com/en/premium-subscription" target="_blank" rel="noopener">SuperMemo.com — Premium Subscription（web 约 $9 月 / $90 年、约 300 门语言课、无 IR）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 2 次</span></li>
+        <li id="ref-20"><a href="https://flashrecall.app/blog/supermemo-vs-anki" target="_blank" rel="noopener">FlashRecall — SuperMemo vs Anki（Delphi、Windows Only、UI 陈旧、优先级 0% 反直觉、学习曲线陡）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-21"><a href="https://supermemo.guru/wiki/SuperMemo_does_not_work_for_kids" target="_blank" rel="noopener">SuperMemo Guru — SuperMemo does not work for kids（幼儿强记有害、9–12 岁需监督、外部激励毒性关联）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 6 次</span></li>
+        <li id="ref-22"><a href="https://supermemopedia.com/wiki/Gamification" target="_blank" rel="noopener">Supermemopedia — Gamification（官方远离游戏化的立场）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 3 次</span></li>
+        <li id="ref-23"><a href="https://www.toolchase.com/tool/heptabase/" target="_blank" rel="noopener">Toolchase — Heptabase（Card=Markdown 原子笔记、无限白板、同卡多板无副本、Card 即 Note）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 4 次</span></li>
+        <li id="ref-24"><a href="https://wiki.heptabase.com/roadmap/nextup" target="_blank" rel="noopener">Heptabase Wiki — Roadmap Next Up（SRS 未上线，列为 Priority 1，2026-04-07）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 4 次</span></li>
+        <li id="ref-25"><a href="https://wiki.heptabase.com/pdf-annotation" target="_blank" rel="noopener">Heptabase Wiki — PDF Annotation（PDF/Highlight Card、Readwise/Zotero/YouTube 字幕时间戳/Podcast AI 转录）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 4 次</span></li>
+        <li id="ref-26"><a href="https://heptabase.com/pricing" target="_blank" rel="noopener">Heptabase — Pricing（无免费层；Pro $8.99 / Premium $17.99 / Premium+ $53.99；7 天试用；无 edu 折扣）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 2 次</span></li>
+        <li id="ref-27"><a href="https://toolstack.io/tools/heptabase" target="_blank" rel="noopener">Toolstack — Heptabase（杀手功能 PDF 高亮→白板卡；视觉化关联、离线 Markdown 数据自持）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 2 次</span></li>
+        <li id="ref-28"><a href="https://makerstack.co/reviews/heptabase-review/" target="_blank" rel="noopener">Makerstack — Heptabase Review（痛点：无 SRS/无协作/移动端弱/大画布卡顿/学生偏贵）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 4 次</span></li>
+        <li id="ref-29"><a href="https://wiki.heptabase.com/use-case-and-workflow" target="_blank" rel="noopener">Heptabase Wiki — Use Case and Workflow（目标用户成人/大学生/研究者，K12 不在受众）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 2 次</span></li>
+        <li id="ref-30"><a href="https://docs.capacities.io/reference/content-types" target="_blank" rel="noopener">Capacities Docs — Content Types（object 必有 type、内置 11 种 + Custom Type、block 是 property）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 5 次</span></li>
+        <li id="ref-31"><a href="https://capacities.io/whats-new/release-8/" target="_blank" rel="noopener">Capacities — Release 8（Daily notes 收件箱、WhatsApp/Telegram/邮件捕获、Created on This Day）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 4 次</span></li>
+        <li id="ref-32"><a href="https://docs.capacities.io/reference/related-content" target="_blank" rel="noopener">Capacities Docs — Related Content（Pro/AI 实时展示最相关 5 个）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-33"><a href="https://capacities.io/pro" target="_blank" rel="noopener">Capacities — Pro（无原生 SRS，温故靠 Created on this day / Related Content / Readwise）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 4 次</span></li>
+        <li id="ref-34"><a href="https://capacities.io/whats-new/release-63/" target="_blank" rel="noopener">Capacities — Release 63（roadmap 提「按时间上下文 resurface」未上线）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-35"><a href="https://apps.apple.com/us/app/capacities-web-extension/id6502697899" target="_blank" rel="noopener">App Store — Capacities Web Extension（Web Clipper 只存链接不抓正文；PDF 无原生批注层）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 3 次</span></li>
+        <li id="ref-36"><a href="https://costbench.com/software/note-taking/capacities/" target="_blank" rel="noopener">CostBench — Capacities Pricing（Free 5GB / Pro $9.99 月·$119.88 年 / Believer $12.49 月）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 2 次</span></li>
+        <li id="ref-37"><a href="https://aitoolscoop.com/tool/capacities/" target="_blank" rel="noopener">AI Tools Coop — Capacities（成人知识工作者/研究者；学生页 404、面向大学文科生；不面向 K12）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 2 次</span></li>
+        <li id="ref-38"><a href="https://memoforge.app/blog/fsrs-vs-sm2-anki-algorithm-guide-2025/" target="_blank" rel="noopener">MemoForge — FSRS vs SM-2 Anki Algorithm Guide 2025（减 25–40% 复习、误差 ±5.3% vs ±16.2%、ease hell）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 4 次</span></li>
+        <li id="ref-39"><a href="https://faqs.ankiweb.net/what-spaced-repetition-algorithm" target="_blank" rel="noopener">Anki FAQ — What spaced repetition algorithm does Anki use（v23.10 内置 FSRS）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-40"><a href="https://github.com/open-spaced-repetition" target="_blank" rel="noopener">GitHub — open-spaced-repetition（FSRS 多语言实现组织：ts/py/rs 及 Node/Go/Java/Swift/Dart 绑定）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 3 次</span></li>
+        <li id="ref-41"><a href="https://github.com/open-spaced-repetition/py-fsrs" target="_blank" rel="noopener">GitHub — py-fsrs（v6.3.1，约 450★；API：Card/Rating/Scheduler）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 3 次</span></li>
+        <li id="ref-42"><a href="https://github.com/open-spaced-repetition/ts-fsrs" target="_blank" rel="noopener">GitHub — ts-fsrs（TypeScript，浏览器可直接跑）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-43"><a href="https://tactyqal.com/blog/why-anki-failed-an-entrepreneurs-perspective/" target="_blank" rel="noopener">Tactyqal — Why Anki Failed: An Entrepreneur's Perspective（Anki 约 200 万活跃 vs Quizlet 5000 万+、美医学生 86.2%、UX 像 2008）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 3 次</span></li>
+        <li id="ref-44"><a href="https://chunks.app/blog/best-spaced-repetition-apps-2026" target="_blank" rel="noopener">Chunks — Best Spaced Repetition Apps 2026（品类盘点、K12 一体化真空）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 3 次</span></li>
+        <li id="ref-45"><a href="https://www.obsidianstats.com/posts/2025-05-01-spaced-repetition-plugins" target="_blank" rel="noopener">ObsidianStats — Spaced Repetition Plugins（26 个 SRS 插件盘点）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-46"><a href="https://github.com/st3v3nmw/obsidian-spaced-repetition" target="_blank" rel="noopener">GitHub — obsidian-spaced-repetition（支持 FSRS + SM-2，#flashcard 笔记内定义）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-47"><a href="https://flashrecall.app/blog/logseq-flashcards" target="_blank" rel="noopener">FlashRecall — Logseq Flashcards（内置 SRS，任意 block 加 #card，SM-5，免费开源）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 3 次</span></li>
+        <li id="ref-48"><a href="https://study-genius-ai.hatolabs.com/blog/mochi-vs-anki-2026" target="_blank" rel="noopener">Study Genius AI — Mochi vs Anki 2026（Mochi $5 月/$40 年、Markdown、分钟级 onboarding、SM-2 变体无 FSRS）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-49"><a href="https://fueler.io/blog/readwise-usage-revenue-valuation-growth-statistics" target="_blank" rel="noopener">Fueler — Readwise Usage/Revenue Statistics（高亮→衰减算法每日复习，ARR 约 $14M；⚠️ 单源）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 3 次</span></li>
+        <li id="ref-50"><a href="https://www.wiseguyreports.com/reports/flashcard-app-market" target="_blank" rel="noopener">WiseGuy Reports — Flashcard App Market（$1.32B/$2.5B 等分歧数据；⚠️ 口径不一仅供量级）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-51"><a href="https://secretgeek.net/spaced_repetition_kids" target="_blank" rel="noopener">SecretGeek — Spaced Repetition for Kids（2014 指出「面向孩子的 SRS 市场不存在」）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 3 次</span></li>
+        <li id="ref-52"><a href="https://en.wikipedia.org/wiki/Spaced_repetition" target="_blank" rel="noopener">Wikipedia — Spaced repetition（Cepeda 2006 元分析：254 研究/14000+ 观察）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-53"><a href="https://www.lscp.net/persons/ramus/docs/EPR20.pdf" target="_blank" rel="noopener">Donoghue &amp; Hattie 2021 — 元分析（242 研究/约 169000 人；分散练习 + 提取练习效应最稳）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-54"><a href="https://journals.sagepub.com/doi/abs/10.1111/j.1467-9280.2006.01693.x" target="_blank" rel="noopener">Roediger &amp; Karpicke 2006 — Test-Enhanced Learning（5 分钟后重读略优，2 天/1 周后提取显著优）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-55"><a href="https://files.eric.ed.gov/fulltext/ED599273.pdf" target="_blank" rel="noopener">ERIC ED599273 — 测试效应相关研究综述</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-56"><a href="https://www.researchgate.net/publication/390260478" target="_blank" rel="noopener">Evans &amp; Shively 2019 — Cornell Notes（101 名八年级，通过率 100% vs 70%，cue column 强制自测）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-57"><a href="https://supermemo.guru/wiki/Incremental_reading" target="_blank" rel="noopener">SuperMemo Guru — Incremental reading（阅读→提取→回忆完整闭环）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-58"><a href="https://atomicworkflows.com/atomic-note-taking/" target="_blank" rel="noopener">Atomic Workflows — Atomic Note-Taking（Zettelkasten 一 note 一 idea，匹配复习单元，写时强迫理解）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-59"><a href="https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2025.1632206/full" target="_blank" rel="noopener">Frontiers in Psychology 2025 — 小学五年级（n=33）填空 67.0% vs 重读 48.6%；间隔 1 天 vs 4 天无显著差异</a><span class="ref-meta">· 访问 2026-07-09 · 引用 6 次</span></li>
+        <li id="ref-60"><a href="https://www.instrucko.com/blogs/what-is-the-ideal-attention-span-for-kids" target="_blank" rel="noopener">Instrucko — Ideal Attention Span for Kids（约年龄 ×2–3 分钟，小学 12–36 分钟；微学习 5–15 分钟）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-61"><a href="https://www.youngurbanproject.com/duolingo-case-study/" target="_blank" rel="noopener">Young Urban Project — Duolingo Case Study（30 天流失 47%→约 28%；新奇消退后靠内容驱动）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 3 次</span></li>
+        <li id="ref-62"><a href="https://www.plotline.so/blog/streaks-for-gamification-in-mobile-apps" target="_blank" rel="noopener">Plotline — Streaks for Gamification in Mobile Apps（streak+里程碑 DAU 高 40–60%；损失厌恶 &gt; 奖励）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 2 次</span></li>
+        <li id="ref-63"><a href="https://commoncog.com/a-review-of-bj-foggs-tiny-habits/" target="_blank" rel="noopener">Commoncog — A Review of BJ Fogg's Tiny Habits（B=MAP：动机×能力×提示同时达阈值）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+        <li id="ref-64"><a href="https://easyhabits.io/blog/habit-loop-explained" target="_blank" rel="noopener">EasyHabits — Habit Loop Explained（Cue→Routine→Reward；即时奖励养习惯胜延迟）</a><span class="ref-meta">· 访问 2026-07-09 · 引用 1 次</span></li>
+      </ol>
+    </div>
+  </section>
+  <footer>
+    无忌 · Deep Research（L2）· 2026-07-09 · 仅供阿杰个人决策参考；数据与判例以原始来源为准。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('banmi-note-review-system-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('banmi-note-review-system-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OKR × 半米学习系统：从原理到落地的深度研究 · 无忌 Deep Research · 2026-07-13</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 01 概念对齐</a>
+    <a href="#ch2" data-target="ch2">02 02 目标设定理论</a>
+    <a href="#ch3" data-target="ch3">03 03 管理学谱系</a>
+    <a href="#ch4" data-target="ch4">04 04 动机心理学</a>
+    <a href="#ch5" data-target="ch5">05 05 现有案例</a>
+    <a href="#ch6" data-target="ch6">06 06 相邻框架与空白</a>
+    <a href="#ch7" data-target="ch7">07 07 半米已OKR原生</a>
+    <a href="#ch8" data-target="ch8">08 08 技术架构</a>
+    <a href="#ch9" data-target="ch9">09 09 KR依赖DAG</a>
+    <a href="#ch10" data-target="ch10">10 10 依赖图可视化</a>
+    <a href="#ch11" data-target="ch11">11 11 进度上卷</a>
+    <a href="#ch12" data-target="ch12">12 12 家长仪表盘</a>
+    <a href="#ch13" data-target="ch13">13 13 防KPI化红线</a>
+    <a href="#ch14" data-target="ch14">14 14 落地路线建议</a>
+    <a href="#faq" data-target="faq">15 FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">16 References</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>OKR × 半米学习系统：从原理到落地的深度研究</h1>
+    <div class="hero-meta">
+      <span>📅 2026-07-13</span>
+      <span>🔍 ~五路搜证 40+ 来源</span>
+      <span>🎯 原理 × 落地 × 对标 × 防 KPI 化</span>
+      <span>🧩 立场：半米产品负责人视角</span>
+    </div>
+    <div class="hero-deck">
+      <p><strong>一句话定调：半米不是"要不要加 OKR"的问题——半米的产品设计（升学 Objective + Key Results + Evidence + Plan/Step、并行/串行/门槛、Goal–Result–Evidence 四层）本来就是 OKR 原生。这份研究不是从零加 OKR，而是四件事：把 OKR 为什么成功的底层原理讲透、把并行/串行/前置的 KR 关系落成可实现的 DAG 数据模型与可视化方案、对标市面上真在做的案例、再补一整章防止把儿童学习变成 KPI 的红线。</strong></p>
+      <p>报告按认知顺序展开：先对齐概念（Ch1），再用三章拆 OKR 成功的心理学与管理学底层（Ch2–4）；然后看市面谁在做、教育相邻框架与半米的战略空白（Ch5–6）；盘点半米已有的 OKR 原生资产（Ch7），再用五章给融合方案——数据模型（Ch8）、KR 依赖 DAG（Ch9）、依赖图可视化（Ch10）、进度上卷（Ch11）、家长年度仪表盘（Ch12）；最后是良心章「别把学习变成 KPI」的六条红线（Ch13）与给阿杰的分阶段落地决策树（Ch14）。所有技术架构 / 数据模型 / 可视化方案统一标注为"方案建议"（🔴，非半米现有实现）；关键数据标 🟢多源 / 🟡单源。</p>
+    </div>
+  </div>
+
+  <div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+    <p style="margin:0"><strong>📌 四条最关键发现（先扫这个）：</strong></p>
+    <ul style="margin:8px 0 0">
+      <li><strong>OKR 的每个组件都有扎实的机制支撑：目标设定理论（具体+挑战目标显著提升绩效<sup class="cite" data-refid="1">[1]</sup>）、自我决定理论（自主/胜任/归属三大内在需求<sup class="cite" data-refid="8">[8]</sup>）、O/KR 强制配对的问责设计（方向感 + 数字问责缺一不可<sup class="cite" data-refid="7">[7]</sup>）。</strong>但要诚实：<strong>组件分别有理论支持，不等于"O + KR + 周期回顾"这套完整制度组合后必然有效</strong>——完整 OKR 制度的直接实证（尤其在儿童身上）仍薄弱。半米的价值在于把这套<strong>机制</strong>用对，不是指望 OKR 自动生效。<span class="conf g">🟢</span></li>
+      <li><strong>"KR 有些并行、有些串行、有些前置"——这在计算机科学里有精确名字：有向无环图（DAG）。</strong>用项目管理的四种依赖类型（FS/SS/FF/SF）建模、用 Kahn 算法检测循环依赖、用 Sugiyama 分层布局（React Flow + dagre）画出来，是成熟到工业标准的技术<sup class="cite" data-refid="15">[15]</sup><sup class="cite" data-refid="18">[18]</sup>。半米要做的不是发明，是把这套接进 O/KR 数据模型。<span class="conf g">🟢</span></li>
+      <li><strong>在本次检索覆盖的公开资料里，尚未发现有学习 App 把 OKR 做成核心用户体验——这更像战略空白而非红海（待进一步竞品扫描验证）。</strong>Khan Lab School / Minerva 是先行者但都是内部实践、无对外产品；唯一的 K12 学术实证（MTSU）结论偏负面且被疫情干扰<sup class="cite" data-refid="24">[24]</sup>。教育主流框架（SMART/Bloom/掌握学习CBE/UbD）都比 OKR 更成熟贴教育语境<sup class="cite" data-refid="26">[26]</sup>。半米的独特站位 = 把 OKR 的外形嫁接到掌握学习/CBE 的内核上。<span class="conf y">🟡</span>（"没查到"≠"不存在"，且很多竞品可能用 goal/agency/competency-tracker 而非"OKR"标签，需系统比对。）</li>
+      <li><strong>给儿童用 OKR 有一颗真正的雷：把学习指标化会触发古德哈特/坎贝尔定律，把 KR 和奖励绑定会挤出内在动机（撤奖后自由游戏时间降 50%<sup class="cite" data-refid="40">[40]</sup>）。</strong>半米手册已有"完成任务≠掌握""避免虚假百分比"的理念——本报告把它落成六条可执行红线：KR 定可验证的学习结果（非任务计数/应试分）、禁排名只纵向自比、奖励只用语言型、延展不罚未达、按年龄匹配自主度、Evidence 证明掌握而非计数。<span class="conf g">🟢</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== CH1 ===== -->
+  <section class="chapter" id="ch1" data-nav="01 概念对齐">
+    <h2><span class="num">01</span><span class="title-text">概念对齐：OKR 到底是什么，和半米术语怎么对上</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>在拆原理之前，先花一章把词统一了——因为半米团队日常已经在说"Objective""Key Result""Evidence"，很容易以为都懂，但 OKR 有几个精妙的设计点如果不点破，融合方案会走偏。</p>
+      <h3>O 和 KR 是两种不同的东西，不是一个东西的两半</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th></th><th>Objective（目标）</th><th>Key Result（关键结果）</th></tr></thead>
+        <tbody>
+          <tr><td><strong>回答的问题</strong></td><td>我要去哪里？</td><td>我怎么知道到了？</td></tr>
+          <tr><td><strong>性质</strong></td><td>定性、鼓舞人心、有方向感</td><td>定量、可验证、可衡量</td></tr>
+          <tr><td><strong>好的样子</strong></td><td>"成为能自信用英语表达观点的人"</td><td>"能在无提示下复述一篇听力材料的主旨"</td></tr>
+          <tr><td><strong>坏的样子</strong></td><td>"提高英语"（太泛，没方向）</td><td>"努力学习"（不可衡量，等于没说）</td></tr>
+        </tbody>
+      </table></div>
+      <p>Andy Grove 在 Intel 做的核心创新，就是<strong>把这两层强制配对</strong>——只有 O 而无 KR，方向清晰却无从问责；只有 KR 而无 O，会退化成"为了数字而数字"的指标游戏，失去鼓舞人心的方向<sup class="cite" data-refid="7">[7]</sup>。这个配对，正是 Grove 补上 Drucker 的目标管理（MBO）"重目标、轻量化"缺陷的地方（Ch3 详述谱系）。<span class="conf g">🟢</span></p>
+      <div class="callout info"><p><strong>对上半米：</strong>半米手册里"O 说明希望实现什么、KR 说明哪些可观察可判断的关键结果出现才算 O 实现"——这就是标准 OKR 配对结构，半米已经内建。半米还多走了一步：明确 <strong>Plan ≠ KR、Step ≠ KR、Evidence 才是证明 KR 达到的事实</strong>。这一点后面会看到，恰恰是防 KPI 化的关键护栏。</p></div>
+      <h3>两种 OKR：渴望型 vs 承诺型</h3>
+      <p>Google 把 OKR 分成两类，它们的评分标准完全不同<sup class="cite" data-refid="6">[6]</sup>：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>类型</th><th>期望完成度</th><th>用在哪</th><th>不达成意味着</th></tr></thead>
+        <tbody>
+          <tr><td><strong>承诺型（committed）</strong></td><td>必须 100%</td><td>核心运营、必达底线</td><td>是真的没做到，要复盘</td></tr>
+          <tr><td><strong>渴望型（aspirational）</strong></td><td>期望 60–70%</td><td>创新、长期、登月式目标</td><td>正常——本来就够不着才对</td></tr>
+        </tbody>
+      </table></div>
+      <p>Google 用 0.0–1.0 打分，甜蜜区是 <strong>0.6–0.7</strong>；如果一个人的渴望型 OKR 长期拿满分，说明目标设得<strong>不够大胆</strong><sup class="cite" data-refid="6">[6]</sup>。Larry Page 的话："When you aim for the stars you may come up short, but still reach the moon."（瞄准星辰即使够不着，也能到月亮。）<span class="conf g">🟢</span></p>
+      <div class="callout warn"><p><strong>为什么这一点对半米生死攸关：</strong>渴望型 OKR 的"0.7 是好成绩"逻辑，用在成人企业里是激励，用在<strong>儿童</strong>身上如果处理不当就是灾难——孩子拿到 0.7 可能理解成"我失败了 30%"。半米的延展目标必须配"未达不惩罚、失败被正常化"的机制（见 Ch13 红线四）。这不是给 OKR 泼冷水，是把 OKR 用对年龄。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH2 ===== -->
+  <section class="chapter" id="ch2" data-nav="02 目标设定理论">
+    <h2><span class="num">02</span><span class="title-text">机制来源①：目标设定理论——OKR 目标层的科学依据</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>OKR 的<strong>目标层</strong>站在心理学里最扎实的地基之一：Edwin Locke 和 Gary Latham 从 1960 年代做到 1990 年代的目标设定理论。<strong>注意分寸：</strong>目标设定理论证明的是"某些目标属性（具体、有挑战）与绩效的关系"，它<strong>不等于</strong>证明了"O + KR + 周期回顾"整套 OKR 制度有效——本章讲的是 OKR 的一块机制来源，不是 OKR 整体的疗效证书。</p>
+      <h3>核心发现：具体且有挑战性的目标，通常显著优于模糊目标</h3>
+      <p>Klein 等（1999）对 83 项研究做 meta-analysis，得出具体难目标相比"尽力而为"或无目标，绩效有显著提升（标准化效应量约 d=0.80，属较大效应）<sup class="cite" data-refid="1">[1]</sup>；Locke & Latham 的原始工作已覆盖 88 种任务类型、40,000+ 参与者，横跨亚欧美澳，方向一致性高<sup class="cite" data-refid="2">[2]</sup>。</p>
+      <div class="callout warn"><p><strong>诚实标注（🟡）：坊间常引的"+16%"要小心。</strong>标准化效应量 d≈0.80 是"较大效应"，但它<strong>不能直接换算成"绩效提高 16%"</strong>——原始尺度差异依任务和实施条件而变，两者不是一回事。而且这个数字来自 Klein 1999 元分析（二手引用），<strong>不是 Locke & Latham 本人的数字</strong>。所以本报告只保留方向性结论（具体+有挑战目标显著优于模糊目标），<strong>不使用"+16%"这个精确百分比</strong>。半米对外传播时同样别说"OKR 能提升 16% 绩效"。<span class="conf y">🟡</span></p></div>
+      <h3>目标为什么能提升绩效：四大机制</h3>
+      <p>Locke & Latham（2002）指出目标通过四条路径影响绩效<sup class="cite" data-refid="3">[3]</sup>：</p>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">引导</div><div class="l">引导注意力（directive）：把认知资源导向与目标相关的活动，屏蔽无关的</div></div>
+        <div class="metric"><div class="v">激发</div><div class="l">激发努力（energizing）：目标越高，投入的努力越大</div></div>
+        <div class="metric"><div class="v">坚持</div><div class="l">增强坚持：面对困难时更持久，不轻易放弃</div></div>
+        <div class="metric"><div class="v">策略</div><div class="l">激活策略：现有技能不足时，触发去寻找新方法（学习效应）</div></div>
+      </div>
+      <p>第四条对学习产品尤其重要：当孩子发现现有做法达不到 KR，会被"逼"着去找新策略——这正是学习发生的时刻，前提是 KR 定得对（定成"用自己的话解释"而非"刷 50 题"，见 Ch13）。<span class="conf g">🟢</span></p>
+      <h3>五大调节变量：目标不是万能的，有前提条件</h3>
+      <p>目标要生效，需要五个调节变量到位<sup class="cite" data-refid="4">[4]</sup>：<strong>承诺</strong>（对目标的认同）、<strong>反馈</strong>、<strong>任务复杂度</strong>、<strong>能力</strong>、<strong>情境约束</strong>。其中一条对半米是设计级的启示：</p>
+      <div class="callout accent"><p><strong>🔑 "没有目标时，单独给反馈对绩效无效——反馈必须搭配目标才起作用"<sup class="cite" data-refid="4">[4]</sup>。</strong>这一条直接击中很多学习 App 的软肋：光给孩子看"你做了 200 道题、正确率 78%"这种反馈，如果没有一个清晰的目标框住它，反馈本身不改变行为。半米的 Goal–Result–Evidence 四层里，正是先有 Goal 和 KR，Evidence（反馈）才有意义——这个顺序不能倒。<span class="conf g">🟢</span></p></div>
+      <div class="callout info"><p><strong>对上半米：</strong>目标设定理论解释了半米"长期目标→阶段→周→日→Today"层级链为什么有效——它在每一层都提供具体、有挑战、可反馈的目标。但理论也警告：任务复杂时光有目标不够，还要配能力与策略指导。半米的 Learning Graph + Plan 体系正是提供"策略脚手架"的部分，缺了它，光设目标会让复杂任务上的孩子挫败。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH3 ===== -->
+  <section class="chapter" id="ch3" data-nav="03 管理学谱系">
+    <h2><span class="num">03</span><span class="title-text">为什么成功②：管理学谱系与 FACTS 五超能力</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <h3>OKR 的血统：从 Drucker 到 Google 的 45 年</h3>
+      <div class="step"><div class="step-head"><span class="sn">1</span>1954 · Drucker 的 MBO</div><div class="step-body">彼得·德鲁克在《管理的实践》提出目标管理（Management by Objectives）：核心洞见是"员工参与设定目标 → 产生承诺而非服从"。但 MBO 重目标、轻量化，缺可验证的结果层<sup class="cite" data-refid="5">[5]</sup>。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>1971 · Grove 在 Intel 加 Key Results</div><div class="step-body">Andy Grove 把 MBO 改造成 iMBO：加入 <strong>Key Results</strong> 和<strong>季度节奏</strong>，这就是 OKR 的雏形。Grove 名言："It almost doesn't matter what you know. It's what you can do with whatever you know."（你知道什么几乎不重要，重要的是你能用它做什么。）<sup class="cite" data-refid="5">[5]</sup></div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>1975 · Doerr 上了 Grove 的课</div><div class="step-body">John Doerr 在 Intel 学到 OKR 方法论，成为它最重要的传道者。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>1999 · 带进 Google</div><div class="step-body">Doerr 把 OKR 带给刚起步的 Google，帮它从几十人扩张到全球巨头始终保持目标对齐。2018 年《Measure What Matters》出版，OKR 从硅谷内部方法变成全球流行的管理框架<sup class="cite" data-refid="5">[5]</sup>。</div></div>
+      <h3>Doerr 的 FACTS：OKR 的五大"超能力"</h3>
+      <p>Doerr 把 OKR 的价值总结为五个超能力（首字母 FACTS）<sup class="cite" data-refid="6b">[6b]</sup>。注意 Doerr 强调："没有人天生拥有这些超能力——组织必须刻意培养它们。"这句话对半米意味着：OKR 不是装上就有效的功能，而是要培育的文化能力。</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>超能力</th><th>含义</th><th>对半米学习场景的翻译</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Focus 聚焦</strong></td><td>给"说不"的许可，只做最重要的少数事</td><td>孩子不该同时追 20 个目标；少而精的 O 才能真投入</td></tr>
+          <tr><td><strong>Align 对齐</strong></td><td>透明打通上下层，破除信息孤岛</td><td>周目标→阶段→年度总目标全程可追溯（半米已有层级链）</td></tr>
+          <tr><td><strong>Commit 承诺</strong></td><td>集体投入，公开承诺</td><td>目标由学生本人选择（承诺来自参与，见 SDT）</td></tr>
+          <tr><td><strong>Track 追踪</strong></td><td>用进度数字说话，定期 check-in</td><td>Evidence 驱动的进度更新，而非任务打卡</td></tr>
+          <tr><td><strong>Stretch 延展</strong></td><td>追求超出舒适区的大胆目标</td><td>⚠️ 儿童场景的双刃剑，必须配保护机制（Ch13）</td></tr>
+        </tbody>
+      </table></div>
+      <h3>延展目标：登月思维，也是最需要小心的一条</h3>
+      <p>渴望型 OKR 的哲学是"故意设够不着的目标激发 10x 思考"，甜蜜区 0.6–0.7<sup class="cite" data-refid="6">[6]</sup>。在企业里，这是打破增量思维的利器。但要提前埋一个伏笔：<strong>五条超能力里，Focus / Align / Commit / Track 对儿童学习基本是纯正面的，唯独 Stretch（延展）是双刃剑</strong>——设计不当会加剧焦虑（Ch13 红线四会给出缓解设计）。这不是否定延展，而是它需要最谨慎的年龄适配。<span class="conf g">🟢</span></p>
+    </div>
+  </section>
+
+  <!-- ===== CH4 ===== -->
+  <section class="chapter" id="ch4" data-nav="04 动机心理学">
+    <h2><span class="num">04</span><span class="title-text">为什么成功③：动机心理学——OKR 好用法与坏用法的分水岭</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>前两章讲的是"目标为什么有效"，这一章讲更深的问题：<strong>为什么同样的 OKR，有的地方用出内驱力、有的地方用成打卡奴役？</strong>答案在自我决定理论。</p>
+      <h3>自我决定理论（SDT）：三大内在需求</h3>
+      <p>Deci & Ryan（1985/2000）提出，人的内在动机在三个需求被满足时最强<sup class="cite" data-refid="8">[8]</sup>：</p>
+      <div class="metric-grid">
+        <div class="metric"><div class="v">自主</div><div class="l">Autonomy：感到"是我自己在选"，而非被强加</div></div>
+        <div class="metric"><div class="v">胜任</div><div class="l">Competence：感到"我能做好"，有可见的进步</div></div>
+        <div class="metric"><div class="v">归属</div><div class="l">Relatedness：感到与他人的连接和被认可</div></div>
+      </div>
+      <p>OKR 的<strong>好用法</strong>直接服务前两个需求：自己设目标 → 满足自主；可见的进度 + 评分 → 满足胜任。但同一个工具的<strong>坏用法</strong>会反向破坏：被强制分派的 OKR 损害自主；KR 与薪酬（或对孩子而言，与奖惩）强绑定，会把内在动机替换成外在压力<sup class="cite" data-refid="8">[8]</sup>。<span class="conf g">🟢</span></p>
+      <div class="callout accent"><p><strong>🔑 这是整份报告最重要的一条设计原理：OKR 是"自主的放大器"，不是"控制的工具"。</strong>让孩子参与设定自己的目标，OKR 增强内驱；把 OKR 变成大人下达、孩子执行的任务清单，OKR 就成了外部控制，反而挤出兴趣。半米的每一个 OKR 交互设计，都要过这道检验：这个设计是在<strong>放大孩子的自主</strong>，还是在<strong>加强大人的控制</strong>？</p></div>
+      <h3>Google Project Aristotle：结构与清晰度是高效团队的第三支柱</h3>
+      <p>2012 年起 Google 用访谈 + 数据分析研究了 180 个团队，总结出高效团队的五项特征（re:Work 列举时未强调严格因果排序）<sup class="cite" data-refid="9">[9]</sup>：心理安全、可信赖、<strong>结构与清晰度</strong>（目标要 specific + challenging + attainable）、工作意义、影响力。re:Work 官方说："Google 常用 OKR 来设定和沟通长短期目标"——所以<strong>OKR 是"结构与清晰度"的一种落地工具，而非 Aristotle 证明了 OKR 有效</strong>。这个案例是组织实践背景，不是 OKR 效果的直接证据。<span class="conf g">🟢</span></p>
+      <div class="callout warn"><h4>⚠️ 三处必须诚实标注的证据薄弱点</h4><p><strong>①SDT × OKR 缺顶刊实证交叉研究。</strong>SDT 是扎实理论、OKR 是成熟实践，但两者的直接交叉实证（"用 OKR 是否通过满足三需求提升学习动机"）目前主要是从业者推断，缺乏顶刊对照研究，证据等级偏弱。<span class="conf y">🟡</span></p><p><strong>②Project Aristotle 讲的是团队效能五因素，不直接等于"OKR 有效"的证据</strong>——它只是说"结构与清晰度"重要，OKR 是实现它的一种工具。</p><p><strong>③另有 Project Oxygen 研究"什么让管理者优秀"（八行为），常被混引为 OKR 证据，但它根本不涉及 OKR</strong>，与 Aristotle 是两个平行研究。半米对外引用时不要把这几条混为一谈。</p></div>
+      <h3>内在 vs 外在动机：这条线决定了 OKR 在儿童身上是良药还是毒药</h3>
+      <p>SDT 的一个推论在 Ch13 会展开：外在奖励（尤其"预期可见的奖励"）会<strong>挤出</strong>内在动机（过度合理化效应），撤奖后孩子的自发投入甚至低于从没给过奖的组<sup class="cite" data-refid="40">[40]</sup>。这意味着——把 KR 达成与积分、徽章、排名强绑定，是 OKR 用在儿童身上最危险的坏用法。半米对 Evidence 与奖励的处理必须极其克制（Ch13 红线三）。</p>
+    </div>
+  </section>
+
+  <!-- ===== CH5 ===== -->
+  <section class="chapter" id="ch5" data-nav="05 现有案例">
+    <h2><span class="num">05</span><span class="title-text">现有案例：市面上谁在把 OKR 用进教育，怎么用的</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>阿杰关心的第三个问题：有没有人真把 OKR 融进学习/教学？答案是有先行者、但都在早期，且没有一个是"给学习者用的产品"。逐个看，同时标清每个案例的证据质量。</p>
+      <div class="callout info"><h4>Khan Lab School（K12，最接近"学生用 OKR"）</h4><p>Sal Khan 创办的实验私校，用类 OKR 的个人目标追踪：<strong>每个学生一套独立目标</strong>（不是全班统一），中学生每周有 2 小时自主时间追踪进度，受《Measure What Matters》启发。学生汇报能力感提升、同理心增强、欺凌减少<sup class="cite" data-refid="21">[21]</sup>。<strong>局限（🟡）：</strong>信息来自 OKR 倡导者网站（whatmatters.com，有立场），偏宣传稿——没有公开的具体 O/KR 文本、没有前后测数据、没提"不达成怎么处理"、没有焦虑/压力数据。作为"可行性存在证明"有价值，作为"有效性证据"不够。<span class="conf y">🟡</span></p></div>
+      <div class="callout info"><h4>Minerva（高教，用 OKR 最具体的案例）</h4><p>Minerva 的学生体验团队 2019 年引入 OKR，把<strong>每一学年当成一个独立"产品"</strong>来设 OKR。最漂亮的一步：把 KR 从"合作伙伴数量"这种虚荣指标，升级为"学生<strong>实际拿到</strong>推荐信/实习的数量"——从投入指标转向结果指标。它帮学术、教练、学生事务、心理健康四个部门协同<sup class="cite" data-refid="22">[22]</sup>。<strong>局限（🟡）：</strong>单源、来自 Doerr 官媒偏正面，但内容具体、对半米"Application Objective"（申请结果）的设计有直接借鉴价值。<span class="conf y">🟡</span></p></div>
+      <div class="callout bad"><h4>MTSU 学术实证（目前少见的教育 OKR 实证，结论偏负面）</h4><p>中田纳西州立大学的<strong>准实验</strong>（非随机对照 RCT）：给 K12 <strong>教师</strong>实施 OKR 目标设定，测教师表现、学生英数成绩、教师动机。摘要显示"<strong>数据不支持 OKR 在任何研究领域的效果</strong>"<sup class="cite" data-refid="24">[24]</sup>。<strong>但必须谨慎读（🟡）：</strong>①本报告只读到摘要，未核到样本量、分配方法、流失率、统计功效和效应区间——设计强度无法评估；②执行期是 2020–2021（疫情），混淆变量极大——但要留个反向解读：疫情既可能削弱效果，也可能<strong>暴露 OKR 在高扰动环境下的脆弱性</strong>，不能只当"替负结果开脱"的理由；③它测的是"教师用 OKR"不是"学生用 OKR"，与半米场景不完全对应。价值在于：它是目前少见的、正式的教育 OKR 实证，而它<strong>不支持</strong>OKR 有效——提醒别把 OKR 当学习成效灵丹。<span class="conf y">🟡</span></p></div>
+      <div class="callout info"><h4>牛津框架论文 & Duolingo 的真相</h4><p><strong>牛津</strong>有一篇 160 页论文《OKR in the classroom: a framework for practice》，案例叙事式讨论 OKR 课堂实施，涉及非认知技能，属理论框架型、非对照实验<sup class="cite" data-refid="23">[23]</sup>。<span class="conf y">🟡</span> <br><strong>Duolingo</strong> 常被误传"用 OKR 教学"——真相是：Duolingo <strong>内部用 OKR 做产品管理</strong>（如把 Stories 从 2 万用户做到 8 万），但<strong>给学习者的是"每日 XP 目标"</strong>，那是打卡/行为激励，<strong>不是 OKR</strong><sup class="cite" data-refid="25">[25]</sup>。这个区分很重要：市面上"用 OKR 的教育公司"多数是用在自己的运营上，不是给学习者的功能。<span class="conf g">🟢</span></p></div>
+      <div class="callout warn"><h4>⚠️ 个人学习 OKR：热闹，但主要是成人自学圈</h4><p>Reddit / Medium / 博客圈有大量"personal OKR for learning"内容，代表人物如 Christina Wodtke（Eleganthack）<sup class="cite" data-refid="30b">[30b]</sup>。但<strong>用户几乎全是职场人、工程师、研究生</strong>——专门给 K12 儿童用 OKR 的实操内容极少。这再次印证：儿童学习 OKR 是一片没人认真做的地。<span class="conf g">🟢</span></p></div>
+      <div class="callout accent"><h4>📊 案例对标总表</h4>
+      <div class="table-wrap"><table>
+        <thead><tr><th>案例</th><th>层级</th><th>OKR 给谁用</th><th>证据质量</th><th>对半米的价值</th></tr></thead>
+        <tbody>
+          <tr><td>Khan Lab School</td><td>K12</td><td class="check y">学生</td><td>🟡 宣传稿</td><td>可行性存在证明 + "学生本人选目标"原则</td></tr>
+          <tr><td>Minerva</td><td>高教</td><td class="check p">部门+学生结果</td><td>🟡 官媒偏正</td><td>KR 从投入转结果的升级范式</td></tr>
+          <tr><td>MTSU 实证</td><td>K12</td><td class="check n">教师</td><td>🟡 疫情干扰</td><td>警示：OKR 非成效灵丹</td></tr>
+          <tr><td>牛津论文</td><td>课堂</td><td class="check p">教师框架</td><td>🟡 理论型</td><td>框架参考，非实证</td></tr>
+          <tr><td>Duolingo</td><td>产品</td><td class="check n">内部运营</td><td>🟢 多源</td><td>反例：给学习者的是 XP 不是 OKR</td></tr>
+        </tbody>
+      </table></div></div>
+    </div>
+  </section>
+
+  <!-- ===== CH6 ===== -->
+  <section class="chapter" id="ch6" data-nav="06 相邻框架与空白">
+    <h2><span class="num">06</span><span class="title-text">教育相邻框架与半米的战略空白</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>OKR 来自商业。教育界其实有自己的一整套目标/能力框架，而且比 OKR 更早、更成熟、更贴教育语境。半米要用 OKR，必须先搞清它和这些框架的关系——不是替代，是嫁接。</p>
+      <h3>四大教育相邻框架 vs OKR</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>框架</th><th>核心逻辑</th><th>与 OKR 的关系</th></tr></thead>
+        <tbody>
+          <tr><td><strong>SMART Goals</strong></td><td>目标要 Specific/Measurable/Achievable/Relevant/Time-bound。K12 最普及，IEP（个别化教育计划）法律要求用这个格式</td><td>比 KR 更细的"单个目标写法规范"；OKR 的 KR 可以是 SMART 的</td></tr>
+          <tr><td><strong>Bloom's Taxonomy</strong></td><td>认知层级：记忆→理解→应用→分析→评估→创造</td><td>提供"KR 该定在哪个认知层"的标尺；OKR 没有这个维度</td></tr>
+          <tr><td><strong>掌握学习 / CBE</strong></td><td>能力达标才晋级（而非时间到了就晋级）。Khan Lab School 用的就是这个</td><td>⭐ 与半米 Mastery 状态最同源；OKR 的外形可嫁接到这个内核上</td></tr>
+          <tr><td><strong>UbD（逆向设计）</strong></td><td>先定学习成果，再倒推设计课程</td><td>与 OKR"先定 KR"最像，但它是教育内生的</td></tr>
+        </tbody>
+      </table></div>
+      <p>本质差异<sup class="cite" data-refid="26">[26]</sup>：教育框架强调<strong>认知层次、发展连续性、法律合规</strong>；OKR 来自商业，强调<strong>季度迭代 + 可量化增长</strong>。谁也不能替代谁——OKR 给的是"节奏感和方向-问责配对"，教育框架给的是"认知深度和发展适宜性"。<span class="conf g">🟢</span></p>
+      <h3>战略空白：这是机会，不是拥挤的红海</h3>
+      <p>把五路搜证的"没查到"汇总起来，画出一张空白地图<sup class="cite" data-refid="27">[27]</sup>：</p>
+      <div class="check-box">
+        <p><strong>❌ 没有的东西（= 半米的机会窗口）：</strong></p>
+        <ul>
+          <li>没有"某 K12 学校用 OKR，学生成绩 +X%"的对照实验（唯一学术实证 MTSU 反而偏负面 + 疫情干扰）</li>
+          <li><strong>没有任何学习 App 把 OKR 做成核心用户体验框架</strong>（Duolingo 有 XP 非 OKR；Khan Lab School 内部自研无对外产品）</li>
+          <li>没有东南亚 / 亚洲国际学校用 OKR 的公开案例</li>
+          <li>没有全国性 / 跨学区规模化推广</li>
+          <li>没有教育研究者专门批 OKR 的论文（批评多是泛泛的"学校不是企业"）</li>
+        </ul>
+      </div>
+      <div class="callout accent"><h4>🎯 半米的独特站位</h4><p><strong>OKR 融入教育目前处于早期探索：有倡导文章、少量先行者（Khan Lab School / Minerva）、一篇失败实证（MTSU）、一篇框架论文（牛津），但没有成规模、有严格证据的 K12 落地。</strong>半米可以做那个把 OKR 的外形（O + 可量化 KR + 周期回顾 + 家长可视化）<strong>嫁接到掌握学习 / CBE 的内核上</strong>的产品——用 OKR 解决"方向感 + 家长看得懂"，用 CBE/Mastery 保证"真掌握而非应试"。这个组合，市面上还没人做好。<span class="conf y">🟡</span>（判断基于"检索没查到"的空白证据，属谨慎推断而非硬事实。）</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH7 ===== -->
+  <section class="chapter" id="ch7" data-nav="07 半米已OKR原生">
+    <h2><span class="num">07</span><span class="title-text">半米已是 OKR 原生：现状资产盘点</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>在给任何"融合方案"之前，必须先说清楚一件事：<strong>半米不需要"加"OKR，因为它已经是 OKR 原生设计</strong>。这一章盘点半米手册（第六阶段产品手册）里已经存在的 OKR 结构——后面所有方案都建在这上面，用"半米已经有 X → 建议在此之上做 Y"的句式，绝不推翻重来。</p>
+      <h3>半米已有的 OKR 原生资产</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>OKR 概念</th><th>半米已有的对应设计</th></tr></thead>
+        <tbody>
+          <tr><td>Objective（目标）</td><td>升学 O = Learning Objective（学会/掌握）+ Application Objective（选校/材料/活动/推荐信/截止日期）；可分学科/阶段/Plan 层级</td></tr>
+          <tr><td>Key Result（关键结果）</td><td>"哪些可观察、可判断的关键结果出现后，才算这个 O 实现"——标准 OKR 配对表述</td></tr>
+          <tr><td>Evidence（证据）</td><td>⭐ 半米的独有强化：Evidence 是证明 KR 是否达到的事实（考试/测评/作品/录音/写作/老师判断）。Plan≠KR、Step≠KR</td></tr>
+          <tr><td>Alignment（对齐）</td><td>所有 O 最终能向上追溯到总升学 Objective；同时可多个 O 并行</td></tr>
+          <tr><td>依赖关系</td><td>手册已明确"进度不能机械平均，要尊重核心门槛、并行、串行、多结果汇合、替代证明"</td></tr>
+          <tr><td>层级链</td><td>长期目标→阶段计划→阶段门槛→周计划→日计划→Today 任务</td></tr>
+          <tr><td>可视化</td><td>家长端四层 = Goal（目标）→ Result（关键结果）→ 投入过程 → Evidence</td></tr>
+          <tr><td>Mastery 状态</td><td>成长路径显示可解释状态（未开始/已接触/学习中/基础掌握/熟练掌握/需复习/存在困难），而非无口径百分比</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout good"><h4>✅ 半米三个"比标准 OKR 更成熟"的地方</h4>
+      <p><strong>① Evidence 层是防 KPI 化的天然护栏。</strong>标准 OKR 只有 O 和 KR，KR 达成靠自报进度。半米强制"KR 达成必须有 Evidence 支撑"——这一步就把"完成大量任务≠掌握能力"堵在了设计层，是很多 OKR 工具没有的。</p>
+      <p><strong>② 明确区分 Plan/Step 与 KR。</strong>手册白纸黑字："Plan 是实现目标的方案，Step 是实际行动，Evidence 是证明 KR 是否达到的事实"——这防止了把"做了多少事"误当"达成多少结果"，正是古德哈特定律的解药。</p>
+      <p><strong>③ Mastery 是可重算、可解释的状态投影，不是百分比。</strong>手册要求"避免用虚假百分比制造确定感""不同学习行为证明力不同"（无提示回忆/延迟复习/老师判断 = 掌握证据；看视频/收藏/高亮 = 仅接触）。这比大多数学习 App 的"完成度 %"精细得多。</p></div>
+      <div class="callout info"><p><strong>那这份研究到底补什么？</strong>半米在<strong>概念层</strong>已经很完整，缺的是<strong>落地层</strong>：①"进度不能机械平均、并行/串行/前置怎么呈现"——手册有理念，缺 DAG 数据模型和可视化实现（Ch8–11）；②"家长一眼看今年多少 O、多少 KR、几个达成/推进/风险"——手册有 Goal–Result–Evidence 四层的方向，"成长总览"入口<strong>已确认但未开发</strong>（Ch12）；③防 KPI 化——手册有零散理念（避免虚假百分比、完成≠掌握），缺一套<strong>成体系的红线</strong>（Ch13）。接下来七章就补这三块。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH8 ===== -->
+  <section class="chapter" id="ch8" data-nav="08 技术架构">
+    <h2><span class="num">08</span><span class="title-text">融合方案①：技术架构与数据模型</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="callout warn"><p><strong>⚠️ 本章及 Ch9–12 全部标注为"方案建议"（🔴），非半米现有实现。</strong>数据模型、Schema、可视化选型、算法都是基于成熟工具的技术推导，供阿杰决策参考，落地时需结合半米实际后端架构调整。</p></div>
+      <h3>主流 OKR 工具的核心三层实体</h3>
+      <p>调研 Quantive/Gtmhub、Viva Goals（原 Ally.io）、Perdoo、Weekdone 等主流工具，它们的核心数据模型高度一致<sup class="cite" data-refid="14">[14]</sup>：</p>
+      <div class="tree">
+        <div class="node"><span class="lbl y">Objective（目标）</span>用 <code>parent_id</code> 指向父 O 实现对齐；无父则为顶层</div>
+        <div class="node"><span class="lbl m">Key Result（关键结果）</span>挂在 O 下，有 metric_type / baseline / target / current_value / weight</div>
+        <div class="node"><span class="lbl y">Initiative（举措）</span>为达成 KR 而做的具体行动 = 半米的 Plan / Step</div>
+      </div>
+      <p>关键设计点：<strong>alignment（对齐）用 parent_id 自引用实现</strong>——一个 O 只对齐一个父 O（Perdoo 的约束），进度可以从子级 rollup 上来（Ch11）。这正好对上半米"所有 O 向上追溯到总升学 Objective"。<span class="conf g">🟢</span></p>
+      <h3>半米适用的 DB Schema 草案</h3>
+      <div class="callout accent"><p><strong>🔴 以下 Schema 是技术推导（方案建议），非半米现有实现</strong>。它把半米已有概念（O/KR/Evidence/Plan/Step）和 OKR 工具的成熟字段对齐，并新增了 DAG 边表和历史快照表：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>表</th><th>关键字段</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Objective</strong></td><td>id, title, description, owner_id, period_id, <strong>parent_id</strong>(→Objective), progress, status</td><td>parent_id 实现对齐树；period_id 对应半米"阶段"</td></tr>
+          <tr><td><strong>KeyResult</strong></td><td>id, objective_id, title, <strong>metric_type</strong>(numeric/binary/milestone), baseline, target, current_value, <strong>weight</strong>, unit</td><td>weight 支持加权上卷（Ch11）</td></tr>
+          <tr><td><strong>KRDependency</strong> ⭐新</td><td>id, <strong>from_kr_id, to_kr_id, dependency_type</strong>(FS/SS/FF/SF)</td><td>DAG 的边表，实现并行/串行/前置（Ch9）</td></tr>
+          <tr><td><strong>CheckIn</strong> ⭐新</td><td>id, kr_id, actor_id, value, confidence(0-1), note, created_at</td><td>历史快照，支持进度趋势与信心曲线</td></tr>
+          <tr><td><strong>Evidence</strong></td><td>id, kr_id, type, url, description, created_at</td><td>半米已有概念，绑定到 KR</td></tr>
+          <tr><td><strong>Plan / Step</strong></td><td>Plan: id, kr_id, title, status / Step: id, plan_id, title, order, status</td><td>半米已有概念，即 OKR 的 Initiative 层</td></tr>
+        </tbody>
+      </table></div>
+      <p style="margin-top:10px"><strong>关键约束：</strong>每次新增 KRDependency 时跑一次 Kahn 算法做循环检测，有环则拒绝写入并报错（Ch9 详述）。<span class="conf r">🔴</span></p></div>
+      <div class="callout info"><p><strong>对上半米的三个咬合点：</strong>①<code>CheckIn</code> 表呼应半米"Objective 正式调整不能无痕覆盖历史"——每次进度/目标变更都留快照（谁、何时、原因）；②<code>confidence(0-1)</code> 字段对应半米"高影响结果不能只由 AI 宣布达成"——记录判断的信心度和确认者；③<code>Evidence</code> 独立成表且绑 KR，落实"KR 达成必须有 Evidence"。这些不是新发明，是把半米理念翻译成表结构。</p></div>
+      <div class="callout warn"><p><strong>需方案设计补的坑（🔴）：</strong>①Quantive 完整 API schema 因被 WorkBoard 收购后文档已不可访问，字段以其他工具交叉推导；②半米的"Learning Graph 知识点依赖"和"KR 依赖"是两张不同的图（前者是稳定的知识结构，后者是本次目标的执行依赖），Schema 上要分开建模、通过 Objective 关联，别混成一张表。</p></div>
+      <div class="callout accent"><h4>🔑 比 DAG 更难、也更该先想清楚的：Evidence 有效性模型</h4><p><strong>坦白一句：本报告在 DAG/算法/可视化上花的笔墨，超过了"Evidence 如何可靠地证明掌握"这个更难的问题——但后者才是整个防 KPI 化论证的地基。</strong>如果 Evidence 本身不可靠（一次侥幸答对、老师随手打分、rubric 各人不一），那 gating、掌握级判定、"完成≠掌握"全都建在流沙上。所以在画 DAG 之前，半米更该先定一套 <strong>Evidence validity model（🔴 方案建议）</strong>：<strong>证据等级</strong>（无提示回忆/迁移应用 &gt; 有提示 &gt; 识记）、<strong>评分者</strong>（AI/老师/自评，权重不同）、<strong>rubric 版本</strong>（可追溯、可复算）、<strong>置信度</strong>（对应 CheckIn.confidence）、<strong>复测窗口</strong>（延迟再证明，防一次性侥幸——呼应 Khan 的 Mastery Challenge 在新情境重证）、<strong>争议处理</strong>（家长/老师对某条 Evidence 有异议怎么走）。防古德哈特的正解不是取消结果指标，而是用<strong>多证据 + 延迟复测 + 抽样复核</strong>保护指标效度。这一层建好了，Ch11 的 gating 和 Ch13 红线六才真正立得住。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH9 ===== -->
+  <section class="chapter" id="ch9" data-nav="09 KR依赖DAG">
+    <h2><span class="num">09</span><span class="title-text">融合方案②：KR 依赖关系 = 有向无环图（DAG）</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>阿杰的原话是"有些 KR 并行、有些串行、有些前置"。这句话在计算机科学里有精确的对应物：<strong>有向无环图（Directed Acyclic Graph, DAG）</strong>。这一章把这个直觉翻译成可实现的模型。</p>
+      <h3>为什么是 DAG</h3>
+      <p>DAG 的定义：边从"前置"指向"依赖"，且<strong>无环</strong>（不能 A 依赖 B、B 又依赖 A）。无环才能算出合法的<strong>拓扑序</strong>——也就是"先做什么、后做什么"的顺序<sup class="cite" data-refid="15">[15]</sup>。半米的 KR 依赖天然是 DAG：一个 KR 达成后才能解锁下一个（串行）、多个 KR 可以同时推进（并行）、几个 KR 全达成才触发一个汇合目标（join）。<span class="conf g">🟢</span></p>
+      <h3>项目管理的四种依赖类型，直接可用</h3>
+      <p>不需要重新发明依赖模型——项目管理有成熟的四种依赖类型<sup class="cite" data-refid="15">[15]</sup>：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>类型</th><th>全称</th><th>含义</th><th>半米学习场景例子</th><th>常见度</th></tr></thead>
+        <tbody>
+          <tr><td><strong>FS</strong></td><td>Finish-to-Start</td><td>A 完成后 B 才能开始</td><td>掌握"现在时"后才学"现在完成时"（串行/最常见）</td><td>★★★★★</td></tr>
+          <tr><td><strong>SS</strong></td><td>Start-to-Start</td><td>A 一开始，B 也可以开始</td><td>开始练听力的同时可以开始练口语（并行触发）</td><td>★★★</td></tr>
+          <tr><td><strong>FF</strong></td><td>Finish-to-Finish</td><td>A 和 B 要同时结束</td><td>写作和词汇量目标要在期末一起达标</td><td>★★</td></tr>
+          <tr><td><strong>SF</strong></td><td>Start-to-Finish</td><td>A 开始后 B 才能结束（罕见）</td><td>教学场景极少用，可暂不实现</td><td>★</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info"><p><strong>给半米的务实建议：</strong>第一版只需实现 <strong>FS（串行前置）</strong> 和 <strong>SS（并行）</strong> 两种就覆盖 90% 的教学场景；FF 用得少、SF 教学几乎不用，可以后置。别一上来就做全四种，那是过度工程。<span class="conf r">🔴</span></p></div>
+      <h3>汇合节点（join）：多个前置全达成才解锁</h3>
+      <p>半米手册提到的"多个结果汇合"，在 DAG 里就是 <strong>join 节点</strong>——一个 KR 有多个前驱，必须所有（或按规则加权达到阈值的）前驱都完成，它才解锁<sup class="cite" data-refid="15">[15]</sup>。例如"能做一场英文演讲"这个 KR，前置是"词汇达标 + 语法达标 + 发音达标"三条 KR 的汇合。<span class="conf g">🟢</span></p>
+      <div class="callout warn"><p><strong>🔴 需产品自定义的规则：</strong>"汇合进度"到底怎么算——是所有前置 100% 才解锁，还是加权达到某阈值（如 80%）就解锁？现有 OKR 工具无原生实现，半米要自己定这个规则。建议：核心门槛型汇合用"全部达成"，弹性汇合用"加权阈值"，由老师在 Objective 层配置。</p></div>
+      <h3>循环依赖检测：Kahn 算法，O(V+E)</h3>
+      <p>DAG 最怕出现环（循环依赖），会导致"永远解锁不了"的死锁。检测方法是成熟算法<sup class="cite" data-refid="16">[16]</sup>：<strong>Kahn 算法</strong>（BFS：反复找入度为 0 的节点移除，如果最后还有节点没被移除 = 有环）或 DFS 后序逆排，复杂度 O(V+E)，对半米这种小图是瞬时的。<strong>工程约定：每次新增/修改 KR 依赖时跑一次拓扑排序，失败即报错拒写</strong>，把"循环依赖"挡在数据写入层。<span class="conf g">🟢</span></p>
+      <div class="callout accent"><p><strong>🔑 一句话总结这一章：</strong>阿杰凭直觉说的"并行/串行/前置"，不是需要摸索的模糊需求，而是一个<strong>有 40 年成熟理论、有现成算法、有工业级实现</strong>的确定问题。半米要做的是选型和接入（Ch10 讲怎么画出来），不是从零研究。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH10 ===== -->
+  <section class="chapter" id="ch10" data-nav="10 依赖图可视化">
+    <h2><span class="num">10</span><span class="title-text">融合方案③：KR 依赖图怎么画出来</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>有了 DAG 数据模型，下一个问题是前端怎么把它画成家长/学生看得懂的图。这一章给库选型和布局方案。</p>
+      <h3>前端库选型对比</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>库</th><th>适用规模</th><th>优点</th><th>缺点</th><th>对半米</th></tr></thead>
+        <tbody>
+          <tr><td><strong>React Flow + dagre</strong></td><td>≤100 节点</td><td>React 组件化、节点可嵌 UI 控件（状态徽章/进度条）、bundle 最小、Sugiyama 分层现成</td><td>dagre 已停维护（但稳定）</td><td class="check y">⭐ 首选：半米 KR 图是小图</td></tr>
+          <tr><td><strong>React Flow + ELK</strong></td><td>复杂层级</td><td>最可配置、边路由好</td><td>复杂、体积大（1.45MB+）</td><td class="check p">图复杂了再升级</td></tr>
+          <tr><td><strong>Cytoscape.js</strong></td><td>大规模</td><td>内置图算法（BFS/最短路/中心度）、WebGL 性能</td><td>非 React 原生、学习曲线陡</td><td class="check p">留给 Learning Graph 大图</td></tr>
+          <tr><td><strong>d3-dag</strong></td><td>纯 DAG</td><td>边交叉最小化最优、TS 优先</td><td>无 React 绑定</td><td class="check p">可只做离线布局计算</td></tr>
+          <tr><td><strong>Mermaid</strong></td><td>静态文档</td><td>写法简单、文档嵌入</td><td>不适合交互产品内嵌</td><td class="check n">仅文档用，不进产品</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout good"><p><strong>✅ 明确建议（🔴 方案建议）：半米 KR 依赖图用 React Flow + dagre 做渲染，需要更优布局时用 d3-dag 做离线布局计算、React Flow 只做渲染层</strong><sup class="cite" data-refid="18">[18]</sup>。理由：半米的 KR 依赖图是小图（一个孩子一年的 O/KR 通常几十个节点），React Flow 的节点可以直接嵌半米的状态徽章、进度环、Evidence 图标，交互体验最好。Cytoscape.js 那种大图算法引擎是给 Learning Graph（知识点图谱）用的，两张图两套技术，别混用。</p></div>
+      <h3>布局：Sugiyama 分层是工业标准</h3>
+      <p>DAG 绘制的工业标准是 <strong>Sugiyama Framework（1981）</strong>——分四步：移除环 → 分层 → 减少边交叉 → 坐标赋值<sup class="cite" data-refid="18">[18]</sup>。dagre 和 ELK 都是它的 JS 实现。四种依赖关系怎么画出来：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>关系</th><th>视觉呈现</th></tr></thead>
+        <tbody>
+          <tr><td>串行链（FS）</td><td>自顶向下的层级视图（TB 方向），一条线往下走</td></tr>
+          <tr><td>并行分叉（SS）</td><td>同一层多个节点，宽度自动撑开，家长一眼看到"这几个在同时推进"</td></tr>
+          <tr><td>前置锁</td><td>未解锁的 KR 节点着灰色（locked），前置达成后点亮</td></tr>
+          <tr><td>汇合（join）</td><td>多个入箭头自然收敛到一个节点，视觉上就是"几条线汇成一条"</td></tr>
+        </tbody>
+      </table></div>
+      <h3>一个说明性示意（非工程代码）</h3>
+      <p>用文字描述一个孩子"英语能力年度目标"的 KR 依赖图长什么样：</p>
+      <div class="callout info"><p style="font-family:monospace;font-size:13px;line-height:1.9">
+      【顶层 O】成为能自信用英语表达的学习者<br>
+      &nbsp;&nbsp;├─ KR1 基础词汇达标 ──FS──▶ KR3 能读懂分级读物 ──┐<br>
+      &nbsp;&nbsp;├─ KR2 语法基础达标 ──FS──▶ KR3 ◀──────────────┤<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;（KR1、KR2 并行 SS）&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;▼<br>
+      &nbsp;&nbsp;└─ KR4 发音达标 ──────────FS──────────▶ 【join】KR5 能做一场英文演讲<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;（KR3 读懂 + KR4 发音 汇合，才解锁 KR5）
+      </p><p style="margin-top:8px;font-size:13px">读图：KR1/KR2 并行推进（灰底表示进行中）→ 都达成后 KR3 点亮 → KR3 和 KR4 汇合 → 解锁最终的 KR5 演讲目标。<strong>家长不用懂 DAG，只要看到"哪些在同时做、哪些还锁着、哪条路走到哪了"就够了。</strong></p></div>
+      <div class="callout warn"><p><strong>⚠️ 别过度可视化。</strong>D-可视化证据反复警告：>50 节点的图会"难以一览"，反而挫伤理解<sup class="cite" data-refid="35">[35]</sup>。半米家长端<strong>默认不该把完整 DAG 甩给家长</strong>——手册也说"复杂的 Learning Graph 留在老师和系统后台"。家长端首屏应该是聚合后的状态（Ch12），依赖图是<strong>可选下钻</strong>的第二层，而且要用"锁/并行/汇合"的直觉语言，不是节点边的技术图。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH11 ===== -->
+  <section class="chapter" id="ch11" data-nav="11 进度上卷">
+    <h2><span class="num">11</span><span class="title-text">融合方案④：进度上卷——半米"不机械平均"的技术兑现</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>半米手册有一句非常重要的话："<strong>进度不能机械平均</strong>，要尊重核心门槛、并行、串行、多结果汇合、替代证明。"这一章告诉阿杰：这句理念，技术上怎么实现。</p>
+      <h3>三种上卷（rollup）算法</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>算法</th><th>公式</th><th>例子（3 个 KR：100% / 0% / 0%）</th><th>问题</th></tr></thead>
+        <tbody>
+          <tr><td><strong>等权平均</strong>（Perdoo 默认）</td><td>O.progress = mean(KR.progress[])</td><td>O = 33%</td><td>把核心 KR 和边缘 KR 一样对待</td></tr>
+          <tr><td><strong>加权平均</strong>（Profit.co/Weekdone）</td><td>Σ(KR.progress × weight)，Σweight=1</td><td>若第一个 KR 权重 0.6 → O = 60%</td><td>能突出核心，但仍不能表达"门槛"</td></tr>
+          <tr><td><strong>门槛 gating</strong> ⭐</td><td>若 blocking KR 未达阈值，则 O 进度强制封顶</td><td>核心 KR=0% → O 无论其他多高都封顶（如 max 50%）</td><td>🔴 无现成工具，需自建</td></tr>
+        </tbody>
+      </table></div>
+      <p>主流 OKR 工具默认用等权平均，进阶用加权<sup class="cite" data-refid="17">[17]</sup>。但半米理念要求的"尊重核心门槛"——即某个关键 KR（blocking KR）不过，整体就不能算高分——<strong>现有工具全都没有原生实现</strong>。<span class="conf g">🟢</span>（平均/加权）<span class="conf r">🔴</span>（gating 为技术判断，无现成实现）</p>
+      <div class="callout accent"><h4>🔑 给半米的建议：加权 + gating 组合，这正是半米理念的技术兑现</h4>
+      <p><strong>算法（🔴 方案建议）：</strong>①先算加权平均得到基础进度；②再跑一遍 gating 检查——如果任何一个被标为"核心门槛"的 KR 未达阈值，就把 O 的进度<strong>强制封顶</strong>（如封到 50%），并在 UI 上标注"核心门槛未过"。</p>
+      <p><strong>为什么这个组合是对的：</strong>它精确对应半米手册的两条要求——"进度不能机械平均"（→ 用加权而非等权）+ "尊重核心门槛"（→ 用 gating）。一个孩子如果"做完了大量练习但核心的口语表达 KR 没过"，系统<strong>不该</strong>显示"进度 80%"给家长制造虚假安心——gating 会把它封在 50% 并说明原因。这就是把"完成任务≠掌握能力"落到进度算法层。</p></div>
+      <h3>状态判断：expected vs actual</h3>
+      <p>除了进度百分比，OKR 工具还会算<strong>健康状态</strong>（Viva Goals 的做法）<sup class="cite" data-refid="17">[17]</sup>：按 start/end date 线性插值算出"此刻应该到的进度（expected）"，和实际进度比：|expected−actual|>25% = At Risk（有风险）；0–25% = Behind（落后）；≤0% = On Track（正常）。里程碑型 KR 则是 binary（完成 100 / 未完成 0）。这套状态色（RAG 红黄绿）正是 Ch12 家长仪表盘的视觉基础。<span class="conf g">🟢</span></p>
+      <div class="callout warn"><p><strong>⚠️ 儿童场景的调整：</strong>企业 OKR 的"At Risk/Behind"红色告警，直接用在孩子身上会制造焦虑。半米建议把面向<strong>家长</strong>的状态色保留（家长需要知道风险），但面向<strong>孩子</strong>的界面把"落后/风险"重构成"这里需要多花点时间"的成长语言（呼应 Ch13 红线四"失败正常化"）。同一份数据，两种表达。<span class="conf r">🔴</span></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH12 ===== -->
+  <section class="chapter" id="ch12" data-nav="12 家长仪表盘">
+    <h2><span class="num">12</span><span class="title-text">融合方案⑤：家长年度仪表盘设计</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>阿杰的核心诉求：家长要"一眼看清今年 N 个 Objective、M 个 Key Result，几个达成、几个推进中、几个有风险"。这一章把它落成可设计的仪表盘方案，直接服务半米手册里<strong>已确认但未开发</strong>的"Goal–Result–Evidence 成长总览"入口。</p>
+      <h3>第一原则：少而精，每个数字都能回答"我该怎么做"</h3>
+      <p>家长仪表盘设计的第一条铁律<sup class="cite" data-refid="28">[28]</sup>：<strong>每屏 5–7 个核心指标</strong>，次要数据用渐进披露（progressive disclosure）下钻。每个上首屏的数字都要能通过 <strong>Metric-to-Action 测试</strong>：家长看到它能答出"我该做什么"吗？答不出就不上首屏。研究还警告：仪表盘设计不当会因<strong>过度社会比较</strong>反而挫伤学习者<sup class="cite" data-refid="28">[28]</sup>。<span class="conf g">🟢</span></p>
+      <h3>年度总览首屏：四层结构 + RAG 状态</h3>
+      <div class="callout accent"><p><strong>🔴 首屏方案建议（对应半米 Goal–Result–Evidence 四层）：</strong></p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>层</th><th>家长看到什么</th><th>视觉</th></tr></thead>
+        <tbody>
+          <tr><td><strong>① 今年的目标</strong></td><td>本年度 N 个 Objective，每个一句话 + 总体 RAG 状态</td><td>卡片，绿/黄/红边</td></tr>
+          <tr><td><strong>② 关键结果概览</strong></td><td>共 M 个 KR：X 个已达成 / Y 个推进中 / Z 个有风险</td><td>三色计数条（一眼看总量分布）</td></tr>
+          <tr><td><strong>③ 投入过程</strong></td><td>完成了哪些 Plan/Step、是否持续稳定</td><td>次要区，可折叠</td></tr>
+          <tr><td><strong>④ Evidence</strong></td><td>授权后的正式成长证据（作品/测评/老师判断）</td><td>点开 KR 才展开，不默认铺开</td></tr>
+        </tbody>
+      </table></div></div>
+      <h3>RAG 红黄绿：OKR 仪表盘的通用视觉语言</h3>
+      <p>RAG（Red-Amber-Green）是 OKR 仪表盘最通用的健康度语言<sup class="cite" data-refid="29">[29]</sup>：绿 = On Track、黄 = At Risk、红 = Off Track；Weekdone 还扩展了蓝色（超预期）。可叠加 <strong>Confidence Score</strong>（0–10 每次 check-in 更新），在时间轴上画成 sparkline 微型折线看信心趋势。半米用这套 = 和商业 OKR 工具视觉一致，家长零学习成本。<span class="conf g">🟢</span></p>
+      <h3>掌握度可视化：四种范式，选对场景</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>范式</th><th>长什么样</th><th>适用</th><th>不适用</th></tr></thead>
+        <tbody>
+          <tr><td><strong>技能树</strong></td><td>节点=技能、边=依赖，完成点亮</td><td>展示路径 + 成就感（正好用在 Ch10 的 KR 依赖图）</td><td>>50 节点难一览</td></tr>
+          <tr><td><strong>热力方格矩阵</strong></td><td>行=技能、格色=掌握度（Khan 用）</td><td>一屏看全学科掌握分布</td><td>太多格难定位重点</td></tr>
+          <tr><td><strong>进度环</strong></td><td>圆形填充=完成%</td><td>直觉强、儿童友好，适合单个 KR</td><td>只能表达一维</td></tr>
+          <tr><td><strong>能力雷达/轮</strong></td><td>多轴雷达</td><td>多维比较</td><td>⛔ 儿童家长理解成本高，不建议做主视图</td></tr>
+        </tbody>
+      </table></div>
+      <p style="font-size:13px">来源<sup class="cite" data-refid="35">[35]</sup>。🟢（技能树/热力图为主流），🟡（能力轮/四色交通灯为单源或特定研究）。</p>
+      <h3>业界掌握度可视化参考（每条标证据质量）</h3>
+      <div class="callout info"><p><strong>Khan Academy 四级掌握度</strong>（🟢 行业标杆）：Attempted→Familiar→Proficient→Mastered，每技能 0–100 分（Familiar=50/Proficient=80/Mastered=100），单元用"小方格矩阵"热力图，家长按 Course→Unit 展开<sup class="cite" data-refid="31">[31]</sup>。⭐ 对上半米的可解释状态（未接触/学习中/基础掌握/熟练掌握），几乎是现成模板。</p></div>
+      <div class="callout info"><p><strong>i-Ready 三色区</strong>（🟡 第三方解读，官方 403）：红=低于年级 / 绿=达到 / 紫=超过 + 蓝色进度条呈现年度成长，绿色阴影标年级线一眼看差距<sup class="cite" data-refid="33">[33]</sup>。半米若做"年级对标"可参考，但要注意 i-Ready 是标准化测评产品，半米是个性化目标产品，别照搬"全国百分位"逻辑（那正是 Ch13 要避免的横向比较）。</p></div>
+      <div class="callout info"><p><strong>IXL SmartScore</strong>（🟢 多源）：0–100 综合难度/一致性的自适应分（非正确率），80=熟练/90=优秀/100=精通；2024 加了"国家百分位"视图<sup class="cite" data-refid="32">[32]</sup>。<strong>半米要警惕的反面：</strong>SmartScore 这种单一综合分很方便，但容易滑向"用一个数字概括孩子"——半米手册明确反对"虚假百分比"，宁可用可解释状态。</p></div>
+      <div class="callout accent"><h4>🔑 避免虚假进度：Evidence Check + Metric-to-Action（直接呼应半米理念）</h4><p>D-可视化的核心设计原则<sup class="cite" data-refid="34">[34]</sup>：<strong>虚荣指标</strong>（登录次数/视频完成率/总时长）无法区分主动学习 vs 被动挂机，不该上首屏。<strong>有效证据指标</strong>：正确率 + 错误类型（概念性 vs 粗心）、productive struggle（挣扎模式）、外部测评与平台分的相关性。进度必须有 Evidence 支撑（Khan 用 Mastery Challenge 在新情境再证明，i-Ready 用标准检核单），不能只靠练习次数往上推。<strong>这一整套原则，半米手册已经用"Progress 必须能解释来源，避免用虚假百分比制造确定感"表达了——这一章只是给它落地的指标清单。</strong><span class="conf g">🟢</span></p></div>
+      <div class="callout warn"><p><strong>⚠️ 隐私边界（半米手册明确要求）：</strong>家长看到的是<strong>授权后的正式成长 Evidence</strong>，不默认获得孩子全部私人 Notes、草稿、失败尝试。仪表盘设计上，Evidence 层要有权限过滤——家长端只拉"已授权、正式确认"的 Evidence，孩子的私人学习过程留在学生端。这是产品伦理，不是可选项。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH13 ===== -->
+  <section class="chapter" id="ch13" data-nav="13 防KPI化红线">
+    <h2><span class="num">13</span><span class="title-text">⚠️ 半米红线：别把孩子的学习变成 KPI</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>这是整份报告的良心章。前面十二章讲的都是"OKR 多好、怎么落地"，但把一个<strong>为成人企业设计的绩效工具</strong>用到<strong>儿童</strong>身上，有真实的、被反复验证的风险。这一章先把风险讲透，再把它变成半米可执行的六条红线。<strong>不读这一章，前面所有的方案都可能变成伤害孩子的工具。</strong></p>
+      <h3>四个必须知道的风险机制</h3>
+      <div class="callout bad"><h4>① 古德哈特/坎贝尔定律——指标一旦变成目标，就不再是好指标</h4><p>Campbell's Law（1976，本就是针对教育测量提出的）："一个量化社会指标被用于社会决策越多，它就越容易被操纵，越会扭曲它本想监测的社会过程。"Strathern 的通俗版："When a measure becomes a target, it ceases to be a good measure."<sup class="cite" data-refid="36">[36]</sup> 真实教训：美国 NCLB / Race to the Top 把标准化测试分当核心指标后，出现了 teaching to the test（为考试而教）、砍掉音体美、分数失去效度。<strong>对半米的直接警示：如果 KR 定成"做完 50 道题""读完 5 本书"这种可量化任务数，就会触发同等操纵——孩子会为了数字而刷，学习本身被异化。</strong><span class="conf g">🟢</span></p></div>
+      <div class="callout bad"><h4>② 过度合理化效应——预期可见的奖励，挤出内在动机</h4><p>Lepper/Greene/Nisbett（1973）经典实验：本来爱画画的学前儿童，被告知"画画有奖"的那组，在奖励撤除后的自由绘画时间<strong>下降了 50%</strong>；而没被许诺奖励的组毫无变化<sup class="cite" data-refid="40">[40]</sup>。Deci/Koestner/Ryan 1999 对 128 项研究的元分析：表现-条件奖励削弱自由选择行为 <strong>d=−0.28</strong>，有形奖励对<strong>儿童</strong>的伤害大于大学生；反过来，<strong>语言正反馈（表扬）增强内在动机 d=+0.31</strong><sup class="cite" data-refid="41">[41]</sup>。<strong>对半米的直接警示：把 KR 达成与积分、徽章、排名直接绑定、且孩子事先知道——这是最容易触发过度合理化的坏设计。</strong><span class="conf g">🟢</span></p></div>
+      <div class="callout bad"><h4>③ 成就目标理论——KR 定成结果指标，把孩子推向"表现目标"陷阱</h4><p>掌握目标（mastery，聚焦"学会"）→ 深度策略、遇障坚持、正向情绪；表现目标（performance，聚焦"证明我行/比别人强"）→ 表面策略、遇障放弃、焦虑<sup class="cite" data-refid="42">[42]</sup>。Dweck 对 400 名五年级学生的实验：夸"努力"的孩子失败后成绩<strong>+30%</strong>，夸"聪明"的孩子失败后<strong>−20%</strong><sup class="cite" data-refid="43">[43]</sup>。<strong>对半米的直接警示：KR 定成"考 90 分""超过班上 X%"会推向表现目标；定成"能用自己的话解释光合作用""独立做完 3 个探究实验"则保持掌握目标。同样是 KR，措辞决定它是良药还是毒药。</strong><span class="conf g">🟢</span></p></div>
+      <div class="callout bad"><h4>④ 高利害焦虑 + 延展目标双刃剑</h4><p>极度考试焦虑影响约 <strong>20%</strong> 学龄儿童（另 18% 较轻）；有综述称高利害考试临近时皮质醇平均升约 <strong>15%</strong>、关联 SAT 降约 80 分，长期皮质醇升高损伤记忆注意的脑回路<sup class="cite" data-refid="44">[44]</sup>。延展目标（stretch）是双刃剑：设计正确能建自信和韧性，但若孩子认为目标<strong>根本不可及</strong>，会侵蚀信心、崩塌承诺、激增焦虑，把"目标"和"失败恐惧"绑在一起<sup class="cite" data-refid="45">[45]</sup>。<strong>对半米的直接警示：企业 OKR 的"0.7 是好成绩""登月目标"哲学，不能不加改造地用在孩子身上。</strong><span class="conf y">🟡</span>（15%/80 分等精确数字来自二手综述 [44]，不同研究样本/情境被压缩，宜按"方向性存在、量级待核"读，不作硬阈值；20% 焦虑比例方向多源一致。延展双刃剑主要单源但与 SDT/成就目标多向一致。）</p></div>
+      <h3>半米六条红线（每条都是可落地的产品规则）</h3>
+      <p>把上面四个风险机制，翻译成半米产品设计的六条硬性红线。<strong>这六条不是建议，是防止半米变成"高级刷题打卡机"的护栏。</strong></p>
+      <div class="callout warn"><h4>🚫 红线一：KR 定"可验证的学习结果"，而非"任务计数"或"应试分数"</h4><p><strong>先厘清一个容易误读的点（呼应 Ch1）：</strong>KR 依然要回答"我怎么知道到了"、依然是<strong>可验证的结果</strong>——这条红线<strong>不是</strong>把 KR 降级成过程步骤（那样就和 Plan/Step 混了）。它反对的是两类<strong>坏 KR</strong>：①可量化的<strong>任务计数</strong>（"做完 50 题""读完 5 本书"）——这是把 Plan/Step 冒充 KR；②<strong>应试分数/排名</strong>（"考 90 分""超过班上 X%"）——这会触发古德哈特和表现目标陷阱。<strong>好 KR 的样子：</strong>"能在无提示下复述一篇听力材料的主旨""能用自己的话解释光合作用"——是<strong>掌握型的可验证结果</strong>，既非计数、也非应试分。<strong>为什么：</strong>可量化任务数一旦成为 KR 就会被刷（古德哈特，风险①）；应试分数把孩子推向表现目标（风险③）。半米手册"完成大量任务≠掌握能力"正是这条的理念源头。<strong>字段建议：</strong>把 KR 相关字段分三类——<strong>学习结果 KR</strong>（掌握型、可验证，唯一能判定 O 达成的）、<strong>过程信号</strong>（题量/时长，只做诊断性 leading indicator，不单独证明掌握）、<strong>外部/高利害结果</strong>（考试分、录取，单独归档不当日常 KR）。<strong>落地：</strong>KR 创建界面提示区分这三类，结果型 KR 必须配掌握级 Evidence 定义（见红线六）。</p></div>
+      <div class="callout warn"><h4>🚫 红线二：禁用横向排名和公开比较，只允许纵向自比</h4><p><strong>规则：</strong>产品里<strong>不出现</strong>任何形式的孩子间排行榜、班级排名、"你排第几"。所有进步只跟"过去的自己"比——"比上周的我进步了吗"。<strong>为什么：</strong>排行榜损伤低绩效孩子的能力感需求，并触发实证存在的"被同伴优秀打击"（discouragement by peer excellence）效应，导致后续动机显著下降（红线针对风险④）<sup class="cite" data-refid="44">[44]</sup>。这也是为什么 Ch12 特别提醒别照搬 IXL/i-Ready 的"全国百分位"逻辑。<strong>落地：</strong>家长仪表盘的所有对比基线设成"孩子自己的历史"和"目标线"，绝不设成"同龄人分布"。</p></div>
+      <div class="callout warn"><h4>🚫 红线三：奖励反馈只用语言型 + 信息型，不用有形-预期型</h4><p><strong>规则：</strong>反馈以<strong>语言正反馈</strong>（具体、针对努力和策略的表扬）为主；徽章/积分可以存在，但定位成"进步的<strong>信息标记</strong>"（记录你到了哪），<strong>绝不</strong>做成"完成 KR 就换积分"的<strong>预期交换品</strong>。<strong>为什么：</strong>语言正反馈 d=+0.31 增强内在动机，有形-预期奖励对儿童伤害最大（红线针对风险②）<sup class="cite" data-refid="41">[41]</sup>。区别在"事先许诺换取"——"做完这个给你星星"是毒药，"你做到了，这是你走过的路"是良药。<strong>落地：</strong>徽章设计成"回顾性成长档案"（Duolingo Year in Review 那种事后故事卡<sup class="cite" data-refid="46">[46]</sup>），不做成"任务完成即时弹出的奖励诱饵"。</p></div>
+      <div class="callout warn"><h4>🚫 红线四：延展目标不惩罚未达成，失败必须被正常化</h4><p><strong>规则：</strong>渴望型/延展 KR 未达成 = "挑战区"，<strong>不是</strong>"失败"。UI 上不用红叉、不用"未完成"这种负面框架，而用"还在路上""这里需要多花点时间"。成人（老师/家长）要示范：公开自己没达成的目标并示范反思。<strong>为什么：</strong>Dweck 实验——夸努力的孩子失败后 +30%，夸聪明的 −20%（红线针对风险③④）<sup class="cite" data-refid="43">[43]</sup>；延展目标只有在"心理安全、失败可改善"的框架下才建立韧性而非焦虑<sup class="cite" data-refid="45">[45]</sup>。<strong>落地：</strong>把 Ch1 的"0.7 是好成绩"逻辑对孩子翻译成成长语言；Ch11 的"At Risk/Behind"状态色对孩子界面重构成中性的"需要关注"，红色告警只留给家长和老师看。</p></div>
+      <div class="callout warn"><h4>🚫 红线五：按年龄匹配目标设定的自主度</h4><p><strong>规则：</strong>不同年龄给不同的自主度——<strong>&lt;8 岁</strong>：成人主导目标框架，孩子选内容（"今天想读小猪还是恐龙"）；<strong>8–12 岁</strong>：脚手架式协作设目标（成人给结构，孩子填内容和难度）；<strong>&gt;12 岁</strong>：逐步独立设定和监控。<strong>为什么：</strong>Zimmerman 自我调节三阶段需要脚手架逐步内化——3–7 岁元认知有限、不适合独立设目标，8–10 岁才出现元认知策略（约 85% 能表达简单目标），过早要求独立设复杂 OKR 会因元认知不足而失效甚至增焦虑（红线针对发展适宜性）<sup class="cite" data-refid="47">[47]</sup>。<strong>落地：</strong>半米的 OKR 设定界面按学段切换"自主度档位"——低龄档 AI/老师给候选目标让孩子选，高龄档开放自主创建。<strong>注意：上面的 &lt;8 / 8–12 / &gt;12 是方向性分层不是精确断点</strong>——实际能力个体差异大，应做成<strong>可配置的能力分层</strong>（由老师按孩子实际元认知水平调），别把年龄硬编成规则。这也正是 SDT"自主性支持"的正确实现：让孩子选有意义的目标，而不是强加成人目标。</p></div>
+      <div class="callout warn"><h4>🚫 红线六：Evidence 证明掌握，而非计数任务</h4><p><strong>规则：</strong>KR 的达成证据用"<strong>展示理解</strong>"的产出——讲给别人听、做一个项目、画概念图、无提示复述——而不是"做了多少题、花了多少时间"的计数。<strong>为什么：</strong>这既满足掌握目标标准（避免表现目标陷阱），又避免应试化（避免古德哈特触发）——是红线一/三/成就目标理论的收口（红线针对风险①③）。半米手册已经区分了"证明力不同的学习行为"（无提示回忆/延迟复习/老师判断=掌握证据；看视频/收藏=仅接触），这条红线把它绑定到 KR 达成判定上。<strong>落地：</strong>Ch8 的 Evidence 表按"证明力等级"打标，KR 达成判定<strong>只认掌握级 Evidence</strong>，接触级行为不能推动 KR 进度——技术上兑现"完成≠掌握"。</p></div>
+      <div class="callout good"><p><strong>✅ 一句话收口：</strong>OKR 用在孩子身上的成败，几乎全押在这六条上。半米已经有 Evidence 层、"完成≠掌握"、"避免虚假百分比"这些理念基因——把它们固化成上面六条产品红线，半米就能拿到 OKR 的方向感和家长可视化收益，同时躲开把学习异化成 KPI 的坑。<strong>这是半米相对所有"直接把 OKR 搬进教育"的先行者的最大护城河。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ===== CH14 ===== -->
+  <section class="chapter" id="ch14" data-nav="14 落地路线建议">
+    <h2><span class="num">14</span><span class="title-text">半米路线建议：决策树 + 可执行下一步</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <p>把前面十三章收成一句可执行的话：<strong>半米不需要"上 OKR"，需要的是把已有的 OKR 原生设计落地成三样看得见的东西——数据模型、家长年度总览、KR 依赖图——并全程用六条红线守住。</strong>这一章给决策树和分步路线。</p>
+      <h3>决策树：半米该从哪里开始</h3>
+      <div class="tree">
+        <p><strong>Q1：第一个落地点选什么？</strong></p>
+        <div class="node"><span class="lbl y">家长端"Goal–Result–Evidence 成长总览"</span>✅ 首选——手册里<strong>已确认待开发</strong>，用户价值最直接（家长看得懂），技术风险最低（不需要 DAG）→ 去 Q2</div>
+        <div class="node"><span class="lbl m">KR 依赖图可视化</span>⚠️ 酷但复杂，家长不一定需要看完整图 → 放第三步（Ch10 警告别过度可视化）</div>
+        <div class="node"><span class="lbl n">先重构整个后端数据模型</span>⛔ 太重、见效慢、风险高 → 别一上来做</div>
+        <p style="margin-top:14px"><strong>Q2：成长总览的最小可行版（MVP）做到什么程度？</strong></p>
+        <div class="node"><span class="lbl y">先做"N 个 O / M 个 KR / 三色计数 + RAG 状态"的静态总览</span>✅ 用现有数据就能拼出来，家长立刻有感 → 去 Q3</div>
+        <div class="node"><span class="lbl m">一步做到实时依赖联动</span>⚠️ 需要先有 DAG 数据模型，是第二步的事</div>
+        <p style="margin-top:14px"><strong>Q3：什么时候引入 gating（核心门槛封顶）？</strong></p>
+        <div class="node"><span class="lbl y">和加权 rollup 一起，作为进度算法的第二步</span>✅ 这是半米"不机械平均"理念的技术兑现，值得早做（Ch11）</div>
+        <div class="node"><span class="lbl m">等家长总览跑通后再接</span>⚠️ 也可以，但别拖太久——没有 gating 的进度会给家长虚假安心</div>
+      </div>
+      <h3>推荐的分步 MVP 路线</h3>
+      <div class="step"><div class="step-head"><span class="sn">1</span>第一步 · 家长端「成长年度总览」MVP（对齐手册已确认待开发项）</div><div class="step-body"><strong>做什么：</strong>用半米现有的 O/KR/Evidence 数据，拼一个家长首屏——本年度 N 个 Objective 卡片（每个带 RAG 状态）+ M 个 KR 的"已达成/推进中/有风险"三色计数条 + 点开看授权 Evidence。<strong>为什么先做它：</strong>①手册里已确认待开发、方向无争议；②直接回答阿杰"家长一眼看多少 O 多少 KR"的核心诉求；③不需要 DAG，技术风险最低；④让家长价值最快显性化。<strong>守的红线：</strong>红线二（无横向排名）、红线六（只显示掌握级 Evidence）、隐私边界（只拉授权 Evidence）。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">2</span>第二步 · O/KR/Evidence 数据模型 + 加权 gating rollup</div><div class="step-body"><strong>做什么：</strong>把 Ch8 的 Schema 落地（Objective/KeyResult/Evidence/CheckIn + weight 字段），实现 Ch11 的"加权平均 + 核心门槛 gating"进度算法。<strong>为什么这个顺序：</strong>第一步的总览如果用死数据能跑，但要让进度"不机械平均、尊重门槛"必须有这层数据模型和算法支撑——它是把手册理念变成真实进度数字的地基。<strong>守的红线：</strong>红线一（KR 定可验证的学习结果、非任务计数/应试分）、gating 兑现"完成≠掌握"。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">3</span>第三步 · KR 依赖 DAG + 可视化（React Flow + dagre）</div><div class="step-body"><strong>做什么：</strong>加 KRDependency 边表（先只做 FS/SS 两种依赖，Ch9）+ Kahn 算法循环检测，用 React Flow + dagre 画依赖图（Ch10），作为家长/学生的<strong>可选下钻</strong>层，不放首屏。<strong>为什么放最后：</strong>①依赖图最复杂、最容易过度工程；②手册说"复杂 Learning Graph 留后台"，家长首屏不需要它；③前两步跑通后，数据模型已经支持依赖，这步只是加可视化。<strong>守的红线：</strong>Ch10 警告——别把 >50 节点的完整 DAG 甩给家长，用"锁/并行/汇合"的直觉语言。</div></div>
+      <div class="step"><div class="step-head"><span class="sn">4</span>贯穿全程 · 六条红线做成设计 review checklist</div><div class="step-body"><strong>做什么：</strong>把 Ch13 六条红线变成每个 OKR 相关功能上线前的检查清单（这个 KR 是过程还是结果？有没有横向比较？奖励是不是预期交换？失败框架对不对？年龄自主度匹配吗？Evidence 是掌握级吗？）。<strong>为什么：</strong>这是半米对所有"直接搬 OKR"竞品的护城河，不能等出问题再补。</div></div>
+      <div class="callout warn"><h4>⚠️ 边界：什么时候 OKR 反而不该用（诚实的反论）</h4><p>OKR 不是万能框架，硬套会伤人。几个<strong>不该用 OKR（或该弱化）</strong>的场景：①<strong>纯探索/兴趣萌芽期</strong>——低龄孩子还在广泛接触、培养兴趣时，过早上目标-结果的问责结构会把探索变成任务，违背 SDT 自主需求；②<strong>基础学科的连续掌握</strong>——这类更适合直接用掌握学习/CBE 的能力达标逻辑，OKR 的"季度周期 + 大胆延展"反而是多余包装（Ch6 已说 OKR 强在方向感、CBE 强在认知深度）；③<strong>情绪/心理状态不稳的孩子</strong>——延展目标和进度可视化对焦虑体质的孩子风险更高（Ch13 风险④），该退回纯支持性、无量化的陪伴；④<strong>没有可靠 Evidence 的能力维度</strong>——如果一项能力暂时无法用可信证据判定（如"创造力"），别硬编 KR，宁可留白。<strong>一句话：OKR 用在"有明确方向、有可靠证据、孩子情绪稳定"的场景最好，其余场景要么弱化、要么不用。</strong></p></div>
+      <div class="callout good"><h4>✅ 给阿杰的一句话行动建议</h4><p><strong>先做家长端「Goal–Result–Evidence 成长年度总览」的 MVP（第一步）——它是手册里已确认待开发、用户价值最直接、技术风险最低的落地点。</strong>用现有数据先拼出"N 个 O / M 个 KR / 三色状态"的静态总览让家长有感，然后第二步补加权 gating 让进度真实、第三步才上 KR 依赖图。全程用六条红线当 checklist。这条路线的每一步都建在半米已有的资产上，不推翻重来，风险可控、价值前置。<strong>但记住 Ch14 的边界和 Ch8 的 Evidence 有效性——先用小范围原型验证"OKR 包装相对现有学习计划确有增量价值"，别一次全押。</strong></p></div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="chapter" id="faq" data-nav="FAQ 常见问题">
+    <h2><span class="num">15</span><span class="title-text">FAQ · 常见问题</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">OKR 和 SMART 目标到底有什么区别？</span><span class="toggle">＋</span></div><div class="faq-a"><p>层级不同。SMART 是"单个目标怎么写好"的规范（Specific/Measurable/Achievable/Relevant/Time-bound），OKR 是"一整套目标怎么组织+对齐+追踪"的系统。它们不冲突——OKR 里的每个 Key Result 完全可以写成 SMART 的<sup class="cite" data-refid="26">[26]</sup>。半米两者都用：用 OKR 组织方向和对齐，用 SMART/Bloom 保证单个 KR 定在对的认知层。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">孩子几岁能开始设 OKR？</span><span class="toggle">＋</span></div><div class="faq-a"><p>看自主度档位，不是"能不能"而是"给多少自主"。&lt;8 岁：元认知有限，成人主导框架、孩子只选内容；8–12 岁：约 85% 能表达简单目标，走脚手架式协作设定；&gt;12 岁：逐步独立设定和监控<sup class="cite" data-refid="47">[47]</sup>。过早要求独立设复杂 OKR 会因元认知不足失效甚至增焦虑（Ch13 红线五）。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">一个 Objective 下定几个 KR 合适？</span><span class="toggle">＋</span></div><div class="faq-a"><p>OKR 通用实践是每个 O 配 2–5 个 KR（少于 2 个无法从多角度验证，多于 5 个失去聚焦）。对儿童场景建议偏少（2–3 个），呼应 FACTS 的 Focus 超能力——聚焦是"给说不的许可"<sup class="cite" data-refid="6b">[6b]</sup>。孩子同时追太多 KR 会稀释投入、增加焦虑。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">达不成 KR 就算失败吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>看类型。承诺型 KR 期望 100%，没做到要复盘；渴望型/延展 KR 期望本来就是 60–70%，Google 认为 0.7 是好成绩、长期拿满分反而说明目标不够大胆<sup class="cite" data-refid="6">[6]</sup>。对孩子，半米红线四要求延展未达成一律框架成"挑战区/还在路上"，不用"失败"这个词——Dweck 实验证明失败后的归因方式直接决定后续成绩（夸努力 +30% vs 夸聪明 −20%）<sup class="cite" data-refid="43">[43]</sup>。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">给孩子上 OKR，会不会反而让家长更焦虑？</span><span class="toggle">＋</span></div><div class="faq-a"><p>设计不当会。研究明确警告仪表盘会因"过度社会比较"挫伤学习者和家长<sup class="cite" data-refid="28">[28]</sup>。半米的对策：①家长仪表盘只做纵向自比不做横向排名（红线二）；②每个数字过 Metric-to-Action 测试，答不出"该怎么做"就不上首屏；③进度用可解释状态而非虚假百分比。做对了，OKR 反而降低焦虑——因为它把"我孩子到底学得怎么样"这个模糊焦虑，变成"目标是什么、现在到哪、下一步做什么"的清晰画面。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">KR 依赖图会不会太复杂，家长根本看不懂？</span><span class="toggle">＋</span></div><div class="faq-a"><p>如果把完整 DAG 甩给家长，会。>50 节点的图会难以一览、反而挫伤理解<sup class="cite" data-refid="35">[35]</sup>，半米手册也说"复杂 Learning Graph 留后台"。正确做法（Ch10）：家长首屏是聚合后的状态（几个 O、几个 KR、三色分布），依赖图是<strong>可选下钻</strong>的第二层，而且用"锁着/并行/汇合"的直觉语言，不是节点边的技术图。所以依赖图排在落地路线第三步，不是第一步。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">半米现在就该做 OKR 相关功能吗，还是再等等？</span><span class="toggle">＋</span></div><div class="faq-a"><p>现在就该做，但从最轻的做起。战略窗口<strong>看起来</strong>是开的——本次检索没发现有学习 App 把 OKR 做成核心 UX，先行者都在早期（Ch6）；这是<strong>待验证的假设</strong>而非已证事实，落地前建议先做一轮针对性竞品扫描（goal-setting / student agency / competency-tracker 类产品，它们未必打"OKR"标签）确认空白真实存在。但别一上来做重的数据模型重构或依赖图，先做家长端「成长年度总览」MVP（Ch14 第一步）：手册已确认待开发、用现有数据就能拼、家长立刻有感、技术风险最低。价值前置、风险可控。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">有没有真正的证据证明学生用 OKR 能提高成绩？</span><span class="toggle">＋</span></div><div class="faq-a"><p>诚实说：没有强证据。唯一接近对照实验的 K12 研究（MTSU）结论偏负面，且被疫情干扰、测的还是教师而非学生<sup class="cite" data-refid="24">[24]</sup>；Khan Lab School / Minerva 是先行案例但都是宣传稿、无前后测数据。所以半米的定位不应该是"OKR 能提分"（这没证据），而是"OKR 提供方向感 + 让家长看得懂 + 把掌握学习组织起来"——这些价值有理论支撑（目标设定理论、SDT），而且要靠半米自己的 Evidence 层和防 KPI 红线去兑现，不是靠 OKR 本身自动实现。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">为什么不能把 KR 达成和积分/徽章奖励绑起来，孩子不是更有动力吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>短期看有动力，长期是毒药。过度合理化效应：被许诺奖励的孩子在撤奖后自发投入下降 50%，有形-预期奖励对儿童伤害最大（d=−0.28）；而语言表扬反而增强内在动机（d=+0.31）<sup class="cite" data-refid="40">[40]</sup><sup class="cite" data-refid="41">[41]</sup>。关键区别在"预期交换"——"做完给你星星"是毒药，"你做到了，这是你走过的路"是良药。半米红线三：徽章可存在但只做"进步的信息标记"（回顾性成长档案），绝不做预期奖励诱饵。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">"进度不能机械平均"技术上到底怎么实现？</span><span class="toggle">＋</span></div><div class="faq-a"><p>加权平均 + 门槛 gating 组合（Ch11）。①先按 KR 权重算加权平均（突出核心 KR，而非等权对待所有 KR）；②再跑 gating 检查——任何"核心门槛"KR 未达阈值就把 O 进度强制封顶（如封到 50%）并标注原因<sup class="cite" data-refid="17">[17]</sup>。这样"做完大量练习但核心口语 KR 没过"不会显示成"80%"给家长虚假安心。gating 无现成工具需自建（🔴），但它正是半米"尊重核心门槛""完成≠掌握"理念的技术兑现。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">半米和 Khan Academy 的掌握度体系比，优势在哪？</span><span class="toggle">＋</span></div><div class="faq-a"><p>Khan 的四级掌握度（Attempted→Familiar→Proficient→Mastered）+ 热力方格是行业标杆<sup class="cite" data-refid="31">[31]</sup>，半米可以直接借鉴它的可视化。半米的差异化在两点：①Khan 是"练习驱动"的掌握判定，半米有更丰富的 Evidence 层（作品/口语/老师判断，证明力分级），能判定 Khan 判不了的高阶能力；②Khan 没有 OKR 的"目标-对齐-家长年度总览"结构，半米把掌握学习组织进 OKR 框架后，家长能看到"今年的方向"而不只是"技能点亮了多少"。简单说：借 Khan 的可视化，用半米的 Evidence 深度 + OKR 组织力。</p></div></div>
+      <div class="faq-item"><div class="faq-q"><span class="qmark">Q12</span><span class="qtext">这份研究里哪些是可靠事实，哪些是需要谨慎对待的？</span><span class="toggle">＋</span></div><div class="faq-a"><p>可靠（🟢多源）：OKR 起源谱系、目标设定理论四机制五变量、SDT 三需求、过度合理化/成就目标理论/古德哈特定律、DAG/Kahn 算法/Sugiyama 布局、RAG 与 Khan 掌握度可视化。需谨慎（🟡）：本报告已删除坊间"+16%"精确数字只留方向性结论（d≈0.80 不能直接换算成百分比）、Project Aristotle 已降为组织实践背景非 OKR 疗效证据、所有教育案例都偏宣传或单源、SDT×OKR 缺顶刊交叉实证、"战略空白"是基于检索没查到的推断（未做系统竞品扫描）、Ch13 部分精确数字（皮质醇 15%/SAT 80 分）来自二手综述宜按量级读、i-Ready/Beast 等单源。核心提醒：<strong>组件有理论支持 ≠ 完整 OKR 制度组合后必然有效</strong>。方案建议（🔴，非半米现有实现）：Ch8–12 全部技术架构/Schema/可视化选型/gating 算法 + Evidence 有效性模型。半米对外传播时按这个可信度分级把握措辞。</p></div></div>
+    </div>
+  </section>
+
+  <!-- ===== References ===== -->
+  <section class="chapter" id="refs" data-nav="References">
+    <h2><span class="num">16</span><span class="title-text">References · 参考来源</span><span class="caret">▾</span></h2>
+    <div class="chapter-body">
+      <ol class="ref-list">
+        <li id="ref-1"><a href="https://eleganthack.com/the-effect-of-goal-setting-on-group-performance-a-meta-analysis/" target="_blank" rel="noopener">The Effect of Goal Setting on Group Performance: A Meta-Analysis（Klein 等 1999，具体难目标 +16%）</a><span class="ref-meta">· 访问 2026-07-13 · 引用 2 次</span></li>
+        <li id="ref-2"><a href="https://goalsandprogress.com/goal-setting-theory-locke-latham-explained/" target="_blank" rel="noopener">Goal-Setting Theory (Locke & Latham) Explained（88 种任务、40,000+ 参与者）</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-3"><a href="https://eric.ed.gov/?id=EJ654871" target="_blank" rel="noopener">Locke & Latham (2002) Building a Practically Useful Theory of Goal Setting（四大机制，American Psychologist 57:705–717）</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-4"><a href="https://wsu.pressbooks.pub/theoreticalmodelsforteachingandresearch/chapter/goal-setting-theory/" target="_blank" rel="noopener">Goal Setting Theory（五大调节变量；无目标时反馈无效）— WSU Pressbooks</a><span class="ref-meta">· 访问 2026-07-13 · 引用 2 次</span></li>
+        <li id="ref-5"><a href="https://www.whatmatters.com/articles/the-origin-story" target="_blank" rel="noopener">The Origin Story of OKRs（Drucker→Grove→Doerr→Google 谱系）— What Matters</a><span class="ref-meta">· 访问 2026-07-13 · 引用 4 次</span></li>
+        <li id="ref-6"><a href="https://rework.withgoogle.com/intl/en/guides/set-goals-with-okrs" target="_blank" rel="noopener">Set goals with OKRs（0.6–0.7 甜蜜区、渴望型 vs 承诺型）— Google re:Work</a><span class="ref-meta">· 访问 2026-07-13 · 引用 4 次</span></li>
+        <li id="ref-6b"><a href="https://www.whatmatters.com/okrs-explained/benefits-of-okrs" target="_blank" rel="noopener">The Benefits of OKRs / FACTS Superpowers（Focus/Align/Commit/Track/Stretch）— What Matters</a><span class="ref-meta">· 访问 2026-07-13 · 引用 2 次</span></li>
+        <li id="ref-7"><a href="https://okrinternational.com/how-to-differentiate-between-objectives-and-key-results/" target="_blank" rel="noopener">How to Differentiate Between Objectives and Key Results（O 定性 vs KR 定量，强制配对逻辑）— OKR International</a><span class="ref-meta">· 访问 2026-07-13 · 引用 2 次</span></li>
+        <li id="ref-8"><a href="https://www.apa.org/research-practice/conduct-research/self-determination-theory" target="_blank" rel="noopener">Self-Determination Theory（自主/胜任/归属三大内在需求）— American Psychological Association</a><span class="ref-meta">· 访问 2026-07-13 · 引用 3 次</span></li>
+        <li id="ref-9"><a href="https://rework.withgoogle.com/intl/en/guides/understand-team-effectiveness" target="_blank" rel="noopener">Understand team effectiveness / Project Aristotle（结构与清晰度、五因素）— Google re:Work</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-14"><a href="https://learn.microsoft.com/en-us/viva/goals/configure-okr-model" target="_blank" rel="noopener">Configure your OKR model（O→KR→Initiative 三层、parent_id 对齐）— Microsoft Viva Goals</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-15"><a href="https://asana.com/resources/project-dependencies" target="_blank" rel="noopener">Project Dependencies: 4 Types（FS/SS/FF/SF）— Asana</a><span class="ref-meta">· 访问 2026-07-13 · 引用 3 次</span></li>
+        <li id="ref-16"><a href="https://medium.com/codetodeploy/topological-sort-cycle-detection-the-brain-behind-scheduling-problems-9f3063571e83" target="_blank" rel="noopener">Topological Sort & Cycle Detection（Kahn 算法，循环依赖检测 O(V+E)）— Medium</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-17"><a href="https://www.perdoo.com/resources/blog/weighting-key-results-and-aligned-okrs" target="_blank" rel="noopener">Weighting Key Results and Aligned OKRs（等权/加权 rollup；配合 Viva Goals 状态判断）— Perdoo</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-18"><a href="https://reactflow.dev/learn/layouting/layouting" target="_blank" rel="noopener">Layouting in React Flow（dagre/ELK、Sugiyama 分层布局）— React Flow</a><span class="ref-meta">· 访问 2026-07-13 · 引用 2 次</span></li>
+        <li id="ref-21"><a href="https://www.whatmatters.com/articles/okrs-for-students" target="_blank" rel="noopener">OKRs for Students / Khan Lab School（学生用 OKR 案例，倡导者立场）— What Matters</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-22"><a href="https://www.whatmatters.com/articles/higher-education-college-university-okrs" target="_blank" rel="noopener">Higher Education OKRs / Minerva（把每学年当独立产品、KR 从投入转结果）— What Matters</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-23"><a href="https://ora.ox.ac.uk/objects/uuid:27a16f6b-1aa8-4e32-b384-70c894d624ed" target="_blank" rel="noopener">OKR in the classroom: a framework for practice（160 页框架论文）— Oxford Research Archive</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-24"><a href="https://jewlscholar.mtsu.edu/items/f3c70942-eec6-43d2-a89d-77196f49577b" target="_blank" rel="noopener">准实验：K12 教师用 OKR 的效果（结论偏负面，2020–2021 疫情期）— MTSU JEWLScholar</a><span class="ref-meta">· 访问 2026-07-13 · 引用 2 次</span></li>
+        <li id="ref-25"><a href="https://www.whatmatters.com/articles/duolingo-okrs-product-development" target="_blank" rel="noopener">Duolingo OKRs & Product Development（内部用 OKR，给学习者的是 XP 非 OKR）— What Matters</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-26"><a href="https://aurora-institute.org/cw_post/is-there-any-difference-between-competency-based-education-and-mastery-based-learning/" target="_blank" rel="noopener">CBE vs Mastery-Based Learning（教育相邻框架与 OKR 的本质差异）— Aurora Institute</a><span class="ref-meta">· 访问 2026-07-13 · 引用 2 次</span></li>
+        <li id="ref-27"><a href="https://eleganthack.com/why-use-personal-okrs/" target="_blank" rel="noopener">战略空白综合判断参考 / Personal OKR 生态（Christina Wodtke）— Eleganthack</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-30b"><a href="https://eleganthack.com/why-use-personal-okrs/" target="_blank" rel="noopener">Why Use Personal OKRs（个人学习 OKR 面向成人自学者）— Christina Wodtke, Eleganthack</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-28"><a href="https://backpackinteractive.com/insights/ux-design-for-education/" target="_blank" rel="noopener">UX Design for Education（家长仪表盘少而精 5–7 指标、Metric-to-Action、过度社会比较风险）— Backpack Interactive</a><span class="ref-meta">· 访问 2026-07-13 · 引用 3 次</span></li>
+        <li id="ref-29"><a href="https://blog.weekdone.com/ragb-traffic-light-rating-system-expanding-established-design-patterns/" target="_blank" rel="noopener">RAGB Traffic Light Rating System（RAG 红黄绿 + 蓝、Confidence sparkline）— Weekdone</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-31"><a href="https://support.khanacademy.org/hc/en-us/articles/5548760867853" target="_blank" rel="noopener">Khan Academy 掌握度体系（Attempted→Familiar→Proficient→Mastered、方格热力图）— Khan Academy Support</a><span class="ref-meta">· 访问 2026-07-13 · 引用 2 次</span></li>
+        <li id="ref-32"><a href="https://www.ixl.com/inspiration/us/IXL-SmartScore-Guide.pdf" target="_blank" rel="noopener">IXL SmartScore Guide（0–100 自适应分、国家百分位）— IXL</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-33"><a href="https://pengi.ai/blog/i-ready-diagnostic-score-interpretation-2026" target="_blank" rel="noopener">i-Ready Diagnostic 三色区解读（红/绿/紫 + 蓝色成长条，第三方解读）— Pengi</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-34"><a href="https://tribalhabits.com/learning-analytics-dashboard-metrics-that-matter/" target="_blank" rel="noopener">Learning Analytics Dashboard: Metrics That Matter（虚荣指标 vs 有效证据指标、Evidence Check）— TribalHabits</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-35"><a href="https://www.aicoursify.com/blog/visualizing-learner-progress-with-heat-maps" target="_blank" rel="noopener">Visualizing Learner Progress（技能树/热力图/进度环/能力轮四范式适用场景）— AICoursify</a><span class="ref-meta">· 访问 2026-07-13 · 引用 3 次</span></li>
+        <li id="ref-36"><a href="https://en.wikipedia.org/wiki/Campbell%27s_law" target="_blank" rel="noopener">Campbell's Law（指标变目标即腐化，原本针对教育测量）— Wikipedia</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-40"><a href="https://www.structural-learning.com/post/overjustification-effect" target="_blank" rel="noopener">The Overjustification Effect（Lepper 1973，撤奖后自由游戏时间降 50%）— Structural Learning</a><span class="ref-meta">· 访问 2026-07-13 · 引用 3 次</span></li>
+        <li id="ref-41"><a href="https://home.ubalt.edu/tmitch/642/articles%20syllabus/Deci%20Koestner%20Ryan%20meta%20IM%20psy%20bull%2099.pdf" target="_blank" rel="noopener">Deci, Koestner & Ryan (1999) 元分析（128 项，有形奖励 d=−0.28，语言表扬 d=+0.31）— Psychological Bulletin</a><span class="ref-meta">· 访问 2026-07-13 · 引用 2 次</span></li>
+        <li id="ref-42"><a href="https://psychologyfanatic.com/achievement-goal-theory/" target="_blank" rel="noopener">Achievement Goal Theory（掌握目标 vs 表现目标）— Psychology Fanatic</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-43"><a href="https://bingschool.stanford.edu/news/carol-dweck-praising-intelligence-costs-childrens-self-esteem-and-motivation" target="_blank" rel="noopener">Carol Dweck: Praising Intelligence Costs（夸努力 +30% vs 夸聪明 −20%）— Stanford Bing School</a><span class="ref-meta">· 访问 2026-07-13 · 引用 2 次</span></li>
+        <li id="ref-44"><a href="https://www.edutopia.org/article/psychological-toll-high-stakes-testing/" target="_blank" rel="noopener">The Psychological Toll of High-Stakes Testing（20% 儿童极度考试焦虑、皮质醇升 15%、被同伴优秀打击）— Edutopia</a><span class="ref-meta">· 访问 2026-07-13 · 引用 2 次</span></li>
+        <li id="ref-45"><a href="https://www.businessthink.unsw.edu.au/articles/why-setting-stretch-goals-is-a-double-edged-sword" target="_blank" rel="noopener">Why Setting Stretch Goals Is a Double-Edged Sword（延展目标双刃剑）— UNSW BusinessThink</a><span class="ref-meta">· 访问 2026-07-13 · 引用 2 次</span></li>
+        <li id="ref-46"><a href="https://blog.duolingo.com/year-in-review-behind-the-scenes/" target="_blank" rel="noopener">Duolingo Year in Review（回顾性成长故事卡，非即时奖励诱饵）— Duolingo Blog</a><span class="ref-meta">· 访问 2026-07-13 · 引用 1 次</span></li>
+        <li id="ref-47"><a href="https://www.structural-learning.com/post/self-regulation-of-learning" target="_blank" rel="noopener">Self-Regulation of Learning（Zimmerman 三阶段、按年龄的目标设定能力）— Structural Learning</a><span class="ref-meta">· 访问 2026-07-13 · 引用 2 次</span></li>
+      </ol>
+    </div>
+  </section>
+  <footer>
+    无忌 · Deep Research（L2）· 2026-07-13 · 仅供阿杰个人决策参考；数据与判例以原始来源为准。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('banmi-okr-learning-system-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('banmi-okr-learning-system-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

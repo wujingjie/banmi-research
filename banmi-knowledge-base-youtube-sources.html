@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>YouTube 知识库选材调研：英语学习 + 知识类素材全景 + 入库框架 · 无忌 Deep Research · 2026-07-15</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 01 入库选材6维框架</a>
+    <a href="#ch2" data-target="ch2">02 02 英语·听说读写课程练习</a>
+    <a href="#ch3" data-target="ch3">03 03 英语·访谈&podcast</a>
+    <a href="#ch4" data-target="ch4">04 04 英语·A1/A2兴趣驱动</a>
+    <a href="#ch5" data-target="ch5">05 05 知识类·佛法</a>
+    <a href="#ch6" data-target="ch6">06 06 知识类·哲学</a>
+    <a href="#ch7" data-target="ch7">07 07 知识类·心理学</a>
+    <a href="#ch8" data-target="ch8">08 08 知识类·AI/机器学习</a>
+    <a href="#ch9" data-target="ch9">09 09 知识类·谭崔(审慎)</a>
+    <a href="#ch10" data-target="ch10">10 10 TED/演讲/科技podcast</a>
+    <a href="#ch11" data-target="ch11">11 11 纪录片&科普</a>
+    <a href="#ch12" data-target="ch12">12 12 名校开放课程(许可)</a>
+    <a href="#ch13" data-target="ch13">13 13 版权接入+库分流</a>
+    <a href="#ch14" data-target="ch14">14 14 阿杰路线建议(决策树)</a>
+    <a href="#faq" data-target="faq">15 FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">16 References</a>
+  </div>
+</nav>
+
+<main><div class="hero">
+  <h1>YouTube 知识库选材调研：英语学习 + 知识类素材全景 + 入库框架</h1>
+  <div class="hero-meta">
+    <span>📅 2026-07-15</span>
+    <span>🔍 六路搜证 · 60+ 频道</span>
+    <span>🎯 选材 + 入库判断手册</span>
+    <span>🔗 承接 #41 视频库</span>
+  </div>
+  <div class="hero-deck">
+    <p><strong>这不是一份「频道大全」，而是一套「什么素材值得入库、怎么入」的判断手册。</strong>它承接 <span class="conf g">🟢</span> #41《banmi YouTube 英语视频库》——那份已经把教学型英语频道（BBC Learning English / Rachel's English / engVid 等）铺齐；本报告补 #41 没深挖的三块英语空白（访谈 & podcast、A1/A2 兴趣驱动、结构化课程与练习），再开辟一块全新大陆：<strong>知识类素材</strong>（佛法 / 哲学 / 心理学 / AI / 谭崔 / 纪录片 / 名校公开课）。</p>
+    <p>脊梁是 <strong>ch1 的「入库选材 6 维框架」</strong>——内容质量、可理解度分级、字幕质量、结构化程度、许可版权、兴趣与用途分流。后面每一个频道推荐都回扣这 6 维。ch2–ch4 补英语；ch5–ch12 是知识类六大领域矩阵表；ch13 讲版权接入与「半米 vs 个人库」分流；ch14 给决策树式路线建议。</p>
+  </div>
+</div>
+
+<div class="callout accent" style="margin: 20px 0; padding: 16px 18px;">
+  <h4>★ 四条核心结论（先看这个）</h4>
+  <p><strong>① 入库判断有框架，别凭感觉收。</strong>一套 6 维筛子（质量 / 分级 / 字幕 / 结构化 / 许可 / 用途），任何频道套一遍就知道值不值得入、进哪个库、能做什么加工。</p>
+  <p><strong>② 许可是隐藏的门槛，决定「能否深加工」。</strong>MIT OCW、Open Yale 是 CC BY-NC-SA，可以合法挖空 / 切片 / 精读重制；BBC、PBS、DW、Crash Course、可汗（已撤 CC）全是版权保留，只能链接观看和有限引用。这条线区分「素材」和「弹药」。</p>
+  <p><strong>③ 英语补 #41 三块空白。</strong>写作 / 学术词汇 / 系统听写（IELTS Liz、EAPFoundation、Daily Dictation）、学习者 podcast（Leonardo English 完整 transcript、BBC 6 Minute English）、A1/A2 叙事（VOA Let's Learn English、Dreaming English）、TED shadowing 黄金材料。</p>
+  <p><strong>④ 知识类贴阿杰个人研究，进个人库不进半米。</strong>佛法（Doug's Dharma 最贴金刚经考据）、哲学（Michael Sugrue 西哲通史成体系孤篇）、心理（Sapolsky 与佛法强互补）、AI（Karpathy 神级课）、谭崔（严格筛，仅 Christopher Wallis 一档学术源）。</p>
+</div>
+
+<section class="chapter" id="ch1" data-nav="01 入库选材6维框架">
+  <h2><span class="num">01</span><span class="title-text">入库选材框架：6 维判断「什么素材值得入库」</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>知识库最容易犯的错，是把 YouTube 当收藏夹——看到好频道就收，收完一盘散沙，既不知道能拿它做什么，也不知道它该进半米还是进个人研究库。这一章立一套 6 维筛子，让每个候选频道过一遍就能落位。<strong>这 6 维是全篇脊梁，后面每个推荐都回扣它。</strong></p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>维度</th><th>问什么</th><th>为什么关键</th><th>不合格的信号</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1 内容质量与权威性</strong></td><td>信源可靠吗？内容经得起推敲吗？</td><td>知识类尤其命门：佛法 / 哲学要正统不玄，AI / 科技要专业不水</td><td>匿名无背景、观点激进无引用、标题党</td></tr>
+        <tr><td><strong>2 可理解度与分级（CEFR）</strong></td><td>对得到 A1/A2/B1/C1 吗？</td><td>英语类决定给谁用；A1-A2 要「可理解输入 i+1」（慢速 / 视觉支撑 / 话题有趣）</td><td>语速过快无字幕、词汇覆盖率 &lt;90%</td></tr>
+        <tr><td><strong>3 字幕 / 文字稿质量</strong></td><td>有官方英文 CC 或完整 transcript 吗？</td><td>决定能否做精听核对 / 精读 / 挖空（承接 #41 字幕框架）</td><td>只有自动生成字幕且错漏多、纯音频无稿</td></tr>
+        <tr><td><strong>4 结构化程度</strong></td><td>成体系课程，还是零散单集？</td><td>课程型可排 Plan/Steps；访谈型 / 纪录片型用法完全不同</td><td>话题跳跃、无序列、单集孤岛</td></tr>
+        <tr><td><strong>5 许可与版权 / 接入</strong><span class="conf g">🟢</span></td><td>能引用？能嵌入？能深加工吗？</td><td><strong>最容易被忽略但最硬</strong>：CC 授权才能合法挖空 / 切片 / 重制，版权保留只能链接观看</td><td>版权保留却想拿来做挖空练习 = 侵权</td></tr>
+        <tr><td><strong>6 兴趣匹配与用途分流</strong></td><td>服务半米 K12，还是阿杰个人研究？</td><td>英语类多进半米学习内容库；知识类（佛法 / 谭崔 / 哲学 / AI）进个人知识库</td><td>把成人深度访谈硬塞给 K12 学生</td></tr>
+      </tbody>
+    </table></div>
+
+    <p>六维里，前四维决定「好不好、给谁用、能不能精加工」，是内容侧；<strong>第 5 维「许可」是隐藏的一票否决项</strong>——它决定你到手的是「素材」（能拆能改）还是「弹药」（只能链接）；第 6 维「用途」决定它落哪个库。下面把两个最容易踩坑的维度单独展开。</p>
+
+    <div class="callout warn"><h4>⚠️ 第 5 维展开：许可决定你「拥有的是素材还是链接」</h4><p>同样是优质公开课，MIT OpenCourseWare 是 <strong>CC BY-NC-SA 4.0</strong>——署名 + 非商业 + 相同共享的前提下，可以合法修改、重混、二次加工<sup class="cite" data-refid="1">[1]</sup>；Open Yale 是 CC BY-NC-SA 3.0<sup class="cite" data-refid="2">[2]</sup>。这意味着你可以把它切片、做挖空练习、做精读卡、做双语对照，一切在授权范围内。而 BBC / PBS / DW / Crash Course 全是<strong>标准版权保留</strong>——免费看没问题，做课堂引用大多也容忍，但一旦「修改 + 分发」就越界了<sup class="cite" data-refid="3">[3]</sup><sup class="cite" data-refid="4">[4]</sup>。最坑的是可汗学院（Khan Academy）：它<strong>过去是 CC BY-NC-SA、现在已撤成版权保留</strong>，很多老资料还写着 CC，别被误导<sup class="cite" data-refid="5">[5]</sup>。<strong>入库时许可信息必须逐个核准，写进元数据字段。</strong></p></div>
+
+    <div class="callout info"><h4>第 6 维展开：英语进半米，知识类进个人库</h4><p>用途分流的直觉判断：<strong>英语类素材</strong>（听说读写课程、学习者 podcast、A1-A2 叙事）服务的是半米 K12 学习内容库——它们要挂 LE Template、做词汇挖空、喂 FSRS 复习。<strong>知识类素材</strong>（佛法 / 谭崔 / 哲学 / 心理学 / AI）服务的是阿杰自己的研究——金刚经讲记要英文对照、AI 要跟进业界、谭崔哲学是个人兴趣，这些进个人知识库（可搭 NotebookLM / Obsidian），不进半米 K12。分流表见 <a href="#ch13">ch13</a>，具体路线见 <a href="#ch14">ch14</a>。</p></div>
+
+    <div class="callout accent"><p><strong>这章立起判断逻辑：</strong>后面 ch2–ch12 每个频道推荐，都会标它的 CEFR / 字幕 / 许可 / 更适合半米还是个人库——就是这 6 维的落地。读矩阵表时，重点看「许可」列和「进哪个库」列，那是决定你能拿它做什么的两根轴。</p></div>
+  </div>
+</section>
+
+<section class="chapter" id="ch2" data-nav="02 英语·听说读写课程练习">
+  <h2><span class="num">02</span><span class="title-text">英语·听说读写词汇语法：结构化课程与练习（补 #41 空白）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p><strong>定位先说清：</strong>#41 已经把「教学型」频道铺满了（BBC Learning English、Rachel's English、engVid、Pronunciation with Emma、mmmEnglish 等发音 / 通用教学频道）——那些不在这里重列，<a href="#refs">见 #41</a>。这一章专补 #41 的四个弱项：<strong>写作、学术词汇、系统语法课程、听写训练</strong>。这些是有教材质感、可排进 Plan 的结构化资源，正是半米学习内容库的骨架。</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>频道</th><th>补的空白</th><th>CEFR</th><th>字幕 / 稿</th><th>为什么入库</th><th>可信度</th></tr></thead>
+      <tbody>
+        <tr><td><strong>IELTS Liz</strong><sup class="cite" data-refid="6">[6]</sup></td><td>英语写作（Task1 图表 / Task2 议论文）</td><td>B2-C1</td><td>部分字幕 + 网站稿</td><td>前 IELTS 考官，45+ 核心写作视频 + ieltsliz.com 300 页练习，<strong>写作类 #41 最弱项首选补入</strong></td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>EAPFoundation</strong><sup class="cite" data-refid="7">[7]</sup></td><td>学术英语写作 + 学术词汇 AWL</td><td>B2-C1 大学预备</td><td>有字幕 + 网站</td><td>创始人 Sheldon Smith 教 EAP 20 年，AWL 570 词族 + finder 工具，<strong>学术词汇 + 写作双覆盖，K12 高段刚需</strong></td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>JenniferESL</strong><sup class="cite" data-refid="8">[8]</sup></td><td>系统语法课程（按教学顺序）</td><td>A1-B2</td><td>CC 手工标注质量高</td><td>2007 起，时态→复合句→高级逐级推进，每集讲解 + 练习互动，<strong>系统语法首选，最有教材质感</strong></td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Daily Dictation（Coach Shane）</strong><sup class="cite" data-refid="9">[9]</sup></td><td>精听 + 听写训练</td><td>中-高级</td><td>编号 001-700，网站 1000+ 题即时批改</td><td>每集 1-2 句地道美语（发音 / 连读 / 缩略），听→写→对答案→跟读闭环，<strong>听写唯一体系化，直接可用于半米精听模块</strong></td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>VOA Learning English</strong><sup class="cite" data-refid="10">[10]</sup></td><td>分级听力 + Everyday Grammar</td><td>A2-B1（Slow）/ B1-B2</td><td>全字幕 + 网站稿</td><td>1959 起权威，慢速美式新闻 + American Stories + 52 周免费课，<strong>分级听力入门首选，慢速 + 字幕 + 文字稿三合一</strong></td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Anglo-Link</strong><sup class="cite" data-refid="11">[11]</sup></td><td>高级语法 + 词汇 + 发音</td><td>B1-C1</td><td>有字幕</td><td>英美双口音，有 C1 Advanced Grammar 列表，130 万订阅，高级语法补充搭 JenniferESL</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>English with Lucy（Grammar playlist）</strong><sup class="cite" data-refid="12">[12]</sup></td><td>时态 + 常见错误</td><td>A2-C1</td><td>CC + 免费 PDF 笔记</td><td>免费 Grammar playlist 可作结构化入门（付费课不计），覆盖所有时态 + 50 常见错误</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>British Council LearnEnglish</strong><sup class="cite" data-refid="13">[13]</sup></td><td>全 CEFR 分级课</td><td>A1-C1</td><td>字幕 + 网站习题</td><td>机构权威免费，Grammar 分级练习题，<strong>主价值在网站</strong>（YouTube 是入口）</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>TryShadowing</strong><sup class="cite" data-refid="14">[14]</sup></td><td>跟读 + 录音评分反馈</td><td>A2-C1</td><td>字幕切短句</td><td>跟读 + 录音 + 即时打分平台（非传统频道），<strong>唯一带录音评分反馈，补 #41「只有输入没反馈」缺口</strong></td><td class="conf y">🟡</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout good"><h4>✅ 优先入库三个「可排 Plan」的种子</h4><p>这一章里最值得先入的是 <strong>JenniferESL（系统语法）+ Daily Dictation（听写）+ VOA Learning English（分级听力）</strong>——它们都是编号成序列的课程型资源，能直接排进半米的 Plan/Steps，字幕稿也齐全，做精听核对 / 挖空 / 语法讲解都够用。写作侧补 <strong>IELTS Liz + EAPFoundation</strong>，覆盖 K12 高段的学术写作和学术词汇刚需。这五个是 #41 空白区的第一批弹药。</p></div>
+
+    <div class="callout warn"><h4>⚠️ 诚实标一个空白：分级阅读（Graded Readers）YouTube 上没有好频道</h4><p>搜证发现，YouTube 上<strong>没有规模化的分级阅读专属频道</strong>——纯写作课（非 IELTS 应试向）也稀疏，词根词缀系统课分散<sup class="cite" data-refid="15">[15]</sup>。分级阅读这块建议不要在 YouTube 上硬找，转走网站资源（如 freegradedreaders.com）或专门的阅读平台。这是本章要如实标注的能力边界，别为了凑数硬推不合格的频道。<span class="conf y">🟡</span></p></div>
+
+    <div class="callout info"><h4>💡 别漏了「知识 × 分级英语」交叉频道——它们两栖，直接接你现有工作流</h4><p>有一类频道既是<strong>知识科普</strong>、又是<strong>分级听力富矿</strong>，用途横跨英语线和知识线：<strong>SciShow / SciShow Kids</strong>（科学科普，语速与词汇可控，适合 B1 及少儿）、<strong>Kurzgesagt</strong>（精美动画科普，B1-B2，字幕完整）、<strong>National Geographic / BBC Earth</strong>（自然科学，视觉支撑强）。这些在本报告里作为「知识 / 纪录片」出现在 <a href="#ch8">ch8</a> / <a href="#ch11">ch11</a>，但<strong>对半米英语线同样是弹药</strong>——尤其呼应阿杰已经在做的 <strong>SciShow Kids / Crash Course Kids 词表工作流</strong>：拿它们做「学科 × 分级词汇」的挖空，既学知识又学英语。#41 也已把 SciShow Kids / Kurzgesagt 归入少儿 / 内容型英语频道。<strong>入库建议：这类打「双库」标签（半米英语 + 个人知识都可用），别只当纯知识类处理。</strong></p></div>
+  </div>
+</section>
+
+<section class="chapter" id="ch3" data-nav="03 英语·访谈&podcast">
+  <h2><span class="num">03</span><span class="title-text">英语·高质量访谈 &amp; podcast</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>这是 #41 完全没覆盖的一块。分两层：<strong>层一是「学习者导向」的英语 podcast</strong>（专为学英语设计，多数配完整 transcript，可精听核对）；<strong>层二是「真实访谈」</strong>（不是给学习者做的，但语速清晰 / 时长可控 / 有精校字幕，B1+ 学习者够得着，是 shadowing 和专业词汇的富矿）。</p>
+
+    <h3>层一 · 学习者导向英语 podcast（有 transcript，可精听）</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>频道 / 节目</th><th>特点</th><th>CEFR</th><th>字幕 / 稿</th><th>可信度</th></tr></thead>
+      <tbody>
+        <tr><td><strong>BBC Learning English（6 Minute English 等）</strong><sup class="cite" data-refid="16">[16]</sup></td><td>官方多节目，6 分钟含 6 目标词，含 The English We Speak / Learning Easy English</td><td>A2-B2</td><td>✅ 网站完整 transcript + CC</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Leonardo English</strong><sup class="cite" data-refid="17">[17]</sup></td><td>讲世界奇异有趣事（历史 / 文化 / 科学），Alastair 主持</td><td>B2-C1</td><td>✅ 500+ 集免费 transcript + 12 语翻译 + PDF 学习包</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Thinking in English</strong><sup class="cite" data-refid="18">[18]</sup></td><td>以英语讲历史人物 / 词汇 / 文化</td><td>B1-C1</td><td>✅ blog 每集 transcript</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>All Ears English</strong><sup class="cite" data-refid="19">[19]</sup></td><td>美式两女主持对话体，生活口语惯用语，1000+ 集</td><td>B1-C1</td><td>✅ 第三方 transcript（HappyScribe）</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>ESL Pod</strong><sup class="cite" data-refid="20">[20]</sup></td><td>2005 起日常场景对话刻意慢速，词汇文化注释</td><td>A2-B2</td><td>✅ 脚本付费</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Luke's English Podcast</strong><sup class="cite" data-refid="21">[21]</sup></td><td>英国喜剧演员 + 教师，900+ 集英式自然口语</td><td>B1-C1</td><td>🟡 免费集无完整 transcript（Premium 有 PDF）</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>Culips ESL</strong><sup class="cite" data-refid="22">[22]</sup></td><td>加拿大母语真实对话，交互 transcript 可逐词回放</td><td>B1-B2</td><td>✅ 免费 PDF + 交互稿</td><td class="conf y">🟡</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout good"><h4>✅ 层一首选：Leonardo English + BBC 6 Minute English</h4><p>如果只入两个学习者 podcast，选 <strong>Leonardo English</strong>（B2→C1 首选，学英语同时学知识，500+ 集免费 transcript + 多语翻译一流）和 <strong>BBC 6 Minute English</strong>（官方品控 + 免费稿 + 碎片精听，A2-B2 覆盖低段）。这两个 transcript 质量都能直接支撑半米的精听核对和词汇挖空。A2-B1 过渡段补 <strong>ESL Pod</strong>（刻意慢速，衔接最佳）。</p></div>
+
+    <h3>层二 · 对学习者友好的真实访谈（B1-C1，shadowing 富矿）</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>频道</th><th>特点 / 用法</th><th>CEFR</th><th>字幕 / 稿</th><th>可信度</th></tr></thead>
+      <tbody>
+        <tr><td><strong>TED Talks（官方）</strong><sup class="cite" data-refid="23">[23]</sup></td><td>18 分钟演讲，编辑选「清晰表达」者，有「语言学习」播放列表</td><td>B1-C2（按演讲者）</td><td>✅ 几乎每个都有人工审核多语字幕 + 可下载 transcript</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Lex Fridman Podcast</strong><sup class="cite" data-refid="24">[24]</sup></td><td>MIT 研究员深度长访谈（科学家 / 工程师 / 哲学家），选人物 / 人生哲学集，避纯技术集</td><td>C1-C2</td><td>✅ 官网人工 transcript 含时间戳</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>The Diary of a CEO</strong><sup class="cite" data-refid="25">[25]</sup></td><td>访谈企业家 / 科学家 / 心理学家，英式商务口语，心理健康商业词密</td><td>B2-C1（较快）</td><td>🟡 YouTube 自动 CC + 第三方 AI 转写 95%+</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>Modern Wisdom</strong><sup class="cite" data-refid="26">[26]</sup></td><td>心理学 / 哲学 / 生活方式，嘉宾 Peterson/Harris/Naval，观点密集</td><td>B2-C1</td><td>🟡 第三方 Tapesearch transcript</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>Hot Ones</strong><sup class="cite" data-refid="27">[27]</sup></td><td>边吃辣翅边深访好莱坞明星 / 运动员，20-30 分钟，名人自然状态真实英语</td><td>B2</td><td>🟡 自动 CC</td><td class="conf g">🟢</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout accent"><h4>★ TED = 精听 / shadowing 黄金材料（层二里唯一 🟢 强推）</h4><p>层二里，<strong>TED Talks 是唯一无保留强推的</strong>：时长短（18 分钟）+ 多为单说话人 + 每个演讲几乎都有人工精校多语字幕和可下载 transcript<sup class="cite" data-refid="23">[23]</sup>——这三条正好命中「精听核对 / 影子跟读」对材料的全部要求。TED 官方还专门做了「语言学习」播放列表。<strong>入库时优先收这个 playlist，作为半米「视频精听 / 影子跟读」的高级素材池。</strong>Lex Fridman、Modern Wisdom 这类真实访谈专业词密度高，但语速快、多为长内容，适合 C1 学习者做泛听 / 专业词汇，别硬塞给中段学生。</p></div>
+
+    <div class="callout warn"><h4>⚠️ 空白机会（呼应 #41）：没有「名人访谈 + 双语字幕 + 讲解」的成熟频道</h4><p>搜证明确：市面上<strong>没有把「名人真实访谈 + 双语字幕 + 语言讲解」融合成核心 UX 的 YouTube 频道</strong>——FluentU、Migaku 是付费平台 / 浏览器插件，不是频道<sup class="cite" data-refid="28">[28]</sup>。这正呼应 #41 那句「没有学习 App 把内容做成核心 UX」。<strong>这是半米的产品机会，不是选材缺陷</strong>：真实访谈素材有的是，缺的是把它加工成学习体验的那一层——那层恰好该由半米来补。</p></div>
+  </div>
+</section>
+
+<section class="chapter" id="ch4" data-nav="04 英语·A1/A2兴趣驱动">
+  <h2><span class="num">04</span><span class="title-text">英语·A1/A2 兴趣驱动 &amp; 可理解输入</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>这一层是 #41 最薄弱、也最难的一块：<strong>真正面向 A1/A2 初学者、又有兴趣钩子的素材。</strong>难点在于「简单」和「有趣」通常互斥——简单的往往枯燥（跟读单词），有趣的往往太难（名人访谈语速快）。搜证把可用资源分三类：纯 CI（可理解输入）、慢速叙事、名人 / 真实人物访谈（靠字幕托底）。</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>类别</th><th>频道</th><th>特点</th><th>CEFR</th><th>字幕</th><th>可信度</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="2"><strong>纯 CI</strong></td><td><strong>Comprehensible English</strong><sup class="cite" data-refid="29">[29]</sup></td><td>TPR/TPRS，英语教英语不翻译，刻意慢速 + 图画手势指物，日常动作场景视觉支撑强</td><td>A1-A2</td><td>视频内无字幕（CI 理念靠视觉推导）</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Dreaming English</strong><sup class="cite" data-refid="30">[30]</sup></td><td>仿 Dreaming Spanish 的 CI，分级明确（Super Beginner 专区），母语慢速 + 图画表情手势，<strong>话题最丰富（故事 / 游戏 / 文化 / 旅行），青少年接受度高</strong></td><td>A1 超初级-中级</td><td>支持英文字幕</td><td class="conf g">🟢</td></tr>
+        <tr><td rowspan="2"><strong>慢速叙事</strong></td><td><strong>VOA Let's Learn English</strong><sup class="cite" data-refid="10">[10]</sup></td><td>官方 A1 初级叙事，52 集，人物故事线（Anna 搬到 DC）有复述 + 情境，看医生 / 找工作生活化，<strong>叙事追剧感</strong></td><td>A1 专区</td><td>逐字字幕 + 文字稿可下载</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Easy English（Super Easy 子系列）</strong><sup class="cite" data-refid="31">[31]</sup></td><td>街头真实访谈英音，Super Easy/Slow Easy 子系列专为初级全字幕</td><td>A1 限 Super Easy 子系列（主频道 A2-B1）</td><td>全字幕</td><td class="conf y">🟡</td></tr>
+        <tr><td rowspan="3"><strong>名人 / 真实人物</strong></td><td><strong>English Speeches</strong><sup class="cite" data-refid="32">[32]</sup></td><td>名人演讲 / 访谈合集大字幕（核心卖点），<strong>名人效应对青少年极强</strong>（Taylor Swift/Emma Watson/Beckham）</td><td>整体 B1（非真 A1-A2）</td><td>全程大字幕</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>VoiceTube（平台工具）</strong><sup class="cite" data-refid="33">[33]</sup></td><td>100000+ 视频按 CEFR A1-C2 分级 + 双语字幕 + 内建词典，可筛 A1-A2，<strong>名人内容 + 可控难度 + 工具辅助降门槛</strong></td><td>可筛 A1-A2</td><td>双语字幕</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>Learn English With TV Series</strong><sup class="cite" data-refid="34">[34]</sup></td><td>取 Friends/The Office 加教学拆解，先字幕后无字幕，<strong>对青少年追剧代入极强</strong>（#41 也提，这里聚焦兴趣驱动）</td><td>A2-B1（真 A1 需字幕托底）</td><td>字幕 + 教学说明</td><td class="conf y">🟡</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>A1/A2 选材要点表（判断一个素材能不能给初学者用）</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>指标</th><th>合格线</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><strong>语速 WPM</strong></td><td>A1 ≤ 120 / A2 ~140（正常英语 120-180）</td><td>做 80% 测试：无字幕听 1 分钟懂 ≥ 80% 才合适</td></tr>
+        <tr><td><strong>词汇覆盖率</strong></td><td>≥ 90%</td><td>低于这个门槛就是「不可理解输入」，学生只会挫败</td></tr>
+        <tr><td><strong>视觉支撑</strong></td><td>图画 / 手势 / 指物</td><td>纯 A1 近乎必需（Comprehensible English 靠这个不用字幕）</td></tr>
+        <tr><td><strong>字幕</strong></td><td>英文字幕大降门槛，双语字幕是兴趣保障</td><td>字幕是名人访谈能给初学者用的<strong>唯一托底手段</strong></td></tr>
+        <tr><td><strong>话题吸引力</strong></td><td>具体形象 &gt; 抽象；名人 / 爱好显著提升坚持率</td><td>叙事对话 &gt; 学术讲座</td></tr>
+        <tr><td><strong>时长</strong></td><td>6 分钟内或明确分段（CI 10-20 分钟可接受）</td><td>初学者注意力和挫败阈值都低</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout warn"><h4>⚠️ 诚实标注：真正面向 A1 的名人访谈频道，市面暂无</h4><p>搜证结论很清楚：<strong>专门面向 A1 的名人访谈频道不存在</strong>——名人访谈基本都是 B1+ 的真实语速<sup class="cite" data-refid="35">[35]</sup>。想让初学者接触名人内容，唯一现实路径是<strong>靠字幕托底 + 平台工具降门槛</strong>：English Speeches 的大字幕先让学生「看懂大意不求听懂每词」，VoiceTube 靠 CEFR 分级 + 双语字幕 + 内建词典把难度可控化。别指望找到「又是名人、又真 A1」的频道，那是产品要补的加工层（见 <a href="#ch3">ch3</a> 空白机会），不是选材能解决的。</p></div>
+
+    <div class="callout good"><h4>✅ A1/A2 首选组合</h4><p>纯初学者种子选 <strong>Dreaming English</strong>（话题最丰富、有英文字幕、分级明确，青少年友好）+ <strong>VOA Let's Learn English</strong>（A1 叙事追剧感，字幕稿全）。兴趣驱动靠 <strong>English Speeches + VoiceTube</strong> 用字幕和工具托住难度。Comprehensible English 无字幕但视觉支撑强，适合作纯听 CI 补充。</p></div>
+  </div>
+</section>
+
+<section class="chapter" id="ch5" data-nav="05 知识类·佛法">
+  <h2><span class="num">05</span><span class="title-text">知识类·佛法（贴阿杰金刚经 / 坛经研究）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>阿杰在做金刚经 / 六祖坛经讲记，佛法是他深耕的领域。这一章找的是<strong>英文</strong>的优质佛法频道——用途明确：进个人知识库，做阿杰中文讲记的<strong>英文对照参照</strong>（核查文本、追溯源头、看西方学术怎么讲同一个概念）。这些不进半米 K12。</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>频道</th><th>定位</th><th>受众</th><th>字幕</th><th>为什么入库（对阿杰的用途）</th><th>可信度</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Doug's Dharma</strong><sup class="cite" data-refid="36">[36]</sup></td><td>早期佛教学术（Early Buddhism）经文与历史，博士（Columbia 哲学）+ 修行，Bhikkhu Bodhi 作序</td><td>知识型修行者</td><td>🟡 自动字幕（30-60 分钟长）</td><td><strong>学术严谨度最高的英文佛法频道</strong>，追溯金刚经源头 / 核查文本最佳参照，有专讲空 / 无我 / 中道</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Plum Village（一行禅师官方）</strong><sup class="cite" data-refid="37">[37]</sup></td><td>Thich Nhat Hanh 传承官方，正念 / 慈悲 / 禅定开示 + 引导冥想</td><td>初-中阶</td><td>🟢 英文字幕志愿团队校对较完整</td><td>「正念 + 禅宗融合现代」路线对照，<strong>可做一行禅师英文讲记摘录</strong></td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Study Buddhism / Berzin</strong><sup class="cite" data-refid="38">[38]</sup></td><td>Dr. Alexander Berzin（哈佛 PhD，达赖身边 29 年）学术库，全四大藏传传承，21 语言</td><td>研究者 / 修行者</td><td>🟡 视频字幕有限，网站文字库极完整</td><td><strong>藏传佛教学术侧权威</strong>，补 Theravada / 禅宗以外维度</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Alan Watts（官方）</strong><sup class="cite" data-refid="39">[39]</sup></td><td>1950-73 讲座，禅 + 道 + 印度教融合，西方最早系统讲东方哲学者</td><td>西方知识分子</td><td>🟡 档案录音自动字幕不稳</td><td><strong>禅宗西传史一手材料</strong>，与阿杰讲坛经主题交叉可引用对话</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Tara Brach</strong><sup class="cite" data-refid="40">[40]</sup></td><td>临床心理学博士 + 佛法教师，内观 / 正念心理整合，RAIN 情绪处理</td><td>西方修行者 / 治疗师</td><td>🟡 自动字幕</td><td>佛法与西方心理学结合标杆（与 <a href="#ch7">ch7 心理学</a> 打通）</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>Jack Kornfield</strong><sup class="cite" data-refid="41">[41]</sup></td><td>内观西传奠基人，叙事 / 故事性开示情感温暖</td><td>中阶以上</td><td>🟡 自动字幕</td><td>与一行禅师 / Tara Brach 合成西方内观三角</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>Secular Buddhism（Noah Rasheta）</strong><sup class="cite" data-refid="42">[42]</sup></td><td>去超自然保留伦理正念，面向世俗初学者</td><td>入门通俗</td><td>🟡 自动字幕</td><td>对比参考「世俗化」教佛法怎么讲</td><td class="conf y">🟡</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout accent"><h4>★ 最贴金刚经研究：Doug's Dharma</h4><p>如果只入一个，选 <strong>Doug's Dharma</strong>——它是搜证里学术严谨度最高的英文佛法频道，聚焦早期佛教的经文与历史考据，有专门讲「空 / 无我 / 中道」的集<sup class="cite" data-refid="36">[36]</sup>。这正是阿杰做金刚经讲记时最需要的英文对照：核查一个概念在巴利经典和后期大乘里的演变、看西方佛学学者怎么处理同一段文本。<strong>用法建议：作为讲记撰写时的「英文旁证库」，不是给学生的学习材料。</strong></p></div>
+
+    <div class="callout warn"><h4>⚠️ 佛法频道的普遍短板：字幕多为自动生成</h4><p>佛法开示这一类，<strong>字幕质量普遍是弱项</strong>：只有 Plum Village 靠志愿团队校对较完整，其余（Doug's Dharma、Study Buddhism、Alan Watts、Tara Brach、Kornfield）多是自动字幕<sup class="cite" data-refid="43">[43]</sup>，做精确文本核对时要留意错漏。另外 Dharma Seed 这类经典开示库是<strong>纯音频、在 YouTube 外</strong>，不在本报告范围。没字幕的佛法开示怎么用，见 <a href="#faq">FAQ</a>。<span class="conf y">🟡</span></p></div>
+  </div>
+</section>
+
+<section class="chapter" id="ch6" data-nav="06 知识类·哲学">
+  <h2><span class="num">06</span><span class="title-text">知识类·哲学</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>哲学频道分两档用法：<strong>系统课程</strong>（成体系的通史讲座，可当英文教材读）和<strong>入门科普</strong>（动画 / 短视频，建立背景）。和东方哲学（阿杰的坛经 / 金刚经）对照，西哲通史尤其有参照价值。</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>频道</th><th>定位</th><th>结构化</th><th>字幕</th><th>入库价值 / 注意</th><th>可信度</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Michael Sugrue</strong><sup class="cite" data-refid="44">[44]</sup></td><td>早年 Columbia、后任 Princeton Council of the Humanities fellow / 讲师；与 Darren Staloff 合讲的《Great Minds of the Western Intellectual Tradition》西哲通史（50+ 讲，Plato→批判理论），<strong>原为 Great Courses 付费产品、版权到期后上传 YouTube</strong>，教授已故</td><td>成体系通史</td><td>🟡 后期加字幕中等</td><td><strong>YouTube 上难得的成体系西哲通史（学术系统性最强之一）</strong>，与东方哲学对照，Marcus Aurelius 最热单集</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Wireless Philosophy（WiPhi）</strong><sup class="cite" data-refid="45">[45]</sup></td><td>Khan 合作，Yale/Stanford/Oxford/MIT 教授制作动画哲学入门 130+ 视频</td><td>模块化入门</td><td>🟢 官方字幕质量好</td><td>哲学工具箱基础材料（认识论 / 形而上学 / 伦理 / 批判思维）</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Crash Course Philosophy</strong><sup class="cite" data-refid="46">[46]</sup></td><td>46 集西哲入门古希腊到当代，IMDb 9.0</td><td>快节奏入门</td><td>🟢 官方多语字幕</td><td>标准哲学入门快速背景（⚠️ 版权保留，见 <a href="#ch12">ch12</a>）</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Academy of Ideas</strong><sup class="cite" data-refid="47">[47]</sup></td><td>匿名 2M 订阅，Nietzsche/Jung/斯多葛/存在主义制作精良</td><td>专题</td><td>🟡 自动字幕</td><td>⚠️ <strong>部分 libertarian 立场需批判取用</strong>，作者匿名无学术署名</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>The School of Life</strong><sup class="cite" data-refid="48">[48]</sup></td><td>Alain de Botton 创立，哲学 + 心理 + 情感教育短视频高产</td><td>零散短片</td><td>🟢 官方字幕</td><td>⚠️ <strong>常被批过度简化</strong>，做通俗引用可，系统研究意义不大</td><td class="conf y">🟡</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout accent"><h4>★ 哲学首选：Michael Sugrue（已故，先抢存）</h4><p><strong>Michael Sugrue 的 50+ 讲西哲通史是这一章的镇章之宝</strong>——他是 Princeton Council of the Humanities 的 fellow / 讲师（早年在 Columbia 任教），这套《Great Minds of the Western Intellectual Tradition》是他与 Darren Staloff <strong>合讲的 Great Courses 付费产品</strong>，覆盖 Plato 到批判理论，学术系统性在 YouTube 哲学内容里最强<sup class="cite" data-refid="44">[44]</sup>。它<strong>原本是版权保留的商业课，版权到期后才回归 Sugrue 本人上传 YouTube</strong>——这点正好呼应 <a href="#ch12">ch12</a> 的许可逻辑。<strong>教授已故，建议优先入库存档</strong>（存 videoId + 记录 playlist 顺序），它能当英文的西哲教材来读，与阿杰的东方哲学研究形成东西对照。入门快速铺背景用 WiPhi（字幕最好）和 Crash Course Philosophy。</p></div>
+
+    <div class="callout warn"><h4>⚠️ 两个需要标立场 / 标水位的频道</h4><p><strong>Academy of Ideas</strong> 制作精良、选题吸引人（Nietzsche/Jung/斯多葛），但<strong>作者匿名、部分内容带 libertarian 政治立场</strong>，入库时要标注「需批判取用」，别当中立学术源<sup class="cite" data-refid="47">[47]</sup>。<strong>The School of Life</strong> 官方字幕好、话题亲民，但<strong>常被批过度简化</strong>，适合通俗引用，不适合当系统研究材料<sup class="cite" data-refid="48">[48]</sup>。这两个入库时都要在元数据里留一句立场 / 水位提示。</p></div>
+  </div>
+</section>
+
+<section class="chapter" id="ch7" data-nav="07 知识类·心理学">
+  <h2><span class="num">07</span><span class="title-text">知识类·心理学</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>心理学这一章有个特别的价值：<strong>它和佛法强互补</strong>——从神经科学 / 行为生物学角度理解宗教、道德、冥想的心理机制，正好给阿杰的佛法研究提供「科学侧」的对照视角。这里推的多是名校正式课录像，结构化程度高。</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>频道 / 课程</th><th>定位</th><th>许可 / 字幕</th><th>入库价值 / 注意</th><th>可信度</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Stanford Human Behavioral Biology（Robert Sapolsky）</strong><sup class="cite" data-refid="49">[49]</sup></td><td>神经科学 / 生物 / 灵长类交叉，25 讲每讲 90 分钟（进化到内分泌到暴力 / 宗教 / 意识）</td><td>🟡 部分自动字幕</td><td><strong>YouTube 最严格全面的人类行为科学公开课</strong>，从神经科学理解宗教 / 道德 / 佛法心理现象 = 佛法研究强互补</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Yale Intro to Psychology（Paul Bloom, Open Yale）</strong><sup class="cite" data-refid="50">[50]</sup></td><td>Yale 正式课录像，感知 / 学习 / 记忆 / 决策 / 宗教 / 情绪全谱</td><td>🟢 <strong>CC BY-NC-SA</strong> + 官方文字稿 + 可搜索字幕质量最佳</td><td>系统学心理学首选，<strong>CC 授权可深加工</strong>（见 <a href="#ch12">ch12</a>）</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Jordan Peterson — Maps of Meaning</strong><sup class="cite" data-refid="51">[51]</sup></td><td>Jungian 心理学 / 神话 / 宗教符号解读意义与道德，Harvard 版 12 小时</td><td>🟡 自动字幕</td><td>⚠️ <strong>近年政治争议大，但早期学术讲座扎实可独立取用</strong>，与佛法「空 / 无我」哲学对话</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>Big Think</strong><sup class="cite" data-refid="52">[52]</sup></td><td>哲学 / 科学 / AI / 心理专家短片 3-15 分钟（Dennett/Pinker/Brian Cox）</td><td>🟡 自动字幕</td><td>知识型大众，零散卡片，适合钩子不适合系统学</td><td class="conf y">🟡</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout accent"><h4>★ 与佛法互补的一对：Sapolsky + Paul Bloom</h4><p><strong>Robert Sapolsky 的斯坦福人类行为生物学</strong>是这章的核心——它从神经科学和进化生物学解释宗教、道德、暴力、意识这些现象<sup class="cite" data-refid="49">[49]</sup>，正好给阿杰的佛法研究一个「科学怎么看同一件事」的对照面（比如无我 / 空 的心理机制、冥想的神经基础）。<strong>Paul Bloom 的 Yale 心理学导论额外有一个杀手锏：它是 CC BY-NC-SA 授权 + 官方文字稿</strong><sup class="cite" data-refid="50">[50]</sup>——既是好内容，又能合法深加工（切片 / 挖空 / 双语对照），在知识类里罕见地兼具「质量」和「许可」两个绿灯。</p></div>
+
+    <div class="callout warn"><h4>⚠️ Jordan Peterson：切开取用，早期学术 vs 近年争议</h4><p>Jordan Peterson 的 <strong>Maps of Meaning</strong>（Harvard / Toronto 早期学术讲座）在 Jungian 心理学、神话、宗教符号学上扎实，与佛法的「空 / 无我」哲学有对话空间<sup class="cite" data-refid="51">[51]</sup>。但<strong>他近年的政治争议很大</strong>，入库时要把「早期学术讲座」和「近年公共言论」切开——前者可独立取用，后者不是学术材料。标清楚这条边界，别把整个人物一刀切收或一刀切弃。</p></div>
+  </div>
+</section>
+
+<section class="chapter" id="ch8" data-nav="08 知识类·AI/机器学习">
+  <h2><span class="num">08</span><span class="title-text">知识类·AI / 机器学习</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>AI 是阿杰要持续跟进的专业领域（半米本身是 AI 学习产品）。这一章按用途分：<strong>动手学</strong>（写代码）、<strong>数学直觉</strong>、<strong>系统入门课</strong>、<strong>论文精读 / 前沿动态</strong>、<strong>业界一手声音</strong>。</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>频道</th><th>定位</th><th>受众</th><th>字幕 / 稿</th><th>入库价值</th><th>可信度</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Andrej Karpathy</strong><sup class="cite" data-refid="53">[53]</sup></td><td>前 OpenAI/Tesla AI 负责人亲录，「Neural Networks: Zero to Hero」从零写 micrograd→makemore→nanoGPT，新增 LLM101n/nanochat</td><td>编程基础→工程师</td><td>CC + GitHub</td><td><strong>公认 AI 教学第一人</strong>，代码 + 理论，仍在更新</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>3Blue1Brown</strong><sup class="cite" data-refid="54">[54]</sup></td><td>数学可视化标杆，线代 / 微积分 / 神经网络 / 反向传播 / Transformer 底层数学</td><td>高中数学以上</td><td>🟢 字幕完整多语</td><td><strong>理解 DL 数学最好的视觉资源</strong>，与 Karpathy 互补（直觉 vs 代码）</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>DeepLearning.AI / 吴恩达</strong><sup class="cite" data-refid="55">[55]</sup></td><td>系统化 AI 课，Deep Learning + ML Specialization，150+ 课覆盖 LLM/MLOps/GenAI</td><td>零基础→有基础</td><td>完整字幕</td><td><strong>行业标准入门课</strong>，直觉到实现完整路径</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>StatQuest（Josh Starmer）</strong><sup class="cite" data-refid="56">[56]</sup></td><td>最简语言拆统计 + ML，Quest 积木递进（贝叶斯 / 决策树 / 随机森林 / 神经网络）</td><td>数理基础有限者最佳入口</td><td>🟢 字幕完整</td><td>打基础神器</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Yannic Kilcher</strong><sup class="cite" data-refid="57">[57]</sup></td><td>ETH Zurich ML 博士逐字精读论文批判分析（动机 / 假设 / 问题）</td><td>有 ML 基础研究者</td><td>英文字幕</td><td>论文精读视角独特，兼主持 MLST</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Two Minute Papers</strong><sup class="cite" data-refid="58">[58]</sup></td><td>快速解析最新 AI 论文 2-5 分钟</td><td>跟进研究进展者</td><td>自动字幕</td><td><strong>前沿动态高效入口</strong>（时效性强，见下方 callout）</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Machine Learning Street Talk（MLST）</strong><sup class="cite" data-refid="59">[59]</sup></td><td>最技术向 AI 播客，认知科学 / 神经科学 / 哲学心智前沿，嘉宾 Bengio/LeCun/Chollet</td><td>强 AI 背景研究者</td><td>字幕</td><td><strong>跨学科深度无出其右</strong>，填 AI 哲学 + 认知视角</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Stanford CS231n / CS229</strong><sup class="cite" data-refid="60">[60]</sup></td><td>斯坦福顶尖课录像（CV / ML），学术级</td><td>本科 / 研究生</td><td>英文字幕（旧版）</td><td><strong>行业共识最扎实 ML/CV 基础</strong>（许可需逐课确认，见 <a href="#ch12">ch12</a>）</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Lex Fridman Podcast（AI 向）</strong><sup class="cite" data-refid="24">[24]</sup></td><td>长访谈 AI 顶尖研究者 + 创业者（Hinton/LeCun/Musk）</td><td>各层次</td><td>完整字幕 + clips 频道</td><td>AI 业界一手声音（也见 <a href="#ch3">ch3</a> 英语访谈）</td><td class="conf y">🟡</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout accent"><h4>★ AI 学习黄金三角：Karpathy + 3Blue1Brown + 吴恩达</h4><p>这一章的核心组合很清晰：<strong>Karpathy（代码：从零手写 GPT）+ 3Blue1Brown（数学直觉：可视化反向传播 / Transformer）+ 吴恩达 DeepLearning.AI（系统课：完整学习路径）</strong>。三个正好互补——Karpathy 教你怎么写、3B1B 教你为什么这样、吴恩达给你完整地图<sup class="cite" data-refid="53">[53]</sup><sup class="cite" data-refid="54">[54]</sup><sup class="cite" data-refid="55">[55]</sup>。数理基础薄的先过 StatQuest 垫底。研究向补 Yannic Kilcher（论文精读）和 MLST（AI 哲学 / 认知）。</p></div>
+
+    <div class="callout warn"><h4>⚠️ AI 内容的时效性：动态类要标「时间戳」，别当常青素材</h4><p>AI 领域里，内容分两种寿命：<strong>基础类</strong>（Karpathy 的 micrograd 原理、3B1B 的反向传播数学、CS229 的经典 ML）几乎不过时，可长期入库；<strong>动态类</strong>（Two Minute Papers 的最新论文、Lex 的「State of AI」年度访谈、模型能力对比）<strong>半年就可能过时</strong>。入库这类时要在元数据里标清录制日期，把它当「快照」而非「常青素材」——尤其涉及具体模型能力 / 价格 / benchmark 的结论，超过一年就该复核。这是知识类里唯一有强烈时效性的领域。</p></div>
+  </div>
+</section>
+
+<section class="chapter" id="ch9" data-nav="09 知识类·谭崔(审慎)">
+  <h2><span class="num">09</span><span class="title-text">知识类·谭崔（Tantra，审慎处理）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>谭崔（Tantra）单独成章，因为它在 YouTube 上鱼龙混杂到必须先立规矩再选材。<strong>先讲清定位：这里说的谭崔是印度哲学 / 灵修传统（克什米尔湿婆派 Kashmir Shaivism、吠陀不二论、金刚乘），不是情色。</strong>YouTube 上约 90% 挂「Tantra」标签的内容是标题党、伪灵修或 NSFW 边缘。所以这一章先给筛选原则，再只列证据包里通过学术门槛的三个源。用途明确：<strong>进个人库，不进半米 K12。</strong></p>
+
+    <div class="callout warn"><h4>⚠️ 谭崔筛选原则（先立规矩，再选材）</h4>
+    <p><strong>✅ 收录标准（四条全部满足）：</strong>① 讲者是梵文学者出身；② 出版过学术著作；③ 讲的是正统传承（克什米尔湿婆派 / 吠陀不二论 / 金刚乘）；④ 内容无 NSFW。</p>
+    <p><strong>⛔ 排除标准（命中任一即排除）：</strong>标题含「sexual energy / sacred sexuality / tantric sex」；讲者无学术背景；与商业灵修 / 疗愈产品混杂销售。</p>
+    <p><strong>🟡 需人工核实：</strong>边界模糊者（平台聚合、多讲者混杂）逐个视频过滤，不整频道照单全收<sup class="cite" data-refid="61">[61]</sup>。</p>
+    </div>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>频道</th><th>学术资质（为什么过关）</th><th>字幕 / 稿</th><th>定位</th><th>可信度</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Christopher Wallis（Hareesh）— Tantra Illuminated</strong><sup class="cite" data-refid="62">[62]</sup></td><td>梵文学者 + 克什米尔湿婆派传承，30 年修行 + 15 年学术，著《Tantra Illuminated》《Recognition Sutras》（学术出版），Podcast 含 Alexis Sanderson（牛津梵文权威）</td><td>Podcast transcript（Acast）+ YouTube 字幕</td><td><strong>英语世界最权威 Classical Tantra 学术-实践综合资源</strong></td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Deconstructing Yourself（Michael Taft）</strong><sup class="cite" data-refid="63">[63]</sup></td><td>35 年冥想，Nondual Shaiva Tantra + 佛教金刚乘 + 神经科学，Podcast 有 Wallis 专访 transcript</td><td>Podcast transcript + 字幕</td><td>印度哲学 + 西方神经科学交叉，<strong>非 NSFW</strong></td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Embodied Philosophy</strong><sup class="cite" data-refid="64">[64]</sup></td><td>多师平台 1000+ 小时（谭崔 / 瑜伽 / 冥想 / 印度哲学），含 non-dual Tantra 系统课，曾访 Wallis</td><td>部分字幕</td><td>整体可信但<strong>平台较杂，需人工过滤个别视频</strong></td><td class="conf y">🟡</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout accent"><h4>★ 谭崔唯一无保留强推：Christopher Wallis（Tantra Illuminated）</h4><p>如果只入一个谭崔源，就是 <strong>Christopher Wallis（Hareesh）</strong>——他是梵文学者 + 克什米尔湿婆派传承者，30 年修行叠 15 年学术，出版过《Tantra Illuminated》《Recognition Sutras》这样的学术著作，Podcast 还请过牛津梵文权威 Alexis Sanderson<sup class="cite" data-refid="62">[62]</sup>。这是英语世界里 Classical Tantra 学术性和实践性都过硬的第一档资源，四条收录标准全满足。他把谭崔还原成严肃的印度哲学传统，正是这一章要的定位。Michael Taft 补「谭崔 + 神经科学」交叉视角，同样非 NSFW。Embodied Philosophy 是平台不是单一讲者，<strong>入库时不整频道收，只挑其中通过筛选的单集</strong>。</p></div>
+
+    <div class="callout info"><p><strong>为什么谭崔章要这么谨慎：</strong>因为这个词在搜索和推荐里被情色内容严重污染，任何「照单全收频道」的做法都会把不该入的东西带进库。这一章的价值不在于列了多少频道（只列了 3 个，其中 1 个还要单集过滤），而在于立了一套<strong>可复用的筛选原则</strong>——它同样适用于任何在 YouTube 上被污染的严肃话题。定位再强调一次：<strong>哲学 / 灵修传统，非情色，进个人研究库。</strong></p></div>
+  </div>
+</section>
+
+<section class="chapter" id="ch10" data-nav="10 TED/演讲/科技podcast">
+  <h2><span class="num">10</span><span class="title-text">知识类·TED / 演讲 / 科技 podcast</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>这一章是「广度型」知识入口：TED / 演讲类给启发和背景，科技 podcast 给业界一手视角。特点是<strong>单集独立、非成体系课程</strong>——用法是当「钩子」和「一手声音」，不是当系统教材。</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>类别</th><th>频道</th><th>特点</th><th>字幕 / 稿</th><th>入库价值 / 注意</th><th>可信度</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="4"><strong>TED / 演讲</strong></td><td><strong>TED</strong><sup class="cite" data-refid="23">[23]</sup></td><td>18 分钟演讲，6700 万+ 订阅</td><td>✅ 100+ 语 + ted.com 互动 transcript（高亮跟读）</td><td>最权威短演讲，transcript 便检索（也是 <a href="#ch3">ch3</a> 英语 shadowing 材料）</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Talks at Google</strong><sup class="cite" data-refid="65">[65]</sup></td><td>Google 内部讲座对外，科学 / 商业 / AI / 创意，1 小时含 Q&amp;A</td><td>自动字幕</td><td><strong>比 TED 更专业，AI / 技术嘉宾质量高</strong>，长格式深度消化</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Big Think</strong><sup class="cite" data-refid="52">[52]</sup></td><td>哲学 / 科学 / AI / 心理专家短片 3-15 分钟</td><td>自动字幕</td><td>哲学 + AI 交叉，零散卡片（也见 <a href="#ch7">ch7</a>）</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>TEDx Talks</strong><sup class="cite" data-refid="66">[66]</sup></td><td>各地 TED 格式质量参差，85 亿播放</td><td>🟡 部分字幕志愿翻译</td><td>⚠️ <strong>需按话题 / 推荐列表筛选，非全量订阅</strong></td><td class="conf y">🟡</td></tr>
+        <tr><td rowspan="5"><strong>科技 podcast / 频道</strong></td><td><strong>All-In Podcast</strong><sup class="cite" data-refid="67">[67]</sup></td><td>四 VC（Chamath/Jason/Sacks/Friedberg）长聊科技 / 市场 / 政策 / AI</td><td>自动字幕 + Metacast transcript</td><td><strong>VC 视角看 AI / 科技，政策市场研判</strong></td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>a16z Podcast（AI + a16z）</strong><sup class="cite" data-refid="68">[68]</sup></td><td>Andreessen Horowitz 出品 AI + 科技 + 创业 VC 视角</td><td>字幕</td><td>顶级 VC 一手，<strong>补 Lex 技术向盲区</strong></td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Y Combinator</strong><sup class="cite" data-refid="69">[69]</sup></td><td>创业讲座 + 创始人访谈 + AI Startup School，含 Paul Graham 访谈</td><td>字幕</td><td><strong>AI 创业实践最权威，Startup Library 当参考书</strong></td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Fireship</strong><sup class="cite" data-refid="70">[70]</sup></td><td>开发者教程 8-12 分钟「100 Seconds」高密度零废话</td><td>字幕</td><td>技术雷达类卡片，快速了解新工具 / 框架</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>ColdFusion</strong><sup class="cite" data-refid="71">[71]</sup></td><td>工业级科技史 + 公司史（半导体 / 计算机史 / 供应链）纪录片质感</td><td>字幕</td><td>技术史视角填空</td><td class="conf g">🟢</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout good"><h4>✅ 科技 podcast 三选：All-In + a16z + Y Combinator</h4><p>跟进 AI / 科技的业界动向，这三个互补最好：<strong>All-In</strong>（VC 视角看市场 / 政策）、<strong>a16z</strong>（顶级 VC 的 AI 产品 / 市场深度，补 Lex 的纯技术盲区）、<strong>Y Combinator</strong>（AI 创业实践最权威，Startup Library 当参考书）<sup class="cite" data-refid="67">[67]</sup><sup class="cite" data-refid="68">[68]</sup><sup class="cite" data-refid="69">[69]</sup>。这块和 <a href="#ch8">ch8 的 Lex Fridman</a> 一起构成 AI 业界的「一手声音」层。演讲侧优先 Talks at Google（比 TED 更专业深度）。</p></div>
+
+    <div class="callout warn"><h4>⚠️ TEDx 和 Big Think：别整频道订阅，要挑</h4><p><strong>TEDx</strong> 是各地自办的 TED 格式，质量参差极大——不能像 TED 官方那样整体信任，<strong>要按话题或推荐列表筛单集</strong><sup class="cite" data-refid="66">[66]</sup>。<strong>Big Think</strong> 嘉宾质量高但内容零散成卡片，适合当钩子不适合系统学。入库时这两个都标「需人工挑选，非全量」。</p></div>
+  </div>
+</section>
+
+<section class="chapter" id="ch11" data-nav="11 纪录片&科普">
+  <h2><span class="num">11</span><span class="title-text">知识类·纪录片 &amp; 科普</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>纪录片 / 科普这一章的选材关键，除了质量，<strong>还要盯「官方 vs 二手转授」</strong>——同样一部纪录片，官方频道发的可以放心引用，聚合转授的（Timeline 之类）版权链复杂，不能当原始版权源引用。所以矩阵表里许可列尤其重要。</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>频道</th><th>定位</th><th>许可 / 字幕</th><th>入库价值 / 注意</th><th>可信度</th></tr></thead>
+      <tbody>
+        <tr><td><strong>DW Documentary（德国之声）</strong><sup class="cite" data-refid="3">[3]</sup></td><td>官方免费正版跨学科（社会 / 政治 / 环境 / 科学），多语言版本，更新频率高</td><td>版权保留（免费正版），多语</td><td><strong>性价比极高的首选纪录片频道</strong>（免费正版 + 跨学科 + 国际视角），⚠️ 不可商业再加工</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>PBS Nova</strong><sup class="cite" data-refid="72">[72]</sup></td><td>PBS/GBH Boston，美国最受关注电视科学节目，每集 50+ 分钟含专家采访</td><td>PBS 版权，英文完整字幕，教育可课堂用</td><td>北美权威科普标杆</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>PBS Eons</strong><sup class="cite" data-refid="73">[73]</sup></td><td>专攻地球生命史（古生物 / 进化），10-20 分钟有文献</td><td>PBS 版权，英文字幕</td><td>古生物 / 进化稀缺高质</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>PBS Space Time</strong><sup class="cite" data-refid="74">[74]</sup></td><td>天体物理 + 量子力学，主持 Matthew O'Dowd（天体物理学家），研究生级有数学推导</td><td>PBS 版权，字幕</td><td><strong>最大物理频道 300 万，严谨</strong>（主持是研究者）</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>BBC Earth</strong><sup class="cite" data-refid="4">[4]</sup></td><td>BBC Studios 官方自然纪录片（Attenborough 系列）</td><td>版权保留，英文字幕多语，可课堂播放</td><td>自然科学视觉天花板（#41 已简略交叉引用）</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>BBC Timestamp</strong><sup class="cite" data-refid="75">[75]</sup></td><td>2024 改名（原 BBC Documentary），聚焦历史纪录片 BBC 正版</td><td>版权保留，英文</td><td>历史向 BBC 正版集中地</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Osmosis（Elsevier）</strong><sup class="cite" data-refid="76">[76]</sup></td><td>医学教育 3D 动画（疾病 / 解剖 / 生理），100+ 医学专家审核</td><td>Elsevier 背景，英文字幕（完整课付费）</td><td>高质医学教育，YouTube 短视频免费</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Smithsonian Channel</strong><sup class="cite" data-refid="77">[77]</sup></td><td>史密森尼官方（历史 / 航空航天 / 科学 / 自然）</td><td>版权保留，官方</td><td>品牌背书可信度高</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>Numberphile</strong><sup class="cite" data-refid="78">[78]</sup></td><td>数学家采访讲数学趣味话题</td><td>🟡</td><td>与 3B1B 互补给数学钩子（趣味 &gt; 系统）</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>Extra History</strong><sup class="cite" data-refid="79">[79]</sup></td><td>历史子频道每话题 5-9 集短系列制作精良</td><td>🟡 自动字幕</td><td>有教育价值非学术级，偶有错误（自发 Errata）</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>OverSimplified</strong><sup class="cite" data-refid="80">[80]</sup></td><td>历史趣味动画</td><td>🟡</td><td>⚠️ 浅娱乐向（准确 ~8/10），入库限「兴趣激发」标注娱乐向</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>Timeline</strong><sup class="cite" data-refid="81">[81]</sup></td><td>Little Dot Studios 聚合<strong>转授</strong> BBC/C4/Discovery/PBS 历史纪录片</td><td>🟡 二手转授</td><td>⚠️ <strong>非原制不能作原始版权引用，可参考不适合再加工分发</strong></td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>Economics Explained</strong><sup class="cite" data-refid="82">[82]</sup></td><td>宏观经济通俗，数据来自 IMF / 世界银行</td><td>🟡</td><td>⚠️ <strong>入库标「批判性参考非学术权威」</strong>（用权威数据是优点，但被批引用异端理论 / 过度简化）</td><td class="conf y">🟡</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout good"><h4>✅ 纪录片首选：DW Documentary（免费正版 + 跨学科）</h4><p>纪录片这块的性价比之王是 <strong>DW Documentary</strong>——德国之声官方出品，免费正版、跨学科、国际视角、多语言版本、更新频繁<sup class="cite" data-refid="3">[3]</sup>。它是「官方正版」而非搬运，引用安全（但仍是版权保留，不能商业再加工）。学科细分补 PBS 系列（Nova 科学 / Eons 古生物 / Space Time 物理）和 BBC Earth（自然视觉天花板）。医学补 Osmosis（Elsevier 背景）。</p></div>
+
+    <div class="callout warn"><h4>⚠️ 三个许可 / 准确性要标红的坑</h4>
+    <p><strong>① Timeline = 二手转授，不能当原始版权源。</strong>它聚合的是 BBC/C4/Discovery/PBS 的转授内容<sup class="cite" data-refid="81">[81]</sup>——参考可以，但引用要追到原制方，再加工分发有版权风险。</p>
+    <p><strong>② OverSimplified / Extra History = 娱乐向，标准确度。</strong>历史趣味动画准确度约 8/10，Extra History 自己都发 Errata 更正<sup class="cite" data-refid="79">[79]</sup><sup class="cite" data-refid="80">[80]</sup>。入库限「兴趣激发」用途，不当事实源。</p>
+    <p><strong>③ Economics Explained = 批判性参考。</strong>用 IMF / 世界银行数据是优点，但被批引用过异端经济理论、过度简化<sup class="cite" data-refid="82">[82]</sup>。入库标「非学术权威」。</p>
+    </div>
+
+    <div class="callout info"><p><strong>待核实项（诚实标注）：</strong>Nat Geo 官方频道 vs 聚合搬运需独立核实；PBS 的 YouTube 授权条款未找到明确 CC 声明（默认按版权保留处理）<sup class="cite" data-refid="83">[83]</sup>。这些不影响「观看 / 有限引用」，但若要深加工必须先逐个确认许可。<span class="conf y">🟡</span></p></div>
+  </div>
+</section>
+
+<section class="chapter" id="ch12" data-nav="12 名校开放课程(许可)">
+  <h2><span class="num">12</span><span class="title-text">知识类·名校开放课程（许可深加工重点）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>这是全篇「许可维度」最关键的一章。名校公开课里，<strong>有的是 CC 授权可以合法深加工，有的是版权保留只能看</strong>——这条线直接决定你能不能拿它做半米的挖空 / 精读 / 切片。下面用对比方式突出「哪些能深加工、哪些只能引用」。</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>课程</th><th>许可</th><th>能否深加工</th><th>定位</th><th>可信度</th></tr></thead>
+      <tbody>
+        <tr class="row-highlight"><td><strong>MIT OpenCourseWare</strong><sup class="cite" data-refid="1">[1]</sup></td><td><strong>CC BY-NC-SA 4.0</strong>（⚠️ 课内第三方素材例外）</td><td class="check y">✅ 可修改重混再加工（署名 + 非商业 + 相同共享），⚠️ 标「All Rights Reserved」的第三方素材需逐资源看标注</td><td>2500+ 门全学科，研究生 / 本科严格学术，<strong>深加工可行性最高</strong></td><td class="conf g">🟢</td></tr>
+        <tr class="row-highlight"><td><strong>Open Yale Courses</strong><sup class="cite" data-refid="2">[2]</sup></td><td><strong>CC BY-NC-SA 3.0</strong>（⚠️ 第三方内容例外）</td><td class="check y">✅ 可再加工，⚠️ third-party content 不在 CC 内需逐个看</td><td>40 门精品入门（哲学 / 文学 / 历史 / 心理），Paul Bloom 心理学尤有名（2022 后冻结但内容高质）</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Harvard CS50</strong><sup class="cite" data-refid="84">[84]</sup></td><td>官方明说教师可采用改编</td><td class="check y">✅ 官方允许教师采用改编</td><td>哈佛最受欢迎 CS 入门课每年更新，freeCodeCamp 版 25 小时完整，CS 教育标杆</td><td class="conf g">🟢</td></tr>
+        <tr><td><strong>Stanford Online</strong><sup class="cite" data-refid="85">[85]</sup></td><td>🟡 仅 SEE 系列 CC 明确</td><td class="check p">⚠️ SEE 系列 CC，ML 名课（CS229/231n）许可需逐课确认</td><td>2700+ 视频，AI/ML 名课（Ng 的 CS229 是 ML 必看）</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>Khan Academy</strong><sup class="cite" data-refid="5">[5]</sup></td><td>⚠️ <strong>已撤 CC → 版权保留</strong></td><td class="check n">⛔ 原 CC BY-NC-SA 现已撤，免费看 OK 不再允许改编</td><td>最大免费 K12-大学数理 + 人文，结构完整有练习</td><td class="conf y">🟡</td></tr>
+        <tr><td><strong>Crash Course（主频道）</strong><sup class="cite" data-refid="46">[46]</sup></td><td>⚠️ 标准 YouTube 版权（非 CC）</td><td class="check n">⛔ 引用 / 参考 OK，改编分发需申请</td><td>Green 兄弟 + PBS，50+ 门全学科快节奏动画，1700 万+ 订阅</td><td class="conf g">🟢</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="metric-grid">
+      <div class="metric"><span class="v">2</span><span class="l">CC 授权可深加工<br>（MIT OCW / Open Yale）</span></div>
+      <div class="metric"><span class="v">1</span><span class="l">官方允许教师改编<br>（Harvard CS50）</span></div>
+      <div class="metric"><span class="v">1</span><span class="l">部分 CC 需逐课确认<br>（Stanford SEE）</span></div>
+      <div class="metric"><span class="v">2</span><span class="l">版权保留仅可看引用<br>（Khan 撤 CC / Crash Course）</span></div>
+    </div>
+
+    <div class="callout accent"><h4>★ 深加工首选：MIT OCW + Open Yale（唯二 CC BY-NC-SA）</h4><p>整份报告里，<strong>许可绿灯 + 质量绿灯双绿的公开课只有两个：MIT OpenCourseWare（CC BY-NC-SA 4.0）和 Open Yale Courses（CC BY-NC-SA 3.0）</strong><sup class="cite" data-refid="1">[1]</sup><sup class="cite" data-refid="2">[2]</sup>。在署名 + 非商业 + 相同共享的前提下，它们可以合法切片、挖空、做精读卡、做双语对照——这是「深加工」的全部前提。<strong>如果阿杰要做「可深加工的知识类素材」，从这两个入手，风险最低。</strong>Harvard CS50 官方也明说教师可采用改编，算第三档。</p></div>
+
+    <div class="callout warn"><h4>⚠️ 关键细节：CC 公开课里有「All Rights Reserved」的第三方素材，不是整门课都能改</h4><p>「MIT OCW = CC BY-NC-SA」说的是<strong>MIT 自己制作的课程材料</strong>。但 OCW 课程里常嵌入<strong>第三方内容</strong>（授权图表、教科书章节、客座讲者贡献），这些会被明确标注「All Rights Reserved / 版权所有」——<strong>它们不在 CC 授权范围内，只能按 fair use 观看，不能下载改编分发</strong><sup class="cite" data-refid="1">[1]</sup>。Open Yale 的 Terms 同样声明 third-party content 不在 CC 内<sup class="cite" data-refid="2">[2]</sup>。所以拿 OCW / Yale 做挖空 / 切片前，<strong>要逐个资源看它的许可标注</strong>，别默认整门课都能随便加工——这是「CC 可深加工」这条结论里唯一的法律缺口，也是最容易踩的坑。</p></div>
+
+    <div class="callout warn"><h4>⚠️ 两个「看着能改其实不能」的陷阱</h4><p><strong>Khan Academy 是最大的坑</strong>：它历史上是 CC BY-NC-SA，很多旧文档和二手资料还写着 CC——但它<strong>已经撤销了 CC 许可、改成版权保留</strong><sup class="cite" data-refid="5">[5]</sup>。现在只能免费看，不能再改编分发。别拿几年前的信息当依据。<strong>Crash Course 也不是 CC</strong>——虽然它和 PBS 合作、看着很「公益」，但用的是标准 YouTube 版权，引用参考可以，改编分发要申请<sup class="cite" data-refid="46">[46]</sup>。<strong>Stanford 的 ML 名课（CS229/CS231n）许可不统一</strong>，只有 SEE 系列明确 CC，其余要逐课确认<sup class="cite" data-refid="85">[85]</sup>——想深加工前必须先查清。</p></div>
+  </div>
+</section>
+
+<section class="chapter" id="ch13" data-nav="13 版权接入+库分流">
+  <h2><span class="num">13</span><span class="title-text">版权 / 接入方式 + 半米 vs 个人库分流</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>选完材，最后一关是「怎么接入」和「进哪个库」。这一章把前面所有频道的许可和用途，收敛成两张可执行的对照表。</p>
+
+    <h3>接入方式：引用 / 嵌入，不下载重托管（承接 #41 + peppa 报告）</h3>
+    <div class="callout info"><p><strong>统一原则（呼应 #41 版权结论 + peppa/local-video 报告）：</strong>半米 Library <strong>引用 / 嵌入官方播放器 + 存 videoId，不下载重托管</strong>。这条已经在 #41 论证过——自营视频点播撞版权 + 视听证双墙，纯客户端 / 嵌正版才是安全形态。知识类进个人库同理，链接观看为主。区别在<strong>深加工权限</strong>：CC 授权素材（MIT OCW / Open Yale）可以在授权范围内切片重制，版权保留素材（BBC / PBS / Crash Course）只能存链接、做笔记，不能改编分发。</p></div>
+
+    <h3>用途分流表：素材类型 × 可做什么加工 × 进哪个库</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>素材类型</th><th>代表频道</th><th>许可</th><th>可做什么加工</th><th>进哪个库</th></tr></thead>
+      <tbody>
+        <tr><td><strong>英语·结构化课程</strong></td><td>JenniferESL / VOA / Daily Dictation</td><td>多为版权保留（免费看）</td><td>排 Plan/Steps、精听核对、链接学习（字幕自备）</td><td class="check y">半米 K12</td></tr>
+        <tr><td><strong>英语·学习者 podcast</strong></td><td>Leonardo English / BBC 6 Min</td><td>版权保留 + 官方 transcript</td><td>精听、词汇挖空（基于官方稿）</td><td class="check y">半米 K12</td></tr>
+        <tr><td><strong>英语·A1/A2 叙事 / CI</strong></td><td>Dreaming English / VOA Let's Learn</td><td>版权保留</td><td>泛听 i+1、字幕辅助、兴趣驱动</td><td class="check y">半米 K12</td></tr>
+        <tr><td><strong>英语·TED shadowing</strong></td><td>TED（官方）</td><td>版权保留 + 精校多语字幕</td><td>影子跟读、精听（链接 + 官方 transcript）</td><td class="check y">半米 K12（高段）</td></tr>
+        <tr><td><strong>知识类·CC 公开课</strong></td><td>MIT OCW / Open Yale</td><td class="check y"><strong>CC BY-NC-SA</strong></td><td class="check y"><strong>可深加工：切片 / 挖空 / 精读 / 双语</strong></td><td class="check p">个人库（可回流半米）</td></tr>
+        <tr><td><strong>知识类·佛法 / 哲学 / 心理</strong></td><td>Doug's Dharma / Sugrue / Sapolsky</td><td>多为版权保留 / 自动字幕</td><td>研究参照、英文对照、链接观看</td><td class="check p">个人研究库</td></tr>
+        <tr><td><strong>知识类·AI / 科技</strong></td><td>Karpathy / 吴恩达 / a16z</td><td>混合（Karpathy 有 GitHub CC 代码）</td><td>学习 / 跟进（动态类标时效）</td><td class="check p">个人研究库</td></tr>
+        <tr><td><strong>知识类·谭崔</strong></td><td>Christopher Wallis</td><td>版权保留 + Podcast transcript</td><td>研究参照（严格筛选后）</td><td class="check p">个人研究库</td></tr>
+        <tr><td><strong>纪录片 / 科普</strong></td><td>DW / PBS Nova / BBC Earth</td><td>版权保留（含二手转授要留意）</td><td>链接观看 / 有限引用，⛔ 不改编</td><td class="check p">个人库 / 半米背景素材</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout good"><h4>✅ 一句话分流规则</h4><p><strong>英语类默认进半米 K12</strong>（挂 LE Template、做词汇挖空、喂 FSRS）；<strong>知识类默认进个人研究库</strong>（佛法 / 哲学 / 心理 / AI / 谭崔）。中间地带是 <strong>CC 授权的公开课</strong>（MIT OCW / Open Yale / Paul Bloom）——它们既是知识内容、又能合法深加工，先进个人库，将来要做成英语精读 / 学科素材时可以回流半米（因为许可允许）。这是唯一能双向流动的一类。</p></div>
+
+    <div class="callout warn"><h4>⚠️ 深加工前的许可自检清单</h4><p>任何素材要做「挖空 / 切片 / 重制 / 分发」之前，过三个问题：① 它是 CC 授权吗？（只有 CC 才能改编——见 <a href="#ch12">ch12</a>）② 是官方源还是二手转授？（转授要追原制方——见 Timeline）③ 用途是非商业教育吗？（BY-NC-SA 的 NC 是非商业限制）。三个都过才动手改。不确定就默认「只链接、只做笔记、不改编」——这是零风险底线。</p></div>
+  </div>
+</section>
+
+<section class="chapter" id="ch14" data-nav="14 阿杰路线建议(决策树)">
+  <h2><span class="num">14</span><span class="title-text">阿杰路线建议（决策树）</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <p>选材调研落到行动：先入哪些当种子、怎么打标签、英语类怎么接半米、知识类进哪个库。给一棵决策树 + 分阶段清单。</p>
+
+    <div class="tree">
+      <div class="node q">Q1 · 这个素材是英语学习，还是知识内容？</div>
+      <div class="node"><span class="lbl y">英语学习</span>→ 进半米 K12，继续 Q2</div>
+      <div class="node"><span class="lbl m">知识内容</span>→ 进个人研究库，继续 Q3</div>
+
+      <div class="node q">Q2 · 英语素材有官方字幕 / transcript 吗？</div>
+      <div class="node"><span class="lbl y">有官方稿</span>✅ 优先入（可做精听核对 / 挖空）→ 挂 LE Template，词汇进 [[#38 FSRS]]</div>
+      <div class="node"><span class="lbl m">仅自动字幕</span>⚠️ 可入但标「字幕待核」，只做泛听 / 链接学习</div>
+
+      <div class="node q">Q3 · 知识素材是 CC 授权吗？</div>
+      <div class="node"><span class="lbl y">CC（MIT OCW/Yale）</span>✅ 可深加工 → 进个人库，标「可切片 / 挖空」，将来可回流半米</div>
+      <div class="node"><span class="lbl m">版权保留</span>⚠️ 只链接 / 做笔记，不改编 → 进个人库标「仅引用」</div>
+      <div class="node"><span class="lbl n">二手转授 / 匿名源</span>⛔ 追原制方 / 标立场，谨慎入或不入</div>
+    </div>
+
+    <h3>分阶段路线</h3>
+    <div class="step"><div class="step-head"><span class="sn">1</span>第一批种子 · 英语（每类 2-3 个字幕好的）</div><div class="step-body">
+      <p>选字幕 / transcript 最齐的先入，作半米学习内容库骨架：</p>
+      <p><strong>课程练习：</strong>JenniferESL（系统语法）+ Daily Dictation（听写）+ VOA Learning English（分级听力）。<strong>学习者 podcast：</strong>Leonardo English（完整 transcript）+ BBC 6 Minute English。<strong>A1/A2：</strong>Dreaming English + VOA Let's Learn English。<strong>高段 shadowing：</strong>TED「语言学习」playlist。</p>
+      <p>接入：挂 LE Template（精听 6 步 / 影子跟读 4 阶段，见 #41），词汇挖空进 <strong>[[#38 FSRS]]</strong>，学习产出喂 <strong>[[#40 OKR]]</strong>。</p>
+    </div></div>
+    <div class="step"><div class="step-head"><span class="sn">2</span>第一批种子 · 知识类（先入你正在做的）</div><div class="step-body">
+      <p>贴阿杰当前研究，先入这几块：</p>
+      <p><strong>佛法（正在做金刚经 / 坛经）：</strong>Doug's Dharma（学术考据）+ Plum Village（字幕好）+ Alan Watts（禅道西传一手）。<strong>AI（半米本行）：</strong>Karpathy + 3Blue1Brown + 吴恩达。<strong>你感兴趣的谭崔 / 哲学：</strong>Christopher Wallis（严筛后）+ Michael Sugrue（西哲通史，已故先存档）。心理侧补 Sapolsky + Paul Bloom（CC，可深加工）。</p>
+      <p>接入：进个人知识库（可搭 <strong>NotebookLM</strong> 做源锚定问答 / <strong>Obsidian</strong> 做笔记网络）。</p>
+    </div></div>
+    <div class="step"><div class="step-head"><span class="sn">3</span>打标签规则（入库时一次做对）</div><div class="step-body">
+      <p>每个素材入库时打三类标签：<strong>① Step / 用法标签</strong>（精读 / 精听 / 影子跟读 / 研究参照）；<strong>② 许可标签</strong>（CC 可深加工 / 版权保留仅引用 / 二手转授慎用）；<strong>③ 库归属标签</strong>（半米 K12 / 个人研究 / 可回流）。许可标签尤其别省——它决定了这素材将来能不能拿来做挖空练习，事后补很难。</p>
+    </div></div>
+    <div class="step"><div class="step-head"><span class="sn">4</span>先英语还是先知识类？</div><div class="step-body">
+      <p>建议<strong>英语类先跑通一个窄的</strong>（比如只做「Leonardo English 精听 + 词汇挖空」一条链，验证半米的 LE Template 接得住），再铺知识类。知识类里<strong>先入你此刻正在用的</strong>（金刚经的英文对照、AI 的跟进），别一次性把六领域全入——那又会变成收藏夹。种子跑通了再扩。</p>
+    </div></div>
+
+    <div class="callout accent"><h4>★ 一句话路线</h4><p><strong>英语：每类挑 2-3 个字幕最好的先入半米，跑通一条「精听 + 挖空 + FSRS」的窄链再扩。知识类：先入你正在做的佛法 + AI + 感兴趣的谭崔 / 哲学，进个人库，CC 授权的（MIT OCW/Yale/Bloom）标「可深加工」留将来回流。所有素材入库时把许可标签打死。</strong></p></div>
+  </div>
+</section>
+
+<section class="chapter" id="faq" data-nav="FAQ 常见问题">
+  <h2><span class="num">15</span><span class="title-text">FAQ · 常见问题</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q1</span><span class="qtext">知识类素材到底该进半米还是个人库？</span><span class="toggle">＋</span></div><div class="faq-a"><p>默认进<strong>个人研究库</strong>（佛法 / 哲学 / 心理 / AI / 谭崔）——它们服务的是阿杰自己的研究，不是 K12 学生。唯一例外是 <strong>CC 授权的公开课</strong>（MIT OCW / Open Yale / Paul Bloom 心理学）：它们既是知识内容、又因为许可允许可以深加工，先进个人库，将来要做成英语精读 / 学科素材时能合法回流半米。判断口诀：内容给谁用 → 决定进哪个库；许可允不允许改 → 决定能不能回流。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q2</span><span class="qtext">佛法开示大多只有自动字幕，怎么用？</span><span class="toggle">＋</span></div><div class="faq-a"><p>佛法频道确实字幕是弱项，只有 Plum Village（一行禅师官方）靠志愿团队校对较完整<sup class="cite" data-refid="43">[43]</sup>。用法上分两层：<strong>要精确文本核对</strong>（比如核金刚经某个概念的英译），别只靠自动字幕，回到原始经典 / 学术著作（Doug's Dharma 的博主本身有学术出版，可追他的文字来源）；<strong>要英文对照参照 / 找讲法灵感</strong>，自动字幕够用，配合听。总之佛法这块定位是「研究旁证」不是「学生学习材料」，对字幕精度的要求可以低一档。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q3</span><span class="qtext">许可信息看不懂 / 查不到怎么办？</span><span class="toggle">＋</span></div><div class="faq-a"><p>记住一条零风险底线：<strong>查不到许可，就默认「只链接、只做笔记、不改编分发」。</strong>能明确的：MIT OCW = CC BY-NC-SA 4.0<sup class="cite" data-refid="1">[1]</sup>、Open Yale = CC BY-NC-SA 3.0<sup class="cite" data-refid="2">[2]</sup>，这两个可深加工。明确不能改的：Khan（已撤 CC）<sup class="cite" data-refid="5">[5]</sup>、Crash Course、BBC、PBS、DW 全是版权保留。灰色的（Stanford ML 课、PBS 的 YouTube 授权、Nat Geo 聚合 vs 官方）逐个核实，核不清就当版权保留处理。CC BY-NC-SA 拆开就三条：BY = 要署名、NC = 只能非商业、SA = 改编后要同样开放。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q4</span><span class="qtext">谭崔为什么只推了三个（还有一个要单集过滤）？</span><span class="toggle">＋</span></div><div class="faq-a"><p>因为谭崔在 YouTube 上被情色内容严重污染，约 90% 是标题党 / NSFW 边缘 / 商业灵修混杂。我们立了严格的四条收录标准（梵文学者出身 + 学术出版 + 正统传承 + 无 NSFW），能全部满足的极少<sup class="cite" data-refid="61">[61]</sup>。Christopher Wallis（Tantra Illuminated）是英语世界 Classical Tantra 学术性最硬的<sup class="cite" data-refid="62">[62]</sup>，Michael Taft 补神经科学交叉<sup class="cite" data-refid="63">[63]</sup>，Embodied Philosophy 是平台不是单一讲者、所以只能挑单集<sup class="cite" data-refid="64">[64]</sup>。宁缺毋滥——列多了反而把不该入的带进库。定位再强调：这是印度哲学 / 灵修传统，不是情色，进个人库。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q5</span><span class="qtext">A1/A2 学生真能用名人访谈吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>直接听不行——名人访谈基本都是 B1+ 的真实语速，市面上<strong>没有专门面向 A1 的名人访谈频道</strong><sup class="cite" data-refid="35">[35]</sup>。但可以「借名人的兴趣钩子，用字幕托底」：English Speeches 靠大字幕让学生「看懂大意不求听懂每词」<sup class="cite" data-refid="32">[32]</sup>；VoiceTube 靠 CEFR 分级 + 双语字幕 + 内建词典把难度可控化<sup class="cite" data-refid="33">[33]</sup>。定位是「用名人激发兴趣、用字幕降门槛」，不是「让 A1 裸听名人」。纯 A1 的可理解输入还是靠 Dreaming English / VOA Let's Learn 这些专门做初学者的。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q6</span><span class="qtext">深加工（挖空 / 切片 / 精读重制）需要什么授权？</span><span class="toggle">＋</span></div><div class="faq-a"><p>需要 <strong>CC 授权</strong>（或版权方明确允许）。「深加工」= 修改 + 分发，这超出了「合理使用 / 免费观看」的范围。目前报告里许可绿灯的只有 MIT OCW（CC BY-NC-SA 4.0）<sup class="cite" data-refid="1">[1]</sup>、Open Yale（CC BY-NC-SA 3.0）<sup class="cite" data-refid="2">[2]</sup>，加上官方明说教师可改编的 Harvard CS50<sup class="cite" data-refid="84">[84]</sup>。版权保留的素材（BBC/PBS/Crash Course/Khan）只能存链接、做私人笔记，不能改编后分发给学生。<strong>两个提醒：</strong>① 即便是 CC 公开课，课内标「All Rights Reserved」的第三方素材（授权图表 / 客座讲者）也不在 CC 内，要逐资源看标注（见 <a href="#ch12">ch12</a>）；② BY-NC-SA 的 NC（非商业）——半米如果商业化，这个 NC 限制要重新评估。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q7</span><span class="qtext">先入英语类还是知识类？</span><span class="toggle">＋</span></div><div class="faq-a"><p><strong>英语类先跑通一条窄链</strong>（比如 Leonardo English 精听 + 词汇挖空 + FSRS），验证半米的 LE Template / Step 模型接得住内容，再铺量。知识类<strong>先入你此刻正在用的</strong>——金刚经研究的英文对照（Doug's Dharma）、AI 跟进（Karpathy）——别一次把六领域全入，那会变回收藏夹。军师的建议是「先挑一个窄的跑通」，种子验证过了再扩。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q8</span><span class="qtext">这份报告和 #41 视频库是什么关系，会重复吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>不重复，是互补。<strong>#41 已经铺了「教学型 + 内容型」英语频道</strong>（BBC Learning English / Rachel's English / engVid / TED-Ed / Kurzgesagt 等）+ Step 结合手册 + 字幕框架 + 版权结论。<strong>本报告英语部分只补 #41 的三块空白</strong>：访谈 & podcast、A1/A2 兴趣驱动、结构化课程与练习（写作 / 学术词汇 / 听写）——教学型频道直接引用 #41 不重列。<strong>知识类是全新的一块</strong>，#41 完全没覆盖。接入方式（引用不下载）也承接 #41 和 peppa 版权报告的结论。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q9</span><span class="qtext">AI 类内容更新很快，入库后会不会很快过时？</span><span class="toggle">＋</span></div><div class="faq-a"><p>分两种。<strong>基础类几乎不过时</strong>：Karpathy 的 micrograd 原理、3Blue1Brown 的反向传播数学、CS229 的经典 ML——这些是底层原理，可长期入库。<strong>动态类半年就可能过时</strong>：Two Minute Papers 的最新论文、Lex 的年度「State of AI」、具体模型的能力 / 价格 / benchmark——入这类时要在元数据标清录制日期，当「快照」不当「常青素材」，超过一年的结论要复核。AI 是知识类里唯一有强时效性的领域，别把动态结论当永久事实收。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q10</span><span class="qtext">Jordan Peterson / Academy of Ideas 这些有争议的，到底收不收？</span><span class="toggle">＋</span></div><div class="faq-a"><p>收，但要「切开取用 + 标立场」。<strong>Jordan Peterson</strong>：早期学术讲座（Maps of Meaning，Jungian 心理学 / 神话 / 宗教符号）扎实可独立取用，与佛法「空 / 无我」有对话空间；但要和他近年的政治公共言论切开，后者不是学术材料<sup class="cite" data-refid="51">[51]</sup>。<strong>Academy of Ideas</strong>：制作精良但作者匿名、部分 libertarian 立场，入库标「需批判取用」<sup class="cite" data-refid="47">[47]</sup>。原则是：有学术价值的部分可取，但在元数据里留一句立场提示，别当中立权威源。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q11</span><span class="qtext">纪录片里 Timeline、Free Documentary 这种聚合频道能用吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>能参考，不能当原始版权源引用、更不能再加工分发。Timeline 是 Little Dot Studios 聚合<strong>转授</strong>的 BBC/C4/Discovery/PBS 历史纪录片<sup class="cite" data-refid="81">[81]</sup>——它有合法授权（区别于盗版搬运），但版权链复杂，你若要引用得追到原制方。纪录片优先选<strong>官方频道</strong>：DW Documentary（德国之声官方正版）<sup class="cite" data-refid="3">[3]</sup>、PBS 系列、BBC Earth，这些引用安全。聚合频道当「发现库 / 浏览用」，正式引用回官方源。</p></div></div>
+
+    <div class="faq-item"><div class="faq-q"><span class="qmark">Q12</span><span class="qtext">这份报告里的「最优质 / 最适合」判断可信吗？</span><span class="toggle">＋</span></div><div class="faq-a"><p>要分开看。<strong>客观可查证的特点</strong>（CEFR 范围、有没有官方 transcript、CC 许可类型、订阅数、集数）标 🟢，这些是事实。<strong>「最优质 / 最适合 / 首选」这类主观判断</strong>是基于搜证的筛选意见，正文里也标了——比如「Doug's Dharma 学术严谨度最高」「TED 是 shadowing 黄金材料」，是综合评估不是绝对定论。资料稀疏的领域（谭崔正统老师、英文佛法开示的字幕情况）老实标了 🟡（单源或需人工核实）。入库前，主观推荐的频道建议自己先看 2-3 集验证，别全盘照单。</p></div></div>
+  </div>
+</section>
+
+<section class="chapter" id="refs" data-nav="References">
+  <h2><span class="num">16</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <ol class="ref-list">
+      <li id="ref-1"><a href="https://ocw.mit.edu" target="_blank" rel="noopener">MIT OpenCourseWare（2500+ 门全学科公开课，许可 CC BY-NC-SA 4.0）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 6 次</span></li>
+      <li id="ref-2"><a href="https://oyc.yale.edu" target="_blank" rel="noopener">Open Yale Courses（40 门精品入门课，许可 CC BY-NC-SA 3.0）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 6 次</span></li>
+      <li id="ref-3"><a href="https://www.youtube.com/channel/UCW39zufHfsuGgpLviKh297Q" target="_blank" rel="noopener">DW Documentary（德国之声官方纪录片频道，免费正版，版权保留）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 4 次</span></li>
+      <li id="ref-4"><a href="https://www.youtube.com/channel/UCwmZiChSryoWQCZMIQezgTg" target="_blank" rel="noopener">BBC Earth（BBC Studios 官方自然纪录片频道，版权保留）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-5"><a href="https://www.youtube.com/@khanacademy" target="_blank" rel="noopener">Khan Academy（K12-大学数理人文，原 CC 已撤为版权保留）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 4 次</span></li>
+      <li id="ref-6"><a href="https://ieltsliz.com/" target="_blank" rel="noopener">IELTS Liz（前 IELTS 考官英语写作课，45+ 视频 + 300 页练习）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-7"><a href="https://www.eapfoundation.com/" target="_blank" rel="noopener">EAP Foundation（学术英语写作 + 学术词汇 AWL 570 词族，Sheldon Smith）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-8"><a href="https://www.youtube.com/playlist?list=PLEEA0D5FA42DB4C58" target="_blank" rel="noopener">English with Jennifer（JenniferESL）系统语法课程 playlist</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-9"><a href="https://dailydictation.com/" target="_blank" rel="noopener">Daily Dictation（Coach Shane）精听 + 听写训练，编号 001-700 + 1000+ 题即时批改</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-10"><a href="https://learningenglish.voanews.com/" target="_blank" rel="noopener">VOA Learning English（含 Let's Learn English A1 系列，慢速新闻 + 字幕 + 文字稿）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 3 次</span></li>
+      <li id="ref-11"><a href="https://anglo-link.com/" target="_blank" rel="noopener">Anglo-Link（英美双口音语法 + 词汇 + 发音，含 C1 Advanced Grammar）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-12"><a href="https://www.youtube.com/playlist?list=PLL-unHNlmWAty4aYnYQL7ewI89QwxJ2ey" target="_blank" rel="noopener">English with Lucy — Grammar playlist（时态 + 常见错误 + 免费 PDF）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-13"><a href="https://learnenglish.britishcouncil.org/" target="_blank" rel="noopener">British Council LearnEnglish（全 CEFR 分级课 + 网站习题）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-14"><a href="https://tryshadowing.com/en" target="_blank" rel="noopener">TryShadowing（跟读 + 录音 + 即时打分平台，带反馈）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-15"><a href="https://freegradedreaders.com/" target="_blank" rel="noopener">Free Graded Readers（分级阅读资源网站，弥补 YouTube 分级阅读空白）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-16"><a href="https://www.youtube.com/@bbclearningenglish" target="_blank" rel="noopener">BBC Learning English（含 6 Minute English，官方 transcript + CC）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-17"><a href="https://www.leonardoenglish.com/" target="_blank" rel="noopener">Leonardo English（English Learning for Curious Minds，500+ 集免费 transcript + 多语翻译）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-18"><a href="https://thinkinginenglish.blog/" target="_blank" rel="noopener">Thinking in English（以英语讲历史 / 词汇 / 文化，blog 每集 transcript）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-19"><a href="https://www.allearsenglish.com/" target="_blank" rel="noopener">All Ears English（美式对话体生活口语，1000+ 集，第三方 transcript）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-20"><a href="https://www.eslpod.com/" target="_blank" rel="noopener">ESL Pod（日常场景对话刻意慢速，A2-B2 过渡）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-21"><a href="https://teacherluke.co.uk/" target="_blank" rel="noopener">Luke's English Podcast（英式自然口语，900+ 集，Premium 有 PDF）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-22"><a href="https://www.youtube.com/@Culips" target="_blank" rel="noopener">Culips ESL（加拿大母语真实对话，交互 transcript + 免费 PDF）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-23"><a href="https://www.ted.com/playlists/655/great_ted_talks_for_language_practice" target="_blank" rel="noopener">TED Talks — Great Talks for Language Practice playlist（精校多语字幕，shadowing 材料）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 4 次</span></li>
+      <li id="ref-24"><a href="https://lexfridman.com/podcast/" target="_blank" rel="noopener">Lex Fridman Podcast（深度长访谈，官网人工 transcript 含时间戳）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-25"><a href="https://www.youtube.com/TheDiaryOfACEO" target="_blank" rel="noopener">The Diary of a CEO（Steven Bartlett 访谈，英式商务口语）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-26"><a href="https://www.youtube.com/c/ModernWisdomPodcast" target="_blank" rel="noopener">Modern Wisdom（Chris Williamson，心理学 / 哲学 / 生活方式访谈）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-27"><a href="https://www.youtube.com/channel/UCPD_bxCRGpmmeQcbe2kpPaA" target="_blank" rel="noopener">Hot Ones（First We Feast，名人深访 20-30 分钟真实英语）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-28"><a href="https://www.fluentu.com/" target="_blank" rel="noopener">FluentU（付费语言学习平台，真实视频 + 双语字幕，非 YouTube 频道，佐证市场空白）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-29"><a href="https://comprehensibleenglish.com/" target="_blank" rel="noopener">Comprehensible English（TPR/TPRS 纯 CI，刻意慢速 + 视觉支撑，A1-A2）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-30"><a href="https://www.youtube.com/c/dreamingenglish" target="_blank" rel="noopener">Dreaming English（仿 Dreaming Spanish 的 CI，分级明确，话题丰富）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-31"><a href="https://www.easyenglish.video/" target="_blank" rel="noopener">Easy English（街头真实访谈，Super Easy 子系列面向初级全字幕）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-32"><a href="https://www.youtube.com/channel/UCLyr-hfWVCKHcZjV5fg3jbw" target="_blank" rel="noopener">English Speeches（名人演讲 / 访谈合集大字幕，6M+ 订阅）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-33"><a href="https://www.voicetube.com" target="_blank" rel="noopener">VoiceTube（100000+ 视频按 CEFR 分级 + 双语字幕 + 内建词典）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-34"><a href="https://www.youtube.com/channel/UCKgpamMlm872zkGDcBJHYDg" target="_blank" rel="noopener">Learn English With TV Series（Friends/The Office 教学拆解，追剧代入）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-35"><a href="https://www.voicetube.com" target="_blank" rel="noopener">A1/A2 名人访谈频道市场调研（搜证结论：无专门面向 A1 的名人访谈频道，靠字幕 + 平台工具降门槛）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-36"><a href="https://dougsdharma.com/" target="_blank" rel="noopener">Doug's Dharma（早期佛教学术考据，博士 + 修行，Bhikkhu Bodhi 作序）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-37"><a href="https://plumvillage.app/subtitles/" target="_blank" rel="noopener">Plum Village（一行禅师官方，志愿团队校对英文字幕）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-38"><a href="https://studybuddhism.com/" target="_blank" rel="noopener">Study Buddhism / Berzin Archives（Dr. Alexander Berzin 藏传佛教学术库，21 语言）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-39"><a href="https://www.youtube.com/channel/UC3wxPA1Sph--HxKGdOGVjrg" target="_blank" rel="noopener">Alan Watts（官方，1950-73 讲座，禅 + 道 + 印度教融合，禅宗西传一手）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-40"><a href="https://www.youtube.com/@TaraBrach" target="_blank" rel="noopener">Tara Brach（临床心理学博士 + 佛法教师，RAIN 情绪处理）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-41"><a href="https://www.youtube.com/channel/UC5JayBKk-Bynk6XnUnU7vLA" target="_blank" rel="noopener">Jack Kornfield（内观西传奠基人，叙事性开示）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-42"><a href="https://www.youtube.com/@Secularbuddhism" target="_blank" rel="noopener">Secular Buddhism（Noah Rasheta，世俗化教佛法，面向初学者）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-43"><a href="https://www.youtube.com/@DougsDharma" target="_blank" rel="noopener">佛法频道字幕情况汇总（搜证：仅 Plum Village 校对较完整，其余多自动字幕）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-44"><a href="https://www.youtube.com/@dr.michaelsugrue" target="_blank" rel="noopener">Michael Sugrue（Princeton Council of the Humanities fellow，与 Darren Staloff 合讲 Great Courses《Great Minds of the Western Intellectual Tradition》50+ 讲西哲通史，版权回归后上传）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-45"><a href="https://www.wi-phi.com/" target="_blank" rel="noopener">Wireless Philosophy（WiPhi，名校教授动画哲学入门 130+ 视频，官方字幕）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-46"><a href="https://www.youtube.com/@crashcourse" target="_blank" rel="noopener">Crash Course（Green 兄弟 + PBS，50+ 门全学科，标准 YouTube 版权非 CC）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 3 次</span></li>
+      <li id="ref-47"><a href="https://www.youtube.com/user/academyofideas" target="_blank" rel="noopener">Academy of Ideas（匿名 2M 订阅，Nietzsche/Jung/斯多葛，部分 libertarian 立场）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-48"><a href="https://www.youtube.com/@theschooloflifetv" target="_blank" rel="noopener">The School of Life（Alain de Botton，哲学 + 心理短视频，常被批过度简化）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-49"><a href="https://www.youtube.com/playlist?list=PL6VdA4P1ujN-Jft5oTMwZ3xpmtSLwY7dR" target="_blank" rel="noopener">Stanford Human Behavioral Biology（Robert Sapolsky，25 讲人类行为科学公开课）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-50"><a href="https://oyc.yale.edu/introduction-psychology/psyc-110" target="_blank" rel="noopener">Yale Intro to Psychology（Paul Bloom，Open Yale，CC BY-NC-SA + 官方文字稿）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 3 次</span></li>
+      <li id="ref-51"><a href="https://www.youtube.com/playlist?list=PL22J3VaeABQCn5nTAx65NRlh1EsKD0UQD" target="_blank" rel="noopener">Jordan Peterson — Maps of Meaning（Harvard/Toronto 早期学术讲座，Jungian 心理学）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 3 次</span></li>
+      <li id="ref-52"><a href="https://www.youtube.com/user/bigthink" target="_blank" rel="noopener">Big Think（哲学 / 科学 / AI / 心理专家短片，零散卡片）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-53"><a href="https://karpathy.ai/zero-to-hero.html" target="_blank" rel="noopener">Andrej Karpathy — Neural Networks: Zero to Hero（前 OpenAI/Tesla，从零手写 GPT）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-54"><a href="https://www.youtube.com/c/3blue1brown" target="_blank" rel="noopener">3Blue1Brown（Grant Sanderson，数学可视化，反向传播 / Transformer 底层数学）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-55"><a href="https://www.deeplearning.ai/" target="_blank" rel="noopener">DeepLearning.AI（吴恩达系统化 AI 课，Deep Learning + ML Specialization）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-56"><a href="https://www.youtube.com/@statquest" target="_blank" rel="noopener">StatQuest（Josh Starmer，最简语言拆统计 + ML，数理基础薄弱者入口）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-57"><a href="https://www.youtube.com/c/YannicKilcher" target="_blank" rel="noopener">Yannic Kilcher（ETH Zurich ML 博士，逐字精读论文批判分析）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-58"><a href="https://www.youtube.com/@TwoMinutePapers" target="_blank" rel="noopener">Two Minute Papers（快速解析最新 AI 论文 2-5 分钟，前沿动态）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-59"><a href="https://www.youtube.com/c/machinelearningstreettalk" target="_blank" rel="noopener">Machine Learning Street Talk（MLST，最技术向 AI 播客，跨学科深度）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-60"><a href="https://www.youtube.com/playlist?list=PLSVEhWrZWDHQTBmWZufjxpw3s8sveJtnJ" target="_blank" rel="noopener">Stanford CS231n / CS229（斯坦福 CV / ML 公开课录像，学术级）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-61"><a href="https://tantrailluminated.org" target="_blank" rel="noopener">谭崔（Tantra）筛选原则说明（搜证：YouTube 谭崔 90% 标题党 / NSFW，仅收梵文学者 + 学术出版 + 正统传承 + 无 NSFW）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-62"><a href="https://www.youtube.com/channel/UCpESGVz_4KaI3duvhfedf7g" target="_blank" rel="noopener">Christopher Wallis (Hareesh) — Tantra Illuminated（梵文学者 + 克什米尔湿婆派传承，学术出版）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-63"><a href="https://www.youtube.com/channel/UCnKdQDH10tUQNhdyXhAy0Tw" target="_blank" rel="noopener">Deconstructing Yourself（Michael Taft，Nondual Shaiva Tantra + 神经科学，非 NSFW）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-64"><a href="https://www.youtube.com/EmbodiedPhilosophy" target="_blank" rel="noopener">Embodied Philosophy（多师平台 1000+ 小时，含 non-dual Tantra 系统课，需人工过滤单集）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-65"><a href="https://www.youtube.com/talksatgoogle" target="_blank" rel="noopener">Talks at Google（Google 内部讲座对外，AI / 技术嘉宾质量高，长格式）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-66"><a href="https://www.youtube.com/channel/UCsT0YIqwnpJCM-mx7-gSA4Q" target="_blank" rel="noopener">TEDx Talks（各地 TED 格式质量参差，需按话题筛选非全量订阅）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-67"><a href="https://www.youtube.com/@allin" target="_blank" rel="noopener">All-In Podcast（四 VC 长聊科技 / 市场 / 政策 / AI，Metacast transcript）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-68"><a href="https://a16z.com/podcasts/ai-a16z/" target="_blank" rel="noopener">a16z Podcast — AI + a16z（Andreessen Horowitz 出品，VC 视角 AI 深度）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-69"><a href="https://www.youtube.com/@ycombinator" target="_blank" rel="noopener">Y Combinator（创业讲座 + 创始人访谈 + AI Startup School，Startup Library）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-70"><a href="https://www.youtube.com/@Fireship" target="_blank" rel="noopener">Fireship（开发者教程 8-12 分钟高密度，技术雷达）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-71"><a href="https://www.youtube.com/coldfusion" target="_blank" rel="noopener">ColdFusion（工业级科技史 + 公司史，纪录片质感）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-72"><a href="https://www.youtube.com/channel/UCjHz5SVHeMT0AViCYZvsGDA" target="_blank" rel="noopener">PBS Nova（PBS/GBH Boston 美国最受关注电视科学节目，专家采访）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-73"><a href="https://www.youtube.com/@eons" target="_blank" rel="noopener">PBS Eons（专攻地球生命史 / 古生物 / 进化，有文献）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-74"><a href="https://www.youtube.com/@pbsspacetime" target="_blank" rel="noopener">PBS Space Time（天体物理 + 量子力学，主持是天体物理学家，研究生级）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-75"><a href="https://www.youtube.com/channel/UCZEPItn2Nb62Zso5eohHAAA" target="_blank" rel="noopener">BBC Timestamp（原 BBC Documentary，2024 改名，历史纪录片 BBC 正版）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-76"><a href="https://www.youtube.com/@osmosis" target="_blank" rel="noopener">Osmosis（Elsevier 医学教育 3D 动画，100+ 医学专家审核）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-77"><a href="https://www.youtube.com/channel/UCWqPRUsJlZaDp-PVbqEch9g" target="_blank" rel="noopener">Smithsonian Channel（史密森尼官方，历史 / 航空航天 / 科学 / 自然）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-78"><a href="https://www.youtube.com/@numberphile" target="_blank" rel="noopener">Numberphile（数学家采访讲数学趣味话题，与 3B1B 互补）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-79"><a href="https://www.youtube.com/@ExtraCredits" target="_blank" rel="noopener">Extra History（历史短系列制作精良，非学术级偶有错误，自发 Errata）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-80"><a href="https://www.youtube.com/@OverSimplified" target="_blank" rel="noopener">OverSimplified（历史趣味动画，浅娱乐向准确约 8/10，限兴趣激发）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-81"><a href="https://www.youtube.com/@TimelineChannel" target="_blank" rel="noopener">Timeline（Little Dot Studios 聚合转授 BBC/C4/Discovery/PBS 历史纪录片，二手转授）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-82"><a href="https://www.youtube.com/channel/UCZ4AMrDcNrfy3X6nsU8-rPg" target="_blank" rel="noopener">Economics Explained（宏观经济通俗，用 IMF / 世界银行数据但被批过度简化，批判性参考）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-83"><a href="https://www.pbs.org/about/about-pbs/producing-for-pbs/" target="_blank" rel="noopener">PBS YouTube 授权条款（未找到明确 CC 声明，默认按版权保留处理，待核实）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 1 次</span></li>
+      <li id="ref-84"><a href="https://cs50.harvard.edu" target="_blank" rel="noopener">Harvard CS50（哈佛最受欢迎 CS 入门课，官方明说教师可采用改编）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+      <li id="ref-85"><a href="https://online.stanford.edu" target="_blank" rel="noopener">Stanford Online（2700+ 视频，仅 SEE 系列 CC 明确，ML 课许可需逐课确认）</a><span class="ref-meta">· 访问 2026-07-15 · 引用 2 次</span></li>
+    </ol>
+  </div>
+</section>
+  <footer>
+    无忌 · Deep Research（L2）· 2026-07-15 · 仅供阿杰个人决策参考；数据与判例以原始来源为准。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('banmi-knowledge-base-youtube-sources-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('banmi-knowledge-base-youtube-sources-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

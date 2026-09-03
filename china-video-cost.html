@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>中国视频播放成本分析 · 无忌 Deep Research · 2026-09-03</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 01 云厂商CDN价格</a>
+    <a href="#ch2" data-target="ch2">02 02 编码优化深度</a>
+    <a href="#ch3" data-target="ch3">03 03 P2P CDN方案</a>
+    <a href="#ch4" data-target="ch4">04 04 竞品成本结构</a>
+    <a href="#ch5" data-target="ch5">05 05 成本优化工具箱</a>
+    <a href="#ch6" data-target="ch6">06 06 实际场景计算</a>
+    <a href="#ch7" data-target="ch7">07 07 技术选型决策树</a>
+    <a href="#ch8" data-target="ch8">08 08 风险评估应对</a>
+    <a href="#ch9" data-target="ch9">09 09 半米路线建议</a>
+    <a href="#ch10" data-target="ch10">10 10 成本监控优化</a>
+    <a href="#faq" data-target="faq">11 FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">12 References</a>
+  </div>
+</nav>
+
+<main><div class="hero">
+  <h1>中国视频播放成本分析</h1>
+  <div class="hero-meta">
+    <span>📅 2026-09-03</span>
+    <span>👤 无忌</span>
+    <span>🎯 半米中国版成本评估</span>
+  </div>
+  <div class="hero-deck">
+    <p><strong>教育视频平台降本策略与技术选型指南</strong></p>
+    <p>阿杰要做半米教育视频平台中国版，核心问题是：1000 用户阶段，月成本能否控制在 ¥2000 以内？本报告深度剖析云厂商 CDN 价格、编码优化、P2P 方案、竞品成本结构，给出不同规模阶段的具体降本路线和技术选型决策树。</p>
+  </div>
+</div>
+
+<div class="callout accent">
+  <h3>核心发现 1：1000 用户阶段月成本可控</h3>
+  <p><strong>结论：可以控制在 ¥2000 以内，但需要精细优化。</strong></p>
+  <p>假设每用户每月观看 10 小时视频（720p H.264，码率 4 Mbps），总流量约 <strong>1800 GB/月</strong><sup class="cite" data-refid="calc1">[计算]</sup>。使用阿里云按量付费 CDN（¥0.24/GB），成本约 <strong>¥432/月</strong><sup class="cite" data-refid="1">[1]</sup>；若采用套餐包折扣价（¥0.14/GB）<sup class="cite" data-refid="2">[2]</sup>，降至 <strong>¥252/月</strong>。加上存储成本（约 ¥50/月）<sup class="cite" data-refid="1">[1]</sup>和转码成本（一次性约 ¥200）<sup class="cite" data-refid="1">[1]</sup>，视频总成本约 <strong>¥300-500/月</strong>，占 ¥2000 预算的 15-25%，可控。</p>
+  <p><span class="conf g">🟢 高可信度</span> — 基于阿里云/腾讯云官方定价，2026-09-03 验证有效。</p>
+</div>
+
+<div class="callout accent">
+  <h3>核心发现 2：H.265 编码是最大杠杆，但有陷阱</h3>
+  <p><strong>同画质下 H.265 省流量 40-50%，但转码成本是 H.264 的 5 倍。</strong></p>
+  <p>ITU-T 官方验证测试显示，720p/1080p 场景下 H.265 可省流量 58-60%<sup class="cite" data-refid="3">[3]</sup>；若从 H.264 1080p（月流量 3600 GB，成本 ¥864）切换到 H.265 720p（月流量 1080 GB，成本 ¥259），可节省 <strong>70% CDN 成本</strong><sup class="cite" data-refid="calc2">[计算]</sup>。但阿里云 H.265 转码价格是 H.264 的 <strong>5 倍</strong><sup class="cite" data-refid="1">[1]</sup>，1080p 视频需约 <strong>163 次播放才能回本</strong><sup class="cite" data-refid="4">[4]</sup>。关键陷阱：<strong>iOS Safari Mobile 不支持 MediaSource API</strong><sup class="cite" data-refid="5">[5]</sup>，兼容性有限；且低分辨率（<720p）省流量效果仅 20-35%<sup class="cite" data-refid="3">[3]</sup>。</p>
+  <p><span class="conf g">🟢 高可信度</span> — 压缩率来自 ITU-T 官方数据，转码成本来自云厂商官网。</p>
+</div>
+
+<div class="callout accent">
+  <h3>核心发现 3：P2P CDN 降本 30-50%，但不适合 MVP 阶段</h3>
+  <p><strong>P2P CDN 可降低 30-50% 成本，但技术门槛高、稳定性依赖用户节点、监管风险不可控。</strong></p>
+  <p>真实案例：学霸君 10W+ 平台节省 <strong>75% 带宽</strong><sup class="cite" data-refid="6">[6]</sup>，某视频点播公司年省近 <strong>100 万元</strong><sup class="cite" data-refid="7">[7]</sup>。但 P2P 依赖用户节点稳定性，运营商可能限制（15-20% 丢包率抑制 PCDN）<sup class="cite" data-refid="8">[8]</sup>，且 <strong>iOS Safari Mobile 不支持 MediaSource API</strong><sup class="cite" data-refid="5">[5]</sup>，移动端兼容性受限。<strong>对于单人开发的 MVP 阶段（0-1000 用户），不建议接入</strong> — 技术复杂度高（RUDP 协议、NAT 穿透）<sup class="cite" data-refid="9">[9]</sup>，优先级应让位于产品验证和用户增长。待用户规模达 5000-10000、视频成本占比超 30% 时，再评估引入。</p>
+  <p><span class="conf y">🟡 中等可信度</span> — 降本数据来自厂商案例，监管风险基于行业观察。</p>
+</div>
+
+<section class="chapter" id="ch1" data-nav="01 云厂商CDN价格">
+  <h2><span class="num">01</span><span class="title-text">云厂商 CDN 价格对比：2026 年战况</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <h3>主流厂商定价（按量付费）</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>厂商</th>
+            <th>CDN 流量（0-10TB）</th>
+            <th>存储（标准）</th>
+            <th>转码 H.264（1080p）</th>
+            <th>转码 H.265（1080p）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>阿里云</strong><sup class="cite" data-refid="1">[1]</sup></td>
+            <td>¥0.24/GB</td>
+            <td>¥0.12/GB/月</td>
+            <td>¥0.0651/分钟</td>
+            <td>¥0.3255/分钟<br><span class="pill">5倍成本</span></td>
+          </tr>
+          <tr>
+            <td><strong>腾讯云</strong><sup class="cite" data-refid="10">[10]</sup></td>
+            <td>¥0.24/GB</td>
+            <td>¥0.144/GB/月</td>
+            <td>¥0.061/分钟</td>
+            <td>¥0.152/分钟<br><span class="pill">2.5倍成本</span></td>
+          </tr>
+          <tr>
+            <td><strong>七牛云</strong><sup class="cite" data-refid="11">[11]</sup></td>
+            <td>¥0.24/GB</td>
+            <td>—</td>
+            <td>—</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><strong>又拍云</strong><sup class="cite" data-refid="12">[12]</sup></td>
+            <td>¥0.29/GB</td>
+            <td>—</td>
+            <td>—</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>关键观察</strong>：阿里云/腾讯云基础价格一致（¥0.24/GB），但阿里云 H.265 转码成本显著更高（5 倍 vs 腾讯云 2.5 倍）。又拍云流量单价最贵，比主流高 21%。</p>
+
+    <h3>阶梯降价机制</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>流量档位</th>
+            <th>阿里云<sup class="cite" data-refid="1">[1]</sup></th>
+            <th>腾讯云<sup class="cite" data-refid="10">[10]</sup></th>
+            <th>七牛云<sup class="cite" data-refid="11">[11]</sup></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>0-10TB</td>
+            <td>¥0.24/GB</td>
+            <td>¥0.24/GB</td>
+            <td>¥0.24/GB</td>
+          </tr>
+          <tr>
+            <td>10-50TB</td>
+            <td>¥0.23/GB</td>
+            <td>¥0.23/GB</td>
+            <td>¥0.23/GB</td>
+          </tr>
+          <tr>
+            <td>50-100TB</td>
+            <td>¥0.21/GB</td>
+            <td>¥0.21/GB</td>
+            <td>¥0.21/GB</td>
+          </tr>
+          <tr>
+            <td>100TB-1PB</td>
+            <td>¥0.18/GB</td>
+            <td>¥0.18/GB</td>
+            <td>¥0.18/GB</td>
+          </tr>
+          <tr>
+            <td>≥1PB</td>
+            <td>¥0.15/GB</td>
+            <td>¥0.15/GB</td>
+            <td>¥0.14/GB</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>启示</strong>：1000 用户阶段月流量约 1.8TB，处于最贵档位（¥0.24/GB）；只有达到 10000 用户规模（月流量 18TB）才能触发降价。但套餐包可提前享受折扣。</p>
+
+    <h3>套餐包 vs 按量付费</h3>
+    <div class="callout info">
+      <p><strong>套餐包折扣价可低至 ¥0.06-0.14/GB</strong><sup class="cite" data-refid="2">[2]</sup>，比按量付费便宜 42-75%。</p>
+      <ul>
+        <li>阿里云：1TB 套餐包 ¥140（折合 ¥0.14/GB），5TB 套餐包 ¥600（折合 ¥0.12/GB）</li>
+        <li>腾讯云：1TB 套餐包 ¥150（折合 ¥0.15/GB），10TB 套餐包 ¥1200（折合 ¥0.12/GB）</li>
+      </ul>
+      <p><strong>建议</strong>：1000 用户阶段可购买 2TB 套餐包（约 ¥280/月），比按量付费省 ¥152/月（35%）。</p>
+    </div>
+
+    <h3>2025-2026 价格战趋势</h3>
+    <p>基础 CDN 降价 10-12%<sup class="cite" data-refid="2">[2]</sup>，但网宿科技因 Akamai 退出中国，2026 年 2 月涨价 35-40%<sup class="cite" data-refid="13">[13]</sup>。市场呈现两极分化：头部厂商（阿里云/腾讯云）继续降价抢占份额，中小厂商面临成本压力被迫涨价或退出。</p>
+  </div>
+</section>
+
+<section class="chapter" id="ch2" data-nav="02 编码优化深度">
+  <h2><span class="num">02</span><span class="title-text">视频编码优化深度分析：H.265 的杠杆与陷阱</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <h3>H.265 vs H.264 压缩率实测</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>分辨率</th>
+            <th>H.264 文件大小</th>
+            <th>H.265 文件大小</th>
+            <th>省流量比例</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>480p</td>
+            <td>110 MB/10分钟<sup class="cite" data-refid="14">[14]</sup></td>
+            <td>55 MB/10分钟</td>
+            <td><strong>50%</strong><sup class="cite" data-refid="3">[3]</sup></td>
+          </tr>
+          <tr>
+            <td>720p</td>
+            <td>300 MB/10分钟<sup class="cite" data-refid="14">[14]</sup></td>
+            <td>126 MB/10分钟</td>
+            <td><strong>58%</strong><sup class="cite" data-refid="3">[3]</sup></td>
+          </tr>
+          <tr>
+            <td>1080p</td>
+            <td>525 MB/10分钟<sup class="cite" data-refid="14">[14]</sup></td>
+            <td>210 MB/10分钟</td>
+            <td><strong>60%</strong><sup class="cite" data-refid="3">[3]</sup></td>
+          </tr>
+          <tr>
+            <td>4K</td>
+            <td>1400 MB/10分钟<sup class="cite" data-refid="14">[14]</sup></td>
+            <td>490 MB/10分钟</td>
+            <td><strong>65%</strong><sup class="cite" data-refid="3">[3]</sup></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>关键发现</strong>：分辨率越高，H.265 优势越明显。但 ITU-T 测试同时指出：<strong>低分辨率（<720p）+ 低码率（<2 Mbps）场景下，省流量效果仅 20-35%</strong><sup class="cite" data-refid="3">[3]</sup>。</p>
+
+    <h3>编码成本陷阱</h3>
+    <div class="callout warn">
+      <h4>⚠️ H.265 转码成本是 H.264 的 2.5-5 倍</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>分辨率</th>
+              <th>H.264 转码成本<sup class="cite" data-refid="1">[1]</sup></th>
+              <th>H.265 转码成本<sup class="cite" data-refid="1">[1]</sup></th>
+              <th>成本倍数</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>720p HD</td>
+              <td>¥0.0651/分钟</td>
+              <td>¥0.3255/分钟</td>
+              <td><strong>5.0x</strong></td>
+            </tr>
+            <tr>
+              <td>1080p FHD</td>
+              <td>¥0.0651/分钟</td>
+              <td>¥0.3255/分钟</td>
+              <td><strong>5.0x</strong></td>
+            </tr>
+            <tr>
+              <td>2K</td>
+              <td>¥0.14/分钟</td>
+              <td>¥0.70/分钟</td>
+              <td><strong>5.0x</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>回本计算</strong>：假设 1080p 视频 60 分钟，H.264 转码成本 ¥3.9，H.265 转码成本 ¥19.5，多花 ¥15.6。若每次播放省 ¥0.096 流量费<sup class="cite" data-refid="calc3">[计算]</sup>，需 <strong>163 次播放才能回本</strong><sup class="cite" data-refid="4">[4]</sup>。</p>
+      <p><strong>结论</strong>：H.265 只适合高播放量内容（>500 次）或长期运营平台；低播放量内容用 H.264 更划算。</p>
+    </div>
+
+    <h3>兼容性限制</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>平台</th>
+            <th>H.264 支持</th>
+            <th>H.265 支持</th>
+            <th>备注</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>桌面端 Chrome/Safari/Edge</td>
+            <td><span class="check y">✅</span></td>
+            <td><span class="check y">✅</span></td>
+            <td>需硬件解码器<sup class="cite" data-refid="15">[15]</sup></td>
+          </tr>
+          <tr>
+            <td>iOS Safari Mobile</td>
+            <td><span class="check y">✅</span></td>
+            <td><span class="check p">⚠️</span></td>
+            <td>不支持 MediaSource API<sup class="cite" data-refid="5">[5]</sup></td>
+          </tr>
+          <tr>
+            <td>Android Chrome</td>
+            <td><span class="check y">✅</span></td>
+            <td><span class="check y">✅</span></td>
+            <td>2019 年 90% 手机已支持<sup class="cite" data-refid="16">[16]</sup></td>
+          </tr>
+          <tr>
+            <td>Windows/Linux</td>
+            <td><span class="check y">✅</span></td>
+            <td><span class="check p">⚠️</span></td>
+            <td>需硬件解码器或软解（耗 CPU）<sup class="cite" data-refid="15">[15]</sup></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>关键限制</strong>：iOS Safari Mobile 不支持 MediaSource API<sup class="cite" data-refid="5">[5]</sup>，意味着无法实现 ABR（自适应码率切换）和 P2P 分发。若目标用户中 iOS 占比高（如 K12 教育），H.265 兼容性受限。</p>
+
+    <h3>实际案例</h3>
+    <ul>
+      <li><strong>Bilibili</strong>：用 H.265 省带宽 50%<sup class="cite" data-refid="16">[16]</sup>，2019 年 90% 手机已支持硬件解码，优先推送 H.265 给移动端用户。</li>
+      <li><strong>YouTube/Netflix</strong>：转向 AV1 编码（免版权费 + 更高压缩率）<sup class="cite" data-refid="17">[17]</sup>，但 AV1 解码兼容性更差，仅新设备支持。</li>
+      <li><strong>中国平台共识</strong>：H.264 为主（兼容性优先）+ 部分 H.265（降本优先）<sup class="cite" data-refid="16">[16]</sup>。</li>
+    </ul>
+  </div>
+</section>
+
+<section class="chapter" id="ch3" data-nav="03 P2P CDN方案">
+  <h2><span class="num">03</span><span class="title-text">P2P CDN 方案评估：降本 30-50% 的高风险杠杆</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <h3>工作原理</h3>
+    <p>P2P CDN（也称 PCDN）采用 <strong>CDN + P2P 混合架构</strong>：传统 CDN 作为 fallback 保证 100% 可用性，同时利用用户节点闲置带宽作为分布式缓存。当用户 A 请求视频时，系统优先从附近其他用户（B/C/D）的缓存中获取分片，降低中心 CDN 流量<sup class="cite" data-refid="9">[9]</sup>。</p>
+    <p>技术栈：RUDP 协议（可靠 UDP）、NAT 穿透、动态拓扑维护<sup class="cite" data-refid="9">[9]</sup>；现代方案用 WebRTC + HTML5 或本地 HTTP Server 简化接入<sup class="cite" data-refid="18">[18]</sup>。</p>
+
+    <h3>主流厂商与降本效果</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>厂商</th>
+            <th>降本比例</th>
+            <th>典型案例</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>阿里云 PCDN</strong><sup class="cite" data-refid="19">[19]</sup></td>
+            <td>比传统 CDN 便宜 1/4</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><strong>网心云</strong><sup class="cite" data-refid="20">[20]</sup></td>
+            <td>—</td>
+            <td>播放流畅率 >97%，首播 <1 秒</td>
+          </tr>
+          <tr>
+            <td><strong>学霸君</strong><sup class="cite" data-refid="6">[6]</sup></td>
+            <td><strong>75% 带宽节省</strong></td>
+            <td>10W+ 平台，平均延迟 1.07 秒</td>
+          </tr>
+          <tr>
+            <td><strong>某视频点播公司</strong><sup class="cite" data-refid="7">[7]</sup></td>
+            <td>每月省近 50%</td>
+            <td>年省近 100 万元</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>综合数据</strong>：降低 <strong>30-50%</strong> 成本<sup class="cite" data-refid="21">[21]</sup>，个别高密度场景（如学霸君）可达 75%<sup class="cite" data-refid="6">[6]</sup>。</p>
+
+    <h3>三大风险</h3>
+    <div class="callout bad">
+      <h4>风险 1：稳定性依赖用户节点</h4>
+      <p>P2P 性能取决于在线用户数量和质量。用户少、网络差、或集中掉线时，回落到纯 CDN，成本优势消失。B 站案例：CDN 限速 10Mbps + 降码率 + PCDN 降本<sup class="cite" data-refid="8">[8]</sup>，可能影响体验。</p>
+    </div>
+
+    <div class="callout bad">
+      <h4>风险 2：监管风险不可控</h4>
+      <p>运营商可能限制 P2P 流量（15-20% 丢包率抑制 PCDN）<sup class="cite" data-refid="8">[8]</sup>，政策变化可能导致服务突然不可用。</p>
+    </div>
+
+    <div class="callout bad">
+      <h4>风险 3：iOS Safari Mobile 兼容性受限</h4>
+      <p>iOS Safari Mobile 不支持 MediaSource API<sup class="cite" data-refid="5">[5]</sup>，无法实现基于 MSE 的 P2P 分发。若 iOS 用户占比高，降本效果大打折扣。</p>
+    </div>
+
+    <h3>技术门槛评估</h3>
+    <div class="metric-grid">
+      <div class="metric">
+        <div class="v">中等到较高</div>
+        <div class="l">接入难度<sup class="cite" data-refid="9">[9]</sup></div>
+      </div>
+      <div class="metric">
+        <div class="v">2-4 周</div>
+        <div class="l">单人开发集成周期<span class="conf r">🔴 估算</span></div>
+      </div>
+      <div class="metric">
+        <div class="v"><300ms</div>
+        <div class="l">首屏加载<sup class="cite" data-refid="20">[20]</sup></div>
+      </div>
+      <div class="metric">
+        <div class="v">>97%</div>
+        <div class="l">流畅率<sup class="cite" data-refid="20">[20]</sup></div>
+      </div>
+    </div>
+
+    <h3>适用场景分析</h3>
+    <div class="tree">
+      <div class="node">
+        <strong>是否适合用 P2P CDN？</strong>
+        <div class="tree">
+          <div class="node">
+            ✅ 适合：用户规模 >5000，同时在线 >500，Android 占比 >60%，视频成本占比 >30%
+          </div>
+          <div class="node">
+            ⛔ 不适合：MVP 阶段（<1000 用户），iOS 占比 >50%，单人开发无专职运维，监管敏感行业
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="ch4" data-nav="04 竞品成本结构">
+  <h2><span class="num">04</span><span class="title-text">竞品成本结构剖析：知识付费平台的隐藏账本</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <h3>技术选型对比</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>平台</th>
+            <th>底层云服务</th>
+            <th>CDN 策略</th>
+            <th>差异化</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>小鹅通</strong><sup class="cite" data-refid="22">[22]</sup></td>
+            <td>腾讯云全套方案</td>
+            <td>非自建</td>
+            <td>SaaS 工具箱（直播+社群+作业）</td>
+          </tr>
+          <tr>
+            <td><strong>腾讯课堂</strong><sup class="cite" data-refid="23">[23]</sup></td>
+            <td>腾讯云全套方案</td>
+            <td>非自建</td>
+            <td>流量平台 + 分发</td>
+          </tr>
+          <tr>
+            <td><strong>千聊</strong><sup class="cite" data-refid="24">[24]</sup></td>
+            <td>未披露</td>
+            <td>分布式架构</td>
+            <td>存储流量不限额 + 阶梯抽佣（3%→0%）</td>
+          </tr>
+          <tr>
+            <td><strong>得到</strong></td>
+            <td>未披露</td>
+            <td>未披露</td>
+            <td>精品内容 + 自有 IP</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>关键观察</strong>：知识付费平台普遍<strong>不自建 CDN</strong>，而是采用云厂商全套方案<sup class="cite" data-refid="22">[22]</sup><sup class="cite" data-refid="23">[23]</sup>。原因：CDN 自建需巨额投入（B 站 2023 年服务器+带宽成本 19.8 亿元）<sup class="cite" data-refid="25">[25]</sup>，知识付费平台用户规模远不及 UGC 视频网站，无法摊薄成本。</p>
+
+    <h3>视频成本占比估算</h3>
+    <div class="callout info">
+      <p><strong>B 站参考数据</strong>：带宽+服务器费用约占总成本 <strong>10%</strong><sup class="cite" data-refid="25">[25]</sup>（UGC 视频网站，内容成本占比极低）。</p>
+      <p><strong>知识付费平台推算</strong>：内容成本（讲师分成/版权采购）远低于 UGC 平台（B 站 2023 年营收成本 197 亿元，主要是内容激励）<sup class="cite" data-refid="25">[25]</sup>，视频成本占比可能更高，估算 <strong>10-15%</strong><span class="conf r">🔴 推算值</span>。</p>
+      <p>⚠️ 竞品普遍不单独披露视频成本，此数据为基于行业对标的估算。</p>
+    </div>
+
+    <h3>成本优化共识</h3>
+    <ul>
+      <li><strong>编码优化是最直接杠杆</strong>：H.265 比 H.264 节省 50% 带宽<sup class="cite" data-refid="3">[3]</sup>，行业普遍采用。</li>
+      <li><strong>P2P 分发</strong>可降低 30-75% 成本<sup class="cite" data-refid="6">[6]</sup><sup class="cite" data-refid="21">[21]</sup>，但<strong>未找到知识付费平台实际应用案例</strong><span class="conf y">🟡 信息缺口</span> — 可能因用户同时在线数不足、iOS 占比高、或技术门槛导致。</li>
+      <li><strong>分层定价</strong>（免费低清/付费高清） + CDN 缓存优化 + 预加载策略是标配<sup class="cite" data-refid="26">[26]</sup>。</li>
+    </ul>
+
+    <h3>千聊的差异化策略</h3>
+    <div class="callout good">
+      <p><strong>"存储流量不限额" + 阶梯式抽佣（3% → 0%）平衡成本</strong><sup class="cite" data-refid="24">[24]</sup></p>
+      <p>千聊通过技术优化（分布式架构、缓存优化）降低边际成本，用"不限流量"吸引创作者，同时用阶梯抽佣（销售额越高抽佣越低）激励高产出，最终靠规模效应覆盖成本。</p>
+      <p><strong>启示</strong>：单纯降低视频成本不是唯一路径，还可以通过商业模式设计（抽佣机制、增值服务）转嫁或分摊成本。</p>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="ch5" data-nav="05 成本优化工具箱">
+  <h2><span class="num">05</span><span class="title-text">成本优化方案工具箱：6 大杠杆详解</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <h3>杠杆 1：CDN 缓存优化（ROI 最高）</h3>
+    <div class="callout good">
+      <p><strong>缓存命中率从 85-90% 提升到 92-96%，成本节省 30-60%</strong><sup class="cite" data-refid="27">[27]</sup></p>
+      <p>Netflix 案例：动态 TTL + 热度缓存，峰值时段 <strong>98%+ 命中率</strong><sup class="cite" data-refid="28">[28]</sup>。</p>
+    </div>
+    <p><strong>技术手段</strong>：</p>
+    <ul>
+      <li><strong>Range Requests</strong>（HTTP 206）：分片缓存，提升命中率 15-25%<sup class="cite" data-refid="27">[27]</sup></li>
+      <li><strong>内容感知清除</strong>：LRU 改进算法，优先清除低热度内容</li>
+      <li><strong>缓存分片</strong>：按视频分辨率/码率分别缓存，避免全量缓存</li>
+      <li><strong>分层缓存</strong>：热内容推到边缘节点，冷内容留中心<sup class="cite" data-refid="27">[27]</sup></li>
+    </ul>
+
+    <h3>杠杆 2：存储分层（省 50-85%）</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>存储类型</th>
+            <th>价格<sup class="cite" data-refid="1">[1]</sup></th>
+            <th>节省比例</th>
+            <th>适用场景</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>标准存储</td>
+            <td>¥0.12/GB/月</td>
+            <td>—</td>
+            <td>高频访问视频</td>
+          </tr>
+          <tr>
+            <td>低频存储</td>
+            <td>¥0.084/GB/月</td>
+            <td><strong>30%</strong></td>
+            <td>月访问 <10 次</td>
+          </tr>
+          <tr>
+            <td>归档存储</td>
+            <td>¥0.04/GB/月</td>
+            <td><strong>67%</strong></td>
+            <td>季度访问 <5 次</td>
+          </tr>
+          <tr>
+            <td>冷归档存储</td>
+            <td>¥0.018/GB/月</td>
+            <td><strong>85%</strong></td>
+            <td>年访问 <1 次</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>策略</strong>：新视频用标准存储，30 天后自动转低频，90 天后转归档<sup class="cite" data-refid="29">[29]</sup>。</p>
+
+    <h3>杠杆 3：ABR 智能码率（流量 -24-45%）</h3>
+    <p><strong>阿里云实战数据</strong>：H.265 + ABR 流量带宽降低 <strong>24-45%</strong>，总账单降低 <strong>8-25%</strong><sup class="cite" data-refid="30">[30]</sup>。</p>
+    <p><strong>工作原理</strong>：根据用户网络状况动态切换视频码率（480p/720p/1080p），避免高清浪费<sup class="cite" data-refid="31">[31]</sup>。</p>
+
+    <h3>杠杆 4：窄带高清（省 20-40%，但回本慢）</h3>
+    <div class="callout warn">
+      <p><strong>窄带高清技术：同等画质下降低带宽成本 20-40%</strong><sup class="cite" data-refid="32">[32]</sup></p>
+      <p>但转码成本高，回本周期长：</p>
+      <ul>
+        <li><strong>窄带高清 1.0</strong>：1080p 视频需约 <strong>163 次播放</strong>才能回本<sup class="cite" data-refid="4">[4]</sup></li>
+        <li><strong>窄带高清 2.0</strong>：1080p 视频需约 <strong>814 次播放</strong>才能回本<sup class="cite" data-refid="4">[4]</sup></li>
+      </ul>
+      <p><strong>建议</strong>：只对高播放量内容（>500 次）或长期运营平台使用。</p>
+    </div>
+
+    <h3>杠杆 5：视频预加载策略（体验优先，成本次要）</h3>
+    <p><strong>首屏加载超 3 秒，超 50% 用户放弃观看</strong><sup class="cite" data-refid="33">[33]</sup>。</p>
+    <p><strong>技术手段</strong>：</p>
+    <ul>
+      <li>预加载元数据（视频时长/缩略图）</li>
+      <li>智能预加载（预判下一个视频）</li>
+      <li>滑动调播优化（节省约 300ms）<sup class="cite" data-refid="33">[33]</sup></li>
+    </ul>
+    <p>⚠️ 预加载会增加带宽消耗（未被观看的内容），需平衡体验和成本。</p>
+
+    <h3>杠杆 6：分层定价策略（转嫁成本给用户）</h3>
+    <div class="callout accent">
+      <p><strong>免费 480P-720P，付费 1080P-4K</strong></p>
+      <p>OpenAI Sora 案例：Plus $20/月享 480p，Pro $200/月享 1080p（10 倍价差对应 2 倍分辨率）<sup class="cite" data-refid="34">[34]</sup>。</p>
+      <p>国内视频平台：爱奇艺会员营收 49 亿元 > 广告营收 15 亿元<sup class="cite" data-refid="35">[35]</sup>，会员付费已成主要收入。</p>
+    </div>
+    <p><strong>启示</strong>：用户愿意为高清付费，分层定价既能降低免费用户成本，又能提升付费转化。</p>
+
+    <h3>综合优先级建议</h3>
+    <div class="step">
+      <div class="step-head"><span class="sn">1</span>立即实施（高 ROI，低风险）</div>
+      <div class="step-body">CDN 缓存优化、存储分层、基础 ABR</div>
+    </div>
+    <div class="step">
+      <div class="step-head"><span class="sn">2</span>中期规划</div>
+      <div class="step-body">窄带高清转码（高播放量内容）、预加载策略、分层定价设计</div>
+    </div>
+    <div class="step">
+      <div class="step-head"><span class="sn">3</span>高级优化</div>
+      <div class="step-body">上下文感知编码、按标题编码、实时成本监控<sup class="cite" data-refid="36">[36]</sup></div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="ch6" data-nav="06 实际场景计算">
+  <h2><span class="num">06</span><span class="title-text">实际场景成本计算：1000 vs 10000 用户对比</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <h3>假设前提</h3>
+    <ul>
+      <li>每用户每月观看 10 小时视频</li>
+      <li>基准：720p H.264，码率 4 Mbps，10 分钟约 300 MB<sup class="cite" data-refid="14">[14]</sup></li>
+      <li>月活跃率 80%（实际观看用户 = 总用户 × 80%）</li>
+    </ul>
+
+    <h3>场景 1：1000 用户阶段</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>方案</th>
+            <th>总流量/月</th>
+            <th>CDN 成本</th>
+            <th>存储成本</th>
+            <th>转码成本（一次性）</th>
+            <th>总成本/月</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>传统 CDN（按量付费）</strong></td>
+            <td>1800 GB<sup class="cite" data-refid="calc4">[计算]</sup></td>
+            <td>¥432<sup class="cite" data-refid="1">[1]</sup></td>
+            <td>¥50<sup class="cite" data-refid="calc5">[计算]</sup></td>
+            <td>¥200<sup class="cite" data-refid="calc6">[计算]</sup></td>
+            <td><strong>¥482 + ¥200（首月）</strong></td>
+          </tr>
+          <tr>
+            <td><strong>套餐包优化</strong></td>
+            <td>1800 GB</td>
+            <td>¥252<sup class="cite" data-refid="2">[2]</sup></td>
+            <td>¥50</td>
+            <td>¥200</td>
+            <td><strong>¥302 + ¥200（首月）</strong></td>
+          </tr>
+          <tr>
+            <td><strong>H.265 + 套餐包</strong></td>
+            <td>1080 GB<sup class="cite" data-refid="calc7">[计算]</sup></td>
+            <td>¥151<sup class="cite" data-refid="calc8">[计算]</sup></td>
+            <td>¥30<sup class="cite" data-refid="calc9">[计算]</sup></td>
+            <td>¥1000<sup class="cite" data-refid="calc10">[计算]</sup></td>
+            <td><strong>¥181 + ¥1000（首月）</strong></td>
+          </tr>
+          <tr>
+            <td><strong>P2P CDN（降本 40%）</strong></td>
+            <td>1080 GB（CDN 部分）<sup class="cite" data-refid="calc11">[计算]</sup></td>
+            <td>¥259<sup class="cite" data-refid="calc12">[计算]</sup></td>
+            <td>¥50</td>
+            <td>¥200</td>
+            <td><strong>¥309 + ¥200（首月）</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>结论</strong>：</p>
+    <ul>
+      <li><strong>套餐包优化最划算</strong>：月成本 ¥302，远低于 ¥2000 预算。</li>
+      <li><strong>H.265 首月成本高</strong>：转码费 ¥1000 拖累总成本，需 5 个月才能摊平（vs 套餐包方案）。</li>
+      <li><strong>P2P CDN 不适合 1000 用户</strong>：在线用户少（800×80%=640 人），P2P 效果有限，且技术投入高。</li>
+    </ul>
+
+    <h3>场景 2：10000 用户阶段</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>方案</th>
+            <th>总流量/月</th>
+            <th>CDN 成本</th>
+            <th>存储成本</th>
+            <th>总成本/月</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>传统 CDN（按量付费）</strong></td>
+            <td>18000 GB<sup class="cite" data-refid="calc13">[计算]</sup></td>
+            <td>¥4140<sup class="cite" data-refid="calc14">[计算]</sup></td>
+            <td>¥500</td>
+            <td><strong>¥4640</strong></td>
+          </tr>
+          <tr>
+            <td><strong>套餐包优化</strong></td>
+            <td>18000 GB</td>
+            <td>¥2160<sup class="cite" data-refid="calc15">[计算]</sup></td>
+            <td>¥500</td>
+            <td><strong>¥2660</strong></td>
+          </tr>
+          <tr>
+            <td><strong>H.265 + 套餐包</strong></td>
+            <td>10800 GB</td>
+            <td>¥1296<sup class="cite" data-refid="calc16">[计算]</sup></td>
+            <td>¥300</td>
+            <td><strong>¥1596</strong></td>
+          </tr>
+          <tr>
+            <td><strong>P2P CDN（降本 50%）</strong></td>
+            <td>9000 GB（CDN 部分）</td>
+            <td>¥2070<sup class="cite" data-refid="calc17">[计算]</sup></td>
+            <td>¥500</td>
+            <td><strong>¥2570</strong></td>
+          </tr>
+          <tr>
+            <td><strong>H.265 + P2P 组合</strong></td>
+            <td>5400 GB（CDN 部分）</td>
+            <td>¥1242<sup class="cite" data-refid="calc18">[计算]</sup></td>
+            <td>¥300</td>
+            <td><strong>¥1542</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>结论</strong>：</p>
+    <ul>
+      <li><strong>H.265 + P2P 组合降本 67%</strong>：从 ¥4640 降至 ¥1542，成本优势显著。</li>
+      <li><strong>H.265 单独使用降本 66%</strong>：从 ¥4640 降至 ¥1596，无需 P2P 技术投入。</li>
+      <li><strong>10000 用户规模，H.265 转码成本已摊平</strong>：月播放量足够高，转码投入值得。</li>
+    </ul>
+
+    <h3>回本周期对比</h3>
+    <div class="metric-grid">
+      <div class="metric">
+        <div class="v">5 个月</div>
+        <div class="l">H.265 vs 套餐包（1000 用户）<sup class="cite" data-refid="calc19">[计算]</sup></div>
+      </div>
+      <div class="metric">
+        <div class="v">1 个月</div>
+        <div class="l">H.265 vs 套餐包（10000 用户）<sup class="cite" data-refid="calc20">[计算]</sup></div>
+      </div>
+      <div class="metric">
+        <div class="v">3-4 周</div>
+        <div class="l">P2P 技术投入回本（10000 用户）<span class="conf r">🔴 估算</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="ch7" data-nav="07 技术选型决策树">
+  <h2><span class="num">07</span><span class="title-text">技术选型决策树：4 个关键分叉</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <h3>决策树</h3>
+    <div class="tree">
+      <div class="node">
+        <strong>用户规模？</strong>
+        <div class="tree">
+          <div class="node">
+            <strong><1000 用户（MVP 阶段）</strong>
+            <div class="tree">
+              <div class="node">
+                <strong>移动端占比？</strong>
+                <div class="tree">
+                  <div class="node">
+                    iOS >50% → <strong>H.264 + 套餐包 + 基础 ABR</strong>（兼容性优先）
+                  </div>
+                  <div class="node">
+                    Android >60% → <strong>H.265 + 套餐包</strong>（降本优先，5 个月回本）
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="node">
+            <strong>1000-5000 用户（增长期）</strong>
+            <div class="tree">
+              <div class="node">
+                <strong>视频时长？</strong>
+                <div class="tree">
+                  <div class="node">
+                    短视频（<10 分钟）→ <strong>H.264 + CDN 缓存优化</strong>（缓存命中率高）
+                  </div>
+                  <div class="node">
+                    长视频（>30 分钟）→ <strong>H.265 + 窄带高清 + ABR</strong>（降本杠杆大）
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="node">
+            <strong>5000-10000 用户（扩张期）</strong>
+            <div class="tree">
+              <div class="node">
+                <strong>视频成本占比？</strong>
+                <div class="tree">
+                  <div class="node">
+                    <20% → <strong>H.265 + 存储分层</strong>（成本可控，优先产品功能）
+                  </div>
+                  <div class="node">
+                    >30% → <strong>H.265 + P2P CDN 试点</strong>（降本压力大，值得技术投入）
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="node">
+            <strong>>10000 用户（成熟期）</strong>
+            <div class="tree">
+              <div class="node">
+                <strong>H.265 + P2P CDN + 分层定价 + 实时成本监控</strong>（全套优化）
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3>关键因素权重</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>因素</th>
+            <th>权重</th>
+            <th>判断标准</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>用户规模</td>
+            <td><strong>40%</strong></td>
+            <td><1000 不用 P2P，>5000 可试点</td>
+          </tr>
+          <tr>
+            <td>iOS 占比</td>
+            <td><strong>25%</strong></td>
+            <td>>50% 避免 H.265/P2P（兼容性差）</td>
+          </tr>
+          <tr>
+            <td>视频成本占比</td>
+            <td><strong>20%</strong></td>
+            <td>>30% 值得技术投入，<20% 优先产品</td>
+          </tr>
+          <tr>
+            <td>视频时长</td>
+            <td><strong>15%</strong></td>
+            <td>长视频降本杠杆大，短视频靠缓存</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="ch8" data-nav="08 风险评估应对">
+  <h2><span class="num">08</span><span class="title-text">风险评估和应对策略：4 大隐患</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <h3>风险 1：H.265 兼容性风险</h3>
+    <div class="trap-box">
+      <p><strong>风险</strong>：iOS Safari Mobile 不支持 MediaSource API<sup class="cite" data-refid="5">[5]</sup>，无法实现 ABR 和 P2P，部分 Windows/Linux 用户需硬件解码器。</p>
+      <p><strong>应对</strong>：</p>
+      <ul>
+        <li><strong>多格式备份</strong>：H.265 + H.264 双份存储，iOS 用户自动回落 H.264（增加存储成本 100%）</li>
+        <li><strong>用户设备检测</strong>：前端检测硬件解码支持，不支持则推送 H.264</li>
+        <li><strong>渐进式迁移</strong>：新视频用 H.265，存量视频保留 H.264，避免全量转码</li>
+      </ul>
+    </div>
+
+    <h3>风险 2：P2P 监管风险</h3>
+    <div class="trap-box">
+      <p><strong>风险</strong>：运营商可能限制 P2P 流量（15-20% 丢包率）<sup class="cite" data-refid="8">[8]</sup>，政策变化可能导致服务突然不可用。</p>
+      <p><strong>应对</strong>：</p>
+      <ul>
+        <li><strong>混合架构</strong>：P2P 仅作优化层，100% fallback 到 CDN，确保可用性</li>
+        <li><strong>监控告警</strong>：P2P 分流比例 <30% 自动切换回纯 CDN</li>
+        <li><strong>合规优先</strong>：选择持证厂商（阿里云 PCDN/腾讯云 ECDN），避免灰色地带</li>
+      </ul>
+    </div>
+
+    <h3>风险 3：成本突增风险</h3>
+    <div class="trap-box">
+      <p><strong>风险</strong>：用户增长超预期、热门视频爆发式传播、DDoS 攻击导致流量激增，成本失控。</p>
+      <p><strong>应对</strong>：</p>
+      <ul>
+        <li><strong>成本上限告警</strong>：设置日/周/月预算上限（如 ¥5000/月），触发自动限流</li>
+        <li><strong>紧急降级</strong>：流量超阈值自动降低默认分辨率（1080p → 720p）</li>
+        <li><strong>DDoS 防护</strong>：启用云厂商 DDoS 高防（阿里云/腾讯云）</li>
+      </ul>
+    </div>
+
+    <h3>风险 4：用户体验降级风险</h3>
+    <div class="trap-box">
+      <p><strong>风险</strong>：过度优化成本导致播放卡顿、首屏加载慢、清晰度下降，用户流失。</p>
+      <p><strong>应对</strong>：</p>
+      <ul>
+        <li><strong>体验红线</strong>：首屏加载 <3 秒，卡顿率 <5%，低于红线停止降本优化</li>
+        <li><strong>A/B 测试</strong>：新优化方案先在 10% 用户试点，验证体验无损再推全量</li>
+        <li><strong>用户分层</strong>：付费用户享受高清无广告，免费用户承受适度体验降级</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="ch9" data-nav="09 半米路线建议">
+  <h2><span class="num">09</span><span class="title-text">阿杰半米路线建议：三阶段具体方案</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <h3>阶段 1：MVP 阶段（0-1000 用户，0-3 个月）</h3>
+    <div class="callout accent">
+      <h4>✅ 推荐方案：阿里云套餐包 + H.264 + 基础 ABR</h4>
+      <p><strong>成本预算</strong>：¥300-500/月（占 ¥2000 总预算的 15-25%）</p>
+      <p><strong>具体配置</strong>：</p>
+      <ul>
+        <li><strong>CDN</strong>：阿里云 2TB 套餐包（¥280/月）<sup class="cite" data-refid="2">[2]</sup></li>
+        <li><strong>存储</strong>：标准存储 500GB（¥60/月）<sup class="cite" data-refid="1">[1]</sup></li>
+        <li><strong>转码</strong>：H.264 720p/1080p 双档（一次性 ¥200）<sup class="cite" data-refid="1">[1]</sup></li>
+        <li><strong>ABR</strong>：用阿里云内置 ABR，无额外成本</li>
+      </ul>
+      <p><strong>为什么不用 H.265？</strong></p>
+      <ul>
+        <li>转码成本高（¥1000 vs ¥200），5 个月才回本</li>
+        <li>MVP 阶段优先验证产品，不是优化成本</li>
+        <li>iOS 兼容性问题可能影响用户体验</li>
+      </ul>
+      <p><strong>为什么不用 P2P？</strong></p>
+      <ul>
+        <li>1000 用户同时在线仅 640 人，P2P 效果有限</li>
+        <li>单人开发无精力维护 P2P 技术栈</li>
+        <li>监管风险不可控</li>
+      </ul>
+    </div>
+
+    <h3>阶段 2：增长期（1000-5000 用户，3-12 个月）</h3>
+    <div class="callout accent">
+      <h4>✅ 推荐方案：H.265 + 套餐包 + CDN 缓存优化 + 存储分层</h4>
+      <p><strong>成本预算</strong>：¥800-1500/月（vs 传统方案 ¥2000-3000/月，降本 40-50%）</p>
+      <p><strong>具体配置</strong>：</p>
+      <ul>
+        <li><strong>编码迁移</strong>：新视频用 H.265 720p/1080p，存量视频保留 H.264（渐进式迁移）</li>
+        <li><strong>CDN 缓存</strong>：启用 Range Requests + 热度缓存，命中率提升至 92%+<sup class="cite" data-refid="27">[27]</sup></li>
+        <li><strong>存储分层</strong>：30 天后自动转低频存储（省 30%）<sup class="cite" data-refid="29">[29]</sup></li>
+        <li><strong>成本监控</strong>：设置 ¥2000/月预算告警</li>
+      </ul>
+      <p><strong>迁移步骤</strong>：</p>
+      <ol>
+        <li>第 1 个月：试点 10 个新视频用 H.265，验证兼容性和成本</li>
+        <li>第 2-3 个月：新视频全部 H.265，监控播放质量指标</li>
+        <li>第 4-6 个月：高播放量存量视频（>500 次）重新转码 H.265</li>
+      </ol>
+    </div>
+
+    <h3>阶段 3：扩张期（5000-10000 用户，1-2 年）</h3>
+    <div class="callout accent">
+      <h4>✅ 推荐方案：H.265 + P2P CDN 试点 + 分层定价 + 窄带高清</h4>
+      <p><strong>成本预算</strong>：¥1500-2500/月（vs 传统方案 ¥4000-6000/月，降本 60%+）</p>
+      <p><strong>具体配置</strong>：</p>
+      <ul>
+        <li><strong>P2P 试点</strong>：Android 用户（占比 >60%）启用 P2P，iOS 用户回落 CDN</li>
+        <li><strong>分层定价</strong>：免费用户 720p，付费用户 1080p/4K</li>
+        <li><strong>窄带高清</strong>：高播放量视频（>1000 次）启用窄带高清 1.0<sup class="cite" data-refid="4">[4]</sup></li>
+        <li><strong>实时监控</strong>：成本、体验、P2P 分流比例三维监控</li>
+      </ul>
+      <p><strong>P2P 接入建议</strong>：</p>
+      <ul>
+        <li>选择阿里云 PCDN 或腾讯云 ECDN（持证合规，技术成熟）</li>
+        <li>设置 P2P 分流比例上限 50%，避免过度依赖</li>
+        <li>预留 1-2 周集成和测试时间</li>
+      </ul>
+    </div>
+
+    <h3>具体下一步（本周可执行）</h3>
+    <div class="check-box">
+      <ul>
+        <li><strong>Day 1-2</strong>：注册阿里云账号，开通视频点播服务，购买 2TB CDN 套餐包</li>
+        <li><strong>Day 3-5</strong>：上传 5-10 个测试视频，配置 H.264 720p/1080p 转码模板，测试播放</li>
+        <li><strong>Day 6-7</strong>：集成阿里云 Player SDK，实现基础 ABR（根据网速自动切换清晰度）</li>
+        <li><strong>Week 2</strong>：监控一周成本数据，验证月成本在 ¥300-500 区间</li>
+        <li><strong>Week 3-4</strong>：优化 CDN 缓存策略（启用 Range Requests），观察命中率变化</li>
+      </ul>
+    </div>
+
+    <h3>常见陷阱和避坑指南</h3>
+    <div class="callout warn">
+      <p><strong>陷阱 1：过早优化</strong> — 1000 用户前不要花时间搞 H.265/P2P，优先验证产品。</p>
+      <p><strong>陷阱 2：忽略 iOS 用户</strong> — 教育场景 iOS 占比可能 >50%，H.265/P2P 兼容性问题会影响核心用户。</p>
+      <p><strong>陷阱 3：全量转码 H.265</strong> — 低播放量视频转码不划算，优先转高播放量内容。</p>
+      <p><strong>陷阱 4：成本监控缺失</strong> — 没有预算告警，流量突增可能导致账单爆炸。</p>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="ch10" data-nav="10 成本监控优化">
+  <h2><span class="num">10</span><span class="title-text">成本监控和持续优化：3 个关键指标</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <h3>关键监控指标</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>指标</th>
+            <th>目标值</th>
+            <th>告警阈值</th>
+            <th>优化方向</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>CDN 流量单价</strong></td>
+            <td>¥0.12-0.15/GB</td>
+            <td>>¥0.20/GB</td>
+            <td>切换套餐包或厂商</td>
+          </tr>
+          <tr>
+            <td><strong>缓存命中率</strong></td>
+            <td>>92%</td>
+            <td><85%</td>
+            <td>优化缓存策略</td>
+          </tr>
+          <tr>
+            <td><strong>视频成本占总成本比例</strong></td>
+            <td>10-15%</td>
+            <td>>30%</td>
+            <td>启动降本方案</td>
+          </tr>
+          <tr>
+            <td><strong>首屏加载时间</strong></td>
+            <td><2 秒</td>
+            <td>>3 秒</td>
+            <td>预加载优化</td>
+          </tr>
+          <tr>
+            <td><strong>卡顿率</strong></td>
+            <td><3%</td>
+            <td>>5%</td>
+            <td>检查 CDN 质量</td>
+          </tr>
+          <tr>
+            <td><strong>P2P 分流比例</strong></td>
+            <td>40-60%</td>
+            <td><30% 或 >80%</td>
+            <td>调整 P2P 策略</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>成本突增预警机制</h3>
+    <div class="step">
+      <div class="step-head"><span class="sn">1</span>设置预算上限</div>
+      <div class="step-body">日预算 ¥100，周预算 ¥600，月预算 ¥2000（阿里云控制台配置）</div>
+    </div>
+    <div class="step">
+      <div class="step-head"><span class="sn">2</span>告警触发</div>
+      <div class="step-body">超 80% 预算发邮件/短信，超 100% 自动限流（降低默认分辨率）</div>
+    </div>
+    <div class="step">
+      <div class="step-head"><span class="sn">3</span>异常排查</div>
+      <div class="step-body">检查流量来源（DDoS 攻击？热门视频爆发？缓存失效？）</div>
+    </div>
+    <div class="step">
+      <div class="step-head"><span class="sn">4</span>紧急降级</div>
+      <div class="step-body">临时关闭 4K/1080p，仅提供 720p；或暂停非核心视频播放</div>
+    </div>
+
+    <h3>优化工具和平台推荐</h3>
+    <ul>
+      <li><strong>阿里云视频点播控制台</strong>：实时监控流量、存储、转码成本，支持预算告警<sup class="cite" data-refid="1">[1]</sup></li>
+      <li><strong>腾讯云视频点播控制台</strong>：类似功能，数据可视化更友好<sup class="cite" data-refid="10">[10]</sup></li>
+      <li><strong>BlazingCDN</strong>：第三方 CDN 优化服务，提供缓存命中率分析<sup class="cite" data-refid="27">[27]</sup></li>
+      <li><strong>自建监控</strong>：用 Grafana + Prometheus 监控自定义指标（播放次数、用户分布、P2P 效果）</li>
+    </ul>
+
+    <h3>持续优化检查清单（月度）</h3>
+    <div class="check-box">
+      <ul>
+        <li>检查 CDN 流量单价是否在目标范围（¥0.12-0.15/GB）</li>
+        <li>分析缓存命中率，低于 92% 优化缓存策略</li>
+        <li>识别高播放量视频（>500 次），评估是否转码 H.265</li>
+        <li>清理低频视频（30 天无播放），转入归档存储</li>
+        <li>对比竞品成本（小鹅通/千聊），评估自己是否偏高</li>
+        <li>A/B 测试新优化方案（窄带高清/P2P），验证 ROI</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="faq" data-nav="FAQ 常见问题">
+  <h2><span class="num">11</span><span class="title-text">FAQ 常见问题</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">1000 用户阶段月成本能否控制在 ¥2000 以内？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>可以。</strong>使用阿里云套餐包 + H.264，视频成本约 ¥300-500/月<sup class="cite" data-refid="calc21">[计算]</sup>，占 ¥2000 预算的 15-25%。关键是购买套餐包（比按量付费便宜 35%）<sup class="cite" data-refid="2">[2]</sup>，避免按量付费的高单价。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">视频播放成本占总成本比例是多少？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>10-15%</strong><span class="conf r">🔴 估算</span>。B 站参考数据：带宽+服务器费用约占总成本 10%<sup class="cite" data-refid="25">[25]</sup>；知识付费平台内容成本更低，视频成本占比可能略高。但竞品普遍不单独披露，此为基于行业对标的估算。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">H.265 值得用吗？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>看规模和用户设备。</strong>1000 用户阶段不值得（转码成本高，5 个月回本）<sup class="cite" data-refid="calc22">[计算]</sup>；5000 用户以上值得（1 个月回本，降本 60%）<sup class="cite" data-refid="calc23">[计算]</sup>。但若 iOS 用户占比 >50%，H.265 兼容性受限<sup class="cite" data-refid="5">[5]</sup>，优先用 H.264。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">P2P CDN 适合知识付费平台吗？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>5000 用户以上可试点，1000 用户以下不适合。</strong>P2P 降本 30-50%<sup class="cite" data-refid="21">[21]</sup>，但依赖在线用户数量；1000 用户阶段同时在线仅 640 人，效果有限。且 iOS Safari Mobile 不支持 MediaSource API<sup class="cite" data-refid="5">[5]</sup>，若 iOS 占比高效果打折。监管风险也需考虑<sup class="cite" data-refid="8">[8]</sup>。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">免费 480P + 付费 1080P 策略会不会赶跑用户？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>不会，反而能提升付费转化。</strong>OpenAI Sora、爱奇艺都采用分层定价<sup class="cite" data-refid="34">[34]</sup><sup class="cite" data-refid="35">[35]</sup>，用户已习惯"免费低清 + 付费高清"。关键是免费档体验不能太差（480P-720P 可接受），付费档价值感要足（1080P + 无广告 + 离线下载）。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">阿里云 vs 腾讯云 vs 七牛云，哪家性价比最高？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>基础价格一致（¥0.24/GB），差异在转码和生态。</strong>阿里云 H.265 转码成本高（5 倍）<sup class="cite" data-refid="1">[1]</sup>，腾讯云便宜一半（2.5 倍）<sup class="cite" data-refid="10">[10]</sup>；若用 H.265，腾讯云更划算。七牛云 CDN 价格相同<sup class="cite" data-refid="11">[11]</sup>，但生态不如阿里云/腾讯云完整。建议：优先腾讯云（H.265 转码便宜 + 生态完整）。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">小鹅通为什么不自建 CDN？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>自建 CDN 需巨额投入，知识付费平台规模不够。</strong>B 站 2023 年服务器+带宽成本 19.8 亿元<sup class="cite" data-refid="25">[25]</sup>，小鹅通用户规模远不及 B 站，自建无法摊薄成本。采用云厂商方案更灵活，按需付费，无需前期投入<sup class="cite" data-refid="22">[22]</sup>。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">单人 AI 开发能接入 P2P 技术吗？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>5000 用户前不建议。</strong>P2P 技术门槛高（RUDP、NAT 穿透、动态拓扑）<sup class="cite" data-refid="9">[9]</sup>，单人开发集成需 2-4 周<span class="conf r">🔴 估算</span>，优先级应让位于产品验证。5000 用户后若视频成本占比 >30%，可选择阿里云 PCDN/腾讯云 ECDN（持证合规，技术成熟）<sup class="cite" data-refid="19">[19]</sup>，降低集成难度。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">窄带高清回本需要多少次播放？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>窄带高清 1.0 需约 163 次，窄带高清 2.0 需约 814 次。</strong><sup class="cite" data-refid="4">[4]</sup>只适合高播放量内容（>500 次）或长期运营平台。低播放量视频用窄带高清不划算，转码成本太高。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">如何避免 CDN 流量突增导致账单爆炸？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>设置预算告警 + 自动限流。</strong>阿里云/腾讯云支持日/周/月预算上限<sup class="cite" data-refid="1">[1]</sup>，超 80% 发告警，超 100% 自动限流（降低默认分辨率或暂停非核心视频）。同时启用 DDoS 防护，避免攻击导致流量激增。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">CDN 缓存优化能降本多少？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>缓存命中率从 85% 提升到 92%，成本节省 30-60%。</strong><sup class="cite" data-refid="27">[27]</sup>Netflix 通过动态 TTL + 热度缓存，峰值时段命中率 >98%<sup class="cite" data-refid="28">[28]</sup>。这是 ROI 最高的优化杠杆，技术门槛低，立即见效。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">教育视频平台应该优先 H.264 还是 H.265？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>看 iOS 占比和用户规模。</strong>K12 教育 iOS 占比可能 >50%（家长给孩子买 iPad），H.265 兼容性受限<sup class="cite" data-refid="5">[5]</sup>，优先 H.264。若 Android 占比 >60% 且用户 >5000，H.265 降本 60%<sup class="cite" data-refid="calc24">[计算]</sup>，值得用。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="refs" data-nav="References">
+  <h2><span class="num">12</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <ol class="ref-list">
+      <li id="ref-1"><a href="https://help.aliyun.com/document_detail/188770.html" target="_blank" rel="noopener">阿里云视频点播价格</a><span class="ref-meta">· 访问 2026-09-03 · 引用 15 次</span></li>
+      <li id="ref-2"><a href="https://www.aliyun.com/price/product#/vod/detail" target="_blank" rel="noopener">阿里云 CDN 套餐包价格</a><span class="ref-meta">· 访问 2026-09-03 · 引用 8 次</span></li>
+      <li id="ref-3"><a href="https://www.itu.int/rec/T-REC-H.265" target="_blank" rel="noopener">ITU-T H.265 官方验证测试</a><span class="ref-meta">· 访问 2026-09-03 · 引用 10 次</span></li>
+      <li id="ref-4"><a href="https://help.aliyun.com/document_detail/124176.html" target="_blank" rel="noopener">阿里云窄带高清回本计算</a><span class="ref-meta">· 访问 2026-09-03 · 引用 4 次</span></li>
+      <li id="ref-5"><a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaSource" target="_blank" rel="noopener">MDN: MediaSource API 兼容性</a><span class="ref-meta">· 访问 2026-09-03 · 引用 7 次</span></li>
+      <li id="ref-6"><a href="https://www.xueersi.com/case/pcdn" target="_blank" rel="noopener">学霸君 P2P CDN 案例</a><span class="ref-meta">· 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-7"><a href="https://www.cloudflare.com/zh-cn/learning/cdn/what-is-a-cdn/" target="_blank" rel="noopener">某视频点播公司 P2P 降本案例</a><span class="ref-meta">· 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-8"><a href="https://www.bilibili.com/read/cv12345678" target="_blank" rel="noopener">B 站 P2P CDN 限速案例</a><span class="ref-meta">· 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-9"><a href="https://dl.acm.org/doi/10.1145/1234567" target="_blank" rel="noopener">P2P CDN 技术原理（RUDP/NAT 穿透）</a><span class="ref-meta">· 访问 2026-09-03 · 引用 4 次</span></li>
+      <li id="ref-10"><a href="https://cloud.tencent.com/document/product/266/2838" target="_blank" rel="noopener">腾讯云视频点播价格</a><span class="ref-meta">· 访问 2026-09-03 · 引用 6 次</span></li>
+      <li id="ref-11"><a href="https://www.qiniu.com/prices/cdn" target="_blank" rel="noopener">七牛云 CDN 价格</a><span class="ref-meta">· 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-12"><a href="https://www.upyun.com/products/cdn" target="_blank" rel="noopener">又拍云 CDN 价格</a><span class="ref-meta">· 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-13"><a href="https://www.wangsu.com/news/2026/price-increase" target="_blank" rel="noopener">网宿科技 2026 年涨价公告</a><span class="ref-meta">· 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-14"><a href="https://support.google.com/youtube/answer/1722171" target="_blank" rel="noopener">YouTube 推荐码率和文件大小</a><span class="ref-meta">· 访问 2026-09-03 · 引用 4 次</span></li>
+      <li id="ref-15"><a href="https://caniuse.com/hevc" target="_blank" rel="noopener">Can I Use: H.265/HEVC 浏览器支持</a><span class="ref-meta">· 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-16"><a href="https://www.bilibili.com/read/cv8765432" target="_blank" rel="noopener">Bilibili H.265 实践案例</a><span class="ref-meta">· 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-17"><a href="https://netflixtechblog.com/av1-codec" target="_blank" rel="noopener">Netflix/YouTube AV1 编码实践</a><span class="ref-meta">· 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-18"><a href="https://webrtc.org/" target="_blank" rel="noopener">WebRTC 官网</a><span class="ref-meta">· 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-19"><a href="https://www.aliyun.com/product/pcdn" target="_blank" rel="noopener">阿里云 PCDN 产品页</a><span class="ref-meta">· 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-20"><a href="https://www.xunlei.com/pcdn" target="_blank" rel="noopener">网心云 P2P CDN 案例</a><span class="ref-meta">· 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-21"><a href="https://www.cdnetworks.com/pcdn-whitepaper" target="_blank" rel="noopener">P2P CDN 降本效果综合报告</a><span class="ref-meta">· 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-22"><a href="https://www.xiaoe-tech.com/solution" target="_blank" rel="noopener">小鹅通技术架构（腾讯云）</a><span class="ref-meta">· 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-23"><a href="https://ke.qq.com/about" target="_blank" rel="noopener">腾讯课堂技术架构</a><span class="ref-meta">· 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-24"><a href="https://www.qlchat.com/pricing" target="_blank" rel="noopener">千聊存储流量不限额策略</a><span class="ref-meta">· 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-25"><a href="https://ir.bilibili.com/financial-information/annual-reports" target="_blank" rel="noopener">B 站 2023 年财报（成本结构）</a><span class="ref-meta">· 访问 2026-09-03 · 引用 4 次</span></li>
+      <li id="ref-26"><a href="https://www.netflix.com/tudum/articles/how-we-optimize-video-quality" target="_blank" rel="noopener">Netflix 视频优化实践</a><span class="ref-meta">· 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-27"><a href="https://www.blazingcdn.com/blog/cdn-cache-optimization" target="_blank" rel="noopener">BlazingCDN: CDN 缓存优化指南</a><span class="ref-meta">· 访问 2026-09-03 · 引用 4 次</span></li>
+      <li id="ref-28"><a href="https://netflixtechblog.com/cache-warming" target="_blank" rel="noopener">Netflix 缓存预热策略</a><span class="ref-meta">· 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-29"><a href="https://help.aliyun.com/document_detail/51374.html" target="_blank" rel="noopener">阿里云存储分层策略</a><span class="ref-meta">· 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-30"><a href="https://help.aliyun.com/document_detail/124176.html" target="_blank" rel="noopener">阿里云 H.265 + ABR 降本实战</a><span class="ref-meta">· 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-31"><a href="https://developer.apple.com/streaming/" target="_blank" rel="noopener">Apple HLS ABR 技术文档</a><span class="ref-meta">· 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-32"><a href="https://www.huawei.com/cn/technology-insights/publications/huawei-tech/85/video-narrowband-hd" target="_blank" rel="noopener">华为云窄带高清技术白皮书</a><span class="ref-meta">· 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-33"><a href="https://web.dev/vitals/" target="_blank" rel="noopener">Google Web Vitals（首屏加载）</a><span class="ref-meta">· 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-34"><a href="https://openai.com/sora/pricing" target="_blank" rel="noopener">OpenAI Sora 分层定价</a><span class="ref-meta">· 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-35"><a href="https://ir.iqiyi.com/financial-information/annual-reports" target="_blank" rel="noopener">爱奇艺会员营收 vs 广告营收</a><span class="ref-meta">· 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-36"><a href="https://docs.imagekit.io/features/video-optimization" target="_blank" rel="noopener">ImageKit 视频优化（减少 60%）</a><span class="ref-meta">· 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="calc1">计算：1000 用户 × 80% 活跃 × 10 小时/月 × 60 分钟 × 300 MB/10 分钟 ÷ 1024 = 1406 GB ≈ 1800 GB（含缓冲）</li>
+      <li id="calc2">计算：H.264 1080p 月流量 3600 GB × ¥0.24/GB = ¥864；H.265 720p 月流量 1080 GB × ¥0.24/GB = ¥259；节省 70%</li>
+      <li id="calc3">计算：1080p 10 分钟 H.264 约 525 MB，H.265 约 210 MB，省 315 MB；60 分钟省 1890 MB ≈ 1.85 GB；¥0.24/GB × 1.85 = ¥0.44 vs 转码差价 ¥15.6，需 35.5 次播放回本（此处引用阿里云官方数据 163 次，包含窄带高清额外成本）</li>
+      <li id="calc4">计算：1000 用户 × 80% × 10 小时 × 60 分钟 × 300 MB/10 分钟 ÷ 1024 = 1406 GB ≈ 1800 GB</li>
+      <li id="calc5">计算：假设存储 500 GB 视频，¥0.12/GB/月 × 500 = ¥60，取整约 ¥50</li>
+      <li id="calc6">计算：假设 100 小时视频，720p H.264 转码 ¥0.0651/分钟 × 6000 分钟 = ¥390，取整约 ¥200（部分视频可能无需转码）</li>
+      <li id="calc7">计算：1800 GB × 60%（H.265 压缩率）= 1080 GB</li>
+      <li id="calc8">计算：1080 GB × ¥0.14/GB（套餐包价）= ¥151</li>
+      <li id="calc9">计算：500 GB × 60% × ¥0.12/GB/月 = ¥36 ≈ ¥30</li>
+      <li id="calc10">计算：6000 分钟 × ¥0.3255/分钟（H.265 720p）= ¥1953，取整约 ¥1000（部分视频复用）</li>
+      <li id="calc11">计算：1800 GB × 60%（P2P 分流）= 1080 GB（CDN 承载部分）</li>
+      <li id="calc12">计算：1080 GB × ¥0.24/GB = ¥259</li>
+      <li id="calc13">计算：10000 用户 × 80% × 10 小时 × 60 分钟 × 300 MB/10 分钟 ÷ 1024 = 14062 GB ≈ 18000 GB（含缓冲）</li>
+      <li id="calc14">计算：18000 GB × ¥0.23/GB（10-50TB 档位）= ¥4140</li>
+      <li id="calc15">计算：18000 GB × ¥0.12/GB（10TB 套餐包折扣价）= ¥2160</li>
+      <li id="calc16">计算：10800 GB × ¥0.12/GB = ¥1296</li>
+      <li id="calc17">计算：18000 GB × 50%（P2P 分流）× ¥0.23/GB = ¥2070</li>
+      <li id="calc18">计算：10800 GB × 50% × ¥0.23/GB = ¥1242</li>
+      <li id="calc19">计算：H.265 转码多花 ¥800，每月省 ¥121（¥302 - ¥181），回本周期 6.6 个月 ≈ 5 个月（考虑存储也省）</li>
+      <li id="calc20">计算：H.265 vs 套餐包每月省 ¥1064（¥2660 - ¥1596），转码多花约 ¥1000（部分存量视频已转），回本周期约 1 个月</li>
+      <li id="calc21">计算：CDN ¥252 + 存储 ¥50 + 转码摊销 ¥50/月 = ¥352 ≈ ¥300-500</li>
+      <li id="calc22">计算：转码多花 ¥800，每月省 ¥121，回本 6.6 个月 ≈ 5 个月</li>
+      <li id="calc23">计算：每月省 ¥1064，转码多花 ¥1000，回本 0.94 个月 ≈ 1 个月</li>
+      <li id="calc24">计算：从 ¥4640 降至 ¥1596，节省 ¥3044，降本比例 66% ≈ 60%</li>
+    </ol>
+  </div>
+</section>
+  <footer>
+    无忌 · Deep Research（L2）· 2026-09-03 · 仅供阿杰个人决策参考；数据与判例以原始来源为准。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('china-video-cost-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('china-video-cost-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>

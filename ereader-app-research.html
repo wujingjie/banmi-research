@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>主流电子阅读器和阅读 App 深度调研报告 · 无忌 Deep Research · 2026-09-03</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe7;
+    --bg-soft: #ece5d8;
+    --bg-elevated: #fbf9f4;
+    --bg-stripe: #efe7d8;
+    --text: #2e2a24;
+    --text-soft: #6b6255;
+    --text-mute: #938979;
+    --border: #ddd3c2;
+    --border-strong: #cbbfa9;
+    --accent: #bf5d38;
+    --accent-soft: #f1ddd0;
+    --accent-text: #a04829;
+    --good: #5f7a3e;
+    --good-soft: #cfdab4;
+    --warn: #9a6a16;
+    --warn-soft: #f6e6c8;
+    --bad: #b5462f;
+    --bad-soft: #f3d8cf;
+    --info: #5b7d8c;
+    --info-soft: #cddbe1;
+    --code-bg: #efe7d8;
+    --purple: #8a5a6f;
+    --purple-soft: #ecd9e1;
+    --shadow: 0 8px 22px -16px rgba(70,55,35,.40);
+    --shadow-lg: 0 22px 50px -24px rgba(70,55,35,.50);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --serif: "Fraunces","Noto Serif SC",Georgia,serif;
+    --sans: "Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #221f1a;
+    --bg-soft: #2c2822;
+    --bg-elevated: #2a2620;
+    --bg-stripe: #26221c;
+    --text: #ece4d6;
+    --text-soft: #c3b8a6;
+    --text-mute: #998f7e;
+    --border: #3c362e;
+    --border-strong: #4d463b;
+    --accent: #e2825c;
+    --accent-soft: #3a261c;
+    --accent-text: #ef9a76;
+    --good: #9bbf6a;
+    --good-soft: #2e3a1d;
+    --warn: #d9a441;
+    --warn-soft: #3d2f12;
+    --bad: #e08163;
+    --bad-soft: #3d1f16;
+    --info: #8fb3c2;
+    --info-soft: #1d2e34;
+    --code-bg: #1a1712;
+    --purple: #c79bb0;
+    --purple-soft: #33222a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 12% -8%, rgba(191,93,56,.10), transparent 60%), radial-gradient(800px 480px at 105% 8%, rgba(125,154,86,.12), transparent 55%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: 60px;
+    transition: background-color .25s, color .25s;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple)); z-index: 1000; transition: width .1s linear; }
+  header.topbar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 15px; letter-spacing: .2px; color: var(--text); white-space: nowrap; }
+  .brand .tag { margin-left: 6px; font-weight: 500; font-size: 11px; color: var(--text-mute); padding: 2px 7px; border: 1px solid var(--border); border-radius: 999px; font-family: var(--sans); }
+  .topbar-spacer { flex: 1; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; font-size: 18px; transition: transform .15s, background-color .15s; }
+  .icon-btn:active { transform: scale(.94); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .hero { padding: 28px 4px 12px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.22; margin: 0 0 12px; letter-spacing: -.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent-text) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-mute); }
+  .hero-meta span { background: var(--bg-soft); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .hero-deck { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; color: var(--text); font-size: 15px; }
+  .hero-deck p { margin: 6px 0; color: var(--text); }
+  section.chapter { margin: 24px 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  section.chapter > h2 { font-family: var(--serif); font-size: 21px; margin: 0; padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); user-select: none; background: var(--bg-elevated); transition: background-color .15s; min-height: 56px; }
+  section.chapter > h2:active { background: var(--bg-soft); }
+  section.chapter > h2 .num { font-family: var(--serif); font-style: italic; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  section.chapter > h2 .title-text { flex: 1; }
+  section.chapter > h2 .caret { transition: transform .25s; color: var(--text-mute); font-size: 14px; }
+  section.chapter.collapsed > h2 .caret { transform: rotate(-90deg); }
+  section.chapter.collapsed > h2 { border-bottom-color: transparent; }
+  .chapter-body { padding: 18px 20px 22px; max-height: 100000px; overflow: hidden; transition: max-height .35s ease, padding .25s; }
+  section.chapter.collapsed .chapter-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  h3 { font-family: var(--serif); font-size: 18px; margin: 22px 0 10px; color: var(--text); padding-left: 10px; border-left: 3px solid var(--accent); }
+  h4 { font-size: 15px; margin: 16px 0 8px; color: var(--text-soft); }
+  p { margin: 8px 0 12px; color: var(--text-soft); }
+  strong { color: var(--text); }
+  ul, ol { margin: 8px 0 14px; padding-left: 22px; color: var(--text-soft); }
+  li { margin: 4px 0; }
+  .callout { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border-left: 4px solid; font-size: 14.5px; line-height: 1.65; }
+  .callout.info { background: var(--info-soft); border-color: var(--info); }
+  .callout.good { background: var(--good-soft); border-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .callout.accent { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout h4 { margin-top: 0; }
+  .table-wrap { margin: 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elevated); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 560px; }
+  thead th { position: sticky; top: 0; background: var(--bg-soft); color: var(--text); text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; z-index: 1; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-soft); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: var(--bg-stripe); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.row-highlight td { background: var(--accent-soft) !important; color: var(--text); }
+  tbody tr { cursor: pointer; transition: background-color .15s; }
+  td.check { text-align: center; font-weight: 600; }
+  td.check.y { color: var(--good); }
+  td.check.n { color: var(--bad); }
+  td.check.p { color: var(--warn); }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg-elevated); }
+  .faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; user-select: none; min-height: 50px; }
+  .faq-q .qmark { color: var(--accent-text); font-weight: 700; font-size: 16px; flex: 0 0 auto; font-family: var(--serif); }
+  .faq-q .qtext { flex: 1; font-size: 15px; line-height: 1.45; }
+  .faq-q .toggle { color: var(--text-mute); transition: transform .25s; font-size: 14px; }
+  .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+  .faq-a { padding: 0 16px; max-height: 0; overflow: hidden; color: var(--text-soft); font-size: 14.5px; line-height: 1.65; transition: max-height .3s, padding .25s; }
+  .faq-item.open .faq-a { max-height: 4000px; padding: 0 16px 14px 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .back-to-top { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 40; border: none; }
+  .back-to-top.show { display: flex; }
+  .back-to-top:active { transform: scale(.94); }
+  .back-fab { position: fixed; right: 20px; bottom: 78px; z-index: 45; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elevated); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 24px; padding: 9px 16px; font-size: 13.5px; text-decoration: none; font-weight: 700; box-shadow: var(--shadow-lg); }
+  .back-fab:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+  footer { text-align: center; padding: 24px 16px; color: var(--text-mute); font-size: 13px; border-top: 1px solid var(--border); margin-top: 32px; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text); }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); margin: 12px 0; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 12px 0; padding: 10px 16px; border-left: 4px solid var(--text-mute); background: var(--bg-soft); border-radius: 6px; color: var(--text-soft); font-size: 14.5px; }
+  .pill { display: inline-block; padding: 3px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+  .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .pill.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .metric { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; }
+  .metric .v { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--accent-text); }
+  .metric .l { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+  .tree { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-soft); }
+  .tree .node { padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; }
+  .tree .node.q { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .tree .lbl { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-right: 8px; }
+  .tree .lbl.y { background: var(--good-soft); color: var(--good); }
+  .tree .lbl.n { background: var(--bad-soft); color: var(--bad); }
+  .tree .lbl.m { background: var(--warn-soft); color: var(--warn); }
+  .tree .step-arrow { text-align: center; color: var(--text-mute); margin: 2px 0; font-size: 18px; }
+  .step { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); }
+  .step-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--bg-soft); font-family: var(--serif); font-weight: 700; font-size: 15.5px; color: var(--text); }
+  .step-head .sn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  .step-body { padding: 10px 14px 14px; font-size: 14.5px; }
+  .check-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--good-soft); border-left: 4px solid var(--good); font-size: 14px; }
+  .trap-box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--bad-soft); border-left: 4px solid var(--bad); font-size: 14px; }
+  sup.cite { cursor: help; position: relative; border-bottom: 1px dotted currentColor; padding: 0 1px; color: var(--accent-text); font-weight: 600; }
+  sup.cite:hover { background: rgba(191,93,56,0.18); border-radius: 3px; }
+  .cite-popover { position: absolute; z-index: 9999; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 380px; min-width: 220px; box-shadow: 0 10px 30px rgba(70,55,35,0.25); font-size: 13px; line-height: 1.55; pointer-events: auto; }
+  .cite-popover a { color: var(--accent-text); text-decoration: underline; word-break: break-all; }
+  .cite-popover ul, .cite-popover ol { margin: 4px 0 0; padding-left: 18px; }
+  .cite-popover ::before { content: none !important; }
+  .conf { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; vertical-align:middle; }
+  .conf.g { background: var(--good-soft); color: var(--good); }
+  .conf.y { background: var(--warn-soft); color: var(--warn); }
+  .conf.r { background: var(--bad-soft); color: var(--bad); }
+  .ref-list { list-style: none; padding: 0; counter-reset: ref; }
+  .ref-list li { counter-increment: ref; padding: 8px 10px 8px 36px; position: relative; border-bottom: 1px dashed var(--border); font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+  .ref-list li::before { content: "[" counter(ref) "]"; position: absolute; left: 4px; top: 8px; font-weight: 700; color: var(--accent-text); font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .ref-list li a { color: var(--accent-text); text-decoration: none; word-break: break-all; }
+  .ref-list li a:hover { text-decoration: underline; }
+  .ref-list li .ref-meta { color: var(--text-mute); font-size: 12px; margin-left: 4px; }
+  nav.anchor-nav { position: fixed; top: 100px; left: 0; width: 220px; height: calc(100vh - 100px); overflow-y: auto; overflow-x: hidden; background: var(--bg-soft); border-right: 1px solid var(--border); z-index: 60; padding: 16px 0 40px; transition: transform .28s ease; white-space: normal; }
+  nav.anchor-nav::-webkit-scrollbar { width: 6px; }
+  nav.anchor-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .nav-title { padding: 4px 20px 12px; font-size: 13px; font-weight: 700; color: var(--text-mute); }
+  .anchor-list { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+  .anchor-list a { display: block; min-height: 38px; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.35; color: var(--text-soft); text-decoration: none; border-left: 3px solid transparent; }
+  .anchor-list a.active { color: var(--accent-text); background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+  .nav-toggle { position: fixed; left: 16px; bottom: 24px; width: 52px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; border: none; font-size: 22px; z-index: 70; box-shadow: var(--shadow-lg); cursor: pointer; align-items: center; justify-content: center; display: none; }
+  .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .28s; }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 23px; }
+    section.chapter > h2 { font-size: 18px; padding: 14px 14px; }
+    .chapter-body { padding: 14px 14px 18px; }
+    h3 { font-size: 16px; }
+  }
+  @media (max-width: 1040px) {
+    nav.anchor-nav { top: 0; height: 100vh; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px; max-width: 82vw; }
+    nav.anchor-nav.open { transform: translateX(0); }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-toggle { display: flex; }
+  }
+  @media print {
+    @page { margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0 !important; font-size: 11pt; line-height: 1.55; }
+    body::before { display: none !important; }
+    header.topbar, #progress, .back-to-top, .back-fab, nav.anchor-nav, .nav-toggle, .nav-overlay, #pdfBtn { display: none !important; }
+    main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+    .hero h1, h1 { -webkit-text-fill-color: #1a1d23 !important; color: #1a1d23 !important; background: none !important; }
+    section.chapter { box-shadow: none !important; border: 1px solid #d9dde5 !important; margin: 14px 0 !important; }
+    section.chapter > h2 { cursor: default; position: static; }
+    section.chapter.collapsed .chapter-body, .chapter-body { max-height: none !important; overflow: visible !important; padding: 14px 18px 18px !important; }
+    .caret { display: none !important; }
+    .faq-a { max-height: none !important; overflow: visible !important; padding: 0 16px 12px 16px !important; border-top: 1px solid #e3e6ec; }
+    .faq-q .toggle { display: none !important; }
+    .callout, .step, .metric-grid, .tree, .faq-item, table { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    .table-wrap { overflow: visible !important; border: none !important; }
+    table { min-width: 0 !important; font-size: 9pt; }
+    .cite-popover { display: none !important; }
+    sup.cite { border-bottom: none !important; color: var(--accent-text) !important; }
+  }
+  @media (min-width: 1041px) { main { margin-left: 220px; } }
+</style>
+</head>
+<body data-theme="light">
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="icon-btn" href="./index.html" title="返回研究总目录" aria-label="返回研究总目录" style="text-decoration:none">←</a>
+    <span class="brand">无忌 · Deep Research<span class="tag">L2</span></span>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="pdfBtn" onclick="window.print()" aria-label="下载 PDF" title="下载 PDF（打印 → 存储为 PDF，已优化排版）">⬇</button>
+    <button class="icon-btn" id="themeToggle" aria-label="切换主题" title="明暗切换">🌙</button>
+  </div>
+</header>
+
+<button class="nav-toggle" id="navToggle" aria-label="章节目录">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="anchor-nav">
+  <div class="nav-title">📖 目录</div>
+  <div class="anchor-list" id="anchorList">
+    <a href="#ch1" data-target="ch1">01 01 市场全景</a>
+    <a href="#ch2" data-target="ch2">02 02 Kindle 深度</a>
+    <a href="#ch3" data-target="ch3">03 03 Apple Books</a>
+    <a href="#ch4" data-target="ch4">04 04 Kobo</a>
+    <a href="#ch5" data-target="ch5">05 05 Google Play Books</a>
+    <a href="#ch6" data-target="ch6">06 06 微信读书</a>
+    <a href="#ch7" data-target="ch7">07 07 得到 App</a>
+    <a href="#ch8" data-target="ch8">08 08 其他中国App</a>
+    <a href="#ch9" data-target="ch9">09 09 有声书赛道</a>
+    <a href="#ch10" data-target="ch10">10 10 用户迁移与槽点</a>
+    <a href="#ch11" data-target="ch11">11 11 横向对比</a>
+    <a href="#ch12" data-target="ch12">12 12 决策树</a>
+    <a href="#ch13" data-target="ch13">13 13 阿杰路线建议</a>
+    <a href="#faq" data-target="faq">14 FAQ 常见问题</a>
+    <a href="#refs" data-target="refs">15 References</a>
+  </div>
+</nav>
+
+<main><div class="hero">
+  <h1>主流电子阅读器和阅读 App 深度调研报告</h1>
+  <div class="hero-meta">
+    <span>📅 2026-09-03</span>
+    <span>🔍 80+ 搜索验证</span>
+    <span>📊 15+ 平台深度解析</span>
+  </div>
+  <div class="hero-deck">
+    <p><strong>生态锁定、DRM 迁移成本、平台退出风险——用户选择阅读工具时真正在权衡什么？</strong></p>
+    <p>本报告深度解析海外主流平台（Kindle、Apple Books、Kobo、Google Play Books）、中国阅读 App 生态（微信读书、得到、掌阅等）、有声书与图书馆服务（Audible、Libby、Scribd），从用户真实反馈中提炼出各平台的核心优势、高频槽点与适用人群，并给出横向对比表与决策树，帮助你找到最适合自己的阅读工具。</p>
+  </div>
+</div>
+
+<div class="callout accent">
+  <h3>🎯 三条最关键发现</h3>
+  <ol>
+    <li><strong>生态锁定是双刃剑</strong>：Kindle 在美国占 83% 市场份额<sup class="cite" data-refid="1">[1]</sup>，Apple Books 深度绑定 Apple 设备，但 DRM 锁定让用户迁移成本极高——2025 年 Amazon 取消 USB 下载功能<sup class="cite" data-refid="2">[2]</sup>、2012 年前设备被强制停止服务<sup class="cite" data-refid="3">[3]</sup>，用户"购买"的电子书本质上只是租赁许可证。</li>
+    <li><strong>中国市场形成"免费+广告"与"付费会员"双轨制</strong>：番茄小说以 2.61 亿月活<sup class="cite" data-refid="4">[4]</sup>成为最大网文平台，免费模式吸引年轻用户；微信读书靠社交属性和 19 元/月会员<sup class="cite" data-refid="5">[5]</sup>占据中高端市场，但付费后网文仍需书币的"二次收费"引发大量用户不满<sup class="cite" data-refid="6">[6]</sup>。</li>
+    <li><strong>图书馆借阅是被低估的免费替代方案</strong>：Libby 覆盖北美 90%+ 公共图书馆<sup class="cite" data-refid="7">[7]</sup>、2025 年全球借阅 8.2 亿次<sup class="cite" data-refid="8">[8]</sup>，完全免费且可发送到 Kindle 阅读，唯一代价是热门书等待时间可达 26 周<sup class="cite" data-refid="9">[9]</sup>——对不急着读特定书的用户，这是性价比最高的选择。</li>
+  </ol>
+</div>
+
+<section class="chapter" id="ch1" data-nav="01 市场全景">
+  <h2><span class="num">01</span><span class="title-text">市场全景：海外垄断 vs 中国多元</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+
+    <h3>海外市场：Kindle 一家独大</h3>
+
+    <p>在英语阅读市场，Amazon Kindle 占据压倒性优势。根据 2026 年数据，Kindle 控制美国电子书市场 67% 的销售额，计入 Kindle Unlimited 订阅借阅后市场份额达到 83%<sup class="cite" data-refid="1">[1]</sup>；在英国市场占比更是高达 87.9%<sup class="cite" data-refid="1">[1]</sup>。这种垄断地位源于三大优势：</p>
+
+    <ul>
+      <li><strong>书库规模</strong>：Kindle 每年售出 4.87 亿本电子书<sup class="cite" data-refid="10">[10]</sup>，书库规模远超竞争对手</li>
+      <li><strong>订阅服务</strong>：Kindle Unlimited 月费 $11.99 提供数百万本书<sup class="cite" data-refid="10">[10]</sup>，性价比吸引重度读者</li>
+      <li><strong>生态整合</strong>：与 Audible 无缝切换、Whispersync 跨设备同步、X-Ray 功能<sup class="cite" data-refid="10">[10]</sup></li>
+    </ul>
+
+    <p>Apple Books 在 Apple 生态内有稳固地位，但仅限 iOS/iPadOS/macOS 用户<sup class="cite" data-refid="11">[11]</sup>；Kobo 在加拿大和欧洲表现更强<sup class="cite" data-refid="12">[12]</sup>，主打图书馆集成和格式开放；Google Play Books 在 Android 主导的亚非拉市场份额更高<sup class="cite" data-refid="13">[13]</sup>，但英语市场不如前三者。</p>
+
+    <h3>中国市场：免费与付费双轨并行</h3>
+
+    <p>中国阅读 App 市场呈现完全不同的格局：</p>
+
+    <div class="metric-grid">
+      <div class="metric">
+        <div class="v">2.61 亿</div>
+        <div class="l">番茄小说月活（中国最大）<sup class="cite" data-refid="4">[4]</sup></div>
+      </div>
+      <div class="metric">
+        <div class="v">2.1 亿</div>
+        <div class="l">微信读书注册用户<sup class="cite" data-refid="14">[14]</sup></div>
+      </div>
+      <div class="metric">
+        <div class="v">6346 万</div>
+        <div class="l">七猫免费小说月活<sup class="cite" data-refid="15">[15]</sup></div>
+      </div>
+    </div>
+
+    <p><strong>免费阅读赛道</strong>由字节跳动的番茄小说和百度的七猫免费小说主导，采用"免费阅读 + 广告变现"模式<sup class="cite" data-refid="16">[16]</sup>，用户结构偏年轻（50% 以上用户 < 30 岁<sup class="cite" data-refid="17">[17]</sup>），番茄小说年收入估算达 300-400 亿元<sup class="cite" data-refid="4">[4]</sup> <span class="conf r">🔴</span>。</p>
+
+    <p><strong>付费会员赛道</strong>以微信读书、得到 App、QQ 阅读为代表。微信读书凭借腾讯生态和社交属性，月费 19 元<sup class="cite" data-refid="5">[5]</sup>，吸引高学历年轻人群（本科及以上占 80%<sup class="cite" data-refid="18">[18]</sup>）；得到 App 主打专家级内容，年度会员 365 元<sup class="cite" data-refid="19">[19]</sup>；QQ 阅读背靠阅文集团 1000 万部作品储备<sup class="cite" data-refid="20">[20]</sup>，是网文赛道王者。</p>
+
+    <h3>有声书市场：快速增长的新赛道</h3>
+
+    <p>全球有声书市场 2025 年规模 110 亿美元，2026 年达 139 亿美元，预计 2033 年增长至 585 亿美元（CAGR 22.7%）<sup class="cite" data-refid="21">[21]</sup>。Audible 以 40% 市场份额<sup class="cite" data-refid="22">[22]</sup>和 70 万+ 书库<sup class="cite" data-refid="22">[22]</sup>主导付费市场；Libby 凭借图书馆借阅在北美快速增长，2025 年全球借阅 8.2 亿次（同比增 10.9%）<sup class="cite" data-refid="8">[8]</sup>。</p>
+
+  </div>
+</section>
+
+<section class="chapter" id="ch2" data-nav="02 Kindle 深度">
+  <h2><span class="num">02</span><span class="title-text">Kindle：生态霸主的垄断与代价</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+
+    <h3>核心优势：最大书库 + 订阅服务 + 生态整合</h3>
+
+    <div class="callout good">
+      <p><strong>为什么用户选择 Kindle？</strong></p>
+      <ul>
+        <li><strong>书库无敌</strong>：年售 4.87 亿本<sup class="cite" data-refid="10">[10]</sup>，几乎所有英文畅销书都能找到</li>
+        <li><strong>订阅性价比高</strong>：Kindle Unlimited $11.99/月<sup class="cite" data-refid="10">[10]</sup>提供数百万本书，重度读者月读 3+ 本即回本</li>
+        <li><strong>已在 Amazon 生态</strong>：Prime 会员、购物账号复用，一键购买零门槛<sup class="cite" data-refid="23">[23]</sup></li>
+        <li><strong>跨设备同步</strong>：Whispersync 自动同步阅读位置、高亮、笔记<sup class="cite" data-refid="10">[10]</sup></li>
+        <li><strong>Audible 联动</strong>：有声书与电子书无缝切换<sup class="cite" data-refid="10">[10]</sup></li>
+        <li><strong>X-Ray 功能</strong>：可探索书中角色、地点、术语<sup class="cite" data-refid="10">[10]</sup></li>
+      </ul>
+    </div>
+
+    <h3>高频槽点：格式封闭 + 破坏性更新 + 平台风险</h3>
+
+    <div class="callout bad">
+      <p><strong>为什么用户不选择 / 放弃 Kindle？</strong></p>
+
+      <p><strong>1. 格式封闭，迁移困难</strong></p>
+      <p>Kindle 不支持 EPUB 格式，必须使用专有的 AZW/MOBI/KFX 格式<sup class="cite" data-refid="24">[24]</sup>。2025 年 2 月，Amazon 取消了"Download & Transfer via USB"功能<sup class="cite" data-refid="2">[2]</sup>——这曾是用户转换格式到 EPUB 用于 Kobo 的唯一方法。DRM 锁定让你的书库被永久绑定在 Kindle 生态，迁移到其他平台需要技术手段破解 DRM。</p>
+
+      <p><strong>2. 频繁破坏性更新</strong></p>
+      <p>2026 年初的 5.18.6 固件更新破坏了书签和词典功能<sup class="cite" data-refid="24">[24]</sup>，引发大量用户投诉；TTS 功能在遇到生僻词时卡住不继续；页面跳转时随机丢失阅读位置<sup class="cite" data-refid="24">[24]</sup>。更严重的是，Amazon 在 2026 年终止了对 2012 年前设备的支持<sup class="cite" data-refid="3">[3]</sup>，这些设备无法连接服务购买、借阅或下载新书——你的"旧"设备变成砖头。</p>
+
+      <p><strong>3. 你不拥有所有权</strong></p>
+      <p>用户"购买"的电子书本质上只是阅读许可证，Amazon 有权随时撤销已购书籍<sup class="cite" data-refid="3">[3]</sup>。2019 年 Amazon 曾从用户设备中远程删除奥威尔的《1984》，引发舆论哗然——讽刺的是，这正是《1984》描述的场景。</p>
+
+      <p><strong>4. 推荐内容侵占界面</strong></p>
+      <p>Kindle 首页被推荐标题和促销信息占据，挤压用户真正添加的内容<sup class="cite" data-refid="25">[25]</sup>。用户抱怨"我花钱买的设备，为什么要看 Amazon 的广告？"</p>
+
+      <p><strong>5. 图书馆借阅体验差</strong></p>
+      <p>从图书馆借书需要通过 Libby → 浏览器跳转 → Amazon 登录 → 有时还需邮件发送<sup class="cite" data-refid="26">[26]</sup>，远不如 Kobo 的设备内直接借阅体验。</p>
+    </div>
+
+    <h3>适用人群</h3>
+
+    <div class="callout info">
+      <p><strong>Kindle 最适合：</strong></p>
+      <ul>
+        <li>✅ 已深度使用 Amazon 生态（Prime、Audible、购物账号）</li>
+        <li>✅ 主要阅读英文畅销书和新书</li>
+        <li>✅ 重度读者（月读 5+ 本书，订阅 Kindle Unlimited 划算）</li>
+        <li>✅ 接受平台锁定，不打算迁移到其他生态</li>
+      </ul>
+      <p><strong>不适合：</strong></p>
+      <ul>
+        <li>⛔ 需要 EPUB 格式灵活性的用户</li>
+        <li>⛔ 经常从图书馆借书的用户（Kobo 体验更好）</li>
+        <li>⛔ 担心平台风险、希望"真正拥有"书籍的用户</li>
+        <li>⛔ 反感推荐内容和促销信息的用户</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<section class="chapter" id="ch3" data-nav="03 Apple Books">
+  <h2><span class="num">03</span><span class="title-text">Apple Books：封闭生态的极致体验</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+
+    <h3>核心优势：Apple 生态无缝集成 + 无订阅</h3>
+
+    <div class="callout good">
+      <p><strong>为什么用户选择 Apple Books？</strong></p>
+      <ul>
+        <li><strong>预装零门槛</strong>：所有 Apple 设备预装，iPhone/iPad/Mac 自动 iCloud 同步<sup class="cite" data-refid="27">[27]</sup></li>
+        <li><strong>界面简洁优雅</strong>：Apple 式设计，无广告、无推荐干扰<sup class="cite" data-refid="28">[28]</sup></li>
+        <li><strong>无订阅模式</strong>：按本购买，不需要月费<sup class="cite" data-refid="28">[28]</sup></li>
+        <li><strong>iPad 手写笔记</strong>：支持 Scribble 手写批注<sup class="cite" data-refid="27">[27]</sup></li>
+        <li><strong>阅读目标追踪</strong>：自动记录每日阅读时长<sup class="cite" data-refid="27">[27]</sup></li>
+      </ul>
+    </div>
+
+    <h3>高频槽点：书库小 + 平台锁定 + Bug 多</h3>
+
+    <div class="callout bad">
+      <p><strong>为什么用户不选择 Apple Books？</strong></p>
+
+      <p><strong>1. 书库比竞争对手小</strong></p>
+      <p>Apple Books 书库规模不及 Kindle 和 Google Play Books<sup class="cite" data-refid="29">[29]</sup>，尤其是非英语书籍和小众题材。</p>
+
+      <p><strong>2. 仅限 Apple 生态</strong></p>
+      <p>只能在 iOS/iPadOS/macOS 使用<sup class="cite" data-refid="11">[11]</sup>，Android 和 Windows 用户完全无法访问。在 Apple 占主导的英语市场（美英澳）份额较强<sup class="cite" data-refid="11">[11]</sup>，但在 Android 占主导的地区覆盖弱。</p>
+
+      <p><strong>3. 字体大小受限</strong></p>
+      <p>字体大小选项有限，视障用户投诉这个问题 8 年未改进<sup class="cite" data-refid="29">[29]</sup>。</p>
+
+      <p><strong>4. 滚动阅读 Bug</strong></p>
+      <p>滚动模式下屏幕会随机跳过段落甚至整个章节<sup class="cite" data-refid="29">[29]</sup>，严重影响阅读体验。</p>
+
+      <p><strong>5. 价格偏高</strong></p>
+      <p>同一本书的定价通常高于 Kindle<sup class="cite" data-refid="29">[29]</sup>，且无订阅服务选项。</p>
+    </div>
+
+    <h3>适用人群</h3>
+
+    <div class="callout info">
+      <p><strong>Apple Books 最适合：</strong></p>
+      <ul>
+        <li>✅ 拥有多台 Apple 设备（iPhone + iPad + Mac）的用户</li>
+        <li>✅ 重视界面简洁、无广告干扰</li>
+        <li>✅ 不想订阅，偏好按本购买</li>
+        <li>✅ 使用 iPad + Apple Pencil 做手写笔记</li>
+      </ul>
+      <p><strong>不适合：</strong></p>
+      <ul>
+        <li>⛔ 使用 Android 或 Windows 设备的用户</li>
+        <li>⛔ 需要大量小众书籍的用户</li>
+        <li>⛔ 对价格敏感、希望订阅服务的用户</li>
+        <li>⛔ 视障用户（字体选项受限）</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<section class="chapter" id="ch4" data-nav="04 Kobo">
+  <h2><span class="num">04</span><span class="title-text">Kobo：图书馆借阅的最佳伴侣</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+
+    <h3>核心优势：图书馆集成 + 格式开放</h3>
+
+    <div class="callout good">
+      <p><strong>为什么用户选择 Kobo？</strong></p>
+      <ul>
+        <li><strong>图书馆借阅内置</strong>：OverDrive 图书馆借阅直接集成在设备内<sup class="cite" data-refid="30">[30]</sup>，2025 年 Kobo-Libby 合作深化后可在 App 内直接借书<sup class="cite" data-refid="30">[30]</sup></li>
+        <li><strong>格式开放</strong>：原生支持 EPUB/MOBI/PDF/漫画格式<sup class="cite" data-refid="30">[30]</sup>，不需要转换</li>
+        <li><strong>排版自定义</strong>：支持更多字体和间距微调<sup class="cite" data-refid="30">[30]</sup></li>
+        <li><strong>避开 Amazon 锁定</strong>：不被 Amazon 生态绑定<sup class="cite" data-refid="31">[31]</sup></li>
+        <li><strong>环保材料</strong>：部分设备使用回收材料制造<sup class="cite" data-refid="31">[31]</sup></li>
+      </ul>
+    </div>
+
+    <h3>高频槽点：书库小 + App 体验差 + 硬件品控</h3>
+
+    <div class="callout bad">
+      <p><strong>为什么用户不选择 Kobo？</strong></p>
+
+      <p><strong>1. 书店规模不及 Amazon</strong></p>
+      <p>Kobo 书店的书库规模远小于 Kindle<sup class="cite" data-refid="32">[32]</sup>，尤其在美国市场选品和推广相对劣势<sup class="cite" data-refid="12">[12]</sup>（在加拿大和欧洲表现更好）。</p>
+
+      <p><strong>2. App 无法记住阅读位置</strong></p>
+      <p>Kobo App 无法记住上次阅读位置，有声书每次都从头开始播放<sup class="cite" data-refid="32">[32]</sup>——这是 2026 年用户评论区最高频的抱怨。</p>
+
+      <p><strong>3. 硬件品控问题</strong></p>
+      <p>部分用户报告屏幕缺陷、触控间歇失灵<sup class="cite" data-refid="32">[32]</sup>；控制敏感导致误触屏幕跳页<sup class="cite" data-refid="32">[32]</sup>。</p>
+
+      <p><strong>4. 区域差异明显</strong></p>
+      <p>在加拿大和欧洲地区服务更完善，美国市场相对弱<sup class="cite" data-refid="12">[12]</sup>。</p>
+    </div>
+
+    <h3>适用人群</h3>
+
+    <div class="callout info">
+      <p><strong>Kobo 最适合：</strong></p>
+      <ul>
+        <li>✅ 图书馆重度用户（经常从公共图书馆借书）</li>
+        <li>✅ 需要 EPUB 格式灵活性的用户</li>
+        <li>✅ 主动拒绝 Amazon 生态锁定</li>
+        <li>✅ 重视排版自定义和字体选择</li>
+        <li>✅ 位于加拿大或欧洲的用户</li>
+      </ul>
+      <p><strong>不适合：</strong></p>
+      <ul>
+        <li>⛔ 需要最大书库的用户（Kindle 更好）</li>
+        <li>⛔ 主要使用 App 而非硬件阅读器的用户（App 体验差）</li>
+        <li>⛔ 位于美国且不常用图书馆的用户</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<section class="chapter" id="ch5" data-nav="05 Google Play Books">
+  <h2><span class="num">05</span><span class="title-text">Google Play Books：跨平台与 AI 的结合</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+
+    <h3>核心优势：跨平台 + 自有文件上传 + AI 功能</h3>
+
+    <div class="callout good">
+      <p><strong>为什么用户选择 Google Play Books？</strong></p>
+      <ul>
+        <li><strong>真正跨平台</strong>：Android/iOS/Web 全平台可用<sup class="cite" data-refid="33">[33]</sup>，不被单一生态锁定</li>
+        <li><strong>上传自有文件</strong>：可上传 1000 个自有 EPUB/PDF 文件<sup class="cite" data-refid="33">[33]</sup>，管理个人书库</li>
+        <li><strong>AI 朗读</strong>：Read Aloud 功能提供自然语音朗读<sup class="cite" data-refid="33">[33]</sup></li>
+        <li><strong>PDF 智能重排</strong>：Flowing Text 用设备端 ML 将扫描 PDF 重排为响应式文本<sup class="cite" data-refid="33">[33]</sup></li>
+        <li><strong>学术文献管理</strong>：适合管理大量 PDF 论文和教材<sup class="cite" data-refid="34">[34]</sup></li>
+        <li><strong>Google Play 积分</strong>：购书可赚取积分<sup class="cite" data-refid="34">[34]</sup></li>
+      </ul>
+    </div>
+
+    <h3>高频槽点：笔记同步失败 + 无社交功能</h3>
+
+    <div class="callout bad">
+      <p><strong>为什么用户不选择 Google Play Books？</strong></p>
+
+      <p><strong>1. 笔记同步严重问题</strong></p>
+      <p>Android App 在重装或清除数据后，高亮和笔记会消失<sup class="cite" data-refid="35">[35]</sup>，即使 Web 版仍可见——这是用户评论区最严重的抱怨，直接导致部分用户放弃平台。</p>
+
+      <p><strong>2. 无订阅计划</strong></p>
+      <p>仅提供按本购买，没有类似 Kindle Unlimited 的订阅服务<sup class="cite" data-refid="35">[35]</sup>。</p>
+
+      <p><strong>3. 无社交和游戏化功能</strong></p>
+      <p>没有社区、排行榜、阅读挑战等功能<sup class="cite" data-refid="35">[35]</sup>，对喜欢社交阅读的用户吸引力低。</p>
+
+      <p><strong>4. 中文 TTS 支持不足</strong></p>
+      <p>Read Aloud 对中文等非英语语言的支持较弱 <span class="conf r">🔴</span>。</p>
+    </div>
+
+    <h3>适用人群</h3>
+
+    <div class="callout info">
+      <p><strong>Google Play Books 最适合：</strong></p>
+      <ul>
+        <li>✅ 同时使用 Android 和 iOS 设备的用户</li>
+        <li>✅ 需要管理大量自有 PDF 文件（学术文献、教材）</li>
+        <li>✅ 不想被单一平台锁定</li>
+        <li>✅ 重视 AI 朗读和 PDF 智能重排功能</li>
+        <li>✅ 位于 Android 占主导的地区（亚非拉）</li>
+      </ul>
+      <p><strong>不适合：</strong></p>
+      <ul>
+        <li>⛔ 重度依赖笔记功能的用户（同步问题严重）</li>
+        <li>⛔ 希望订阅服务的用户</li>
+        <li>⛔ 需要社交阅读功能的用户</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+<section class="chapter" id="ch6" data-nav="06 微信读书">
+  <h2><span class="num">06</span><span class="title-text">微信读书：社交阅读的双刃剑</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+
+    <h3>核心优势：社交属性 + 资源库丰富 + 性价比高</h3>
+
+    <div class="callout good">
+      <p><strong>为什么用户选择微信读书？</strong></p>
+      <ul>
+        <li><strong>社交阅读独一无二</strong>：基于微信关系链，支持好友读书动态、阅读时长排行、书籍讨论<sup class="cite" data-refid="36">[36]</sup></li>
+        <li><strong>资源库丰富</strong>：综合评分 87.3 分，资源库覆盖出版书和网文<sup class="cite" data-refid="37">[37]</sup></li>
+        <li><strong>性价比高</strong>：19 元/月会员<sup class="cite" data-refid="5">[5]</sup>，比 Kindle Unlimited 便宜</li>
+        <li><strong>跨平台内容互通</strong>：2025 年 5 月与起点读书实现内容互通<sup class="cite" data-refid="5">[5]</sup></li>
+        <li><strong>高学历用户群</strong>：19-35 岁占比超 60%，本科及以上占 80%<sup class="cite" data-refid="18">[18]</sup></li>
+        <li><strong>App Store 高评分</strong>：4.9/5，5 星评分占 92.8%<sup class="cite" data-refid="18">[18]</sup></li>
+      </ul>
+    </div>
+
+    <h3>高频槽点：二次收费 + 隐私问题</h3>
+
+    <div class="callout bad">
+      <p><strong>为什么用户不选择微信读书？</strong></p>
+
+      <p><strong>1. 付费会员后网文仍需书币（最高频抱怨）</strong></p>
+      <p>开通 19 元/月付费会员后，网络连载小说仍需额外购买书币才能阅读<sup class="cite" data-refid="6">[6]</sup>——这种"二次收费"引发大量用户不满。知乎上相关吐槽帖有数百条回复<sup class="cite" data-refid="6">[6]</sup>。</p>
+
+      <p><strong>2. 书币获取困难</strong></p>
+      <p>更新后只有付费会员才能兑换书币，普通用户只能兑换体验卡<sup class="cite" data-refid="38">[38]</sup>，凑齐书币变得非常困难<sup class="cite" data-refid="38">[38]</sup>。</p>
+
+      <p><strong>3. 隐私问题</strong></p>
+      <p>2020 年因侵害用户信息被北京互联网法院判决侵权<sup class="cite" data-refid="39">[39]</sup>；默认设置下好友可以查看你的书单和阅读习惯<sup class="cite" data-refid="39">[39]</sup>——很多用户不希望同事/家人看到自己在读什么书。</p>
+
+      <p><strong>4. 版权书下架</strong></p>
+      <p>东野圭吾《白夜行》等热门作品因版权问题下架<sup class="cite" data-refid="39">[39]</sup>，用户"买"的书可能突然消失。</p>
+
+      <p><strong>5. Eink 版功能缺陷</strong></p>
+      <p>墨水屏版没有书签功能、不能查看评论回复、无书籍分类、不能导入本地书籍<sup class="cite" data-refid="40">[40]</sup>。</p>
+    </div>
+
+    <h3>适用人群</h3>
+
+    <div class="callout info">
+      <p><strong>微信读书最适合：</strong></p>
+      <ul>
+        <li>✅ 喜欢社交阅读、与朋友分享读书动态的用户</li>
+        <li>✅ 主要阅读出版书（非网文）的用户</li>
+        <li>✅ 高学历年轻人群（19-35 岁）</li>
+        <li>✅ 对隐私不敏感，愿意公开书单的用户</li>
+      </ul>
+      <p><strong>不适合：</strong></p>
+      <ul>
+        <li>⛔ 主要读网文的用户（需要额外买书币）</li>
+        <li>⛔ 重视阅读隐私的用户（默认好友可见）</li>
+        <li>⛔ 使用墨水屏阅读器的用户（功能缺陷多）</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<section class="chapter" id="ch7" data-nav="07 得到 App">
+  <h2><span class="num">07</span><span class="title-text">得到 App：知识服务的付费高地</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+
+    <h3>核心优势：专家级内容 + 体系化知识服务</h3>
+
+    <div class="callout good">
+      <p><strong>为什么用户选择得到 App？</strong></p>
+      <ul>
+        <li><strong>专家级内容</strong>：380+ 门课程、97000+ 电子书、3000 本听书<sup class="cite" data-refid="41">[41]</sup></li>
+        <li><strong>名师阵容</strong>：200+ 专家教授、企业家开课<sup class="cite" data-refid="41">[41]</sup></li>
+        <li><strong>体系化知识服务</strong>：综合得分 88.8 分，在专家级内容解读和体系化知识服务方面保持顶级水准<sup class="cite" data-refid="42">[42]</sup></li>
+        <li><strong>AI 学习助手</strong>：配备 AI 学习助手、AI 学习圈<sup class="cite" data-refid="43">[43]</sup></li>
+        <li><strong>创业者社区</strong>：得到新商学——创业者帮创业者的社区<sup class="cite" data-refid="43">[43]</sup></li>
+      </ul>
+    </div>
+
+    <h3>定价</h3>
+
+    <p>听书会员分三档<sup class="cite" data-refid="44">[44]</sup>：</p>
+    <ul>
+      <li>年度会员：365 元</li>
+      <li>月度会员：48 元</li>
+      <li>连续包月：35 元</li>
+    </ul>
+
+    <h3>适用人群</h3>
+
+    <div class="callout info">
+      <p><strong>得到 App 最适合：</strong></p>
+      <ul>
+        <li>✅ 需要体系化学习商业、科技、人文知识的用户</li>
+        <li>✅ 愿意为高质量内容付费的用户</li>
+        <li>✅ 创业者、管理者、知识工作者</li>
+        <li>✅ 偏好专家讲解而非自己读原著的用户</li>
+      </ul>
+      <p><strong>不适合：</strong></p>
+      <ul>
+        <li>⛔ 主要读小说、网文的用户</li>
+        <li>⛔ 对价格敏感的用户（365 元/年比其他平台贵）</li>
+        <li>⛔ 偏好自己读原著而非听讲解的用户</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<section class="chapter" id="ch8" data-nav="08 其他中国App">
+  <h2><span class="num">08</span><span class="title-text">其他中国阅读 App：各有千秋</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+
+    <h3>掌阅 iReader：AI 辅助阅读的先行者</h3>
+
+    <div class="callout">
+      <p><strong>核心优势</strong></p>
+      <ul>
+        <li><strong>书库规模</strong>：内置掌阅书城提供超 50 万册图书<sup class="cite" data-refid="45">[45]</sup></li>
+        <li><strong>AI 功能领先</strong>："掌阅书童"AI 智能助手实时答疑，AI 速读可快速总结全书<sup class="cite" data-refid="45">[45]</sup></li>
+        <li><strong>出版读物丰富</strong>：传统出版物方面与微信读书并列第一梯队<sup class="cite" data-refid="46">[46]</sup></li>
+        <li><strong>业务转型</strong>：2025 年短剧业务超越数字阅读成为第一大收入板块<sup class="cite" data-refid="47">[47]</sup></li>
+      </ul>
+      <p><strong>适合</strong>：需要 AI 辅助阅读、阅读传统出版物的用户。</p>
+    </div>
+
+    <h3>网易蜗牛读书：时间付费的创新尝试</h3>
+
+    <div class="callout">
+      <p><strong>核心优势</strong></p>
+      <ul>
+        <li><strong>时间付费模式</strong>：每天免费读书 1 小时，以"时间"而非"内容"付费<sup class="cite" data-refid="48">[48]</sup></li>
+        <li><strong>纯净体验</strong>：偏向读书问答（类知乎），社交功能节制<sup class="cite" data-refid="49">[49]</sup></li>
+        <li><strong>批注与提问分开</strong>：设计更人性化<sup class="cite" data-refid="49">[49]</sup></li>
+        <li><strong>Turbo 会员</strong>：可免费阅读专属书库所有书籍，支持多设备登录<sup class="cite" data-refid="50">[50]</sup></li>
+      </ul>
+      <p><strong>适合</strong>：每天阅读时间有限、喜欢纯净体验和读书问答社区的用户。</p>
+    </div>
+
+    <h3>QQ 阅读：网文赛道的王者</h3>
+
+    <div class="callout">
+      <p><strong>核心优势</strong></p>
+      <ul>
+        <li><strong>网文资源最全</strong>：阅文集团旗下，1000 万部作品储备、400 万名作者<sup class="cite" data-refid="20">[20]</sup></li>
+        <li><strong>SVIP 会员</strong>：可免费阅读 10 万本专享书库<sup class="cite" data-refid="51">[51]</sup>，购买付费书 7 折（年卡）或 8 折<sup class="cite" data-refid="51">[51]</sup></li>
+        <li><strong>全品类覆盖</strong>：男频、女频、漫画分区全覆盖<sup class="cite" data-refid="52">[52]</sup></li>
+      </ul>
+      <p><strong>适合</strong>：网文重度读者，需要最全的网文资源。</p>
+    </div>
+
+    <h3>番茄小说：免费阅读的流量巨头</h3>
+
+    <div class="callout">
+      <p><strong>核心优势</strong></p>
+      <ul>
+        <li><strong>完全免费</strong>：免费阅读 + 广告变现模式<sup class="cite" data-refid="16">[16]</sup></li>
+        <li><strong>用户规模最大</strong>：2025 年底月活 2.61 亿<sup class="cite" data-refid="4">[4]</sup>，是中国最大在线文学平台</li>
+        <li><strong>年轻用户</strong>：50% 以上用户 < 30 岁<sup class="cite" data-refid="17">[17]</sup></li>
+        <li><strong>年收入估算</strong>：300-400 亿元<sup class="cite" data-refid="4">[4]</sup> <span class="conf r">🔴</span></li>
+      </ul>
+      <p><strong>槽点</strong>：2026 年规则调整取消阅读量收益<sup class="cite" data-refid="53">[53]</sup>，引发作者不满（仅影响作者，不影响读者）。</p>
+      <p><strong>适合</strong>：完全不想付费、可以接受广告的用户。</p>
+    </div>
+
+    <h3>七猫免费小说：百度流量加持</h3>
+
+    <div class="callout">
+      <p><strong>核心优势</strong></p>
+      <ul>
+        <li><strong>免费阅读</strong>：与番茄同为免费 + 广告模式</li>
+        <li><strong>百度流量</strong>：背靠中国最大搜索引擎<sup class="cite" data-refid="54">[54]</sup></li>
+        <li><strong>月活规模</strong>：6346 万月活<sup class="cite" data-refid="15">[15]</sup></li>
+      </ul>
+      <p><strong>适合</strong>：免费阅读需求 + 百度生态用户。</p>
+    </div>
+
+  </div>
+</section>
+
+<section class="chapter" id="ch9" data-nav="09 有声书赛道">
+  <h2><span class="num">09</span><span class="title-text">有声书与图书馆服务：付费霸主 vs 免费替代</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+
+    <h3>Audible：付费有声书的市场领导者</h3>
+
+    <div class="callout good">
+      <p><strong>核心优势</strong></p>
+      <ul>
+        <li><strong>市场份额 40%</strong><sup class="cite" data-refid="22">[22]</sup>，书库 70 万+ 书目<sup class="cite" data-refid="22">[22]</sup></li>
+        <li><strong>永久拥有</strong>：订阅期内选择的书永久保留（即使取消会员）<sup class="cite" data-refid="55">[55]</sup></li>
+        <li><strong>独家内容</strong>：独家协议和独家朗读<sup class="cite" data-refid="55">[55]</sup></li>
+        <li><strong>2026 年新计划</strong>：Standard $8.99/月（1 本），Premium Plus $14.95/月<sup class="cite" data-refid="56">[56]</sup></li>
+        <li><strong>年度订阅性价比</strong>：~$299/24 月获 24 本书（零售价值 ~$792）<sup class="cite" data-refid="57">[57]</sup></li>
+        <li><strong>用户满意度高</strong>：App Store 4.9/5（550 万评价）<sup class="cite" data-refid="58">[58]</sup></li>
+      </ul>
+    </div>
+
+    <div class="callout bad">
+      <p><strong>主要槽点</strong></p>
+      <ul>
+        <li><strong>界面混乱</strong>：首页促销横幅过多、导航重复臃肿<sup class="cite" data-refid="58">[58]</sup></li>
+        <li><strong>退货政策争议</strong>：独立作者因用户退货被扣版税，引发 Reddit r/Fantasy 社区抗议<sup class="cite" data-refid="59">[59]</sup></li>
+        <li><strong>独家锁定</strong>：某些书只能在 Audible 听<sup class="cite" data-refid="59">[59]</sup></li>
+        <li><strong>积分过期</strong>：会员积分若取消会过期<sup class="cite" data-refid="59">[59]</sup></li>
+      </ul>
+    </div>
+
+    <p><strong>适合</strong>：重度有声书听众（年订阅者 24 个月花 $299 获 24 本永久拥有的书，每本摊 $12.5<sup class="cite" data-refid="57">[57]</sup>），看重独家内容和永久拥有权。</p>
+
+    <h3>Libby：免费图书馆借阅的最佳工具</h3>
+
+    <div class="callout good">
+      <p><strong>核心优势</strong></p>
+      <ul>
+        <li><strong>完全免费</strong>：覆盖北美 90%+ 公共图书馆<sup class="cite" data-refid="7">[7]</sup>，只需图书馆卡</li>
+        <li><strong>借阅量创新高</strong>：2025 年全球借阅 8.2 亿次（同比增 10.9%）<sup class="cite" data-refid="8">[8]</sup></li>
+        <li><strong>发送到 Kindle</strong>：可发送到 Kindle 阅读<sup class="cite" data-refid="60">[60]</sup></li>
+        <li><strong>唯一官方 app</strong>：2025 年 1 月 31 日 OverDrive app 停用，Libby 成为唯一官方应用<sup class="cite" data-refid="61">[61]</sup></li>
+        <li><strong>App Store 高评分</strong>：4.9/5（440 万评价）<sup class="cite" data-refid="7">[7]</sup></li>
+      </ul>
+    </div>
+
+    <div class="callout bad">
+      <p><strong>最大槽点：等待时间极长</strong></p>
+      <p>热门书等待 26 周或更久<sup class="cite" data-refid="9">[9]</sup>，有的显示"数月"因队伍太长无法计算<sup class="cite" data-refid="9">[9]</sup>。原因：</p>
+      <ul>
+        <li>出版商执行"一书一人"模式，图书馆买 3 份只能同时 3 人借<sup class="cite" data-refid="9">[9]</sup></li>
+        <li>有声书授权比电子书贵得多，同样预算图书馆可能买 10 份电子书但只买 2 份有声书<sup class="cite" data-refid="9">[9]</sup></li>
+      </ul>
+      <p><strong>技术稳定性问题</strong>：2026 年 3-4 月 Trustpilot 评论报告"数周无法访问电子书"、"持续冻结"<sup class="cite" data-refid="62">[62]</sup></p>
+    </div>
+
+    <p><strong>适合</strong>：预算有限、不急着读某本特定书的用户——完全免费但需要耐心等待。</p>
+
+    <h3>Scribd/Everand：混合内容订阅平台</h3>
+
+    <div class="callout">
+      <p><strong>特点</strong></p>
+      <ul>
+        <li><strong>价格</strong>：$11.99/月<sup class="cite" data-refid="63">[63]</sup></li>
+        <li><strong>内容</strong>：100 万+ 电子书，实际有声书约 3-4 万本<sup class="cite" data-refid="63">[63]</sup>，包含杂志和文档</li>
+        <li><strong>2026 年放弃无限模式</strong><sup class="cite" data-refid="64">[64]</sup></li>
+      </ul>
+      <p><strong>劣势</strong>：租赁制（取消订阅失去访问）<sup class="cite" data-refid="65">[65]</sup>、新书少、限流<sup class="cite" data-refid="65">[65]</sup></p>
+      <p><strong>适合</strong>：重度阅读+听书的轻度用户，消费大量内容但不在意永久拥有<sup class="cite" data-refid="66">[66]</sup>。</p>
+    </div>
+
+    <h3>其他免费选项</h3>
+
+    <ul>
+      <li><strong>Hoopla</strong>：支持美国、加拿大、澳大利亚、新西兰公共图书馆，App Store 4.8/5（140 万评价）<sup class="cite" data-refid="67">[67]</sup></li>
+      <li><strong>LibriVox</strong>：所有 1926 年前出版作品（公版）免费，志愿者朗读<sup class="cite" data-refid="68">[68]</sup></li>
+      <li><strong>Spotify</strong>：Premium 订阅用户每月 15 小时免费有声书<sup class="cite" data-refid="69">[69]</sup></li>
+    </ul>
+
+  </div>
+</section>
+
+<section class="chapter" id="ch10" data-nav="10 用户迁移与槽点">
+  <h2><span class="num">10</span><span class="title-text">用户迁移行为与跨平台槽点</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+
+    <h3>高频迁移路径</h3>
+
+    <div class="callout">
+      <ol>
+        <li><strong>Kindle 中国 → 海外 Kindle 账户</strong>：2023 年 6 月 Kindle 退出中国市场<sup class="cite" data-refid="70">[70]</sup>，需要推送服务的用户被迫切换到海外账户</li>
+        <li><strong>Kindle → Kobo</strong>：图书馆 Overdrive/Libby 集成更好、界面更简洁<sup class="cite" data-refid="71">[71]</sup></li>
+        <li><strong>Sony Reader → Kobo</strong>：Sony 官方退出后主动迁移用户<sup class="cite" data-refid="72">[72]</sup></li>
+        <li><strong>各平台间横跳</strong>：单一平台缺书，被迫多平台并用<sup class="cite" data-refid="73">[73]</sup></li>
+      </ol>
+    </div>
+
+    <h3>高频槽点排行（按阻止选择的强度）</h3>
+
+    <div class="callout bad">
+      <h4>1. DRM 锁定与迁移成本</h4>
+      <p><strong>被 4+ 平台用户吐槽</strong></p>
+      <ul>
+        <li>Amazon DRM 最严：2025 年 2 月取消 USB 下载<sup class="cite" data-refid="2">[2]</sup>，2026 年 1 月才开始允许出版商选择 DRM-free<sup class="cite" data-refid="2">[2]</sup></li>
+        <li>格式转换困难：EPUB ↔ Amazon 专有格式需要技术手段破解</li>
+        <li>图书馆书籍 DRM 导入 Kobo 耗时 8+ 小时<sup class="cite" data-refid="74">[74]</sup></li>
+      </ul>
+    </div>
+
+    <div class="callout bad">
+      <h4>2. 平台退出/服务终止风险</h4>
+      <p><strong>3 个实际案例</strong></p>
+      <ul>
+        <li>Kindle 中国 2023 年退出<sup class="cite" data-refid="70">[70]</sup></li>
+        <li>Sony Reader 退出<sup class="cite" data-refid="72">[72]</sup></li>
+        <li>Amazon 终止 2012 年前设备支持<sup class="cite" data-refid="3">[3]</sup></li>
+      </ul>
+    </div>
+
+    <div class="callout bad">
+      <h4>3. 书库不全/版权缺失</h4>
+      <p><strong>所有平台的共同痛点</strong></p>
+      <ul>
+        <li>出版社担心盗版不授权电子版<sup class="cite" data-refid="75">[75]</sup></li>
+        <li>掌阅会员能看的书少需额外购买<sup class="cite" data-refid="75">[75]</sup></li>
+        <li>微信读书版权书下架（如东野圭吾《白夜行》）<sup class="cite" data-refid="39">[39]</sup></li>
+        <li>Apple Books / Google Play Books 中文书库弱 <span class="conf r">🔴</span></li>
+      </ul>
+    </div>
+
+    <div class="callout bad">
+      <h4>4. 不拥有所有权（仅许可证）</h4>
+      <ul>
+        <li>Amazon 可撤销已购书籍<sup class="cite" data-refid="3">[3]</sup></li>
+        <li>功能降级（USB 下载取消<sup class="cite" data-refid="2">[2]</sup>）</li>
+      </ul>
+    </div>
+
+    <div class="callout bad">
+      <h4>5. 隐私问题</h4>
+      <p><strong>微信读书专属</strong></p>
+      <ul>
+        <li>默认好友可见书单<sup class="cite" data-refid="39">[39]</sup></li>
+        <li>2020 年法院判决侵权<sup class="cite" data-refid="39">[39]</sup></li>
+      </ul>
+    </div>
+
+    <div class="callout bad">
+      <h4>6. 功能限制/封闭生态</h4>
+      <ul>
+        <li>掌阅 Ocean2 封闭系统，仅内置掌阅+微信读书 <span class="conf r">🔴</span></li>
+        <li>Apple Books 生态锁定 Apple 设备<sup class="cite" data-refid="11">[11]</sup></li>
+        <li>掌阅不同设备不自动同步书架 <span class="conf r">🔴</span></li>
+      </ul>
+    </div>
+
+    <div class="callout bad">
+      <h4>7. 界面体验</h4>
+      <ul>
+        <li>Kindle 首页推荐/促销内容占据空间<sup class="cite" data-refid="25">[25]</sup></li>
+        <li>Audible 首页混乱<sup class="cite" data-refid="58">[58]</sup></li>
+      </ul>
+    </div>
+
+    <div class="callout bad">
+      <h4>8. 付费模式变化</h4>
+      <ul>
+        <li>微信读书免费→付费转型<sup class="cite" data-refid="6">[6]</sup></li>
+        <li>掌阅会员便宜但可看书少 <span class="conf r">🔴</span></li>
+      </ul>
+    </div>
+
+    <div class="callout bad">
+      <h4>9. 语言/本地化支持不足</h4>
+      <ul>
+        <li>Google Play Books 中文 TTS 不足 <span class="conf r">🔴</span></li>
+        <li>Apple Books 对非 Apple DRM 格式支持有限 <span class="conf r">🔴</span></li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<section class="chapter" id="ch11" data-nav="11 横向对比">
+  <h2><span class="num">11</span><span class="title-text">横向对比：功能·价格·生态全景</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+
+    <h3>海外主流平台对比</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>平台</th>
+            <th>书库规模</th>
+            <th>订阅价格</th>
+            <th>格式支持</th>
+            <th>生态限制</th>
+            <th>图书馆集成</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Kindle</strong></td>
+            <td>最大（4.87 亿/年）</td>
+            <td>$11.99/月（KU）</td>
+            <td>专有格式（不支持 EPUB）</td>
+            <td>Amazon 锁定</td>
+            <td>体验差（多步跳转）</td>
+          </tr>
+          <tr>
+            <td><strong>Apple Books</strong></td>
+            <td>中等（小于 Kindle）</td>
+            <td>无订阅（按本购买）</td>
+            <td>EPUB、PDF</td>
+            <td>仅 Apple 设备</td>
+            <td>不支持</td>
+          </tr>
+          <tr>
+            <td><strong>Kobo</strong></td>
+            <td>中等（小于 Kindle）</td>
+            <td>无订阅（按本购买）</td>
+            <td>EPUB、MOBI、PDF</td>
+            <td>无锁定</td>
+            <td>最佳（设备内直接借阅）</td>
+          </tr>
+          <tr>
+            <td><strong>Google Play Books</strong></td>
+            <td>中等</td>
+            <td>无订阅（按本购买）</td>
+            <td>EPUB、PDF</td>
+            <td>无锁定（跨平台）</td>
+            <td>不支持</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>中国阅读 App 对比</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>平台</th>
+            <th>商业模式</th>
+            <th>月活/用户</th>
+            <th>价格</th>
+            <th>核心优势</th>
+            <th>最大槽点</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>番茄小说</strong></td>
+            <td>免费+广告</td>
+            <td>2.61 亿月活</td>
+            <td>免费</td>
+            <td>完全免费、用户最多</td>
+            <td>广告</td>
+          </tr>
+          <tr>
+            <td><strong>微信读书</strong></td>
+            <td>付费会员</td>
+            <td>2.1 亿注册</td>
+            <td>19 元/月</td>
+            <td>社交属性、资源库丰富</td>
+            <td>会员后网文仍需书币</td>
+          </tr>
+          <tr>
+            <td><strong>得到 App</strong></td>
+            <td>付费会员+课程</td>
+            <td>—</td>
+            <td>365 元/年</td>
+            <td>专家级内容、体系化</td>
+            <td>价格高</td>
+          </tr>
+          <tr>
+            <td><strong>QQ 阅读</strong></td>
+            <td>付费会员</td>
+            <td>—</td>
+            <td>—</td>
+            <td>网文资源最全</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><strong>掌阅</strong></td>
+            <td>付费会员</td>
+            <td>—</td>
+            <td>—</td>
+            <td>出版读物丰富、AI 功能</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><strong>蜗牛读书</strong></td>
+            <td>时间付费</td>
+            <td>—</td>
+            <td>免费 1 小时/天</td>
+            <td>纯净体验</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>有声书平台对比</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>平台</th>
+            <th>价格</th>
+            <th>书库</th>
+            <th>所有权</th>
+            <th>核心优势</th>
+            <th>最大槽点</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Audible</strong></td>
+            <td>$8.99-14.95/月</td>
+            <td>70 万+</td>
+            <td>永久拥有</td>
+            <td>书库最大、独家内容</td>
+            <td>界面混乱、独家锁定</td>
+          </tr>
+          <tr>
+            <td><strong>Libby</strong></td>
+            <td>免费</td>
+            <td>图书馆决定</td>
+            <td>借阅</td>
+            <td>完全免费</td>
+            <td>等待时间极长（26 周+）</td>
+          </tr>
+          <tr>
+            <td><strong>Scribd</strong></td>
+            <td>$11.99/月</td>
+            <td>3-4 万有声书</td>
+            <td>租赁</td>
+            <td>混合内容（书+杂志）</td>
+            <td>租赁制、新书少</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<section class="chapter" id="ch12" data-nav="12 决策树">
+  <h2><span class="num">12</span><span class="title-text">决策树：如何选择适合你的阅读工具</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+
+    <div class="tree">
+      <div class="node">
+        <strong>你主要读什么？</strong>
+      </div>
+
+      <div class="node">
+        <strong>英文电子书</strong>
+        <div class="tree">
+          <div class="node">你已深度使用 Amazon 生态？</div>
+          <div class="node">
+            ✅ 是 → <span class="pill">Kindle</span>（书库最大 + KU 订阅）
+          </div>
+          <div class="node">
+            ⛔ 否 → 你经常从图书馆借书？
+            <div class="tree">
+              <div class="node">✅ 是 → <span class="pill">Kobo</span>（图书馆集成最佳 + 格式开放）</div>
+              <div class="node">⛔ 否 → 你只用 Apple 设备？
+                <div class="tree">
+                  <div class="node">✅ 是 → <span class="pill">Apple Books</span>（预装 + 无订阅）</div>
+                  <div class="node">⛔ 否 → <span class="pill">Google Play Books</span>（跨平台 + PDF 管理）</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node">
+        <strong>中文出版书 / 网文</strong>
+        <div class="tree">
+          <div class="node">你愿意付费吗？</div>
+          <div class="node">
+            ✅ 愿意 → 你喜欢社交阅读吗？
+            <div class="tree">
+              <div class="node">✅ 是 → <span class="pill">微信读书</span>（19 元/月 + 社交属性）</div>
+              <div class="node">⛔ 否 → 你主要读网文还是出版书？
+                <div class="tree">
+                  <div class="node">网文 → <span class="pill">QQ 阅读</span>（网文资源最全）</div>
+                  <div class="node">出版书 → <span class="pill">掌阅</span>（出版读物丰富 + AI 功能）</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="node">
+            ⛔ 不愿意 → <span class="pill">番茄小说</span>或<span class="pill">七猫免费小说</span>（完全免费 + 广告）
+          </div>
+        </div>
+      </div>
+
+      <div class="node">
+        <strong>知识学习 / 商业课程</strong>
+        <div class="tree">
+          <div class="node"><span class="pill">得到 App</span>（365 元/年 + 专家级内容）</div>
+        </div>
+      </div>
+
+      <div class="node">
+        <strong>有声书</strong>
+        <div class="tree">
+          <div class="node">你愿意付费吗？</div>
+          <div class="node">
+            ✅ 愿意 → 你是重度听众（月听 3+ 本）吗？
+            <div class="tree">
+              <div class="node">✅ 是 → <span class="pill">Audible</span>（$14.95/月 + 永久拥有）</div>
+              <div class="node">⛔ 否 → <span class="pill">Scribd</span>（$11.99/月 + 混合内容）</div>
+            </div>
+          </div>
+          <div class="node">
+            ⛔ 不愿意 → 你有图书馆卡且不急着听特定书吗？
+            <div class="tree">
+              <div class="node">✅ 是 → <span class="pill">Libby</span>（完全免费但等待 26 周+）</div>
+              <div class="node">⛔ 否 → <span class="pill">LibriVox</span>（公版书免费）或<span class="pill">Spotify</span>（Premium 用户 15 小时/月）</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="chapter" id="ch13" data-nav="13 阿杰路线建议">
+  <h2><span class="num">13</span><span class="title-text">阿杰路线建议：banmi 产品 + 个人阅读</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+
+    <h3>banmi 产品视角：K12 AI 学习操作系统的阅读场景</h3>
+
+    <div class="callout accent">
+      <p><strong>核心洞察：banmi 的阅读场景 ≠ 传统阅读 App</strong></p>
+      <p>banmi 是"行为驱动 AI 学习操作系统"，阅读不是目的，是学习路径的一环。用户（东南亚国际学校 K12 学生）的阅读需求：</p>
+      <ul>
+        <li><strong>教材/课程材料阅读</strong>：PDF、EPUB 格式，需要批注、高亮、笔记</li>
+        <li><strong>英语分级阅读</strong>：从 A1 到 C2 的阶梯式进阶</li>
+        <li><strong>学习轨迹追踪</strong>：阅读时长、理解度、词汇积累需要与 banmi 的学习记录打通</li>
+        <li><strong>跨设备同步</strong>：手机、平板、电脑无缝切换</li>
+      </ul>
+    </div>
+
+    <h3>建议 1：不自建阅读器，集成开放平台</h3>
+
+    <div class="callout good">
+      <p><strong>为什么不自建？</strong></p>
+      <ul>
+        <li>阅读器是重资产（排版引擎、格式解析、跨设备同步），投入产出比低</li>
+        <li>用户已有阅读习惯（Google Play Books / Apple Books / 微信读书），强行切换摩擦大</li>
+        <li>banmi 的核心价值在"学习操作系统"，不在"阅读体验"</li>
+      </ul>
+      <p><strong>推荐路线</strong>：</p>
+      <ol>
+        <li><strong>优先集成 Google Play Books</strong>：跨平台（Android/iOS/Web）、支持上传 1000 个自有 PDF/EPUB<sup class="cite" data-refid="33">[33]</sup>、AI 朗读、用户在东南亚可直接使用</li>
+        <li><strong>API 打通学习轨迹</strong>：通过 Google Play Books API 获取阅读时长、进度，回传到 banmi 学习记录</li>
+        <li><strong>推送课程材料</strong>：banmi 生成的 PDF 练习题、课程讲义直接推送到用户的 Google Play Books 书库</li>
+      </ol>
+    </div>
+
+    <h3>建议 2：针对性补足图书馆资源</h3>
+
+    <div class="callout">
+      <p>东南亚国际学校学生可能无法访问北美公共图书馆（Libby 需要当地图书馆卡）。banmi 可以：</p>
+      <ul>
+        <li>与出版商谈集体授权（如 Oxford Reading Tree、Raz-Kids 等分级阅读书库）</li>
+        <li>整合 LibriVox 公版有声书作为免费英语听力材料<sup class="cite" data-refid="68">[68]</sup></li>
+        <li>引入 AI 生成的分级阅读内容（成本低、可定制难度）</li>
+      </ul>
+    </div>
+
+    <h3>建议 3：避开微信读书的隐私坑</h3>
+
+    <div class="callout warn">
+      <p>微信读书的"社交阅读"看似契合 banmi 的"社区学习"，但有两个风险：</p>
+      <ul>
+        <li><strong>隐私问题</strong>：2020 年被判侵权<sup class="cite" data-refid="39">[39]</sup>，默认好友可见书单——学生和家长对隐私敏感</li>
+        <li><strong>内容不匹配</strong>：微信读书主要是中文出版书和网文，banmi 的 K12 学生需要英文教材和分级读物</li>
+      </ul>
+      <p>如果要借鉴"社交阅读"，建议在 banmi 内自建轻量级功能（如"班级共读打卡"），而不是依赖外部平台。</p>
+    </div>
+
+    <h3>个人阅读视角：阿杰自己的选择</h3>
+
+    <div class="callout info">
+      <p>假设阿杰在马来西亚，主要阅读英文技术书 + 中文商业书，以下是推荐组合：</p>
+      <ul>
+        <li><strong>英文技术书</strong>：<span class="pill">Kindle</span>（书库最大 + KU 订阅 $11.99/月）或<span class="pill">Google Play Books</span>（跨平台 + 上传自有 PDF）</li>
+        <li><strong>中文商业书</strong>：<span class="pill">微信读书</span>（19 元/月 + 资源库丰富）或<span class="pill">得到 App</span>（365 元/年 + 专家级内容）</li>
+        <li><strong>图书馆借阅</strong>：如果有马来西亚公共图书馆卡，可尝试 Libby（完全免费但等待时间长）</li>
+        <li><strong>有声书</strong>：<span class="pill">Audible</span>（年度订阅 $299/24 月 = 24 本永久拥有）或<span class="pill">Libby</span>（免费但等待）</li>
+      </ul>
+      <p><strong>核心原则</strong>：避开 Apple Books（仅限 Apple 设备）和 Kobo（美国外书库弱），优先跨平台 + 订阅服务。</p>
+    </div>
+
+  </div>
+</section>
+
+<section class="chapter" id="faq" data-nav="FAQ 常见问题">
+  <h2><span class="num">14</span><span class="title-text">FAQ 常见问题</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">我已经买了很多 Kindle 电子书，现在想换平台怎么办？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>DRM 是最大障碍</strong>。Amazon 的 DRM 锁定让你无法直接将 Kindle 书籍转换为 EPUB 格式。2025 年 2 月取消 USB 下载功能<sup class="cite" data-refid="2">[2]</sup>后，官方渠道几乎完全封死。</p>
+        <p><strong>可选方案</strong>：</p>
+        <ul>
+          <li>保留 Kindle 账号和设备，只用于已购书籍；新书在其他平台购买</li>
+          <li>使用第三方工具（如 Calibre + DeDRM 插件）破解 DRM——技术门槛高且法律风险未定</li>
+          <li>接受损失，在新平台重新购买核心书籍</li>
+        </ul>
+        <p><strong>教训</strong>：下次购买前考虑 DRM-free 平台（如 Kobo 的部分书籍、独立书店）。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">图书馆借阅等 26 周太久，有没有加速方法？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>合法加速方法</strong>：</p>
+        <ul>
+          <li><strong>办多个图书馆卡</strong>：很多地区允许非居民办卡（需付年费），可以同时在多个图书馆系统预约同一本书，哪个先到用哪个</li>
+          <li><strong>使用 Hoopla 而非 Libby</strong>：Hoopla 没有等待队列（但每月借阅次数有限）<sup class="cite" data-refid="67">[67]</sup></li>
+          <li><strong>换冷门书</strong>：热门畅销书等待时间长，冷门经典往往立即可借</li>
+        </ul>
+        <p><strong>付费替代</strong>：如果急着读某本特定书，直接买纸书或电子书比等 26 周更划算。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">微信读书的"付费会员后网文仍需书币"是怎么回事？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p>微信读书的会员分两类内容：</p>
+        <ul>
+          <li><strong>会员专享书库</strong>：付费会员可免费阅读（主要是出版书）</li>
+          <li><strong>网络连载小说</strong>：需要额外购买"书币"才能解锁章节<sup class="cite" data-refid="6">[6]</sup></li>
+        </ul>
+        <p>这种"二次收费"引发大量用户不满<sup class="cite" data-refid="6">[6]</sup>。如果你主要读网文，<strong>QQ 阅读</strong>（SVIP 会员可免费读 10 万本专享书库<sup class="cite" data-refid="51">[51]</sup>）或<strong>番茄小说</strong>（完全免费）可能更适合。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">Apple Books 和 Kindle 哪个更好？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>看你的设备生态</strong>：</p>
+        <ul>
+          <li>只用 Apple 设备（iPhone/iPad/Mac）→ <strong>Apple Books</strong>（预装、免费、无订阅）</li>
+          <li>跨平台或已深度使用 Amazon 生态 → <strong>Kindle</strong>（书库更大、有订阅服务）</li>
+        </ul>
+        <p><strong>书库规模</strong>：Kindle 碾压 Apple Books<sup class="cite" data-refid="29">[29]</sup>。</p>
+        <p><strong>价格</strong>：Apple Books 无订阅但单本价格偏高<sup class="cite" data-refid="29">[29]</sup>；Kindle Unlimited $11.99/月<sup class="cite" data-refid="10">[10]</sup>适合重度读者。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">Audible 年度订阅真的划算吗？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>算一笔账</strong>：年度订阅 ~$299/24 月获 24 本书（零售价值 ~$792）<sup class="cite" data-refid="57">[57]</sup>，每本摊 $12.5，且永久拥有<sup class="cite" data-refid="55">[55]</sup>。</p>
+        <p><strong>划算条件</strong>：</p>
+        <ul>
+          <li>你是重度听众（月听 2+ 本有声书）</li>
+          <li>你看重"永久拥有"（取消订阅后仍可听已选的书）</li>
+          <li>你需要独家内容（某些书只在 Audible 有<sup class="cite" data-refid="55">[55]</sup>）</li>
+        </ul>
+        <p><strong>不划算场景</strong>：轻度听众（月听 < 1 本）或不在意永久拥有 → 改用 <strong>Libby</strong>（免费但等待）或 <strong>Scribd</strong>（$11.99/月租赁制）。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">番茄小说完全免费，为什么还有人用微信读书付费？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>内容差异</strong>：</p>
+        <ul>
+          <li><strong>番茄小说</strong>：主要是网文，出版书少<sup class="cite" data-refid="16">[16]</sup></li>
+          <li><strong>微信读书</strong>：出版书 + 网文都有，资源库更丰富<sup class="cite" data-refid="37">[37]</sup></li>
+        </ul>
+        <p><strong>用户群差异</strong>：</p>
+        <ul>
+          <li>番茄小说：50% 用户 < 30 岁<sup class="cite" data-refid="17">[17]</sup>，偏年轻、偏网文</li>
+          <li>微信读书：本科及以上占 80%<sup class="cite" data-refid="18">[18]</sup>，高学历、读出版书多</li>
+        </ul>
+        <p><strong>体验差异</strong>：番茄有广告，微信读书付费无广告 + 社交功能。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">Kobo 真的比 Kindle 好吗？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>不是"更好"，是"更适合特定用户"</strong>：</p>
+        <p><strong>Kobo 优势</strong>：</p>
+        <ul>
+          <li>图书馆集成最佳（设备内直接借阅）<sup class="cite" data-refid="30">[30]</sup></li>
+          <li>格式开放（原生 EPUB）<sup class="cite" data-refid="30">[30]</sup></li>
+          <li>避开 Amazon 锁定<sup class="cite" data-refid="31">[31]</sup></li>
+        </ul>
+        <p><strong>Kindle 优势</strong>：</p>
+        <ul>
+          <li>书库规模碾压 Kobo<sup class="cite" data-refid="32">[32]</sup></li>
+          <li>订阅服务（Kindle Unlimited）</li>
+          <li>生态整合（Audible、Whispersync）</li>
+        </ul>
+        <p><strong>结论</strong>：经常从图书馆借书 → Kobo；需要最大书库 + 订阅服务 → Kindle。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">Google Play Books 笔记同步失败的问题解决了吗？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>截至 2026 年 9 月，仍未完全解决</strong>。Android App 在重装或清除数据后，高亮和笔记可能消失<sup class="cite" data-refid="35">[35]</sup>（即使 Web 版仍可见）。</p>
+        <p><strong>临时解决方案</strong>：</p>
+        <ul>
+          <li>重要笔记定期手动导出（复制粘贴到其他 app）</li>
+          <li>优先使用 Web 版而非 Android App</li>
+          <li>如果笔记功能是刚需，改用 Kindle（笔记同步稳定）或 Apple Books</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">得到 App 和微信读书有什么区别？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>内容定位</strong>：</p>
+        <ul>
+          <li><strong>得到 App</strong>：专家级内容（课程 + 听书 + 电子书），主打体系化知识服务<sup class="cite" data-refid="41">[41]</sup></li>
+          <li><strong>微信读书</strong>：通用阅读（出版书 + 网文），主打社交阅读<sup class="cite" data-refid="36">[36]</sup></li>
+        </ul>
+        <p><strong>价格</strong>：</p>
+        <ul>
+          <li>得到：365 元/年<sup class="cite" data-refid="19">[19]</sup></li>
+          <li>微信读书：19 元/月 = 228 元/年<sup class="cite" data-refid="5">[5]</sup></li>
+        </ul>
+        <p><strong>适合人群</strong>：</p>
+        <ul>
+          <li>得到：创业者、管理者、需要体系化学习商业/科技/人文知识</li>
+          <li>微信读书：通用读者、喜欢社交分享、读小说 + 出版书</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">我应该选墨水屏阅读器还是平板/手机？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>墨水屏优势</strong>：</p>
+        <ul>
+          <li>护眼（长时间阅读不累）</li>
+          <li>续航长（充一次电用几周）</li>
+          <li>阳光下可读</li>
+          <li>专注（没有通知干扰）</li>
+        </ul>
+        <p><strong>平板/手机优势</strong>：</p>
+        <ul>
+          <li>彩色（适合漫画、图文书）</li>
+          <li>多功能（阅读 + 上网 + 娱乐）</li>
+          <li>响应速度快（翻页、批注）</li>
+        </ul>
+        <p><strong>推荐</strong>：重度阅读文字书 → 墨水屏；偶尔阅读 + 需要彩色 + 多功能 → 平板/手机。</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">平台退出（如 Kindle 中国）后我的书怎么办？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>Kindle 中国案例</strong>：2023 年 6 月退出后<sup class="cite" data-refid="70">[70]</sup>，已购书籍仍可在设备上阅读（但无法下载新书到新设备）。</p>
+        <p><strong>Sony Reader 案例</strong>：Sony 退出后主动将用户账户和购买记录迁移到 Kobo<sup class="cite" data-refid="72">[72]</sup>。</p>
+        <p><strong>风险防范</strong>：</p>
+        <ul>
+          <li>优先选择大平台（Amazon / Apple / Google）或开放格式（EPUB）</li>
+          <li>重要书籍定期备份到本地（如果平台允许下载）</li>
+          <li>避免把全部书库押注在单一平台</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        <span class="qmark">Q</span>
+        <span class="qtext">有没有完全开放、无 DRM 的阅读平台？</span>
+        <span class="toggle">▾</span>
+      </div>
+      <div class="faq-a">
+        <p><strong>部分开放平台</strong>：</p>
+        <ul>
+          <li><strong>Kobo</strong>：部分书籍提供 DRM-free 选项<sup class="cite" data-refid="30">[30]</sup></li>
+          <li><strong>独立书店</strong>：如 Smashwords、Gumroad 等，部分作者提供 DRM-free EPUB/PDF</li>
+          <li><strong>LibriVox</strong>：公版书完全开放<sup class="cite" data-refid="68">[68]</sup></li>
+        </ul>
+        <p><strong>注意</strong>：主流畅销书通常都有 DRM 保护，完全避开 DRM 意味着书库选择受限。</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="chapter" id="refs" data-nav="References">
+  <h2><span class="num">15</span><span class="title-text">References 参考来源</span><span class="caret">▾</span></h2>
+  <div class="chapter-body">
+    <ol class="ref-list">
+      <li id="ref-1"><a href="https://bestwriting.com/ebook-statistics" target="_blank" rel="noopener">50 Ebook Statistics for 2026</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-2"><a href="https://alternativeto.net/news/2025/2/amazon-will-remove-the-option-to-download-transfer-kindle-e-books-via-usb-by-february-2025" target="_blank" rel="noopener">Amazon will remove the option to download & transfer Kindle e-books via USB by February 2025</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 5 次</span></li>
+      <li id="ref-3"><a href="https://www.howtogeek.com/reasons-i-dont-trust-my-amazon-kindle/" target="_blank" rel="noopener">5 Reasons I Don't Trust My Amazon Kindle</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 4 次</span></li>
+      <li id="ref-4"><a href="https://zhuanlan.zhihu.com/p/1936374238455001232" target="_blank" rel="noopener">网络小说平台对比分析</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 4 次</span></li>
+      <li id="ref-5"><a href="https://www.woshipm.com/evaluating/5577900.html" target="_blank" rel="noopener">微信读书产品分析报告</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-6"><a href="https://www.woshipm.com/evaluating/5577900.html" target="_blank" rel="noopener">微信读书付费会员后网文仍需书币用户不满</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 4 次</span></li>
+      <li id="ref-7"><a href="https://www.littlealmanack.com/p/best-audiobook-apps" target="_blank" rel="noopener">Best Free Audiobook App 2026 Alternatives</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-8"><a href="https://www.infodocket.com/2026/01/21/new-data-from-overdrive-libraries-break-digital-lending-records-in-2025-with-over-820-million-checkouts-and-over-1-billion-minutes-streamed/" target="_blank" rel="noopener">Libraries Break Digital Lending Records in 2025</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-9"><a href="https://reciprocard.com/unlock-libby/wait-times" target="_blank" rel="noopener">Libby Waitlist Hold Time Complaints 2026</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-10"><a href="https://www.shortform.com/blog/hub/product/best-apps-for-readers/" target="_blank" rel="noopener">The 10 Best Apps for Readers in 2026</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 7 次</span></li>
+      <li id="ref-11"><a href="https://www.siliconchips-services.com/insight/now-its-time-for-google-vs-apple/" target="_blank" rel="noopener">Google Play Books vs Apple Books</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-12"><a href="https://boredom-at-work.com/kindle-vs-kobo/" target="_blank" rel="noopener">Kindle vs Kobo (2026): I Own Both</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 4 次</span></li>
+      <li id="ref-13"><a href="https://www.siliconchips-services.com/insight/now-its-time-for-google-vs-apple/" target="_blank" rel="noopener">Google Play Books Broader Global Reach in Android-Dominant Markets</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-14"><a href="https://www.woshipm.com/evaluating/5577900.html" target="_blank" rel="noopener">微信读书 2.1 亿注册用户</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-15"><a href="https://m.gelonghui.com/p/1724632" target="_blank" rel="noopener">阅读 APP 行业深度调研</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-16"><a href="https://www.woshipm.com/operate/5079287.html" target="_blank" rel="noopener">免费阅读产品商业化</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-17"><a href="https://www.woshipm.com/evaluating/5903816.html" target="_blank" rel="noopener">番茄小说产品分析</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-18"><a href="https://www.woshipm.com/evaluating/5577900.html" target="_blank" rel="noopener">微信读书用户群高学历年轻人为主</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-19"><a href="https://www.igetget.com/" target="_blank" rel="noopener">得到 App 官网</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-20"><a href="https://book.qq.com/book-shortage-post/r000002LKlcO1pLYiQ0000xU" target="_blank" rel="noopener">QQ 阅读会员攻略</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-21"><a href="https://www.grandviewresearch.com/industry-analysis/audiobooks-market" target="_blank" rel="noopener">Audiobooks Market Size, Share & Trends Report, 2026-2033</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-22"><a href="https://medium.com/illumination/is-audible-worth-it-in-2026-i-listened-to-200-audiobooks-and-heres-my-honest-answer-29cc16a4854b" target="_blank" rel="noopener">Is Audible Worth It in 2026?</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-23"><a href="https://boredom-at-work.com/kindle-vs-kobo/" target="_blank" rel="noopener">Kindle 用户选择理由</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-24"><a href="https://blog.the-ebook-reader.com/2026/01/14/how-to-complain-to-amazon-about-broken-and-missing-kindle-features/" target="_blank" rel="noopener">How to Complain to Amazon About Broken Kindle Features</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-25"><a href="https://www.howtogeek.com/reasons-i-dont-trust-my-amazon-kindle/" target="_blank" rel="noopener">Kindle 推荐内容侵占界面空间</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-26"><a href="https://boredom-at-work.com/kindle-vs-kobo/" target="_blank" rel="noopener">Kindle 图书馆借阅体验差于 Kobo</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-27"><a href="https://www.shortform.com/blog/hub/product/best-apps-for-readers/" target="_blank" rel="noopener">Apple Books Features</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-28"><a href="https://ebookfriendly.com/apple-books-ios-12-book-audiobook-app-review/" target="_blank" rel="noopener">Apple Books App Review</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-29"><a href="https://ebookfriendly.com/apple-books-ios-12-book-audiobook-app-review/" target="_blank" rel="noopener">Apple Books 槽点</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-30"><a href="https://www.ereadersforum.com/threads/kindle-vs-kobo-choosing-the-right-ecosystem-for-serious-readers.10362/" target="_blank" rel="noopener">Kindle vs Kobo: Choosing the Right Ecosystem</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-31"><a href="https://boredom-at-work.com/kindle-vs-kobo/" target="_blank" rel="noopener">Kobo 用户选择理由</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-32"><a href="https://justuseapp.com/en/app/301259483/kobo-books/reviews" target="_blank" rel="noopener">Kobo Books Audiobooks Reviews (2026)</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-33"><a href="https://www.shortform.com/blog/hub/product/best-apps-for-readers/" target="_blank" rel="noopener">Google Play Books Features</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-34"><a href="https://scribecount.com/author-resource/publishing-wide/google-play-books-for-indie-authors" target="_blank" rel="noopener">Google Play Books for Authors</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-35"><a href="https://scribecount.com/author-resource/publishing-wide/google-play-books-for-indie-authors" target="_blank" rel="noopener">Google Play Books 笔记同步失败问题</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-36"><a href="https://baike.baidu.com/item/%E5%BE%AE%E4%BF%A1%E8%AF%BB%E4%B9%A6/18529222" target="_blank" rel="noopener">微信读书百度百科</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-37"><a href="https://www.leikeji.com/article/69571" target="_blank" rel="noopener">四大读书 App 横评</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-38"><a href="https://zhuanlan.zhihu.com/p/32441006849" target="_blank" rel="noopener">微信读书缺点槽点</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-39"><a href="https://www.sohu.com/a/314474537_498761" target="_blank" rel="noopener">微信读书侵犯隐私权</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 4 次</span></li>
+      <li id="ref-40"><a href="https://zhuanlan.zhihu.com/p/32441006849" target="_blank" rel="noopener">微信读书 Eink 版功能缺陷</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-41"><a href="https://www.igetget.com/" target="_blank" rel="noopener">得到 App 官网</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-42"><a href="https://www.leikeji.com/article/69571" target="_blank" rel="noopener">得到 App 体系化知识服务</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-43"><a href="https://www.igetget.com/" target="_blank" rel="noopener">得到 App AI 学习助手</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-44"><a href="https://www.igetget.com/" target="_blank" rel="noopener">得到 App 会员价格</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-45"><a href="https://baike.baidu.com/item/iReader%E6%8E%8C%E9%98%85/16044499" target="_blank" rel="noopener">掌阅 iReader 百度百科</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-46"><a href="https://www.douban.com/group/topic/165617594/" target="_blank" rel="noopener">蜗牛/掌阅/微信读书用户体验</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-47"><a href="https://baike.baidu.com/item/iReader%E6%8E%8C%E9%98%85/16044499" target="_blank" rel="noopener">掌阅 2025 年短剧业务超越数字阅读</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-48"><a href="https://baike.baidu.com/item/%E7%BD%91%E6%98%93%E8%9C%97%E7%89%9B%E8%AF%BB%E4%B9%A6/20832600" target="_blank" rel="noopener">网易蜗牛读书百度百科</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-49"><a href="https://zhuanlan.zhihu.com/p/371583149" target="_blank" rel="noopener">微信读书 vs 蜗牛读书对比</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-50"><a href="https://baike.baidu.com/item/%E7%BD%91%E6%98%93%E8%9C%97%E7%89%9B%E8%AF%BB%E4%B9%A6/20832600" target="_blank" rel="noopener">蜗牛读书 Turbo 会员</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-51"><a href="https://book.qq.com/book-shortage-post/r000002LKlcO1pLYiQ0000xU" target="_blank" rel="noopener">QQ 阅读 SVIP 会员</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-52"><a href="https://www.leikeji.com/article/69571" target="_blank" rel="noopener">QQ 阅读网文资源最全</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-53"><a href="https://zhuanlan.zhihu.com/p/1994837748784333753" target="_blank" rel="noopener">七猫 vs 番茄 2026 新方向</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-54"><a href="https://zhuanlan.zhihu.com/p/1994837748784333753" target="_blank" rel="noopener">七猫免费小说依托百度流量</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-55"><a href="https://unstar.app/blog/audible-spotify-libby-kindle-audiobook-apps-ranked-2026" target="_blank" rel="noopener">Audible vs Spotify: 6 Audiobook Apps Ranked (2026)</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-56"><a href="https://www.bgr.com/2183652/are-audiobooks-subscriptions-still-worth-it/" target="_blank" rel="noopener">Audiobook Subscription Worth It Value Analysis 2026</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-57"><a href="https://medium.com/illumination/is-audible-worth-it-in-2026-i-listened-to-200-audiobooks-and-heres-my-honest-answer-29cc16a4854b" target="_blank" rel="noopener">Audible 年度订阅性价比</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-58"><a href="https://www.usebetterproducts.com/audible-review/" target="_blank" rel="noopener">Audible App Store Review 2026</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-59"><a href="https://andrewliptak.substack.com/p/audible-backtracks-after-outrage" target="_blank" rel="noopener">Audible User Complaints Reddit 2026</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-60"><a href="https://brighterly.com/blog/how-does-libby-work/" target="_blank" rel="noopener">Libby App User Reviews 2026</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-61"><a href="https://www.library.pima.gov/blogs/post/do-you-still-use-the-overdrive-app/" target="_blank" rel="noopener">Libby vs OverDrive Difference 2026</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-62"><a href="https://www.trustpilot.com/review/libbyapp.com" target="_blank" rel="noopener">Libby App User Reviews Reddit 2026</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-63"><a href="https://www.greatworklife.com/scribd-review/" target="_blank" rel="noopener">Scribd Audiobook Review Pros Cons 2026</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-64"><a href="https://www.bgr.com/2183652/are-audiobooks-subscriptions-still-worth-it/" target="_blank" rel="noopener">Audiobook Subscription Worth It 2026</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-65"><a href="https://www.greatworklife.com/scribd-vs-audible/" target="_blank" rel="noopener">Scribd vs Audible Pros Cons</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-66"><a href="https://blog.brandumentals.com/scribd-review/" target="_blank" rel="noopener">Scribd Review 2026</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-67"><a href="https://audiobookpicks.com/blog/best-free-audiobook-apps-services-2026" target="_blank" rel="noopener">Best Free Audiobook App 2026</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-68"><a href="https://audiobookpicks.com/blog/best-free-audiobook-apps-services-2026" target="_blank" rel="noopener">LibriVox Public Domain Audiobooks</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-69"><a href="https://audiobookpicks.com/blog/best-free-audiobook-apps-services-2026" target="_blank" rel="noopener">Spotify Premium Audiobooks</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-70"><a href="https://zhuanlan.zhihu.com/p/622135538" target="_blank" rel="noopener">Kindle 退出中国市场</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 3 次</span></li>
+      <li id="ref-71"><a href="https://www.goodreads.com/author_blog_posts/1154765-kindle-versus-kobo---from-a-reader-and-writer-s-perspective" target="_blank" rel="noopener">Kindle vs Kobo Reader Perspective</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-72"><a href="https://techcrunch.com/?p=954178" target="_blank" rel="noopener">Sony Reader 退出并迁移用户到 Kobo</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+      <li id="ref-73"><a href="https://www.v2ex.com/t/1116004" target="_blank" rel="noopener">V2EX 各平台间横跳讨论</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-74"><a href="https://community.adobe.com/questions-611/library-books-not-opening-in-kobo-409420" target="_blank" rel="noopener">Adobe Community - Library Books Not Opening in Kobo</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 1 次</span></li>
+      <li id="ref-75"><a href="https://zhuanlan.zhihu.com/p/622547944" target="_blank" rel="noopener">电子书盗版困局</a><span class="ref-meta"> · 访问 2026-09-03 · 引用 2 次</span></li>
+    </ol>
+  </div>
+</section>
+  <footer>
+    无忌 · Deep Research（L2）· 2026-09-03 · 仅供阿杰个人决策参考；数据与判例以原始来源为准。
+  </footer>
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<a href="index.html" class="back-fab" title="返回研究总目录">← 返回总目录</a>
+
+<script>
+// 进度条 + 回顶
+(function(){
+  var progress=document.getElementById('progress'), btt=document.getElementById('backToTop');
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop||document.body.scrollTop, mx=(h.scrollHeight-h.clientHeight)||1;
+    progress.style.width=(sc/mx*100)+'%';
+    if(sc>500){btt.classList.add('show');}else{btt.classList.remove('show');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+// 主题切换
+(function(){
+  var t=document.getElementById('themeToggle'), b=document.body;
+  var saved=localStorage.getItem('ereader-app-research-theme'); if(saved){b.setAttribute('data-theme',saved);}
+  function upd(){t.textContent=b.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+  upd();
+  t.addEventListener('click',function(){var n=b.getAttribute('data-theme')==='dark'?'light':'dark';b.setAttribute('data-theme',n);localStorage.setItem('ereader-app-research-theme',n);upd();});
+})();
+// 章节折叠
+document.querySelectorAll('section.chapter > h2').forEach(function(h){
+  h.addEventListener('click',function(){h.parentElement.classList.toggle('collapsed');});
+});
+// FAQ 展开
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){q.parentElement.classList.toggle('open');});
+});
+// 表格行高亮
+document.querySelectorAll('tbody tr').forEach(function(r){
+  r.addEventListener('click',function(){r.classList.toggle('row-highlight');});
+});
+// 左侧导航：抽屉 + scroll-spy
+(function(){
+  var nav=document.querySelector('nav.anchor-nav'),tog=document.getElementById('navToggle'),ov=document.getElementById('navOverlay');
+  if(nav&&tog&&ov){
+    function c(){nav.classList.remove('open');ov.classList.remove('show');}
+    tog.addEventListener('click',function(){var o=!nav.classList.contains('open');nav.classList.toggle('open',o);ov.classList.toggle('show',o);});
+    ov.addEventListener('click',c);
+    document.querySelectorAll('.anchor-list a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=1040)c();});});
+  }
+  var links=document.querySelectorAll('.anchor-list a'), secs=[];
+  links.forEach(function(a){var el=document.getElementById(a.getAttribute('data-target'));if(el)secs.push({a:a,el:el});});
+  function spy(){
+    var pos=window.scrollY+120, cur=null;
+    secs.forEach(function(s){if(s.el.offsetTop<=pos)cur=s;});
+    links.forEach(function(a){a.classList.remove('active');});
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+// citation popover
+(function() {
+  let activePopover=null, activeTrigger=null, hideTimer=null;
+  function getRefContent(refid){var el=document.getElementById('ref-'+refid);return el?el.innerHTML:null;}
+  function positionPopover(pop,trigger){
+    var r=trigger.getBoundingClientRect(),popW=pop.offsetWidth,popH=pop.offsetHeight;
+    var left=r.left+window.scrollX;
+    if(left+popW>window.innerWidth-12)left=window.innerWidth-popW-12;
+    if(left<12)left=12;
+    var top=r.bottom+window.scrollY+6;
+    if(r.bottom+popH>window.innerHeight-12&&r.top>popH+12){top=r.top+window.scrollY-popH-6;}
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  }
+  function showPopover(trigger){
+    if(activeTrigger===trigger&&activePopover)return;
+    if(activePopover){activePopover.remove();activePopover=null;}
+    var content=getRefContent(trigger.getAttribute('data-refid'));if(!content)return;
+    var pop=document.createElement('div');pop.className='cite-popover';pop.innerHTML=content;
+    document.body.appendChild(pop);positionPopover(pop,trigger);
+    activePopover=pop;activeTrigger=trigger;
+    pop.addEventListener('mouseenter',function(){if(hideTimer)clearTimeout(hideTimer);});
+    pop.addEventListener('mouseleave',scheduleHide);
+  }
+  function scheduleHide(){if(hideTimer)clearTimeout(hideTimer);hideTimer=setTimeout(function(){if(activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}},200);}
+  function bindCites(){
+    document.querySelectorAll('sup.cite[data-refid]').forEach(function(sup){
+      sup.addEventListener('mouseenter',function(){showPopover(sup);});
+      sup.addEventListener('mouseleave',scheduleHide);
+      sup.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(activeTrigger===sup&&activePopover){activePopover.remove();activePopover=null;activeTrigger=null;}else{showPopover(sup);}});
+    });
+    document.addEventListener('click',function(e){if(!activePopover)return;if(e.target.closest('.cite-popover')||e.target.closest('sup.cite'))return;activePopover.remove();activePopover=null;activeTrigger=null;});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindCites);}else{bindCites();}
+})();
+</script>
+<script>/* PDF-HIDE-REFS */
+(function(){
+  function hide(){document.querySelectorAll('section.chapter').forEach(function(s){var h=s.querySelector('h2');if(h&&/references|参考文献|参考来源/i.test(h.textContent)){s.setAttribute('data-printhidden','1');s.style.display='none';}});}
+  function show(){document.querySelectorAll('[data-printhidden]').forEach(function(s){s.style.display='';s.removeAttribute('data-printhidden');});}
+  window.addEventListener('beforeprint',hide);window.addEventListener('afterprint',show);
+})();
+</script>
+</body>
+</html>
